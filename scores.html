@@ -3,70 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <title>Scores - Presta'Puce</title>
+    <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
+    
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --bg-color: #1a1a1a; --accent: #f1c40f; --card-bg: rgba(44, 62, 80, 0.7); }
         body { margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at center, #2c3e50 0%, #1a1a1a 100%); color: white; height: 100vh; overflow: hidden; box-sizing: border-box; }
-        .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; height: calc(100vh - 120px); }
-        .column-title { text-align: center; font-size: 1.8rem; color: var(--accent); text-transform: uppercase; margin-bottom: 15px; border-bottom: 2px solid var(--accent); }
-        .card { background: var(--card-bg); display: flex; align-items: center; padding: 10px 20px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid var(--accent); transition: 0.3s; }
-        .avatar, .crest { font-size: 2.2rem; width: 60px; text-align: center; display: flex; justify-content: center; }
-        .crest img { width: 45px; height: 45px; object-fit: contain; }
+        
+        .header-scores { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; gap: 20px; }
+        .logo-main { width: 70px; height: auto; }
+        
+        .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; height: calc(100vh - 150px); }
+        .column-title { text-align: center; font-size: 1.8rem; color: var(--accent); text-transform: uppercase; margin-bottom: 15px; border-bottom: 2px solid var(--accent); letter-spacing: 2px; }
+        
+        .card { background: var(--card-bg); display: flex; align-items: center; padding: 10px 20px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid var(--accent); transition: 0.3s; height: 70px; }
+        .avatar, .crest { font-size: 2.2rem; width: 65px; text-align: center; display: flex; justify-content: center; align-items: center; }
+        .crest img { width: 50px; height: 50px; object-fit: contain; }
+        
         .info { flex: 1; margin-left: 15px; }
-        .pts { font-size: 1.8rem; font-weight: 900; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 8px; }
-        #qr-box { position: fixed; bottom: 20px; right: 20px; background: white; padding: 12px; border-radius: 12px; text-align: center; color: black; font-weight: bold; font-size: 0.8rem; }
-        .last-buzzed { border: 4px solid var(--accent) !important; transform: scale(1.02); background: rgba(241, 196, 15, 0.2); }
+        .info b { font-size: 1.4rem; }
+        .info small { opacity: 0.7; font-size: 0.9rem; }
+        
+        .pts { font-size: 2rem; font-weight: 900; background: rgba(0,0,0,0.4); padding: 5px 20px; border-radius: 10px; color: var(--accent); }
+        
+        #qr-box { position: fixed; bottom: 20px; right: 20px; background: white; padding: 15px; border-radius: 15px; text-align: center; color: black; font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #qrcode img { margin: 0 auto; }
+
+        .last-buzzed { border: 5px solid #2ecc71 !important; background: rgba(46, 204, 113, 0.2) !important; transform: scale(1.03); box-shadow: 0 0 20px rgba(46, 204, 113, 0.4); }
     </style>
 </head>
 <body>
-    <div style="text-align:center; margin-bottom:15px;"><h1 style="margin:0;">SALLE : <span id="room-title">----</span></h1></div>
-    <div class="main-container">
-        <div><div class="column-title">Joueurs</div><div id="player-list"></div></div>
-        <div><div class="column-title">Général</div><div id="global-list"></div></div>
+
+    <div class="header-scores">
+        <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" class="logo-main">
+        <h1 style="margin:0; font-size: 2.5rem;">SALLE : <span id="room-title" style="color:var(--accent)">----</span></h1>
     </div>
-    <div id="qr-box"><div id="qrcode"></div><div style="margin-top:5px;">SCANNEZ POUR JOUER</div></div>
+
+    <div class="main-container">
+        <div>
+            <div class="column-title">Joueurs</div>
+            <div id="player-list"></div>
+        </div>
+
+        <div>
+            <div class="column-title">Classement Général</div>
+            <div id="global-list"></div>
+        </div>
+    </div>
+
+    <div id="qr-box">
+        <div id="qrcode"></div>
+        <div style="margin-top:10px; font-size: 0.9rem;">SCANNEZ POUR JOUER</div>
+    </div>
 
     <script>
         const firebaseConfig = { databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Demande du code salle au lancement
         const roomID = prompt("Code de la salle ?");
         document.getElementById('room-title').innerText = roomID;
         const roomRef = db.ref('roomsData/' + roomID);
 
+        // Génération du QR Code avec l'ID de salle
         const playURL = "https://prestapuce.github.io/prestapuce-blindtest/?room=" + roomID;
-        new QRCode(document.getElementById("qrcode"), { text: playURL, width: 110, height: 110 });
+        new QRCode(document.getElementById("qrcode"), { 
+            text: playURL, 
+            width: 120, 
+            height: 120,
+            colorDark : "#000000",
+            colorLight : "#ffffff"
+        });
 
+        // Ecoute des scores en temps réel
         roomRef.child('scores').on('value', snap => {
-            const players = []; snap.forEach(c => { players.push({ name: c.key, ...c.val() }); });
+            const scoresData = snap.val() || {};
+            const players = []; 
+            snap.forEach(c => { players.push({ name: c.key, ...c.val() }); });
+            
+            // Tri par points décroissants
             players.sort((a,b) => b.pts - a.pts);
             
-            const pList = document.getElementById('player-list'); pList.innerHTML = "";
+            // Mise à jour Colonne Joueurs
+            const pList = document.getElementById('player-list'); 
+            pList.innerHTML = "";
             players.forEach(p => {
-                pList.innerHTML += `<div class="card" id="card-${p.name}"><div class="avatar">${p.avatar}</div><div class="info"><b>${p.name}</b><br><small>${p.teamName}</small></div><div class="pts">${p.pts}</div></div>`;
+                pList.innerHTML += `
+                    <div class="card" id="card-${p.name}">
+                        <div class="avatar">${p.avatar}</div>
+                        <div class="info"><b>${p.name}</b><br><small>${p.teamName}</small></div>
+                        <div class="pts">${p.pts}</div>
+                    </div>`;
             });
 
+            // Logique Colonne Général (Fusionne les joueurs d'une même équipe)
             const teamScores = {};
             players.forEach(p => {
-                const tKey = (p.teamName === "Solo") ? p.name : p.teamName;
-                const tIcon = (p.teamName === "Solo") ? null : p.teamIcon;
-                if(!teamScores[tKey]) teamScores[tKey] = { pts: 0, icon: tIcon, type: p.teamName };
+                // Si Solo, la clé est le pseudo. Si équipe, la clé est le nom de l'équipe.
+                const isSolo = (p.teamName === "Solo" || !p.teamName);
+                const tKey = isSolo ? p.name : p.teamName;
+                
+                if(!teamScores[tKey]) {
+                    teamScores[tKey] = { 
+                        pts: 0, 
+                        icon: isSolo ? p.avatar : p.teamIcon,
+                        isTeam: !isSolo
+                    };
+                }
                 teamScores[tKey].pts += p.pts;
             });
 
-            const gList = document.getElementById('global-list'); gList.innerHTML = "";
-            Object.entries(teamScores).sort((a,b)=>b[1].pts - a[1].pts).forEach(([name, d]) => {
-                const icon = d.icon ? `<img src="${d.icon}">` : `<span style="font-size:1.5rem">👤</span>`;
-                gList.innerHTML += `<div class="card"><div class="crest">${icon}</div><div class="info"><b>${name}</b></div><div class="pts">${d.pts}</div></div>`;
-            });
+            const gList = document.getElementById('global-list'); 
+            gList.innerHTML = "";
+            Object.entries(teamScores)
+                .sort((a,b) => b[1].pts - a[1].pts)
+                .forEach(([name, d]) => {
+                    // Si c'est une équipe on affiche l'image, si c'est un solo on affiche l'émoji
+                    const visual = d.isTeam 
+                        ? `<img src="${d.icon}">` 
+                        : `<span style="font-size:2.5rem">${d.icon}</span>`;
+                    
+                    gList.innerHTML += `
+                        <div class="card">
+                            <div class="crest">${visual}</div>
+                            <div class="info"><b>${name}</b></div>
+                            <div class="pts">${d.pts}</div>
+                        </div>`;
+                });
         });
 
+        // Effet visuel quand quelqu'un buzze
         roomRef.child('buzzers').on('value', snap => {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('last-buzzed'));
-            if(snap.exists()) { const c = document.getElementById('card-' + snap.val().pseudo); if(c) c.classList.add('last-buzzed'); }
+            if(snap.exists()) { 
+                const buzzedPseudo = snap.val().pseudo;
+                const card = document.getElementById('card-' + buzzedPseudo); 
+                if(card) card.classList.add('last-buzzed'); 
+            }
         });
     </script>
 </body>
