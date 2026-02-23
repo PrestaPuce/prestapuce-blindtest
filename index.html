@@ -173,7 +173,7 @@
                 roomRef.child('scores/' + userPseudo).update({ 
                     active: false,
                     lastTeam: userTeamName,
-                    teamName: (userTeamName === "Solo") ? "Solo" : "", // On vide l'équipe pour le compteur MJ
+                    teamName: (userTeamName === "Solo") ? "Solo" : "", 
                     teamIcon: (userTeamName === "Solo") ? "" : "",
                     avatar: "👻" 
                 });

@@ -30,8 +30,8 @@
     <div id="screen-login" class="login-box">
         <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px;">
         <h2>Accès MJ</h2>
-        <input type="text" id="mj-user" placeholder="Identifiant">
-        <input type="password" id="mj-pass" placeholder="Mot de passe">
+        <input type="text" id="mj-user" placeholder="Identifiant" onkeypress="if(event.key === 'Enter') login()">
+        <input type="password" id="mj-pass" placeholder="Mot de passe" onkeypress="if(event.key === 'Enter') login()">
         <button onclick="login()">SE CONNECTER</button>
     </div>
 
@@ -39,7 +39,7 @@
         <div class="room-info">SALLE : <span id="display-room">----</span></div>
         <div style="display:flex; gap:10px; margin-bottom:20px;">
             <button style="background:var(--blue)" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
-            <button style="background:var(--danger)" onclick="fullReset()">STOP / RESET</button>
+            <button style="background:var(--danger)" onclick="fullReset()">STOP / RESET TITRE</button>
         </div>
 
         <div id="player-box" class="current-player">
@@ -56,14 +56,15 @@
 
         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-top: 20px;">
             <h3>Gestion Équipes</h3>
-            <input type="text" id="t-name" placeholder="Nom de l'équipe...">
+            <input type="text" id="t-name" placeholder="Nom de l'équipe..." onkeypress="if(event.key === 'Enter') addTeam()" oninput="checkTeamForm()">
             <div class="crest-picker" id="crest-grid"></div>
-            <button id="btn-add-team" onclick="addTeam()">Créer l'Équipe</button>
+            <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
             <div id="mj-team-list-display" style="margin-top:15px;"></div>
         </div>
 
         <h3>Scores & Lobby</h3>
         <div id="score-list"></div>
+        <button style="background:black; color:red; margin-top:50px; border:1px solid red;" onclick="resetFullGame()">RESET TOTAL PARTIE</button>
     </div>
 
     <script>
@@ -108,8 +109,8 @@
                 const p = snap.val(); const box = document.getElementById('player-box');
                 if(p) { 
                     currentPlayer = p; document.getElementById('p-avatar').innerText = p.avatar; document.getElementById('p-name').innerText = p.pseudo;
-                    const teamDisplay = (p.teamName && p.teamName !== "Solo") ? `<div class="crest-mini-bg"><img src="${p.teamIcon}" class="crest-mini"></div> ${p.teamName}` : "Solo";
-                    document.getElementById('p-team').innerHTML = teamDisplay; box.style.display = "block";
+                    const teamDisp = (p.teamName && p.teamName !== "Solo") ? `<div class="crest-mini-bg"><img src="${p.teamIcon}" class="crest-mini"></div> ${p.teamName}` : "Solo";
+                    document.getElementById('p-team').innerHTML = teamDisp; box.style.display = "block";
                 } else { box.style.display = "none"; }
             });
             roomRef.child('scores').on('value', snap => {
@@ -135,13 +136,15 @@
             const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
             crests.forEach(c => {
                 const wrap = document.createElement('div'); wrap.className = 'crest-wrapper'; const img = document.createElement('img'); img.src = c; img.className = 'crest-opt';
-                wrap.onclick = () => { document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); wrap.classList.add('crest-selected'); selCrest = c; };
+                wrap.onclick = () => { document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); wrap.classList.add('crest-selected'); selCrest = c; checkTeamForm(); };
                 wrap.appendChild(img); grid.appendChild(wrap);
             });
         }
-        function addTeam() { const n = document.getElementById('t-name').value.trim(); if(n && selCrest) { roomRef.child('teams/' + n).set({ icon: selCrest }); document.getElementById('t-name').value = ""; } }
+        function checkTeamForm() { const name = document.getElementById('t-name').value.trim(); document.getElementById('btn-add-team').disabled = !(name.length > 0 && selCrest !== ""); }
+        function addTeam() { const n = document.getElementById('t-name').value.trim(); if(n && selCrest) { roomRef.child('teams/' + n).set({ icon: selCrest }); document.getElementById('t-name').value = ""; selCrest = ""; document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); checkTeamForm(); } }
         function deleteTeam(name) { if(confirm("Supprimer l'équipe ?")) roomRef.child('teams/' + name).remove(); }
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
+        function resetFullGame() { if(confirm("Changer de salle et réinitialiser ?")) { roomRef.remove(); location.reload(); } }
     </script>
 </body>
 </html>

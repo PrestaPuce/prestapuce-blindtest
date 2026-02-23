@@ -48,27 +48,25 @@
             const pList = document.getElementById('player-list'); pList.innerHTML = "";
             const gList = document.getElementById('global-list'); gList.innerHTML = "";
             
-            // 1. Liste des Joueurs (Seulement ceux qui sont là)
             const players = []; Object.entries(scoresData).forEach(([k,v]) => { if(v.active !== false) players.push({name: k, ...v}); });
             players.sort((a,b) => b.pts - a.pts).forEach(p => {
-                pList.innerHTML += `<div class="card" id="card-${p.name}"><div class="avatar">${p.avatar}</div><div class="info"><b>${p.name}</b><br><small>${p.teamName}</small></div><div class="pts">${p.pts}</div></div>`;
+                const teamLabel = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
+                pList.innerHTML += `<div class="card" id="card-${p.name}"><div class="avatar">${p.avatar}</div><div class="info"><b>${p.name}</b><br><small>${teamLabel}</small></div><div class="pts">${p.pts}</div></div>`;
             });
 
-            // 2. Classement Général
             let global = [];
-            // Ajouter les Équipes
             Object.entries(teamsData).forEach(([tName, tInfo]) => {
                 let count = 0; let totalPts = 0;
                 Object.values(scoresData).forEach(p => { 
                     if(p.teamName === tName || p.lastTeam === tName) totalPts += p.pts;
                     if(p.teamName === tName && p.active !== false) count++;
                 });
-                global.push({ name: `${tName} (${count} joueurs)`, pts: totalPts, icon: tInfo.icon, isTeam: true });
+                global.push({ name: `${tName} (${count} joueurs)`, pts: totalPts, icon: tInfo.icon, isTeam: true, tName: tName });
             });
-            // Ajouter les Solo (Ils restent même s'ils partent)
+
             Object.entries(scoresData).forEach(([pName, pData]) => {
                 if (!pData.teamName || pData.teamName === "Solo" || pData.teamName === "" || pData.lastTeam === "Solo") {
-                    global.push({ name: pName, pts: pData.pts, icon: pData.avatar, isTeam: false });
+                    global.push({ name: `${pName} (Solo)`, pts: pData.pts, icon: pData.avatar, isTeam: false });
                 }
             });
 
