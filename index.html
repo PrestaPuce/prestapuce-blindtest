@@ -34,15 +34,15 @@
     </div>
 
     <div id="screen-room" class="screen active-screen">
-        <h2 style="color:var(--accent-color)">CODE DE LA SALLE</h2>
+        <h2 style="color:var(--accent-color)">CODE SALLE</h2>
         <input type="number" id="room-code-input" placeholder="CODE SALLE" onkeypress="if(event.key === 'Enter') validateRoom()">
         <button class="btn-ui" onclick="validateRoom()">Rejoindre</button>
     </div>
 
     <div id="screen-login" class="screen">
         <h2 style="color:var(--accent-color)">TON PSEUDO</h2>
-        <input type="text" id="input-pseudo" placeholder="Ex: Jean-Mi" maxlength="12" onkeypress="if(event.key === 'Enter') showSetup()">
-        <button class="btn-ui" onclick="showSetup()">Suivant</button>
+        <input type="text" id="input-pseudo" placeholder="Ex: Jean-Mi" maxlength="12" onkeypress="if(event.key === 'Enter') checkPseudo()">
+        <button class="btn-ui" onclick="checkPseudo()">Suivant</button>
     </div>
 
     <div id="screen-setup" class="screen">
@@ -80,6 +80,31 @@
             });
         }
 
+        function checkPseudo() {
+            userPseudo = document.getElementById('input-pseudo').value.trim();
+            if(userPseudo.length < 2) return alert("Pseudo trop court !");
+
+            roomRef.child('scores/' + userPseudo).once('value', snap => {
+                if(snap.exists()) {
+                    // Le pseudo existe. On vérifie si c'est une reconnexion sur le même navigateur
+                    const isReconnect = localStorage.getItem('presta_pseudo') === userPseudo;
+                    if(isReconnect) {
+                        if(confirm("Tu es déjà connecté. Reprendre ta partie ?")) {
+                            selectedAvatar = snap.val().avatar;
+                            userTeamName = snap.val().teamName;
+                            userTeamIcon = snap.val().teamIcon;
+                            startBuzzer();
+                        }
+                    } else {
+                        alert("Ce pseudo est déjà utilisé par un autre joueur !");
+                    }
+                } else {
+                    // Nouveau pseudo
+                    showScreen('screen-setup');
+                }
+            });
+        }
+
         function listenToTeams() {
             roomRef.child('teams').on('value', snap => {
                 const select = document.getElementById('select-team');
@@ -93,12 +118,6 @@
             });
         }
 
-        function showSetup() {
-            userPseudo = document.getElementById('input-pseudo').value.trim();
-            if(userPseudo.length < 2) return alert("Pseudo trop court !");
-            showScreen('screen-setup');
-        }
-
         function initAvatarGrid() {
             const grid = document.getElementById('avatar-grid');
             avatars.forEach(a => {
@@ -109,7 +128,6 @@
                     div.classList.add('selected');
                     selectedAvatar = a;
                     document.getElementById('btn-final').classList.remove('btn-disabled');
-                    document.getElementById('avatar-container').style.borderColor = "#2ecc71";
                 };
                 grid.appendChild(div);
             });
@@ -119,6 +137,10 @@
             if(!selectedAvatar) return alert("Choisis un avatar !");
             const val = document.getElementById('select-team').value.split('|');
             userTeamName = val[0]; userTeamIcon = val[1];
+            
+            // On sauvegarde localement pour la reconnexion
+            localStorage.setItem('presta_pseudo', userPseudo);
+
             roomRef.child('scores/' + userPseudo).set({ 
                 pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon 
             });
