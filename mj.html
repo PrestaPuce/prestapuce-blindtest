@@ -10,20 +10,17 @@
         :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; }
         body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         .login-box { max-width: 350px; margin: 80px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; }
-        .input-group { position: relative; margin-bottom: 15px; }
-        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; }
-        .pass-wrapper { position: relative; }
-        .eye-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; font-size: 1.2rem; opacity: 0.6; }
-        button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
+        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; margin-bottom: 15px; }
+        .eye-icon { position: absolute; right: 12px; top: 12px; cursor: pointer; font-size: 1.2rem; opacity: 0.6; }
+        button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; text-transform: uppercase; }
+        .btn-disabled { background-color: #7f8c8d !important; cursor: not-allowed; opacity: 0.5; }
         .dashboard { display: none; max-width: 800px; margin: 0 auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
-        
-        /* Grille des blasons avec fond blanc et icônes colorées */
         .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; }
-        .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; transition: 0.2s; }
-        .crest-wrapper.crest-selected { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; }
+        .crest-selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); }
         .crest-opt { width: 30px; height: 30px; object-fit: contain; }
-
+        .team-item { display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; margin-bottom: 5px; justify-content: space-between; font-size: 0.9rem; }
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; }
         .crest-mini-bg { background: white; padding: 2px; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; }
         .crest-mini { width: 20px; height: 20px; object-fit: contain; }
@@ -34,8 +31,8 @@
     <div id="screen-login" class="login-box">
         <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px;">
         <h2>Accès MJ</h2>
-        <div class="input-group"><input type="text" id="mj-user" placeholder="Identifiant" onkeypress="if(event.key === 'Enter') login()"></div>
-        <div class="input-group pass-wrapper">
+        <input type="text" id="mj-user" placeholder="Identifiant" onkeypress="if(event.key === 'Enter') login()">
+        <div style="position:relative">
             <input type="password" id="mj-pass" placeholder="Mot de passe" onkeypress="if(event.key === 'Enter') login()">
             <span class="eye-icon" onmousedown="showPass()" onmouseup="hidePass()" onmouseleave="hidePass()">👁️</span>
         </div>
@@ -45,8 +42,8 @@
     <div id="screen-dashboard" class="dashboard">
         <div class="room-info">SALLE ACTIVE : <span id="display-room">----</span></div>
         <div style="display:flex; gap:10px;">
-            <button style="background:#3498db" onclick="statusUpdate('ready')">START</button>
-            <button style="background:var(--danger)" onclick="fullReset()">RESET TITRE</button>
+            <button style="background:#3498db" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
+            <button style="background:var(--danger)" onclick="fullReset()">Bloquer / Stop</button>
         </div>
 
         <div id="player-box" class="current-player">
@@ -61,12 +58,14 @@
         </div>
 
         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-top: 20px;">
-            <h3 style="margin-top:0;">Créer une Équipe</h3>
-            <input type="text" id="t-name" placeholder="Nom de l'équipe..." onkeypress="if(event.key === 'Enter') addTeam()">
+            <h3 style="margin:0 0 10px 0;">Créer une Équipe</h3>
+            <input type="text" id="t-name" placeholder="Nom de l'équipe...">
             <div class="crest-picker" id="crest-grid"></div>
-            <button style="background:#9b59b6" onclick="addTeam()">AJOUTER L'ÉQUIPE</button>
+            <button id="btn-add-team" class="btn-disabled" onclick="addTeam()">Ajouter l'Équipe</button>
+            <div id="mj-team-list" style="margin-top:15px;"></div>
         </div>
-        <h3>Classement</h3>
+
+        <h3>Scores & Lobby</h3>
         <div id="score-list"></div>
         <button style="background:black; color:red; margin-top:50px; border:1px solid red;" onclick="resetFullGame()">RESET TOTAL PARTIE</button>
     </div>
@@ -77,24 +76,7 @@
         const db = firebase.database();
         const mjAccounts = { "prestapuce": "Prest@Puce06", "museikevents": "@Lex1977" };
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "";
-
-        // NOUVELLE LISTE D'ICÔNES (Colorées et visibles)
-        const crests = [
-            "https://cdn-icons-png.flaticon.com/512/1165/1165187.png", // Éclat Jaune
-            "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", // Bouclier Bleu
-            "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", // Couronne Or
-            "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", // Étoile Rouge
-            "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", // Épées
-            "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", // Casque
-            "https://cdn-icons-png.flaticon.com/512/1065/1065553.png", // Dragon Vert
-            "https://cdn-icons-png.flaticon.com/512/1152/1152912.png", // Lion Or
-            "https://cdn-icons-png.flaticon.com/512/2583/2583344.png", // Phoenix
-            "https://cdn-icons-png.flaticon.com/512/2583/2583319.png", // Griffon
-            "https://cdn-icons-png.flaticon.com/512/2583/2583434.png", // Licorne
-            "https://cdn-icons-png.flaticon.com/512/2583/2583351.png", // Loup
-            "https://cdn-icons-png.flaticon.com/512/1037/1037953.png", // Aigle
-            "https://cdn-icons-png.flaticon.com/512/1037/1037984.png"  // Requin
-        ];
+        const crests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png", "https://cdn-icons-png.flaticon.com/512/1152/1152912.png", "https://cdn-icons-png.flaticon.com/512/2583/2583344.png", "https://cdn-icons-png.flaticon.com/512/2583/2583319.png", "https://cdn-icons-png.flaticon.com/512/2583/2583434.png", "https://cdn-icons-png.flaticon.com/512/2583/2583351.png", "https://cdn-icons-png.flaticon.com/512/1037/1037953.png", "https://cdn-icons-png.flaticon.com/512/1037/1037984.png"];
 
         function showPass() { document.getElementById("mj-pass").type = "text"; }
         function hidePass() { document.getElementById("mj-pass").type = "password"; }
@@ -115,14 +97,21 @@
         function initMJLogic() {
             roomRef.child('buzzers').on('value', snap => {
                 const p = snap.val(); const box = document.getElementById('player-box');
-                if(p) { currentPlayer = p; document.getElementById('p-avatar').innerText = p.avatar; document.getElementById('p-name').innerText = p.pseudo; document.getElementById('p-team').innerText = p.teamName !== "Solo" ? p.teamName : "Solo"; box.style.display = "block"; } else { box.style.display = "none"; }
+                if(p) { currentPlayer = p; document.getElementById('p-avatar').innerText = p.avatar; document.getElementById('p-name').innerText = p.pseudo; document.getElementById('p-team').innerText = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo"; box.style.display = "block"; } else { box.style.display = "none"; }
             });
             roomRef.child('scores').on('value', snap => {
                 const l = document.getElementById('score-list'); l.innerHTML = "";
-                const data = []; snap.forEach(c => { data.push({name: c.key, ...c.val()}); });
-                data.sort((a,b) => b.pts - a.pts).forEach(p => {
-                    const icon = p.teamIcon ? `<div class="crest-mini-bg"><img src="${p.teamIcon}" class="crest-mini"></div>` : '';
-                    l.innerHTML += `<div class="score-row"><span>${p.avatar} <b>${p.name}</b> ${icon} : ${p.pts} pts</span><div><button style="width:35px; background:var(--danger)" onclick="adj('${p.name}',-1)">-</button><button style="width:35px; margin-left:5px;" onclick="adj('${p.name}',1)">+</button></div></div>`;
+                snap.forEach(c => { 
+                    const d = c.val();
+                    const icon = d.teamIcon ? `<div class="crest-mini-bg"><img src="${d.teamIcon}" class="crest-mini"></div>` : '';
+                    l.innerHTML += `<div class="score-row"><span>${d.avatar} <b>${c.key}</b> ${icon} : ${d.pts} pts</span><div><button style="width:35px; background:var(--danger)" onclick="adj('${c.key}',-1)">-</button><button style="width:35px; margin-left:5px;" onclick="adj('${c.key}',1)">+</button></div></div>`;
+                });
+            });
+            roomRef.child('teams').on('value', snap => {
+                const tList = document.getElementById('mj-team-list'); tList.innerHTML = "";
+                snap.forEach(t => {
+                    tList.innerHTML += `<div class="team-item"><span><img src="${t.val().icon}" class="crest-mini"> ${t.key}</span> 
+                    <div><span onclick="renameTeam('${t.key}')" style="cursor:pointer; margin-right:10px;">✏️</span><span onclick="roomRef.child('teams/${t.key}').remove()" style="color:red; cursor:pointer;">✖</span></div></div>`;
                 });
             });
         }
@@ -131,13 +120,22 @@
             crests.forEach(c => {
                 const wrap = document.createElement('div'); wrap.className = 'crest-wrapper';
                 const img = document.createElement('img'); img.src = c; img.className = 'crest-opt';
-                wrap.onclick = () => { document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); wrap.classList.add('crest-selected'); selCrest = c; };
+                wrap.onclick = () => { 
+                    document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); 
+                    wrap.classList.add('crest-selected'); selCrest = c; 
+                    document.getElementById('btn-add-team').classList.remove('btn-disabled');
+                };
                 wrap.appendChild(img); grid.appendChild(wrap);
             });
         }
         function addTeam() { 
             const n = document.getElementById('t-name').value.trim(); 
-            if(n && selCrest) { roomRef.child('teams/' + n).set({ icon: selCrest }); document.getElementById('t-name').value = ""; alert("Équipe créée !"); } else { alert("Nom + Blason !"); }
+            if(!selCrest) return alert("Choisis un blason !");
+            if(n) { roomRef.child('teams/' + n).set({ icon: selCrest }); document.getElementById('t-name').value = ""; selCrest = ""; document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); document.getElementById('btn-add-team').classList.add('btn-disabled'); }
+        }
+        function renameTeam(old) {
+            const n = prompt("Nouveau nom :", old);
+            if(n && n !== old) { roomRef.child('teams/'+old).once('value', s => { roomRef.child('teams/'+n).set(s.val()); roomRef.child('teams/'+old).remove(); }); }
         }
         function statusUpdate(st) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); }
         function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
