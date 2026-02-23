@@ -4,178 +4,134 @@
     <meta charset="UTF-8">
     <title>Console MJ - Presta'Puce</title>
     <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
-    
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
         :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; }
         body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        
-        /* Écran de Login */
-        .login-box { max-width: 350px; margin: 80px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .login-box { max-width: 350px; margin: 80px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; }
         .input-group { position: relative; margin-bottom: 15px; }
         input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; }
-        input:focus { border-color: var(--mj-color); }
-        
-        /* Oeil interactif pour mot de passe */
         .pass-wrapper { position: relative; }
         .eye-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; font-size: 1.2rem; opacity: 0.6; }
-        
-        button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1rem; transition: 0.2s; }
-        button:hover { filter: brightness(1.1); }
-
-        /* Dashboard MJ */
+        button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
         .dashboard { display: none; max-width: 800px; margin: 0 auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
         
-        /* Grille des blasons */
-        .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 10px 0; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; }
-        .crest-opt { width: 32px; height: 32px; cursor: pointer; border-radius: 5px; border: 2px solid transparent; object-fit: contain; }
-        .crest-selected { border-color: var(--accent); background: rgba(241,196,15,0.2); transform: scale(1.1); }
+        /* Grille des blasons avec fond blanc pour la visibilité */
+        .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; }
+        .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; transition: 0.2s; }
+        .crest-wrapper:hover { transform: scale(1.1); }
+        .crest-wrapper.crest-selected { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        .crest-opt { width: 30px; height: 30px; object-fit: contain; }
 
-        /* Buzzers & Scores */
-        .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 20px 0; text-align: center; display: none; }
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; }
-        .crest-mini { width: 22px; height: 22px; vertical-align: middle; object-fit: contain; margin: 0 5px; }
-        .btn-small { width: 35px; height: 35px; padding: 0; margin-left: 5px; }
+        .crest-mini-bg { background: white; padding: 2px; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; }
+        .crest-mini { width: 20px; height: 20px; object-fit: contain; }
+        .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 20px 0; text-align: center; display: none; }
     </style>
 </head>
 <body>
-
     <div id="screen-login" class="login-box">
         <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px;">
-        <h2 style="margin-top:0;">Accès MJ</h2>
-        <div class="input-group">
-            <input type="text" id="mj-user" placeholder="Identifiant" onkeypress="if(event.key === 'Enter') login()">
-        </div>
+        <h2>Accès MJ</h2>
+        <div class="input-group"><input type="text" id="mj-user" placeholder="Identifiant" onkeypress="if(event.key === 'Enter') login()"></div>
         <div class="input-group pass-wrapper">
             <input type="password" id="mj-pass" placeholder="Mot de passe" onkeypress="if(event.key === 'Enter') login()">
-            <span class="eye-icon" onmousedown="showPass()" onmouseup="hidePass()" onmouseleave="hidePass()" ontouchstart="showPass()" ontouchend="hidePass()">👁️</span>
+            <span class="eye-icon" onmousedown="showPass()" onmouseup="hidePass()" onmouseleave="hidePass()">👁️</span>
         </div>
         <button onclick="login()">SE CONNECTER</button>
     </div>
 
     <div id="screen-dashboard" class="dashboard">
         <div class="room-info">SALLE ACTIVE : <span id="display-room">----</span></div>
-        
         <div style="display:flex; gap:10px;">
-            <button style="background:#3498db" onclick="statusUpdate('ready')">OUVRIR BUZZERS (START)</button>
-            <button style="background:var(--danger)" onclick="fullReset()">RESET TITRE (STOP)</button>
+            <button style="background:#3498db" onclick="statusUpdate('ready')">START</button>
+            <button style="background:var(--danger)" onclick="fullReset()">RESET TITRE</button>
         </div>
 
         <div id="player-box" class="current-player">
             <div id="p-avatar" style="font-size:3.5rem"></div>
-            <h2 id="p-name" style="margin:5px 0; font-size:1.8rem;"></h2>
+            <h2 id="p-name" style="margin:5px 0;"></h2>
             <div id="p-team" style="color:var(--accent); font-weight:bold; margin-bottom:15px;"></div>
             <div style="display:flex; gap:10px;">
-                <button style="background:var(--mj-color)" onclick="reward(1, true)">+1 PT (PARTIEL)</button>
-                <button style="background:#8e44ad" onclick="reward(3, false)">+3 PTS (COMPLET)</button>
+                <button onclick="reward(1, true)">+1 PT</button>
+                <button style="background:#8e44ad" onclick="reward(3, false)">+3 PTS</button>
             </div>
             <button style="background:#7f8c8d; margin-top:10px;" onclick="errorBlock()">ERREUR / BLOQUER</button>
         </div>
 
         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-top: 20px;">
             <h3 style="margin-top:0;">Créer une Équipe</h3>
-            <input type="text" id="t-name" placeholder="Nom de l'équipe...">
+            <input type="text" id="t-name" placeholder="Nom de l'équipe..." onkeypress="if(event.key === 'Enter') addTeam()">
             <div class="crest-picker" id="crest-grid"></div>
             <button style="background:#9b59b6" onclick="addTeam()">AJOUTER L'ÉQUIPE</button>
         </div>
-
-        <h3>Classement en direct</h3>
+        <h3>Classement</h3>
         <div id="score-list"></div>
-
-        <button style="background:black; color:red; margin-top:50px; border:1px solid red;" onclick="resetFullGame()">RESET TOTAL DE LA PARTIE</button>
+        <button style="background:black; color:red; margin-top:50px; border:1px solid red;" onclick="resetFullGame()">RESET TOTAL PARTIE</button>
     </div>
 
     <script>
         const firebaseConfig = { databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        // Vos comptes MJ
         const mjAccounts = { "prestapuce": "Prest@Puce06", "museikevents": "@Lex1977" };
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "";
-
-        const crests = [
-            "https://cdn-icons-png.flaticon.com/512/744/744922.png", "https://cdn-icons-png.flaticon.com/512/744/744921.png",
-            "https://cdn-icons-png.flaticon.com/512/744/744849.png", "https://cdn-icons-png.flaticon.com/512/744/744905.png",
-            "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png",
-            "https://cdn-icons-png.flaticon.com/512/1065/1065551.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png",
-            "https://cdn-icons-png.flaticon.com/512/1152/1152912.png", "https://cdn-icons-png.flaticon.com/512/1152/1152918.png",
-            "https://cdn-icons-png.flaticon.com/512/2583/2583344.png", "https://cdn-icons-png.flaticon.com/512/2583/2583319.png",
-            "https://cdn-icons-png.flaticon.com/512/2583/2583434.png", "https://cdn-icons-png.flaticon.com/512/2583/2583351.png"
-        ];
+        const crests = ["https://cdn-icons-png.flaticon.com/512/744/744922.png", "https://cdn-icons-png.flaticon.com/512/744/744921.png", "https://cdn-icons-png.flaticon.com/512/744/744849.png", "https://cdn-icons-png.flaticon.com/512/744/744905.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065551.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png", "https://cdn-icons-png.flaticon.com/512/1152/1152912.png", "https://cdn-icons-png.flaticon.com/512/1152/1152918.png", "https://cdn-icons-png.flaticon.com/512/2583/2583344.png", "https://cdn-icons-png.flaticon.com/512/2583/2583319.png", "https://cdn-icons-png.flaticon.com/512/2583/2583434.png", "https://cdn-icons-png.flaticon.com/512/2583/2583351.png"];
 
         function showPass() { document.getElementById("mj-pass").type = "text"; }
         function hidePass() { document.getElementById("mj-pass").type = "password"; }
-
         function login() {
             const u = document.getElementById('mj-user').value.toLowerCase().trim();
             const p = document.getElementById('mj-pass').value;
             if(mjAccounts[u] === p) startRoom(); else alert("Accès refusé.");
         }
-
         function startRoom() {
             roomID = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('screen-login').style.display = "none";
             document.getElementById('screen-dashboard').style.display = "block";
             document.getElementById('display-room').innerText = roomID;
-            db.ref('activeRooms/' + roomID).set({ status: 'open', created: Date.now() });
+            db.ref('activeRooms/' + roomID).set({ status: 'open' });
             roomRef = db.ref('roomsData/' + roomID);
             initMJLogic(); initCrestGrid();
         }
-
         function initMJLogic() {
             roomRef.child('buzzers').on('value', snap => {
                 const p = snap.val(); const box = document.getElementById('player-box');
-                if(p) { 
-                    currentPlayer = p; 
-                    document.getElementById('p-avatar').innerText = p.avatar; 
-                    document.getElementById('p-name').innerText = p.pseudo; 
-                    document.getElementById('p-team').innerText = (p.teamName && p.teamName !== "Solo") ? "Équipe : " + p.teamName : "Solo";
-                    box.style.display = "block"; 
-                } else { box.style.display = "none"; }
+                if(p) { currentPlayer = p; document.getElementById('p-avatar').innerText = p.avatar; document.getElementById('p-name').innerText = p.pseudo; document.getElementById('p-team').innerText = p.teamName !== "Solo" ? p.teamName : "Solo"; box.style.display = "block"; } else { box.style.display = "none"; }
             });
             roomRef.child('scores').on('value', snap => {
                 const l = document.getElementById('score-list'); l.innerHTML = "";
                 const data = []; snap.forEach(c => { data.push({name: c.key, ...c.val()}); });
                 data.sort((a,b) => b.pts - a.pts).forEach(p => {
-                    const icon = p.teamIcon ? `<img src="${p.teamIcon}" class="crest-mini">` : '';
-                    l.innerHTML += `<div class="score-row"><span>${p.avatar} <b>${p.name}</b> ${icon} : ${p.pts} pts</span>
-                    <div><button class="btn-small" style="background:var(--danger)" onclick="adj('${p.name}',-1)">-</button>
-                    <button class="btn-small" style="background:var(--mj-color)" onclick="adj('${p.name}',1)">+</button></div></div>`; 
+                    const icon = p.teamIcon ? `<div class="crest-mini-bg"><img src="${p.teamIcon}" class="crest-mini"></div>` : '';
+                    l.innerHTML += `<div class="score-row"><span>${p.avatar} <b>${p.name}</b> ${icon} : ${p.pts} pts</span><div><button style="width:35px; background:var(--danger)" onclick="adj('${p.name}',-1)">-</button><button style="width:35px; margin-left:5px;" onclick="adj('${p.name}',1)">+</button></div></div>`;
                 });
             });
         }
-
         function initCrestGrid() {
             const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
             crests.forEach(c => {
+                const wrap = document.createElement('div'); wrap.className = 'crest-wrapper';
                 const img = document.createElement('img'); img.src = c; img.className = 'crest-opt';
-                img.onclick = () => { document.querySelectorAll('.crest-opt').forEach(i=>i.classList.remove('crest-selected')); img.classList.add('crest-selected'); selCrest = c; };
-                grid.appendChild(img);
+                wrap.onclick = () => { document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); wrap.classList.add('crest-selected'); selCrest = c; };
+                wrap.appendChild(img); grid.appendChild(wrap);
             });
         }
-
         function addTeam() { 
             const n = document.getElementById('t-name').value.trim(); 
-            if(n && selCrest) { 
-                roomRef.child('teams/' + n).set({ icon: selCrest }); 
-                document.getElementById('t-name').value = ""; alert("Équipe créée !");
-            } else { alert("Nom + Blason obligatoires !"); }
+            if(n && selCrest) { roomRef.child('teams/' + n).set({ icon: selCrest }); document.getElementById('t-name').value = ""; alert("Équipe créée !"); } else { alert("Nom + Blason !"); }
         }
-
         function statusUpdate(st) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); }
         function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
         function reward(pts, keep) { 
-            roomRef.child('scores/' + currentPlayer.pseudo).transaction(c => { 
-                return { pts: (c ? c.pts : 0) + pts, avatar: currentPlayer.avatar, teamName: currentPlayer.teamName, teamIcon: currentPlayer.teamIcon }; 
-            });
+            roomRef.child('scores/' + currentPlayer.pseudo).transaction(c => { return { pts: (c ? c.pts : 0) + pts, avatar: currentPlayer.avatar, teamName: currentPlayer.teamName, teamIcon: currentPlayer.teamIcon }; });
             if(keep) { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); } else { fullReset(); }
         }
         function errorBlock() { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); }
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
-        function resetFullGame() { if(confirm("Changer de salle et tout effacer ?")) { roomRef.remove(); location.reload(); } }
+        function resetFullGame() { if(confirm("Tout effacer ?")) { roomRef.remove(); location.reload(); } }
     </script>
 </body>
 </html>
