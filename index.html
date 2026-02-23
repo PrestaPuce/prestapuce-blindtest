@@ -24,7 +24,6 @@
         .buzzer { width: 70vw; height: 70vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
         .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
-        .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; }
     </style>
 </head>
 <body>
@@ -35,25 +34,22 @@
     </div>
 
     <div id="screen-room" class="screen active-screen">
-        <h2 style="color:var(--accent-color); margin-bottom:5px;">BIENVENUE</h2>
-        <p style="margin-bottom:20px; opacity:0.8;">Entrez le code affiché sur l'écran</p>
-        <input type="number" id="room-code-input" placeholder="CODE SALLE">
+        <h2 style="color:var(--accent-color)">CODE DE LA SALLE</h2>
+        <input type="number" id="room-code-input" placeholder="CODE SALLE" onkeypress="if(event.key === 'Enter') validateRoom()">
         <button class="btn-ui" onclick="validateRoom()">Rejoindre</button>
     </div>
 
     <div id="screen-login" class="screen">
         <h2 style="color:var(--accent-color)">TON PSEUDO</h2>
-        <input type="text" id="input-pseudo" placeholder="Ex: Jean-Mi" maxlength="12">
+        <input type="text" id="input-pseudo" placeholder="Ex: Jean-Mi" maxlength="12" onkeypress="if(event.key === 'Enter') showSetup()">
         <button class="btn-ui" onclick="showSetup()">Suivant</button>
     </div>
 
     <div id="screen-setup" class="screen">
         <h3 style="margin:0 0 10px 0;">CHOISIS TON AVATAR</h3>
         <div class="avatar-scroll" id="avatar-container"><div class="avatar-grid" id="avatar-grid"></div></div>
-        
         <h3 style="margin:0 0 10px 0;">TON ÉQUIPE</h3>
         <select id="select-team"><option value="Solo|">Mode Solo</option></select>
-        
         <button id="btn-final" class="btn-ui btn-disabled" onclick="finalizeSetup()">C'est parti !</button>
     </div>
 
@@ -69,14 +65,7 @@
 
         let roomID = "", roomRef = null, userPseudo = "", userTeamName = "", userTeamIcon = "", selectedAvatar = null;
         let gameState = "waiting", isBlockedLocally = false, currentWinner = null;
-        const avatars = ["🦁","Tiger","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
-
-        window.onload = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const r = urlParams.get('room');
-            if(r) { document.getElementById('room-code-input').value = r; validateRoom(); }
-            initAvatarGrid();
-        };
+        const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
         function validateRoom() {
             roomID = document.getElementById('room-code-input').value.trim();
@@ -114,13 +103,11 @@
             const grid = document.getElementById('avatar-grid');
             avatars.forEach(a => {
                 const div = document.createElement('div');
-                div.className = 'avatar-item';
-                div.innerText = a;
+                div.className = 'avatar-item'; div.innerText = a;
                 div.onclick = () => {
                     document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
                     div.classList.add('selected');
                     selectedAvatar = a;
-                    // Activer le bouton
                     document.getElementById('btn-final').classList.remove('btn-disabled');
                     document.getElementById('avatar-container').style.borderColor = "#2ecc71";
                 };
@@ -129,19 +116,11 @@
         }
 
         function finalizeSetup() {
-            if(!selectedAvatar) {
-                alert("Choisis un avatar avant de continuer !");
-                document.getElementById('avatar-container').style.borderColor = "red";
-                return;
-            }
+            if(!selectedAvatar) return alert("Choisis un avatar !");
             const val = document.getElementById('select-team').value.split('|');
             userTeamName = val[0]; userTeamIcon = val[1];
-            
             roomRef.child('scores/' + userPseudo).set({ 
-                pts: 0, 
-                avatar: selectedAvatar, 
-                teamName: userTeamName, 
-                teamIcon: userTeamIcon 
+                pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon 
             });
             startBuzzer();
         }
@@ -175,6 +154,7 @@
         }
 
         function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById(id).classList.add('active-screen'); }
+        initAvatarGrid();
     </script>
 </body>
 </html>
