@@ -31,7 +31,7 @@
     </div>
     <div class="main-container">
         <div><div class="column-title">Joueurs</div><div id="player-list"></div></div>
-        <div><div class="column-title">Général</div><div id="global-list"></div></div>
+        <div><div class="column-title">Classement Général</div><div id="global-list"></div></div>
     </div>
     <div id="qr-box"><div id="qrcode"></div><div style="margin-top:5px; font-size:0.8rem;">SCANNEZ POUR JOUER</div></div>
     <script>
@@ -49,25 +49,22 @@
         function updateDisplay() {
             const pList = document.getElementById('player-list'); pList.innerHTML = "";
             const gList = document.getElementById('global-list'); gList.innerHTML = "";
-
             const players = []; Object.entries(scoresData).forEach(([k,v]) => { players.push({name: k, ...v}); });
             players.sort((a,b) => b.pts - a.pts);
 
-            // 1. Colonne Joueurs
             players.forEach(p => {
                 pList.innerHTML += `<div class="card" id="card-${p.name}"><div class="avatar">${p.avatar}</div><div class="info"><b>${p.name}</b><br><small>${p.teamName}</small></div><div class="pts">${p.pts}</div></div>`;
             });
 
-            // 2. Colonne Général
             let global = [];
-            // Ajouter toutes les équipes créées (même à 0 pt)
             Object.entries(teamsData).forEach(([tName, tInfo]) => {
-                global.push({ name: tName, pts: 0, icon: tInfo.icon, isTeam: true });
+                let count = 0; Object.values(scoresData).forEach(p => { if(p.teamName === tName) count++; });
+                global.push({ name: `${tName} (${count})`, pts: 0, icon: tInfo.icon, isTeam: true, tName: tName });
             });
 
             players.forEach(p => {
-                if (p.teamName && p.teamName !== "Solo") {
-                    let team = global.find(e => e.isTeam && e.name === p.teamName);
+                if (p.teamName && p.teamName !== "Solo" && p.teamName !== "") {
+                    let team = global.find(e => e.isTeam && e.tName === p.teamName);
                     if (team) team.pts += p.pts;
                 } else {
                     global.push({ name: p.name, pts: p.pts, icon: p.avatar, isTeam: false });
@@ -82,7 +79,6 @@
 
         roomRef.child('scores').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
         roomRef.child('teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
-
         roomRef.child('buzzers').on('value', snap => {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('last-buzzed'));
             if(snap.exists()) { const card = document.getElementById('card-' + snap.val().pseudo); if(card) card.classList.add('last-buzzed'); }

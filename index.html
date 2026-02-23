@@ -10,9 +10,9 @@
     <style>
         :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; }
-        .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 90px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; border-bottom: 2px solid rgba(255,255,255,0.1); z-index: 1000; }
+        .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 95px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; border-bottom: 2px solid rgba(255,255,255,0.1); z-index: 1000; }
         .logo-presta { width: 45px; height: auto; -webkit-tap-highlight-color: transparent; }
-        .screen { display: none; height: 100%; width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; padding-top: 90px; box-sizing: border-box; }
+        .screen { display: none; height: 100%; width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; padding-top: 100px; box-sizing: border-box; }
         .active-screen { display: flex !important; }
         input, select { width: 100%; max-width: 280px; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); font-size: 1.1rem; background: var(--card-bg); color: white; text-align: center; outline: none; }
         .btn-ui { width: 100%; max-width: 280px; padding: 18px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: 900; cursor: pointer; background-color: var(--primary-color); color: white; box-shadow: 0 8px 0 #2980b9; text-transform: uppercase; margin-bottom: 10px; }
@@ -21,10 +21,11 @@
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .avatar-item { font-size: 2rem; background: var(--card-bg); padding: 10px; border-radius: 15px; cursor: pointer; border: 3px solid transparent; text-align: center; }
         .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); background: rgba(241, 196, 15, 0.2); }
-        .buzzer { width: 70vw; height: 70vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; }
+        .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
         .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
         .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; }
+        .btn-exit { width: 45px; height: 45px; border-radius: 50%; background: #e74c3c; border: none; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -68,7 +69,8 @@
                 <span id="label" style="color:white; font-size:1.4rem; font-weight:bold;">ATTENDEZ</span>
             </button>
         </div>
-        <div style="margin-bottom:25px; font-weight: bold;">Score : <span id="score" style="color:var(--accent-color)">0</span> pts</div>
+        <div style="font-weight: bold;">Score : <span id="score" style="color:var(--accent-color)">0</span> pts</div>
+        <button class="btn-exit" onclick="leaveGame()">×</button>
     </div>
 
     <audio id="buzz-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3" preload="auto"></audio>
@@ -146,7 +148,7 @@
         function startBuzzer() {
             document.getElementById('display-pseudo').innerText = userPseudo;
             document.getElementById('display-avatar').innerText = selectedAvatar;
-            document.getElementById('display-team-label').innerText = (userTeamName === "Solo") ? "Mode Solo" : userTeamName;
+            document.getElementById('display-team-label').innerText = userTeamName;
             showScreen('screen-buzzer');
             roomRef.child('scores/' + userPseudo).on('value', s => { if(s.exists()) document.getElementById('score').innerText = s.val().pts; });
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlockedLocally = snap.exists(); updateUI(); });
@@ -156,14 +158,21 @@
 
         function onBuzzerClick() {
             if(gameState === "ready" && !isBlockedLocally && !currentWinner) {
-                // Vibration (Android) et Son (Tous)
                 if (navigator.vibrate) navigator.vibrate(100);
                 const sound = document.getElementById('buzz-sound');
                 sound.currentTime = 0;
-                sound.play().catch(e => console.log("Audio bloqué par le navigateur"));
-
+                sound.play().catch(e => {});
                 roomRef.child('gameState').update({ status: 'taken' });
                 roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
+            }
+        }
+
+        function leaveGame() {
+            if(confirm("Quitter la partie ? Vos points seront conservés.")) {
+                roomRef.child('blockedPlayers/' + userPseudo).remove();
+                roomRef.child('scores/' + userPseudo).update({ teamName: "", teamIcon: "", avatar: "👻" });
+                localStorage.removeItem('presta_pseudo');
+                location.reload();
             }
         }
 
