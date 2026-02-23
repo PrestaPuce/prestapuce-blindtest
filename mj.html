@@ -13,17 +13,22 @@
         input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; margin-bottom: 15px; }
         .eye-icon { position: absolute; right: 12px; top: 12px; cursor: pointer; font-size: 1.2rem; opacity: 0.6; }
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; text-transform: uppercase; }
-        .btn-disabled { background-color: #7f8c8d !important; cursor: not-allowed; opacity: 0.5; }
+        
+        /* Style du bouton désactivé */
+        button:disabled { background-color: #7f8c8d !important; cursor: not-allowed; opacity: 0.5; box-shadow: none; }
+
         .dashboard { display: none; max-width: 800px; margin: 0 auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
+        
         .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; }
         .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; }
         .crest-selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); }
         .crest-opt { width: 30px; height: 30px; object-fit: contain; }
-        .team-item { display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; margin-bottom: 5px; justify-content: space-between; font-size: 0.9rem; }
+
+        .team-item { display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin-bottom: 8px; justify-content: space-between; }
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; }
         .crest-mini-bg { background: white; padding: 2px; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; }
-        .crest-mini { width: 20px; height: 20px; object-fit: contain; }
+        .crest-mini { width: 22px; height: 22px; object-fit: contain; }
         .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 20px 0; text-align: center; display: none; }
     </style>
 </head>
@@ -41,7 +46,7 @@
 
     <div id="screen-dashboard" class="dashboard">
         <div class="room-info">SALLE ACTIVE : <span id="display-room">----</span></div>
-        <div style="display:flex; gap:10px;">
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
             <button style="background:#3498db" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
             <button style="background:var(--danger)" onclick="fullReset()">Bloquer / Stop</button>
         </div>
@@ -59,13 +64,15 @@
 
         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-top: 20px;">
             <h3 style="margin:0 0 10px 0;">Créer une Équipe</h3>
-            <input type="text" id="t-name" placeholder="Nom de l'équipe...">
+            <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()">
             <div class="crest-picker" id="crest-grid"></div>
-            <button id="btn-add-team" class="btn-disabled" onclick="addTeam()">Ajouter l'Équipe</button>
-            <div id="mj-team-list" style="margin-top:15px;"></div>
+            <button id="btn-add-team" disabled onclick="addTeam()">Ajouter l'Équipe</button>
+            
+            <h4 style="margin:20px 0 10px 0; color:var(--accent);">Équipes enregistrées :</h4>
+            <div id="mj-team-list-display"></div>
         </div>
 
-        <h3>Scores & Lobby</h3>
+        <h3>Scores & Lobby Joueurs</h3>
         <div id="score-list"></div>
         <button style="background:black; color:red; margin-top:50px; border:1px solid red;" onclick="resetFullGame()">RESET TOTAL PARTIE</button>
     </div>
@@ -80,11 +87,13 @@
 
         function showPass() { document.getElementById("mj-pass").type = "text"; }
         function hidePass() { document.getElementById("mj-pass").type = "password"; }
+        
         function login() {
             const u = document.getElementById('mj-user').value.toLowerCase().trim();
             const p = document.getElementById('mj-pass').value;
             if(mjAccounts[u] === p) startRoom(); else alert("Accès refusé.");
         }
+
         function startRoom() {
             roomID = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('screen-login').style.display = "none";
@@ -92,13 +101,18 @@
             document.getElementById('display-room').innerText = roomID;
             db.ref('activeRooms/' + roomID).set({ status: 'open' });
             roomRef = db.ref('roomsData/' + roomID);
-            initMJLogic(); initCrestGrid();
+            initMJLogic(); 
+            initCrestGrid();
         }
+
         function initMJLogic() {
+            // Affichage des buzzers
             roomRef.child('buzzers').on('value', snap => {
                 const p = snap.val(); const box = document.getElementById('player-box');
                 if(p) { currentPlayer = p; document.getElementById('p-avatar').innerText = p.avatar; document.getElementById('p-name').innerText = p.pseudo; document.getElementById('p-team').innerText = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo"; box.style.display = "block"; } else { box.style.display = "none"; }
             });
+
+            // Affichage des scores
             roomRef.child('scores').on('value', snap => {
                 const l = document.getElementById('score-list'); l.innerHTML = "";
                 snap.forEach(c => { 
@@ -107,14 +121,22 @@
                     l.innerHTML += `<div class="score-row"><span>${d.avatar} <b>${c.key}</b> ${icon} : ${d.pts} pts</span><div><button style="width:35px; background:var(--danger)" onclick="adj('${c.key}',-1)">-</button><button style="width:35px; margin-left:5px;" onclick="adj('${c.key}',1)">+</button></div></div>`;
                 });
             });
+
+            // Affichage des équipes dans la console MJ
             roomRef.child('teams').on('value', snap => {
-                const tList = document.getElementById('mj-team-list'); tList.innerHTML = "";
+                const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
                 snap.forEach(t => {
-                    tList.innerHTML += `<div class="team-item"><span><img src="${t.val().icon}" class="crest-mini"> ${t.key}</span> 
-                    <div><span onclick="renameTeam('${t.key}')" style="cursor:pointer; margin-right:10px;">✏️</span><span onclick="roomRef.child('teams/${t.key}').remove()" style="color:red; cursor:pointer;">✖</span></div></div>`;
+                    tList.innerHTML += `<div class="team-item">
+                        <span><div class="crest-mini-bg"><img src="${t.val().icon}" class="crest-mini"></div> <b>${t.key}</b></span> 
+                        <div>
+                            <span onclick="renameTeam('${t.key}')" style="cursor:pointer; margin-right:15px;">✏️</span>
+                            <span onclick="deleteTeam('${t.key}')" style="color:var(--danger); cursor:pointer; font-weight:bold;">✖</span>
+                        </div>
+                    </div>`;
                 });
             });
         }
+
         function initCrestGrid() {
             const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
             crests.forEach(c => {
@@ -122,21 +144,47 @@
                 const img = document.createElement('img'); img.src = c; img.className = 'crest-opt';
                 wrap.onclick = () => { 
                     document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); 
-                    wrap.classList.add('crest-selected'); selCrest = c; 
-                    document.getElementById('btn-add-team').classList.remove('btn-disabled');
+                    wrap.classList.add('crest-selected'); 
+                    selCrest = c; 
+                    checkTeamForm();
                 };
                 wrap.appendChild(img); grid.appendChild(wrap);
             });
         }
+
+        function checkTeamForm() {
+            const name = document.getElementById('t-name').value.trim();
+            const btn = document.getElementById('btn-add-team');
+            if(name.length > 0 && selCrest !== "") {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        }
+
         function addTeam() { 
             const n = document.getElementById('t-name').value.trim(); 
-            if(!selCrest) return alert("Choisis un blason !");
-            if(n) { roomRef.child('teams/' + n).set({ icon: selCrest }); document.getElementById('t-name').value = ""; selCrest = ""; document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); document.getElementById('btn-add-team').classList.add('btn-disabled'); }
+            if(n && selCrest) { 
+                roomRef.child('teams/' + n).set({ icon: selCrest }); 
+                document.getElementById('t-name').value = ""; 
+                selCrest = ""; 
+                document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); 
+                checkTeamForm();
+            }
         }
+
+        function deleteTeam(name) { if(confirm("Supprimer l'équipe " + name + " ?")) roomRef.child('teams/' + name).remove(); }
+
         function renameTeam(old) {
-            const n = prompt("Nouveau nom :", old);
-            if(n && n !== old) { roomRef.child('teams/'+old).once('value', s => { roomRef.child('teams/'+n).set(s.val()); roomRef.child('teams/'+old).remove(); }); }
+            const n = prompt("Nouveau nom pour " + old + " :", old);
+            if(n && n.trim() !== "" && n !== old) { 
+                roomRef.child('teams/'+old).once('value', s => { 
+                    roomRef.child('teams/'+n.trim()).set(s.val()); 
+                    roomRef.child('teams/'+old).remove(); 
+                }); 
+            }
         }
+
         function statusUpdate(st) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); }
         function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
         function reward(pts, keep) { 
@@ -145,7 +193,7 @@
         }
         function errorBlock() { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); }
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
-        function resetFullGame() { if(confirm("Tout effacer ?")) { roomRef.remove(); location.reload(); } }
+        function resetFullGame() { if(confirm("Voulez-vous vraiment changer de salle ?")) { roomRef.remove(); location.reload(); } }
     </script>
 </body>
 </html>
