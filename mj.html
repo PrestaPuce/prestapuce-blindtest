@@ -24,22 +24,25 @@
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; }
         .crest-mini-bg { background: white; padding: 2px; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; }
         .crest-mini { width: 22px; height: 22px; object-fit: contain; }
+        #mj-team-list-display { margin-bottom: 20px; }
     </style>
 </head>
 <body>
+
     <div id="screen-login" class="login-box">
         <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px;">
         <h2>Accès MJ</h2>
-        <input type="text" id="mj-user" placeholder="Identifiant" onkeypress="if(event.key === 'Enter') login()">
-        <input type="password" id="mj-pass" placeholder="Mot de passe" onkeypress="if(event.key === 'Enter') login()">
+        <input type="text" id="mj-user" placeholder="Identifiant" onkeydown="if(event.key === 'Enter') login()">
+        <input type="password" id="mj-pass" placeholder="Mot de passe" onkeydown="if(event.key === 'Enter') login()">
         <button onclick="login()">SE CONNECTER</button>
     </div>
 
     <div id="screen-dashboard" class="dashboard">
-        <div class="room-info">SALLE : <span id="display-room">----</span></div>
+        <div class="room-info">SALLE ACTIVE : <span id="display-room">----</span></div>
+        
         <div style="display:flex; gap:10px; margin-bottom:20px;">
             <button style="background:var(--blue)" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
-            <button style="background:var(--danger)" onclick="fullReset()">STOP / RESET TITRE</button>
+            <button style="background:var(--danger)" onclick="fullReset()">RESET TITRE (STOP)</button>
         </div>
 
         <div id="player-box" class="current-player">
@@ -47,7 +50,7 @@
             <h2 id="p-name" style="margin:5px 0;"></h2>
             <div id="p-team" style="color:var(--accent); font-weight:bold; margin-bottom:10px;"></div>
             <div class="action-grid">
-                <button style="background:var(--gold)" onclick="handleReward(3, 'finish')">+3 (TITRE + ARTISTE)</button>
+                <button style="background:var(--gold); border: 2px solid white;" onclick="handleReward(3, 'finish')">+3 (TITRE + ARTISTE)</button>
                 <button style="background:var(--blue)" onclick="handleReward(1, 'partial')">+1 (PARTIEL)</button>
                 <button style="background:var(--mj-color)" onclick="handleReward(1, 'finish')">+1 (FIN DE TITRE)</button>
                 <button style="background:var(--danger)" onclick="handleError()">ERREUR</button>
@@ -56,15 +59,17 @@
 
         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-top: 20px;">
             <h3>Gestion Équipes</h3>
-            <input type="text" id="t-name" placeholder="Nom de l'équipe..." onkeypress="if(event.key === 'Enter') addTeam()" oninput="checkTeamForm()">
+            <input type="text" id="t-name" placeholder="Nom de l'équipe..." onkeydown="if(event.key === 'Enter') addTeam()" oninput="checkTeamForm()">
             <div class="crest-picker" id="crest-grid"></div>
             <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
-            <div id="mj-team-list-display" style="margin-top:15px;"></div>
+            <h4 style="color:var(--accent); margin-bottom:10px;">Lobby Équipes :</h4>
+            <div id="mj-team-list-display"></div>
         </div>
 
-        <h3>Scores & Lobby</h3>
+        <h3>Scores & Lobby Joueurs</h3>
         <div id="score-list"></div>
-        <button style="background:black; color:red; margin-top:50px; border:1px solid red;" onclick="resetFullGame()">RESET TOTAL PARTIE</button>
+
+        <button style="background:black; color:red; margin-top:60px; border:2px solid red; padding: 20px;" onclick="resetFullGame()">⚠️ RESET TOTAL PARTIE ⚠️</button>
     </div>
 
     <script>
@@ -78,7 +83,7 @@
         function login() {
             const u = document.getElementById('mj-user').value.toLowerCase().trim();
             const p = document.getElementById('mj-pass').value;
-            if(mjAccounts[u] === p) startRoom(); else alert("Accès refusé.");
+            if(mjAccounts[u] === p) startRoom(); else alert("Accès MJ refusé.");
         }
         function startRoom() {
             roomID = Math.floor(1000 + Math.random() * 9000).toString();
@@ -109,15 +114,15 @@
                 const p = snap.val(); const box = document.getElementById('player-box');
                 if(p) { 
                     currentPlayer = p; document.getElementById('p-avatar').innerText = p.avatar; document.getElementById('p-name').innerText = p.pseudo;
-                    const teamDisp = (p.teamName && p.teamName !== "Solo") ? `<div class="crest-mini-bg"><img src="${p.teamIcon}" class="crest-mini"></div> ${p.teamName}` : "Solo";
-                    document.getElementById('p-team').innerHTML = teamDisp; box.style.display = "block";
+                    const teamDisplay = (p.teamName && p.teamName !== "Solo") ? `<div class="crest-mini-bg"><img src="${p.teamIcon}" class="crest-mini"></div> ${p.teamName}` : "Solo";
+                    document.getElementById('p-team').innerHTML = teamDisplay; box.style.display = "block";
                 } else { box.style.display = "none"; }
             });
             roomRef.child('scores').on('value', snap => {
                 const l = document.getElementById('score-list'); l.innerHTML = "";
                 snap.forEach(c => {
                     const d = c.val();
-                    const teamInfo = (d.teamName && d.teamName !== "Solo" && d.teamName !== "") ? ` (${d.teamName})` : "";
+                    const teamInfo = (d.teamName && d.teamName !== "Solo" && d.teamName !== "") ? ` (${d.teamName})` : " (Solo)";
                     const icon = d.teamIcon ? `<div class="crest-mini-bg"><img src="${d.teamIcon}" class="crest-mini"></div>` : '';
                     l.innerHTML += `<div class="score-row"><span>${d.avatar} <b>${c.key}</b> ${icon}${teamInfo} : ${d.pts} pts</span><div><button style="width:30px; background:var(--danger)" onclick="adj('${c.key}',-1)">-</button><button style="width:30px; margin-left:5px;" onclick="adj('${c.key}',1)">+</button></div></div>`;
                 });
@@ -144,7 +149,7 @@
         function addTeam() { const n = document.getElementById('t-name').value.trim(); if(n && selCrest) { roomRef.child('teams/' + n).set({ icon: selCrest }); document.getElementById('t-name').value = ""; selCrest = ""; document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); checkTeamForm(); } }
         function deleteTeam(name) { if(confirm("Supprimer l'équipe ?")) roomRef.child('teams/' + name).remove(); }
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
-        function resetFullGame() { if(confirm("Changer de salle et réinitialiser ?")) { roomRef.remove(); location.reload(); } }
+        function resetFullGame() { if(confirm("⚠️ ATTENTION : Cela va supprimer tous les scores et les équipes de cette salle. Continuer ?")) { roomRef.remove(); location.reload(); } }
     </script>
 </body>
 </html>
