@@ -10,26 +10,35 @@
     <style>
         :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; }
-        .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 80px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; border-bottom: 2px solid rgba(255,255,255,0.1); z-index: 1000; }
-        .logo-presta { width: 45px; height: auto; }
-        .screen { display: none; height: 100%; width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; padding-top: 80px; box-sizing: border-box; }
+        .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 90px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; border-bottom: 2px solid rgba(255,255,255,0.1); z-index: 1000; }
+        .logo-presta { width: 45px; height: auto; -webkit-tap-highlight-color: transparent; }
+        .screen { display: none; height: 100%; width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; padding-top: 90px; box-sizing: border-box; }
         .active-screen { display: flex !important; }
         input, select { width: 100%; max-width: 280px; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); font-size: 1.1rem; background: var(--card-bg); color: white; text-align: center; outline: none; }
         .btn-ui { width: 100%; max-width: 280px; padding: 18px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: 900; cursor: pointer; background-color: var(--primary-color); color: white; box-shadow: 0 8px 0 #2980b9; text-transform: uppercase; margin-bottom: 10px; }
         .btn-disabled { background-color: #7f8c8d !important; box-shadow: 0 8px 0 #636e72 !important; cursor: not-allowed; opacity: 0.6; }
-        .avatar-scroll { width: 100%; max-width: 320px; max-height: 200px; overflow-y: auto; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 20px; border: 2px solid transparent; }
+        .avatar-scroll { width: 100%; max-width: 320px; max-height: 200px; overflow-y: auto; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 20px; }
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .avatar-item { font-size: 2rem; background: var(--card-bg); padding: 10px; border-radius: 15px; cursor: pointer; border: 3px solid transparent; text-align: center; transition: 0.2s; }
+        .avatar-item { font-size: 2rem; background: var(--card-bg); padding: 10px; border-radius: 15px; cursor: pointer; border: 3px solid transparent; text-align: center; }
         .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); background: rgba(241, 196, 15, 0.2); }
-        .buzzer { width: 70vw; height: 70vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; }
+        .buzzer { width: 70vw; height: 70vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
         .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
+        .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; }
     </style>
 </head>
 <body>
     <div class="header-bar">
-        <div style="flex:1"><span id="display-avatar" style="font-size:1.5rem"></span> <span id="display-pseudo"></span></div>
-        <div style="flex:0; padding: 0 10px;"><img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" class="logo-presta"></div>
+        <div style="flex:1; line-height: 1.2;">
+            <span id="display-avatar" style="font-size:1.5rem"></span> 
+            <span id="display-pseudo" style="font-weight: bold;"></span><br>
+            <span id="display-team-label" style="font-size: 0.8rem; color: var(--accent-color); font-style: italic;"></span>
+        </div>
+        <div style="flex:0; padding: 0 10px;">
+            <a href="https://tapni.com/app/djcedrik" target="_blank">
+                <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" class="logo-presta">
+            </a>
+        </div>
         <div style="flex:1; text-align:right" id="display-room-info"></div>
     </div>
 
@@ -41,29 +50,35 @@
 
     <div id="screen-login" class="screen">
         <h2 style="color:var(--accent-color)">TON PSEUDO</h2>
-        <input type="text" id="input-pseudo" placeholder="Ex: Jean-Mi" maxlength="12" onkeypress="if(event.key === 'Enter') checkPseudo()">
+        <input type="text" id="input-pseudo" placeholder="Pseudo..." maxlength="12" onkeypress="if(event.key === 'Enter') checkPseudo()">
         <button class="btn-ui" onclick="checkPseudo()">Suivant</button>
     </div>
 
     <div id="screen-setup" class="screen">
         <h3 style="margin:0 0 10px 0;">CHOISIS TON AVATAR</h3>
-        <div class="avatar-scroll" id="avatar-container"><div class="avatar-grid" id="avatar-grid"></div></div>
+        <div class="avatar-scroll"><div class="avatar-grid" id="avatar-grid"></div></div>
         <h3 style="margin:0 0 10px 0;">TON ÉQUIPE</h3>
         <select id="select-team"><option value="Solo|">Mode Solo</option></select>
         <button id="btn-final" class="btn-ui btn-disabled" onclick="finalizeSetup()">C'est parti !</button>
     </div>
 
     <div id="screen-buzzer" class="screen">
-        <div style="flex:1; display:flex; align-items:center;"><button class="buzzer" id="btn-buzz" onclick="onBuzzerClick()"><span id="label" style="color:white; font-size:1.4rem; font-weight:bold;">ATTENDEZ</span></button></div>
+        <div style="flex:1; display:flex; align-items:center;">
+            <button class="buzzer" id="btn-buzz" onclick="onBuzzerClick()">
+                <span id="label" style="color:white; font-size:1.4rem; font-weight:bold;">ATTENDEZ</span>
+            </button>
+        </div>
         <div style="margin-bottom:25px; font-weight: bold;">Score : <span id="score" style="color:var(--accent-color)">0</span> pts</div>
     </div>
+
+    <audio id="buzz-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3" preload="auto"></audio>
 
     <script>
         const firebaseConfig = { databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let roomID = "", roomRef = null, userPseudo = "", userTeamName = "", userTeamIcon = "", selectedAvatar = null;
+        let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
         let gameState = "waiting", isBlockedLocally = false, currentWinner = null;
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
@@ -83,25 +98,10 @@
         function checkPseudo() {
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return alert("Pseudo trop court !");
-
             roomRef.child('scores/' + userPseudo).once('value', snap => {
-                if(snap.exists()) {
-                    // Le pseudo existe. On vérifie si c'est une reconnexion sur le même navigateur
-                    const isReconnect = localStorage.getItem('presta_pseudo') === userPseudo;
-                    if(isReconnect) {
-                        if(confirm("Tu es déjà connecté. Reprendre ta partie ?")) {
-                            selectedAvatar = snap.val().avatar;
-                            userTeamName = snap.val().teamName;
-                            userTeamIcon = snap.val().teamIcon;
-                            startBuzzer();
-                        }
-                    } else {
-                        alert("Ce pseudo est déjà utilisé par un autre joueur !");
-                    }
-                } else {
-                    // Nouveau pseudo
-                    showScreen('screen-setup');
-                }
+                if(snap.exists() && localStorage.getItem('presta_pseudo') !== userPseudo) {
+                    alert("Ce pseudo est déjà utilisé !");
+                } else { showScreen('screen-setup'); }
             });
         }
 
@@ -125,8 +125,7 @@
                 div.className = 'avatar-item'; div.innerText = a;
                 div.onclick = () => {
                     document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
-                    div.classList.add('selected');
-                    selectedAvatar = a;
+                    div.classList.add('selected'); selectedAvatar = a;
                     document.getElementById('btn-final').classList.remove('btn-disabled');
                 };
                 grid.appendChild(div);
@@ -134,13 +133,10 @@
         }
 
         function finalizeSetup() {
-            if(!selectedAvatar) return alert("Choisis un avatar !");
+            if(!selectedAvatar) return;
             const val = document.getElementById('select-team').value.split('|');
-            userTeamName = val[0]; userTeamIcon = val[1];
-            
-            // On sauvegarde localement pour la reconnexion
+            userTeamName = val[0] || "Solo"; userTeamIcon = val[1] || "";
             localStorage.setItem('presta_pseudo', userPseudo);
-
             roomRef.child('scores/' + userPseudo).set({ 
                 pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon 
             });
@@ -150,8 +146,9 @@
         function startBuzzer() {
             document.getElementById('display-pseudo').innerText = userPseudo;
             document.getElementById('display-avatar').innerText = selectedAvatar;
+            document.getElementById('display-team-label').innerText = (userTeamName === "Solo") ? "Mode Solo" : userTeamName;
             showScreen('screen-buzzer');
-            roomRef.child('scores/' + userPseudo).on('value', s => { if(!s.exists()) return; document.getElementById('score').innerText = s.val().pts; });
+            roomRef.child('scores/' + userPseudo).on('value', s => { if(s.exists()) document.getElementById('score').innerText = s.val().pts; });
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlockedLocally = snap.exists(); updateUI(); });
             roomRef.child('gameState').on('value', snap => { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); });
             roomRef.child('buzzers').on('value', snap => { currentWinner = snap.val() ? snap.val().pseudo : null; updateUI(); });
@@ -159,6 +156,12 @@
 
         function onBuzzerClick() {
             if(gameState === "ready" && !isBlockedLocally && !currentWinner) {
+                // Vibration (Android) et Son (Tous)
+                if (navigator.vibrate) navigator.vibrate(100);
+                const sound = document.getElementById('buzz-sound');
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log("Audio bloqué par le navigateur"));
+
                 roomRef.child('gameState').update({ status: 'taken' });
                 roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
             }
