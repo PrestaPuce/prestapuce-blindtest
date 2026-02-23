@@ -73,7 +73,7 @@
         <button class="btn-exit" onclick="leaveGame()">×</button>
     </div>
 
-    <audio id="buzz-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3" preload="auto"></audio>
+    <audio id="buzz-sound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
 
     <script>
         const firebaseConfig = { databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app/" };
@@ -140,7 +140,7 @@
             userTeamName = val[0] || "Solo"; userTeamIcon = val[1] || "";
             localStorage.setItem('presta_pseudo', userPseudo);
             roomRef.child('scores/' + userPseudo).set({ 
-                pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon 
+                pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon, active: true 
             });
             startBuzzer();
         }
@@ -148,7 +148,7 @@
         function startBuzzer() {
             document.getElementById('display-pseudo').innerText = userPseudo;
             document.getElementById('display-avatar').innerText = selectedAvatar;
-            document.getElementById('display-team-label').innerText = userTeamName;
+            document.getElementById('display-team-label').innerText = (userTeamName === "Solo") ? "Mode Solo" : userTeamName;
             showScreen('screen-buzzer');
             roomRef.child('scores/' + userPseudo).on('value', s => { if(s.exists()) document.getElementById('score').innerText = s.val().pts; });
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlockedLocally = snap.exists(); updateUI(); });
@@ -158,7 +158,7 @@
 
         function onBuzzerClick() {
             if(gameState === "ready" && !isBlockedLocally && !currentWinner) {
-                if (navigator.vibrate) navigator.vibrate(100);
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 const sound = document.getElementById('buzz-sound');
                 sound.currentTime = 0;
                 sound.play().catch(e => {});
@@ -170,7 +170,13 @@
         function leaveGame() {
             if(confirm("Quitter la partie ? Vos points seront conservés.")) {
                 roomRef.child('blockedPlayers/' + userPseudo).remove();
-                roomRef.child('scores/' + userPseudo).update({ teamName: "", teamIcon: "", avatar: "👻" });
+                roomRef.child('scores/' + userPseudo).update({ 
+                    active: false,
+                    lastTeam: userTeamName,
+                    teamName: (userTeamName === "Solo") ? "Solo" : "", // On vide l'équipe pour le compteur MJ
+                    teamIcon: (userTeamName === "Solo") ? "" : "",
+                    avatar: "👻" 
+                });
                 localStorage.removeItem('presta_pseudo');
                 location.reload();
             }
