@@ -27,6 +27,7 @@
         .btn-google { background: white; color: #444; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-ghost { background: none; border: 1px solid #7f8c8d; color: #bdc3c7; }
         .btn-accent { background: var(--accent); color: black; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 15px; }
         .avatar-item { font-size: 1.5rem; cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 5px; }
@@ -76,8 +77,8 @@
     <div id="screen-verify-email" class="screen">
         <h3 style="color:var(--accent)">VÉRIFIE TES MAILS ! 📧</h3>
         <p>Un lien de validation a été envoyé à : <br><b id="user-email-sent"></b></p>
-        <p style="font-size:0.8rem; opacity:0.8; margin:20px 0;">Vérifie tes spams si tu ne vois rien. Une fois cliqué sur le lien dans le mail, appuie ci-dessous :</p>
-        <button class="btn btn-accent" onclick="checkIfVerified()">J'ai validé mon mail !</button>
+        <p style="font-size:0.8rem; opacity:0.8; margin:20px 0;">Vérifie tes spams. Une fois le lien cliqué dans le mail, appuie sur le bouton ci-dessous :</p>
+        <button id="btn-check-verify" class="btn btn-accent" onclick="checkIfVerified()">J'ai validé mon mail !</button>
         <button class="btn btn-ghost" onclick="resendVerify()">Renvoyer l'e-mail</button>
     </div>
 
@@ -111,11 +112,6 @@
         let roomID = "", roomRef = null, userPseudo = "", selectedAvatar = "🐱", isGuest = true, gameScore = 0, emailMode = 'login';
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🐙","🦉","🐸"];
 
-        function loginGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).then(res => postSignIn(res.user)).catch(e => alert(e.message));
-        }
-
         function toggleEmailMode() {
             emailMode = (emailMode === 'login') ? 'signup' : 'login';
             document.getElementById('email-title').innerText = (emailMode === 'login') ? 'CONNEXION' : 'CRÉER UN COMPTE';
@@ -144,14 +140,27 @@
         }
 
         function checkIfVerified() {
-            if(!auth.currentUser) return;
-            auth.currentUser.reload().then(() => {
-                if(auth.currentUser.emailVerified) { postSignIn(auth.currentUser); } 
-                else { alert("L'e-mail n'est pas encore validé. Pense à vérifier tes spams !"); }
+            const user = auth.currentUser;
+            if(!user) return alert("Session perdue. Reconnectez-vous.");
+
+            const btn = document.getElementById('btn-check-verify');
+            btn.innerText = "Vérification...";
+            btn.disabled = true;
+
+            user.reload().then(() => {
+                if(user.emailVerified) {
+                    postSignIn(user);
+                } else {
+                    alert("L'e-mail n'est pas encore détecté comme validé. Cliquez bien sur le lien dans le mail reçu.");
+                    btn.innerText = "J'ai validé mon mail !";
+                    btn.disabled = false;
+                }
+            }).catch(e => {
+                alert("Erreur de synchronisation. Merci de réessayer.");
+                btn.innerText = "J'ai validé mon mail !";
+                btn.disabled = false;
             });
         }
-
-        function resendVerify() { auth.currentUser.sendEmailVerification().then(() => alert("E-mail renvoyé !")); }
 
         function postSignIn(user) {
             isGuest = false;
@@ -160,7 +169,6 @@
                 if(data && data.pseudo) {
                     userPseudo = data.pseudo;
                     selectedAvatar = data.avatar || "🐱";
-                    // Sélection visuelle automatique
                     document.getElementById('pseudo-input').value = userPseudo;
                     document.querySelectorAll('.avatar-item').forEach(i => {
                         if(i.innerText === selectedAvatar) i.classList.add('selected');
@@ -169,6 +177,11 @@
                     confirmProfile(); 
                 } else { showScreen('screen-profile'); }
             });
+        }
+
+        function loginGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).then(res => postSignIn(res.user)).catch(e => alert(e.message));
         }
 
         function joinRoom() {
@@ -235,6 +248,8 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
+
+        function resendVerify() { auth.currentUser.sendEmailVerification().then(() => alert("E-mail renvoyé !")); }
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
