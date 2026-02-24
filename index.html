@@ -82,7 +82,7 @@
 
         let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
         let gameState = "waiting", isBlockedLocally = false, currentWinner = null;
-        let kickListener = null; // Stocker l'écouteur pour pouvoir le couper
+        let kickListener = null;
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
         window.onload = () => {
@@ -114,18 +114,25 @@
                 const data = snap.val();
 
                 if(snap.exists()) {
+                    // Reconnexion possible si c'est le même téléphone ET (joueur inactif OU c'est bien nous)
                     if(savedPseudo === userPseudo && savedRoom === roomID) {
                         if(confirm("Reprendre votre partie avec le pseudo " + userPseudo + " ?")) {
                             selectedAvatar = data.avatar;
-                            userTeamName = data.active ? data.teamName : (data.lastTeam || "Solo");
-                            userTeamIcon = data.active ? data.teamIcon : (data.lastTeamIcon || "");
-                            roomRef.child('scores/' + userPseudo).update({ active: true, teamName: userTeamName });
-                            startBuzzer();
+                            userTeamName = data.lastTeam || data.teamName || "Solo";
+                            userTeamIcon = data.lastTeamIcon || data.teamIcon || "";
+                            
+                            roomRef.child('scores/' + userPseudo).update({ 
+                                active: true,
+                                teamName: userTeamName,
+                                teamIcon: userTeamIcon
+                            }).then(() => { startBuzzer(); });
                         }
-                    } else if (data.active === true) {
-                        alert("Ce pseudo est déjà utilisé par un autre joueur !");
-                    } else {
-                        alert("Ce pseudo appartient à un joueur déconnecté.");
+                    } 
+                    else if (data.active === true) {
+                        alert("Ce pseudo est déjà utilisé !");
+                    }
+                    else {
+                        alert("Ce pseudo appartient à un joueur déconnecté. Si c'est vous, utilisez le même appareil.");
                     }
                 } else { showScreen('screen-setup'); }
             });
@@ -176,10 +183,13 @@
             document.getElementById('display-team-label').innerText = userTeamName;
             showScreen('screen-buzzer');
             
-            // On stocke l'écouteur d'expulsion
+            // Écouteur d'expulsion (KICK)
+            if(kickListener) roomRef.child('scores/' + userPseudo + '/active').off('value', kickListener);
             kickListener = roomRef.child('scores/' + userPseudo + '/active').on('value', s => { 
-                if(s.val() === false) { 
+                if(s.val() === false && !localStorage.getItem('leaving')) { 
                     alert("Vous avez été retiré de la salle par le MJ.");
+                    localStorage.removeItem('presta_pseudo');
+                    localStorage.removeItem('presta_room');
                     location.reload(); 
                 }
             });
@@ -204,18 +214,16 @@
 
         function leaveGame() {
             if(confirm("Quitter la partie ? Vos points seront conservés.")) {
+                localStorage.setItem('leaving', 'true'); // Marqueur temporaire pour éviter l'alerte MJ
                 if(roomRef && userPseudo) {
-                    // 1. On coupe l'écouteur d'expulsion AVANT de changer le statut
-                    if(kickListener) roomRef.child('scores/' + userPseudo + '/active').off('value', kickListener);
-                    
-                    // 2. On change le statut en base
+                    const isSolo = (userTeamName === "Solo" || userTeamName === "");
                     roomRef.child('scores/' + userPseudo).update({ 
                         active: false, 
-                        lastTeam: userTeamName 
+                        lastTeam: userTeamName,
+                        teamName: isSolo ? "Solo" : "",
+                        teamIcon: ""
                     }).then(() => {
-                        // 3. On nettoie et on recharge
-                        localStorage.removeItem('presta_pseudo');
-                        localStorage.removeItem('presta_room');
+                        localStorage.removeItem('leaving');
                         location.reload();
                     });
                 }
