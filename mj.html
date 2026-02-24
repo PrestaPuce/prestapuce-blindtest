@@ -2,17 +2,19 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ - Presta'Puce</title>
+    <title>Console MJ Sécurisée - Presta'Puce</title>
     <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    
     <style>
         :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; }
         body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        .login-box { max-width: 350px; margin: 80px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; }
+        .login-box { max-width: 350px; margin: 80px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; margin-bottom: 15px; }
-        select.mini-select { width: auto; padding: 5px; margin: 0 10px; font-size: 0.8rem; background: var(--card-bg); border: 1px solid var(--accent); }
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; text-transform: uppercase; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
         .dashboard { display: none; max-width: 800px; margin: 0 auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
         .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 20px 0; text-align: center; display: none; }
@@ -26,16 +28,17 @@
         .crest-mini-bg { background: white; padding: 2px; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; }
         .crest-mini { width: 22px; height: 22px; object-fit: contain; }
         .kick-btn { color: var(--danger); cursor: pointer; font-weight: bold; font-size: 1.2rem; margin-left: 15px; padding: 0 5px; }
-        .score-actions { display: flex; align-items: center; }
     </style>
 </head>
 <body>
+
     <div id="screen-login" class="login-box">
         <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px;">
-        <h2>Accès MJ</h2>
-        <input type="text" id="mj-user" placeholder="Identifiant" onkeydown="if(event.key === 'Enter') login()">
-        <input type="password" id="mj-pass" placeholder="Mot de passe" onkeydown="if(event.key === 'Enter') login()">
-        <button onclick="login()">SE CONNECTER</button>
+        <h2>Accès MJ Sécurisé</h2>
+        <input type="email" id="mj-email" placeholder="Email MJ">
+        <input type="password" id="mj-pass" placeholder="Mot de passe">
+        <button id="btn-login" onclick="login()">Se Connecter</button>
+        <p id="login-error" style="color:red; font-size:0.8rem; margin-top:10px;"></p>
     </div>
 
     <div id="screen-dashboard" class="dashboard">
@@ -59,7 +62,7 @@
 
         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-top: 20px;">
             <h3>Gestion Équipes</h3>
-            <input type="text" id="t-name" placeholder="Nom de l'équipe..." onkeydown="if(event.key === 'Enter') addTeam()" oninput="checkTeamForm()">
+            <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()">
             <div class="crest-picker" id="crest-grid"></div>
             <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
             <div id="mj-team-list-display" style="margin-top:15px;"></div>
@@ -74,24 +77,43 @@
         const firebaseConfig = { databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const mjAccounts = { "prestapuce": "Prest@Puce06", "museikevents": "@Lex1977" };
+        const auth = firebase.auth();
+
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {};
         const crests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png", "https://cdn-icons-png.flaticon.com/512/1152/1152912.png", "https://cdn-icons-png.flaticon.com/512/2583/2583344.png", "https://cdn-icons-png.flaticon.com/512/2583/2583319.png", "https://cdn-icons-png.flaticon.com/512/2583/2583434.png", "https://cdn-icons-png.flaticon.com/512/2583/2583351.png", "https://cdn-icons-png.flaticon.com/512/1037/1037953.png", "https://cdn-icons-png.flaticon.com/512/1037/1037984.png"];
 
+        // FONCTION DE CONNEXION SÉCURISÉE
         function login() {
-            const u = document.getElementById('mj-user').value.toLowerCase().trim();
-            const p = document.getElementById('mj-pass').value;
-            if(mjAccounts[u] === p) startRoom(); else alert("Accès MJ refusé.");
+            const email = document.getElementById('mj-email').value;
+            const pass = document.getElementById('mj-pass').value;
+            const errorP = document.getElementById('login-error');
+
+            auth.signInWithEmailAndPassword(email, pass)
+                .then((userCredential) => {
+                    errorP.innerText = "";
+                    startRoom();
+                })
+                .catch((error) => {
+                    errorP.innerText = "Identifiants incorrects.";
+                });
         }
+
         function startRoom() {
             roomID = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('screen-login').style.display = "none";
             document.getElementById('screen-dashboard').style.display = "block";
             document.getElementById('display-room').innerText = roomID;
+            
+            // Créer la salle
             db.ref('activeRooms/' + roomID).set({ status: 'open' });
             roomRef = db.ref('roomsData/' + roomID);
-            initMJLogic(); initCrestGrid();
+            
+            initMJLogic(); 
+            initCrestGrid();
         }
+
+        // --- Logique du Dashboard (Identique à ton code précédent) ---
+
         function handleReward(pts, mode) {
             if(!currentPlayer) return;
             roomRef.child('scores/' + currentPlayer.pseudo).transaction(c => {
@@ -137,21 +159,12 @@
         function changePlayerTeam(pseudo, combinedValue) {
             const [newName, newIcon] = combinedValue.split('|');
             const isSolo = (newName === "Solo" || newName === "");
-            // On met à jour teamName et lastTeam pour figer le "dernier état"
-            roomRef.child('scores/' + pseudo).update({ 
-                teamName: newName, 
-                teamIcon: newIcon, 
-                lastTeam: isSolo ? "Solo" : newName 
-            });
+            roomRef.child('scores/' + pseudo).update({ teamName: newName, teamIcon: newIcon, lastTeam: isSolo ? "Solo" : newName });
         }
 
         function kickPlayer(pseudo) {
             if(confirm("Expulser " + pseudo + " ?")) {
-                roomRef.child('scores/' + pseudo).once('value', snap => {
-                    const d = snap.val(); 
-                    // On ne vide PAS lastTeam lors d'un kick pour garder l'historique du score
-                    roomRef.child('scores/' + pseudo).update({ active: false, teamName: "", teamIcon: "" });
-                });
+                roomRef.child('scores/' + pseudo).update({ active: false, teamName: "", teamIcon: "" });
             }
         }
         function initCrestGrid() {
@@ -166,7 +179,7 @@
         function addTeam() { const n = document.getElementById('t-name').value.trim(); if(n && selCrest) { roomRef.child('teams/' + n).set({ icon: selCrest }); document.getElementById('t-name').value = ""; selCrest = ""; document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); checkTeamForm(); } }
         function deleteTeam(name) { if(confirm("Supprimer l'équipe ?")) roomRef.child('teams/' + name).remove(); }
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
-        function resetFullGame() { if(confirm("⚠️ RESET TOTAL PARTIE ?")) { roomRef.remove(); location.reload(); } }
+        function resetFullGame() { if(confirm("⚠️ RESET TOTAL ?")) { roomRef.remove(); location.reload(); } }
     </script>
 </body>
 </html>
