@@ -22,16 +22,13 @@
         .dashboard { display: none; max-width: 800px; margin: 0 auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
         
-        /* Grille de blasons */
         .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; }
         .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; transition: 0.2s; }
         .crest-selected { border-color: var(--accent) !important; background: var(--accent) !important; transform: scale(1.1); }
         .crest-opt { width: 30px; height: 30px; object-fit: contain; }
         
-        /* Upload Area */
         .upload-section { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed var(--blue); }
         
-        /* Autres styles habituels */
         .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 20px 0; text-align: center; display: none; }
         .action-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px; }
         .team-item { display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin-bottom: 8px; justify-content: space-between; }
@@ -47,16 +44,16 @@
         <h2>Connexion MJ</h2>
         <input type="email" id="mj-email" placeholder="Email">
         <input type="password" id="mj-pass" placeholder="Mot de passe">
-        <button onclick="login()" style="width:100%">Entrer</button>
+        <button id="btn-login" onclick="login()" style="width:100%">Entrer</button>
         <p onclick="forgotPassword()" style="color:var(--accent); cursor:pointer; font-size:0.8rem;">Mot de passe oublié ?</p>
-        <p id="login-error" style="color:var(--danger);"></p>
+        <p id="login-error" style="color:var(--danger); font-size:0.8rem; margin-top:10px;"></p>
     </div>
 
     <div id="screen-choice" class="box" style="display:none;">
         <h2>Gestion des Salles</h2>
         <button onclick="createNewRoom()" style="width:100%">🆕 Créer une nouvelle salle</button>
         <button id="btn-resume" onclick="resumeRoom()" style="width:100%; display:none; background:var(--blue)">🔄 Reprendre la salle <span id="last-room-id"></span></button>
-        <button onclick="auth.signOut(); location.reload();" style="background:none; border:1px solid white; font-size:0.7rem;">Déconnexion</button>
+        <button onclick="auth.signOut().then(()=>location.reload())" style="background:none; border:1px solid white; font-size:0.7rem;">Déconnexion</button>
     </div>
 
     <div id="screen-dashboard" class="dashboard">
@@ -81,7 +78,7 @@
         <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-top: 20px;">
             <h3>Gestion Équipes</h3>
             <div class="upload-section">
-                <label style="font-size: 0.8rem; color: var(--blue); font-weight: bold;">+ AJOUTER TON LOGO PERSO (JPG/PNG) :</label><br><br>
+                <label style="font-size: 0.8rem; color: var(--blue); font-weight: bold;">+ AJOUTER TON LOGO PERSO :</label><br><br>
                 <input type="file" id="upload-crest" accept="image/*" style="font-size: 0.8rem;">
             </div>
             
@@ -111,16 +108,26 @@
         const auth = firebase.auth();
         const storage = firebase.storage();
 
+        // --- SÉCURITÉ MJ ---
+        const authorizedMJs = ["museikevents@yahoo.com", "contact@prestapuce.com"];
+
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         const defaultCrests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png", "https://cdn-icons-png.flaticon.com/512/1152/1152912.png"];
 
-        // --- AUTH & ROOMS ---
         function login() {
-            const email = document.getElementById('mj-email').value.trim();
+            const email = document.getElementById('mj-email').value.trim().toLowerCase();
             const pass = document.getElementById('mj-pass').value;
+            const err = document.getElementById('login-error');
+            
+            // Vérification immédiate de la liste blanche
+            if (!authorizedMJs.includes(email)) {
+                err.innerText = "Accès refusé. Compte non autorisé.";
+                return;
+            }
+
             auth.signInWithEmailAndPassword(email, pass)
                 .then(user => { checkUserRoom(user.user.uid); })
-                .catch(err => { document.getElementById('login-error').innerText = "Erreur de connexion."; });
+                .catch(err => { document.getElementById('login-error').innerText = "Identifiants incorrects."; });
         }
 
         function forgotPassword() {
@@ -160,16 +167,11 @@
             loadCrestGrid();
         }
 
-        // --- GESTION DES BLASONS ---
         function loadCrestGrid() {
             const grid = document.getElementById('crest-grid');
-            
-            // Écoute des blasons perso du MJ
             db.ref('users/' + auth.currentUser.uid + '/customCrests').on('value', snap => {
                 grid.innerHTML = "";
-                // 1. Blasons perso
                 snap.forEach(child => { createCrestIcon(child.val().url); });
-                // 2. Blasons par défaut
                 defaultCrests.forEach(url => { createCrestIcon(url); });
             });
         }
@@ -191,7 +193,6 @@
             grid.appendChild(wrap);
         }
 
-        // Upload de blason
         document.getElementById('upload-crest').addEventListener('change', e => {
             const file = e.target.files[0];
             if (!file) return;
@@ -203,7 +204,6 @@
             });
         });
 
-        // --- LOGIQUE DE JEU ---
         function checkTeamForm() {
             const name = document.getElementById('t-name').value.trim();
             document.getElementById('btn-add-team').disabled = !(name.length > 0 && selCrest !== "");
@@ -242,11 +242,9 @@
             roomRef.child('scores').once('value', snap => {
                 const l = document.getElementById('score-list'); l.innerHTML = "";
                 const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
-                // Affichage Équipes
                 Object.keys(globalTeams).forEach(tKey => {
                     tList.innerHTML += `<div class="team-item"><span><div class="crest-mini-bg"><img src="${globalTeams[tKey].icon}" class="crest-mini"></div> <b>${tKey}</b></span><span onclick="deleteTeam('${tKey}')" style="color:red; cursor:pointer">✖</span></div>`;
                 });
-                // Affichage Joueurs
                 snap.forEach(c => {
                     const d = c.val(); if(d.active === false) return;
                     l.innerHTML += `<div class="score-row"><span>${d.avatar} <b>${c.key}</b> : ${d.pts} pts</span><div><button onclick="adj('${c.key}',-1)">-</button><button onclick="adj('${c.key}',1)">+</button></div></div>`;
