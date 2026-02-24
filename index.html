@@ -25,7 +25,7 @@
         .btn-blue { background: var(--primary); color: white; }
         .btn-accent { background: var(--accent); color: black; }
         .btn-ghost { background: none; border: 1px solid #7f8c8d; color: #bdc3c7; }
-        .btn:disabled { opacity: 0.5; cursor: wait; }
+        .btn:disabled { opacity: 0.5; }
         .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; font-weight: bold; }
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; }
         .avatar-item { font-size: 1.8rem; cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 5px; }
@@ -69,15 +69,15 @@
     </div>
 
     <div id="screen-verify-email" class="screen">
-        <h3 style="color:var(--accent)">VÉRIFICATION E-MAIL</h3>
-        <p>Lien envoyé ! Une fois validé dans tes mails, clique ici :</p>
+        <h3 style="color:var(--accent)">VÉRIFICATION</h3>
+        <p>Clique sur le lien reçu par mail.<br>Ensuite, appuie ici :</p>
         <button id="btn-check-verify" class="btn btn-accent" onclick="forceVerify()">J'ai validé mon mail !</button>
-        <button class="btn btn-ghost" onclick="location.reload()">Retour / Reconnexion</button>
+        <button class="btn btn-ghost" style="margin-top:20px;" onclick="location.reload()">Retour / Annuler</button>
     </div>
 
     <div id="screen-profile" class="screen">
         <h3>TON PROFIL</h3>
-        <div class="auth-container"><input type="text" id="pseudo-input" placeholder="Ton pseudo..."></div>
+        <div class="auth-container"><input type="text" id="pseudo-input" placeholder="Pseudo..."></div>
         <div class="avatar-grid" id="avatar-grid"></div>
         <button class="btn btn-blue" onclick="confirmProfile()">C'est parti !</button>
     </div>
@@ -122,13 +122,16 @@
             if(!email || !pass) return alert("Remplis tout !");
             
             btn.disabled = true;
-            btn.innerText = "Patientez...";
+            btn.innerText = "Chargement...";
 
             const action = (emailMode === 'login') ? auth.signInWithEmailAndPassword(email, pass) : auth.createUserWithEmailAndPassword(email, pass);
             
             action.then(res => {
+                btn.disabled = false;
+                btn.innerText = (emailMode === 'login') ? "Se connecter" : "S'enregistrer";
                 if(emailMode === 'signup') {
-                    res.user.sendEmailVerification().then(() => showScreen('screen-verify-email'));
+                    res.user.sendEmailVerification();
+                    showScreen('screen-verify-email');
                 } else {
                     if(!res.user.emailVerified) showScreen('screen-verify-email');
                     else postSignIn(res.user);
@@ -140,25 +143,13 @@
             });
         }
 
-        // --- LA NOUVELLE LOGIQUE POST-2025 ---
         function forceVerify() {
             const user = auth.currentUser;
             if(!user) return location.reload();
-            
-            const btn = document.getElementById('btn-check-verify');
-            btn.innerText = "Vérification...";
-            btn.disabled = true;
-
-            // On recharge le profil de force
             user.reload().then(() => {
-                if(user.emailVerified) {
-                    postSignIn(user);
-                } else {
-                    alert("E-mail non validé par Google. Si tu l'as fait, déconnecte-toi et reconnecte-toi.");
-                    btn.innerText = "J'ai validé mon mail !";
-                    btn.disabled = false;
-                }
-            }).catch(() => location.reload());
+                if(user.emailVerified) postSignIn(user);
+                else alert("L'e-mail n'est pas encore validé. Vérifie tes spams.");
+            });
         }
 
         function postSignIn(user) {
@@ -169,7 +160,7 @@
                     selectedAvatar = data.avatar || "🐱";
                     confirmProfile(); 
                 } else { showScreen('screen-profile'); }
-            });
+            }).catch(() => showScreen('screen-profile'));
         }
 
         function joinRoom() {
@@ -188,12 +179,11 @@
 
         function confirmProfile() {
             userPseudo = document.getElementById('pseudo-input').value.trim() || userPseudo;
-            if(!userPseudo) return alert("Pseudo obligatoire");
+            if(!userPseudo) return alert("Pseudo requis");
             if(auth.currentUser) {
-                db.ref('players/' + auth.currentUser.uid).update({
-                    pseudo: userPseudo, avatar: selectedAvatar
-                });
+                db.ref('players/' + auth.currentUser.uid).update({ pseudo: userPseudo, avatar: selectedAvatar });
             }
+            if(!roomRef) return location.reload();
             roomRef.child('scores/' + userPseudo).set({ pts: 0, avatar: selectedAvatar, active: true });
             initGameInterface();
         }
@@ -226,6 +216,16 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
+
+        // --- RETABLISSEMENT LECTURE QR CODE ---
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const r = urlParams.get('room');
+            if (r) { 
+                document.getElementById('room-input').value = r; 
+                joinRoom(); 
+            }
+        };
 
         const grid = document.getElementById('avatar-grid');
         avatars.forEach(a => {
