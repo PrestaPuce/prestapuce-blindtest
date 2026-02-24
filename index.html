@@ -20,24 +20,27 @@
         .screen { display: none; height: calc(100% - 60px); width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; overflow-y: auto; }
         .active { display: flex !important; }
 
-        .input-group { position: relative; width: 100%; max-width: 280px; margin-bottom: 10px; }
-        input { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--card); color: white; text-align: center; font-size: 1rem; outline: none; }
-        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #7f8c8d; }
+        /* Alignement parfait des champs */
+        .auth-field { width: 100%; max-width: 300px; margin-bottom: 12px; position: relative; }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--card); color: white; text-align: center; font-size: 1rem; outline: none; box-sizing: border-box; }
         
-        .btn { width: 100%; max-width: 280px; padding: 16px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; text-transform: uppercase; transition: 0.2s; }
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.7; z-index: 10; }
+        
+        .btn { width: 100%; max-width: 300px; padding: 16px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; text-transform: uppercase; transition: 0.2s; }
         .btn-blue { background: var(--primary); color: white; }
         .btn-google { background: white; color: #444; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-ghost { background: none; border: 1px solid #7f8c8d; color: #bdc3c7; }
         .btn-accent { background: var(--accent); color: black; }
         .btn:disabled { opacity: 0.5; cursor: wait; }
 
-        .avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 15px; }
-        .avatar-item { font-size: 1.5rem; cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 5px; }
-        .avatar-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
+        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; }
+        .avatar-item { font-size: 1.8rem; cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 5px; transition: 0.2s; }
+        .avatar-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); transform: scale(1.1); }
         
-        .buzzer { width: 200px; height: 200px; border-radius: 50%; border: none; background: var(--danger); box-shadow: 0 10px 0 #c0392b; cursor: pointer; }
+        .buzzer { width: 220px; height: 220px; border-radius: 50%; border: none; background: var(--danger); box-shadow: 0 10px 0 #c0392b; cursor: pointer; transition: 0.1s; }
+        .buzzer:active { transform: translateY(5px); box-shadow: 0 5px 0 #c0392b; }
         .ready .buzzer { background: var(--success); box-shadow: 0 10px 0 #27ae60; }
-        .error-msg { color: var(--danger); font-size: 0.8rem; margin-bottom: 10px; }
+        .error-msg { color: var(--danger); font-size: 0.85rem; margin-bottom: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -50,7 +53,7 @@
 
     <div id="screen-room" class="screen active">
         <h2 style="color:var(--accent)">CODE SALLE</h2>
-        <input type="number" id="room-input" placeholder="Ex: 1234">
+        <div class="auth-field"><input type="number" id="room-input" placeholder="Ex: 1234"></div>
         <button class="btn btn-blue" onclick="joinRoom()">Valider</button>
     </div>
 
@@ -68,10 +71,10 @@
 
     <div id="screen-email-login" class="screen">
         <h3 id="email-title">CONNEXION</h3>
-        <input type="email" id="log-email" placeholder="E-mail">
-        <div class="input-group">
+        <div class="auth-field"><input type="email" id="log-email" placeholder="E-mail"></div>
+        <div class="auth-field">
             <input type="password" id="log-pass" placeholder="Mot de passe">
-            <span class="toggle-password" onclick="togglePasswordVisibility()"><img src="https://img.icons8.com/material-outlined/24/000000/visible--v1.png" width="24"/></span>
+            <span class="toggle-password" onclick="togglePass()">👁️</span>
         </div>
         <p id="error-auth" class="error-msg"></p>
         <button class="btn btn-blue" id="btn-email-main" onclick="handleAuth()">Se connecter</button>
@@ -80,16 +83,17 @@
     </div>
 
     <div id="screen-verify-email" class="screen">
-        <h3 style="color:var(--accent)">VÉRIFIE TES MAILS ! </h3>
-        <p>Un lien de validation a été envoyé à : <br><b id="user-email-sent"></b></p>
-        <p style="font-size:0.8rem; opacity:0.8; margin:20px 0;">Vérifie tes spams. Une fois le lien cliqué dans le mail, appuie ici :</p>
+        <h3 style="color:var(--accent)">VÉRIFIE TES MAILS ! 📧</h3>
+        <p>Un lien a été envoyé à : <br><b id="user-email-sent"></b></p>
+        <p style="font-size:0.8rem; opacity:0.8; margin:20px 0;">Vérifie tes spams. Une fois validé, appuie ici :</p>
         <button id="btn-check-verify" class="btn btn-accent" onclick="checkIfVerified()">J'ai validé mon mail !</button>
         <button class="btn btn-ghost" onclick="resendVerify()">Renvoyer l'e-mail</button>
+        <button class="btn btn-ghost" style="border:none; margin-top:10px;" onclick="showScreen('screen-email-login')">Retour à la connexion</button>
     </div>
 
     <div id="screen-profile" class="screen">
-        <h3>TON PROFIL PERMANENT</h3>
-        <input type="text" id="pseudo-input" placeholder="Pseudo...">
+        <h3>TON PROFIL</h3>
+        <div class="auth-field"><input type="text" id="pseudo-input" placeholder="Ton pseudo..."></div>
         <div class="avatar-grid" id="avatar-grid"></div>
         <button class="btn btn-blue" onclick="confirmProfile()">C'est parti !</button>
     </div>
@@ -114,19 +118,12 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        let roomID = "", roomRef = null, userPseudo = "", selectedAvatar = "", isGuest = true, gameScore = 0, emailMode = 'login';
-        const avatars = ["","","","","","","","","","","","","","","",""];
+        let roomID = "", roomRef = null, userPseudo = "", selectedAvatar = "🐱", isGuest = true, gameScore = 0, emailMode = 'login';
+        const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🐙","🦉","🐸"];
 
-        function togglePasswordVisibility() {
-            const passInput = document.getElementById('log-pass');
-            const toggle = document.querySelector('.toggle-password img');
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                toggle.src = 'https://img.icons8.com/material-outlined/24/000000/hide.png';
-            } else {
-                passInput.type = 'password';
-                toggle.src = 'https://img.icons8.com/material-outlined/24/000000/visible--v1.png';
-            }
+        function togglePass() {
+            const p = document.getElementById('log-pass');
+            p.type = p.type === 'password' ? 'text' : 'password';
         }
 
         function toggleEmailMode() {
@@ -134,13 +131,14 @@
             document.getElementById('email-title').innerText = (emailMode === 'login') ? 'CONNEXION' : 'CRÉER UN COMPTE';
             document.getElementById('btn-email-main').innerText = (emailMode === 'login') ? 'Se connecter' : 'S\'enregistrer';
             document.getElementById('btn-email-switch').innerText = (emailMode === 'login') ? 'Pas de compte ? Créer' : 'Déjà un compte ? Login';
+            document.getElementById('error-auth').innerText = "";
         }
 
         function handleAuth() {
             const email = document.getElementById('log-email').value;
             const pass = document.getElementById('log-pass').value;
-            document.getElementById('error-auth').innerText = '';
-            
+            if(!email || !pass) return alert("Remplis tous les champs !");
+
             const action = (emailMode === 'login') ? auth.signInWithEmailAndPassword(email, pass) : auth.createUserWithEmailAndPassword(email, pass);
             
             action.then(res => {
@@ -156,26 +154,18 @@
                     } else { postSignIn(res.user); }
                 }
             }).catch(e => { 
-                // Gestion améliorée des erreurs
-                if (emailMode === 'login' && (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password')) {
-                    document.getElementById('error-auth').innerText = "Compte non trouvé ou mot de passe incorrect. Créez un compte si ce n'est pas déjà fait.";
-                    toggleEmailMode(); // Suggestion de création de compte
-                } else if (emailMode === 'signup' && e.code === 'auth/email-already-in-use') {
-                    document.getElementById('error-auth').innerText = "Cet e-mail est déjà utilisé. Connectez-vous.";
-                    toggleEmailMode(); // Revenir au mode connexion
-                } else {
-                    document.getElementById('error-auth').innerText = e.message;
+                let msg = e.message;
+                if(e.code === "auth/user-not-found") {
+                    msg = "Compte inconnu. Nous avons basculé en mode 'Création'.";
+                    toggleEmailMode();
                 }
+                document.getElementById('error-auth').innerText = msg;
             });
         }
 
         function checkIfVerified() {
             const user = auth.currentUser;
-            if(!user) {
-                alert("Session perdue. Merci de vous reconnecter.");
-                showScreen('screen-email-login');
-                return;
-            }
+            if(!user) return showScreen('screen-email-login');
 
             const btn = document.getElementById('btn-check-verify');
             btn.innerText = "Vérification...";
@@ -185,15 +175,12 @@
                 if(user.emailVerified) {
                     postSignIn(user);
                 } else {
-                    alert("E-mail non détecté comme validé.\n\nASTUCE : Si vous l'avez validé, reconnectez-vous, cela débloquera votre compte.");
+                    alert("L'e-mail n'est pas encore validé. Si c'est fait, reconnecte-toi pour forcer l'accès.");
                     btn.innerText = "J'ai validé mon mail !";
                     btn.disabled = false;
-                    showScreen('screen-email-login'); // Reconnexion forcée pour rafraîchir
                 }
-            }).catch(e => {
-                alert("Synchronisation impossible. Merci de vous reconnecter.");
-                btn.disabled = false;
-                btn.innerText = "J'ai validé mon mail !";
+            }).catch(() => {
+                alert("Erreur de synchronisation. Merci de te reconnecter.");
                 showScreen('screen-email-login');
             });
         }
@@ -204,11 +191,9 @@
                 const data = snap.val();
                 if(data && data.pseudo) {
                     userPseudo = data.pseudo;
-                    selectedAvatar = data.avatar || "";
+                    selectedAvatar = data.avatar || "🐱";
                     confirmProfile(); 
-                } else { 
-                    showScreen('screen-profile'); 
-                }
+                } else { showScreen('screen-profile'); }
             });
         }
 
@@ -234,8 +219,7 @@
         function confirmProfile() {
             const input = document.getElementById('pseudo-input').value.trim();
             if(input) userPseudo = input;
-            
-            if(!userPseudo) return showScreen('screen-profile');
+            if(!userPseudo) return alert("Choisis un pseudo !");
 
             if(!isGuest && auth.currentUser) {
                 db.ref('players/' + auth.currentUser.uid).update({
@@ -285,7 +269,7 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function resendVerify() { auth.currentUser.sendEmailVerification().then(() => alert("E-mail renvoyé !")); }
+        function resendVerify() { auth.currentUser.sendEmailVerification().then(() => alert("E-mail envoyé !")); }
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
