@@ -20,7 +20,6 @@
         .screen { display: none; height: calc(100% - 60px); width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
         .active { display: flex !important; }
 
-        /* --- CORRECTION ERGONOMIE CHAMPS --- */
         .auth-container { width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
         
         .input-wrapper { 
@@ -44,22 +43,15 @@
             box-sizing: border-box;
         }
 
-        .eye-icon {
-            position: absolute;
-            right: 15px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            opacity: 0.7;
-            user-select: none;
-        }
-        /* ---------------------------------- */
+        .eye-icon { position: absolute; right: 15px; cursor: pointer; font-size: 1.2rem; opacity: 0.7; user-select: none; }
 
         .btn { width: 100%; max-width: 300px; padding: 16px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; text-transform: uppercase; transition: 0.2s; }
         .btn-blue { background: var(--primary); color: white; }
         .btn-google { background: white; color: #444; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; }
         .btn-ghost { background: none; border: 1px solid #7f8c8d; color: #bdc3c7; }
         .btn-accent { background: var(--accent); color: black; }
-        .btn:disabled { opacity: 0.5; cursor: wait; }
+        .btn:active { transform: scale(0.98); opacity: 0.8; }
+        .btn:disabled { background: #7f8c8d; cursor: not-allowed; opacity: 0.5; }
 
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; }
         .avatar-item { font-size: 1.8rem; cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 5px; }
@@ -67,7 +59,7 @@
         
         .buzzer { width: 220px; height: 220px; border-radius: 50%; border: none; background: var(--danger); box-shadow: 0 10px 0 #c0392b; cursor: pointer; }
         .ready .buzzer { background: var(--success); box-shadow: 0 10px 0 #27ae60; }
-        .error-msg { color: var(--danger); font-size: 0.85rem; margin: 10px 0; font-weight: bold; }
+        .error-msg { color: var(--danger); font-size: 0.85rem; margin: 10px 0; font-weight: bold; min-height: 1em; }
     </style>
 </head>
 <body>
@@ -105,7 +97,7 @@
             <p id="error-auth" class="error-msg"></p>
             <button class="btn btn-blue" id="btn-email-main" onclick="handleAuth()">Se connecter</button>
             <button class="btn btn-ghost" id="btn-email-switch" onclick="toggleEmailMode()">Pas de compte ? Créer</button>
-            <button class="btn btn-ghost" style="border:none;" onclick="showScreen('screen-auth-choice')">Retour</button>
+            <button class="btn btn-ghost" style="border:none;" onclick="cleanExitAuth()">Retour</button>
         </div>
     </div>
 
@@ -115,7 +107,7 @@
         <p style="font-size:0.8rem; margin:20px 0;">Vérifie tes spams. Une fois validé, appuie ici :</p>
         <button id="btn-check-verify" class="btn btn-accent" onclick="checkIfVerified()">J'ai validé mon mail !</button>
         <button class="btn btn-ghost" onclick="resendVerify()">Renvoyer l'e-mail</button>
-        <button class="btn btn-ghost" style="border:none; margin-top:10px;" onclick="showScreen('screen-email-login')">Retour à la connexion</button>
+        <button class="btn btn-ghost" style="border:none; margin-top:10px;" onclick="cleanExitAuth()">Retour à la connexion</button>
     </div>
 
     <div id="screen-profile" class="screen">
@@ -158,16 +150,31 @@
             document.getElementById('email-title').innerText = (emailMode === 'login') ? 'CONNEXION' : 'CRÉER UN COMPTE';
             document.getElementById('btn-email-main').innerText = (emailMode === 'login') ? 'Se connecter' : 'S\'enregistrer';
             document.getElementById('btn-email-switch').innerText = (emailMode === 'login') ? 'Pas de compte ? Créer' : 'Déjà un compte ? Login';
+            document.getElementById('error-auth').innerText = "";
+        }
+
+        function cleanExitAuth() {
+            auth.signOut().then(() => {
+                document.getElementById('error-auth').innerText = "";
+                showScreen('screen-auth-choice');
+            });
         }
 
         function handleAuth() {
-            const email = document.getElementById('log-email').value;
+            const email = document.getElementById('log-email').value.trim();
             const pass = document.getElementById('log-pass').value;
-            if(!email || !pass) return alert("Remplis tout !");
+            const errField = document.getElementById('error-auth');
+            const btn = document.getElementById('btn-email-main');
+
+            if(!email || !pass) { errField.innerText = "Remplis tous les champs !"; return; }
+            
+            errField.innerText = "Connexion...";
+            btn.disabled = true;
 
             const action = (emailMode === 'login') ? auth.signInWithEmailAndPassword(email, pass) : auth.createUserWithEmailAndPassword(email, pass);
             
             action.then(res => {
+                btn.disabled = false;
                 if(emailMode === 'signup') {
                     res.user.sendEmailVerification().then(() => {
                         document.getElementById('user-email-sent').innerText = email;
@@ -180,38 +187,41 @@
                     } else { postSignIn(res.user); }
                 }
             }).catch(e => { 
-                let msg = e.message;
+                btn.disabled = false;
+                console.error("Auth Error:", e.code);
                 if(e.code === "auth/user-not-found") {
-                    msg = "Compte inconnu. Passez en mode 'Création'.";
-                    toggleEmailMode();
+                    errField.innerText = "Compte inexistant. Cliquez sur 'Créer'.";
+                } else if(e.code === "auth/wrong-password") {
+                    errField.innerText = "Mot de passe incorrect.";
+                } else {
+                    errField.innerText = "Erreur : " + e.message;
                 }
-                document.getElementById('error-auth').innerText = msg;
             });
         }
 
-        // --- CORRECTION DU BLOCAGE DE VÉRIFICATION ---
         function checkIfVerified() {
             const user = auth.currentUser;
-            if(!user) return showScreen('screen-email-login');
-
             const btn = document.getElementById('btn-check-verify');
+            
+            if(!user) { cleanExitAuth(); return; }
+
             btn.innerText = "Vérification...";
             btn.disabled = true;
 
-            // On force le reload ET on vérifie
             user.reload().then(() => {
-                // On récupère l'instance fraîche après reload
-                const freshUser = auth.currentUser;
-                if(freshUser.emailVerified) {
-                    postSignIn(freshUser);
+                const updatedUser = auth.currentUser;
+                if(updatedUser.emailVerified) {
+                    postSignIn(updatedUser);
                 } else {
-                    alert("E-mail non validé. Si vous venez de cliquer, attendez 5s et réessayez.");
+                    alert("E-mail non validé par Google. Vérifiez vos spams !");
                     btn.innerText = "J'ai validé mon mail !";
                     btn.disabled = false;
                 }
-            }).catch(() => {
-                alert("Erreur. Reconnectez-vous pour actualiser.");
-                showScreen('screen-email-login');
+            }).catch(e => {
+                btn.disabled = false;
+                btn.innerText = "J'ai validé mon mail !";
+                alert("Session expirée. Reconnectez-vous.");
+                cleanExitAuth();
             });
         }
 
