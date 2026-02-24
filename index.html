@@ -107,39 +107,24 @@
         function checkPseudo() {
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return alert("Pseudo trop court !");
-            
             roomRef.child('scores/' + userPseudo).once('value', snap => {
                 const savedPseudo = localStorage.getItem('presta_pseudo');
                 const savedRoom = localStorage.getItem('presta_room');
                 const data = snap.val();
-
                 if(snap.exists()) {
-                    // SI C'EST LE MÊME APPAREIL (LocalStorage OK)
                     if(savedPseudo === userPseudo && savedRoom === roomID) {
                         if(confirm("Reprendre votre partie avec le pseudo " + userPseudo + " ?")) {
                             selectedAvatar = data.avatar;
-                            // Récupérer l'équipe (soit actuelle, soit celle d'avant l'expulsion)
                             userTeamName = data.teamName || data.lastTeam || "Solo";
                             userTeamIcon = data.teamIcon || "";
-                            
-                            roomRef.child('scores/' + userPseudo).update({ 
-                                active: true,
-                                teamName: userTeamName 
-                            }).then(() => { startBuzzer(); });
+                            roomRef.child('scores/' + userPseudo).update({ active: true, teamName: userTeamName }).then(() => { startBuzzer(); });
                         }
-                    } 
-                    // SI LE PSEUDO EST ACTIF CHEZ QUELQU'UN D'AUTRE
-                    else if (data.active === true) {
-                        alert("Ce pseudo est déjà utilisé par un autre joueur !");
+                    } else if (data.active === true) {
+                        alert("Ce pseudo est déjà utilisé !");
+                    } else {
+                        alert("Ce pseudo appartient à un joueur déconnecté. Utilisez le même appareil.");
                     }
-                    // SI LE PSEUDO EST INACTIF (EXPULSÉ) MAIS PAS LE BON APPAREIL
-                    else {
-                        alert("Ce pseudo appartient à un joueur déconnecté. Si c'est vous, utilisez le même appareil.");
-                    }
-                } else { 
-                    // Nouveau pseudo
-                    showScreen('screen-setup'); 
-                }
+                } else { showScreen('screen-setup'); }
             });
         }
 
@@ -195,11 +180,7 @@
                     location.reload(); 
                 }
             });
-
-            roomRef.child('scores/' + userPseudo + '/pts').on('value', s => {
-                document.getElementById('score').innerText = s.val() || 0;
-            });
-
+            roomRef.child('scores/' + userPseudo + '/pts').on('value', s => { document.getElementById('score').innerText = s.val() || 0; });
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlockedLocally = snap.exists(); updateUI(); });
             roomRef.child('gameState').on('value', snap => { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); });
             roomRef.child('buzzers').on('value', snap => { currentWinner = snap.val() ? snap.val().pseudo : null; updateUI(); });
@@ -220,15 +201,9 @@
                 if(roomRef && userPseudo) {
                     const isSolo = (userTeamName === "Solo" || userTeamName === "");
                     roomRef.child('scores/' + userPseudo).update({ 
-                        active: false, 
-                        lastTeam: userTeamName,
-                        teamName: isSolo ? "Solo" : "",
-                        teamIcon: ""
-                    }).then(() => {
-                        localStorage.removeItem('leaving');
-                        // Optionnel : ne pas supprimer le localStorage pour permettre le retour
-                        location.reload();
-                    });
+                        active: false, lastTeam: userTeamName,
+                        teamName: isSolo ? "Solo" : "", teamIcon: ""
+                    }).then(() => { localStorage.removeItem('leaving'); location.reload(); });
                 }
             }
         }

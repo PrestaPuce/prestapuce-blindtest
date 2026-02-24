@@ -30,7 +30,6 @@
     </style>
 </head>
 <body>
-
     <div id="screen-login" class="login-box">
         <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px;">
         <h2>Accès MJ</h2>
@@ -41,7 +40,6 @@
 
     <div id="screen-dashboard" class="dashboard">
         <div class="room-info">SALLE ACTIVE : <span id="display-room">----</span></div>
-        
         <div style="display:flex; gap:10px; margin-bottom:20px;">
             <button style="background:var(--blue)" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
             <button style="background:var(--danger)" onclick="fullReset()">STOP / RESET TITRE</button>
@@ -70,7 +68,6 @@
 
         <h3>Lobby Joueurs Actifs</h3>
         <div id="score-list"></div>
-
         <button style="background:black; color:red; margin-top:60px; border:2px solid red; padding: 20px;" onclick="resetFullGame()">⚠️ RESET TOTAL PARTIE ⚠️</button>
     </div>
 
@@ -79,8 +76,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const mjAccounts = { "prestapuce": "Prest@Puce06", "museikevents": "@Lex1977" };
-        let roomID = "", roomRef = null, currentPlayer = null, selCrest = "";
-        let globalTeams = {}; // Stockage des équipes pour les menus déroulants
+        let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {};
         const crests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png", "https://cdn-icons-png.flaticon.com/512/1152/1152912.png", "https://cdn-icons-png.flaticon.com/512/2583/2583344.png", "https://cdn-icons-png.flaticon.com/512/2583/2583319.png", "https://cdn-icons-png.flaticon.com/512/2583/2583434.png", "https://cdn-icons-png.flaticon.com/512/2583/2583351.png", "https://cdn-icons-png.flaticon.com/512/1037/1037953.png", "https://cdn-icons-png.flaticon.com/512/1037/1037984.png"];
 
         function login() {
@@ -105,10 +101,7 @@
             if(mode === 'partial') { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); }
             else { fullReset(); }
         }
-        function handleError() {
-            if(!currentPlayer) return;
-            roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready');
-        }
+        function handleError() { if(!currentPlayer) return; roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); }
         function statusUpdate(st) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); }
         function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
         
@@ -121,76 +114,38 @@
                     document.getElementById('p-team').innerHTML = teamDisplay; box.style.display = "block";
                 } else { box.style.display = "none"; }
             });
-
-            // Écouteur des équipes pour peupler le menu déroulant
-            roomRef.child('teams').on('value', snap => {
-                globalTeams = snap.val() || {};
-                renderLobby(); // Re-générer le lobby quand une équipe est ajoutée/supprimée
-            });
-
-            // Écouteur des scores
-            roomRef.child('scores').on('value', snap => {
-                renderLobby();
-            });
+            roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
+            roomRef.child('scores').on('value', snap => { renderLobby(); });
         }
 
         function renderLobby() {
             roomRef.child('scores').once('value', snap => {
                 const l = document.getElementById('score-list'); l.innerHTML = "";
                 const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
-                
-                // 1. Rendu des équipes dans la section de gestion
                 Object.keys(globalTeams).forEach(tKey => {
-                    let count = 0;
-                    snap.forEach(s => { if(s.val().teamName === tKey && s.val().active !== false) count++; });
+                    let count = 0; snap.forEach(s => { if(s.val().teamName === tKey && s.val().active !== false) count++; });
                     tList.innerHTML += `<div class="team-item"><span><div class="crest-mini-bg"><img src="${globalTeams[tKey].icon}" class="crest-mini"></div> <b>${tKey}</b> (${count} joueurs)</span><div><span class="kick-btn" onclick="deleteTeam('${tKey}')">✖</span></div></div>`;
                 });
-
-                // 2. Rendu des joueurs dans le lobby
                 snap.forEach(c => {
-                    const d = c.val();
-                    if(d.active === false) return; 
-                    
-                    // Création du selecteur d'équipe
+                    const d = c.val(); if(d.active === false) return; 
                     let options = `<option value="Solo|" ${(!d.teamName || d.teamName === "Solo") ? 'selected' : ''}>Solo</option>`;
-                    Object.keys(globalTeams).forEach(tName => {
-                        options += `<option value="${tName}|${globalTeams[tName].icon}" ${(d.teamName === tName) ? 'selected' : ''}>${tName}</option>`;
-                    });
-
-                    l.innerHTML += `<div class="score-row">
-                        <span>${d.avatar} <b>${c.key}</b> 
-                            <select class="mini-select" onchange="changePlayerTeam('${c.key}', this.value)">${options}</select>
-                            : ${d.pts} pts
-                        </span>
-                        <div class="score-actions">
-                            <button style="width:30px; background:var(--danger)" onclick="adj('${c.key}',-1)">-</button>
-                            <button style="width:30px; margin-left:5px; background:var(--mj-color)" onclick="adj('${c.key}',1)">+</button>
-                            <span class="kick-btn" onclick="kickPlayer('${c.key}')">✖</span>
-                        </div>
-                    </div>`;
+                    Object.keys(globalTeams).forEach(tName => { options += `<option value="${tName}|${globalTeams[tName].icon}" ${(d.teamName === tName) ? 'selected' : ''}>${tName}</option>`; });
+                    l.innerHTML += `<div class="score-row"><span>${d.avatar} <b>${c.key}</b> <select class="mini-select" onchange="changePlayerTeam('${c.key}', this.value)">${options}</select>: ${d.pts} pts</span><div class="score-actions"><button style="width:30px; background:var(--danger)" onclick="adj('${c.key}',-1)">-</button><button style="width:30px; margin-left:5px; background:var(--mj-color)" onclick="adj('${c.key}',1)">+</button><span class="kick-btn" onclick="kickPlayer('${c.key}')">✖</span></div></div>`;
                 });
             });
         }
 
         function changePlayerTeam(pseudo, combinedValue) {
             const [newName, newIcon] = combinedValue.split('|');
-            roomRef.child('scores/' + pseudo).update({
-                teamName: newName,
-                teamIcon: newIcon
-            });
+            const isSolo = (newName === "Solo" || newName === "");
+            roomRef.child('scores/' + pseudo).update({ teamName: newName, teamIcon: newIcon, lastTeam: isSolo ? "" : newName });
         }
 
         function kickPlayer(pseudo) {
             if(confirm("Expulser " + pseudo + " ?")) {
                 roomRef.child('scores/' + pseudo).once('value', snap => {
-                    const d = snap.val();
-                    const isSolo = (d.teamName === "Solo" || d.teamName === "");
-                    roomRef.child('scores/' + pseudo).update({ 
-                        active: false, 
-                        lastTeam: d.teamName,
-                        teamName: isSolo ? "Solo" : "",
-                        teamIcon: "" 
-                    });
+                    const d = snap.val(); const isSolo = (d.teamName === "Solo" || d.teamName === "");
+                    roomRef.child('scores/' + pseudo).update({ active: false, lastTeam: d.teamName, teamName: isSolo ? "Solo" : "", teamIcon: "" });
                 });
             }
         }

@@ -33,38 +33,24 @@
         <div><div class="column-title">Classement Général</div><div id="global-list"></div></div>
     </div>
     <div id="qr-box"><div id="qrcode"></div><div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">REJOINDRE</div></div>
-
     <script>
         const firebaseConfig = { databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
         const roomID = prompt("Code de la salle ?");
         document.getElementById('room-title').innerText = roomID;
         const roomRef = db.ref('roomsData/' + roomID);
-
-        // CORRECTION DE L'URL : On pointe explicitement vers index.html
-        const baseURL = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-        const playURL = baseURL + "/index.html?room=" + roomID;
-
-        new QRCode(document.getElementById("qrcode"), { 
-            text: playURL, 
-            width: 110, 
-            height: 110,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
+        const playURL = "https://prestapuce.github.io/prestapuce-blindtest/index.html?room=" + roomID;
+        new QRCode(document.getElementById("qrcode"), { text: playURL, width: 110, height: 110, correctLevel : QRCode.CorrectLevel.H });
 
         let scoresData = {}, teamsData = {};
 
         function updateDisplay() {
             const pList = document.getElementById('player-list'); pList.innerHTML = "";
             const gList = document.getElementById('global-list'); gList.innerHTML = "";
-            
-            const players = []; Object.entries(scoresData).forEach(([k,v]) => { if(v.active !== false) players.push({name: k, ...v}); });
-            players.sort((a,b) => b.pts - a.pts).forEach(p => {
-                const teamLabel = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
+            const activePlayers = []; Object.entries(scoresData).forEach(([k,v]) => { if(v.active !== false) activePlayers.push({name: k, ...v}); });
+            activePlayers.sort((a,b) => b.pts - a.pts).forEach(p => {
+                const teamLabel = (p.teamName && p.teamName !== "Solo" && p.teamName !== "") ? p.teamName : "Solo";
                 pList.innerHTML += `<div class="card" id="card-${p.name}"><div class="avatar">${p.avatar}</div><div class="info"><b>${p.name}</b><br><small>${teamLabel}</small></div><div class="pts">${p.pts}</div></div>`;
             });
 
@@ -72,24 +58,25 @@
             Object.entries(teamsData).forEach(([tName, tInfo]) => {
                 let count = 0; let totalPts = 0;
                 Object.values(scoresData).forEach(p => { 
-                    if(p.teamName === tName || p.lastTeam === tName) totalPts += p.pts;
-                    if(p.teamName === tName && p.active !== false) count++;
+                    if(p.teamName === tName || (p.active === false && p.lastTeam === tName)) {
+                        totalPts += p.pts; if(p.active !== false) count++;
+                    }
                 });
-                global.push({ name: `${tName} (${count} joueurs)`, pts: totalPts, icon: tInfo.icon, isTeam: true, tName: tName });
+                if (totalPts > 0 || count > 0) global.push({ name: `${tName} (${count} joueurs)`, pts: totalPts, icon: tInfo.icon, isTeam: true });
             });
-
             Object.entries(scoresData).forEach(([pName, pData]) => {
-                if (!pData.teamName || pData.teamName === "Solo" || pData.teamName === "" || pData.lastTeam === "Solo") {
-                    global.push({ name: `${pName} (Solo)`, pts: pData.pts, icon: pData.avatar, isTeam: false });
+                const isCurrentlySolo = (!pData.teamName || pData.teamName === "Solo" || pData.teamName === "");
+                if (isCurrentlySolo) {
+                    if (pData.active !== false || !pData.lastTeam || pData.lastTeam === "Solo" || pData.lastTeam === "") {
+                        global.push({ name: `${pName} (Solo)`, pts: pData.pts, icon: pData.avatar, isTeam: false });
+                    }
                 }
             });
-
             global.sort((a,b) => b.pts - a.pts).forEach(item => {
                 const iconContent = item.isTeam ? `<div class="crest-bg"><img src="${item.icon}"></div>` : `<span>${item.icon}</span>`;
                 gList.innerHTML += `<div class="card"><div class="crest">${iconContent}</div><div class="info"><b>${item.name}</b></div><div class="pts">${item.pts}</div></div>`;
             });
         }
-
         roomRef.child('scores').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
         roomRef.child('teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
         roomRef.child('buzzers').on('value', snap => {
