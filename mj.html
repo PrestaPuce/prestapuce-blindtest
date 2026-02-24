@@ -2,12 +2,13 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Sécurisée - Presta'Puce</title>
+    <title>Console MJ Pro - Presta'Puce</title>
     <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
     
     <style>
         :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; }
@@ -16,74 +17,83 @@
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; margin-bottom: 15px; }
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; text-transform: uppercase; margin-bottom: 10px; }
         button:hover { opacity: 0.9; transform: translateY(-1px); }
-        button:disabled { background: #7f8c8d !important; cursor: not-allowed; opacity: 0.5; transform: none !important; }
-        .secondary-btn { background: var(--blue); }
-        .link-text { color: var(--accent); cursor: pointer; font-size: 0.8rem; text-decoration: underline; margin-top: 10px; display: block; }
+        button:disabled { background: #7f8c8d !important; cursor: not-allowed; opacity: 0.5; }
         
         .dashboard { display: none; max-width: 800px; margin: 0 auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
+        
+        /* Grille de blasons */
+        .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; }
+        .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; transition: 0.2s; }
+        .crest-selected { border-color: var(--accent) !important; background: var(--accent) !important; transform: scale(1.1); }
+        .crest-opt { width: 30px; height: 30px; object-fit: contain; }
+        
+        /* Upload Area */
+        .upload-section { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed var(--blue); }
+        
+        /* Autres styles habituels */
         .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 20px 0; text-align: center; display: none; }
         .action-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px; }
-        .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; }
-        .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; }
-        .crest-selected { border-color: var(--accent) !important; background: var(--accent) !important; }
-        .crest-opt { width: 30px; height: 30px; object-fit: contain; }
         .team-item { display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin-bottom: 8px; justify-content: space-between; }
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; }
         .crest-mini-bg { background: white; padding: 2px; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; }
         .crest-mini { width: 22px; height: 22px; object-fit: contain; }
-        .kick-btn { color: var(--danger); cursor: pointer; font-weight: bold; font-size: 1.2rem; margin-left: 15px; padding: 0 5px; }
-        #team-msg { color: var(--danger); font-size: 0.8rem; margin-bottom: 10px; display: block; height: 1rem; }
     </style>
 </head>
 <body>
 
     <div id="screen-login" class="box">
         <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px;">
-        <h2>Accès MJ Sécurisé</h2>
-        <input type="email" id="mj-email" placeholder="Email MJ">
+        <h2>Connexion MJ</h2>
+        <input type="email" id="mj-email" placeholder="Email">
         <input type="password" id="mj-pass" placeholder="Mot de passe">
-        <button onclick="login()" style="width:100%">Se Connecter</button>
-        <span class="link-text" onclick="forgotPassword()">Mot de passe oublié ?</span>
-        <p id="login-error" style="color:var(--danger); font-size:0.8rem; margin-top:10px;"></p>
+        <button onclick="login()" style="width:100%">Entrer</button>
+        <p onclick="forgotPassword()" style="color:var(--accent); cursor:pointer; font-size:0.8rem;">Mot de passe oublié ?</p>
+        <p id="login-error" style="color:var(--danger);"></p>
     </div>
 
     <div id="screen-choice" class="box" style="display:none;">
-        <h2>Bonjour MJ !</h2>
-        <p>Que souhaitez-vous faire ?</p>
+        <h2>Gestion des Salles</h2>
         <button onclick="createNewRoom()" style="width:100%">🆕 Créer une nouvelle salle</button>
-        <button id="btn-resume" onclick="resumeRoom()" class="secondary-btn" style="width:100%; display:none;">🔄 Reprendre la salle <span id="last-room-id"></span></button>
+        <button id="btn-resume" onclick="resumeRoom()" style="width:100%; display:none; background:var(--blue)">🔄 Reprendre la salle <span id="last-room-id"></span></button>
         <button onclick="auth.signOut(); location.reload();" style="background:none; border:1px solid white; font-size:0.7rem;">Déconnexion</button>
     </div>
 
     <div id="screen-dashboard" class="dashboard">
-        <div class="room-info">SALLE ACTIVE : <span id="display-room">----</span></div>
+        <div class="room-info">SALLE : <span id="display-room">----</span></div>
+        
         <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <button style="background:var(--blue)" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
-            <button style="background:var(--danger)" onclick="fullReset()">STOP / RESET TITRE</button>
+            <button style="background:var(--blue); flex:1;" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
+            <button style="background:var(--danger); flex:1;" onclick="fullReset()">RESET TITRE</button>
         </div>
+
         <div id="player-box" class="current-player">
             <div id="p-avatar" style="font-size:3.5rem"></div>
             <h2 id="p-name" style="margin:5px 0;"></h2>
-            <div id="p-team" style="color:var(--accent); font-weight:bold; margin-bottom:10px;"></div>
+            <div id="p-team"></div>
             <div class="action-grid">
-                <button style="background:var(--gold); border: 2px solid white;" onclick="handleReward(3, 'finish')">+3 (TITRE + ARTISTE)</button>
+                <button style="background:var(--gold)" onclick="handleReward(3, 'finish')">+3 (TOUT)</button>
                 <button style="background:var(--blue)" onclick="handleReward(1, 'partial')">+1 (PARTIEL)</button>
-                <button style="background:var(--mj-color)" onclick="handleReward(1, 'finish')">+1 (FIN DE TITRE)</button>
                 <button style="background:var(--danger)" onclick="handleError()">ERREUR</button>
             </div>
         </div>
-        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-top: 20px;">
+
+        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-top: 20px;">
             <h3>Gestion Équipes</h3>
+            <div class="upload-section">
+                <label style="font-size: 0.8rem; color: var(--blue); font-weight: bold;">+ AJOUTER TON LOGO PERSO (JPG/PNG) :</label><br><br>
+                <input type="file" id="upload-crest" accept="image/*" style="font-size: 0.8rem;">
+            </div>
+            
             <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()">
-            <span id="team-msg"></span>
             <div class="crest-picker" id="crest-grid"></div>
-            <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
-            <div id="mj-team-list-display" style="margin-top:15px;"></div>
+            <button id="btn-add-team" disabled onclick="addTeam()" style="width:100%">Créer l'Équipe</button>
+            <div id="mj-team-list-display"></div>
         </div>
-        <h3>Lobby Joueurs Actifs</h3>
+
+        <h3>Lobby Joueurs</h3>
         <div id="score-list"></div>
-        <button style="background:black; color:red; margin-top:60px; border:2px solid red; padding: 20px; width:100%" onclick="resetFullGame()">⚠️ RESET TOTAL PARTIE ⚠️</button>
+        <button style="background:black; color:red; margin-top:40px; border:1px solid red; width:100%" onclick="resetFullGame()">⚠️ RESET TOTAL PARTIE ⚠️</button>
     </div>
 
     <script>
@@ -99,24 +109,24 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
+        const storage = firebase.storage();
 
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
-        const crests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png", "https://cdn-icons-png.flaticon.com/512/1152/1152912.png", "https://cdn-icons-png.flaticon.com/512/2583/2583344.png", "https://cdn-icons-png.flaticon.com/512/2583/2583319.png", "https://cdn-icons-png.flaticon.com/512/2583/2583434.png", "https://cdn-icons-png.flaticon.com/512/2583/2583351.png", "https://cdn-icons-png.flaticon.com/512/1037/1037953.png", "https://cdn-icons-png.flaticon.com/512/1037/1037984.png"];
+        const defaultCrests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png", "https://cdn-icons-png.flaticon.com/512/1152/1152912.png"];
 
+        // --- AUTH & ROOMS ---
         function login() {
             const email = document.getElementById('mj-email').value.trim();
             const pass = document.getElementById('mj-pass').value;
             auth.signInWithEmailAndPassword(email, pass)
-                .then(userCredential => { checkUserRoom(userCredential.user.uid); })
-                .catch(err => { document.getElementById('login-error').innerText = "Identifiants incorrects."; });
+                .then(user => { checkUserRoom(user.user.uid); })
+                .catch(err => { document.getElementById('login-error').innerText = "Erreur de connexion."; });
         }
 
         function forgotPassword() {
             const email = document.getElementById('mj-email').value.trim();
-            if(!email) return alert("Entrez votre email d'abord.");
-            auth.sendPasswordResetEmail(email)
-                .then(() => alert("Email de réinitialisation envoyé !"))
-                .catch(err => alert("Erreur : " + err.message));
+            if(!email) return alert("Indique ton email.");
+            auth.sendPasswordResetEmail(email).then(() => alert("Lien envoyé !"));
         }
 
         function checkUserRoom(uid) {
@@ -147,22 +157,69 @@
             db.ref('activeRooms/' + roomID).set({ status: 'open' });
             roomRef = db.ref('roomsData/' + roomID);
             initMJLogic(); 
-            initCrestGrid();
+            loadCrestGrid();
         }
 
-        function handleReward(pts, mode) {
-            if(!currentPlayer) return;
-            roomRef.child('scores/' + currentPlayer.pseudo).transaction(c => {
-                return { pts: (c ? c.pts : 0) + pts, avatar: currentPlayer.avatar, teamName: currentPlayer.teamName, teamIcon: currentPlayer.teamIcon, active: true };
+        // --- GESTION DES BLASONS ---
+        function loadCrestGrid() {
+            const grid = document.getElementById('crest-grid');
+            
+            // Écoute des blasons perso du MJ
+            db.ref('users/' + auth.currentUser.uid + '/customCrests').on('value', snap => {
+                grid.innerHTML = "";
+                // 1. Blasons perso
+                snap.forEach(child => { createCrestIcon(child.val().url); });
+                // 2. Blasons par défaut
+                defaultCrests.forEach(url => { createCrestIcon(url); });
             });
-            if(mode === 'partial') { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); }
-            else { fullReset(); }
         }
 
-        function handleError() { if(!currentPlayer) return; roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); }
-        function statusUpdate(st) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); }
-        function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
-        
+        function createCrestIcon(url) {
+            const grid = document.getElementById('crest-grid');
+            const wrap = document.createElement('div');
+            wrap.className = 'crest-wrapper';
+            const img = document.createElement('img');
+            img.src = url;
+            img.className = 'crest-opt';
+            wrap.onclick = () => {
+                document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected'));
+                wrap.classList.add('crest-selected');
+                selCrest = url;
+                checkTeamForm();
+            };
+            wrap.appendChild(img);
+            grid.appendChild(wrap);
+        }
+
+        // Upload de blason
+        document.getElementById('upload-crest').addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const ref = storage.ref(`mj_crests/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+            ref.put(file).then(snap => {
+                snap.ref.getDownloadURL().then(url => {
+                    db.ref('users/' + auth.currentUser.uid + '/customCrests').push({ url: url });
+                });
+            });
+        });
+
+        // --- LOGIQUE DE JEU ---
+        function checkTeamForm() {
+            const name = document.getElementById('t-name').value.trim();
+            document.getElementById('btn-add-team').disabled = !(name.length > 0 && selCrest !== "");
+        }
+
+        function addTeam() {
+            const n = document.getElementById('t-name').value.trim();
+            if(n && selCrest) {
+                roomRef.child('teams/' + n).set({ icon: selCrest });
+                document.getElementById('t-name').value = "";
+                selCrest = "";
+                document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected'));
+                checkTeamForm();
+            }
+        }
+
         function initMJLogic() {
             roomRef.child('buzzers').on('value', snap => {
                 const p = snap.val(); const box = document.getElementById('player-box');
@@ -185,68 +242,31 @@
             roomRef.child('scores').once('value', snap => {
                 const l = document.getElementById('score-list'); l.innerHTML = "";
                 const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
+                // Affichage Équipes
                 Object.keys(globalTeams).forEach(tKey => {
-                    let count = 0; snap.forEach(s => { if(s.val().teamName === tKey && s.val().active !== false) count++; });
-                    tList.innerHTML += `<div class="team-item"><span><div class="crest-mini-bg"><img src="${globalTeams[tKey].icon}" class="crest-mini"></div> <b>${tKey}</b> (${count} joueurs)</span><div><span class="kick-btn" onclick="deleteTeam('${tKey}')">✖</span></div></div>`;
+                    tList.innerHTML += `<div class="team-item"><span><div class="crest-mini-bg"><img src="${globalTeams[tKey].icon}" class="crest-mini"></div> <b>${tKey}</b></span><span onclick="deleteTeam('${tKey}')" style="color:red; cursor:pointer">✖</span></div>`;
                 });
+                // Affichage Joueurs
                 snap.forEach(c => {
-                    const d = c.val(); if(d.active === false) return; 
-                    let options = `<option value="Solo|" ${(!d.teamName || d.teamName === "Solo") ? 'selected' : ''}>Solo</option>`;
-                    Object.keys(globalTeams).forEach(tName => { options += `<option value="${tName}|${globalTeams[tName].icon}" ${(d.teamName === tName) ? 'selected' : ''}>${tName}</option>`; });
-                    l.innerHTML += `<div class="score-row"><span>${d.avatar} <b>${c.key}</b> <select onchange="changePlayerTeam('${c.key}', this.value)" style="width:auto; padding:5px; margin:0 5px; font-size:0.8rem; background:var(--card-bg); color:white; border:1px solid var(--accent);">${options}</select>: ${d.pts} pts</span><div style="display:flex; align-items:center;"><button style="width:30px; background:var(--danger); border:none; color:white; border-radius:4px;" onclick="adj('${c.key}',-1)">-</button><button style="width:30px; margin-left:5px; background:var(--mj-color); border:none; color:white; border-radius:4px;" onclick="adj('${c.key}',1)">+</button><span class="kick-btn" onclick="kickPlayer('${c.key}')">✖</span></div></div>`;
+                    const d = c.val(); if(d.active === false) return;
+                    l.innerHTML += `<div class="score-row"><span>${d.avatar} <b>${c.key}</b> : ${d.pts} pts</span><div><button onclick="adj('${c.key}',-1)">-</button><button onclick="adj('${c.key}',1)">+</button></div></div>`;
                 });
             });
         }
 
-        function changePlayerTeam(pseudo, combinedValue) {
-            const [newName, newIcon] = combinedValue.split('|');
-            roomRef.child('scores/' + pseudo).update({ teamName: newName, teamIcon: newIcon, lastTeam: (newName || "Solo") });
-        }
-
-        function kickPlayer(pseudo) { if(confirm("Expulser " + pseudo + " ?")) roomRef.child('scores/' + pseudo).update({ active: false, teamName: "", teamIcon: "" }); }
-        
-        function initCrestGrid() {
-            const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
-            crests.forEach(c => {
-                const wrap = document.createElement('div'); wrap.className = 'crest-wrapper'; const img = document.createElement('img'); img.src = c; img.className = 'crest-opt';
-                wrap.onclick = () => { 
-                    document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); 
-                    wrap.classList.add('crest-selected'); 
-                    selCrest = c; 
-                    checkTeamForm(); 
-                };
-                wrap.appendChild(img); grid.appendChild(wrap);
+        function statusUpdate(st) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); }
+        function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
+        function handleReward(pts, mode) {
+            roomRef.child('scores/' + currentPlayer.pseudo).transaction(c => {
+                return { pts: (c ? c.pts : 0) + pts, avatar: currentPlayer.avatar, teamName: currentPlayer.teamName, teamIcon: currentPlayer.teamIcon, active: true };
             });
+            if(mode === 'partial') { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); }
+            else { fullReset(); }
         }
-
-        function checkTeamForm() { 
-            const name = document.getElementById('t-name').value.trim(); 
-            const msg = document.getElementById('team-msg');
-            const btn = document.getElementById('btn-add-team');
-            
-            if (name.length > 0 && selCrest === "") {
-                msg.innerText = "⚠️ Choisissez un blason pour cette équipe";
-                btn.disabled = true;
-            } else {
-                msg.innerText = "";
-                btn.disabled = !(name.length > 0 && selCrest !== "");
-            }
-        }
-
-        function addTeam() { 
-            const n = document.getElementById('t-name').value.trim(); 
-            if(n && selCrest) { 
-                roomRef.child('teams/' + n).set({ icon: selCrest }); 
-                document.getElementById('t-name').value = ""; 
-                selCrest = ""; 
-                document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); 
-                checkTeamForm(); 
-            } 
-        }
-
-        function deleteTeam(name) { if(confirm("Supprimer l'équipe ?")) roomRef.child('teams/' + name).remove(); }
+        function handleError() { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); }
+        function deleteTeam(name) { if(confirm("Supprimer ?")) roomRef.child('teams/' + name).remove(); }
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
-        function resetFullGame() { if(confirm("⚠️ RESET TOTAL ?")) { roomRef.remove(); location.reload(); } }
+        function resetFullGame() { if(confirm("RESET TOTAL ?")) { roomRef.remove(); location.reload(); } }
     </script>
 </body>
 </html>
