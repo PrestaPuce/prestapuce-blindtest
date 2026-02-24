@@ -32,15 +32,29 @@
         <div><div class="column-title">Joueurs</div><div id="player-list"></div></div>
         <div><div class="column-title">Classement Général</div><div id="global-list"></div></div>
     </div>
-    <div id="qr-box"><div id="qrcode"></div><div style="font-size:0.7rem; font-weight:bold;">REJOINDRE</div></div>
+    <div id="qr-box"><div id="qrcode"></div><div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">REJOINDRE</div></div>
+
     <script>
         const firebaseConfig = { databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
         const roomID = prompt("Code de la salle ?");
         document.getElementById('room-title').innerText = roomID;
         const roomRef = db.ref('roomsData/' + roomID);
-        new QRCode(document.getElementById("qrcode"), { text: "https://prestapuce.github.io/prestapuce-blindtest/?room=" + roomID, width: 100, height: 100 });
+
+        // CORRECTION DE L'URL : On pointe explicitement vers index.html
+        const baseURL = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+        const playURL = baseURL + "/index.html?room=" + roomID;
+
+        new QRCode(document.getElementById("qrcode"), { 
+            text: playURL, 
+            width: 110, 
+            height: 110,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
 
         let scoresData = {}, teamsData = {};
 
@@ -65,7 +79,6 @@
             });
 
             Object.entries(scoresData).forEach(([pName, pData]) => {
-                // Un joueur Solo reste affiché même s'il est inactif (active: false)
                 if (!pData.teamName || pData.teamName === "Solo" || pData.teamName === "" || pData.lastTeam === "Solo") {
                     global.push({ name: `${pName} (Solo)`, pts: pData.pts, icon: pData.avatar, isTeam: false });
                 }
