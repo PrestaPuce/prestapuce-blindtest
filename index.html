@@ -76,17 +76,16 @@
     <div id="screen-verify-email" class="screen">
         <h3 style="color:var(--accent)">VÉRIFIE TES MAILS ! 📧</h3>
         <p>Un lien de validation a été envoyé à : <br><b id="user-email-sent"></b></p>
-        <p style="font-size:0.8rem; opacity:0.8; margin:20px 0;">Clique sur le lien dans l'e-mail, puis reviens ici.</p>
-        <button class="btn btn-blue" onclick="checkIfVerified()">J'ai validé mon mail !</button>
+        <p style="font-size:0.8rem; opacity:0.8; margin:20px 0;">Vérifie tes spams si tu ne vois rien. Une fois cliqué sur le lien dans le mail, appuie ci-dessous :</p>
+        <button class="btn btn-accent" onclick="checkIfVerified()">J'ai validé mon mail !</button>
         <button class="btn btn-ghost" onclick="resendVerify()">Renvoyer l'e-mail</button>
     </div>
 
     <div id="screen-profile" class="screen">
         <h3>TON PROFIL PERMANENT</h3>
-        <p style="font-size:0.8rem; margin-bottom:15px;">Ces infos seront sauvées dans ton compte.</p>
-        <input type="text" id="pseudo-input" placeholder="Ton Pseudo...">
+        <input type="text" id="pseudo-input" placeholder="Pseudo...">
         <div class="avatar-grid" id="avatar-grid"></div>
-        <button class="btn btn-blue" onclick="confirmProfile()">Valider mon profil</button>
+        <button class="btn btn-blue" onclick="confirmProfile()">C'est parti !</button>
     </div>
 
     <div id="screen-game" class="screen">
@@ -112,7 +111,6 @@
         let roomID = "", roomRef = null, userPseudo = "", selectedAvatar = "🐱", isGuest = true, gameScore = 0, emailMode = 'login';
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🐙","🦉","🐸"];
 
-        // --- AUTH LOGIC ---
         function loginGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider).then(res => postSignIn(res.user)).catch(e => alert(e.message));
@@ -135,7 +133,6 @@
                     res.user.sendEmailVerification().then(() => {
                         document.getElementById('user-email-sent').innerText = email;
                         showScreen('screen-verify-email');
-                        alert("Compte créé ! Merci de valider l'e-mail envoyé.");
                     });
                 } else {
                     if(!res.user.emailVerified) {
@@ -147,9 +144,10 @@
         }
 
         function checkIfVerified() {
+            if(!auth.currentUser) return;
             auth.currentUser.reload().then(() => {
                 if(auth.currentUser.emailVerified) { postSignIn(auth.currentUser); } 
-                else { alert("L'e-mail n'est pas encore validé."); }
+                else { alert("L'e-mail n'est pas encore validé. Pense à vérifier tes spams !"); }
             });
         }
 
@@ -158,15 +156,21 @@
         function postSignIn(user) {
             isGuest = false;
             db.ref('players/' + user.uid).once('value', snap => {
-                if(snap.exists() && snap.val().pseudo) {
-                    userPseudo = snap.val().pseudo;
-                    selectedAvatar = snap.val().avatar || "🐱";
+                const data = snap.val();
+                if(data && data.pseudo) {
+                    userPseudo = data.pseudo;
+                    selectedAvatar = data.avatar || "🐱";
+                    // Sélection visuelle automatique
+                    document.getElementById('pseudo-input').value = userPseudo;
+                    document.querySelectorAll('.avatar-item').forEach(i => {
+                        if(i.innerText === selectedAvatar) i.classList.add('selected');
+                        else i.classList.remove('selected');
+                    });
                     confirmProfile(); 
                 } else { showScreen('screen-profile'); }
             });
         }
 
-        // --- NAVIGATION & JEU ---
         function joinRoom() {
             roomID = document.getElementById('room-input').value;
             if(!roomID) return;
@@ -184,15 +188,11 @@
         function confirmProfile() {
             userPseudo = document.getElementById('pseudo-input').value.trim();
             if(!userPseudo) return alert("Pseudo requis");
-            
             if(!isGuest && auth.currentUser) {
                 db.ref('players/' + auth.currentUser.uid).update({
-                    pseudo: userPseudo,
-                    avatar: selectedAvatar,
-                    email: auth.currentUser.email
+                    pseudo: userPseudo, avatar: selectedAvatar, email: auth.currentUser.email
                 });
             }
-
             roomRef.child('scores/' + userPseudo).set({ pts: 0, avatar: selectedAvatar, active: true });
             initGameInterface();
         }
@@ -236,14 +236,12 @@
             document.getElementById(id).classList.add('active');
         }
 
-        // --- DÉTECTION AUTO URL ---
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
             const r = urlParams.get('room');
             if (r) { document.getElementById('room-input').value = r; joinRoom(); }
         };
 
-        // --- AVATARS ---
         const grid = document.getElementById('avatar-grid');
         avatars.forEach(a => {
             const d = document.createElement('div'); d.className = 'avatar-item'; d.innerText = a;
