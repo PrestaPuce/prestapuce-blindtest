@@ -62,8 +62,7 @@
             <input type="text" id="t-name" placeholder="Nom de l'équipe..." onkeydown="if(event.key === 'Enter') addTeam()" oninput="checkTeamForm()">
             <div class="crest-picker" id="crest-grid"></div>
             <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
-            <h4 style="color:var(--accent); margin: 15px 0 10px 0;">Lobby Équipes :</h4>
-            <div id="mj-team-list-display"></div>
+            <div id="mj-team-list-display" style="margin-top:15px;"></div>
         </div>
 
         <h3>Lobby Joueurs Actifs</h3>
@@ -138,14 +137,20 @@
         function changePlayerTeam(pseudo, combinedValue) {
             const [newName, newIcon] = combinedValue.split('|');
             const isSolo = (newName === "Solo" || newName === "");
-            roomRef.child('scores/' + pseudo).update({ teamName: newName, teamIcon: newIcon, lastTeam: isSolo ? "" : newName });
+            // On met à jour teamName et lastTeam pour figer le "dernier état"
+            roomRef.child('scores/' + pseudo).update({ 
+                teamName: newName, 
+                teamIcon: newIcon, 
+                lastTeam: isSolo ? "Solo" : newName 
+            });
         }
 
         function kickPlayer(pseudo) {
             if(confirm("Expulser " + pseudo + " ?")) {
                 roomRef.child('scores/' + pseudo).once('value', snap => {
-                    const d = snap.val(); const isSolo = (d.teamName === "Solo" || d.teamName === "");
-                    roomRef.child('scores/' + pseudo).update({ active: false, lastTeam: d.teamName, teamName: isSolo ? "Solo" : "", teamIcon: "" });
+                    const d = snap.val(); 
+                    // On ne vide PAS lastTeam lors d'un kick pour garder l'historique du score
+                    roomRef.child('scores/' + pseudo).update({ active: false, teamName: "", teamIcon: "" });
                 });
             }
         }
@@ -159,7 +164,7 @@
         }
         function checkTeamForm() { const name = document.getElementById('t-name').value.trim(); document.getElementById('btn-add-team').disabled = !(name.length > 0 && selCrest !== ""); }
         function addTeam() { const n = document.getElementById('t-name').value.trim(); if(n && selCrest) { roomRef.child('teams/' + n).set({ icon: selCrest }); document.getElementById('t-name').value = ""; selCrest = ""; document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); checkTeamForm(); } }
-        function deleteTeam(name) { if(confirm("Supprimer l'équipe " + name + " ?")) roomRef.child('teams/' + name).remove(); }
+        function deleteTeam(name) { if(confirm("Supprimer l'équipe ?")) roomRef.child('teams/' + name).remove(); }
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
         function resetFullGame() { if(confirm("⚠️ RESET TOTAL PARTIE ?")) { roomRef.remove(); location.reload(); } }
     </script>

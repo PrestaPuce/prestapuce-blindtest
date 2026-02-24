@@ -48,30 +48,49 @@
         function updateDisplay() {
             const pList = document.getElementById('player-list'); pList.innerHTML = "";
             const gList = document.getElementById('global-list'); gList.innerHTML = "";
-            const activePlayers = []; Object.entries(scoresData).forEach(([k,v]) => { if(v.active !== false) activePlayers.push({name: k, ...v}); });
+            
+            // 1. Joueurs Actifs (Colonne de gauche)
+            const activePlayers = []; 
+            Object.entries(scoresData).forEach(([k,v]) => { if(v.active !== false) activePlayers.push({name: k, ...v}); });
             activePlayers.sort((a,b) => b.pts - a.pts).forEach(p => {
-                const teamLabel = (p.teamName && p.teamName !== "Solo" && p.teamName !== "") ? p.teamName : "Solo";
+                const teamLabel = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
                 pList.innerHTML += `<div class="card" id="card-${p.name}"><div class="avatar">${p.avatar}</div><div class="info"><b>${p.name}</b><br><small>${teamLabel}</small></div><div class="pts">${p.pts}</div></div>`;
             });
 
+            // 2. Classement Général (Colonne de droite)
             let global = [];
+
+            // ÉQUIPES
             Object.entries(teamsData).forEach(([tName, tInfo]) => {
                 let count = 0; let totalPts = 0;
                 Object.values(scoresData).forEach(p => { 
-                    if(p.teamName === tName || (p.active === false && p.lastTeam === tName)) {
-                        totalPts += p.pts; if(p.active !== false) count++;
+                    // Un joueur est dans cette équipe si c'est son teamName actuel OU son lastTeam (si inactif)
+                    const currentTeam = p.teamName;
+                    const lastTeam = p.lastTeam;
+                    
+                    if (p.active !== false) {
+                        if (currentTeam === tName) { totalPts += p.pts; count++; }
+                    } else {
+                        if (lastTeam === tName) { totalPts += p.pts; }
                     }
                 });
                 if (totalPts > 0 || count > 0) global.push({ name: `${tName} (${count} joueurs)`, pts: totalPts, icon: tInfo.icon, isTeam: true });
             });
+
+            // SOLOS
             Object.entries(scoresData).forEach(([pName, pData]) => {
-                const isCurrentlySolo = (!pData.teamName || pData.teamName === "Solo" || pData.teamName === "");
-                if (isCurrentlySolo) {
-                    if (pData.active !== false || !pData.lastTeam || pData.lastTeam === "Solo" || pData.lastTeam === "") {
-                        global.push({ name: `${pName} (Solo)`, pts: pData.pts, icon: pData.avatar, isTeam: false });
-                    }
+                const isSoloNow = (!pData.teamName || pData.teamName === "Solo" || pData.teamName === "");
+                const wasSoloBefore = (!pData.lastTeam || pData.lastTeam === "Solo" || pData.lastTeam === "");
+
+                // On affiche en Solo SEULEMENT si son dernier état connu est Solo
+                if ((pData.active !== false && isSoloNow) || (pData.active === false && wasSoloBefore)) {
+                    // Petite sécurité supplémentaire pour éviter les doublons si lastTeam est mal rempli
+                    if (pData.active === false && !wasSoloBefore) return; 
+
+                    global.push({ name: `${pName} (Solo)`, pts: pData.pts, icon: pData.avatar, isTeam: false });
                 }
             });
+
             global.sort((a,b) => b.pts - a.pts).forEach(item => {
                 const iconContent = item.isTeam ? `<div class="crest-bg"><img src="${item.icon}"></div>` : `<span>${item.icon}</span>`;
                 gList.innerHTML += `<div class="card"><div class="crest">${iconContent}</div><div class="info"><b>${item.name}</b></div><div class="pts">${item.pts}</div></div>`;

@@ -116,7 +116,6 @@
                         if(confirm("Reprendre votre partie avec le pseudo " + userPseudo + " ?")) {
                             selectedAvatar = data.avatar;
                             userTeamName = data.teamName || data.lastTeam || "Solo";
-                            userTeamIcon = data.teamIcon || "";
                             roomRef.child('scores/' + userPseudo).update({ active: true, teamName: userTeamName }).then(() => { startBuzzer(); });
                         }
                     } else if (data.active === true) {
@@ -162,7 +161,7 @@
             localStorage.setItem('presta_pseudo', userPseudo);
             localStorage.setItem('presta_room', roomID);
             roomRef.child('scores/' + userPseudo).set({ 
-                pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon, active: true 
+                pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon, active: true, lastTeam: userTeamName
             });
             startBuzzer();
         }
@@ -172,13 +171,9 @@
             document.getElementById('display-avatar').innerText = selectedAvatar;
             document.getElementById('display-team-label').innerText = (userTeamName === "Solo" || userTeamName === "") ? "Mode Solo" : userTeamName;
             showScreen('screen-buzzer');
-            
             if(kickListener) roomRef.child('scores/' + userPseudo + '/active').off('value', kickListener);
             kickListener = roomRef.child('scores/' + userPseudo + '/active').on('value', s => { 
-                if(s.val() === false && !localStorage.getItem('leaving')) { 
-                    alert("Vous avez été retiré de la salle par le MJ.");
-                    location.reload(); 
-                }
+                if(s.val() === false && !localStorage.getItem('leaving')) { alert("Expulsé par le MJ."); location.reload(); }
             });
             roomRef.child('scores/' + userPseudo + '/pts').on('value', s => { document.getElementById('score').innerText = s.val() || 0; });
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlockedLocally = snap.exists(); updateUI(); });
@@ -199,11 +194,9 @@
             if(confirm("Quitter la partie ? Vos points seront conservés.")) {
                 localStorage.setItem('leaving', 'true');
                 if(roomRef && userPseudo) {
-                    const isSolo = (userTeamName === "Solo" || userTeamName === "");
-                    roomRef.child('scores/' + userPseudo).update({ 
-                        active: false, lastTeam: userTeamName,
-                        teamName: isSolo ? "Solo" : "", teamIcon: ""
-                    }).then(() => { localStorage.removeItem('leaving'); location.reload(); });
+                    roomRef.child('scores/' + userPseudo).update({ active: false, teamName: "" }).then(() => {
+                        localStorage.removeItem('leaving'); location.reload();
+                    });
                 }
             }
         }
