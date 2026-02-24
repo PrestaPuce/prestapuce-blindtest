@@ -17,30 +17,57 @@
         .header { height: 60px; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 2px solid var(--card); }
         .logo { width: 35px; }
 
-        .screen { display: none; height: calc(100% - 60px); width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; overflow-y: auto; }
+        .screen { display: none; height: calc(100% - 60px); width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
         .active { display: flex !important; }
 
-        /* Alignement parfait des champs */
-        .auth-field { width: 100%; max-width: 300px; margin-bottom: 12px; position: relative; }
-        input { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--card); color: white; text-align: center; font-size: 1rem; outline: none; box-sizing: border-box; }
+        /* --- CORRECTION ERGONOMIE CHAMPS --- */
+        .auth-container { width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
         
-        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.7; z-index: 10; }
-        
-        .btn { width: 100%; max-width: 300px; padding: 16px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; text-transform: uppercase; transition: 0.2s; }
+        .input-wrapper { 
+            position: relative; 
+            width: 100%; 
+            background: var(--card); 
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            border: none; 
+            background: transparent; 
+            color: white; 
+            text-align: center; 
+            font-size: 1rem; 
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .eye-icon {
+            position: absolute;
+            right: 15px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            user-select: none;
+        }
+        /* ---------------------------------- */
+
+        .btn { width: 100%; max-width: 300px; padding: 16px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; text-transform: uppercase; transition: 0.2s; }
         .btn-blue { background: var(--primary); color: white; }
-        .btn-google { background: white; color: #444; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-google { background: white; color: #444; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; }
         .btn-ghost { background: none; border: 1px solid #7f8c8d; color: #bdc3c7; }
         .btn-accent { background: var(--accent); color: black; }
         .btn:disabled { opacity: 0.5; cursor: wait; }
 
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; }
-        .avatar-item { font-size: 1.8rem; cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 5px; transition: 0.2s; }
-        .avatar-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); transform: scale(1.1); }
+        .avatar-item { font-size: 1.8rem; cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 5px; }
+        .avatar-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
         
-        .buzzer { width: 220px; height: 220px; border-radius: 50%; border: none; background: var(--danger); box-shadow: 0 10px 0 #c0392b; cursor: pointer; transition: 0.1s; }
-        .buzzer:active { transform: translateY(5px); box-shadow: 0 5px 0 #c0392b; }
+        .buzzer { width: 220px; height: 220px; border-radius: 50%; border: none; background: var(--danger); box-shadow: 0 10px 0 #c0392b; cursor: pointer; }
         .ready .buzzer { background: var(--success); box-shadow: 0 10px 0 #27ae60; }
-        .error-msg { color: var(--danger); font-size: 0.85rem; margin-bottom: 12px; font-weight: bold; }
+        .error-msg { color: var(--danger); font-size: 0.85rem; margin: 10px 0; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -53,7 +80,7 @@
 
     <div id="screen-room" class="screen active">
         <h2 style="color:var(--accent)">CODE SALLE</h2>
-        <div class="auth-field"><input type="number" id="room-input" placeholder="Ex: 1234"></div>
+        <div class="auth-container"><input type="number" id="room-input" placeholder="Ex: 1234"></div>
         <button class="btn btn-blue" onclick="joinRoom()">Valider</button>
     </div>
 
@@ -63,29 +90,29 @@
             <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" width="18"> Google
         </button>
         <button class="btn btn-blue" onclick="showScreen('screen-email-login')">E-mail / Mot de passe</button>
-        <div id="guest-option">
-            <div style="margin:10px;">OU</div>
-            <button class="btn btn-ghost" onclick="startAsGuest()">Jouer en Invité (Rapide)</button>
-        </div>
+        <div style="margin:10px;">OU</div>
+        <button class="btn btn-ghost" onclick="startAsGuest()">Jouer en Invité</button>
     </div>
 
     <div id="screen-email-login" class="screen">
         <h3 id="email-title">CONNEXION</h3>
-        <div class="auth-field"><input type="email" id="log-email" placeholder="E-mail"></div>
-        <div class="auth-field">
-            <input type="password" id="log-pass" placeholder="Mot de passe">
-            <span class="toggle-password" onclick="togglePass()">👁️</span>
+        <div class="auth-container">
+            <div class="input-wrapper"><input type="email" id="log-email" placeholder="E-mail"></div>
+            <div class="input-wrapper">
+                <input type="password" id="log-pass" placeholder="Mot de passe">
+                <span class="eye-icon" onclick="togglePass()">👁️</span>
+            </div>
+            <p id="error-auth" class="error-msg"></p>
+            <button class="btn btn-blue" id="btn-email-main" onclick="handleAuth()">Se connecter</button>
+            <button class="btn btn-ghost" id="btn-email-switch" onclick="toggleEmailMode()">Pas de compte ? Créer</button>
+            <button class="btn btn-ghost" style="border:none;" onclick="showScreen('screen-auth-choice')">Retour</button>
         </div>
-        <p id="error-auth" class="error-msg"></p>
-        <button class="btn btn-blue" id="btn-email-main" onclick="handleAuth()">Se connecter</button>
-        <button class="btn btn-ghost" id="btn-email-switch" onclick="toggleEmailMode()">Pas de compte ? Créer</button>
-        <button class="btn btn-ghost" style="border:none;" onclick="showScreen('screen-auth-choice')">Retour</button>
     </div>
 
     <div id="screen-verify-email" class="screen">
         <h3 style="color:var(--accent)">VÉRIFIE TES MAILS ! 📧</h3>
         <p>Un lien a été envoyé à : <br><b id="user-email-sent"></b></p>
-        <p style="font-size:0.8rem; opacity:0.8; margin:20px 0;">Vérifie tes spams. Une fois validé, appuie ici :</p>
+        <p style="font-size:0.8rem; margin:20px 0;">Vérifie tes spams. Une fois validé, appuie ici :</p>
         <button id="btn-check-verify" class="btn btn-accent" onclick="checkIfVerified()">J'ai validé mon mail !</button>
         <button class="btn btn-ghost" onclick="resendVerify()">Renvoyer l'e-mail</button>
         <button class="btn btn-ghost" style="border:none; margin-top:10px;" onclick="showScreen('screen-email-login')">Retour à la connexion</button>
@@ -93,7 +120,7 @@
 
     <div id="screen-profile" class="screen">
         <h3>TON PROFIL</h3>
-        <div class="auth-field"><input type="text" id="pseudo-input" placeholder="Ton pseudo..."></div>
+        <div class="auth-container"><input type="text" id="pseudo-input" placeholder="Ton pseudo..."></div>
         <div class="avatar-grid" id="avatar-grid"></div>
         <button class="btn btn-blue" onclick="confirmProfile()">C'est parti !</button>
     </div>
@@ -131,13 +158,12 @@
             document.getElementById('email-title').innerText = (emailMode === 'login') ? 'CONNEXION' : 'CRÉER UN COMPTE';
             document.getElementById('btn-email-main').innerText = (emailMode === 'login') ? 'Se connecter' : 'S\'enregistrer';
             document.getElementById('btn-email-switch').innerText = (emailMode === 'login') ? 'Pas de compte ? Créer' : 'Déjà un compte ? Login';
-            document.getElementById('error-auth').innerText = "";
         }
 
         function handleAuth() {
             const email = document.getElementById('log-email').value;
             const pass = document.getElementById('log-pass').value;
-            if(!email || !pass) return alert("Remplis tous les champs !");
+            if(!email || !pass) return alert("Remplis tout !");
 
             const action = (emailMode === 'login') ? auth.signInWithEmailAndPassword(email, pass) : auth.createUserWithEmailAndPassword(email, pass);
             
@@ -156,13 +182,14 @@
             }).catch(e => { 
                 let msg = e.message;
                 if(e.code === "auth/user-not-found") {
-                    msg = "Compte inconnu. Nous avons basculé en mode 'Création'.";
+                    msg = "Compte inconnu. Passez en mode 'Création'.";
                     toggleEmailMode();
                 }
                 document.getElementById('error-auth').innerText = msg;
             });
         }
 
+        // --- CORRECTION DU BLOCAGE DE VÉRIFICATION ---
         function checkIfVerified() {
             const user = auth.currentUser;
             if(!user) return showScreen('screen-email-login');
@@ -171,16 +198,19 @@
             btn.innerText = "Vérification...";
             btn.disabled = true;
 
+            // On force le reload ET on vérifie
             user.reload().then(() => {
-                if(user.emailVerified) {
-                    postSignIn(user);
+                // On récupère l'instance fraîche après reload
+                const freshUser = auth.currentUser;
+                if(freshUser.emailVerified) {
+                    postSignIn(freshUser);
                 } else {
-                    alert("L'e-mail n'est pas encore validé. Si c'est fait, reconnecte-toi pour forcer l'accès.");
+                    alert("E-mail non validé. Si vous venez de cliquer, attendez 5s et réessayez.");
                     btn.innerText = "J'ai validé mon mail !";
                     btn.disabled = false;
                 }
             }).catch(() => {
-                alert("Erreur de synchronisation. Merci de te reconnecter.");
+                alert("Erreur. Reconnectez-vous pour actualiser.");
                 showScreen('screen-email-login');
             });
         }
@@ -256,12 +286,7 @@
         }
 
         function exitGame() {
-            if(confirm("Quitter la partie ?")) {
-                if(!isGuest && auth.currentUser) {
-                    db.ref('players/' + auth.currentUser.uid + '/stats/totalScore').transaction(s => (s||0) + gameScore);
-                }
-                location.reload();
-            }
+            if(confirm("Quitter ?")) location.reload();
         }
 
         function showScreen(id) {
@@ -269,7 +294,7 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function resendVerify() { auth.currentUser.sendEmailVerification().then(() => alert("E-mail envoyé !")); }
+        function resendVerify() { auth.currentUser.sendEmailVerification().then(() => alert("Envoyé !")); }
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
