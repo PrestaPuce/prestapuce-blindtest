@@ -82,6 +82,7 @@
 
         let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
         let gameState = "waiting", isBlockedLocally = false, currentWinner = null;
+        let kickListener = null; // Stocker l'écouteur pour pouvoir le couper
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
         window.onload = () => {
@@ -113,33 +114,20 @@
                 const data = snap.val();
 
                 if(snap.exists()) {
-                    // Si c'est le même téléphone (reconnexion)
                     if(savedPseudo === userPseudo && savedRoom === roomID) {
                         if(confirm("Reprendre votre partie avec le pseudo " + userPseudo + " ?")) {
                             selectedAvatar = data.avatar;
-                            // Restaurer l'équipe si c'était un joueur d'équipe expulsé (lastTeam)
                             userTeamName = data.active ? data.teamName : (data.lastTeam || "Solo");
                             userTeamIcon = data.active ? data.teamIcon : (data.lastTeamIcon || "");
-                            
-                            roomRef.child('scores/' + userPseudo).update({ 
-                                active: true,
-                                teamName: userTeamName,
-                                teamIcon: userTeamIcon
-                            });
+                            roomRef.child('scores/' + userPseudo).update({ active: true, teamName: userTeamName });
                             startBuzzer();
                         }
-                    } 
-                    // Si le pseudo est pris par quelqu'un d'autre (actif)
-                    else if (data.active === true) {
+                    } else if (data.active === true) {
                         alert("Ce pseudo est déjà utilisé par un autre joueur !");
+                    } else {
+                        alert("Ce pseudo appartient à un joueur déconnecté.");
                     }
-                    // Si le pseudo a été utilisé mais que l'utilisateur n'a pas le bon localStorage
-                    else {
-                        alert("Ce pseudo appartient à un joueur déconnecté. Si c'est vous, utilisez le même appareil.");
-                    }
-                } else { 
-                    showScreen('screen-setup'); 
-                }
+                } else { showScreen('screen-setup'); }
             });
         }
 
@@ -188,8 +176,8 @@
             document.getElementById('display-team-label').innerText = userTeamName;
             showScreen('screen-buzzer');
             
-            // Écouteur pour l'expulsion MJ
-            roomRef.child('scores/' + userPseudo + '/active').on('value', s => { 
+            // On stocke l'écouteur d'expulsion
+            kickListener = roomRef.child('scores/' + userPseudo + '/active').on('value', s => { 
                 if(s.val() === false) { 
                     alert("Vous avez été retiré de la salle par le MJ.");
                     location.reload(); 
@@ -214,12 +202,23 @@
             }
         }
 
-        function leaveGame(silent = false) {
-            if(silent || confirm("Quitter la partie ? Vos points seront conservés.")) {
+        function leaveGame() {
+            if(confirm("Quitter la partie ? Vos points seront conservés.")) {
                 if(roomRef && userPseudo) {
-                    roomRef.child('scores/' + userPseudo).update({ active: false });
+                    // 1. On coupe l'écouteur d'expulsion AVANT de changer le statut
+                    if(kickListener) roomRef.child('scores/' + userPseudo + '/active').off('value', kickListener);
+                    
+                    // 2. On change le statut en base
+                    roomRef.child('scores/' + userPseudo).update({ 
+                        active: false, 
+                        lastTeam: userTeamName 
+                    }).then(() => {
+                        // 3. On nettoie et on recharge
+                        localStorage.removeItem('presta_pseudo');
+                        localStorage.removeItem('presta_room');
+                        location.reload();
+                    });
                 }
-                location.reload();
             }
         }
 
