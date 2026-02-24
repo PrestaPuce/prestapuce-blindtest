@@ -27,7 +27,7 @@
         .btn-google { background: white; color: #444; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-ghost { background: none; border: 1px solid #7f8c8d; color: #bdc3c7; }
         .btn-accent { background: var(--accent); color: black; }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn:disabled { opacity: 0.5; cursor: wait; }
 
         .avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 15px; }
         .avatar-item { font-size: 1.5rem; cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 5px; }
@@ -77,7 +77,7 @@
     <div id="screen-verify-email" class="screen">
         <h3 style="color:var(--accent)">VÉRIFIE TES MAILS ! 📧</h3>
         <p>Un lien de validation a été envoyé à : <br><b id="user-email-sent"></b></p>
-        <p style="font-size:0.8rem; opacity:0.8; margin:20px 0;">Vérifie tes spams. Une fois le lien cliqué dans le mail, appuie sur le bouton ci-dessous :</p>
+        <p style="font-size:0.8rem; opacity:0.8; margin:20px 0;">Vérifie tes spams. Une fois le lien cliqué dans le mail, appuie ici :</p>
         <button id="btn-check-verify" class="btn btn-accent" onclick="checkIfVerified()">J'ai validé mon mail !</button>
         <button class="btn btn-ghost" onclick="resendVerify()">Renvoyer l'e-mail</button>
     </div>
@@ -120,8 +120,8 @@
         }
 
         function handleAuth() {
-            const email = document.getElementById('log-email').value;
-            const pass = document.getElementById('log-pass').value;
+            const email = document.getElementById('log-email').value || document.getElementById('sign-email').value;
+            const pass = document.getElementById('log-pass').value || document.getElementById('sign-pass').value;
             const action = (emailMode === 'login') ? auth.signInWithEmailAndPassword(email, pass) : auth.createUserWithEmailAndPassword(email, pass);
             
             action.then(res => {
@@ -141,24 +141,32 @@
 
         function checkIfVerified() {
             const user = auth.currentUser;
-            if(!user) return alert("Session perdue. Reconnectez-vous.");
+            if(!user) return alert("Session perdue. Merci de vous reconnecter.");
 
             const btn = document.getElementById('btn-check-verify');
             btn.innerText = "Vérification...";
             btn.disabled = true;
 
+            // Timeout de sécurité au cas où Firebase ne répond pas
+            const safetyTimeout = setTimeout(() => {
+                btn.disabled = false;
+                btn.innerText = "J'ai validé mon mail !";
+            }, 5000);
+
             user.reload().then(() => {
+                clearTimeout(safetyTimeout);
                 if(user.emailVerified) {
                     postSignIn(user);
                 } else {
-                    alert("L'e-mail n'est pas encore détecté comme validé. Cliquez bien sur le lien dans le mail reçu.");
+                    alert("L'e-mail n'est pas encore détecté comme validé. Vérifie tes spams !");
                     btn.innerText = "J'ai validé mon mail !";
                     btn.disabled = false;
                 }
             }).catch(e => {
-                alert("Erreur de synchronisation. Merci de réessayer.");
-                btn.innerText = "J'ai validé mon mail !";
+                clearTimeout(safetyTimeout);
+                alert("Erreur de connexion. Réessaie dans un instant.");
                 btn.disabled = false;
+                btn.innerText = "J'ai validé mon mail !";
             });
         }
 
@@ -169,13 +177,21 @@
                 if(data && data.pseudo) {
                     userPseudo = data.pseudo;
                     selectedAvatar = data.avatar || "🐱";
+                    // Pré-remplir et entrer en jeu
                     document.getElementById('pseudo-input').value = userPseudo;
-                    document.querySelectorAll('.avatar-item').forEach(i => {
-                        if(i.innerText === selectedAvatar) i.classList.add('selected');
-                        else i.classList.remove('selected');
-                    });
+                    selectAvatarVisual(selectedAvatar);
                     confirmProfile(); 
-                } else { showScreen('screen-profile'); }
+                } else { 
+                    showScreen('screen-profile'); 
+                }
+            });
+        }
+
+        function selectAvatarVisual(emoji) {
+            selectedAvatar = emoji;
+            document.querySelectorAll('.avatar-item').forEach(i => {
+                if(i.innerText === emoji) i.classList.add('selected');
+                else i.classList.remove('selected');
             });
         }
 
@@ -260,10 +276,7 @@
         const grid = document.getElementById('avatar-grid');
         avatars.forEach(a => {
             const d = document.createElement('div'); d.className = 'avatar-item'; d.innerText = a;
-            d.onclick = () => {
-                document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
-                d.classList.add('selected'); selectedAvatar = a;
-            };
+            d.onclick = () => selectAvatarVisual(a);
             grid.appendChild(d);
         });
     </script>
