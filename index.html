@@ -20,7 +20,9 @@
         .screen { display: none; height: calc(100% - 60px); width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; overflow-y: auto; }
         .active { display: flex !important; }
 
-        input { width: 100%; max-width: 280px; padding: 15px; margin-bottom: 10px; border-radius: 12px; border: none; background: var(--card); color: white; text-align: center; font-size: 1rem; outline: none; }
+        .input-group { position: relative; width: 100%; max-width: 280px; margin-bottom: 10px; }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--card); color: white; text-align: center; font-size: 1rem; outline: none; }
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #7f8c8d; }
         
         .btn { width: 100%; max-width: 280px; padding: 16px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; text-transform: uppercase; transition: 0.2s; }
         .btn-blue { background: var(--primary); color: white; }
@@ -35,6 +37,7 @@
         
         .buzzer { width: 200px; height: 200px; border-radius: 50%; border: none; background: var(--danger); box-shadow: 0 10px 0 #c0392b; cursor: pointer; }
         .ready .buzzer { background: var(--success); box-shadow: 0 10px 0 #27ae60; }
+        .error-msg { color: var(--danger); font-size: 0.8rem; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -66,15 +69,18 @@
     <div id="screen-email-login" class="screen">
         <h3 id="email-title">CONNEXION</h3>
         <input type="email" id="log-email" placeholder="E-mail">
-        <input type="password" id="log-pass" placeholder="Mot de passe">
-        <p id="error-auth" style="color:var(--danger); font-size:0.8rem; margin-bottom:10px;"></p>
+        <div class="input-group">
+            <input type="password" id="log-pass" placeholder="Mot de passe">
+            <span class="toggle-password" onclick="togglePasswordVisibility()"><img src="https://img.icons8.com/material-outlined/24/000000/visible--v1.png" width="24"/></span>
+        </div>
+        <p id="error-auth" class="error-msg"></p>
         <button class="btn btn-blue" id="btn-email-main" onclick="handleAuth()">Se connecter</button>
         <button class="btn btn-ghost" id="btn-email-switch" onclick="toggleEmailMode()">Pas de compte ? Créer</button>
         <button class="btn btn-ghost" style="border:none;" onclick="showScreen('screen-auth-choice')">Retour</button>
     </div>
 
     <div id="screen-verify-email" class="screen">
-        <h3 style="color:var(--accent)">VÉRIFIE TES MAILS ! 📧</h3>
+        <h3 style="color:var(--accent)">VÉRIFIE TES MAILS ! </h3>
         <p>Un lien de validation a été envoyé à : <br><b id="user-email-sent"></b></p>
         <p style="font-size:0.8rem; opacity:0.8; margin:20px 0;">Vérifie tes spams. Une fois le lien cliqué dans le mail, appuie ici :</p>
         <button id="btn-check-verify" class="btn btn-accent" onclick="checkIfVerified()">J'ai validé mon mail !</button>
@@ -108,8 +114,20 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        let roomID = "", roomRef = null, userPseudo = "", selectedAvatar = "🐱", isGuest = true, gameScore = 0, emailMode = 'login';
-        const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🐙","🦉","🐸"];
+        let roomID = "", roomRef = null, userPseudo = "", selectedAvatar = "", isGuest = true, gameScore = 0, emailMode = 'login';
+        const avatars = ["","","","","","","","","","","","","","","",""];
+
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('log-pass');
+            const toggle = document.querySelector('.toggle-password img');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                toggle.src = 'https://img.icons8.com/material-outlined/24/000000/hide.png';
+            } else {
+                passInput.type = 'password';
+                toggle.src = 'https://img.icons8.com/material-outlined/24/000000/visible--v1.png';
+            }
+        }
 
         function toggleEmailMode() {
             emailMode = (emailMode === 'login') ? 'signup' : 'login';
@@ -121,8 +139,8 @@
         function handleAuth() {
             const email = document.getElementById('log-email').value;
             const pass = document.getElementById('log-pass').value;
-            if(!email || !pass) return alert("Saisir e-mail et mot de passe");
-
+            document.getElementById('error-auth').innerText = '';
+            
             const action = (emailMode === 'login') ? auth.signInWithEmailAndPassword(email, pass) : auth.createUserWithEmailAndPassword(email, pass);
             
             action.then(res => {
@@ -137,7 +155,18 @@
                         showScreen('screen-verify-email');
                     } else { postSignIn(res.user); }
                 }
-            }).catch(e => { document.getElementById('error-auth').innerText = e.message; });
+            }).catch(e => { 
+                // Gestion améliorée des erreurs
+                if (emailMode === 'login' && (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password')) {
+                    document.getElementById('error-auth').innerText = "Compte non trouvé ou mot de passe incorrect. Créez un compte si ce n'est pas déjà fait.";
+                    toggleEmailMode(); // Suggestion de création de compte
+                } else if (emailMode === 'signup' && e.code === 'auth/email-already-in-use') {
+                    document.getElementById('error-auth').innerText = "Cet e-mail est déjà utilisé. Connectez-vous.";
+                    toggleEmailMode(); // Revenir au mode connexion
+                } else {
+                    document.getElementById('error-auth').innerText = e.message;
+                }
+            });
         }
 
         function checkIfVerified() {
@@ -175,7 +204,7 @@
                 const data = snap.val();
                 if(data && data.pseudo) {
                     userPseudo = data.pseudo;
-                    selectedAvatar = data.avatar || "🐱";
+                    selectedAvatar = data.avatar || "";
                     confirmProfile(); 
                 } else { 
                     showScreen('screen-profile'); 
