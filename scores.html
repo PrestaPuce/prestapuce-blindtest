@@ -2,132 +2,58 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Live Scores - Presta'Puce</title>
+    <title>Scores - Presta'Puce</title>
     <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
-    
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
     <style>
-        /* RETOUR AUX COULEURS D'ORIGINE */
-        :root { 
-            --gold: #f1c40f; 
-            --bg-color: #1a1a1a; 
-            --card-bg: #2c3e50; 
-            --text-color: #ffffff; 
-        }
+        :root { --bg-color: #1a1a1a; --accent: #f1c40f; --card-bg: rgba(44, 62, 80, 0.7); --gold: #f1c40f; }
+        body { margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at center, #2c3e50 0%, #1a1a1a 100%); color: white; height: 100vh; overflow: hidden; box-sizing: border-box; }
+        .header-scores { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; gap: 20px; }
+        .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; height: calc(100vh - 150px); }
+        .column-title { text-align: center; font-size: 1.8rem; color: var(--accent); text-transform: uppercase; margin-bottom: 15px; border-bottom: 2px solid var(--accent); }
         
-        body { 
-            background: var(--bg-color); 
-            color: var(--text-color); 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            padding: 20px;
-            overflow-y: auto;
-        }
+        .card { background: var(--card-bg); display: flex; align-items: center; padding: 10px 20px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid var(--accent); height: 70px; transition: all 0.3s ease; }
+        .avatar, .crest { font-size: 2.2rem; width: 65px; display: flex; justify-content: center; align-items: center; }
+        .crest-bg { background: white; padding: 4px; border-radius: 8px; display: flex; }
+        .crest img { width: 45px; height: 45px; object-fit: contain; }
+        .info { flex: 1; margin-left: 15px; }
+        .pts { font-size: 2rem; font-weight: 900; background: rgba(0,0,0,0.4); padding: 5px 15px; border-radius: 10px; color: var(--accent); }
+        
+        #qr-box { position: fixed; bottom: 20px; right: 20px; background: white; padding: 10px; border-radius: 10px; text-align: center; color: black; z-index: 100; }
+        .last-buzzed { border: 5px solid #2ecc71 !important; transform: scale(1.02); background: rgba(46, 204, 113, 0.4); box-shadow: 0 0 20px #2ecc71; }
+        .inactive-card { opacity: 0.4; filter: grayscale(1); border-left-color: #7f8c8d; }
 
-        h1 { 
-            font-size: 3rem; 
-            text-transform: uppercase; 
-            color: var(--gold); 
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        /* GRILLE DE CARTES (Style original) */
-        .scores-container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 20px; 
-            width: 100%; 
-            max-width: 1400px; 
-            margin: 0 auto;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .score-card { 
-            background: var(--card-bg); 
-            padding: 30px; 
-            border-radius: 15px; 
-            text-align: center; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 4px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        /* MISE EN AVANT DU BUZZER */
-        .score-card.buzzed { 
-            border-color: var(--gold); 
-            transform: scale(1.1); 
-            box-shadow: 0 0 40px rgba(241, 196, 15, 0.4);
-            z-index: 10;
-        }
-
-        /* JOUEUR INACTIF */
-        .score-card.inactive { 
-            opacity: 0.3; 
-            filter: grayscale(1);
-        }
-
-        .avatar { font-size: 4rem; display: block; margin-bottom: 10px; }
-        .pseudo { font-size: 1.8rem; font-weight: bold; display: block; margin-bottom: 5px; }
-        .points { font-size: 2.5rem; color: var(--gold); font-weight: bold; }
-
-        /* QR CODE (En haut à droite comme demandé) */
-        #qr-box { 
-            position: fixed; 
-            top: 20px; 
-            right: 20px; 
-            background: white; 
-            padding: 10px; 
-            border-radius: 10px; 
-            border: 5px solid var(--gold); 
-            z-index: 100;
-            text-align: center;
-        }
-        #qr-box p { color: black; margin: 5px 0 0 0; font-weight: bold; font-size: 0.7rem; }
-
-        /* BOUTON MJ (En bas à gauche comme demandé) */
-        #toggle-btn { 
-            position: fixed; 
-            bottom: 20px; 
-            left: 20px; 
-            background: var(--card-bg); 
-            border: 2px solid var(--gold); 
-            color: white; 
-            padding: 12px 25px; 
-            border-radius: 30px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            z-index: 100;
-        }
-
-        /* HALL OF FAME */
-        .page { display: none; flex-direction: column; align-items: center; width: 100%; }
-        .active { display: flex; }
-        .hof-list { width: 100%; max-width: 600px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 20px; }
-        .hof-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.5rem; }
+        /* Hall of Fame Overlay */
+        #hof-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
+        .hof-content { width: 500px; background: #2c3e50; padding: 30px; border-radius: 20px; border: 3px solid var(--accent); }
+        .hof-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.2rem; }
+        
+        #btn-hof { position: fixed; bottom: 20px; left: 20px; background: var(--card-bg); border: 1px solid var(--accent); color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer; z-index: 100; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <button id="toggle-btn" onclick="toggleView()">🏆 Voir Hall of Fame</button>
-
-    <div id="qr-box">
-        <div id="qrcode"></div>
-        <p>SCANNE POUR JOUER</p>
+    <div class="header-scores">
+        <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px;">
+        <h1 style="margin:0;">SALLE : <span id="room-title" style="color:var(--accent)">----</span></h1>
     </div>
 
-    <div id="page-live" class="page active">
-        <h1 id="room-title">LIVE SCORES</h1>
-        <div id="live-list" class="scores-container"></div>
+    <div class="main-container">
+        <div><div class="column-title">Joueurs</div><div id="player-list"></div></div>
+        <div><div class="column-title">Classement Général</div><div id="global-list"></div></div>
     </div>
 
-    <div id="page-hof" class="page">
-        <h1>🏆 HALL OF FAME 🏆</h1>
-        <div id="hof-display" class="hof-list"></div>
+    <div id="qr-box"><div id="qrcode"></div><div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">REJOINDRE</div></div>
+    <button id="btn-hof" onclick="toggleHOF()">🏆 Hall of Fame</button>
+
+    <div id="hof-overlay" onclick="toggleHOF()">
+        <div class="hof-content" onclick="event.stopPropagation()">
+            <h1 style="color:var(--accent); margin-top:0;">🏆 TOP 10 MONDIAL</h1>
+            <div id="hof-list"></div>
+            <button onclick="toggleHOF()" style="margin-top:20px; width:100%; padding:10px; border-radius:10px; border:none; background:var(--accent); font-weight:bold; cursor:pointer;">RETOUR AU JEU</button>
+        </div>
     </div>
 
     <script>
@@ -138,81 +64,107 @@
             projectId: "prestapuce-buzz",
             storageBucket: "prestapuce-buzz.firebasestorage.app",
             messagingSenderId: "907270883505",
-            appId: "1:907270883505:web:197efec0b99db28180ba90"
+            appId: "1:907270883505:web:197efec0b99db28180ba90",
+            measurementId: "G-J04SC2DFFF"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        
+        const roomID = prompt("Code de la salle ?");
+        document.getElementById('room-title').innerText = roomID;
+        const roomRef = db.ref('roomsData/' + roomID);
+        
+        const playURL = "https://prestapuce.github.io/prestapuce-blindtest/index.html?room=" + roomID;
+        new QRCode(document.getElementById("qrcode"), { text: playURL, width: 110, height: 110, correctLevel : QRCode.CorrectLevel.H });
 
-        let roomID = new URLSearchParams(window.location.search).get('room');
-        let currentView = "live";
+        let scoresData = {}, teamsData = {}, currentBuzzer = null;
 
-        if(roomID) {
-            document.getElementById('room-title').innerText = "SALLE " + roomID;
-            new QRCode(document.getElementById("qrcode"), {
-                text: "https://prestapuce.github.io/prestapuce-blindtest/index.html?room=" + roomID,
-                width: 120, height: 120
+        function updateDisplay() {
+            const pList = document.getElementById('player-list'); pList.innerHTML = "";
+            const gList = document.getElementById('global-list'); gList.innerHTML = "";
+            
+            // 1. GESTION LISTE JOUEURS (AVEC PRIORITÉ BUZZER ET TRIS)
+            const allPlayers = Object.entries(scoresData).map(([k,v]) => ({name: k, ...v}));
+            
+            allPlayers.sort((a, b) => {
+                // Priorité 1 : Le buzzer remonte en haut
+                if (a.name === currentBuzzer) return -1;
+                if (b.name === currentBuzzer) return 1;
+                // Priorité 2 : Les inactifs tombent en bas
+                const activeA = a.active !== false;
+                const activeB = b.active !== false;
+                if (activeA && !activeB) return -1;
+                if (!activeA && activeB) return 1;
+                // Priorité 3 : Le score
+                return b.pts - a.pts;
             });
-            initLiveScores(roomID);
-        }
 
-        function initLiveScores(id) {
-            db.ref('roomsData/' + id).on('value', snap => {
-                const data = snap.val();
-                if(!data || !data.scores) return;
-
-                const list = document.getElementById('live-list');
-                const buzzedPlayer = data.buzzers ? data.buzzers.pseudo : null;
+            allPlayers.forEach(p => {
+                const isInactive = p.active === false;
+                const buzzedClass = (p.name === currentBuzzer) ? "last-buzzed" : "";
+                const inactiveClass = isInactive ? "inactive-card" : "";
+                const teamLabel = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
                 
-                const players = Object.entries(data.scores);
+                pList.innerHTML += `
+                    <div class="card ${buzzedClass} ${inactiveClass}" id="card-${p.name}">
+                        <div class="avatar">${p.avatar}</div>
+                        <div class="info"><b>${p.name}</b><br><small>${teamLabel}</small></div>
+                        <div class="pts">${p.pts}</div>
+                    </div>`;
+            });
 
-                // TRI LOGIQUE
-                players.sort((a, b) => {
-                    if (a[0] === buzzedPlayer) return -1;
-                    if (b[0] === buzzedPlayer) return 1;
-                    if (a[1].active === false && b[1].active !== false) return 1;
-                    if (a[1].active !== false && b[1].active === false) return -1;
-                    return b[1].pts - a[1].pts;
+            // 2. CLASSEMENT GÉNÉRAL (TON CODE D'ORIGINE INTACT)
+            let global = [];
+            Object.entries(teamsData).forEach(([tName, tInfo]) => {
+                let activeCount = 0; let totalPts = 0;
+                Object.values(scoresData).forEach(p => { 
+                    if (p.teamName === tName) {
+                        totalPts += p.pts; if (p.active !== false) activeCount++;
+                    } else if (p.active === false && p.lastTeam === tName) {
+                        totalPts += p.pts;
+                    }
                 });
+                global.push({ name: `${tName} (${activeCount})`, pts: totalPts, icon: tInfo.icon, isTeam: true });
+            });
 
-                list.innerHTML = "";
-                players.forEach(([pseudo, info]) => {
-                    const isBuzzed = (pseudo === buzzedPlayer);
-                    const isInactive = (info.active === false);
-                    list.innerHTML += `
-                        <div class="score-card ${isBuzzed ? 'buzzed' : ''} ${isInactive ? 'inactive' : ''}">
-                            <span class="avatar">${info.avatar}</span>
-                            <span class="pseudo">${pseudo}</span>
-                            <span class="points">${info.pts} pts</span>
-                        </div>`;
-                });
+            Object.entries(scoresData).forEach(([pName, pData]) => {
+                const isCurrentlySolo = (!pData.teamName || pData.teamName === "Solo" || pData.teamName === "");
+                const wasSoloBefore = (!pData.lastTeam || pData.lastTeam === "Solo" || pData.lastTeam === "");
+                if ((pData.active !== false && isCurrentlySolo) || (pData.active === false && wasSoloBefore)) {
+                    global.push({ name: `${pName} (Solo)`, pts: pData.pts, icon: pData.avatar, isTeam: false });
+                }
+            });
+
+            global.sort((a,b) => b.pts - a.pts).forEach(item => {
+                const iconContent = item.isTeam ? `<div class="crest-bg"><img src="${item.icon}"></div>` : `<span>${item.icon}</span>`;
+                gList.innerHTML += `<div class="card"><div class="crest">${iconContent}</div><div class="info"><b>${item.name}</b></div><div class="pts">${item.pts}</div></div>`;
             });
         }
 
-        function loadHallOfFame() {
-            db.ref('players').orderByChild('stats/totalScore').limitToLast(10).once('value', snap => {
-                const hofList = document.getElementById('hof-display');
-                hofList.innerHTML = "";
-                let players = [];
-                snap.forEach(c => { players.push({p: c.val().pseudo, a: c.val().avatar, s: c.val().stats.totalScore}); });
-                players.reverse().forEach((p, i) => {
-                    hofList.innerHTML += `<div class="hof-item"><span>${i+1}. ${p.a} <b>${p.p}</b></span><span style="color:var(--gold)">${p.s} pts</span></div>`;
-                });
-            });
-        }
+        // Écouteurs Firebase
+        roomRef.child('scores').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
+        roomRef.child('teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
+        roomRef.child('buzzers').on('value', snap => {
+            currentBuzzer = snap.exists() ? snap.val().pseudo : null;
+            updateDisplay();
+        });
 
-        function toggleView() {
-            const btn = document.getElementById('toggle-btn');
-            if(currentView === "live") {
-                loadHallOfFame();
-                document.getElementById('page-live').classList.remove('active');
-                document.getElementById('page-hof').classList.add('active');
-                btn.innerText = "🎮 Retour au Jeu";
-                currentView = "hof";
+        // Fonction Hall of Fame
+        function toggleHOF() {
+            const overlay = document.getElementById('hof-overlay');
+            if(overlay.style.display === "flex") {
+                overlay.style.display = "none";
             } else {
-                document.getElementById('page-hof').classList.remove('active');
-                document.getElementById('page-live').classList.add('active');
-                btn.innerText = "🏆 Voir Hall of Fame";
-                currentView = "live";
+                overlay.style.display = "flex";
+                db.ref('players').orderByChild('stats/totalScore').limitToLast(10).once('value', snap => {
+                    const list = document.getElementById('hof-list');
+                    list.innerHTML = "";
+                    let pArr = [];
+                    snap.forEach(c => { pArr.push({p:c.val().pseudo, a:c.val().avatar, s:c.val().stats.totalScore}); });
+                    pArr.reverse().forEach((player, i) => {
+                        list.innerHTML += `<div class="hof-item"><span>${i+1}. ${player.a} <b>${player.p}</b></span><b style="color:var(--accent)">${player.s} pts</b></div>`;
+                    });
+                });
             }
         }
     </script>
