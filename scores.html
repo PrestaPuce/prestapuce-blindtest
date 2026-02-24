@@ -65,6 +65,7 @@
             });
 
             Object.entries(scoresData).forEach(([pName, pData]) => {
+                // Un joueur Solo reste affiché même s'il est inactif (active: false)
                 if (!pData.teamName || pData.teamName === "Solo" || pData.teamName === "" || pData.lastTeam === "Solo") {
                     global.push({ name: `${pName} (Solo)`, pts: pData.pts, icon: pData.avatar, isTeam: false });
                 }
