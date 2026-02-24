@@ -35,7 +35,16 @@
     <div id="qr-box"><div id="qrcode"></div><div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">REJOINDRE</div></div>
 
     <script>
-        const firebaseConfig = { databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app/" };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o",
+            authDomain: "prestapuce-buzz.firebaseapp.com",
+            databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "prestapuce-buzz",
+            storageBucket: "prestapuce-buzz.firebasestorage.app",
+            messagingSenderId: "907270883505",
+            appId: "1:907270883505:web:197efec0b99db28180ba90",
+            measurementId: "G-J04SC2DFFF"
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const roomID = prompt("Code de la salle ?");
@@ -50,46 +59,34 @@
             const pList = document.getElementById('player-list'); pList.innerHTML = "";
             const gList = document.getElementById('global-list'); gList.innerHTML = "";
             
-            // 1. Liste des Joueurs Actifs (Gauche)
             const activePlayers = []; 
             Object.entries(scoresData).forEach(([k,v]) => { if(v.active !== false) activePlayers.push({name: k, ...v}); });
             activePlayers.sort((a,b) => b.pts - a.pts).forEach(p => {
-                const teamLabel = (p.teamName && p.teamName !== "Solo" && p.teamName !== "") ? p.teamName : "Solo";
+                const teamLabel = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
                 pList.innerHTML += `<div class="card" id="card-${p.name}"><div class="avatar">${p.avatar}</div><div class="info"><b>${p.name}</b><br><small>${teamLabel}</small></div><div class="pts">${p.pts}</div></div>`;
             });
 
-            // 2. Classement Général (Droite)
             let global = [];
-
-            // ÉQUIPES : On affiche toutes les équipes créées par le MJ
             Object.entries(teamsData).forEach(([tName, tInfo]) => {
-                let activeCount = 0; 
-                let totalPts = 0;
+                let activeCount = 0; let totalPts = 0;
                 Object.values(scoresData).forEach(p => { 
-                    // Si le joueur est actif dans cette équipe OU s'il l'a quittée mais que c'était son dernier état
                     if (p.teamName === tName) {
-                        totalPts += p.pts;
-                        if (p.active !== false) activeCount++;
+                        totalPts += p.pts; if (p.active !== false) activeCount++;
                     } else if (p.active === false && p.lastTeam === tName) {
                         totalPts += p.pts;
                     }
                 });
-                // On affiche l'équipe dès qu'elle existe (même avec 0 joueurs)
-                global.push({ name: `${tName} (${activeCount} joueurs)`, pts: totalPts, icon: tInfo.icon, isTeam: true });
+                global.push({ name: `${tName} (${activeCount})`, pts: totalPts, icon: tInfo.icon, isTeam: true });
             });
 
-            // SOLOS : On affiche les joueurs dont le dernier état est Solo
             Object.entries(scoresData).forEach(([pName, pData]) => {
                 const isCurrentlySolo = (!pData.teamName || pData.teamName === "Solo" || pData.teamName === "");
                 const wasSoloBefore = (!pData.lastTeam || pData.lastTeam === "Solo" || pData.lastTeam === "");
-
-                // Condition : (Actif en solo) OU (Inactif mais dernier état était solo)
                 if ((pData.active !== false && isCurrentlySolo) || (pData.active === false && wasSoloBefore)) {
                     global.push({ name: `${pName} (Solo)`, pts: pData.pts, icon: pData.avatar, isTeam: false });
                 }
             });
 
-            // Tri global par points
             global.sort((a,b) => b.pts - a.pts).forEach(item => {
                 const iconContent = item.isTeam ? `<div class="crest-bg"><img src="${item.icon}"></div>` : `<span>${item.icon}</span>`;
                 gList.innerHTML += `<div class="card"><div class="crest">${iconContent}</div><div class="info"><b>${item.name}</b></div><div class="pts">${item.pts}</div></div>`;
