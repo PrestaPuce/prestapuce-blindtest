@@ -24,10 +24,14 @@
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; }
         .crest-mini-bg { background: white; padding: 2px; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; }
         .crest-mini { width: 22px; height: 22px; object-fit: contain; }
-        .kick-btn { background: none; border: none; color: #888; cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
+        /* Style unifié pour les croix de suppression */
+        .kick-btn { color: var(--danger); cursor: pointer; font-weight: bold; font-size: 1.2rem; margin-left: 15px; padding: 0 5px; transition: 0.2s; }
+        .kick-btn:hover { transform: scale(1.2); }
+        .score-actions { display: flex; align-items: center; }
     </style>
 </head>
 <body>
+
     <div id="screen-login" class="login-box">
         <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px;">
         <h2>Accès MJ</h2>
@@ -37,7 +41,8 @@
     </div>
 
     <div id="screen-dashboard" class="dashboard">
-        <div class="room-info">SALLE : <span id="display-room">----</span></div>
+        <div class="room-info">SALLE ACTIVE : <span id="display-room">----</span></div>
+        
         <div style="display:flex; gap:10px; margin-bottom:20px;">
             <button style="background:var(--blue)" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
             <button style="background:var(--danger)" onclick="fullReset()">STOP / RESET TITRE</button>
@@ -60,12 +65,14 @@
             <input type="text" id="t-name" placeholder="Nom de l'équipe..." onkeydown="if(event.key === 'Enter') addTeam()" oninput="checkTeamForm()">
             <div class="crest-picker" id="crest-grid"></div>
             <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
-            <div id="mj-team-list-display" style="margin-top:15px;"></div>
+            <h4 style="color:var(--accent); margin: 15px 0 10px 0;">Lobby Équipes :</h4>
+            <div id="mj-team-list-display"></div>
         </div>
 
         <h3>Lobby Joueurs Actifs</h3>
         <div id="score-list"></div>
-        <button style="background:black; color:red; margin-top:60px; border:2px solid red; padding: 20px;" onclick="resetFullGame()">RESET TOTAL PARTIE</button>
+
+        <button style="background:black; color:red; margin-top:60px; border:2px solid red; padding: 20px;" onclick="resetFullGame()">⚠️ RESET TOTAL PARTIE ⚠️</button>
     </div>
 
     <script>
@@ -118,12 +125,16 @@
                 const l = document.getElementById('score-list'); l.innerHTML = "";
                 snap.forEach(c => {
                     const d = c.val();
-                    if(d.active === false) return; // N'affiche que les actifs dans le lobby MJ
+                    if(d.active === false) return; 
                     const teamInfo = (d.teamName && d.teamName !== "Solo" && d.teamName !== "") ? ` (${d.teamName})` : " (Solo)";
                     const icon = d.teamIcon ? `<div class="crest-mini-bg"><img src="${d.teamIcon}" class="crest-mini"></div>` : '';
                     l.innerHTML += `<div class="score-row">
-                        <span><button class="kick-btn" onclick="kickPlayer('${c.key}')">×</button>${d.avatar} <b>${c.key}</b> ${icon}${teamInfo} : ${d.pts} pts</span>
-                        <div><button style="width:30px; background:var(--danger)" onclick="adj('${c.key}',-1)">-</button><button style="width:30px; margin-left:5px;" onclick="adj('${c.key}',1)">+</button></div>
+                        <span>${d.avatar} <b>${c.key}</b> ${icon}${teamInfo} : ${d.pts} pts</span>
+                        <div class="score-actions">
+                            <button style="width:30px; background:var(--danger)" onclick="adj('${c.key}',-1)">-</button>
+                            <button style="width:30px; margin-left:5px; background:var(--mj-color)" onclick="adj('${c.key}',1)">+</button>
+                            <span class="kick-btn" onclick="kickPlayer('${c.key}')">✖</span>
+                        </div>
                     </div>`;
                 });
             });
@@ -132,7 +143,10 @@
                     const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
                     snapTeams.forEach(t => {
                         let count = 0; snapScores.forEach(s => { if(s.val().teamName === t.key && s.val().active !== false) count++; });
-                        tList.innerHTML += `<div class="team-item"><span><div class="crest-mini-bg"><img src="${t.val().icon}" class="crest-mini"></div> <b>${t.key}</b> (${count} joueurs)</span><div><span onclick="deleteTeam('${t.key}')" style="color:var(--danger); cursor:pointer;">✖</span></div></div>`;
+                        tList.innerHTML += `<div class="team-item">
+                            <span><div class="crest-mini-bg"><img src="${t.val().icon}" class="crest-mini"></div> <b>${t.key}</b> (${count} joueurs)</span>
+                            <div><span class="kick-btn" onclick="deleteTeam('${t.key}')">✖</span></div>
+                        </div>`;
                     });
                 });
             });
