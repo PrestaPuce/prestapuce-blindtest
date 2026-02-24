@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test</title>
+    <title>Presta'Puce - Player Pro</title>
     <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -13,53 +13,77 @@
     <style>
         :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --accent: #f1c40f; --text: #ffffff; --danger: #e74c3c; --success: #2ecc71; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
-        .header { height: 60px; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 2px solid var(--card); }
+        
+        /* Header & Nav */
+        .header { height: 60px; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 2px solid var(--card); z-index: 100; position: relative; }
         .logo { width: 35px; }
+        .profile-trigger { cursor: pointer; font-size: 1.5rem; background: var(--card); padding: 5px 10px; border-radius: 10px; border: 1px solid var(--primary); }
+
+        /* Screens */
         .screen { display: none; height: calc(100% - 60px); width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
         .active { display: flex !important; }
 
-        /* --- DESIGN DES CHAMPS --- */
-        .auth-container { width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .input-wrapper { position: relative; width: 100%; background: var(--card); border-radius: 12px; display: flex; align-items: center; }
-        input { width: 100%; padding: 15px; border: none; background: transparent; color: white; text-align: center; font-size: 1rem; outline: none; box-sizing: border-box; }
-        .eye-icon { position: absolute; right: 15px; cursor: pointer; font-size: 1.2rem; opacity: 0.7; }
+        /* Profil Side Menu (Drawer) */
+        #profile-drawer { position: fixed; top: 0; right: -100%; width: 85%; max-width: 350px; height: 100%; background: var(--card); z-index: 200; transition: 0.3s; padding: 20px; box-shadow: -5px 0 15px rgba(0,0,0,0.5); overflow-y: auto; }
+        #profile-drawer.open { right: 0; }
+        .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 150; display: none; }
+        
+        .stat-card { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin: 10px 0; display: flex; justify-content: space-around; }
+        .stat-item b { display: block; color: var(--accent); font-size: 1.2rem; }
 
-        .btn { width: 100%; max-width: 300px; padding: 16px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; transition: 0.2s; }
+        /* Inputs & Buttons */
+        .auth-container { width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 10px; }
+        .input-wrapper { position: relative; width: 100%; background: rgba(255,255,255,0.1); border-radius: 12px; display: flex; align-items: center; }
+        input { width: 100%; padding: 15px; border: none; background: transparent; color: white; text-align: center; font-size: 1rem; outline: none; }
+        
+        .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 0.9rem; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
         .btn-blue { background: var(--primary); color: white; }
         .btn-accent { background: var(--accent); color: black; }
+        .btn-danger { background: none; border: 1px solid var(--danger); color: var(--danger); }
         .btn-ghost { background: none; border: 1px solid #7f8c8d; color: #bdc3c7; }
-        .btn:disabled { opacity: 0.5; }
 
-        /* --- DESIGN DU BUZZER (RETOUR AU STYLE D'ORIGINE) --- */
-        .buzzer { 
-            width: 220px; 
-            height: 220px; 
-            border-radius: 50%; 
-            border: none; 
-            background: var(--danger); 
-            box-shadow: 0 10px 0 #c0392b; 
-            cursor: pointer; 
-            transition: 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .buzzer:active { transform: translateY(5px); box-shadow: 0 5px 0 #c0392b; }
+        /* Buzzer */
+        .buzzer { width: 220px; height: 220px; border-radius: 50%; border: none; background: var(--danger); box-shadow: 0 10px 0 #c0392b; cursor: pointer; transition: 0.1s; display: flex; align-items: center; justify-content: center; }
         .ready .buzzer { background: var(--success); box-shadow: 0 10px 0 #27ae60; }
-        .ready .buzzer:active { box-shadow: 0 5px 0 #27ae60; }
-        .buzz-text { color: white; font-size: 1.5rem; font-weight: bold; pointer-events: none; }
+        .buzzer:active { transform: translateY(5px); box-shadow: 0 5px 0 #c0392b; }
 
-        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; }
-        .avatar-item { font-size: 1.8rem; cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 5px; }
+        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+        .avatar-item { font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 8px; border: 2px solid transparent; }
         .avatar-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
     </style>
 </head>
 <body>
 
+    <div class="drawer-overlay" id="overlay" onclick="toggleDrawer()"></div>
+    <div id="profile-drawer">
+        <h2 style="color:var(--accent)">MON PROFIL</h2>
+        
+        <div class="stat-card">
+            <div class="stat-item"><span id="stat-games">0</span><b>PARTIES</b></div>
+            <div class="stat-item"><span id="stat-score">0</span><b>POINTS</b></div>
+            <div class="stat-item"><span id="stat-rank">#--</span><b>RANG</b></div>
+        </div>
+
+        <div style="text-align: left; margin-top: 20px;">
+            <label>Mon Pseudo :</label>
+            <div class="input-wrapper"><input type="text" id="edit-pseudo" placeholder="Pseudo"></div>
+            
+            <label style="display:block; margin-top:15px;">Mon Avatar :</label>
+            <div class="avatar-grid" id="edit-avatar-grid"></div>
+            
+            <button class="btn btn-blue" onclick="updateProfileData()">Enregistrer les modifs</button>
+            <hr style="opacity: 0.1; margin: 20px 0;">
+            
+            <button class="btn btn-ghost" onclick="resetPassword()">Changer mot de passe</button>
+            <button class="btn btn-danger" onclick="logout()">Déconnexion</button>
+            <button class="btn btn-ghost" style="border:none" onclick="toggleDrawer()">Fermer</button>
+        </div>
+    </div>
+
     <div class="header">
-        <div id="bar-info" style="display:none;"><span id="bar-av"></span> <b id="bar-ps"></b></div>
+        <div id="bar-room" style="color:var(--accent); font-weight:bold; font-size: 1.2rem;">#----</div>
         <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" class="logo">
-        <div id="bar-room" style="color:var(--accent); font-weight:bold;"></div>
+        <div class="profile-trigger" id="profile-btn" style="display:none;" onclick="toggleDrawer()">👤</div>
     </div>
 
     <div id="screen-room" class="screen active">
@@ -79,10 +103,7 @@
         <h3 id="email-title">CONNEXION</h3>
         <div class="auth-container">
             <div class="input-wrapper"><input type="email" id="log-email" placeholder="E-mail"></div>
-            <div class="input-wrapper">
-                <input type="password" id="log-pass" placeholder="Mot de passe">
-                <span class="eye-icon" onclick="togglePass()">👁️</span>
-            </div>
+            <div class="input-wrapper"><input type="password" id="log-pass" placeholder="Mot de passe"></div>
             <p id="error-auth" style="color:var(--danger); font-size:0.8rem;"></p>
             <button class="btn btn-blue" id="btn-email-main" onclick="handleAuth()">Se connecter</button>
             <button class="btn btn-ghost" id="btn-email-switch" onclick="toggleEmailMode()">Créer un compte</button>
@@ -92,24 +113,20 @@
 
     <div id="screen-verify-email" class="screen">
         <h3 style="color:var(--accent)">VÉRIFICATION</h3>
-        <p>Clique sur le lien reçu par mail.<br>Ensuite, appuie ici :</p>
-        <button id="btn-check-verify" class="btn btn-accent" onclick="forceVerify()">J'ai validé mon mail !</button>
-        <button class="btn btn-ghost" style="margin-top:20px;" onclick="location.reload()">Retour / Annuler</button>
+        <p>Lien envoyé par mail !</p>
+        <button class="btn btn-accent" onclick="forceVerify()">J'ai validé mon mail !</button>
     </div>
 
     <div id="screen-profile" class="screen">
-        <h3>TON PROFIL</h3>
-        <div class="auth-container"><input type="text" id="pseudo-input" placeholder="Ton pseudo..."></div>
-        <div class="avatar-grid" id="avatar-grid"></div>
-        <button class="btn btn-blue" onclick="confirmProfile()">C'est parti !</button>
+        <h3>CRÉER TON PROFIL</h3>
+        <div class="auth-container"><input type="text" id="init-pseudo" placeholder="Pseudo..."></div>
+        <div class="avatar-grid" id="init-avatar-grid"></div>
+        <button class="btn btn-blue" onclick="confirmFirstProfile()">C'est parti !</button>
     </div>
 
     <div id="screen-game" class="screen">
-        <button class="buzzer" onclick="sendBuzz()">
-            <span id="buzz-label" class="buzz-text">ATTENDEZ</span>
-        </button>
-        <div style="margin-top:20px;">Score : <b id="current-score" style="color:var(--accent); font-size:1.5rem;">0</b></div>
-        <button class="btn btn-ghost" style="margin-top:40px; border-color:var(--danger); color:var(--danger); font-size:0.7rem;" onclick="location.reload()">Quitter</button>
+        <button class="buzzer" onclick="sendBuzz()"><span id="buzz-label" style="color:white; font-size:1.5rem; font-weight:bold;">ATTENDEZ</span></button>
+        <div style="margin-top:20px;">Score Partie : <b id="current-score" style="color:var(--accent); font-size:1.5rem;">0</b></div>
     </div>
 
     <script>
@@ -126,14 +143,24 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        let roomID = "", roomRef = null, userPseudo = "", selectedAvatar = "🐱", emailMode = 'login';
+        let roomID = "", roomRef = null, userPseudo = "", selectedAvatar = "🐱", emailMode = 'login', isGuest = true;
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🐙","🦉","🐸"];
 
-        function togglePass() {
-            const p = document.getElementById('log-pass');
-            p.type = p.type === 'password' ? 'text' : 'password';
+        // Navigation & UI
+        function toggleDrawer() {
+            const d = document.getElementById('profile-drawer');
+            const o = document.getElementById('overlay');
+            const isOpen = d.classList.toggle('open');
+            o.style.display = isOpen ? 'block' : 'none';
+            if(isOpen && !isGuest) loadStats();
         }
 
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // Auth Logic
         function toggleEmailMode() {
             emailMode = (emailMode === 'login') ? 'signup' : 'login';
             document.getElementById('email-title').innerText = (emailMode === 'login') ? 'CONNEXION' : 'CRÉER UN COMPTE';
@@ -144,12 +171,10 @@
             const email = document.getElementById('log-email').value;
             const pass = document.getElementById('log-pass').value;
             const btn = document.getElementById('btn-email-main');
-            if(!email || !pass) return alert("Remplis tout !");
+            if(!email || !pass) return alert("Champs vides");
             btn.disabled = true;
-            btn.innerText = "Chargement...";
 
             const action = (emailMode === 'login') ? auth.signInWithEmailAndPassword(email, pass) : auth.createUserWithEmailAndPassword(email, pass);
-            
             action.then(res => {
                 btn.disabled = false;
                 if(emailMode === 'signup') {
@@ -157,64 +182,86 @@
                     showScreen('screen-verify-email');
                 } else {
                     if(!res.user.emailVerified) showScreen('screen-verify-email');
-                    else postSignIn(res.user);
+                    else fetchUserData(res.user);
                 }
-            }).catch(e => {
-                btn.disabled = false;
-                btn.innerText = (emailMode === 'login') ? "Se connecter" : "S'enregistrer";
-                document.getElementById('error-auth').innerText = e.message;
-            });
+            }).catch(e => { btn.disabled = false; document.getElementById('error-auth').innerText = e.message; });
         }
 
         function forceVerify() {
-            const user = auth.currentUser;
-            if(!user) return location.reload();
-            user.reload().then(() => {
-                if(user.emailVerified) postSignIn(user);
+            auth.currentUser.reload().then(() => {
+                if(auth.currentUser.emailVerified) fetchUserData(auth.currentUser);
                 else alert("Pas encore validé.");
             });
         }
 
-        function postSignIn(user) {
+        // Data Management
+        function fetchUserData(user) {
+            isGuest = false;
+            document.getElementById('profile-btn').style.display = "block";
             db.ref('players/' + user.uid).once('value').then(snap => {
                 const data = snap.val();
                 if(data && data.pseudo) {
                     userPseudo = data.pseudo;
-                    selectedAvatar = data.avatar || "🐱";
-                    confirmProfile(); 
+                    selectedAvatar = data.avatar;
+                    document.getElementById('edit-pseudo').value = userPseudo;
+                    updateAvatarSelection();
+                    confirmProfile();
                 } else { showScreen('screen-profile'); }
-            }).catch(() => showScreen('screen-profile'));
-        }
-
-        function joinRoom() {
-            roomID = document.getElementById('room-input').value;
-            if(!roomID) return;
-            db.ref('activeRooms/' + roomID).once('value', snap => {
-                if(snap.exists()) {
-                    roomRef = db.ref('roomsData/' + roomID);
-                    document.getElementById('bar-room').innerText = "#" + roomID;
-                    showScreen('screen-auth-choice');
-                } else { alert("Salle introuvable."); }
             });
         }
 
-        function startAsGuest() { showScreen('screen-profile'); }
-
-        function confirmProfile() {
-            userPseudo = document.getElementById('pseudo-input').value.trim() || userPseudo;
+        function confirmFirstProfile() {
+            userPseudo = document.getElementById('init-pseudo').value.trim();
             if(!userPseudo) return alert("Pseudo requis");
-            if(auth.currentUser) {
-                db.ref('players/' + auth.currentUser.uid).update({ pseudo: userPseudo, avatar: selectedAvatar });
+            confirmProfile();
+        }
+
+        function updateProfileData() {
+            const newPseudo = document.getElementById('edit-pseudo').value.trim();
+            if(!newPseudo) return alert("Pseudo vide");
+            userPseudo = newPseudo;
+            
+            db.ref('players/' + auth.currentUser.uid).update({
+                pseudo: userPseudo,
+                avatar: selectedAvatar
+            }).then(() => {
+                alert("Profil mis à jour !");
+                toggleDrawer();
+                confirmProfile(); // Refresh UI
+            });
+        }
+
+        function loadStats() {
+            const uid = auth.currentUser.uid;
+            db.ref('players/' + uid).once('value', snap => {
+                const d = snap.val() || {};
+                document.getElementById('stat-games').innerText = d.totalGames || 0;
+                document.getElementById('stat-score').innerText = d.totalScore || 0;
+                document.getElementById('stat-rank').innerText = d.globalRank ? "#" + d.globalRank : "#--";
+            });
+        }
+
+        function resetPassword() {
+            auth.sendPasswordResetEmail(auth.currentUser.email).then(() => alert("Email de réinitialisation envoyé !"));
+        }
+
+        function logout() { auth.signOut().then(() => location.reload()); }
+
+        // Game Logic
+        function confirmProfile() {
+            if(!isGuest && auth.currentUser) {
+                db.ref('players/' + auth.currentUser.uid).update({
+                    pseudo: userPseudo, avatar: selectedAvatar, lastSeen: firebase.database.ServerValue.TIMESTAMP
+                });
             }
-            if(!roomRef) return location.reload();
+            if(!roomRef) return;
             roomRef.child('scores/' + userPseudo).set({ pts: 0, avatar: selectedAvatar, active: true });
             initGameInterface();
         }
 
         function initGameInterface() {
-            document.getElementById('bar-info').style.display = "block";
-            document.getElementById('bar-av').innerText = selectedAvatar;
-            document.getElementById('bar-ps').innerText = userPseudo;
+            document.getElementById('bar-room').innerText = "#" + roomID;
+            document.getElementById('profile-btn').innerText = selectedAvatar;
             showScreen('screen-game');
             roomRef.child('scores/' + userPseudo + '/pts').on('value', s => {
                 document.getElementById('current-score').innerText = s.val() || 0;
@@ -226,6 +273,19 @@
             });
         }
 
+        function joinRoom() {
+            roomID = document.getElementById('room-input').value;
+            if(!roomID) return;
+            db.ref('activeRooms/' + roomID).once('value', snap => {
+                if(snap.exists()) {
+                    roomRef = db.ref('roomsData/' + roomID);
+                    showScreen('screen-auth-choice');
+                } else { alert("Salle introuvable."); }
+            });
+        }
+
+        function startAsGuest() { isGuest = true; showScreen('screen-profile'); }
+
         function sendBuzz() {
             roomRef.child('gameState').once('value', snap => {
                 if(snap.val() && snap.val().status === 'ready') {
@@ -235,30 +295,28 @@
             });
         }
 
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+        // Utils
+        function updateAvatarSelection() {
+            document.querySelectorAll('.avatar-item').forEach(i => {
+                i.classList.toggle('selected', i.innerText === selectedAvatar);
+            });
         }
 
-        // LECTURE DU CODE SALLE DEPUIS L'URL
-        window.onload = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const r = urlParams.get('room');
-            if (r) { 
-                document.getElementById('room-input').value = r; 
-                joinRoom(); 
-            }
+        const setupAvatars = (containerId) => {
+            const container = document.getElementById(containerId);
+            avatars.forEach(a => {
+                const d = document.createElement('div'); d.className = 'avatar-item'; d.innerText = a;
+                d.onclick = () => { selectedAvatar = a; updateAvatarSelection(); };
+                container.appendChild(d);
+            });
         };
 
-        const grid = document.getElementById('avatar-grid');
-        avatars.forEach(a => {
-            const d = document.createElement('div'); d.className = 'avatar-item'; d.innerText = a;
-            d.onclick = () => {
-                document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
-                d.classList.add('selected'); selectedAvatar = a;
-            };
-            grid.appendChild(d);
-        });
+        window.onload = () => {
+            setupAvatars('init-avatar-grid');
+            setupAvatars('edit-avatar-grid');
+            const r = new URLSearchParams(window.location.search).get('room');
+            if (r) { document.getElementById('room-input').value = r; joinRoom(); }
+        };
     </script>
 </body>
 </html>
