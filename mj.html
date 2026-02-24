@@ -16,6 +16,7 @@
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; margin-bottom: 15px; }
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; text-transform: uppercase; margin-bottom: 10px; }
         button:hover { opacity: 0.9; transform: translateY(-1px); }
+        button:disabled { background: #7f8c8d !important; cursor: not-allowed; opacity: 0.5; transform: none !important; }
         .secondary-btn { background: var(--blue); }
         .link-text { color: var(--accent); cursor: pointer; font-size: 0.8rem; text-decoration: underline; margin-top: 10px; display: block; }
         
@@ -25,13 +26,14 @@
         .action-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px; }
         .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; }
         .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; }
-        .crest-selected { border-color: var(--accent) !important; }
+        .crest-selected { border-color: var(--accent) !important; background: var(--accent) !important; }
         .crest-opt { width: 30px; height: 30px; object-fit: contain; }
         .team-item { display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin-bottom: 8px; justify-content: space-between; }
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; }
         .crest-mini-bg { background: white; padding: 2px; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; }
         .crest-mini { width: 22px; height: 22px; object-fit: contain; }
         .kick-btn { color: var(--danger); cursor: pointer; font-weight: bold; font-size: 1.2rem; margin-left: 15px; padding: 0 5px; }
+        #team-msg { color: var(--danger); font-size: 0.8rem; margin-bottom: 10px; display: block; height: 1rem; }
     </style>
 </head>
 <body>
@@ -74,6 +76,7 @@
         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-top: 20px;">
             <h3>Gestion Équipes</h3>
             <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()">
+            <span id="team-msg"></span>
             <div class="crest-picker" id="crest-grid"></div>
             <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
             <div id="mj-team-list-display" style="margin-top:15px;"></div>
@@ -167,7 +170,6 @@
                     currentPlayer = p; 
                     document.getElementById('p-avatar').innerText = p.avatar; 
                     document.getElementById('p-name').innerText = p.pseudo;
-                    // FIX ANTI-BUG AFFICHAGE LOGO
                     const teamDisplay = (p.teamName && p.teamName !== "Solo" && p.teamIcon) 
                         ? `<div class="crest-mini-bg"><img src="${p.teamIcon}" class="crest-mini"></div> ${p.teamName}` 
                         : "Solo";
@@ -207,12 +209,41 @@
             const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
             crests.forEach(c => {
                 const wrap = document.createElement('div'); wrap.className = 'crest-wrapper'; const img = document.createElement('img'); img.src = c; img.className = 'crest-opt';
-                wrap.onclick = () => { document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); wrap.classList.add('crest-selected'); selCrest = c; checkTeamForm(); };
+                wrap.onclick = () => { 
+                    document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); 
+                    wrap.classList.add('crest-selected'); 
+                    selCrest = c; 
+                    checkTeamForm(); 
+                };
                 wrap.appendChild(img); grid.appendChild(wrap);
             });
         }
-        function checkTeamForm() { const name = document.getElementById('t-name').value.trim(); document.getElementById('btn-add-team').disabled = !(name.length > 0 && selCrest !== ""); }
-        function addTeam() { const n = document.getElementById('t-name').value.trim(); if(n && selCrest) { roomRef.child('teams/' + n).set({ icon: selCrest }); document.getElementById('t-name').value = ""; selCrest = ""; document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); checkTeamForm(); } }
+
+        function checkTeamForm() { 
+            const name = document.getElementById('t-name').value.trim(); 
+            const msg = document.getElementById('team-msg');
+            const btn = document.getElementById('btn-add-team');
+            
+            if (name.length > 0 && selCrest === "") {
+                msg.innerText = "⚠️ Choisissez un blason pour cette équipe";
+                btn.disabled = true;
+            } else {
+                msg.innerText = "";
+                btn.disabled = !(name.length > 0 && selCrest !== "");
+            }
+        }
+
+        function addTeam() { 
+            const n = document.getElementById('t-name').value.trim(); 
+            if(n && selCrest) { 
+                roomRef.child('teams/' + n).set({ icon: selCrest }); 
+                document.getElementById('t-name').value = ""; 
+                selCrest = ""; 
+                document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); 
+                checkTeamForm(); 
+            } 
+        }
+
         function deleteTeam(name) { if(confirm("Supprimer l'équipe ?")) roomRef.child('teams/' + name).remove(); }
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
         function resetFullGame() { if(confirm("⚠️ RESET TOTAL ?")) { roomRef.remove(); location.reload(); } }
