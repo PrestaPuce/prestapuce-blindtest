@@ -35,7 +35,6 @@
         
         .buzzer { width: 200px; height: 200px; border-radius: 50%; border: none; background: var(--danger); box-shadow: 0 10px 0 #c0392b; cursor: pointer; }
         .ready .buzzer { background: var(--success); box-shadow: 0 10px 0 #27ae60; }
-        .error-msg { color: var(--danger); font-size: 0.8rem; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -68,7 +67,7 @@
         <h3 id="email-title">CONNEXION</h3>
         <input type="email" id="log-email" placeholder="E-mail">
         <input type="password" id="log-pass" placeholder="Mot de passe">
-        <p id="error-auth" class="error-msg"></p>
+        <p id="error-auth" style="color:var(--danger); font-size:0.8rem; margin-bottom:10px;"></p>
         <button class="btn btn-blue" id="btn-email-main" onclick="handleAuth()">Se connecter</button>
         <button class="btn btn-ghost" id="btn-email-switch" onclick="toggleEmailMode()">Pas de compte ? Créer</button>
         <button class="btn btn-ghost" style="border:none;" onclick="showScreen('screen-auth-choice')">Retour</button>
@@ -120,8 +119,10 @@
         }
 
         function handleAuth() {
-            const email = document.getElementById('log-email').value || document.getElementById('sign-email').value;
-            const pass = document.getElementById('log-pass').value || document.getElementById('sign-pass').value;
+            const email = document.getElementById('log-email').value;
+            const pass = document.getElementById('log-pass').value;
+            if(!email || !pass) return alert("Saisir e-mail et mot de passe");
+
             const action = (emailMode === 'login') ? auth.signInWithEmailAndPassword(email, pass) : auth.createUserWithEmailAndPassword(email, pass);
             
             action.then(res => {
@@ -141,57 +142,44 @@
 
         function checkIfVerified() {
             const user = auth.currentUser;
-            if(!user) return alert("Session perdue. Merci de vous reconnecter.");
+            if(!user) {
+                alert("Session perdue. Merci de vous reconnecter.");
+                showScreen('screen-email-login');
+                return;
+            }
 
             const btn = document.getElementById('btn-check-verify');
             btn.innerText = "Vérification...";
             btn.disabled = true;
 
-            // Timeout de sécurité au cas où Firebase ne répond pas
-            const safetyTimeout = setTimeout(() => {
-                btn.disabled = false;
-                btn.innerText = "J'ai validé mon mail !";
-            }, 5000);
-
             user.reload().then(() => {
-                clearTimeout(safetyTimeout);
                 if(user.emailVerified) {
                     postSignIn(user);
                 } else {
-                    alert("L'e-mail n'est pas encore détecté comme validé. Vérifie tes spams !");
+                    alert("E-mail non détecté comme validé.\n\nASTUCE : Si vous l'avez validé, reconnectez-vous, cela débloquera votre compte.");
                     btn.innerText = "J'ai validé mon mail !";
                     btn.disabled = false;
+                    showScreen('screen-email-login'); // Reconnexion forcée pour rafraîchir
                 }
             }).catch(e => {
-                clearTimeout(safetyTimeout);
-                alert("Erreur de connexion. Réessaie dans un instant.");
+                alert("Synchronisation impossible. Merci de vous reconnecter.");
                 btn.disabled = false;
                 btn.innerText = "J'ai validé mon mail !";
+                showScreen('screen-email-login');
             });
         }
 
         function postSignIn(user) {
             isGuest = false;
-            db.ref('players/' + user.uid).once('value', snap => {
+            db.ref('players/' + user.uid).once('value').then(snap => {
                 const data = snap.val();
                 if(data && data.pseudo) {
                     userPseudo = data.pseudo;
                     selectedAvatar = data.avatar || "🐱";
-                    // Pré-remplir et entrer en jeu
-                    document.getElementById('pseudo-input').value = userPseudo;
-                    selectAvatarVisual(selectedAvatar);
                     confirmProfile(); 
                 } else { 
                     showScreen('screen-profile'); 
                 }
-            });
-        }
-
-        function selectAvatarVisual(emoji) {
-            selectedAvatar = emoji;
-            document.querySelectorAll('.avatar-item').forEach(i => {
-                if(i.innerText === emoji) i.classList.add('selected');
-                else i.classList.remove('selected');
             });
         }
 
@@ -215,8 +203,11 @@
         function startAsGuest() { isGuest = true; showScreen('screen-profile'); }
 
         function confirmProfile() {
-            userPseudo = document.getElementById('pseudo-input').value.trim();
-            if(!userPseudo) return alert("Pseudo requis");
+            const input = document.getElementById('pseudo-input').value.trim();
+            if(input) userPseudo = input;
+            
+            if(!userPseudo) return showScreen('screen-profile');
+
             if(!isGuest && auth.currentUser) {
                 db.ref('players/' + auth.currentUser.uid).update({
                     pseudo: userPseudo, avatar: selectedAvatar, email: auth.currentUser.email
@@ -276,7 +267,10 @@
         const grid = document.getElementById('avatar-grid');
         avatars.forEach(a => {
             const d = document.createElement('div'); d.className = 'avatar-item'; d.innerText = a;
-            d.onclick = () => selectAvatarVisual(a);
+            d.onclick = () => {
+                document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
+                d.classList.add('selected'); selectedAvatar = a;
+            };
             grid.appendChild(d);
         });
     </script>
