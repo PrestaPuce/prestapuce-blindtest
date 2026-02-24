@@ -114,27 +114,32 @@
                 const data = snap.val();
 
                 if(snap.exists()) {
-                    // Reconnexion possible si c'est le même téléphone ET (joueur inactif OU c'est bien nous)
+                    // SI C'EST LE MÊME APPAREIL (LocalStorage OK)
                     if(savedPseudo === userPseudo && savedRoom === roomID) {
                         if(confirm("Reprendre votre partie avec le pseudo " + userPseudo + " ?")) {
                             selectedAvatar = data.avatar;
-                            userTeamName = data.lastTeam || data.teamName || "Solo";
-                            userTeamIcon = data.lastTeamIcon || data.teamIcon || "";
+                            // Récupérer l'équipe (soit actuelle, soit celle d'avant l'expulsion)
+                            userTeamName = data.teamName || data.lastTeam || "Solo";
+                            userTeamIcon = data.teamIcon || "";
                             
                             roomRef.child('scores/' + userPseudo).update({ 
                                 active: true,
-                                teamName: userTeamName,
-                                teamIcon: userTeamIcon
+                                teamName: userTeamName 
                             }).then(() => { startBuzzer(); });
                         }
                     } 
+                    // SI LE PSEUDO EST ACTIF CHEZ QUELQU'UN D'AUTRE
                     else if (data.active === true) {
-                        alert("Ce pseudo est déjà utilisé !");
+                        alert("Ce pseudo est déjà utilisé par un autre joueur !");
                     }
+                    // SI LE PSEUDO EST INACTIF (EXPULSÉ) MAIS PAS LE BON APPAREIL
                     else {
                         alert("Ce pseudo appartient à un joueur déconnecté. Si c'est vous, utilisez le même appareil.");
                     }
-                } else { showScreen('screen-setup'); }
+                } else { 
+                    // Nouveau pseudo
+                    showScreen('screen-setup'); 
+                }
             });
         }
 
@@ -180,16 +185,13 @@
         function startBuzzer() {
             document.getElementById('display-pseudo').innerText = userPseudo;
             document.getElementById('display-avatar').innerText = selectedAvatar;
-            document.getElementById('display-team-label').innerText = userTeamName;
+            document.getElementById('display-team-label').innerText = (userTeamName === "Solo" || userTeamName === "") ? "Mode Solo" : userTeamName;
             showScreen('screen-buzzer');
             
-            // Écouteur d'expulsion (KICK)
             if(kickListener) roomRef.child('scores/' + userPseudo + '/active').off('value', kickListener);
             kickListener = roomRef.child('scores/' + userPseudo + '/active').on('value', s => { 
                 if(s.val() === false && !localStorage.getItem('leaving')) { 
                     alert("Vous avez été retiré de la salle par le MJ.");
-                    localStorage.removeItem('presta_pseudo');
-                    localStorage.removeItem('presta_room');
                     location.reload(); 
                 }
             });
@@ -214,7 +216,7 @@
 
         function leaveGame() {
             if(confirm("Quitter la partie ? Vos points seront conservés.")) {
-                localStorage.setItem('leaving', 'true'); // Marqueur temporaire pour éviter l'alerte MJ
+                localStorage.setItem('leaving', 'true');
                 if(roomRef && userPseudo) {
                     const isSolo = (userTeamName === "Solo" || userTeamName === "");
                     roomRef.child('scores/' + userPseudo).update({ 
@@ -224,6 +226,7 @@
                         teamIcon: ""
                     }).then(() => {
                         localStorage.removeItem('leaving');
+                        // Optionnel : ne pas supprimer le localStorage pour permettre le retour
                         location.reload();
                     });
                 }
