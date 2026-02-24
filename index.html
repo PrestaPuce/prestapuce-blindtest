@@ -106,19 +106,40 @@
         function checkPseudo() {
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return alert("Pseudo trop court !");
+            
             roomRef.child('scores/' + userPseudo).once('value', snap => {
+                const savedPseudo = localStorage.getItem('presta_pseudo');
+                const savedRoom = localStorage.getItem('presta_room');
+                const data = snap.val();
+
                 if(snap.exists()) {
-                    const savedPseudo = localStorage.getItem('presta_pseudo');
-                    const savedRoom = localStorage.getItem('presta_room');
+                    // Si c'est le même téléphone (reconnexion)
                     if(savedPseudo === userPseudo && savedRoom === roomID) {
                         if(confirm("Reprendre votre partie avec le pseudo " + userPseudo + " ?")) {
-                            const d = snap.val();
-                            selectedAvatar = d.avatar; userTeamName = d.teamName; userTeamIcon = d.teamIcon;
-                            roomRef.child('scores/' + userPseudo).update({ active: true });
+                            selectedAvatar = data.avatar;
+                            // Restaurer l'équipe si c'était un joueur d'équipe expulsé (lastTeam)
+                            userTeamName = data.active ? data.teamName : (data.lastTeam || "Solo");
+                            userTeamIcon = data.active ? data.teamIcon : (data.lastTeamIcon || "");
+                            
+                            roomRef.child('scores/' + userPseudo).update({ 
+                                active: true,
+                                teamName: userTeamName,
+                                teamIcon: userTeamIcon
+                            });
                             startBuzzer();
                         }
-                    } else { alert("Ce pseudo est déjà utilisé par un autre joueur !"); }
-                } else { showScreen('screen-setup'); }
+                    } 
+                    // Si le pseudo est pris par quelqu'un d'autre (actif)
+                    else if (data.active === true) {
+                        alert("Ce pseudo est déjà utilisé par un autre joueur !");
+                    }
+                    // Si le pseudo a été utilisé mais que l'utilisateur n'a pas le bon localStorage
+                    else {
+                        alert("Ce pseudo appartient à un joueur déconnecté. Si c'est vous, utilisez le même appareil.");
+                    }
+                } else { 
+                    showScreen('screen-setup'); 
+                }
             });
         }
 
@@ -166,10 +187,19 @@
             document.getElementById('display-avatar').innerText = selectedAvatar;
             document.getElementById('display-team-label').innerText = userTeamName;
             showScreen('screen-buzzer');
-            roomRef.child('scores/' + userPseudo).on('value', s => { 
-                if(!s.exists() || s.val().active === false) { leaveGame(true); } // Expulsé par MJ
-                else { document.getElementById('score').innerText = s.val().pts; }
+            
+            // Écouteur pour l'expulsion MJ
+            roomRef.child('scores/' + userPseudo + '/active').on('value', s => { 
+                if(s.val() === false) { 
+                    alert("Vous avez été retiré de la salle par le MJ.");
+                    location.reload(); 
+                }
             });
+
+            roomRef.child('scores/' + userPseudo + '/pts').on('value', s => {
+                document.getElementById('score').innerText = s.val() || 0;
+            });
+
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlockedLocally = snap.exists(); updateUI(); });
             roomRef.child('gameState').on('value', snap => { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); });
             roomRef.child('buzzers').on('value', snap => { currentWinner = snap.val() ? snap.val().pseudo : null; updateUI(); });
@@ -187,16 +217,8 @@
         function leaveGame(silent = false) {
             if(silent || confirm("Quitter la partie ? Vos points seront conservés.")) {
                 if(roomRef && userPseudo) {
-                    const isSolo = (userTeamName === "Solo" || userTeamName === "");
-                    roomRef.child('scores/' + userPseudo).update({ 
-                        active: false, 
-                        lastTeam: userTeamName,
-                        teamName: isSolo ? "Solo" : "",
-                        teamIcon: ""
-                    });
-                    roomRef.child('blockedPlayers/' + userPseudo).remove();
+                    roomRef.child('scores/' + userPseudo).update({ active: false });
                 }
-                localStorage.removeItem('presta_pseudo'); localStorage.removeItem('presta_room');
                 location.reload();
             }
         }
