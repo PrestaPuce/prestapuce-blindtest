@@ -183,16 +183,14 @@
             roomRef = db.ref('roomsData/' + id);
             db.ref('activeRooms/' + id).set(true);
 
-            // On vérifie si l'élément pour afficher le numéro existe
-            const displayElem = document.getElementById('display-room-id');
-            if (displayElem) {
-                displayElem.innerText = id;
-            }
+            // 1. Mise à jour du texte (ID correct pour ce fichier : display-room)
+            document.getElementById('display-room').innerText = id;
 
-            // On bascule l'affichage
-            showScreen('screen-dashboard');
-            
-            // On ouvre l'onglet des scores
+            // 2. Changement d'écran (On utilise le style direct car c'est une classe "dashboard")
+            document.getElementById('screen-choice').style.display = "none";
+            document.getElementById('screen-dashboard').style.display = "block";
+
+            // 3. Ouverture de l'onglet des scores
             const scoreURL = window.location.origin + window.location.pathname.replace('mj', 'scores') + "?room=" + id;
             window.open(scoreURL, '_blank');
 
