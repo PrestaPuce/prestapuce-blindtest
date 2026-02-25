@@ -180,26 +180,26 @@
         function resumeRoom() { launchDashboard(lastSavedRoom); }
 
         function launchDashboard(id) {
-    roomID = id;
-    roomRef = db.ref('roomsData/' + id);
-    db.ref('activeRooms/' + id).set(true);
+            roomID = id;
+            roomRef = db.ref('roomsData/' + id);
+            db.ref('activeRooms/' + id).set(true);
 
-    // 1. On nettoie l'URL et on remplace "mj" par "scores" (avec ou sans .html)
-    const currentUrl = window.location.href.split('?')[0];
-    const scoreURL = currentUrl.replace('mj', 'scores') + "?room=" + id;
-    
-    // 2. On ouvre l'onglet des scores
-    window.open(scoreURL, '_blank');
+            // 1. Construction du lien et ouverture de l'onglet (déjà OK chez toi)
+            const loc = window.location;
+            const path = loc.pathname.substring(0, loc.pathname.lastIndexOf('/'));
+            const scoreURL = loc.origin + path + "/scores.html?room=" + id;
+            window.open(scoreURL, '_blank');
 
-    // 3. On force l'affichage du tableau de bord sur la page actuelle
-    document.getElementById('display-room-id').innerText = id;
-    
-    // On cache les écrans de sélection et on affiche le dashboard
-    document.getElementById('screen-choice').style.display = "none";
-    document.getElementById('screen-dashboard').style.display = "block";
-    
-    setupRoomListeners();
-}
+            // 2. CORRECTION : On force l'affichage de la console sur la page actuelle
+            document.getElementById('display-room-id').innerText = id;
+            
+            // On cache l'écran de choix
+            document.getElementById('screen-choice').style.display = "none";
+            // On affiche explicitement le dashboard
+            document.getElementById('screen-dashboard').style.display = "block";
+            
+            setupRoomListeners();
+        }
 
         function uploadCustomLogo(input) {
             if (!input.files || !input.files[0]) return;
