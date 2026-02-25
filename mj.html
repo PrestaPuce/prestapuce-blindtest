@@ -180,31 +180,24 @@
         function resumeRoom() { launchDashboard(lastSavedRoom); }
 
         function launchDashboard(id) {
-            // 1. On définit les variables de salle immédiatement
+            // 1. Initialisation des variables de salle
             roomID = id;
             roomRef = db.ref('roomsData/' + id);
             db.ref('activeRooms/' + id).set(true);
 
-            // 2. ON CHANGE L'AFFICHAGE EN PREMIER (pour éviter le blocage navigateur)
+            // 2. OUVERTURE DE L'ONGLET (On le fait avant pour éviter les blocages navigateurs)
+            const scoreURL = window.location.origin + window.location.pathname.replace('mj', 'scores') + "?room=" + id;
+            window.open(scoreURL, '_blank');
+
+            // 3. CHANGEMENT D'ÉCRAN RADICAL
+            // On affiche le numéro de salle
             document.getElementById('display-room-id').innerText = id;
             
-            // On force la disparition de l'écran de choix et l'apparition du dashboard
-            document.getElementById('screen-choice').style.display = "none";
-            document.getElementById('screen-dashboard').style.display = "block";
-            document.getElementById('screen-dashboard').classList.add('active');
-
-            // 3. ON OUVRE L'ONGLET (en dernier)
-            const loc = window.location;
-            const path = loc.pathname.substring(0, loc.pathname.lastIndexOf('/'));
-            const scoreURL = loc.origin + path + "/scores.html?room=" + id;
+            // On force l'affichage via le style direct (le plus puissant)
+            document.getElementById('screen-choice').style.setProperty('display', 'none', 'important');
+            document.getElementById('screen-dashboard').style.setProperty('display', 'block', 'important');
             
-            try {
-                window.open(scoreURL, '_blank');
-            } catch (e) {
-                console.log("L'onglet a été bloqué mais la console est prête.");
-            }
-            
-            // 4. On lance les écouteurs Firebase
+            // 4. On active les écouteurs de la salle
             setupRoomListeners();
         }
 
