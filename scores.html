@@ -95,15 +95,10 @@
         const roomRef = db.ref('roomsData/' + roomID);
         
         // URL dynamique pour le QR Code (pointe vers ton dossier actuel)
-        // On remplace "scores" par "index" peu importe s'il y a le .html ou non
-const currentPath = window.location.pathname.replace('scores', 'index');
-const playURL = window.location.origin + currentPath + "?room=" + roomID;
+        const currentPath = window.location.href.split('?')[0].replace('scores.html', 'index.html');
+        const playURL = currentPath + "?room=" + roomID;
+        new QRCode(document.getElementById("qrcode"), { text: playURL, width: 110, height: 110 });
 
-new QRCode(document.getElementById("qrcode"), { 
-    text: playURL, 
-    width: 110, 
-    height: 110 
-});
         let scoresData = {}, teamsData = {}, currentBuzzer = null;
 
         function updateDisplay() {
@@ -129,43 +124,8 @@ new QRCode(document.getElementById("qrcode"), {
                         <div class="pts">${p.pts || 0}</div>
                     </div>`;
             });
-            // 2. On récupère les joueurs dans un tableau
-            let players = Object.entries(scoresData).map(([pseudo, data]) => ({
-                pseudo,
-                ...data
-            }));
 
-            // 3. LE TRI (C'est la seule chose qu'on ajoute vraiment)
-            players.sort((a, b) => {
-                // Les joueurs qui ont quitté (active: false) vont à la fin
-                if (a.active !== b.active) return a.active ? -1 : 1;
-                
-                // Le joueur qui a buzzé (currentBuzzer) monte tout en haut
-                if (a.pseudo === currentBuzzer) return -1;
-                if (b.pseudo === currentBuzzer) return 1;
-
-                // Pour les autres, on ne change rien (ordre d'arrivée)
-                return 0;
-            });
-            // 4. L'AFFICHAGE (On garde exactement tes balises et tes classes)
-            players.forEach(item => {
-                // On vérifie si c'est le joueur qui buzze pour lui mettre la classe qui fait clignoter
-                const isBuzzed = item.pseudo === currentBuzzer;
-                const isInactive = item.active === false;
-                
-                list.innerHTML += `
-                    <div class="player-card ${isBuzzed ? 'buzzed' : ''} ${isInactive ? 'inactive' : ''}">
-                        <div class="player-info">
-                            <span class="avatar">${item.avatar || '👤'}</span>
-                            <div class="details">
-                                <div class="name">${item.pseudo}</div>
-                                <div class="team">${item.teamIcon || ''} ${item.teamName || ''}</div>
-                            </div>
-                        </div>
-                        <div class="pts">${item.pts}</div>
-                    </div>`;
-            });
-            // 5. Liste de DROITE (Classement Général)
+            // 2. Liste de DROITE (Classement Général)
             let rankingMap = new Map();
 
             listEquipes.forEach(tName => {
