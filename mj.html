@@ -71,7 +71,7 @@
         <button onclick="auth.signOut().then(()=>location.reload())" style="background:none; border:1px solid white; font-size:0.7rem;">Déconnexion</button>
     </div>
 
-   <div id="screen-dashboard" class="screen">
+   <div id="screen-dashboard" class="screen dashboard">
         <div class="card" style="display:flex; justify-content: space-between; align-items: center;">
             <h2 style="margin:0;">SALLE : <span id="display-room-id" style="color:var(--accent)">-</span></h2>
             <button class="btn-danger" style="width:auto; padding:8px 15px; margin:0;" onclick="quitRoom()">QUITTER</button>
@@ -183,12 +183,14 @@
             roomRef = db.ref('roomsData/' + id);
             db.ref('activeRooms/' + id).set(true);
 
-            // 1. Mise à jour du texte (ID correct pour ce fichier : display-room)
-            document.getElementById('display-room').innerText = id;
+            // 1. Mise à jour du numéro de salle
+            const displayElem = document.getElementById('display-room');
+            if (displayElem) {
+                displayElem.innerText = id;
+            }
 
-            // 2. Changement d'écran (On utilise le style direct car c'est une classe "dashboard")
-            document.getElementById('screen-choice').style.display = "none";
-            document.getElementById('screen-dashboard').style.display = "block";
+            // 2. On affiche l'écran (maintenant que la classe 'screen' est là)
+            showScreen('screen-dashboard');
 
             // 3. Ouverture de l'onglet des scores
             const scoreURL = window.location.origin + window.location.pathname.replace('mj', 'scores') + "?room=" + id;
