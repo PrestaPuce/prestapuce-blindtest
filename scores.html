@@ -129,8 +129,26 @@ new QRCode(document.getElementById("qrcode"), {
                         <div class="pts">${p.pts || 0}</div>
                     </div>`;
             });
+            // 2. On récupère les joueurs dans un tableau
+            let players = Object.entries(scoresData).map(([pseudo, data]) => ({
+                pseudo,
+                ...data
+            }));
 
-            // 2. Liste de DROITE (Classement Général)
+            // 3. LE TRI (C'est la seule chose qu'on ajoute vraiment)
+            players.sort((a, b) => {
+                // Les joueurs qui ont quitté (active: false) vont à la fin
+                if (a.active !== b.active) return a.active ? -1 : 1;
+                
+                // Le joueur qui a buzzé (currentBuzzer) monte tout en haut
+                if (a.pseudo === currentBuzzer) return -1;
+                if (b.pseudo === currentBuzzer) return 1;
+
+                // Pour les autres, on ne change rien (ordre d'arrivée)
+                return 0;
+            });
+
+            // 4. Liste de DROITE (Classement Général)
             let rankingMap = new Map();
 
             listEquipes.forEach(tName => {
