@@ -358,13 +358,15 @@
                 roomRef.child('scores/' + pseudo).update({ 
                     teamName: "Solo", 
                     teamIcon: "",
-                    active: true // Force la mise à jour sur le téléphone
+                    active: true 
                 });
             } else { 
+                // On récupère l'icône dans globalTeams pour l'envoyer au téléphone
+                const iconUrl = globalTeams[choice] ? globalTeams[choice].icon : "";
                 roomRef.child('scores/' + pseudo).update({ 
                     teamName: choice, 
-                    teamIcon: globalTeams[choice].icon,
-                    active: true // Force la mise à jour sur le téléphone
+                    teamIcon: iconUrl,
+                    active: true 
                 }); 
             }
         }
