@@ -143,27 +143,47 @@
                     </div>`;
             });
 
-            // 2. Liste de DROITE (Classement Général) - Inchangée (Tri par points)
+            // 2. Liste de DROITE (Classement Général)
             let rankingMap = new Map();
+
+            // On prépare les équipes avec leurs icônes
             listEquipes.forEach(tName => {
                 rankingMap.set("TEAM_" + tName, { name: tName, pts: 0, icon: teamsData[tName].icon, isTeam: true, count: 0 });
             });
+
             allPlayers.forEach(p => {
                 const enEquipe = p.teamName && listEquipes.includes(p.teamName);
+                
                 if (enEquipe) {
+                    // RÈGLE 2 : Il est en équipe -> On ajoute ses points à l'équipe uniquement
+                    // (Même s'il quitte, il n'apparaîtra jamais en solo à droite)
                     let team = rankingMap.get("TEAM_" + p.teamName);
-                    team.pts += (p.pts || 0);
-                    if (p.active !== false) team.count++;
+                    if (team) {
+                        team.pts += (p.pts || 0);
+                        if (p.active !== false) team.count++; // On ne compte que les présents
+                    }
                 } else {
+                    // RÈGLE 1 : Il est Solo -> Il apparaît toujours à droite
+                    // (Même s'il quitte, même s'il a 0 point)
                     rankingMap.set("SOLO_" + p.name, { name: p.name, pts: (p.pts || 0), avatar: p.avatar, isTeam: false });
                 }
             });
+
+            // Tri final par points et affichage
             Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts).forEach(item => {
-                const iconHtml = item.isTeam ? `<div class="crest-bg"><img src="${item.icon}"></div>` : `<span>${item.avatar}</span>`;
+                const iconHtml = item.isTeam 
+                    ? `<div class="crest-bg"><img src="${item.icon}"></div>` 
+                    : `<span>${item.avatar}</span>`;
+                
                 const finalName = item.isTeam ? `${item.name} (${item.count})` : `${item.name} (Solo)`;
-                gList.innerHTML += `<div class="card"><div class="crest">${iconHtml}</div><div class="info"><b>${finalName}</b></div><div class="pts">${item.pts}</div></div>`;
+
+                gList.innerHTML += `
+                    <div class="card">
+                        <div class="crest">${iconHtml}</div>
+                        <div class="info"><b>${finalName}</b></div>
+                        <div class="pts">${item.pts}</div>
+                    </div>`;
             });
-        }
 
         // Mise à jour de l'écouteur de buzz pour gérer l'historique
         roomRef.child('buzzers').on('value', snap => {
