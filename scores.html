@@ -184,7 +184,7 @@
                         <div class="pts">${item.pts}</div>
                     </div>`;
             });
-
+}
         // Mise à jour de l'écouteur de buzz pour gérer l'historique
         roomRef.child('buzzers').on('value', snap => {
             const val = snap.val();
