@@ -179,28 +179,30 @@
 
         function resumeRoom() { launchDashboard(lastSavedRoom); }
 
-function launchDashboard(id) {
+        function launchDashboard(id) {
             roomID = id;
             roomRef = db.ref('roomsData/' + id);
             db.ref('activeRooms/' + id).set(true);
 
-            // Construction de l'URL pour les scores
+            // 1. Ouverture de l'onglet des scores (Fonctionne déjà)
             const loc = window.location;
             const path = loc.pathname.substring(0, loc.pathname.lastIndexOf('/'));
             const scoreURL = loc.origin + path + "/scores.html?room=" + id;
-            
-            // Ouverture de l'onglet des scores
             window.open(scoreURL, '_blank');
 
-            // --- FORCAGE DE L'AFFICHAGE DU MJ ---
+            // 2. MISE À JOUR DE L'AFFICHAGE MJ
             document.getElementById('display-room-id').innerText = id;
             
-            // On cache manuellement tous les écrans
-            document.getElementById('screen-login').style.display = "none";
-            document.getElementById('screen-choice').style.display = "none";
-            
-            // On affiche manuellement le tableau de bord
-            document.getElementById('screen-dashboard').style.display = "block";
+            // On retire la classe 'active' de TOUS les écrans pour être sûr
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+                screen.style.display = "none";
+            });
+
+            // On affiche l'écran du dashboard et on lui ajoute la classe active
+            const dashboard = document.getElementById('screen-dashboard');
+            dashboard.classList.add('active');
+            dashboard.style.display = "block";
             
             setupRoomListeners();
         }
