@@ -189,10 +189,17 @@
                 displayElem.innerText = id;
             }
 
-            // 2. Correction du nom : On utilise switchScreen (le nom présent dans ton fichier)
-            switchScreen('screen-dashboard');
+            // 2. CHANGEMENT D'ÉCRAN DIRECT (Sans passer par une autre fonction)
+            // On cache tous les écrans (login et choix)
+            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+            
+            // On affiche le dashboard
+            const dash = document.getElementById('screen-dashboard');
+            if (dash) {
+                dash.style.display = 'block';
+            }
 
-            // 3. Ouverture de l'onglet des scores
+            // 3. OUVERTURE DE L'ONGLET DES SCORES
             const scoreURL = window.location.origin + window.location.pathname.replace('mj', 'scores') + "?room=" + id;
             window.open(scoreURL, '_blank');
 
