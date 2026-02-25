@@ -34,6 +34,7 @@
         .crest-mini-bg { background: white; padding: 2px; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; }
         .crest-mini { width: 22px; height: 22px; object-fit: contain; }
         .btn-icon { cursor: pointer; font-weight: bold; font-size: 1.1rem; margin-left: 10px; transition: 0.2s; }
+        .btn-edit { color: var(--blue); }
         .btn-del { color: var(--danger); }
         .player-controls { display: flex; align-items: center; gap: 5px; }
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: #34495e; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
@@ -43,6 +44,9 @@
 
         .show-pass-container { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 0.9rem; cursor: pointer; text-align: left; width: 100%; padding-left: 5px; }
         .show-pass-container input { width: 18px; height: 18px; margin: 0; cursor: pointer; flex-shrink: 0; }
+
+        .upload-zone { margin: 10px 0; padding: 10px; border: 2px dashed var(--mj-color); border-radius: 8px; text-align: center; background: rgba(0,0,0,0.2); transition: 0.2s; }
+        .upload-zone:hover { background: rgba(46, 204, 113, 0.1); }
     </style>
 </head>
 <body>
@@ -87,6 +91,14 @@
         <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-top: 20px;">
             <h3>Gestion Équipes</h3>
             <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()">
+            
+            <div class="upload-zone">
+                <label for="upload-logo" style="cursor:pointer; font-weight:bold; color:var(--mj-color); font-size:0.8rem;">
+                    ➕ AJOUTER UN FICHIER IMAGE (BLASON)
+                </label>
+                <input type="file" id="upload-logo" accept="image/*" style="display:none;" onchange="uploadCustomLogo(this)">
+            </div>
+
             <div class="crest-picker" id="crest-grid"></div>
             <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
             <div id="mj-team-list-display"></div>
@@ -114,9 +126,11 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
+        const storage = firebase.storage();
 
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {};
+        let editingTeamKey = null;
 
         const defaultCrests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png"];
 
@@ -137,7 +151,6 @@
             });
         }
 
-        // C'est cette fonction qui gère l'affichage ou non du bouton "Reprendre" au chargement
         function checkUserRoom(uid) {
             db.ref('users/' + uid + '/lastRoom').once('value', snap => {
                 document.getElementById('screen-login').style.display = "none";
@@ -168,22 +181,94 @@
             document.getElementById('display-room').innerText = roomID;
             db.ref('activeRooms/' + roomID).set({ status: 'open' });
             roomRef = db.ref('roomsData/' + id);
-            initMJLogic(); loadCrestGrid();
+            initMJLogic(); 
+            loadCrestGrid(); 
+        }
+
+        function uploadCustomLogo(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const uid = auth.currentUser.uid;
+            const storageRef = storage.ref(`mj_icons/${uid}/${Date.now()}_${file.name}`);
+
+            storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
+                db.ref(`users/${uid}/customLogos`).push(url);
+                loadCrestGrid();
+            }).catch(err => {
+                console.error(err);
+                alert("Erreur upload image");
+            });
         }
 
         function loadCrestGrid() {
             const grid = document.getElementById('crest-grid');
             grid.innerHTML = "";
-            defaultCrests.forEach(url => {
-                const wrap = document.createElement('div'); wrap.className = 'crest-wrapper';
-                const img = document.createElement('img'); img.src = url; img.className = 'crest-opt';
-                wrap.onclick = () => { document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); wrap.classList.add('crest-selected'); selCrest = url; checkTeamForm(); };
-                wrap.appendChild(img); grid.appendChild(wrap);
+            const uid = auth.currentUser.uid;
+
+            db.ref(`users/${uid}/customLogos`).once('value', snap => {
+                snap.forEach(child => {
+                    createCrestItem(child.val(), grid);
+                });
+
+                defaultCrests.forEach(url => {
+                    createCrestItem(url, grid);
+                });
             });
         }
 
-        function checkTeamForm() { const name = document.getElementById('t-name').value.trim(); document.getElementById('btn-add-team').disabled = !(name.length > 0 && selCrest !== ""); }
-        function addTeam() { const n = document.getElementById('t-name').value.trim(); if(n && selCrest) { roomRef.child('teams/' + n).set({ icon: selCrest }); document.getElementById('t-name').value = ""; checkTeamForm(); } }
+        function createCrestItem(url, container) {
+            const wrap = document.createElement('div'); 
+            wrap.className = 'crest-wrapper';
+            if (selCrest === url) wrap.classList.add('crest-selected');
+            
+            const img = document.createElement('img'); 
+            img.src = url; 
+            img.className = 'crest-opt';
+            
+            wrap.onclick = () => { 
+                document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); 
+                wrap.classList.add('crest-selected'); 
+                selCrest = url; 
+                checkTeamForm(); 
+            };
+            
+            wrap.appendChild(img); 
+            container.appendChild(wrap);
+        }
+
+        function checkTeamForm() { 
+            const name = document.getElementById('t-name').value.trim(); 
+            document.getElementById('btn-add-team').disabled = !(name.length > 0 && selCrest !== ""); 
+        }
+
+        function editTeam(n) {
+            const team = globalTeams[n];
+            editingTeamKey = n;
+            document.getElementById('t-name').value = n;
+            selCrest = team.icon;
+            document.getElementById('btn-add-team').innerText = "Modifier l'Équipe";
+            loadCrestGrid();
+            checkTeamForm();
+        }
+
+        function addTeam() { 
+            const n = document.getElementById('t-name').value.trim(); 
+            if(n && selCrest) { 
+                // Si on a changé le nom d'une équipe existante, on supprime l'ancienne
+                if(editingTeamKey && editingTeamKey !== n) {
+                    deleteTeam(editingTeamKey);
+                }
+                roomRef.child('teams/' + n).set({ icon: selCrest }); 
+                
+                // Reset formulaire
+                document.getElementById('t-name').value = ""; 
+                selCrest = ""; 
+                editingTeamKey = null;
+                document.getElementById('btn-add-team').innerText = "Créer l'Équipe";
+                loadCrestGrid(); 
+                checkTeamForm(); 
+            } 
+        }
         
         function initMJLogic() {
             roomRef.child('buzzers').on('value', snap => {
@@ -208,9 +293,21 @@
         function renderLobby() {
             const l = document.getElementById('score-list'); l.innerHTML = "";
             const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
+            
             Object.keys(globalTeams).forEach(tKey => {
-                tList.innerHTML += `<div class="team-item"><span><div class="crest-mini-bg"><img src="${globalTeams[tKey].icon}" class="crest-mini"></div> <b>${tKey}</b></span><div><span class="btn-icon btn-del" onclick="deleteTeam('${tKey}')">✖</span></div></div>`;
+                tList.innerHTML += `
+                    <div class="team-item">
+                        <span>
+                            <div class="crest-mini-bg"><img src="${globalTeams[tKey].icon}" class="crest-mini"></div> 
+                            <b>${tKey}</b>
+                        </span>
+                        <div>
+                            <span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span>
+                            <span class="btn-icon btn-del" onclick="deleteTeam('${tKey}')">✖</span>
+                        </div>
+                    </div>`;
             });
+
             Object.keys(allPlayersData).forEach(pseudo => {
                 const d = allPlayersData[pseudo]; if(d.active === false) return;
                 let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
@@ -246,11 +343,8 @@
 
         function resetFullGame() {
             if(confirm("⚠️ SUPPRIMER LA SALLE ? Toutes les données seront effacées et la salle ne pourra plus être reprise.")) {
-                // On efface physiquement les données
                 roomRef.remove();
                 db.ref('activeRooms/' + roomID).remove();
-                
-                // On efface la référence dans le profil MJ sur Firebase
                 db.ref('users/' + auth.currentUser.uid + '/lastRoom').remove().then(() => {
                     lastSavedRoom = "";
                     checkUserRoom(auth.currentUser.uid); 
