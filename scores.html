@@ -146,25 +146,25 @@
             // 2. Liste de DROITE (Classement Général)
             let rankingMap = new Map();
 
-            // On prépare les équipes avec leurs icônes
+            // Initialisation des équipes
             listEquipes.forEach(tName => {
                 rankingMap.set("TEAM_" + tName, { name: tName, pts: 0, icon: teamsData[tName].icon, isTeam: true, count: 0 });
             });
 
             allPlayers.forEach(p => {
-                const enEquipe = p.teamName && listEquipes.includes(p.teamName);
+                // On vérifie si le joueur appartient à une équipe (même s'il a quitté)
+                const enEquipe = p.teamName && p.teamName !== "" && p.teamName !== "Solo" && listEquipes.includes(p.teamName);
                 
                 if (enEquipe) {
-                    // RÈGLE 2 : Il est en équipe -> On ajoute ses points à l'équipe uniquement
-                    // (Même s'il quitte, il n'apparaîtra jamais en solo à droite)
+                    // RÈGLE : Il est en équipe -> Ses points vont à l'équipe, il n'apparaît JAMAIS seul à droite
                     let team = rankingMap.get("TEAM_" + p.teamName);
                     if (team) {
                         team.pts += (p.pts || 0);
-                        if (p.active !== false) team.count++; // On ne compte que les présents
+                        // On n'incrémente le compteur des membres présents que s'il est actif
+                        if (p.active !== false) team.count++;
                     }
                 } else {
-                    // RÈGLE 1 : Il est Solo -> Il apparaît toujours à droite
-                    // (Même s'il quitte, même s'il a 0 point)
+                    // RÈGLE : Il est Solo -> Il apparaît toujours à droite (actif ou non)
                     rankingMap.set("SOLO_" + p.name, { name: p.name, pts: (p.pts || 0), avatar: p.avatar, isTeam: false });
                 }
             });
