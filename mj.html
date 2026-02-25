@@ -105,6 +105,11 @@
         </div>
         <h3>Lobby Joueurs</h3>
         <div id="score-list"></div>
+
+        <div style="margin-top:20px; padding: 15px; border: 2px solid var(--gold); border-radius: 12px; background: rgba(243, 156, 18, 0.1); text-align: center;">
+            <h3 style="color:var(--gold); margin-top:0;">PODIUM & RÉSULTATS</h3>
+            <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 1.1rem;" onclick="triggerEndGame()">🏁 Fin de partie</button>
+        </div>
         
         <div style="margin-top:40px; border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 12px;">
             <h3 style="color:var(--danger); margin-top:0;">Clôturer la partie</h3>
@@ -254,13 +259,11 @@
         function addTeam() { 
             const n = document.getElementById('t-name').value.trim(); 
             if(n && selCrest) { 
-                // Si on a changé le nom d'une équipe existante, on supprime l'ancienne
                 if(editingTeamKey && editingTeamKey !== n) {
                     deleteTeam(editingTeamKey);
                 }
                 roomRef.child('teams/' + n).set({ icon: selCrest }); 
                 
-                // Reset formulaire
                 document.getElementById('t-name').value = ""; 
                 selCrest = ""; 
                 editingTeamKey = null;
@@ -314,6 +317,31 @@
                 Object.keys(globalTeams).forEach(t => { teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; });
                 l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;"><span style="font-size:1.2rem; margin-right:8px; flex-shrink:0;">${d.avatar}</span><b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${pseudo}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--blue)" onclick="adj('${pseudo}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${pseudo}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${pseudo}')">✖</button></div></div>`;
             });
+        }
+
+        function triggerEndGame() {
+            if(confirm("Voulez-vous figer les scores et enregistrer l'historique pour ce MJ ?")) {
+                const uid = auth.currentUser.uid;
+                
+                const historyData = {
+                    date: new Date().toLocaleString('fr-FR'),
+                    roomID: roomID,
+                    scores: allPlayersData,
+                    teams: globalTeams
+                };
+
+                db.ref(`users/${uid}/history`).push(historyData).then(() => {
+                    roomRef.child('gameState').set({ 
+                        status: 'endGame',
+                        timestamp: Date.now() 
+                    });
+                    roomRef.child('buzzers').remove();
+                    alert("Partie terminée et archivée !");
+                }).catch(err => {
+                    console.error("Erreur archivage:", err);
+                    alert("Erreur lors de l'archivage.");
+                });
+            }
         }
 
         function statusUpdate(st) { if(roomRef) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); } }
