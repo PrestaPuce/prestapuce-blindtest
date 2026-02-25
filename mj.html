@@ -71,11 +71,10 @@
         <button onclick="auth.signOut().then(()=>location.reload())" style="background:none; border:1px solid white; font-size:0.7rem;">Déconnexion</button>
     </div>
 
-    <div id="screen-dashboard" class="dashboard">
-        <div class="room-info">SALLE : <span id="display-room">----</span></div>
-        <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <button style="background:var(--blue); flex:1;" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
-            <button style="background:var(--danger); flex:1;" onclick="fullReset()">RESET TITRE</button>
+   <div id="screen-dashboard" class="screen">
+        <div class="card" style="display:flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin:0;">SALLE : <span id="display-room-id" style="color:var(--accent)">-</span></h2>
+            <button class="btn-danger" style="width:auto; padding:8px 15px; margin:0;" onclick="quitRoom()">QUITTER</button>
         </div>
         <div id="player-box" class="current-player">
             <div id="p-avatar" style="font-size:3.5rem"></div>
@@ -180,31 +179,24 @@
         function resumeRoom() { launchDashboard(lastSavedRoom); }
 
         function launchDashboard(id) {
-            // 1. On prépare les données
             roomID = id;
             roomRef = db.ref('roomsData/' + id);
             db.ref('activeRooms/' + id).set(true);
 
-            // 2. ON FORCE L'AFFICHAGE EN PREMIER
-            document.getElementById('display-room-id').innerText = id;
-            
-            // On utilise la méthode la plus radicale pour basculer les écrans
-            document.getElementById('screen-choice').style.display = "none";
-            document.getElementById('screen-dashboard').style.display = "block";
-            document.getElementById('screen-dashboard').classList.add('active');
+            // On vérifie si l'élément pour afficher le numéro existe
+            const displayElem = document.getElementById('display-room-id');
+            if (displayElem) {
+                displayElem.innerText = id;
+            }
 
-            // 3. ON LANCE LES ÉCOUTEURS FIREBASE
+            // On bascule l'affichage
+            showScreen('screen-dashboard');
+            
+            // On ouvre l'onglet des scores
+            const scoreURL = window.location.origin + window.location.pathname.replace('mj', 'scores') + "?room=" + id;
+            window.open(scoreURL, '_blank');
+
             setupRoomListeners();
-
-            // 4. ON OUVRE L'ONGLET EN DERNIER
-            const loc = window.location;
-            const path = loc.pathname.substring(0, loc.pathname.lastIndexOf('/'));
-            const scoreURL = loc.origin + path + "/scores.html?room=" + id;
-            
-            // On l'enveloppe dans un petit délai pour laisser le temps à l'affichage de changer
-            setTimeout(() => {
-                window.open(scoreURL, '_blank');
-            }, 100);
         }
 
         function loadCrestGrid() {
