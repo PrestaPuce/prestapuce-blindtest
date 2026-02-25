@@ -95,10 +95,15 @@
         const roomRef = db.ref('roomsData/' + roomID);
         
         // URL dynamique pour le QR Code (pointe vers ton dossier actuel)
-        const currentPath = window.location.href.split('?')[0].replace('scores.html', 'index.html');
-        const playURL = currentPath + "?room=" + roomID;
-        new QRCode(document.getElementById("qrcode"), { text: playURL, width: 110, height: 110 });
+        // On remplace "scores" par "index" peu importe s'il y a le .html ou non
+const currentPath = window.location.pathname.replace('scores', 'index');
+const playURL = window.location.origin + currentPath + "?room=" + roomID;
 
+new QRCode(document.getElementById("qrcode"), { 
+    text: playURL, 
+    width: 110, 
+    height: 110 
+});
         let scoresData = {}, teamsData = {}, currentBuzzer = null;
 
         function updateDisplay() {
