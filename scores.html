@@ -101,6 +101,8 @@
 
         let scoresData = {}, teamsData = {}, currentBuzzer = null;
 
+        let buzzHistory = []; // Pour mémoriser l'ordre de la pile
+
         function updateDisplay() {
             const pList = document.getElementById('player-list'); pList.innerHTML = "";
             const gList = document.getElementById('global-list'); gList.innerHTML = "";
@@ -108,14 +110,22 @@
             const listEquipes = Object.keys(teamsData);
             const allPlayers = Object.entries(scoresData).map(([k,v]) => ({name: k, ...v}));
 
-            // 1. Liste de GAUCHE (Joueurs) - MODIFICATION DU TRI UNIQUEMENT
+            // 1. Liste de GAUCHE (Joueurs) - Tri par pile persistante
             allPlayers.sort((a, b) => {
-                // Priorité 1 : Les joueurs actifs devant les inactifs
+                // Priorité 1 : Les joueurs actifs devant
                 if (a.active !== b.active) return a.active ? -1 : 1;
-                // Priorité 2 : Le buzzer actuel tout en haut
-                if (a.name === currentBuzzer) return -1;
-                if (b.name === currentBuzzer) return 1;
-                // Le reste conserve l'ordre d'arrivée (pas de tri par points ici)
+
+                // Priorité 2 : Utilisation de l'historique des buzz pour le tri
+                let indexA = buzzHistory.indexOf(a.name);
+                let indexB = buzzHistory.indexOf(b.name);
+
+                // Si les deux ont buzzé, le plus récent (dernier dans l'array) est en haut
+                if (indexA !== -1 && indexB !== -1) return indexB - indexA;
+                // Si un seul a buzzé, il passe devant
+                if (indexA !== -1) return -1;
+                if (indexB !== -1) return 1;
+
+                // Sinon, ordre d'arrivée
                 return 0;
             }).forEach(p => {
                 const isInactive = p.active === false;
@@ -133,13 +143,11 @@
                     </div>`;
             });
 
-            // 2. Liste de DROITE (Classement Général) - AUCUN CHANGEMENT
+            // 2. Liste de DROITE (Classement Général) - Inchangée (Tri par points)
             let rankingMap = new Map();
-
             listEquipes.forEach(tName => {
                 rankingMap.set("TEAM_" + tName, { name: tName, pts: 0, icon: teamsData[tName].icon, isTeam: true, count: 0 });
             });
-
             allPlayers.forEach(p => {
                 const enEquipe = p.teamName && listEquipes.includes(p.teamName);
                 if (enEquipe) {
@@ -150,21 +158,30 @@
                     rankingMap.set("SOLO_" + p.name, { name: p.name, pts: (p.pts || 0), avatar: p.avatar, isTeam: false });
                 }
             });
-
             Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts).forEach(item => {
-                const iconHtml = item.isTeam 
-                    ? `<div class="crest-bg"><img src="${item.icon}"></div>` 
-                    : `<span>${item.avatar}</span>`;
+                const iconHtml = item.isTeam ? `<div class="crest-bg"><img src="${item.icon}"></div>` : `<span>${item.avatar}</span>`;
                 const finalName = item.isTeam ? `${item.name} (${item.count})` : `${item.name} (Solo)`;
-
-                gList.innerHTML += `
-                    <div class="card">
-                        <div class="crest">${iconHtml}</div>
-                        <div class="info"><b>${finalName}</b></div>
-                        <div class="pts">${item.pts}</div>
-                    </div>`;
+                gList.innerHTML += `<div class="card"><div class="crest">${iconHtml}</div><div class="info"><b>${finalName}</b></div><div class="pts">${item.pts}</div></div>`;
             });
         }
+
+        // Mise à jour de l'écouteur de buzz pour gérer l'historique
+        roomRef.child('buzzers').on('value', snap => {
+            const val = snap.val();
+            currentBuzzer = val ? val.pseudo : null;
+            
+            if (currentBuzzer) {
+                // Si le joueur n'est pas déjà dans l'historique, on l'ajoute à la fin (sommet de pile)
+                if (!buzzHistory.includes(currentBuzzer)) {
+                    buzzHistory.push(currentBuzzer);
+                } else {
+                    // S'il y était déjà, on le déplace à la fin pour qu'il redevienne le "plus récent"
+                    buzzHistory = buzzHistory.filter(name => name !== currentBuzzer);
+                    buzzHistory.push(currentBuzzer);
+                }
+            }
+            updateDisplay();
+        });
 
         roomRef.child('scores').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
         roomRef.child('teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
