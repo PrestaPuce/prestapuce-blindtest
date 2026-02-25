@@ -354,8 +354,19 @@
         function kickPlayer(p) { roomRef.child('scores/' + p).update({ active: false }); }
 
         function togglePlayerTeam(pseudo, choice) {
-            if(choice === "Solo") { roomRef.child('scores/' + pseudo).update({ teamName: "Solo", teamIcon: "" });
-            } else { roomRef.child('scores/' + pseudo).update({ teamName: choice, teamIcon: globalTeams[choice].icon }); }
+            if(choice === "Solo") { 
+                roomRef.child('scores/' + pseudo).update({ 
+                    teamName: "Solo", 
+                    teamIcon: "",
+                    active: true // Force la mise à jour sur le téléphone
+                });
+            } else { 
+                roomRef.child('scores/' + pseudo).update({ 
+                    teamName: choice, 
+                    teamIcon: globalTeams[choice].icon,
+                    active: true // Force la mise à jour sur le téléphone
+                }); 
+            }
         }
 
         function handleReward(pts, mode) {
