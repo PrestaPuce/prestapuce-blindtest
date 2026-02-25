@@ -108,8 +108,16 @@
             const listEquipes = Object.keys(teamsData);
             const allPlayers = Object.entries(scoresData).map(([k,v]) => ({name: k, ...v}));
 
-            // 1. Liste de GAUCHE (Joueurs)
-            allPlayers.sort((a, b) => (b.pts || 0) - (a.pts || 0)).forEach(p => {
+            // 1. Liste de GAUCHE (Joueurs) - MODIFICATION DU TRI UNIQUEMENT
+            allPlayers.sort((a, b) => {
+                // Priorité 1 : Les joueurs actifs devant les inactifs
+                if (a.active !== b.active) return a.active ? -1 : 1;
+                // Priorité 2 : Le buzzer actuel tout en haut
+                if (a.name === currentBuzzer) return -1;
+                if (b.name === currentBuzzer) return 1;
+                // Le reste conserve l'ordre d'arrivée (pas de tri par points ici)
+                return 0;
+            }).forEach(p => {
                 const isInactive = p.active === false;
                 const buzzedClass = (p.name === currentBuzzer) ? "last-buzzed" : "";
                 const inactiveClass = isInactive ? "inactive-card" : "";
@@ -125,7 +133,7 @@
                     </div>`;
             });
 
-            // 2. Liste de DROITE (Classement Général)
+            // 2. Liste de DROITE (Classement Général) - AUCUN CHANGEMENT
             let rankingMap = new Map();
 
             listEquipes.forEach(tName => {
