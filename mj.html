@@ -180,45 +180,32 @@
         function resumeRoom() { launchDashboard(lastSavedRoom); }
 
         function launchDashboard(id) {
+            // 1. On définit les variables de salle immédiatement
             roomID = id;
             roomRef = db.ref('roomsData/' + id);
             db.ref('activeRooms/' + id).set(true);
 
-            // 1. Ouverture de l'onglet des scores (Fonctionne déjà)
+            // 2. ON CHANGE L'AFFICHAGE EN PREMIER (pour éviter le blocage navigateur)
+            document.getElementById('display-room-id').innerText = id;
+            
+            // On force la disparition de l'écran de choix et l'apparition du dashboard
+            document.getElementById('screen-choice').style.display = "none";
+            document.getElementById('screen-dashboard').style.display = "block";
+            document.getElementById('screen-dashboard').classList.add('active');
+
+            // 3. ON OUVRE L'ONGLET (en dernier)
             const loc = window.location;
             const path = loc.pathname.substring(0, loc.pathname.lastIndexOf('/'));
             const scoreURL = loc.origin + path + "/scores.html?room=" + id;
-            window.open(scoreURL, '_blank');
-
-            // 2. MISE À JOUR DE L'AFFICHAGE MJ
-            document.getElementById('display-room-id').innerText = id;
             
-            // On retire la classe 'active' de TOUS les écrans pour être sûr
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-                screen.style.display = "none";
-            });
-
-            // On affiche l'écran du dashboard et on lui ajoute la classe active
-            const dashboard = document.getElementById('screen-dashboard');
-            dashboard.classList.add('active');
-            dashboard.style.display = "block";
+            try {
+                window.open(scoreURL, '_blank');
+            } catch (e) {
+                console.log("L'onglet a été bloqué mais la console est prête.");
+            }
             
+            // 4. On lance les écouteurs Firebase
             setupRoomListeners();
-        }
-        function uploadCustomLogo(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            const uid = auth.currentUser.uid;
-            const storageRef = storage.ref(`mj_icons/${uid}/${Date.now()}_${file.name}`);
-
-            storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
-                db.ref(`users/${uid}/customLogos`).push(url);
-                loadCrestGrid();
-            }).catch(err => {
-                console.error(err);
-                alert("Erreur upload image");
-            });
         }
 
         function loadCrestGrid() {
