@@ -354,19 +354,17 @@
         function kickPlayer(p) { roomRef.child('scores/' + p).update({ active: false }); }
 
         function togglePlayerTeam(pseudo, choice) {
-            const playerRef = roomRef.child('scores/' + pseudo);
-            
             if(choice === "Solo") { 
-                playerRef.update({ 
+                roomRef.child('scores/' + pseudo).update({ 
                     teamName: "Solo", 
                     teamIcon: "",
                     active: true 
                 });
             } else { 
-                // On récupère l'icône de l'équipe depuis les données globales du MJ
+                // On récupère l'icône dans la liste globale des équipes du MJ
                 const iconUrl = globalTeams[choice] ? globalTeams[choice].icon : "";
                 
-                playerRef.update({ 
+                roomRef.child('scores/' + pseudo).update({ 
                     teamName: choice, 
                     teamIcon: iconUrl,
                     active: true 
