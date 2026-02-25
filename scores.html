@@ -95,7 +95,7 @@
         const roomRef = db.ref('roomsData/' + roomID);
         
         // URL dynamique pour le QR Code (pointe vers ton dossier actuel)
-        const currentPath = window.location.href.split('?')[0].replace('scores.html', 'index.html');
+        const currentPath = window.location.href.split('?')[0].replace('scores', 'index');
         const playURL = currentPath + "?room=" + roomID;
         new QRCode(document.getElementById("qrcode"), { text: playURL, width: 110, height: 110 });
 
