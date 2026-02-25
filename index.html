@@ -27,10 +27,6 @@
         .avatar-item.selected { background: var(--accent-color); transform: scale(1.1); }
         #room-id-display { font-weight: bold; color: var(--accent-color); }
         #exit-btn { background: none; border: 1px solid rgba(255,255,255,0.3); padding: 5px 10px; font-size: 0.8rem; width: auto; margin: 0; }
-        
-        /* Styles pour l'écran de fin */
-        #end-message { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #1a1a1a; padding: 20px; }
-        .end-title { color: var(--accent-color); font-size: 2rem; font-weight: bold; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -65,14 +61,6 @@
         <div id="status-sub" style="margin-top:30px; font-weight:bold; font-size:1.2rem; color:var(--accent-color);"></div>
     </div>
 
-    <div id="end-message">
-        <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:100px; margin-bottom:20px;">
-        <div class="end-title">PARTIE TERMINÉE</div>
-        <p style="font-size: 1.2rem;">L'animateur a clôturé la salle.</p>
-        <p>Merci d'avoir joué avec Presta'Puce !</p>
-        <button onclick="location.reload()" style="max-width:200px; background: var(--accent-color); color:black;">RETOUR À L'ACCUEIL</button>
-    </div>
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o",
@@ -97,9 +85,6 @@
             grid.appendChild(span);
         });
 
-        const urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.get('room')) { document.getElementById('room-input').value = urlParams.get('room'); }
-
         function checkRoom() {
             const val = document.getElementById('room-input').value.trim();
             if(!val) return;
@@ -121,29 +106,21 @@
         }
 
         function initGameLogic() {
-            // Écoute du statut de la salle (AJOUTÉ : Détection fermeture)
             roomRef.child('gameState/status').on('value', snap => {
                 gameState = snap.val();
-                if(gameState === 'closed') {
-                    handleEndGame();
-                    return;
-                }
                 updateUI();
             });
 
-            // Écoute du buzzer gagnant
             roomRef.child('buzzers').on('value', snap => {
                 currentWinner = snap.exists() ? snap.val().pseudo : null;
                 updateUI();
             });
 
-            // Écoute si on est bloqué
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => {
                 isBlockedLocally = snap.exists();
                 updateUI();
             });
 
-            // Récupération des infos d'équipe si le MJ nous change
             roomRef.child('scores/' + userPseudo).on('value', snap => {
                 const data = snap.val();
                 if(data) {
@@ -151,7 +128,6 @@
                     userTeamIcon = data.teamIcon || "";
                     document.getElementById('status-sub').innerText = (userTeamName !== "Solo") ? "Équipe : " + userTeamName : "";
                     
-                    // Si le MJ nous marque inactif (kick), on recharge
                     if(data.active === false && !localStorage.getItem('leaving')) {
                         alert("Tu as été retiré de la partie.");
                         location.reload();
@@ -160,22 +136,9 @@
             });
         }
 
-        function handleEndGame() {
-            // Coupe les écoutes Firebase et affiche l'écran de fin
-            if(roomRef) roomRef.off();
-            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-            document.getElementById('end-message').style.display = 'flex';
-        }
-
-        function triggerBuzz(e) {
-            e.preventDefault();
+        function triggerBuzz(event) {
             if(gameState === 'ready' && !currentWinner && !isBlockedLocally) {
-                roomRef.child('buzzers').set({ 
-                    pseudo: userPseudo, 
-                    avatar: selectedAvatar, 
-                    teamName: userTeamName, 
-                    teamIcon: userTeamIcon 
-                });
+                roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
             }
         }
 
@@ -183,42 +146,25 @@
             if(confirm("Quitter la partie ?")) {
                 localStorage.setItem('leaving', 'true');
                 if(roomRef && userPseudo) {
-                    roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => {
+                    roomRef.child('scores/' + userPseudo).update({ active: false, teamName: "" }).then(() => {
                         localStorage.removeItem('leaving'); location.reload();
                     });
-                } else { location.reload(); }
+                }
             }
         }
 
         function updateUI() {
-            const c = document.getElementById('screen-buzzer'); 
-            const l = document.getElementById('label');
+            const c = document.getElementById('screen-buzzer'); const l = document.getElementById('label');
             c.classList.remove('ready', 'main-prise', 'blocked');
-            
-            if(isBlockedLocally) { 
-                c.classList.add('blocked'); 
-                l.innerText = "BLOQUÉ"; 
-            }
+            if(isBlockedLocally) { c.classList.add('blocked'); l.innerText = "BLOQUÉ"; }
             else if (currentWinner) {
-                if(currentWinner === userPseudo) { 
-                    c.classList.add('main-prise'); 
-                    l.innerText = "C'EST À TOI !"; 
-                } else { 
-                    l.innerText = "OCCUPÉ"; 
-                }
-            } else if(gameState === 'ready') { 
-                c.classList.add('ready'); 
-                l.innerText = "BUZZEZ !"; 
-            }
-            else { 
-                l.innerText = "ATTENDEZ"; 
-            }
+                if(currentWinner === userPseudo) { c.classList.add('main-prise'); l.innerText = "C'EST À TOI !"; }
+                else { l.innerText = "OCCUPÉ"; }
+            } else if(gameState === 'ready') { c.classList.add('ready'); l.innerText = "BUZZEZ !"; }
+            else { l.innerText = "ATTENDEZ"; }
         }
 
-        function showScreen(id) { 
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); 
-            document.getElementById(id).classList.add('active-screen'); 
-        }
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById(id).classList.add('active-screen'); }
     </script>
 </body>
 </html>
