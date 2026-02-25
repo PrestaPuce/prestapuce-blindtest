@@ -189,8 +189,8 @@
                 displayElem.innerText = id;
             }
 
-            // 2. On affiche l'écran (maintenant que la classe 'screen' est là)
-            showScreen('screen-dashboard');
+            // 2. Correction du nom : On utilise switchScreen (le nom présent dans ton fichier)
+            switchScreen('screen-dashboard');
 
             // 3. Ouverture de l'onglet des scores
             const scoreURL = window.location.origin + window.location.pathname.replace('mj', 'scores') + "?room=" + id;
