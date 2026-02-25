@@ -147,8 +147,25 @@ new QRCode(document.getElementById("qrcode"), {
                 // Pour les autres, on ne change rien (ordre d'arrivée)
                 return 0;
             });
-
-            // 4. Liste de DROITE (Classement Général)
+            // 4. L'AFFICHAGE (On garde exactement tes balises et tes classes)
+            players.forEach(item => {
+                // On vérifie si c'est le joueur qui buzze pour lui mettre la classe qui fait clignoter
+                const isBuzzed = item.pseudo === currentBuzzer;
+                const isInactive = item.active === false;
+                
+                list.innerHTML += `
+                    <div class="player-card ${isBuzzed ? 'buzzed' : ''} ${isInactive ? 'inactive' : ''}">
+                        <div class="player-info">
+                            <span class="avatar">${item.avatar || '👤'}</span>
+                            <div class="details">
+                                <div class="name">${item.pseudo}</div>
+                                <div class="team">${item.teamIcon || ''} ${item.teamName || ''}</div>
+                            </div>
+                        </div>
+                        <div class="pts">${item.pts}</div>
+                    </div>`;
+            });
+            // 5. Liste de DROITE (Classement Général)
             let rankingMap = new Map();
 
             listEquipes.forEach(tName => {
