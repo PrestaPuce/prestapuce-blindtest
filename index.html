@@ -7,63 +7,95 @@
     <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-    
-    <script>
-        var confetti=function(){var t={};function e(t,e){return e?e(t):t}function n(t,e,n){return Math.max(t,Math.min(e,n))}function a(t){return parseInt(t,16)}function i(t){return{r:a(t.substring(1,3)),g:a(t.substring(3,5)),b:a(t.substring(5,7))}}function o(t){t.width=document.documentElement.clientWidth,t.height=document.documentElement.clientHeight}function r(t,e,n,a,i){var o,r,l,c,s,u,d=e.particleCount,m=e.angle,f=e.spread,g=e.startVelocity,v=e.decay,h=e.gravity,p=e.drift,y=e.ticks,b=e.colors,M=e.shapes,x=e.scalar,w=function(t){var e=t.origin;return{x:null==e.x?.5:e.x,y:null==e.y?.5:e.y}}(e),C=d,k=[],I=t.width*w.x,T=t.height*w.y;for(o=0;o<C;o++)k.push((r=I,l=T,c=m,s=f,u=g,function(t){var e=t*(Math.PI/180),n=s*(Math.PI/180);return{x:r,y:l,w:5*x,h:5*x,velocity:u*.5+Math.random()*u,angle2D:-e+(.5*n-Math.random()*n),tiltAngle:Math.random()*Math.PI,color:b[Math.floor(Math.random()*b.length)],shapes:M,tick:0,totalTicks:y,decay:v,drift:p,random:Math.random()+5,tiltAngleIncremental:.1*Math.random()+.1,gravity:3*h,scalar:x}}(c)));return function(e){var a=i||function(t){requestAnimationFrame(t)};return function i(){t.width&&t.height||(n(),a()),e.clearRect(0,0,t.width,t.height),k=k.filter(function(t){return function(t,e){e.x+=Math.cos(e.angle2D)*e.velocity+e.drift,e.y+=Math.sin(e.angle2D)*e.velocity+e.gravity,e.velocity*=e.decay,e.tiltAngle+=e.tiltAngleIncremental,e.tick++;var n=Math.cos(e.tiltAngle)*e.w*e.scalar,a=Math.sin(e.tiltAngle)*e.h*e.scalar,i=e.x+n,o=e.y+a,r=e.x-n,l=e.y-a;return t.fillStyle=e.color,t.beginPath(),t.moveTo(e.x,e.y),t.lineTo(i,o),t.lineTo(r,l),t.closePath(),t.fill(),e.tick<e.totalTicks}(e,t)}),k.length?a(i):n()}}()}var l=function(){var a,l,c,s=!1,u=null,d=null;return function m(f){var g=f||{};if(null==u){var v=document.createElement("canvas");v.style.position="fixed",v.style.top="0px",v.style.left="0px",v.style.width="100%",h.style?v.style.height="100%":v.setAttribute("style","position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10001"),v.style.pointerEvents="none",v.style.zIndex="10001",document.body.appendChild(v),o(v),a=v,l=a.getContext("2d"),c=window.addEventListener("resize",function(){o(a)},!1),u=a,d=l}var h={particleCount:n(g.particleCount||50,0,1e4),angle:g.angle||90,spread:g.spread||45,startVelocity:g.startVelocity||45,decay:g.decay||.9,gravity:g.gravity||1,drift:g.drift||0,ticks:g.ticks||200,colors:g.colors||["#26ccff","#a25afd","#ff5e7e","#88ff5a","#fcff42","#ffa62d","#ff36ff"],shapes:g.shapes||["square","circle"],scalar:g.scalar||1,origin:g.origin||{x:.5,y:.5}};return r(u,h,function(){u=null},function(){window.removeEventListener("resize",c)},s)(d)}}();return l}();
-    </script>
-
     <style>
         :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; }
-        .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; z-index: 10; }
-        .screen { display: none; height: 100%; width: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .active-screen { display: flex; }
-        
-        .buzzer-container { width: 280px; height: 280px; border-radius: 50%; background: #7f8c8d; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; user-select: none; transition: 0.1s; box-shadow: 0 15px #2c3e50; border: 8px solid #34495e; -webkit-tap-highlight-color: transparent; }
-        .buzzer-container:active { transform: translateY(10px); box-shadow: 0 5px #2c3e50; }
-        .buzzer-container.ready { background: radial-gradient(circle, #e74c3c, #c0392b); box-shadow: 0 15px #962d22; border-color: #962d22; }
-        .buzzer-container.main-prise { background: radial-gradient(circle, #2ecc71, #27ae60); box-shadow: 0 15px #1e8449; border-color: #1e8449; }
-        .buzzer-container.blocked { background: #34495e; opacity: 0.6; box-shadow: 0 10px #2c3e50; cursor: not-allowed; }
-        
-        .buzzer-label { font-size: 1.8rem; font-weight: 900; pointer-events: none; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        
-        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; }
-        .avatar-opt { font-size: 2rem; padding: 10px; cursor: pointer; border-radius: 8px; border: 2px solid transparent; text-align: center; }
-        .avatar-selected { border-color: var(--primary-color); background: var(--card-bg); }
-        
-        input { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--card-bg); color: white; font-size: 1.1rem; box-sizing: border-box; text-align: center; margin-bottom: 15px; }
-        button { background: var(--primary-color); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; font-size: 1.1rem; cursor: pointer; width: 100%; }
-
-        @keyframes trophyZoom {
-            0% { transform: scale(0) rotate(-45deg); opacity: 0; }
-            70% { transform: scale(1.4) rotate(10deg); opacity: 1; }
-            100% { transform: scale(1) rotate(0deg); }
-        }
-        .animate-zoom { animation: trophyZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-    </style>
+        .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 95px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; border-bottom: 2px solid rgba(255,255,255,0.1); z-index: 1000; }
+        .logo-presta { width: 45px; height: auto; -webkit-tap-highlight-color: transparent; }
+        .screen { display: none; height: 100%; width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; padding-top: 100px; box-sizing: border-box; }
+        .active-screen { display: flex !important; }
+        input, select { width: 100%; max-width: 280px; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); font-size: 1.1rem; background: var(--card-bg); color: white; text-align: center; outline: none; }
+        .btn-ui { width: 100%; max-width: 280px; padding: 18px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: 900; cursor: pointer; background-color: var(--primary-color); color: white; box-shadow: 0 8px 0 #2980b9; text-transform: uppercase; margin-bottom: 10px; }
+        .btn-disabled { background-color: #7f8c8d !important; box-shadow: 0 8px 0 #636e72 !important; cursor: not-allowed; opacity: 0.6; }
+        .avatar-scroll { width: 100%; max-width: 320px; max-height: 200px; overflow-y: auto; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 20px; }
+        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .avatar-item { font-size: 2rem; background: var(--card-bg); padding: 10px; border-radius: 15px; cursor: pointer; border: 3px solid transparent; text-align: center; }
+        .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); background: rgba(241, 196, 15, 0.2); }
+        .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; }
+        .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
+        .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
+        .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; }
+        .btn-exit { width: 45px; height: 45px; border-radius: 50%; background: #e74c3c; border: none; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-top: 15px; }
+    /* Uniquement pour la fin de partie */
+#podium-zone { 
+    display: none; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    position: fixed; /* On utilise fixed pour ne pas décaler tes autres éléments */
+    top: 0; left: 0; width: 100%; height: 100%; 
+    background: #1a1a1a; 
+    z-index: 9999; 
+}
+.trophy-img { width: 130px; margin-bottom: 15px; }
+.rank-text { font-size: 1.8rem; font-weight: bold; color: #f1c40f; text-align: center; }
+/* Animation spectaculaire pour le trophée */
+@keyframes trophyZoom {
+    0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+    70% { transform: scale(1.4) rotate(10deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); }
+}
+.animate-zoom { animation: trophyZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+     </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-
+    <div id="podium-zone"></div>
     <div class="header-bar">
-        <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="height:40px;">
-        <div id="user-info" style="font-weight: bold; font-size: 0.9rem;"></div>
-        <div onclick="leaveGame()" style="color: #e74c3c; font-weight: bold; cursor:pointer;">Quitter</div>
+        <div style="flex:1; line-height: 1.2;">
+            <span id="display-avatar" style="font-size:1.5rem"></span> 
+            <span id="display-pseudo" style="font-weight: bold;"></span><br>
+            <span id="display-team-label" style="font-size: 0.8rem; color: var(--accent-color); font-style: italic;"></span>
+        </div>
+        <div style="flex:0; padding: 0 10px;">
+            <a href="https://tapni.com/app/djcedrik" target="_blank">
+                <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" class="logo-presta">
+            </a>
+        </div>
+        <div style="flex:1; text-align:right" id="display-room-info"></div>
     </div>
 
-    <div id="screen-login" class="screen active-screen">
-        <h2 style="margin-bottom:10px;">Rejoindre la partie</h2>
-        <input type="number" id="room-id" placeholder="Code de la salle">
-        <input type="text" id="pseudo" placeholder="Ton Pseudo" maxlength="12">
-        <div class="avatar-grid" id="avatar-list"></div>
-        <button onclick="joinGame()">ENTRER EN JEU</button>
+    <div id="screen-room" class="screen active-screen">
+        <h2 style="color:var(--accent-color)">CODE SALLE</h2>
+        <input type="number" id="room-code-input" placeholder="CODE SALLE" onkeydown="if(event.key === 'Enter') validateRoom()">
+        <button class="btn-ui" onclick="validateRoom()">Rejoindre</button>
+    </div>
+
+    <div id="screen-login" class="screen">
+        <h2 style="color:var(--accent-color)">TON PSEUDO</h2>
+        <input type="text" id="input-pseudo" placeholder="Pseudo..." maxlength="12" onkeydown="if(event.key === 'Enter') checkPseudo()">
+        <button class="btn-ui" onclick="checkPseudo()">Suivant</button>
+    </div>
+
+    <div id="screen-setup" class="screen">
+        <h3 style="margin:0 0 10px 0;">AVATAR</h3>
+        <div class="avatar-scroll"><div class="avatar-grid" id="avatar-grid"></div></div>
+        <h3 style="margin:0 0 10px 0;">ÉQUIPE</h3>
+        <select id="select-team"><option value="Solo|">Mode Solo</option></select>
+        <button id="btn-final" class="btn-ui btn-disabled" onclick="finalizeSetup()">C'est parti !</button>
     </div>
 
     <div id="screen-buzzer" class="screen">
-        <div id="buzzer" class="buzzer-container" onclick="buzz()">
-            <div id="label" class="buzzer-label">ATTENDEZ</div>
+        <div style="flex:1; display:flex; align-items:center;">
+            <button class="buzzer" id="btn-buzz" onclick="onBuzzerClick()">
+                <span id="label" style="color:white; font-size:1.4rem; font-weight:bold;">ATTENDEZ</span>
+            </button>
         </div>
-        <p id="status-msg" style="margin-top: 30px; font-weight: bold; color: #bdc3c7;"></p>
+        <div style="font-weight: bold;">Score : <span id="score" style="color:var(--accent-color)">0</span> pts</div>
+        <button class="btn-exit" onclick="leaveGame()">×</button>
     </div>
+
+    <audio id="buzz-sound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
 
     <script>
         const firebaseConfig = {
@@ -73,94 +105,128 @@
             projectId: "prestapuce-buzz",
             storageBucket: "prestapuce-buzz.firebasestorage.app",
             messagingSenderId: "907270883505",
-            appId: "1:907270883505:web:197efec0b99db28180ba90"
+            appId: "1:907270883505:web:197efec0b99db28180ba90",
+            measurementId: "G-J04SC2DFFF"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let roomRef = null, userPseudo = "", selectedAvatar = "👤", userTeamName = "Solo", userTeamIcon = "";
-        let gameState = 'waiting', currentWinner = null, isBlockedLocally = false;
-        const avatars = ["🦊","🐱","🐭","🐹","🐰","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🦄","🍎","🎮","🎸"];
+        let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
+        let gameState = "waiting", isBlockedLocally = false, currentWinner = null;
+        let kickListener = null;
+        const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
-        const list = document.getElementById('avatar-list');
-        avatars.forEach(a => {
-            const div = document.createElement('div'); div.className = 'avatar-opt'; div.innerText = a;
-            div.onclick = () => {
-                document.querySelectorAll('.avatar-opt').forEach(i=>i.classList.remove('avatar-selected'));
-                div.classList.add('avatar-selected'); selectedAvatar = a;
-            };
-            list.appendChild(div);
-        });
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const r = urlParams.get('room');
+            if(r) { document.getElementById('room-code-input').value = r; validateRoom(); }
+        };
 
-        function joinGame() {
-            const rid = document.getElementById('room-id').value;
-            userPseudo = document.getElementById('pseudo').value.trim();
-            if(!rid || !userPseudo) return alert("Remplis tout !");
-            db.ref('activeRooms/' + rid).once('value', snap => {
-                if(!snap.exists()) return alert("Salle inexistante");
-                roomRef = db.ref('roomsData/' + rid);
-                roomRef.child('scores/' + userPseudo).update({ pts: 0, avatar: selectedAvatar, teamName: "Solo", teamIcon: "", active: true });
-                document.getElementById('user-info').innerText = selectedAvatar + " " + userPseudo;
-                showScreen('screen-buzzer');
-                
-                roomRef.child('gameState').on('value', snap => {
-                    const data = snap.val();
-                    gameState = data ? data.status : 'waiting';
-                    if(gameState === 'endGame') { handleEndGame(); } else { updateUI(); }
-                });
-                roomRef.child('buzzers').on('value', snap => { currentWinner = snap.exists() ? snap.val().pseudo : null; updateUI(); });
-                roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlockedLocally = snap.exists(); updateUI(); });
-                roomRef.child('scores/' + userPseudo).on('value', snap => {
-                    const d = snap.val(); if(d) { userTeamName = d.teamName || "Solo"; userTeamIcon = d.teamIcon || ""; }
-                });
+        function validateRoom() {
+            roomID = document.getElementById('room-code-input').value.trim();
+            if(!roomID) return;
+            db.ref('activeRooms/' + roomID).once('value', snap => {
+                if(snap.exists()) {
+                    roomRef = db.ref('roomsData/' + roomID);
+                    showScreen('screen-login');
+                    document.getElementById('display-room-info').innerText = "SALLE " + roomID;
+                    listenToTeams();
+                } else { alert("Salle introuvable !"); }
             });
         }
 
-        function handleEndGame() {
-            let pZone = document.getElementById('podium-result');
-            if(!pZone) {
-                pZone = document.createElement('div');
-                pZone.id = 'podium-result';
-                pZone.style = "display:flex; flex-direction:column; align-items:center; justify-content:center; position:fixed; top:0; left:0; width:100%; height:100%; background:#1a1a1a; z-index:10000; text-align:center; font-family:sans-serif; color:white;";
-                document.body.appendChild(pZone);
-            }
-            
-            roomRef.child('scores').once('value', snap => {
-                const scores = snap.val() || {};
-                let results = [];
-                Object.entries(scores).forEach(([p, d]) => { if(d.active !== false) results.push({name:p, pts:d.pts||0}); });
-                results.sort((a,b) => b.pts - a.pts);
-                const rank = results.findIndex(r => r.name === userPseudo) + 1;
-
-                let content = "";
-                if(rank === 1) {
-                    content = `
-                        <img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="animate-zoom" style="width:180px;">
-                        <h1 style="color:#f1c40f; font-size:2.5rem; text-shadow: 0 0 20px rgba(241,196,15,0.5);">CHAMPION !</h1>
-                    `;
-                    setTimeout(() => {
-                        if (typeof confetti === 'function') {
-                            var end = Date.now() + 5000;
-                            (function frame() {
-                                confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0, y: 0.6 }, colors: ['#f1c40f', '#ffffff', '#3498db'] });
-                                confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors: ['#f1c40f', '#ffffff', '#3498db'] });
-                                if (Date.now() < end) requestAnimationFrame(frame);
-                            }());
+        function checkPseudo() {
+            userPseudo = document.getElementById('input-pseudo').value.trim();
+            if(userPseudo.length < 2) return alert("Pseudo trop court !");
+            roomRef.child('scores/' + userPseudo).once('value', snap => {
+                const savedPseudo = localStorage.getItem('presta_pseudo');
+                const savedRoom = localStorage.getItem('presta_room');
+                const data = snap.val();
+                if(snap.exists()) {
+                    if(savedPseudo === userPseudo && savedRoom === roomID) {
+                        if(confirm("Reprendre votre partie ?")) {
+                            selectedAvatar = data.avatar;
+                            userTeamName = data.teamName || data.lastTeam || "Solo";
+                            roomRef.child('scores/' + userPseudo).update({ active: true, teamName: userTeamName }).then(() => { startBuzzer(); });
                         }
-                    }, 300);
-                } else if(rank === 2) {
-                    content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583350.png" style="width:130px;"><h1 style="color:#f1c40f;">2ème PLACE</h1>`;
-                } else if(rank === 3) {
-                    content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" style="width:130px;"><h1 style="color:#f1c40f;">3ème PLACE</h1>`;
-                } else {
-                    content = `<h1 style="color:#7f8c8d;">FIN DE PARTIE</h1><p>Merci d'avoir joué !</p>`;
-                }
-                pZone.innerHTML = content + `<button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#3498db; color:white; border:none; border-radius:5px;">RETOUR</button>`;
+                    } else if (data.active === true) {
+                        alert("Ce pseudo est déjà utilisé !");
+                    } else {
+                        alert("Ce pseudo appartient à un joueur déconnecté. Utilisez le même appareil.");
+                    }
+                } else { showScreen('screen-setup'); }
             });
         }
 
-        function buzz() {
-            if(gameState === 'ready' && !currentWinner && !isBlockedLocally) {
+        function listenToTeams() {
+            roomRef.child('teams').on('value', snap => {
+                const select = document.getElementById('select-team');
+                select.innerHTML = '<option value="Solo|">Mode Solo</option>';
+                snap.forEach(child => {
+                    const opt = document.createElement('option');
+                    opt.value = child.key + "|" + child.val().icon;
+                    opt.innerText = child.key;
+                    select.appendChild(opt);
+                });
+            });
+        }
+
+        function initAvatarGrid() {
+            const grid = document.getElementById('avatar-grid');
+            avatars.forEach(a => {
+                const div = document.createElement('div');
+                div.className = 'avatar-item'; div.innerText = a;
+                div.onclick = () => {
+                    document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
+                    div.classList.add('selected'); selectedAvatar = a;
+                    document.getElementById('btn-final').classList.remove('btn-disabled');
+                };
+                grid.appendChild(div);
+            });
+        }
+
+        function finalizeSetup() {
+            if(!selectedAvatar) return;
+            const val = document.getElementById('select-team').value.split('|');
+            userTeamName = val[0] || "Solo"; userTeamIcon = val[1] || "";
+            localStorage.setItem('presta_pseudo', userPseudo);
+            localStorage.setItem('presta_room', roomID);
+            roomRef.child('scores/' + userPseudo).set({ 
+                pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon, active: true, lastTeam: userTeamName
+            });
+            startBuzzer();
+        }
+
+        function startBuzzer() {
+            document.getElementById('display-pseudo').innerText = userPseudo;
+            document.getElementById('display-avatar').innerText = selectedAvatar;
+            document.getElementById('display-team-label').innerText = (userTeamName === "Solo" || userTeamName === "") ? "Mode Solo" : userTeamName;
+            showScreen('screen-buzzer');
+            if(kickListener) roomRef.child('scores/' + userPseudo + '/active').off('value', kickListener);
+            kickListener = roomRef.child('scores/' + userPseudo + '/active').on('value', s => { 
+                if(s.val() === false && !localStorage.getItem('leaving')) { alert("Expulsé par le MJ."); location.reload(); }
+            });
+            roomRef.child('scores/' + userPseudo + '/pts').on('value', s => { document.getElementById('score').innerText = s.val() || 0; });
+            roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlockedLocally = snap.exists(); updateUI(); });
+            roomRef.child('gameState').on('value', snap => {
+    const data = snap.val();
+    gameState = data ? data.status : 'waiting';
+    
+    // Si l'état passe en fin de partie, on déclenche le podium
+    if(gameState === 'endGame') {
+        handleEndGame();
+    } else {
+        updateUI();
+    }
+});
+            roomRef.child('buzzers').on('value', snap => { currentWinner = snap.val() ? snap.val().pseudo : null; updateUI(); });
+        }
+
+        function onBuzzerClick() {
+            if(gameState === "ready" && !isBlockedLocally && !currentWinner) {
+                if (navigator.vibrate) navigator.vibrate(100);
+                document.getElementById('buzz-sound').play().catch(e => {});
+                roomRef.child('gameState').update({ status: 'taken' });
                 roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
             }
         }
@@ -169,15 +235,15 @@
             if(confirm("Quitter la partie ?")) {
                 localStorage.setItem('leaving', 'true');
                 if(roomRef && userPseudo) {
-                    roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => {
+                    roomRef.child('scores/' + userPseudo).update({ active: false, teamName: "" }).then(() => {
                         localStorage.removeItem('leaving'); location.reload();
                     });
-                } else { location.reload(); }
+                }
             }
         }
 
         function updateUI() {
-            const c = document.getElementById('buzzer'); const l = document.getElementById('label');
+            const c = document.getElementById('screen-buzzer'); const l = document.getElementById('label');
             c.classList.remove('ready', 'main-prise', 'blocked');
             if(isBlockedLocally) { c.classList.add('blocked'); l.innerText = "BLOQUÉ"; }
             else if (currentWinner) {
@@ -188,6 +254,53 @@
         }
 
         function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById(id).classList.add('active-screen'); }
+        initAvatarGrid();
+function handleEndGame() {
+    let pZone = document.getElementById('podium-result');
+    if(!pZone) {
+        pZone = document.createElement('div');
+        pZone.id = 'podium-result';
+        pZone.style = "display:flex; flex-direction:column; align-items:center; justify-content:center; position:fixed; top:0; left:0; width:100%; height:100%; background:#1a1a1a; z-index:10000; text-align:center; font-family:sans-serif; color:white;";
+        document.body.appendChild(pZone);
+    }
+    
+    roomRef.child('scores').once('value', snap => {
+        const scores = snap.val() || {};
+        let results = [];
+        Object.entries(scores).forEach(([p, d]) => { 
+            if(d.active !== false) results.push({name:p, pts:d.pts||0}); 
+        });
+        results.sort((a,b) => b.pts - a.pts);
+        const rank = results.findIndex(r => r.name === userPseudo) + 1;
+
+        let content = "";
+        if(rank === 1) {
+            content = `
+                <img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="animate-zoom" style="width:180px;">
+                <h1 style="color:#f1c40f; font-size:2.5rem; text-shadow: 0 0 20px rgba(241,196,15,0.5);">CHAMPION !</h1>
+            `;
+            
+            setTimeout(() => {
+                if (typeof confetti === 'function') {
+                    var duration = 5 * 1000;
+                    var end = Date.now() + duration;
+                    (function frame() {
+                      confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0, y: 0.6 }, colors: ['#f1c40f', '#ffffff', '#3498db'] });
+                      confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors: ['#f1c40f', '#ffffff', '#3498db'] });
+                      if (Date.now() < end) { requestAnimationFrame(frame); }
+                    }());
+                }
+            }, 200);
+        } else if(rank === 2) {
+            content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583350.png" style="width:130px;"><h1 style="color:#f1c40f;">2ème PLACE</h1>`;
+        } else if(rank === 3) {
+            content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" style="width:130px;"><h1 style="color:#f1c40f;">3ème PLACE</h1>`;
+        } else {
+            content = `<h1 style="color:#7f8c8d;">FIN DE PARTIE</h1><p>Merci d'avoir joué !</p>`;
+        }
+        pZone.innerHTML = content + `<button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#3498db; color:white; border:none; border-radius:5px;">RETOUR</button>`;
+    });
+}
     </script>
 </body>
 </html>
