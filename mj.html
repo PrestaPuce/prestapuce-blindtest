@@ -179,16 +179,21 @@
 
         function resumeRoom() { launchDashboard(lastSavedRoom); }
 
-        function launchDashboard(id) {
-            roomID = id; 
-            document.getElementById('screen-choice').style.display = "none"; 
-            document.getElementById('screen-dashboard').style.display = "block";
-            document.getElementById('display-room').innerText = roomID;
-            db.ref('activeRooms/' + roomID).set({ status: 'open' });
-            roomRef = db.ref('roomsData/' + id);
-            initMJLogic(); 
-            loadCrestGrid(); 
-        }
+       function launchDashboard(id) {
+    roomID = id;
+    roomRef = db.ref('roomsData/' + id);
+    db.ref('activeRooms/' + id).set(true);
+
+    // --- DEBUT DE L'AJOUT : OUVERTURE AUTO DE LA PAGE SCORES ---
+    // On construit l'URL en remplaçant mj.html par scores.html
+    const scoreURL = window.location.href.split('?')[0].replace('mj.html', 'scores.html') + "?room=" + id;
+    window.open(scoreURL, '_blank');
+    // --- FIN DE L'AJOUT ---
+
+    document.getElementById('display-room-id').innerText = id;
+    showScreen('screen-dashboard');
+    setupRoomListeners();
+}
 
         function uploadCustomLogo(input) {
             if (!input.files || !input.files[0]) return;
