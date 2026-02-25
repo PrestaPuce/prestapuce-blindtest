@@ -22,11 +22,10 @@
         .pts { font-size: 2rem; font-weight: 900; background: rgba(0,0,0,0.4); padding: 5px 15px; border-radius: 10px; color: var(--accent); }
         
         #qr-box { position: fixed; bottom: 20px; right: 20px; background: white; padding: 10px; border-radius: 10px; text-align: center; color: black; z-index: 100; }
-        .last-buzzed { border: 5px solid #2ecc71 !important; transform: scale(1.02); background: rgba(46, 204, 113, 0.4); box-shadow: 0 0 20px #2ecc71; animation: flash 0.8s infinite alternate; }
+        .last-buzzed { border: 5px solid #2ecc71 !important; transform: scale(1.02); background: rgba(46, 204, 113, 0.4); box-shadow: 0 0 20px #2ecc71; }
         .inactive-card { opacity: 0.4; filter: grayscale(1); border-left-color: #7f8c8d; }
 
-        @keyframes flash { from { opacity: 1; } to { opacity: 0.6; } }
-
+        /* Hall of Fame Style */
         #hof-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
         .hof-content { width: 500px; background: #2c3e50; padding: 30px; border-radius: 20px; border: 3px solid var(--accent); }
         .hof-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.2rem; }
@@ -81,6 +80,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
+        // --- GESTION DE LA SALLE ---
         const urlParams = new URLSearchParams(window.location.search);
         let roomID = urlParams.get('room');
         
@@ -94,12 +94,12 @@
         document.getElementById('room-title').innerText = roomID;
         const roomRef = db.ref('roomsData/' + roomID);
         
+        // URL dynamique pour le QR Code (pointe vers ton dossier actuel)
         const currentPath = window.location.href.split('?')[0].replace('scores.html', 'index.html');
         const playURL = currentPath + "?room=" + roomID;
         new QRCode(document.getElementById("qrcode"), { text: playURL, width: 110, height: 110 });
 
         let scoresData = {}, teamsData = {}, currentBuzzer = null;
-        let buzzHistory = []; // Stocke l'ordre chronologique des buzzers
 
         function updateDisplay() {
             const pList = document.getElementById('player-list'); pList.innerHTML = "";
@@ -108,30 +108,8 @@
             const listEquipes = Object.keys(teamsData);
             const allPlayers = Object.entries(scoresData).map(([k,v]) => ({name: k, ...v}));
 
-            // 1. GESTION LISTE JOUEURS (GAUCHE)
-            allPlayers.sort((a, b) => {
-                // Règle 1 : Inactifs (quitté) toujours tout en bas
-                const aActif = a.active !== false;
-                const bActif = b.active !== false;
-                if (aActif && !bActif) return -1;
-                if (!aActif && bActif) return 1;
-
-                // Règle 2 : Pour les actifs, on suit l'ordre du buzzHistory (index le plus bas = buzzé le plus récemment)
-                if (aActif && bActif) {
-                    let indexA = buzzHistory.indexOf(a.name);
-                    let indexB = buzzHistory.indexOf(b.name);
-                    
-                    // Si un joueur n'a jamais buzzé, il va après ceux qui ont buzzé
-                    if (indexA === -1) indexA = 999;
-                    if (indexB === -1) indexB = 999;
-                    
-                    if (indexA !== indexB) return indexA - indexB;
-                }
-
-                return 0; // Garde l'ordre d'origine si aucune règle ne s'applique
-            });
-
-            allPlayers.forEach(p => {
+            // 1. Liste de GAUCHE (Joueurs)
+            allPlayers.sort((a, b) => (b.pts || 0) - (a.pts || 0)).forEach(p => {
                 const isInactive = p.active === false;
                 const buzzedClass = (p.name === currentBuzzer) ? "last-buzzed" : "";
                 const inactiveClass = isInactive ? "inactive-card" : "";
@@ -147,8 +125,9 @@
                     </div>`;
             });
 
-            // 2. GESTION CLASSEMENT GÉNÉRAL (DROITE)
+            // 2. Liste de DROITE (Classement Général)
             let rankingMap = new Map();
+
             listEquipes.forEach(tName => {
                 rankingMap.set("TEAM_" + tName, { name: tName, pts: 0, icon: teamsData[tName].icon, isTeam: true, count: 0 });
             });
@@ -168,14 +147,7 @@
                 const iconHtml = item.isTeam 
                     ? `<div class="crest-bg"><img src="${item.icon}"></div>` 
                     : `<span>${item.avatar}</span>`;
-                
-                let finalName;
-                if (item.isTeam) {
-                    const plural = item.count > 1 ? "s" : "";
-                    finalName = `${item.name} (${item.count} joueur${plural})`;
-                } else {
-                    finalName = `${item.name} (Solo)`;
-                }
+                const finalName = item.isTeam ? `${item.name} (${item.count})` : `${item.name} (Solo)`;
 
                 gList.innerHTML += `
                     <div class="card">
@@ -188,17 +160,8 @@
 
         roomRef.child('scores').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
         roomRef.child('teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
-        
         roomRef.child('buzzers').on('value', snap => {
-            const newBuzzer = snap.exists() ? snap.val().pseudo : null;
-            
-            if (newBuzzer && newBuzzer !== currentBuzzer) {
-                // On met à jour l'historique : on enlève le nom s'il existait déjà et on le met en index 0 (tout en haut)
-                buzzHistory = buzzHistory.filter(name => name !== newBuzzer);
-                buzzHistory.unshift(newBuzzer);
-            }
-            
-            currentBuzzer = newBuzzer;
+            currentBuzzer = snap.exists() ? snap.val().pseudo : null;
             updateDisplay();
         });
 
