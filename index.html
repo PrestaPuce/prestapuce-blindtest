@@ -137,17 +137,42 @@
 
         function checkPseudo() {
             userPseudo = document.getElementById('input-pseudo').value.trim();
+            userTeamName = data.teamName || data.lastTeam || "Solo";
+            userTeamIcon = data.teamIcon || "";
             if(userPseudo.length < 2) return alert("Pseudo trop court !");
+
+            
+
             roomRef.child('scores/' + userPseudo).once('value', snap => {
                 const savedPseudo = localStorage.getItem('presta_pseudo');
                 const savedRoom = localStorage.getItem('presta_room');
                 const data = snap.val();
+    if(data) {
+        document.getElementById('user-pts').innerText = (data.pts || 0) + " pts";
+        document.getElementById('user-avatar').innerText = data.avatar || "👤";
+
+        const teamZone = document.getElementById('user-team');
+        // LA VARIABLE DE STATUT
+        const statutEquipe = data.teamName || "Solo";
+
+        if(statutEquipe !== "Solo") {
+            // Affichage : [IMAGE BLASON] Nom de l'équipe
+            const blasonHtml = data.teamIcon ? `<img src="${data.teamIcon}" style="height:20px; vertical-align:middle; margin-right:8px;">` : "";
+            teamZone.innerHTML = `${blasonHtml}${statutEquipe}`;
+        } else {
+            teamZone.innerText = "Mode Solo";
+        }
+    }
                 if(snap.exists()) {
                     if(savedPseudo === userPseudo && savedRoom === roomID) {
                         if(confirm("Reprendre votre partie ?")) {
                             selectedAvatar = data.avatar;
                             userTeamName = data.teamName || data.lastTeam || "Solo";
-                            roomRef.child('scores/' + userPseudo).update({ active: true, teamName: userTeamName }).then(() => { startBuzzer(); });
+            roomRef.child('scores/' + userPseudo).update({ 
+                 active: true, 
+                 teamName: userTeamName,
+                 teamIcon: userTeamIcon // On remet l'icône aussi pour être sûr
+                 }).then(() => { startBuzzer(); });
                         }
                     } else if (data.active === true) {
                         alert("Ce pseudo est déjà utilisé !");

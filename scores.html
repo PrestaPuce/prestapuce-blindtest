@@ -152,22 +152,26 @@
             });
 
             allPlayers.forEach(p => {
-                // On vérifie si le joueur appartient à une équipe (même s'il a quitté)
-                const enEquipe = p.teamName && p.teamName !== "" && p.teamName !== "Solo" && listEquipes.includes(p.teamName);
-                
-                if (enEquipe) {
-                    // RÈGLE : Il est en équipe -> Ses points vont à l'équipe, il n'apparaît JAMAIS seul à droite
-                    let team = rankingMap.get("TEAM_" + p.teamName);
-                    if (team) {
-                        team.pts += (p.pts || 0);
-                        // On n'incrémente le compteur des membres présents que s'il est actif
-                        if (p.active !== false) team.count++;
-                    }
-                } else {
-                    // RÈGLE : Il est Solo -> Il apparaît toujours à droite (actif ou non)
-                    rankingMap.set("SOLO_" + p.name, { name: p.name, pts: (p.pts || 0), avatar: p.avatar, isTeam: false });
-                }
-            });
+    // La variable qui définit tout
+    const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
+
+    if (statutEquipe !== "Solo") {
+        // Il a un statut équipe, il va dans le cumul à droite
+        let team = rankingMap.get("TEAM_" + statutEquipe);
+        if (team) {
+            team.pts += (p.pts || 0);
+            if (p.active !== false) team.count++;
+        }
+    } else {
+        // Il a un statut Solo, il va dans la liste individuelle à droite
+        rankingMap.set("SOLO_" + p.name, { 
+            name: p.name, 
+            pts: (p.pts || 0), 
+            avatar: p.avatar, 
+            isTeam: false 
+        });
+    }
+});
 
             // Tri final par points et affichage
             Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts).forEach(item => {
