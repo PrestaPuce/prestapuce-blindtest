@@ -135,51 +135,37 @@
             });
         }
 
-        function checkPseudo() {
+function checkPseudo() {
             userPseudo = document.getElementById('input-pseudo').value.trim();
-            userTeamName = data.teamName || data.lastTeam || "Solo";
-            userTeamIcon = data.teamIcon || "";
             if(userPseudo.length < 2) return alert("Pseudo trop court !");
 
-            
-
             roomRef.child('scores/' + userPseudo).once('value', snap => {
+                const data = snap.val();
                 const savedPseudo = localStorage.getItem('presta_pseudo');
                 const savedRoom = localStorage.getItem('presta_room');
-                const data = snap.val();
-    if(data) {
-        document.getElementById('user-pts').innerText = (data.pts || 0) + " pts";
-        document.getElementById('user-avatar').innerText = data.avatar || "👤";
 
-        const teamZone = document.getElementById('user-team');
-        // LA VARIABLE DE STATUT
-        const statutEquipe = data.teamName || "Solo";
-
-        if(statutEquipe !== "Solo") {
-            // Affichage : [IMAGE BLASON] Nom de l'équipe
-            const blasonHtml = data.teamIcon ? `<img src="${data.teamIcon}" style="height:20px; vertical-align:middle; margin-right:8px;">` : "";
-            teamZone.innerHTML = `${blasonHtml}${statutEquipe}`;
-        } else {
-            teamZone.innerText = "Mode Solo";
-        }
-    }
                 if(snap.exists()) {
                     if(savedPseudo === userPseudo && savedRoom === roomID) {
                         if(confirm("Reprendre votre partie ?")) {
                             selectedAvatar = data.avatar;
-                            userTeamName = data.teamName || data.lastTeam || "Solo";
-            roomRef.child('scores/' + userPseudo).update({ 
-                 active: true, 
-                 teamName: userTeamName,
-                 teamIcon: userTeamIcon // On remet l'icône aussi pour être sûr
-                 }).then(() => { startBuzzer(); });
+                            // On mémorise l'équipe de la base de données
+                            userTeamName = data.teamName || "Solo";
+                            userTeamIcon = data.teamIcon || "";
+                            
+                            roomRef.child('scores/' + userPseudo).update({ 
+                                active: true,
+                                teamName: userTeamName,
+                                teamIcon: userTeamIcon 
+                            }).then(() => { startBuzzer(); });
                         }
                     } else if (data.active === true) {
                         alert("Ce pseudo est déjà utilisé !");
                     } else {
-                        alert("Ce pseudo appartient à un joueur déconnecté. Utilisez le même appareil.");
+                        alert("Ce pseudo appartient à un joueur déconnecté.");
                     }
-                } else { showScreen('screen-setup'); }
+                } else {
+                    showScreen('screen-setup');
+                }
             });
         }
 
@@ -231,7 +217,34 @@
             kickListener = roomRef.child('scores/' + userPseudo + '/active').on('value', s => { 
                 if(s.val() === false && !localStorage.getItem('leaving')) { alert("Expulsé par le MJ."); location.reload(); }
             });
-            roomRef.child('scores/' + userPseudo + '/pts').on('value', s => { document.getElementById('score').innerText = s.val() || 0; });
+            roomRef.child('scores/' + userPseudo + '/pts').on('value', snap => { 
+            const data = snap.val();
+    if(data) {display-tem
+
+        // Met à jour les variables locales pour que le reste du script soit au courant
+        userTeamName = data.teamName || "Solo";
+        userTeamIcon = data.teamIcon || "";
+        
+        // Met à jour l'affichage sur l'écran du joueur immédiatement
+        const label = document.getElementById('display-team-label');
+        if(label) {
+            label.innerText = (userTeamName === "Solo" || userTeamName === "") ? "Mode Solo" : userTeamName;
+        }
+    }
+});
+            const teamLabel = document.getElementById('display-team-label');
+            const updateTeamDisplay = (name, icon) => {
+                if (name && name !== "Solo" && name !== "") {
+                    const iconHtml = icon ? `<img src="${icon}" style="height:20px; vertical-align:middle; margin-right:8px;">` : "";
+                    teamLabel.innerHTML = `${iconHtml}${name}`;
+                } else {
+                    teamLabel.innerText = "Mode Solo";
+                }
+            };
+            
+            // Premier affichage au lancement
+            updateTeamDisplay(userTeamName, userTeamIcon);
+
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlockedLocally = snap.exists(); updateUI(); });
             roomRef.child('gameState').on('value', snap => {
     const data = snap.val();
@@ -245,6 +258,15 @@
     }
 });
             roomRef.child('buzzers').on('value', snap => { currentWinner = snap.val() ? snap.val().pseudo : null; updateUI(); });
+// Écouteur de statut d'équipe (pour mise à jour immédiate via le MJ)
+    roomRef.child('scores/' + userPseudo).on('value', snap => {
+        const d = snap.val();
+        if(d) {
+            userTeamName = d.teamName || "Solo";
+            userTeamIcon = d.teamIcon || "";
+            document.getElementById('display-team-label').innerText = (userTeamName === "Solo" || userTeamName === "") ? "Mode Solo" : userTeamName;
+        }
+    });
         }
 
         function onBuzzerClick() {
