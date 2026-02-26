@@ -199,7 +199,7 @@ function checkPseudo() {
         function finalizeSetup() {
             if(!selectedAvatar) return;
             const val = document.getElementById('select-team').value.split('|');
-            userTeamName = val[0] || "Solo"; userTeamIcon = val[1] || "";
+            userTeamName = val[0] || null; userTeamIcon = val[1] || "";
             localStorage.setItem('presta_pseudo', userPseudo);
             localStorage.setItem('presta_room', roomID);
             roomRef.child('scores/' + userPseudo).set({ 
@@ -209,6 +209,22 @@ function checkPseudo() {
         }
 
         function startBuzzer() {
+    // On prépare les données à mettre à jour
+    let updates = {
+        avatar: selectedAvatar,
+        active: true
+    };
+
+    // IMPORTANT : On ne définit teamName que si le joueur n'en a pas DU TOUT 
+    // (nouveau joueur). Si la variable contient déjà une équipe, on ne l'écrase pas.
+    if (userTeamName !== null) {
+    updates.teamName = userTeamName;
+    updates.teamIcon = userTeamIcon;
+}   if (!userTeamName || userTeamName === "") {
+        userTeamName = "Solo";
+        updates.teamName = "Solo";
+        updates.teamIcon = "";
+    }
             document.getElementById('display-pseudo').innerText = userPseudo;
             document.getElementById('display-avatar').innerText = selectedAvatar;
             document.getElementById('display-team-label').innerText = (userTeamName === "Solo" || userTeamName === "") ? "Mode Solo" : userTeamName;
@@ -279,15 +295,17 @@ function checkPseudo() {
         }
 
         function leaveGame() {
-            if(confirm("Quitter la partie ?")) {
-                localStorage.setItem('leaving', 'true');
-                if(roomRef && userPseudo) {
-                    roomRef.child('scores/' + userPseudo).update({ active: false, teamName: "" }).then(() => {
-                        localStorage.removeItem('leaving'); location.reload();
-                    });
-                }
-            }
+    if(confirm("Quitter la partie ?")) {
+        localStorage.setItem('leaving', 'true');
+        if(roomRef && userPseudo) {
+            // ON RETIRE "teamName: ''" POUR GARDER L'ÉQUIPE INTACTE DANS LA BASE
+            roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => {
+                localStorage.removeItem('leaving'); 
+                location.reload();
+            });
         }
+    }
+}
 
         function updateUI() {
             const c = document.getElementById('screen-buzzer'); const l = document.getElementById('label');
