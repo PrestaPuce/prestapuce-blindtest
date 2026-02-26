@@ -179,7 +179,9 @@
                     ? `<div class="crest-bg"><img src="${item.icon}"></div>` 
                     : `<span>${item.avatar}</span>`;
                 
-                const finalName = item.isTeam ? `${item.name} (${item.count})` : `${item.name} (Solo)`;
+                // Gestion du singulier/pluriel pour le mot "joueur"
+                const labelJoueur = (item.count === 1) ? "joueur" : "joueurs";
+                const finalName = item.isTeam ? `${item.name} (${item.count} ${labelJoueur})` : `${item.name} (Solo)`;
 
                 gList.innerHTML += `
                     <div class="card">
