@@ -243,9 +243,7 @@ function checkPseudo() {
         
         // Met à jour l'affichage sur l'écran du joueur immédiatement
         const label = document.getElementById('display-team-label');
-        if(label) {
-            label.innerText = (userTeamName === "Solo" || userTeamName === "") ? "Mode Solo" : userTeamName;
-        }
+        updateTeamDisplay(userTeamName, userTeamIcon);
     }
 });
             const teamLabel = document.getElementById('display-team-label');
@@ -276,13 +274,13 @@ function checkPseudo() {
             roomRef.child('buzzers').on('value', snap => { currentWinner = snap.val() ? snap.val().pseudo : null; updateUI(); });
 // Écouteur de statut d'équipe (pour mise à jour immédiate via le MJ)
     roomRef.child('scores/' + userPseudo).on('value', snap => {
-        const d = snap.val();
-        if(d) {
-            userTeamName = d.teamName || "Solo";
-            userTeamIcon = d.teamIcon || "";
-            document.getElementById('display-team-label').innerText = (userTeamName === "Solo" || userTeamName === "") ? "Mode Solo" : userTeamName;
-        }
-    });
+    const d = snap.val();
+    if(d) {
+        userTeamName = d.teamName || "Solo";
+        userTeamIcon = d.teamIcon || "";
+        updateTeamDisplay(userTeamName, userTeamIcon);
+    }
+});
         }
 
         function onBuzzerClick() {
@@ -331,12 +329,30 @@ function handleEndGame() {
     
     roomRef.child('scores').once('value', snap => {
         const scores = snap.val() || {};
-        let results = [];
-        Object.entries(scores).forEach(([p, d]) => { 
-            if(d.active !== false) results.push({name:p, pts:d.pts||0}); 
+        const entityScores = {};
+
+        // 1. On regroupe les points par équipe ou par joueur solo
+        Object.keys(scores).forEach(p => {
+            const d = scores[p];
+            // Si le joueur a une équipe, on prend le nom de l'équipe, sinon son pseudo
+            const team = (d.teamName && d.teamName !== "Solo" && d.teamName !== "") ? d.teamName : p;
+            
+            if (!entityScores[team]) {
+                entityScores[team] = 0;
+            }
+            entityScores[team] += (d.pts || 0);
         });
-        results.sort((a,b) => b.pts - a.pts);
-        const rank = results.findIndex(r => r.name === userPseudo) + 1;
+
+        // 2. On transforme en tableau et on trie du plus grand au plus petit
+        const leaderboard = Object.keys(entityScores).map(name => {
+            return { name: name, pts: entityScores[name] };
+        }).sort((a, b) => b.pts - a.pts);
+
+        // 3. On définit l'identité du joueur actuel (Equipe ou Pseudo)
+        const myEntity = (userTeamName && userTeamName !== "Solo" && userTeamName !== "") ? userTeamName : userPseudo;
+        
+        // 4. On trouve le rang réel dans le classement général
+        const rank = leaderboard.findIndex(e => e.name === myEntity) + 1;
 
         let content = "";
         if(rank === 1) {
@@ -363,6 +379,7 @@ function handleEndGame() {
         } else {
             content = `<h1 style="color:#7f8c8d;">FIN DE PARTIE</h1><p>Merci d'avoir joué !</p>`;
         }
+        
         pZone.innerHTML = content + `<button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#3498db; color:white; border:none; border-radius:5px;">RETOUR</button>`;
     });
 }
