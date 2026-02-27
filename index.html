@@ -100,7 +100,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // AJOUT : La variable isBlocked pour suivre l'état du joueur
         let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
@@ -261,7 +260,6 @@
                 }
             });
 
-            // AJOUT : L'écouteur qui vérifie en direct si le MJ a bloqué ce joueur
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => {
                 isBlocked = snap.exists(); 
                 updateUI();
@@ -272,7 +270,6 @@
             if(event) event.preventDefault();
             document.getElementById('sound-click').play().catch(()=>{});
             
-            // AJOUT : On vérifie bien que !isBlocked avant de laisser la requête partir
             if(gameState === "ready" && !currentWinner && !isBlocked) {
                 roomRef.child('gameState').update({ status: 'taken' });
                 roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
@@ -283,7 +280,6 @@
             const c = document.getElementById('screen-buzzer'); const l = document.getElementById('label');
             c.classList.remove('ready', 'main-prise', 'blocked');
             
-            // MODIFICATION : L'ordre de vérification. Si le joueur est bloqué, c'est prioritaire sur le mode ready.
             if (currentWinner) {
                 if(currentWinner === userPseudo) { c.classList.add('main-prise'); l.innerText = "C'EST À TOI !"; }
                 else { l.innerText = "OCCUPÉ"; }
@@ -327,7 +323,12 @@
         function leaveGame() {
             if(confirm("Voulez-vous vraiment quitter la partie ?")) {
                 if(roomRef && userPseudo) {
+                    // MODIFICATION : On arrête d'écouter le changement de statut pour éviter l'alerte d'expulsion
+                    roomRef.child('scores/' + userPseudo + '/active').off();
+                    
                     roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => {
+                        // MODIFICATION : Message informatif personnalisé pour un départ volontaire
+                        alert("Vous avez quitté la partie.\n\nSachez que vous pourrez revenir avec le même pseudo pour récupérer votre score !");
                         location.reload();
                     });
                 } else {
