@@ -16,12 +16,6 @@
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s; text-transform: uppercase; margin-bottom: 10px; position: relative; top: 0; box-shadow: 0 4px rgba(0,0,0,0.3); }
         button:active:not(:disabled) { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; }
-        
-        /* STYLE FORCÉ POUR LES OPTIONS DE CONNEXION */
-        .login-options { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 15px; width: 100%; }
-        .show-pass-container { display: flex !important; align-items: center !important; gap: 10px; font-size: 0.9rem; color: #ccc; cursor: pointer; }
-        .show-pass-container input { width: 18px !important; height: 18px !important; margin: 0 !important; cursor: pointer; }
-        
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
         .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 150px; overflow-y: auto; }
@@ -30,31 +24,28 @@
         .crest-opt { width: 30px; height: 30px; object-fit: contain; }
         .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 20px 0; text-align: center; display: none; }
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .team-item { display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin-bottom: 8px; justify-content: space-between; }
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; }
+        .crest-mini-bg { background: white; padding: 2px; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; }
+        .crest-mini { width: 22px; height: 22px; object-fit: contain; }
+        .btn-icon { cursor: pointer; font-weight: bold; font-size: 1.1rem; margin-left: 10px; transition: 0.2s; }
+        .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border: none; border-radius: 4px; color: white; cursor: pointer; }
+        .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: #34495e; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
+        .upload-zone { margin: 10px 0; padding: 10px; border: 2px dashed var(--mj-color); border-radius: 8px; text-align: center; background: rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
-        <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg);">
+        <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;">
     </div>
 
     <div id="screen-login" class="box">
         <img id="login-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px; border-radius: 10px;">
         <h2>Accès MJ Sécurisé</h2>
-        
         <input type="email" id="mj-email" placeholder="Email MJ">
         <input type="password" id="mj-pass" placeholder="Mot de passe">
-        
-        <div class="login-options">
-            <label class="show-pass-container">
-                <input type="checkbox" onchange="document.getElementById('mj-pass').type = this.checked ? 'text' : 'password'"> Afficher le mot de passe
-            </label>
-        </div>
-
         <button id="btn-login-submit" onclick="login()">Se Connecter</button>
-        
-        <p onclick="forgotPassword()" style="color:var(--accent); cursor:pointer; font-size:0.85rem; text-decoration: underline; margin-top: 15px; font-weight: bold;">Mot de passe oublié ?</p>
     </div>
 
     <div id="screen-choice" class="box" style="display:none;">
@@ -86,8 +77,13 @@
         <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-top: 20px;">
             <h3>Gestion Équipes</h3>
             <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()">
+            <div class="upload-zone">
+                <label for="upload-logo" style="cursor:pointer; font-weight:bold; color:var(--mj-color); font-size:0.8rem;">➕ AJOUTER UN BLASON</label>
+                <input type="file" id="upload-logo" accept="image/*" style="display:none;" onchange="uploadCustomTeamLogo(this)">
+            </div>
             <div class="crest-picker" id="crest-grid"></div>
             <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
+            <div id="mj-team-list-display"></div>
         </div>
 
         <h3>Lobby Joueurs</h3>
@@ -98,7 +94,11 @@
             <div id="banned-list"></div>
         </div>
 
-        <div style="margin-top:20px; border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 12px;">
+        <div style="margin-top:20px; padding: 15px; border: 2px solid var(--gold); border-radius: 12px; text-align: center;">
+            <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black;" onclick="triggerEndGame()">🏁 Fin de partie</button>
+        </div>
+        
+        <div style="margin-top:40px; border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 12px;">
             <button style="background:var(--blue);" onclick="quitRoom()">🚪 Quitter la console</button>
             <button style="background:var(--danger);" onclick="resetFullGame()">⚠️ SUPPRIMER LA SALLE</button>
         </div>
@@ -115,34 +115,23 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
+        const storage = firebase.storage();
 
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {}, currentBlocked = {}, mjProfileData = {};
 
         const defaultCrests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png"];
 
-        // ENTER TO LOGIN
-        document.getElementById('mj-pass').addEventListener('keypress', (e) => { if (e.key === 'Enter') login(); });
-
         function login() {
             const email = document.getElementById('mj-email').value.trim();
             const pass = document.getElementById('mj-pass').value;
-            if(!email || !pass) return;
             auth.signInWithEmailAndPassword(email, pass).then(res => {
                 db.ref('users/' + res.user.uid).once('value', snap => {
                     mjProfileData = snap.val() || {};
                     document.getElementById('mj-display-name').innerText = mjProfileData.prenom || "MJ";
                     checkUserRoom(res.user.uid);
                 });
-            }).catch(() => alert("Email ou mot de passe incorrect."));
-        }
-
-        function forgotPassword() {
-            const email = document.getElementById('mj-email').value.trim();
-            if(!email) return alert("Veuillez saisir votre email dans le champ ci-dessus.");
-            auth.sendPasswordResetEmail(email).then(() => {
-                alert("Email de réinitialisation envoyé !");
-            }).catch(e => alert("Erreur : " + e.message));
+            }).catch(() => alert("Erreur connexion"));
         }
 
         function checkUserRoom(uid) {
@@ -203,57 +192,89 @@
                 const d = allPlayersData[pseudo];
                 if(d.kicked === true) {
                     hasBanned = true;
-                    bList.innerHTML += `<div class="score-row"><span>${pseudo}</span><button style="background:var(--mj-color); width:auto; padding:5px 10px;" onclick="unkickPlayer('${pseudo}')">Réhabiliter</button></div>`;
+                    bList.innerHTML += `<div class="team-item"><span>${pseudo}</span><button style="background:var(--mj-color); width:auto; padding:5px 10px;" onclick="unkickPlayer('${pseudo}')">Réhabiliter</button></div>`;
                     return;
                 }
                 if(d.active === false) return;
+
                 const isBlocked = currentBlocked[pseudo];
                 l.innerHTML += `<div class="score-row">
                     <span><b>${pseudo}</b> (${d.pts || 0} pts)</span>
-                    <div style="display:flex; gap:5px;">
-                        <button style="background:${isBlocked ? 'var(--danger)' : 'gray'}; width:35px; padding:5px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button>
-                        <button style="background:var(--mj-color); width:35px; padding:5px;" onclick="adj('${pseudo}',1)">+</button>
-                        <button style="background:var(--danger); width:35px; padding:5px;" onclick="kickPlayer('${pseudo}')">✖</button>
+                    <div class="player-controls">
+                        <button class="lobby-btn" style="background:${isBlocked ? 'var(--danger)' : 'gray'}" onclick="toggleBlockPlayer('${pseudo}')">🛑</button>
+                        <button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${pseudo}',1)">+</button>
+                        <button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${pseudo}')">✖</button>
                     </div>
                 </div>`;
             });
             document.getElementById('banned-section').style.display = hasBanned ? "block" : "none";
         }
 
+        // --- FONCTIONS ACTIONS MJ ---
+
         function kickPlayer(p) {
-            if(confirm("Expulser " + p + " ?")) {
+            if(confirm("Expulser " + p + " ? Le joueur devra valider le message pour quitter.")) {
+                // 1. On active le drapeau kicked
                 roomRef.child('scores/' + p).update({ kicked: true }).then(() => {
+                    // 2. On laisse le temps à l'alerte de s'afficher avant de marquer inactif
                     setTimeout(() => { roomRef.child('scores/' + p).update({ active: false }); }, 1500);
                 });
             }
         }
+
         function unkickPlayer(p) { roomRef.child('scores/' + p).update({ kicked: false, active: false }); }
-        function statusUpdate(st) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); }
-        function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
+
+        function statusUpdate(st) { 
+            roomRef.child('gameState').set({ status: st }); 
+            if(st === 'ready') roomRef.child('buzzers').remove(); 
+        }
+
+        function fullReset() { 
+            roomRef.child('blockedPlayers').remove(); 
+            roomRef.child('buzzers').remove(); 
+            statusUpdate('waiting'); 
+        }
+
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
+
         function handleReward(pts, mode) {
             roomRef.child('scores/' + currentPlayer.pseudo + '/pts').transaction(x => (x||0)+pts);
-            if(mode === 'partial') { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); } else fullReset();
+            if(mode === 'partial') {
+                roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
+                statusUpdate('ready');
+            } else fullReset();
         }
-        function handleError() { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); }
+
+        function handleError() {
+            roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
+            statusUpdate('ready');
+        }
+
         function toggleBlockPlayer(p) {
             if(currentBlocked[p]) roomRef.child('blockedPlayers/' + p).remove();
             else roomRef.child('blockedPlayers/' + p).set(true);
         }
+
         function triggerEndGame() {
-            if(confirm("Fin de partie ?")) {
+            if(confirm("Fin de partie ? Les scores seront figés.")) {
                 roomRef.child('gameState').set({ status: 'endGame' });
                 roomRef.child('buzzers').remove();
             }
         }
+
         function resetFullGame() {
-            if(confirm("Supprimer la salle ?")) {
+            if(confirm("⚠️ Supprimer définitivement cette salle ?")) {
                 roomRef.remove();
                 db.ref('activeRooms/' + roomID).remove();
                 db.ref('users/' + auth.currentUser.uid + '/lastRoom').remove().then(() => location.reload());
             }
         }
-        function quitRoom() { if(confirm("Quitter la console ?")) location.reload(); }
+
+        function quitRoom() {
+            if(confirm("Quitter la console ? (La salle reste active)")) {
+                location.reload();
+            }
+        }
 
         function loadCrestGrid() {
             const grid = document.getElementById('crest-grid');
@@ -271,7 +292,11 @@
                 grid.appendChild(wrap);
             });
         }
-        function checkTeamForm() { document.getElementById('btn-add-team').disabled = !document.getElementById('t-name').value.trim() || !selCrest; }
+
+        function checkTeamForm() {
+            document.getElementById('btn-add-team').disabled = !document.getElementById('t-name').value.trim() || !selCrest;
+        }
+
         function addTeam() {
             const n = document.getElementById('t-name').value.trim();
             roomRef.child('teams/' + n).set({ icon: selCrest });
