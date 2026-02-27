@@ -113,7 +113,7 @@
             <button style="background:var(--danger); flex:1;" onclick="fullReset()">RESET TITRE</button>
         </div>
         <div id="player-box" class="current-player">
-            <div id="p-avatar" style="font-size:3.5rem; display:flex; justify-content:center; align-items:center;"></div>
+            <div id="p-avatar" style="font-size:3.5rem"></div>
             <h2 id="p-name" style="margin:5px 0;"></h2>
             <div id="p-team" style="display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; margin-bottom: 10px;"></div>
             <div class="action-grid">
@@ -170,7 +170,7 @@
 
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {};
-        let currentBlocked = {};
+        let currentBlocked = {}; // NOUVEAU : Suivi des joueurs bloqués localement pour le MJ
         let editingTeamKey = null;
         let mjProfileData = {};
 
@@ -447,14 +447,7 @@
                     const pseudo = buzzerData.pseudo;
                     const realData = allPlayersData[pseudo] || buzzerData;
                     currentPlayer = realData; currentPlayer.pseudo = pseudo;
-                    
-                    const avatarContainer = document.getElementById('p-avatar');
-                    if(realData.avatar && realData.avatar.startsWith('data:image')) {
-                        avatarContainer.innerHTML = `<img src="${realData.avatar}" style="width:70px; height:70px; border-radius:50%; object-fit:cover;">`;
-                    } else {
-                        avatarContainer.innerHTML = realData.avatar || '👤'; 
-                    }
-
+                    document.getElementById('p-avatar').innerText = realData.avatar; 
                     document.getElementById('p-name').innerText = pseudo; 
                     box.style.display = "block";
                     if(realData.teamName && realData.teamName !== "Solo") {
@@ -465,6 +458,8 @@
             });
             roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
             roomRef.child('scores').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
+            
+            // Écouteur pour savoir qui est bloqué (pour l'UI du MJ)
             roomRef.child('blockedPlayers').on('value', snap => {
                 currentBlocked = snap.val() || {};
                 renderLobby();
@@ -494,27 +489,22 @@
                 let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
                 Object.keys(globalTeams).forEach(t => { teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; });
                 
+                // Style dynamique pour le bouton "Bloquer"
                 const isBlocked = currentBlocked[pseudo];
                 const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
-                
-                let avHtml = "";
-                if(d.avatar && d.avatar.startsWith('data:image')) {
-                    avHtml = `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">`;
-                } else {
-                    avHtml = `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
-                }
+                const blockTitle = isBlocked ? "Débloquer" : "Bloquer pour ce titre";
 
                 l.innerHTML += `
                     <div class="score-row">
                         <div style="display:flex; align-items:center; flex:1; overflow:hidden;">
-                            ${avHtml}
+                            <span style="font-size:1.2rem; margin-right:8px; flex-shrink:0;">${d.avatar}</span>
                             <b style="margin-right:10px;">${pseudo}</b>
                             <select class="mini-select" onchange="togglePlayerTeam('${pseudo}', this.value)">${teamOptions}</select>
                         </div>
                         <div class="player-controls">
                             <span>(${d.pts || 0} pts)</span>
                             <button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${pseudo}')" title="Forcer la main">⚡</button>
-                            <button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button>
+                            <button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')" title="${blockTitle}">🛑</button>
                             <button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${pseudo}',-1)">-</button>
                             <button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${pseudo}',1)">+</button>
                             <button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${pseudo}')">✖</button>
@@ -523,9 +513,13 @@
             });
         }
 
+        // --- NOUVELLES FONCTIONS DE CONTRÔLE MJ ---
+
+        // 1. Force un joueur à prendre la main
         function forceBuzzer(pseudo) {
             const pData = allPlayersData[pseudo];
             if(!pData) return;
+            // On déclare le joueur comme preneur de main officiel (ferme les autres buzzers)
             roomRef.child('gameState').update({ status: 'taken' });
             roomRef.child('buzzers').set({ 
                 pseudo: pseudo, 
@@ -535,13 +529,15 @@
             });
         }
 
+        // 2. Bloque/Débloque manuellement un joueur
         function toggleBlockPlayer(pseudo) {
             if(currentBlocked[pseudo]) {
-                roomRef.child('blockedPlayers/' + pseudo).remove(); 
+                roomRef.child('blockedPlayers/' + pseudo).remove(); // Débloque si déjà bloqué
             } else {
-                roomRef.child('blockedPlayers/' + pseudo).set(true); 
+                roomRef.child('blockedPlayers/' + pseudo).set(true); // Bloque
             }
         }
+        // ------------------------------------------
 
         function triggerEndGame() {
             if(confirm("Voulez-vous figer les scores et enregistrer l'historique pour ce MJ ?")) {

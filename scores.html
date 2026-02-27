@@ -10,220 +10,235 @@
     <style>
         :root { --bg-color: #1a1a1a; --accent: #f1c40f; --card-bg: rgba(44, 62, 80, 0.7); --gold: #f1c40f; }
         body { margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at center, #2c3e50 0%, #1a1a1a 100%); color: white; height: 100vh; overflow: hidden; box-sizing: border-box; }
+        .header-scores { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; gap: 20px; }
+        .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; height: calc(100vh - 150px); }
+        .column-title { text-align: center; font-size: 1.8rem; color: var(--accent); text-transform: uppercase; margin-bottom: 15px; border-bottom: 2px solid var(--accent); }
         
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .mj-logo-display { width: 60px; height: 60px; object-fit: contain; border-radius: 10px; background: rgba(0,0,0,0.5); padding: 5px; }
-        .room-badge { background: var(--accent); color: black; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 1.5rem; letter-spacing: 2px; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3); }
+        .card { background: var(--card-bg); display: flex; align-items: center; padding: 10px 20px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid var(--accent); height: 70px; transition: all 0.3s ease; }
+        .avatar, .crest { font-size: 2.2rem; width: 65px; display: flex; justify-content: center; align-items: center; }
+        .crest-bg { background: white; padding: 4px; border-radius: 8px; display: flex; }
+        .crest img { width: 45px; height: 45px; object-fit: contain; }
+        .info { flex: 1; margin-left: 15px; }
+        .pts { font-size: 2rem; font-weight: 900; background: rgba(0,0,0,0.4); padding: 5px 15px; border-radius: 10px; color: var(--accent); }
         
-        .layout { display: flex; gap: 20px; height: calc(100vh - 100px); }
-        
-        .left-panel { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .buzz-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .buzz-avatar { font-size: 8rem; margin-bottom: 20px; filter: drop-shadow(0 0 20px rgba(241,196,15,0.5)); animation: pulse 1s infinite alternate; }
-        .buzz-img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 5px solid var(--accent); margin-bottom: 20px; box-shadow: 0 0 30px rgba(241,196,15,0.6); animation: pulse 1s infinite alternate; }
-        .buzz-name { font-size: 3rem; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 2px; margin: 0; }
-        .buzz-team { font-size: 1.5rem; color: var(--accent); margin-top: 10px; }
-        
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
-        
-        .right-panel { width: 400px; background: rgba(0,0,0,0.4); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); }
-        .leaderboard-title { text-align: center; color: var(--accent); font-size: 1.5rem; margin-top: 0; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        
-        .list-container { flex: 1; overflow-y: auto; padding-right: 10px; }
-        .list-container::-webkit-scrollbar { width: 8px; }
-        .list-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-        
-        .score-card { background: var(--card-bg); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s; border-left: 5px solid transparent; }
-        .winner-card { border-left-color: var(--gold); background: rgba(241, 196, 15, 0.1); }
-        .buzzing-card { border-left-color: #e74c3c; background: rgba(231, 76, 60, 0.2); transform: translateX(-10px); }
-        
-        .rank { font-size: 1.5rem; font-weight: bold; color: rgba(255,255,255,0.5); width: 40px; }
-        .avatar-circle { width: 45px; height: 45px; border-radius: 50%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-right: 15px; overflow: hidden; }
-        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
-        .player-info { flex: 1; text-align: left; overflow: hidden; }
-        .p-name { font-size: 1.2rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .p-team { font-size: 0.8rem; color: #aaa; }
-        .p-score { font-size: 1.8rem; font-weight: 900; color: var(--accent); }
-        .p-score span { font-size: 0.8rem; color: white; font-weight: normal; }
+        #qr-box { position: fixed; bottom: 20px; right: 20px; background: white; padding: 10px; border-radius: 10px; text-align: center; color: black; z-index: 100; }
+        .last-buzzed { border: 5px solid #2ecc71 !important; transform: scale(1.02); background: rgba(46, 204, 113, 0.4); box-shadow: 0 0 20px #2ecc71; }
+        .inactive-card { opacity: 0.4; filter: grayscale(1); border-left-color: #7f8c8d; }
 
-        .qr-container { position: absolute; bottom: 20px; left: 20px; background: white; padding: 10px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        /* Hall of Fame Style */
+        #hof-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
+        .hof-content { width: 500px; background: #2c3e50; padding: 30px; border-radius: 20px; border: 3px solid var(--accent); }
+        .hof-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.2rem; }
         
-        #hof-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; }
-        .hof-box { background: var(--card-bg); padding: 40px; border-radius: 20px; width: 80%; max-width: 600px; text-align: center; border: 2px solid var(--accent); }
-        .hof-title { color: var(--accent); font-size: 2.5rem; margin-top: 0; }
-        .hof-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.2rem; }
+        #btn-hof { position: fixed; bottom: 20px; left: 20px; background: var(--card-bg); border: 1px solid var(--accent); color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer; z-index: 100; font-size: 0.8rem; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <img id="mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" class="mj-logo-display">
-        <div class="room-badge">SALLE : <span id="room-id-display">----</span></div>
-        <button onclick="toggleHOF()" style="background:var(--accent); border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">🏆 Hall of Fame</button>
+
+    <div class="header-scores">
+        <a id="mj-logo-link" href="#" target="_blank" style="pointer-events: none;">
+            <img id="display-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; height:70px; object-fit:contain; border-radius:8px;">
+        </a>
+        <h1 style="margin:0;">SALLE : <span id="room-title" style="color:var(--accent)">----</span></h1>
     </div>
 
-    <div class="layout">
-        <div class="left-panel">
-            <h2 style="margin:0; color:rgba(255,255,255,0.5); text-align:center;">BUZZER ACTUEL</h2>
-            <div class="buzz-zone" id="current-buzz-display">
-                <div style="color:rgba(255,255,255,0.2); font-size:2rem; font-style:italic;">En attente...</div>
-            </div>
-            
-            <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
-                <h4 style="margin:0 0 10px 0; color:#aaa;">Ordre de buzz :</h4>
-                <div id="buzz-history" style="display:flex; gap:10px; overflow-x:auto;"></div>
-            </div>
+    <div class="main-container">
+        <div>
+            <div class="column-title">Joueurs</div>
+            <div id="player-list"></div>
         </div>
-
-        <div class="right-panel">
-            <h2 class="leaderboard-title">CLASSEMENT</h2>
-            <div class="list-container" id="leaderboard">
-                </div>
+        <div>
+            <div class="column-title">Classement Général</div>
+            <div id="global-list"></div>
         </div>
     </div>
 
-    <div class="qr-container" id="qrcode"></div>
+    <div id="qr-box">
+        <div id="qrcode"></div>
+        <div style="font-size: 0.7rem; font-weight: bold; margin-top: 5px;">REJOINDRE</div>
+    </div>
 
-    <div id="hof-overlay">
-        <div class="hof-box">
-            <h2 class="hof-title">🏆 HALL OF FAME 🏆</h2>
-            <p style="color:#aaa; margin-bottom:20px;">Les meilleurs joueurs de tous les temps (Total des points cumulés)</p>
+    <button id="btn-hof" onclick="toggleHOF()">🏆 Hall of Fame</button>
+
+    <div id="hof-overlay" onclick="toggleHOF()">
+        <div class="hof-content" onclick="event.stopPropagation()">
+            <h1 style="color:var(--accent); margin-top:0;">🏆 TOP 10 MONDIAL</h1>
             <div id="hof-list"></div>
-            <button onclick="toggleHOF()" style="margin-top:30px; background:var(--danger); color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">Fermer</button>
+            <button onclick="toggleHOF()" style="margin-top:20px; width:100%; padding:10px; border-radius:10px; border:none; background:var(--accent); font-weight:bold; cursor:pointer;">RETOUR AU JEU</button>
         </div>
     </div>
 
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o",
-            databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app"
+            authDomain: "prestapuce-buzz.firebaseapp.com",
+            databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "prestapuce-buzz",
+            storageBucket: "prestapuce-buzz.firebasestorage.app",
+            messagingSenderId: "907270883505",
+            appId: "1:907270883505:web:197efec0b99db28180ba90",
+            measurementId: "G-J04SC2DFFF"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const roomID = urlParams.get('room');
         
-        let scoresData = {};
-        let teamsData = {};
-        let currentBuzzer = null;
-        let buzzHistory = [];
-        let currentGameState = 'waiting';
-
-        if(roomID) {
-            document.getElementById('room-id-display').innerText = roomID;
-            
-            // Génération QR Code
-            const joinUrl = window.location.origin + window.location.pathname.replace('scores', 'index') + "?room=" + roomID;
-            new QRCode(document.getElementById("qrcode"), { text: joinUrl, width: 100, height: 100 });
-
-            // Logo personnalisé du MJ
-            db.ref('roomsData/' + roomID + '/mjLogo').on('value', snap => {
-                if(snap.exists()) document.getElementById('mj-logo').src = snap.val();
-            });
-
-            // Écoute de l'état global du jeu pour réinitialiser l'historique des buzzs
-            db.ref('roomsData/' + roomID + '/gameState').on('value', snap => {
-                const val = snap.val();
-                const status = val ? val.status : 'waiting';
-                
-                if(status === 'waiting' || status === 'ready') {
-                    if(currentGameState !== 'waiting' && currentGameState !== 'ready') {
-                        buzzHistory = []; // Reset à la nouvelle manche
-                    }
-                }
-                currentGameState = status;
-                updateDisplay();
-            });
-
-            db.ref('roomsData/' + roomID + '/buzzers').on('value', snap => {
-                const val = snap.val();
-                if(val && val.pseudo) {
-                    currentBuzzer = val.pseudo;
-                    if(!buzzHistory.includes(currentBuzzer)) {
-                        buzzHistory.push(currentBuzzer);
-                    }
-                } else {
-                    currentBuzzer = null;
-                }
-                updateDisplay();
-            });
-
-            db.ref('roomsData/' + roomID + '/scores').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
-            db.ref('roomsData/' + roomID + '/teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
+        // --- GESTION DE LA SALLE ---
+        const urlParams = new URLSearchParams(window.location.search);
+        let roomID = urlParams.get('room');
+        
+        if (!roomID) {
+            roomID = prompt("Entrez le nom de la salle :");
+            if (roomID) {
+                window.location.search = "?room=" + roomID;
+            }
         }
+        
+        document.getElementById('room-title').innerText = roomID;
+        const roomRef = db.ref('roomsData/' + roomID);
+        
+        // URL dynamique pour le QR Code (pointe vers ton dossier actuel)
+        const currentPath = window.location.href.split('?')[0].replace('scores', 'index');
+        const playURL = currentPath + "?room=" + roomID;
+        new QRCode(document.getElementById("qrcode"), { text: playURL, width: 110, height: 110 });
+
+        let scoresData = {}, teamsData = {}, currentBuzzer = null;
+
+        let buzzHistory = []; // Pour mémoriser l'ordre de la pile
+
+        // --- ECOUTEUR LOGO MJ ---
+        roomRef.child('mjLogo').on('value', snap => {
+            if(snap.exists()) {
+                document.getElementById('display-mj-logo').src = snap.val();
+                document.getElementById('page-favicon').href = snap.val(); // Change l'icône de l'onglet
+            }
+        });
+        
+        roomRef.child('mjLink').on('value', snap => {
+            const linkElement = document.getElementById('mj-logo-link');
+            if(snap.exists() && snap.val() !== "") {
+                linkElement.href = snap.val();
+                linkElement.style.pointerEvents = "auto";
+                document.getElementById('display-mj-logo').style.cursor = "pointer";
+            } else {
+                linkElement.href = "#";
+                linkElement.style.pointerEvents = "none";
+                document.getElementById('display-mj-logo').style.cursor = "default";
+            }
+        });
 
         function updateDisplay() {
-            // 1. MISE À JOUR DU LEADERBOARD
-            const players = Object.keys(scoresData)
-                .map(p => ({ name: p, ...scoresData[p] }))
-                .filter(p => p.active !== false)
-                .sort((a, b) => b.pts - a.pts);
-
-            const container = document.getElementById('leaderboard');
-            container.innerHTML = "";
+            const pList = document.getElementById('player-list'); pList.innerHTML = "";
+            const gList = document.getElementById('global-list'); gList.innerHTML = "";
             
-            players.forEach((p, i) => {
-                const isWinner = i === 0 && p.pts > 0;
-                const isBuzzing = p.name === currentBuzzer;
+            const listEquipes = Object.keys(teamsData);
+            const allPlayers = Object.entries(scoresData).map(([k,v]) => ({name: k, ...v}));
 
-                // LOGIQUE D'AFFICHAGE DE L'IMAGE BASE64
-                let avatarHtml = p.avatar;
-                if(p.avatar && p.avatar.startsWith('data:image')) {
-                    avatarHtml = `<img src="${p.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
-                }
+            // 1. Liste de GAUCHE (Joueurs) - Tri par pile persistante
+            allPlayers.sort((a, b) => {
+                // Priorité 1 : Les joueurs actifs devant
+                if (a.active !== b.active) return a.active ? -1 : 1;
 
-                container.innerHTML += `
-                    <div class="score-card ${isWinner ? 'winner-card' : ''} ${isBuzzing ? 'buzzing-card' : ''}">
-                        <div class="rank">#${i + 1}</div>
-                        <div class="avatar-circle">${avatarHtml}</div>
-                        <div class="player-info">
-                            <div class="p-name">${p.name}</div>
-                            <div class="p-team">${p.teamName || 'Indépendant'}</div>
-                        </div>
-                        <div class="p-score">${p.pts} <span>pts</span></div>
+                // Priorité 2 : Utilisation de l'historique des buzz pour le tri
+                let indexA = buzzHistory.indexOf(a.name);
+                let indexB = buzzHistory.indexOf(b.name);
+
+                // Si les deux ont buzzé, le plus récent (dernier dans l'array) est en haut
+                if (indexA !== -1 && indexB !== -1) return indexB - indexA;
+                // Si un seul a buzzé, il passe devant
+                if (indexA !== -1) return -1;
+                if (indexB !== -1) return 1;
+
+                // Sinon, ordre d'arrivée
+                return 0;
+            }).forEach(p => {
+                const isInactive = p.active === false;
+                const buzzedClass = (p.name === currentBuzzer) ? "last-buzzed" : "";
+                const inactiveClass = isInactive ? "inactive-card" : "";
+                
+                const enEquipe = p.teamName && listEquipes.includes(p.teamName);
+                const labelSub = enEquipe ? p.teamName : "Solo";
+                
+                pList.innerHTML += `
+                    <div class="card ${buzzedClass} ${inactiveClass}">
+                        <div class="avatar">${p.avatar}</div>
+                        <div class="info"><b>${p.name}</b><br><small>${labelSub}</small></div>
+                        <div class="pts">${p.pts || 0}</div>
                     </div>`;
             });
 
-            // 2. MISE À JOUR DU BUZZER CENTRAL
-            const buzzZone = document.getElementById('current-buzz-display');
-            if(currentBuzzer && scoresData[currentBuzzer]) {
-                const d = scoresData[currentBuzzer];
-                
-                let bigAvatarHtml = `<div class="buzz-avatar">${d.avatar || '👤'}</div>`;
-                if(d.avatar && d.avatar.startsWith('data:image')) {
-                    bigAvatarHtml = `<img src="${d.avatar}" class="buzz-img">`;
-                }
+            // 2. Liste de DROITE (Classement Général)
+            let rankingMap = new Map();
 
-                buzzZone.innerHTML = `
-                    ${bigAvatarHtml}
-                    <h2 class="buzz-name">${currentBuzzer}</h2>
-                    <div class="buzz-team">${d.teamName || 'Solo'}</div>
-                `;
-            } else {
-                buzzZone.innerHTML = `<div style="color:rgba(255,255,255,0.2); font-size:2rem; font-style:italic;">En attente...</div>`;
-            }
+            // Initialisation des équipes
+            listEquipes.forEach(tName => {
+                rankingMap.set("TEAM_" + tName, { name: tName, pts: 0, icon: teamsData[tName].icon, isTeam: true, count: 0 });
+            });
 
-            // 3. MISE À JOUR DE L'HISTORIQUE DE BUZZ
-            const histZone = document.getElementById('buzz-history');
-            histZone.innerHTML = "";
-            buzzHistory.forEach((pName, index) => {
-                const d = scoresData[pName];
-                if(d) {
-                    let smallAvHtml = `<div style="width:40px; height:40px; border-radius:50%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">${d.avatar || '👤'}</div>`;
-                    if(d.avatar && d.avatar.startsWith('data:image')) {
-                        smallAvHtml = `<img src="${d.avatar}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">`;
+            allPlayers.forEach(p => {
+                // La variable qui définit tout
+                const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
+
+                if (statutEquipe !== "Solo") {
+                    // Il a un statut équipe, il va dans le cumul à droite
+                    let team = rankingMap.get("TEAM_" + statutEquipe);
+                    if (team) {
+                        team.pts += (p.pts || 0);
+                        if (p.active !== false) team.count++;
                     }
-
-                    histZone.innerHTML += `
-                        <div style="display:flex; flex-direction:column; align-items:center; opacity:${index === buzzHistory.length-1 ? '1' : '0.5'};">
-                            <div style="font-size:0.7rem; color:#aaa; margin-bottom:2px;">${index+1}</div>
-                            ${smallAvHtml}
-                            <div style="font-size:0.8rem; margin-top:2px;">${pName}</div>
-                        </div>
-                    `;
+                } else {
+                    // Il a un statut Solo, il va dans la liste individuelle à droite
+                    rankingMap.set("SOLO_" + p.name, { 
+                        name: p.name, 
+                        pts: (p.pts || 0), 
+                        avatar: p.avatar, 
+                        isTeam: false 
+                    });
                 }
             });
+
+            // Tri final par points et affichage
+            Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts).forEach(item => {
+                const iconHtml = item.isTeam 
+                    ? `<div class="crest-bg"><img src="${item.icon}"></div>` 
+                    : `<span>${item.avatar}</span>`;
+                
+                // Gestion du singulier/pluriel pour le mot "joueur"
+                const labelJoueur = (item.count === 1) ? "joueur" : "joueurs";
+                const finalName = item.isTeam ? `${item.name} (${item.count} ${labelJoueur})` : `${item.name} (Solo)`;
+
+                gList.innerHTML += `
+                    <div class="card">
+                        <div class="crest">${iconHtml}</div>
+                        <div class="info"><b>${finalName}</b></div>
+                        <div class="pts">${item.pts}</div>
+                    </div>`;
+            });
         }
+        
+        // Mise à jour de l'écouteur de buzz pour gérer l'historique
+        roomRef.child('buzzers').on('value', snap => {
+            const val = snap.val();
+            currentBuzzer = val ? val.pseudo : null;
+            
+            if (currentBuzzer) {
+                // Si le joueur n'est pas déjà dans l'historique, on l'ajoute à la fin (sommet de pile)
+                if (!buzzHistory.includes(currentBuzzer)) {
+                    buzzHistory.push(currentBuzzer);
+                } else {
+                    // S'il y était déjà, on le déplace à la fin pour qu'il redevienne le "plus récent"
+                    buzzHistory = buzzHistory.filter(name => name !== currentBuzzer);
+                    buzzHistory.push(currentBuzzer);
+                }
+            }
+            updateDisplay();
+        });
+
+        roomRef.child('scores').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
+        roomRef.child('teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
+        roomRef.child('buzzers').on('value', snap => {
+            currentBuzzer = snap.exists() ? snap.val().pseudo : null;
+            updateDisplay();
+        });
 
         function toggleHOF() {
             const overlay = document.getElementById('hof-overlay');
@@ -237,12 +252,7 @@
                     let pArr = [];
                     snap.forEach(c => { pArr.push({p:c.val().pseudo, a:c.val().avatar, s:c.val().stats.totalScore}); });
                     pArr.reverse().forEach((player, i) => {
-                        let hofAv = player.a;
-                        if(player.a && player.a.startsWith('data:image')) {
-                            hofAv = `<img src="${player.a}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; vertical-align:middle;">`;
-                        }
-
-                        list.innerHTML += `<div class="hof-item"><span>${i+1}. ${hofAv} <b>${player.p}</b></span><b style="color:var(--accent)">${player.s} pts</b></div>`;
+                        list.innerHTML += `<div class="hof-item"><span>${i+1}. ${player.a} <b>${player.p}</b></span><b style="color:var(--accent)">${player.s} pts</b></div>`;
                     });
                 });
             }
