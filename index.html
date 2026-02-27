@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
-        :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; --danger: #e74c3c; }
+        :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; touch-action: manipulation; }
         .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 95px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; border-bottom: 2px solid rgba(255,255,255,0.1); z-index: 1000; }
         .logo-presta { width: 45px; height: auto; border-radius: 5px; }
@@ -22,11 +22,6 @@
         .avatar-item { width: 60px; height: 60px; background: var(--card-bg); border-radius: 15px; cursor: pointer; border: 3px solid transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 2rem; }
         .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); }
         .avatar-item img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* Menu Source Image */
-        .upload-menu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10001; flex-direction: column; justify-content: center; align-items: center; gap: 15px; }
-        .btn-choice { width: 85%; max-width: 300px; padding: 18px; border-radius: 15px; border: 2px solid var(--primary-color); background: var(--card-bg); color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 1rem; text-transform: uppercase; }
-
         .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; outline: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
         .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
@@ -40,19 +35,6 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-
-    <div id="upload-menu" class="upload-menu" onclick="this.style.display='none'">
-        <h2 style="color:var(--accent-color); margin-bottom: 20px;">SOURCE DE L'IMAGE</h2>
-        <div class="btn-choice" onclick="triggerInput('input-camera')">📸 Prendre une photo</div>
-        <div class="btn-choice" onclick="triggerInput('input-gallery')">🖼️ Galerie Photos</div>
-        <div class="btn-choice" onclick="triggerInput('input-files')">📂 Fichiers du téléphone</div>
-        <button class="btn-ui" style="background:var(--danger); box-shadow:0 8px 0 #c0392b; margin-top:20px; width: 85%;">ANNULER</button>
-    </div>
-
-    <input type="file" id="input-camera" accept="image/*" capture="environment" style="display:none" onchange="handleFileUpload(this)">
-    <input type="file" id="input-gallery" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
-    <input type="file" id="input-files" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
-
     <div id="podium-zone"></div>
     <div class="header-bar">
         <div style="flex:1; line-height: 1.2; display: flex; align-items: center; gap: 10px;">
@@ -84,8 +66,9 @@
         <h3 style="margin:0 0 10px 0;">AVATAR</h3>
         <div class="avatar-scroll">
             <div class="avatar-grid" id="avatar-grid">
-                <div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('upload-menu').style.display='flex'">
+                <div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('file-input').click()">
                     <span style="font-size:2rem;">+</span>
+                    <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
                 </div>
             </div>
         </div>
@@ -131,12 +114,6 @@
             renderAvatarGrid();
         };
 
-        function triggerInput(id) {
-            event.stopPropagation();
-            document.getElementById(id).click();
-            document.getElementById('upload-menu').style.display = 'none';
-        }
-
         function validateRoom() {
             unlockAudio();
             roomID = document.getElementById('room-code-input').value.trim();
@@ -160,7 +137,11 @@
                 roomRef.child('scores/' + userPseudo).once('value', snap => {
                     const data = snap.val();
                     if(data) {
-                        if(data.kicked === true) { alert("Session refusée."); return; }
+                        // RESTAURATION MESSAGE BANNI
+                        if(data.kicked === true) { 
+                            alert("Vous avez été expulsé de cette partie par le MJ. Vous ne pouvez plus rejoindre avec ce pseudo."); 
+                            return; 
+                        }
                         if(confirm("Reprendre votre partie ?")) {
                             selectedAvatar = data.avatar;
                             userTeamName = data.teamName || "Solo";
@@ -169,8 +150,9 @@
                         } else showScreen('screen-setup');
                     } else {
                         roomRef.child('scores').once('value', scoresSnap => {
+                            // RESTAURATION MESSAGE GUEST
                             if(isGuestRoom && scoresSnap.numChildren() >= 10) {
-                                alert("🔒 Limite de 10 joueurs atteinte.");
+                                alert("🔒 Mode Découverte : La limite de 10 joueurs est atteinte.");
                                 return;
                             }
                             showScreen('screen-setup');
@@ -185,7 +167,7 @@
                 const file = input.files[0];
                 const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
                 if (!validImageTypes.includes(file.type)) {
-                    alert("Erreur : Veuillez sélectionner une image valide.");
+                    alert("Erreur : Veuillez choisir un fichier image (JPG, PNG ou WEBP).");
                     input.value = "";
                     return;
                 }
@@ -209,7 +191,7 @@
 
         function renderAvatarGrid(customImg = null) {
             const grid = document.getElementById('avatar-grid');
-            grid.innerHTML = `<div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('upload-menu').style.display='flex'"><span style="font-size:2rem;">+</span></div>`;
+            grid.innerHTML = `<div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('file-input').click()"><span style="font-size:2rem;">+</span><input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)"></div>`;
             if(customImg) {
                 const div = document.createElement('div');
                 div.className = 'avatar-item selected';
@@ -267,8 +249,13 @@
                 if (val && val.pseudo === userPseudo && currentWinner !== userPseudo) document.getElementById('sound-win').play().catch(()=>{});
                 currentWinner = val ? val.pseudo : null; updateUI(); 
             });
+            
+            // RESTAURATION ALERTE BANNI LIVE
             roomRef.child('scores/' + userPseudo + '/kicked').on('value', snap => {
-                if(snap.exists() && snap.val() === true) { location.reload(); }
+                if(snap.exists() && snap.val() === true) { 
+                    alert("Vous avez été expulsé de la partie par le MJ."); 
+                    location.reload(); 
+                }
             });
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
@@ -308,7 +295,8 @@
         }
 
         function leaveGame() {
-            if(confirm("Quitter ?")) {
+            // RESTAURATION MESSAGE QUITTER
+            if(confirm("Voulez-vous vraiment quitter la partie ?\n\nSachez que vous pourrez revenir avec le même appareil et le même pseudo pour récupérer votre score !")) {
                 if(roomRef && userPseudo) {
                     roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => { location.reload(); });
                 } else location.reload();
