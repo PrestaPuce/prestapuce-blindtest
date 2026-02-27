@@ -130,11 +130,17 @@
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return;
             
-            // On vérifie si le joueur existe déjà pour le reconnecter correctement avec ses infos
             roomRef.child('scores/' + userPseudo).once('value', snap => {
                 if(snap.exists()) {
+                    const data = snap.val();
+                    
+                    // NOUVEAU : Vérification stricte de l'expulsion
+                    if(data.kicked === true) {
+                        alert("Vous avez été expulsé de cette partie par le MJ. Vous ne pouvez plus rejoindre avec ce pseudo.");
+                        return; // On bloque la connexion
+                    }
+
                     if(confirm("Reprendre votre partie ?")) {
-                        const data = snap.val();
                         selectedAvatar = data.avatar;
                         userTeamName = data.teamName || "Solo";
                         userTeamIcon = data.teamIcon || "";
@@ -203,7 +209,8 @@
                 avatar: selectedAvatar, 
                 teamName: userTeamName, 
                 teamIcon: userTeamIcon, 
-                active: true 
+                active: true,
+                kicked: false // On initialise kicked à false
             });
             startBuzzer();
         }
@@ -253,8 +260,9 @@
                 currentWinner = val ? val.pseudo : null; updateUI(); 
             });
 
-            roomRef.child('scores/' + userPseudo + '/active').on('value', snap => {
-                if(snap.exists() && snap.val() === false) {
+            // MODIFICATION : On écoute spécifiquement si le MJ a déclenché l'expulsion via la variable "kicked"
+            roomRef.child('scores/' + userPseudo + '/kicked').on('value', snap => {
+                if(snap.exists() && snap.val() === true) {
                     alert("Vous avez été expulsé de la partie par le MJ.");
                     location.reload();
                 }
@@ -323,12 +331,9 @@
         function leaveGame() {
             if(confirm("Voulez-vous vraiment quitter la partie ?")) {
                 if(roomRef && userPseudo) {
-                    // MODIFICATION : On arrête d'écouter le changement de statut pour éviter l'alerte d'expulsion
-                    roomRef.child('scores/' + userPseudo + '/active').off();
-                    
                     roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => {
-                        // MODIFICATION : Message informatif personnalisé pour un départ volontaire
-                        alert("Vous avez quitté la partie.\n\nSachez que vous pourrez revenir avec le même pseudo pour récupérer votre score !");
+                        // NOUVEAU MESSAGE AMICAL avec mention de l'appareil
+                        alert("Vous avez quitté la partie.\n\nSachez que vous pourrez revenir avec le même appareil et le même pseudo pour récupérer votre score !");
                         location.reload();
                     });
                 } else {
