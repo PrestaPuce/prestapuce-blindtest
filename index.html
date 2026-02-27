@@ -51,7 +51,7 @@
 
     <input type="file" id="input-camera" accept="image/*" capture="environment" style="display:none" onchange="handleFileUpload(this)">
     <input type="file" id="input-gallery" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
-    <input type="file" id="input-files" style="display:none" onchange="handleFileUpload(this)">
+    <input type="file" id="input-files" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
 
     <div id="podium-zone"></div>
     <div class="header-bar">
@@ -160,7 +160,7 @@
                 roomRef.child('scores/' + userPseudo).once('value', snap => {
                     const data = snap.val();
                     if(data) {
-                        if(data.kicked === true) { alert("Vous avez été expulsé de cette partie par le MJ."); return; }
+                        if(data.kicked === true) { alert("Session refusée."); return; }
                         if(confirm("Reprendre votre partie ?")) {
                             selectedAvatar = data.avatar;
                             userTeamName = data.teamName || "Solo";
@@ -170,7 +170,7 @@
                     } else {
                         roomRef.child('scores').once('value', scoresSnap => {
                             if(isGuestRoom && scoresSnap.numChildren() >= 10) {
-                                alert("🔒 Mode Découverte : La limite de 10 joueurs est atteinte.");
+                                alert("🔒 Limite de 10 joueurs atteinte.");
                                 return;
                             }
                             showScreen('screen-setup');
@@ -183,9 +183,9 @@
         function handleFileUpload(input) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
-                // SÉCURITÉ : Vérification que c'est une image (pour le choix Fichiers)
-                if (!file.type.startsWith('image/')) {
-                    alert("Erreur : Veuillez sélectionner un fichier image uniquement.");
+                const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+                if (!validImageTypes.includes(file.type)) {
+                    alert("Erreur : Veuillez sélectionner une image valide.");
                     input.value = "";
                     return;
                 }
@@ -229,8 +229,7 @@
         function finalizeSetup() {
             unlockAudio();
             const val = document.getElementById('select-team').value.split('|');
-            userTeamName = val[0];
-            userTeamIcon = val[1] || "";
+            userTeamName = val[0]; userTeamIcon = val[1] || "";
             roomRef.child('scores/' + userPseudo).set({ 
                 pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon, active: true, kicked: false
             });
@@ -240,7 +239,6 @@
         const updateTeamDisplay = (name, icon) => {
             const teamLabel = document.getElementById('display-team-label');
             if (name && name !== "Solo" && name !== "") {
-                // Correction visuelle : fond blanc pour les logos transparents par défaut
                 const iconHtml = (icon && icon !== "") ? `<img src="${icon}" style="height:15px; vertical-align:middle; margin-right:5px; background:white; border-radius:3px; padding:1px;">` : "";
                 teamLabel.innerHTML = `${iconHtml}${name}`;
             } else teamLabel.innerText = "Mode Solo";
@@ -270,7 +268,7 @@
                 currentWinner = val ? val.pseudo : null; updateUI(); 
             });
             roomRef.child('scores/' + userPseudo + '/kicked').on('value', snap => {
-                if(snap.exists() && snap.val() === true) { alert("Vous avez été expulsé de la partie par le MJ."); location.reload(); }
+                if(snap.exists() && snap.val() === true) { location.reload(); }
             });
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
@@ -299,8 +297,7 @@
             const pZone = document.getElementById('podium-zone');
             pZone.style.display = "flex";
             roomRef.child('scores').once('value', snap => {
-                const scores = snap.val() || {};
-                const leaderboard = Object.keys(scores).map(p => ({ name: p, pts: scores[p].pts })).sort((a, b) => b.pts - a.pts);
+                const leaderboard = Object.keys(snap.val() || {}).map(p => ({ name: p, pts: snap.val()[p].pts })).sort((a, b) => b.pts - a.pts);
                 const rank = leaderboard.findIndex(e => e.name === userPseudo) + 1;
                 if(rank === 1) {
                     pZone.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img animate-zoom"><h1 style="color:gold; font-size:2.5rem;">CHAMPION !</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
@@ -311,12 +308,9 @@
         }
 
         function leaveGame() {
-            if(confirm("Quitter la partie ?")) {
+            if(confirm("Quitter ?")) {
                 if(roomRef && userPseudo) {
-                    roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => {
-                        alert("Vous avez quitté la partie.");
-                        location.reload();
-                    });
+                    roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => { location.reload(); });
                 } else location.reload();
             }
         }
