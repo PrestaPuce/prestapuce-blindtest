@@ -11,35 +11,28 @@
         :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; touch-action: manipulation; }
         .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 95px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; border-bottom: 2px solid rgba(255,255,255,0.1); z-index: 1000; }
-        .logo-presta { width: 45px; height: auto; -webkit-tap-highlight-color: transparent; border-radius: 5px; }
+        .logo-presta { width: 45px; height: auto; border-radius: 5px; }
         .screen { display: none; height: 100%; width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; padding-top: 100px; box-sizing: border-box; }
         .active-screen { display: flex !important; }
         input, select { width: 100%; max-width: 280px; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); font-size: 1.1rem; background: var(--card-bg); color: white; text-align: center; outline: none; }
         .btn-ui { width: 100%; max-width: 280px; padding: 18px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: 900; cursor: pointer; background-color: var(--primary-color); color: white; box-shadow: 0 8px 0 #2980b9; text-transform: uppercase; margin-bottom: 10px; }
         .btn-disabled { background-color: #7f8c8d !important; box-shadow: 0 8px 0 #636e72 !important; cursor: not-allowed; opacity: 0.6; }
         
-        /* Styles Avatar */
         .avatar-scroll { width: 100%; max-width: 320px; max-height: 200px; overflow-y: auto; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 20px; }
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .avatar-item { width: 60px; height: 60px; line-height: 60px; font-size: 2rem; background: var(--card-bg); border-radius: 15px; cursor: pointer; border: 3px solid transparent; text-align: center; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); background: rgba(241, 196, 15, 0.2); }
+        .avatar-item { width: 60px; height: 60px; background: var(--card-bg); border-radius: 15px; cursor: pointer; border: 3px solid transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 2rem; }
+        .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); }
         .avatar-item img { width: 100%; height: 100%; object-fit: cover; }
-        .btn-upload-avatar { background: var(--primary-color); font-size: 1.5rem; color: white; font-weight: bold; }
 
-        /* Buzzer */
-        .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; outline: none; -webkit-tap-highlight-color: transparent; transition: transform 0.05s; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .buzzer:active { transform: scale(0.95); box-shadow: 0 5px 0 #c0392b; top: 10px; }
+        .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; outline: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
         .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
         .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; pointer-events: none; }
         
         .buzzer-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.4; }
-        .buzzer-label { position: relative; z-index: 2; color: white; font-size: 1.4rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .buzzer-label { position: relative; z-index: 2; color: white; font-size: 1.4rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
-        .btn-exit { width: 45px; height: 45px; border-radius: 50%; background: #e74c3c; border: none; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-top: 15px; }
         #podium-zone { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; }
-        @keyframes trophyZoom { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 70% { transform: scale(1.4) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
-        .animate-zoom { animation: trophyZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
@@ -47,16 +40,14 @@
     <div id="podium-zone"></div>
     <div class="header-bar">
         <div style="flex:1; line-height: 1.2; display: flex; align-items: center; gap: 10px;">
-            <div id="display-avatar-container" style="width:40px; height:40px; border-radius:50%; overflow:hidden; background: #333; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"></div>
+            <div id="display-avatar-container" style="display:none; width:40px; height:40px; border-radius:50%; overflow:hidden; background: #333; align-items: center; justify-content: center; font-size: 1.2rem;"></div>
             <div>
                 <span id="display-pseudo" style="font-weight: bold;"></span><br>
                 <span id="display-team-label" style="font-size: 0.7rem; color: var(--accent-color); font-style: italic;"></span>
             </div>
         </div>
         <div style="flex:0; padding: 0 10px;">
-            <a id="mj-logo-link" href="#" target="_blank" style="pointer-events: none;">
-                <img id="display-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" class="logo-presta">
-            </a>
+            <img id="display-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" class="logo-presta">
         </div>
         <div style="flex:1; text-align:right; font-size: 0.8rem;" id="display-room-info"></div>
     </div>
@@ -77,7 +68,7 @@
         <h3 style="margin:0 0 10px 0;">AVATAR</h3>
         <div class="avatar-scroll">
             <div class="avatar-grid" id="avatar-grid">
-                <div class="avatar-item btn-upload-avatar" onclick="document.getElementById('file-input').click()">+
+                <div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold;" onclick="document.getElementById('file-input').click()">+
                     <input type="file" id="file-input" accept="image/*" capture="user" style="display:none" onchange="handleFileUpload(this)">
                 </div>
             </div>
@@ -95,10 +86,10 @@
             </button>
         </div>
         <div style="font-weight: bold;">Score : <span id="score" style="color:var(--accent-color)">0</span> pts</div>
-        <button class="btn-exit" onclick="leaveGame()">×</button>
+        <button class="btn-exit" style="width:40px; height:40px; border-radius:50%; background:red; color:white; border:none; margin-top:10px;" onclick="location.reload()">×</button>
     </div>
 
-    <audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+    <audio id="sound-click" src="https://actions.google.com/sounds/v1/ui/pop.ogg" preload="auto"></audio>
     <audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/2831/2831-preview.mp3" preload="auto"></audio>
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
@@ -110,75 +101,25 @@
             projectId: "prestapuce-buzz",
             storageBucket: "prestapuce-buzz.firebasestorage.app",
             messagingSenderId: "907270883505",
-            appId: "1:907270883505:web:197efec0b99db28180ba90",
-            measurementId: "G-J04SC2DFFF"
+            appId: "1:907270883505:web:197efec0b99db28180ba90"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
-        let gameState = "waiting", isBlockedLocally = false, currentWinner = null;
+        let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", selectedAvatar = null;
+        let gameState = "waiting", currentWinner = null;
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
-        // GESTION UPLOAD PHOTO
-        function handleFileUpload(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        // Compression Canvas
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = 150; canvas.height = 150;
-                        ctx.drawImage(img, 0, 0, 150, 150);
-                        const base64 = canvas.toDataURL('image/jpeg', 0.7);
-                        
-                        // Créer l'item dans la grille
-                        selectedAvatar = base64;
-                        renderAvatarGrid(base64);
-                        document.getElementById('btn-final').classList.remove('btn-disabled');
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(input.files[0]);
+        // RECONNAISSANCE QR CODE AUTOMATIQUE
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const r = urlParams.get('room');
+            if(r) { 
+                document.getElementById('room-code-input').value = r; 
+                validateRoom(); 
             }
-        }
-
-        function renderAvatarGrid(customImg = null) {
-            const grid = document.getElementById('avatar-grid');
-            grid.innerHTML = `<div class="avatar-item btn-upload-avatar" onclick="document.getElementById('file-input').click()">+<input type="file" id="file-input" accept="image/*" capture="user" style="display:none" onchange="handleFileUpload(this)"></div>`;
-            
-            if(customImg) {
-                const div = document.createElement('div');
-                div.className = 'avatar-item selected';
-                div.innerHTML = `<img src="${customImg}">`;
-                div.onclick = () => selectAvatar(customImg, div);
-                grid.appendChild(div);
-            }
-
-            avatars.forEach(a => {
-                const div = document.createElement('div');
-                div.className = 'avatar-item' + (selectedAvatar === a ? ' selected' : '');
-                div.innerText = a;
-                div.onclick = () => selectAvatar(a, div);
-                grid.appendChild(div);
-            });
-        }
-
-        function selectAvatar(val, el) {
-            document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedAvatar = val;
-            document.getElementById('btn-final').classList.remove('btn-disabled');
-        }
-
-        function unlockAudio() {
-            ['sound-click', 'sound-win', 'sound-applause'].forEach(id => {
-                const el = document.getElementById(id);
-                el.volume = 0; el.play().then(() => { el.pause(); el.currentTime = 0; el.volume = 1; }).catch(()=>{});
-            });
-        }
+            renderAvatarGrid();
+        };
 
         function validateRoom() {
             unlockAudio();
@@ -187,7 +128,6 @@
             db.ref('activeRooms/' + roomID).once('value', snap => {
                 if(snap.exists()) {
                     roomRef = db.ref('roomsData/' + roomID);
-                    roomRef.child('mjLogo').on('value', snap => { if(snap.exists()) document.getElementById('display-mj-logo').src = snap.val(); });
                     showScreen('screen-login');
                     document.getElementById('display-room-info').innerText = "SALLE " + roomID;
                     listenToTeams();
@@ -199,16 +139,131 @@
             unlockAudio();
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return;
-            roomRef.child('scores/' + userPseudo).once('value', snap => {
-                if(snap.exists()) {
-                    if(confirm("Reprendre votre partie ?")) {
-                        selectedAvatar = snap.val().avatar;
-                        startBuzzer();
-                    }
-                } else showScreen('screen-setup');
+            showScreen('screen-setup');
+        }
+
+        function handleFileUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 120; canvas.height = 120; // Plus petit pour éviter les bugs d'affichage capture
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, 120, 120);
+                        selectedAvatar = canvas.toDataURL('image/jpeg', 0.6); // Compression forte pour la base de données
+                        renderAvatarGrid(selectedAvatar);
+                        document.getElementById('btn-final').classList.remove('btn-disabled');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function renderAvatarGrid(customImg = null) {
+            const grid = document.getElementById('avatar-grid');
+            grid.innerHTML = `<div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold;" onclick="document.getElementById('file-input').click()">+<input type="file" id="file-input" accept="image/*" capture="user" style="display:none" onchange="handleFileUpload(this)"></div>`;
+            if(customImg) {
+                const div = document.createElement('div');
+                div.className = 'avatar-item selected';
+                div.innerHTML = `<img src="${customImg}">`;
+                div.onclick = () => { selectedAvatar = customImg; renderAvatarGrid(customImg); };
+                grid.appendChild(div);
+            }
+            avatars.forEach(a => {
+                const div = document.createElement('div');
+                div.className = 'avatar-item' + (selectedAvatar === a ? ' selected' : '');
+                div.innerText = a;
+                div.onclick = () => { selectedAvatar = a; renderAvatarGrid(customImg); document.getElementById('btn-final').classList.remove('btn-disabled'); };
+                grid.appendChild(div);
             });
         }
 
+        function finalizeSetup() {
+            unlockAudio();
+            const val = document.getElementById('select-team').value.split('|');
+            userTeamName = val[0];
+            roomRef.child('scores/' + userPseudo).set({ 
+                pts: 0, avatar: selectedAvatar, teamName: userTeamName, active: true
+            });
+            startBuzzer();
+        }
+
+        function startBuzzer() {
+            const avatarContainer = document.getElementById('display-avatar-container');
+            avatarContainer.style.display = "flex"; // On ne l'affiche qu'ici pour éviter le rond noir au début
+            if(selectedAvatar.startsWith('data:image')) avatarContainer.innerHTML = `<img src="${selectedAvatar}" style="width:100%; height:100%; object-fit:cover;">`;
+            else avatarContainer.innerText = selectedAvatar;
+
+            document.getElementById('display-pseudo').innerText = userPseudo;
+            document.getElementById('display-team-label').innerText = userTeamName === "Solo" ? "" : userTeamName;
+            
+            if(selectedAvatar.startsWith('data:image')) {
+                document.getElementById('buzzer-img-placeholder').innerHTML = `<img src="${selectedAvatar}" class="buzzer-img">`;
+            }
+
+            showScreen('screen-buzzer');
+            roomRef.child('scores/' + userPseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
+            roomRef.child('gameState').on('value', snap => {
+                if(snap.val() && snap.val().status === 'endGame') handleEndGame();
+                else { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); }
+            });
+
+            roomRef.child('buzzers').on('value', snap => { 
+                const val = snap.val();
+                if (val && val.pseudo === userPseudo && currentWinner !== userPseudo) {
+                    document.getElementById('sound-win').play().catch(()=>{});
+                }
+                currentWinner = val ? val.pseudo : null; updateUI(); 
+            });
+        }
+
+        function onBuzzerClick(event) {
+            if(event) event.preventDefault();
+            document.getElementById('sound-click').play().catch(()=>{});
+            if(gameState === "ready" && !currentWinner) {
+                roomRef.child('gameState').update({ status: 'taken' });
+                roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName });
+            }
+        }
+
+        function updateUI() {
+            const c = document.getElementById('screen-buzzer'); const l = document.getElementById('label');
+            c.classList.remove('ready', 'main-prise');
+            if (currentWinner) {
+                if(currentWinner === userPseudo) { c.classList.add('main-prise'); l.innerText = "C'EST À TOI !"; }
+                else { l.innerText = "OCCUPÉ"; }
+            } else if(gameState === 'ready') { c.classList.add('ready'); l.innerText = "BUZZEZ !"; }
+            else { l.innerText = "ATTENDEZ"; }
+        }
+
+        function handleEndGame() {
+            const pZone = document.getElementById('podium-zone');
+            pZone.style.display = "flex";
+            roomRef.child('scores').once('value', snap => {
+                const scores = snap.val() || {};
+                const leaderboard = Object.keys(scores).map(p => ({ name: p, pts: scores[p].pts })).sort((a, b) => b.pts - a.pts);
+                const rank = leaderboard.findIndex(e => e.name === userPseudo) + 1;
+                if(rank === 1) {
+                    pZone.innerHTML = `<h1 style="color:gold">CHAMPION !</h1><button onclick="location.reload()" class="btn-ui">RETOUR</button>`;
+                    document.getElementById('sound-applause').play().catch(()=>{});
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                } else {
+                    pZone.innerHTML = `<h1 style="color:white">${rank}ème PLACE</h1><button onclick="location.reload()" class="btn-ui">RETOUR</button>`;
+                }
+            });
+        }
+
+        function unlockAudio() {
+            ['sound-click', 'sound-win', 'sound-applause'].forEach(id => {
+                const el = document.getElementById(id);
+                el.play().then(() => { el.pause(); el.currentTime = 0; }).catch(()=>{});
+            });
+        }
+
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById(id).classList.add('active-screen'); }
         function listenToTeams() {
             roomRef.child('teams').on('value', snap => {
                 const select = document.getElementById('select-team');
@@ -221,97 +276,6 @@
                 });
             });
         }
-
-        function finalizeSetup() {
-            unlockAudio();
-            const val = document.getElementById('select-team').value.split('|');
-            userTeamName = val[0]; userTeamIcon = val[1];
-            roomRef.child('scores/' + userPseudo).set({ 
-                pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon, active: true
-            });
-            startBuzzer();
-        }
-
-        function startBuzzer() {
-            const avatarContainer = document.getElementById('display-avatar-container');
-            if(selectedAvatar.startsWith('data:image')) avatarContainer.innerHTML = `<img src="${selectedAvatar}" style="width:100%; height:100%; object-fit:cover;">`;
-            else avatarContainer.innerText = selectedAvatar;
-
-            document.getElementById('display-pseudo').innerText = userPseudo;
-            document.getElementById('display-team-label').innerText = userTeamName === "Solo" ? "" : userTeamName;
-            
-            // Image sur le buzzer
-            const buzzerPlaceholder = document.getElementById('buzzer-img-placeholder');
-            if(selectedAvatar.startsWith('data:image')) buzzerPlaceholder.innerHTML = `<img src="${selectedAvatar}" class="buzzer-img">`;
-
-            showScreen('screen-buzzer');
-            roomRef.child('scores/' + userPseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
-            roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlockedLocally = snap.exists(); updateUI(); });
-            roomRef.child('gameState').on('value', snap => {
-                if(snap.val() && snap.val().status === 'endGame') handleEndGame();
-                else { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); }
-            });
-
-            roomRef.child('buzzers').on('value', snap => { 
-                const val = snap.val();
-                if (val && val.pseudo === userPseudo && currentWinner !== userPseudo) {
-                    document.getElementById('sound-win').play().catch(()=>{});
-                    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]); 
-                }
-                currentWinner = val ? val.pseudo : null; updateUI(); 
-            });
-        }
-
-        function onBuzzerClick(event) {
-            if(event) event.preventDefault();
-            document.getElementById('sound-click').currentTime = 0;
-            document.getElementById('sound-click').play().catch(()=>{});
-            if (navigator.vibrate) navigator.vibrate(30);
-            if(gameState === "ready" && !isBlockedLocally && !currentWinner) {
-                roomRef.child('gameState').update({ status: 'taken' });
-                roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
-            }
-        }
-
-        function updateUI() {
-            const c = document.getElementById('screen-buzzer'); const l = document.getElementById('label');
-            c.classList.remove('ready', 'main-prise', 'blocked');
-            if(isBlockedLocally) { c.classList.add('blocked'); l.innerText = "BLOQUÉ"; }
-            else if (currentWinner) {
-                if(currentWinner === userPseudo) { c.classList.add('main-prise'); l.innerText = "C'EST À TOI !"; }
-                else { l.innerText = "OCCUPÉ"; }
-            } else if(gameState === 'ready') { c.classList.add('ready'); l.innerText = "BUZZEZ !"; }
-            else { l.innerText = "ATTENDEZ"; }
-        }
-
-        function handleEndGame() {
-            const pZone = document.getElementById('podium-zone');
-            pZone.style.display = "flex";
-            roomRef.child('scores').once('value', snap => {
-                const scores = snap.val() || {};
-                const leaderboard = Object.keys(scores).map(p => ({ name: (scores[p].teamName && scores[p].teamName !== "Solo") ? scores[p].teamName : p, pts: scores[p].pts }))
-                    .sort((a, b) => b.pts - a.pts);
-                const myName = (userTeamName && userTeamName !== "Solo") ? userTeamName : userPseudo;
-                const rank = leaderboard.findIndex(e => e.name === myName) + 1;
-
-                if(rank === 1) {
-                    pZone.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img animate-zoom"><h1 class="rank-text">CHAMPION !</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
-                    document.getElementById('sound-applause').play().catch(()=>{});
-                    var duration = 8 * 1000; var animationEnd = Date.now() + duration;
-                    var interval = setInterval(function() {
-                        var timeLeft = animationEnd - Date.now();
-                        if (timeLeft <= 0) return clearInterval(interval);
-                        confetti({ particleCount: 50, origin: { x: Math.random(), y: Math.random() - 0.2 } });
-                    }, 250);
-                } else {
-                    pZone.innerHTML = `<h1 class="rank-text">${rank}ème PLACE</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
-                }
-            });
-        }
-
-        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById(id).classList.add('active-screen'); }
-        function leaveGame() { if(confirm("Quitter ?")) location.reload(); }
-        renderAvatarGrid();
     </script>
 </body>
 </html>
