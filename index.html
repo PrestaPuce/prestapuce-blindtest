@@ -165,25 +165,30 @@
                 const savedRoom = localStorage.getItem('presta_room');
 
                 if(snap.exists()) {
+                    let wantToResume = false;
+                    
+                    // Si l'appareil reconnaît parfaitement le joueur (via la mémoire locale)
                     if(savedPseudo === userPseudo && savedRoom === roomID) {
-                        if(confirm("Reprendre votre partie ?")) {
-                            selectedAvatar = data.avatar;
-                            userTeamName = data.teamName || "Solo";
-                            userTeamIcon = data.teamIcon || "";
-                            
-                            // Déverrouillage Audio au clic "Reprendre"
-                            unlockAudio();
+                        wantToResume = confirm("Reprendre votre partie ?");
+                    } 
+                    // Si la mémoire locale a été effacée (changement de navigateur, scanner QR, etc.)
+                    else {
+                        wantToResume = confirm("Ce pseudo existe déjà dans cette salle.\nS'il s'agit de votre partie (suite à une coupure ou un changement d'application), voulez-vous forcer la reconnexion et récupérer votre place ?");
+                    }
 
-                            roomRef.child('scores/' + userPseudo).update({ 
-                                active: true,
-                                teamName: userTeamName,
-                                teamIcon: userTeamIcon 
-                            }).then(() => { startBuzzer(); });
-                        }
-                    } else if (data.active === true) {
-                        alert("Ce pseudo est déjà utilisé !");
-                    } else {
-                        alert("Ce pseudo appartient à un joueur déconnecté.");
+                    if(wantToResume) {
+                        selectedAvatar = data.avatar;
+                        userTeamName = data.teamName || "Solo";
+                        userTeamIcon = data.teamIcon || "";
+                        
+                        // Déverrouillage Audio au clic "Reprendre" ou au "Forcer"
+                        unlockAudio();
+
+                        roomRef.child('scores/' + userPseudo).update({ 
+                            active: true,
+                            teamName: userTeamName,
+                            teamIcon: userTeamIcon 
+                        }).then(() => { startBuzzer(); });
                     }
                 } else {
                     showScreen('screen-setup');
