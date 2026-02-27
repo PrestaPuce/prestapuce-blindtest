@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
         :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; touch-action: manipulation; }
         .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 95px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; border-bottom: 2px solid rgba(255,255,255,0.1); z-index: 1000; }
         .logo-presta { width: 45px; height: auto; -webkit-tap-highlight-color: transparent; border-radius: 5px; }
         .screen { display: none; height: 100%; width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; padding-top: 100px; box-sizing: border-box; }
@@ -21,33 +21,20 @@
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .avatar-item { font-size: 2rem; background: var(--card-bg); padding: 10px; border-radius: 15px; cursor: pointer; border: 3px solid transparent; text-align: center; }
         .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); background: rgba(241, 196, 15, 0.2); }
-        .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; }
+        .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; outline: none; -webkit-tap-highlight-color: transparent; transition: transform 0.05s; }
+        .buzzer:active { transform: scale(0.95); box-shadow: 0 5px 0 #c0392b; top: 10px; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
+        .ready .buzzer:active { box-shadow: 0 5px 0 #27ae60; top: 10px; }
         .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
-        .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; }
+        .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; pointer-events: none; }
         .btn-exit { width: 45px; height: 45px; border-radius: 50%; background: #e74c3c; border: none; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-top: 15px; }
-    /* Uniquement pour la fin de partie */
-#podium-zone { 
-    display: none; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center; 
-    position: fixed; /* On utilise fixed pour ne pas décaler tes autres éléments */
-    top: 0; left: 0; width: 100%; height: 100%; 
-    background: #1a1a1a; 
-    z-index: 9999; 
-}
-.trophy-img { width: 130px; margin-bottom: 15px; }
-.rank-text { font-size: 1.8rem; font-weight: bold; color: #f1c40f; text-align: center; }
-/* Animation spectaculaire pour le trophée */
-@keyframes trophyZoom {
-    0% { transform: scale(0) rotate(-45deg); opacity: 0; }
-    70% { transform: scale(1.4) rotate(10deg); opacity: 1; }
-    100% { transform: scale(1) rotate(0deg); }
-}
-.animate-zoom { animation: trophyZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-     </style>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+        #podium-zone { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; }
+        .trophy-img { width: 130px; margin-bottom: 15px; }
+        .rank-text { font-size: 1.8rem; font-weight: bold; color: #f1c40f; text-align: center; }
+        @keyframes trophyZoom { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 70% { transform: scale(1.4) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
+        .animate-zoom { animation: trophyZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     <div id="podium-zone"></div>
@@ -87,7 +74,7 @@
 
     <div id="screen-buzzer" class="screen">
         <div style="flex:1; display:flex; align-items:center;">
-            <button class="buzzer" id="btn-buzz" onclick="onBuzzerClick()">
+            <button class="buzzer" id="btn-buzz" onpointerdown="onBuzzerClick(event)">
                 <span id="label" style="color:white; font-size:1.4rem; font-weight:bold;">ATTENDEZ</span>
             </button>
         </div>
@@ -95,8 +82,8 @@
         <button class="btn-exit" onclick="leaveGame()">×</button>
     </div>
 
-    <audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
-    <audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" preload="auto"></audio>
+    <audio id="sound-click" src="https://actions.google.com/sounds/v1/ui/pop.ogg" preload="auto"></audio>
+    <audio id="sound-win" src="https://actions.google.com/sounds/v1/alarms/ding_dong.ogg" preload="auto"></audio>
 
     <script>
         const firebaseConfig = {
@@ -123,7 +110,28 @@
             if(r) { document.getElementById('room-code-input').value = r; validateRoom(); }
         };
 
+        // Fonction de déverrouillage sécurisée : ne bloque jamais le son en cas d'erreur
+        function unlockAudio() {
+            ['sound-click', 'sound-win'].forEach(id => {
+                const el = document.getElementById(id);
+                el.volume = 0; // Utilise le volume à 0 plutôt que le mode "Mute" qui bug souvent
+                const playPromise = el.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        el.pause();
+                        el.currentTime = 0;
+                        el.volume = 1; // Rétablit le volume
+                    }).catch(() => {
+                        el.volume = 1; // Rétablit le volume MÊME si le navigateur a bloqué l'action
+                    });
+                } else {
+                    el.volume = 1;
+                }
+            });
+        }
+
         function validateRoom() {
+            unlockAudio(); // Tentative de déverrouillage
             roomID = document.getElementById('room-code-input').value.trim();
             if(!roomID) return;
             db.ref('activeRooms/' + roomID).once('value', snap => {
@@ -156,6 +164,7 @@
         }
 
         function checkPseudo() {
+            unlockAudio(); // Tentative de déverrouillage
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return alert("Pseudo trop court !");
 
@@ -167,22 +176,16 @@
                 if(snap.exists()) {
                     let wantToResume = false;
                     
-                    // Si l'appareil reconnaît parfaitement le joueur (via la mémoire locale)
                     if(savedPseudo === userPseudo && savedRoom === roomID) {
                         wantToResume = confirm("Reprendre votre partie ?");
-                    } 
-                    // Si la mémoire locale a été effacée (changement de navigateur, scanner QR, etc.)
-                    else {
-                        wantToResume = confirm("Ce pseudo existe déjà dans cette salle.\nS'il s'agit de votre partie (suite à une coupure ou un changement d'application), voulez-vous forcer la reconnexion et récupérer votre place ?");
+                    } else {
+                        wantToResume = confirm("Ce pseudo existe déjà dans cette salle.\nS'il s'agit de votre partie, voulez-vous forcer la reconnexion et récupérer votre place ?");
                     }
 
                     if(wantToResume) {
                         selectedAvatar = data.avatar;
                         userTeamName = data.teamName || "Solo";
                         userTeamIcon = data.teamIcon || "";
-                        
-                        // Déverrouillage Audio au clic "Reprendre" ou au "Forcer"
-                        unlockAudio();
 
                         roomRef.child('scores/' + userPseudo).update({ 
                             active: true,
@@ -223,28 +226,10 @@
             });
         }
 
-        // Astuce sécurisée pour forcer le navigateur à autoriser les sons
-        function unlockAudio() {
-            ['sound-click', 'sound-win'].forEach(id => {
-                const el = document.getElementById(id);
-                el.muted = true; // On utilise muted plutôt que volume = 0 (plus fiable)
-                const playPromise = el.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        el.pause();
-                        el.currentTime = 0;
-                        el.muted = false; // On rétablit le son pour quand il servira vraiment
-                    }).catch(() => {});
-                }
-            });
-        }
-
         function finalizeSetup() {
             if(!selectedAvatar) return;
+            unlockAudio(); // Dernière tentative de déverrouillage avant d'entrer en jeu
             
-            // Déverrouillage des sons au moment où le joueur interagit (clic sur le bouton final)
-            unlockAudio();
-
             const val = document.getElementById('select-team').value.split('|');
             userTeamName = val[0] || null; userTeamIcon = val[1] || "";
             localStorage.setItem('presta_pseudo', userPseudo);
@@ -256,10 +241,7 @@
         }
 
         function startBuzzer() {
-            let updates = {
-                avatar: selectedAvatar,
-                active: true
-            };
+            let updates = { avatar: selectedAvatar, active: true };
 
             if (userTeamName !== null) {
                 updates.teamName = userTeamName;
@@ -308,17 +290,16 @@
                 }
             });
 
-            // ÉCOUTEUR PRINCIPAL : C'EST LUI QUI GÈRE LE SON DU GAGNANT
+            // ÉCOUTEUR : SON DE VICTOIRE (DING-DONG)
             roomRef.child('buzzers').on('value', snap => { 
                 const val = snap.val();
                 const newWinner = val ? val.pseudo : null;
                 
                 if (newWinner === userPseudo && currentWinner !== userPseudo) {
-                    // C'EST MOI QUI AI LA MAIN ! 
                     const winSound = document.getElementById('sound-win');
-                    winSound.currentTime = 0; // Remise à zéro forçée
+                    winSound.currentTime = 0;
                     winSound.play().catch(()=>{});
-                    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]); // Grosse vibration spéciale
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]); 
                 }
                 
                 currentWinner = newWinner; 
@@ -335,10 +316,14 @@
             });
         }
 
-        function onBuzzerClick() {
-            // Un petit son et une petite vibration instantanés à chaque toucher de bouton
+        // Utilisation de onpointerdown pour réagir à l'appui exact sans attendre le relâchement
+        function onBuzzerClick(event) {
+            // Empêche le déclenchement en double (ex: touch + clic simultané)
+            if(event) event.preventDefault();
+
+            // SON DE CLIC STANDARD
             const clickSound = document.getElementById('sound-click');
-            clickSound.currentTime = 0; // Remise à zéro forçée pour pouvoir mitrailler le bouton
+            clickSound.currentTime = 0;
             clickSound.play().catch(()=>{});
             
             if (navigator.vibrate) navigator.vibrate(30);
