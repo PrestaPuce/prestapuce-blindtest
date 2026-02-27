@@ -82,8 +82,8 @@
         <button class="btn-exit" onclick="leaveGame()">×</button>
     </div>
 
-    <audio id="sound-click" src="https://actions.google.com/sounds/v1/ui/pop.ogg" preload="auto"></audio>
-    <audio id="sound-win" src="https://actions.google.com/sounds/v1/alarms/ding_dong.ogg" preload="auto"></audio>
+    <audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+    <audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/2834/2834-preview.mp3" preload="auto"></audio>
 
     <script>
         const firebaseConfig = {
@@ -110,19 +110,18 @@
             if(r) { document.getElementById('room-code-input').value = r; validateRoom(); }
         };
 
-        // Fonction de déverrouillage sécurisée : ne bloque jamais le son en cas d'erreur
         function unlockAudio() {
             ['sound-click', 'sound-win'].forEach(id => {
                 const el = document.getElementById(id);
-                el.volume = 0; // Utilise le volume à 0 plutôt que le mode "Mute" qui bug souvent
+                el.volume = 0;
                 const playPromise = el.play();
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         el.pause();
                         el.currentTime = 0;
-                        el.volume = 1; // Rétablit le volume
+                        el.volume = 1; 
                     }).catch(() => {
-                        el.volume = 1; // Rétablit le volume MÊME si le navigateur a bloqué l'action
+                        el.volume = 1; 
                     });
                 } else {
                     el.volume = 1;
@@ -131,7 +130,7 @@
         }
 
         function validateRoom() {
-            unlockAudio(); // Tentative de déverrouillage
+            unlockAudio(); 
             roomID = document.getElementById('room-code-input').value.trim();
             if(!roomID) return;
             db.ref('activeRooms/' + roomID).once('value', snap => {
@@ -164,7 +163,7 @@
         }
 
         function checkPseudo() {
-            unlockAudio(); // Tentative de déverrouillage
+            unlockAudio(); 
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return alert("Pseudo trop court !");
 
@@ -228,7 +227,7 @@
 
         function finalizeSetup() {
             if(!selectedAvatar) return;
-            unlockAudio(); // Dernière tentative de déverrouillage avant d'entrer en jeu
+            unlockAudio(); 
             
             const val = document.getElementById('select-team').value.split('|');
             userTeamName = val[0] || null; userTeamIcon = val[1] || "";
@@ -290,7 +289,6 @@
                 }
             });
 
-            // ÉCOUTEUR : SON DE VICTOIRE (DING-DONG)
             roomRef.child('buzzers').on('value', snap => { 
                 const val = snap.val();
                 const newWinner = val ? val.pseudo : null;
@@ -316,12 +314,9 @@
             });
         }
 
-        // Utilisation de onpointerdown pour réagir à l'appui exact sans attendre le relâchement
         function onBuzzerClick(event) {
-            // Empêche le déclenchement en double (ex: touch + clic simultané)
             if(event) event.preventDefault();
 
-            // SON DE CLIC STANDARD
             const clickSound = document.getElementById('sound-click');
             clickSound.currentTime = 0;
             clickSound.play().catch(()=>{});
