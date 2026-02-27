@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Console MJ Pro - Presta'Puce</title>
-    <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
+    <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
@@ -11,7 +11,8 @@
     <style>
         :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; }
         body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        .box { max-width: 400px; margin: 60px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        
+        .box { max-width: 400px; margin: 80px auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; margin-bottom: 15px; }
         
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s; text-transform: uppercase; margin-bottom: 10px; position: relative; top: 0; box-shadow: 0 4px rgba(0,0,0,0.3); }
@@ -19,7 +20,7 @@
         button:active { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; }
 
-        .dashboard { display: none; max-width: 800px; margin: 0 auto; }
+        .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
         .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 150px; overflow-y: auto; }
         .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; }
@@ -51,8 +52,12 @@
 </head>
 <body>
 
+    <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
+        <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Ouvrir / Fermer Mon Profil">
+    </div>
+
     <div id="screen-login" class="box">
-        <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px;">
+        <img id="login-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px; border-radius: 10px;">
         <h2>Accès MJ Sécurisé</h2>
         <input type="email" id="mj-email" placeholder="Email MJ">
         <input type="password" id="mj-pass" placeholder="Mot de passe">
@@ -63,16 +68,46 @@
         <p onclick="forgotPassword()" style="color:var(--accent); cursor:pointer; font-size:0.8rem; text-decoration: underline; margin-top: 10px;">Mot de passe oublié ?</p>
     </div>
 
+    <div id="screen-profile" class="box" style="display:none;">
+        <h2 style="margin-bottom:20px;">Paramètres MJ</h2>
+        <input type="text" id="prof-nom" placeholder="Nom">
+        <input type="text" id="prof-prenom" placeholder="Prénom">
+        <input type="email" id="prof-email" placeholder="Email" disabled style="color:#aaa;">
+        
+        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:15px 0;">
+        <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">PERSONNALISATION</p>
+        
+        <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
+            <img id="prof-logo-preview" src="" style="width:40px; height:40px; object-fit:contain; border-radius:5px; display:none; background:var(--card-bg); padding:2px;">
+            <input type="text" id="prof-logo" placeholder="URL de votre Logo" style="margin-bottom:0; flex-grow:1;" oninput="updateLogoPreview(this.value)">
+            <label for="prof-logo-upload" id="label-logo-upload" style="background:var(--mj-color); padding:10px 15px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.2rem; box-shadow: 0 4px rgba(0,0,0,0.3); transition:0.2s; margin-bottom:0;" title="Uploader une image locale">📁</label>
+            <input type="file" id="prof-logo-upload" accept="image/*" style="display:none;" onchange="uploadProfileLogo(this)">
+        </div>
+
+        <input type="text" id="prof-link" placeholder="Lien de redirection au clic">
+        
+        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:15px 0;">
+        <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">MOT DE PASSE (Optionnel)</p>
+        <input type="password" id="prof-pass" placeholder="Nouveau mot de passe">
+        <input type="password" id="prof-pass-conf" placeholder="Confirmer mot de passe">
+        <label class="show-pass-container">
+            <input type="checkbox" onchange="const t = this.checked ? 'text' : 'password'; document.getElementById('prof-pass').type = t; document.getElementById('prof-pass-conf').type = t;"> Afficher le mot de passe
+        </label>
+        
+        <button onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER</button>
+        <button onclick="closeProfile()" style="background:var(--danger);">Retour</button>
+    </div>
+
     <div id="screen-choice" class="box" style="display:none;">
-        <h2>Bonjour <span id="mj-display-name">MJ</span> !</h2>
-        <button onclick="createNewRoom()">🆕 Créer une nouvelle salle</button>
+        <h2>Bonjour <span id="mj-display-name" style="color:var(--accent);">MJ</span> !</h2>
+        <button onclick="createNewRoom()" style="margin-top:15px;">🆕 Créer une nouvelle salle</button>
         <button id="btn-resume" onclick="resumeRoom()" style="display:none; background:var(--blue)">🔄 Reprendre la salle <span id="last-room-id"></span></button>
-        <button onclick="alert('Profil bientôt disponible')" style="background:var(--gold);">👤 Mon Profil</button>
-        <button onclick="auth.signOut().then(()=>location.reload())" style="background:none; border:1px solid white; font-size:0.7rem;">Déconnexion</button>
+        <button onclick="auth.signOut().then(()=>location.reload())" style="background:none; border:1px solid rgba(255,255,255,0.3); font-size:0.8rem; margin-top:15px; width:auto; padding:8px 15px;">Déconnexion</button>
     </div>
 
     <div id="screen-dashboard" class="dashboard">
-        <div class="room-info">SALLE : <span id="display-room">----</span></div>
+        <div class="room-info" style="margin-bottom:20px; text-align:center;">SALLE : <span id="display-room">----</span></div>
+
         <div style="display:flex; gap:10px; margin-bottom:20px;">
             <button style="background:var(--blue); flex:1;" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
             <button style="background:var(--danger); flex:1;" onclick="fullReset()">RESET TITRE</button>
@@ -96,7 +131,7 @@
                 <label for="upload-logo" style="cursor:pointer; font-weight:bold; color:var(--mj-color); font-size:0.8rem;">
                     ➕ AJOUTER UN FICHIER IMAGE (BLASON)
                 </label>
-                <input type="file" id="upload-logo" accept="image/*" style="display:none;" onchange="uploadCustomLogo(this)">
+                <input type="file" id="upload-logo" accept="image/*" style="display:none;" onchange="uploadCustomTeamLogo(this)">
             </div>
 
             <div class="crest-picker" id="crest-grid"></div>
@@ -136,6 +171,7 @@
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {};
         let editingTeamKey = null;
+        let mjProfileData = {};
 
         const defaultCrests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png"];
 
@@ -149,9 +185,11 @@
         }
 
         function loadMjData(user) {
-            db.ref('mjs/' + user.uid).once('value').then(snap => {
+            db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
+                mjProfileData = data;
                 document.getElementById('mj-display-name').innerText = data.prenom || "MJ";
+                updateLogos(data.customLogo);
                 checkUserRoom(user.uid);
             });
         }
@@ -159,8 +197,12 @@
         function checkUserRoom(uid) {
             db.ref('users/' + uid + '/lastRoom').once('value', snap => {
                 document.getElementById('screen-login').style.display = "none";
+                document.getElementById('screen-profile').style.display = "none";
                 document.getElementById('screen-dashboard').style.display = "none";
                 document.getElementById('screen-choice').style.display = "block";
+                
+                document.getElementById('global-mj-logo-container').style.display = "block";
+
                 if(snap.exists() && snap.val() !== "") { 
                     lastSavedRoom = snap.val(); 
                     document.getElementById('btn-resume').style.display = "block"; 
@@ -169,6 +211,126 @@
                     document.getElementById('btn-resume').style.display = "none";
                 }
             });
+        }
+
+        let previousScreen = "screen-choice";
+
+        function toggleProfile() {
+            const profScreen = document.getElementById('screen-profile');
+            if(profScreen.style.display === "block") {
+                closeProfile();
+            } else {
+                showProfile();
+            }
+        }
+
+        function updateLogoPreview(url) {
+            const preview = document.getElementById('prof-logo-preview');
+            if(url) {
+                preview.src = url;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
+        function showProfile() {
+            if(document.getElementById('screen-choice').style.display === "block") previousScreen = "screen-choice";
+            if(document.getElementById('screen-dashboard').style.display === "block") previousScreen = "screen-dashboard";
+            
+            document.getElementById('screen-choice').style.display = "none";
+            document.getElementById('screen-dashboard').style.display = "none";
+            document.getElementById('screen-profile').style.display = "block";
+
+            const user = auth.currentUser;
+            if(user) {
+                document.getElementById('prof-email').value = user.email;
+                document.getElementById('prof-nom').value = mjProfileData.nom || "";
+                document.getElementById('prof-prenom').value = mjProfileData.prenom || "";
+                
+                const currentLogo = mjProfileData.customLogo || "";
+                document.getElementById('prof-logo').value = currentLogo;
+                updateLogoPreview(currentLogo);
+
+                document.getElementById('prof-link').value = mjProfileData.customLink || "";
+                document.getElementById('prof-pass').value = "";
+                document.getElementById('prof-pass-conf').value = "";
+            }
+        }
+
+        function closeProfile() {
+            document.getElementById('screen-profile').style.display = "none";
+            document.getElementById(previousScreen).style.display = "block";
+        }
+
+        // Upload Base64 (contourne les règles de Storage pour le logo Profil)
+        function uploadProfileLogo(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            const btnLabel = document.getElementById('label-logo-upload');
+            const oldText = btnLabel.innerText;
+            btnLabel.innerText = "⏳";
+
+            reader.onloadend = function() {
+                const base64String = reader.result;
+                document.getElementById('prof-logo').value = base64String;
+                updateLogoPreview(base64String);
+                btnLabel.innerText = "✅";
+                setTimeout(() => btnLabel.innerText = oldText, 2000);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveProfile() {
+            const user = auth.currentUser;
+            if(!user) return;
+            
+            const pass1 = document.getElementById('prof-pass').value;
+            const pass2 = document.getElementById('prof-pass-conf').value;
+            
+            if(pass1 || pass2) {
+                if(pass1 !== pass2) return alert("Les mots de passe ne correspondent pas.");
+                user.updatePassword(pass1).then(() => {
+                    alert("Mot de passe mis à jour avec succès.");
+                    document.getElementById('prof-pass').value = "";
+                    document.getElementById('prof-pass-conf').value = "";
+                }).catch(e => alert("Erreur de mot de passe (veuillez vous reconnecter si l'erreur persiste) : " + e.message));
+            }
+
+            const updates = {
+                nom: document.getElementById('prof-nom').value.trim(),
+                prenom: document.getElementById('prof-prenom').value.trim(),
+                customLogo: document.getElementById('prof-logo').value.trim(),
+                customLink: document.getElementById('prof-link').value.trim()
+            };
+
+            db.ref('users/' + user.uid).update(updates).then(() => {
+                alert("Profil mis à jour !");
+                mjProfileData = { ...mjProfileData, ...updates }; 
+                document.getElementById('mj-display-name').innerText = updates.prenom || "MJ";
+                updateLogos(updates.customLogo);
+                closeProfile();
+            }).catch(e => alert("Erreur de sauvegarde: " + e.message));
+        }
+
+        function updateLogos(url) {
+            const finalUrl = url || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
+            document.getElementById('global-mj-logo').src = finalUrl;
+            
+            const loginLogo = document.getElementById('login-mj-logo');
+            if(loginLogo) loginLogo.src = finalUrl;
+
+            // Mise à jour du favicon de la page MJ
+            const favicon = document.getElementById('page-favicon');
+            if(favicon) favicon.href = finalUrl;
+
+            // Envoi dans la salle active pour mise à jour des joueurs / scores
+            if(roomRef && roomID) {
+                roomRef.child('mjLogo').set(finalUrl);
+                if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink);
+            }
         }
 
         function createNewRoom() { 
@@ -186,14 +348,21 @@
             document.getElementById('display-room').innerText = roomID;
             db.ref('activeRooms/' + roomID).set({ status: 'open' });
             roomRef = db.ref('roomsData/' + id);
+            
+            // On s'assure que le logo est injecté dans la salle à l'ouverture
+            const currentLogo = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
+            roomRef.child('mjLogo').set(currentLogo);
+            if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink);
+
             initMJLogic(); 
             loadCrestGrid();
-        // Ouverture de l'onglet des scores
+            // Ouverture de l'onglet des scores
             const scoreURL = window.location.origin + window.location.pathname.replace('mj', 'scores') + "?room=" + id;
             window.open(scoreURL, '_blank');
         }
 
-        function uploadCustomLogo(input) {
+        // Upload classique (Storage) pour les blasons d'équipe
+        function uploadCustomTeamLogo(input) {
             if (!input.files || !input.files[0]) return;
             const file = input.files[0];
             const uid = auth.currentUser.uid;
@@ -204,7 +373,7 @@
                 loadCrestGrid();
             }).catch(err => {
                 console.error(err);
-                alert("Erreur upload image");
+                alert("Erreur upload blason équipe");
             });
         }
 
@@ -354,14 +523,25 @@
         function kickPlayer(p) { roomRef.child('scores/' + p).update({ active: false }); }
 
         function togglePlayerTeam(pseudo, choice) {
-    const icon = (choice === "Solo") ? "" : (globalTeams[choice] ? globalTeams[choice].icon : "");
-    
-    roomRef.child('scores/' + pseudo).update({ 
-        teamName: choice, 
-        teamIcon: icon,
-        active: true // On réactive pour forcer le téléphone à lire le nouveau statut
-    });
-}
+            const icon = (choice === "Solo") ? "" : (globalTeams[choice] ? globalTeams[choice].icon : "");
+            
+            roomRef.child('scores/' + pseudo).update({ 
+                teamName: choice, 
+                teamIcon: icon,
+                active: true 
+            });
+        }
+
+        // --- CORRECTION AJOUTÉE ICI ---
+        function handleError() {
+            if(currentPlayer && currentPlayer.pseudo) {
+                // Ajoute le joueur actuel à la liste des bloqués pour ce titre
+                roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
+                // Relance les buzzers pour les autres joueurs
+                statusUpdate('ready');
+            }
+        }
+        // ------------------------------
 
         function handleReward(pts, mode) {
             roomRef.child('scores/' + currentPlayer.pseudo).transaction(c => { return { pts: (c ? c.pts : 0) + pts, avatar: c.avatar, teamName: c.teamName, teamIcon: c.teamIcon, active: true }; });

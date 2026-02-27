@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Scores - Presta'Puce</title>
-    <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
+    <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -36,7 +36,9 @@
 <body>
 
     <div class="header-scores">
-        <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px;">
+        <a id="mj-logo-link" href="#" target="_blank" style="pointer-events: none;">
+            <img id="display-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; height:70px; object-fit:contain; border-radius:8px;">
+        </a>
         <h1 style="margin:0;">SALLE : <span id="room-title" style="color:var(--accent)">----</span></h1>
     </div>
 
@@ -103,6 +105,27 @@
 
         let buzzHistory = []; // Pour mémoriser l'ordre de la pile
 
+        // --- ECOUTEUR LOGO MJ ---
+        roomRef.child('mjLogo').on('value', snap => {
+            if(snap.exists()) {
+                document.getElementById('display-mj-logo').src = snap.val();
+                document.getElementById('page-favicon').href = snap.val(); // Change l'icône de l'onglet
+            }
+        });
+        
+        roomRef.child('mjLink').on('value', snap => {
+            const linkElement = document.getElementById('mj-logo-link');
+            if(snap.exists() && snap.val() !== "") {
+                linkElement.href = snap.val();
+                linkElement.style.pointerEvents = "auto";
+                document.getElementById('display-mj-logo').style.cursor = "pointer";
+            } else {
+                linkElement.href = "#";
+                linkElement.style.pointerEvents = "none";
+                document.getElementById('display-mj-logo').style.cursor = "default";
+            }
+        });
+
         function updateDisplay() {
             const pList = document.getElementById('player-list'); pList.innerHTML = "";
             const gList = document.getElementById('global-list'); gList.innerHTML = "";
@@ -152,26 +175,26 @@
             });
 
             allPlayers.forEach(p => {
-    // La variable qui définit tout
-    const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
+                // La variable qui définit tout
+                const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
 
-    if (statutEquipe !== "Solo") {
-        // Il a un statut équipe, il va dans le cumul à droite
-        let team = rankingMap.get("TEAM_" + statutEquipe);
-        if (team) {
-            team.pts += (p.pts || 0);
-            if (p.active !== false) team.count++;
-        }
-    } else {
-        // Il a un statut Solo, il va dans la liste individuelle à droite
-        rankingMap.set("SOLO_" + p.name, { 
-            name: p.name, 
-            pts: (p.pts || 0), 
-            avatar: p.avatar, 
-            isTeam: false 
-        });
-    }
-});
+                if (statutEquipe !== "Solo") {
+                    // Il a un statut équipe, il va dans le cumul à droite
+                    let team = rankingMap.get("TEAM_" + statutEquipe);
+                    if (team) {
+                        team.pts += (p.pts || 0);
+                        if (p.active !== false) team.count++;
+                    }
+                } else {
+                    // Il a un statut Solo, il va dans la liste individuelle à droite
+                    rankingMap.set("SOLO_" + p.name, { 
+                        name: p.name, 
+                        pts: (p.pts || 0), 
+                        avatar: p.avatar, 
+                        isTeam: false 
+                    });
+                }
+            });
 
             // Tri final par points et affichage
             Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts).forEach(item => {
@@ -190,7 +213,8 @@
                         <div class="pts">${item.pts}</div>
                     </div>`;
             });
-}
+        }
+        
         // Mise à jour de l'écouteur de buzz pour gérer l'historique
         roomRef.child('buzzers').on('value', snap => {
             const val = snap.val();
