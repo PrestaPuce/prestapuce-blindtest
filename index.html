@@ -66,7 +66,9 @@
         <h3 style="margin:0 0 10px 0;">AVATAR</h3>
         <div class="avatar-scroll">
             <div class="avatar-grid" id="avatar-grid">
-                <div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('file-input').click()"><span style="font-size:2rem;">+</span><input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)"></div>
+                <div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('file-input').click()"><span style="font-size:2rem;">+</span>
+                    <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
+                </div>
             </div>
         </div>
         <h3 style="margin:0 0 10px 0;">ÉQUIPE</h3>
@@ -130,33 +132,22 @@
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return;
             
-            // On vérifie d'abord si c'est une salle Guest pour la limite des 10 joueurs
             roomRef.child('isGuestRoom').once('value', guestSnap => {
                 const isGuestRoom = guestSnap.val() === true;
-                
                 roomRef.child('scores/' + userPseudo).once('value', snap => {
                     const data = snap.val();
-                    
                     if(data) {
-                        if(data.kicked === true) {
-                            alert("Vous avez été expulsé de cette partie par le MJ.");
-                            return;
-                        }
-
+                        if(data.kicked === true) { alert("Accès refusé."); return; }
                         if(confirm("Reprendre votre partie ?")) {
                             selectedAvatar = data.avatar;
                             userTeamName = data.teamName || "Solo";
                             userTeamIcon = data.teamIcon || "";
                             roomRef.child('scores/' + userPseudo).update({ active: true }).then(() => { startBuzzer(); });
-                        } else {
-                            showScreen('screen-setup');
-                        }
+                        } else showScreen('screen-setup');
                     } else {
-                        // Nouveau joueur : on vérifie la limite si on est en salle Guest
                         roomRef.child('scores').once('value', scoresSnap => {
-                            const totalPlayers = scoresSnap.numChildren();
-                            if(isGuestRoom && totalPlayers >= 10) {
-                                alert("🔒 Mode Découverte : La limite de 10 joueurs est atteinte.");
+                            if(isGuestRoom && scoresSnap.numChildren() >= 10) {
+                                alert("🔒 Limite de 10 joueurs atteinte (Mode Découverte).");
                                 return;
                             }
                             showScreen('screen-setup');
@@ -168,6 +159,15 @@
 
         function handleFileUpload(input) {
             if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // SÉCURITÉ : Vérifier que c'est bien une image
+                if (!file.type.startsWith('image/')) {
+                    alert("Erreur : Veuillez choisir uniquement un fichier image.");
+                    input.value = ""; // Réinitialiser l'input
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = new Image();
@@ -182,7 +182,7 @@
                     };
                     img.src = e.target.result;
                 };
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
         }
 
@@ -219,7 +219,7 @@
         const updateTeamDisplay = (name, icon) => {
             const teamLabel = document.getElementById('display-team-label');
             if (name && name !== "Solo" && name !== "") {
-                const iconHtml = icon ? `<img src="${icon}" style="height:15px; vertical-align:middle; margin-right:5px;">` : "";
+                const iconHtml = (icon && icon !== "") ? `<img src="${icon}" style="height:15px; vertical-align:middle; margin-right:5px; background:white; border-radius:3px; padding:1px;">` : "";
                 teamLabel.innerHTML = `${iconHtml}${name}`;
             } else teamLabel.innerText = "Mode Solo";
         };
@@ -248,10 +248,7 @@
                 currentWinner = val ? val.pseudo : null; updateUI(); 
             });
             roomRef.child('scores/' + userPseudo + '/kicked').on('value', snap => {
-                if(snap.exists() && snap.val() === true) {
-                    alert("Vous avez été expulsé de la partie par le MJ.");
-                    location.reload();
-                }
+                if(snap.exists() && snap.val() === true) { location.reload(); }
             });
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
@@ -280,26 +277,20 @@
             const pZone = document.getElementById('podium-zone');
             pZone.style.display = "flex";
             roomRef.child('scores').once('value', snap => {
-                const scores = snap.val() || {};
-                const leaderboard = Object.keys(scores).map(p => ({ name: p, pts: scores[p].pts })).sort((a, b) => b.pts - a.pts);
+                const leaderboard = Object.keys(snap.val() || {}).map(p => ({ name: p, pts: snap.val()[p].pts })).sort((a, b) => b.pts - a.pts);
                 const rank = leaderboard.findIndex(e => e.name === userPseudo) + 1;
                 if(rank === 1) {
                     pZone.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img animate-zoom"><h1 style="color:gold; font-size:2.5rem;">CHAMPION !</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
                     document.getElementById('sound-applause').play().catch(()=>{});
                     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                } else {
-                    pZone.innerHTML = `<h1 style="color:white; font-size:2rem;">${rank}ème PLACE</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
-                }
+                } else pZone.innerHTML = `<h1 style="color:white; font-size:2rem;">${rank}ème PLACE</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
             });
         }
 
         function leaveGame() {
             if(confirm("Quitter la partie ?")) {
                 if(roomRef && userPseudo) {
-                    roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => {
-                        alert("Vous avez quitté.\n\nRevenez avec le même appareil et pseudo pour retrouver votre score !");
-                        location.reload();
-                    });
+                    roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => { location.reload(); });
                 } else location.reload();
             }
         }
