@@ -100,8 +100,9 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // AJOUT : La variable isBlocked pour suivre l'état du joueur
         let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
-        let gameState = "waiting", currentWinner = null;
+        let gameState = "waiting", currentWinner = null, isBlocked = false;
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
         window.onload = () => {
@@ -208,7 +209,6 @@
             startBuzzer();
         }
 
-        // Nouvelle fonction pour mettre à jour l'affichage de l'équipe avec le blason
         const updateTeamDisplay = (name, icon) => {
             const teamLabel = document.getElementById('display-team-label');
             if (name && name !== "Solo" && name !== "") {
@@ -234,7 +234,6 @@
             
             roomRef.child('scores/' + userPseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
             
-            // NOUVEAU : Écoute en direct des changements sur le profil du joueur (ex: si le MJ le change d'équipe)
             roomRef.child('scores/' + userPseudo).on('value', snap => {
                 const d = snap.val();
                 if(d) {
@@ -261,12 +260,20 @@
                     location.reload();
                 }
             });
+
+            // AJOUT : L'écouteur qui vérifie en direct si le MJ a bloqué ce joueur
+            roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => {
+                isBlocked = snap.exists(); 
+                updateUI();
+            });
         }
 
         function onBuzzerClick(event) {
             if(event) event.preventDefault();
             document.getElementById('sound-click').play().catch(()=>{});
-            if(gameState === "ready" && !currentWinner) {
+            
+            // AJOUT : On vérifie bien que !isBlocked avant de laisser la requête partir
+            if(gameState === "ready" && !currentWinner && !isBlocked) {
                 roomRef.child('gameState').update({ status: 'taken' });
                 roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
             }
@@ -274,12 +281,22 @@
 
         function updateUI() {
             const c = document.getElementById('screen-buzzer'); const l = document.getElementById('label');
-            c.classList.remove('ready', 'main-prise');
+            c.classList.remove('ready', 'main-prise', 'blocked');
+            
+            // MODIFICATION : L'ordre de vérification. Si le joueur est bloqué, c'est prioritaire sur le mode ready.
             if (currentWinner) {
                 if(currentWinner === userPseudo) { c.classList.add('main-prise'); l.innerText = "C'EST À TOI !"; }
                 else { l.innerText = "OCCUPÉ"; }
-            } else if(gameState === 'ready') { c.classList.add('ready'); l.innerText = "BUZZEZ !"; }
-            else { l.innerText = "ATTENDEZ"; }
+            } 
+            else if (isBlocked) { 
+                c.classList.add('blocked'); l.innerText = "BLOQUÉ"; 
+            } 
+            else if (gameState === 'ready') { 
+                c.classList.add('ready'); l.innerText = "BUZZEZ !"; 
+            }
+            else { 
+                l.innerText = "ATTENDEZ"; 
+            }
         }
 
         function handleEndGame() {
