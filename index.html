@@ -11,7 +11,7 @@
         :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; touch-action: manipulation; }
         .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 95px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; border-bottom: 2px solid rgba(255,255,255,0.1); z-index: 1000; }
-        .logo-presta { width: 45px; height: auto; -webkit-tap-highlight-color: transparent; border-radius: 5px; }
+        .logo-presta { width: 45px; height: auto; border-radius: 5px; }
         .screen { display: none; height: 100%; width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; padding-top: 100px; box-sizing: border-box; }
         .active-screen { display: flex !important; }
         input, select { width: 100%; max-width: 280px; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); font-size: 1.1rem; background: var(--card-bg); color: white; text-align: center; outline: none; }
@@ -19,18 +19,16 @@
         .btn-disabled { background-color: #7f8c8d !important; box-shadow: 0 8px 0 #636e72 !important; cursor: not-allowed; opacity: 0.6; }
         .avatar-scroll { width: 100%; max-width: 320px; max-height: 200px; overflow-y: auto; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 20px; }
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .avatar-item { font-size: 2rem; background: var(--card-bg); padding: 10px; border-radius: 15px; cursor: pointer; border: 3px solid transparent; text-align: center; }
-        .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); background: rgba(241, 196, 15, 0.2); }
-        .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; outline: none; -webkit-tap-highlight-color: transparent; transition: transform 0.05s; }
-        .buzzer:active { transform: scale(0.95); box-shadow: 0 5px 0 #c0392b; top: 10px; }
+        .avatar-item { width: 60px; height: 60px; background: var(--card-bg); border-radius: 15px; cursor: pointer; border: 3px solid transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 2rem; }
+        .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); }
+        .avatar-item img { width: 100%; height: 100%; object-fit: cover; }
+        .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; outline: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
-        .ready .buzzer:active { box-shadow: 0 5px 0 #27ae60; top: 10px; }
         .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
         .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; pointer-events: none; }
-        .btn-exit { width: 45px; height: 45px; border-radius: 50%; background: #e74c3c; border: none; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-top: 15px; }
+        .buzzer-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.4; }
+        .buzzer-label { position: relative; z-index: 2; color: white; font-size: 1.4rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
         #podium-zone { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; }
-        .trophy-img { width: 130px; margin-bottom: 15px; }
-        .rank-text { font-size: 1.8rem; font-weight: bold; color: #f1c40f; text-align: center; }
         @keyframes trophyZoom { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 70% { transform: scale(1.4) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
         .animate-zoom { animation: trophyZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     </style>
@@ -39,34 +37,38 @@
 <body>
     <div id="podium-zone"></div>
     <div class="header-bar">
-        <div style="flex:1; line-height: 1.2;">
-            <span id="display-avatar" style="font-size:1.5rem"></span> 
-            <span id="display-pseudo" style="font-weight: bold;"></span><br>
-            <span id="display-team-label" style="font-size: 0.8rem; color: var(--accent-color); font-style: italic;"></span>
+        <div style="flex:1; line-height: 1.2; display: flex; align-items: center; gap: 10px;">
+            <div id="display-avatar-container" style="display:none; width:40px; height:40px; border-radius:50%; overflow:hidden; background: #333; align-items: center; justify-content: center; font-size: 1.2rem;"></div>
+            <div>
+                <span id="display-pseudo" style="font-weight: bold;"></span><br>
+                <span id="display-team-label" style="font-size: 0.7rem; color: var(--accent-color); font-style: italic;"></span>
+            </div>
         </div>
         <div style="flex:0; padding: 0 10px;">
-            <a id="mj-logo-link" href="#" target="_blank" style="pointer-events: none;">
-                <img id="display-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" class="logo-presta">
-            </a>
+            <img id="display-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" class="logo-presta">
         </div>
-        <div style="flex:1; text-align:right" id="display-room-info"></div>
+        <div style="flex:1; text-align:right; font-size: 0.8rem;" id="display-room-info"></div>
     </div>
 
     <div id="screen-room" class="screen active-screen">
         <h2 style="color:var(--accent-color)">CODE SALLE</h2>
-        <input type="number" id="room-code-input" placeholder="CODE SALLE" onkeydown="if(event.key === 'Enter') validateRoom()">
+        <input type="number" id="room-code-input" placeholder="CODE SALLE">
         <button class="btn-ui" onclick="validateRoom()">Rejoindre</button>
     </div>
 
     <div id="screen-login" class="screen">
         <h2 style="color:var(--accent-color)">TON PSEUDO</h2>
-        <input type="text" id="input-pseudo" placeholder="Pseudo..." maxlength="12" onkeydown="if(event.key === 'Enter') checkPseudo()">
+        <input type="text" id="input-pseudo" placeholder="Pseudo..." maxlength="12">
         <button class="btn-ui" onclick="checkPseudo()">Suivant</button>
     </div>
 
     <div id="screen-setup" class="screen">
         <h3 style="margin:0 0 10px 0;">AVATAR</h3>
-        <div class="avatar-scroll"><div class="avatar-grid" id="avatar-grid"></div></div>
+        <div class="avatar-scroll">
+            <div class="avatar-grid" id="avatar-grid">
+                <div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('file-input').click()"><span style="font-size:2rem;">+</span><input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)"></div>
+            </div>
+        </div>
         <h3 style="margin:0 0 10px 0;">ÉQUIPE</h3>
         <select id="select-team"><option value="Solo|">Mode Solo</option></select>
         <button id="btn-final" class="btn-ui btn-disabled" onclick="finalizeSetup()">C'est parti !</button>
@@ -75,14 +77,15 @@
     <div id="screen-buzzer" class="screen">
         <div style="flex:1; display:flex; align-items:center;">
             <button class="buzzer" id="btn-buzz" onpointerdown="onBuzzerClick(event)">
-                <span id="label" style="color:white; font-size:1.4rem; font-weight:bold;">ATTENDEZ</span>
+                <div id="buzzer-img-placeholder"></div>
+                <span id="label" class="buzzer-label">ATTENDEZ</span>
             </button>
         </div>
         <div style="font-weight: bold;">Score : <span id="score" style="color:var(--accent-color)">0</span> pts</div>
-        <button class="btn-exit" onclick="leaveGame()">×</button>
+        <button class="btn-exit" style="width:40px; height:40px; border-radius:50%; background:red; color:white; border:none; margin-top:10px;" onclick="location.reload()">×</button>
     </div>
 
-    <audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+    <audio id="sound-click" src="https://actions.google.com/sounds/v1/ui/pop.ogg" preload="auto"></audio>
     <audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/2831/2831-preview.mp3" preload="auto"></audio>
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
@@ -92,99 +95,213 @@
             authDomain: "prestapuce-buzz.firebaseapp.com",
             databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "prestapuce-buzz",
-            storageBucket: "prestapuce-buzz.firebasestorage.app",
-            messagingSenderId: "907270883505",
-            appId: "1:907270883505:web:197efec0b99db28180ba90",
-            measurementId: "G-J04SC2DFFF"
+            storageBucket: "prestapuce-buzz.firebasestorage.app"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
-        let gameState = "waiting", isBlockedLocally = false, currentWinner = null;
-        let kickListener = null;
+        let gameState = "waiting", currentWinner = null;
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
             const r = urlParams.get('room');
             if(r) { document.getElementById('room-code-input').value = r; validateRoom(); }
+            renderAvatarGrid();
         };
 
-        function unlockAudio() {
-            ['sound-click', 'sound-win', 'sound-applause'].forEach(id => {
-                const el = document.getElementById(id);
-                el.volume = 0;
-                const playPromise = el.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        el.pause();
-                        el.currentTime = 0;
-                        el.volume = 1; 
-                    }).catch(() => {
-                        el.volume = 1; 
-                    });
-                } else {
-                    el.volume = 1;
-                }
-            });
-        }
-
         function validateRoom() {
-            unlockAudio(); 
+            unlockAudio();
             roomID = document.getElementById('room-code-input').value.trim();
             if(!roomID) return;
             db.ref('activeRooms/' + roomID).once('value', snap => {
                 if(snap.exists()) {
                     roomRef = db.ref('roomsData/' + roomID);
-                    roomRef.child('mjLogo').on('value', snap => {
-                        if(snap.exists()) {
-                            document.getElementById('display-mj-logo').src = snap.val();
-                            document.getElementById('page-favicon').href = snap.val();
-                        }
-                    });
-                    roomRef.child('mjLink').on('value', snap => {
-                        const linkElement = document.getElementById('mj-logo-link');
-                        if(snap.exists() && snap.val() !== "") {
-                            linkElement.href = snap.val();
-                            linkElement.style.pointerEvents = "auto";
-                        } else {
-                            linkElement.href = "#";
-                            linkElement.style.pointerEvents = "none";
-                        }
-                    });
                     showScreen('screen-login');
                     document.getElementById('display-room-info').innerText = "SALLE " + roomID;
                     listenToTeams();
-                } else { alert("Salle introuvable !"); }
+                } else alert("Salle introuvable !");
             });
         }
 
         function checkPseudo() {
-            unlockAudio(); 
+            unlockAudio();
             userPseudo = document.getElementById('input-pseudo').value.trim();
-            if(userPseudo.length < 2) return alert("Pseudo trop court !");
+            if(userPseudo.length < 2) return;
+            
+            // On vérifie si le joueur existe déjà pour le reconnecter correctement avec ses infos
             roomRef.child('scores/' + userPseudo).once('value', snap => {
-                const data = snap.val();
-                const savedPseudo = localStorage.getItem('presta_pseudo');
-                const savedRoom = localStorage.getItem('presta_room');
                 if(snap.exists()) {
-                    let wantToResume = false;
-                    if(savedPseudo === userPseudo && savedRoom === roomID) {
-                        wantToResume = confirm("Reprendre votre partie ?");
-                    } else {
-                        wantToResume = confirm("Ce pseudo existe déjà dans cette salle.\nVoulez-vous forcer la reconnexion ?");
-                    }
-                    if(wantToResume) {
+                    if(confirm("Reprendre votre partie ?")) {
+                        const data = snap.val();
                         selectedAvatar = data.avatar;
                         userTeamName = data.teamName || "Solo";
                         userTeamIcon = data.teamIcon || "";
-                        roomRef.child('scores/' + userPseudo).update({ active: true }).then(() => { startBuzzer(); });
+                        
+                        roomRef.child('scores/' + userPseudo).update({ 
+                            active: true,
+                            teamName: userTeamName,
+                            teamIcon: userTeamIcon 
+                        }).then(() => { startBuzzer(); });
+                    } else {
+                        showScreen('screen-setup');
                     }
-                } else { showScreen('screen-setup'); }
+                } else {
+                    showScreen('screen-setup');
+                }
             });
         }
 
+        function handleFileUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 120; canvas.height = 120;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, 120, 120);
+                        selectedAvatar = canvas.toDataURL('image/jpeg', 0.6);
+                        renderAvatarGrid(selectedAvatar);
+                        document.getElementById('btn-final').classList.remove('btn-disabled');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function renderAvatarGrid(customImg = null) {
+            const grid = document.getElementById('avatar-grid');
+            grid.innerHTML = `<div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('file-input').click()"><span style="font-size:2rem;">+</span><input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)"></div>`;
+            if(customImg) {
+                const div = document.createElement('div');
+                div.className = 'avatar-item selected';
+                div.innerHTML = `<img src="${customImg}">`;
+                div.onclick = () => { selectedAvatar = customImg; renderAvatarGrid(customImg); };
+                grid.appendChild(div);
+            }
+            avatars.forEach(a => {
+                const div = document.createElement('div');
+                div.className = 'avatar-item' + (selectedAvatar === a ? ' selected' : '');
+                div.innerText = a;
+                div.onclick = () => { selectedAvatar = a; renderAvatarGrid(customImg); document.getElementById('btn-final').classList.remove('btn-disabled'); };
+                grid.appendChild(div);
+            });
+        }
+
+        function finalizeSetup() {
+            unlockAudio();
+            const val = document.getElementById('select-team').value.split('|');
+            userTeamName = val[0];
+            userTeamIcon = val[1] || "";
+            
+            roomRef.child('scores/' + userPseudo).set({ 
+                pts: 0, 
+                avatar: selectedAvatar, 
+                teamName: userTeamName, 
+                teamIcon: userTeamIcon, 
+                active: true 
+            });
+            startBuzzer();
+        }
+
+        // Nouvelle fonction pour mettre à jour l'affichage de l'équipe avec le blason
+        const updateTeamDisplay = (name, icon) => {
+            const teamLabel = document.getElementById('display-team-label');
+            if (name && name !== "Solo" && name !== "") {
+                const iconHtml = icon ? `<img src="${icon}" style="height:15px; vertical-align:middle; margin-right:5px;">` : "";
+                teamLabel.innerHTML = `${iconHtml}${name}`;
+            } else {
+                teamLabel.innerText = "Mode Solo";
+            }
+        };
+
+        function startBuzzer() {
+            const container = document.getElementById('display-avatar-container');
+            container.style.display = "flex";
+            if(selectedAvatar && selectedAvatar.startsWith('data:image')) container.innerHTML = `<img src="${selectedAvatar}" style="width:100%; height:100%; object-fit:cover;">`;
+            else container.innerText = selectedAvatar || "👤";
+            
+            document.getElementById('display-pseudo').innerText = userPseudo;
+            updateTeamDisplay(userTeamName, userTeamIcon);
+            
+            if(selectedAvatar && selectedAvatar.startsWith('data:image')) document.getElementById('buzzer-img-placeholder').innerHTML = `<img src="${selectedAvatar}" class="buzzer-img">`;
+            
+            showScreen('screen-buzzer');
+            
+            roomRef.child('scores/' + userPseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
+            
+            // NOUVEAU : Écoute en direct des changements sur le profil du joueur (ex: si le MJ le change d'équipe)
+            roomRef.child('scores/' + userPseudo).on('value', snap => {
+                const d = snap.val();
+                if(d) {
+                    userTeamName = d.teamName || "Solo";
+                    userTeamIcon = d.teamIcon || "";
+                    updateTeamDisplay(userTeamName, userTeamIcon);
+                }
+            });
+
+            roomRef.child('gameState').on('value', snap => {
+                if(snap.val() && snap.val().status === 'endGame') handleEndGame();
+                else { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); }
+            });
+            
+            roomRef.child('buzzers').on('value', snap => { 
+                const val = snap.val();
+                if (val && val.pseudo === userPseudo && currentWinner !== userPseudo) document.getElementById('sound-win').play().catch(()=>{});
+                currentWinner = val ? val.pseudo : null; updateUI(); 
+            });
+        }
+
+        function onBuzzerClick(event) {
+            if(event) event.preventDefault();
+            document.getElementById('sound-click').play().catch(()=>{});
+            if(gameState === "ready" && !currentWinner) {
+                roomRef.child('gameState').update({ status: 'taken' });
+                roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
+            }
+        }
+
+        function updateUI() {
+            const c = document.getElementById('screen-buzzer'); const l = document.getElementById('label');
+            c.classList.remove('ready', 'main-prise');
+            if (currentWinner) {
+                if(currentWinner === userPseudo) { c.classList.add('main-prise'); l.innerText = "C'EST À TOI !"; }
+                else { l.innerText = "OCCUPÉ"; }
+            } else if(gameState === 'ready') { c.classList.add('ready'); l.innerText = "BUZZEZ !"; }
+            else { l.innerText = "ATTENDEZ"; }
+        }
+
+        function handleEndGame() {
+            const pZone = document.getElementById('podium-zone');
+            pZone.style.display = "flex";
+            roomRef.child('scores').once('value', snap => {
+                const scores = snap.val() || {};
+                const leaderboard = Object.keys(scores).map(p => ({ name: p, pts: scores[p].pts })).sort((a, b) => b.pts - a.pts);
+                const rank = leaderboard.findIndex(e => e.name === userPseudo) + 1;
+                
+                if(rank === 1) {
+                    pZone.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img animate-zoom"><h1 style="color:gold; font-size:2.5rem;">CHAMPION !</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
+                    document.getElementById('sound-applause').play().catch(()=>{});
+                    
+                    var duration = 8 * 1000;
+                    var animationEnd = Date.now() + duration;
+                    var interval = setInterval(function() {
+                        var timeLeft = animationEnd - Date.now();
+                        if (timeLeft <= 0) return clearInterval(interval);
+                        confetti({ particleCount: 40, spread: 70, origin: { x: Math.random(), y: Math.random() - 0.2 }, zIndex: 10000 });
+                    }, 250);
+                } else {
+                    pZone.innerHTML = `<h1 style="color:white; font-size:2rem;">${rank}ème PLACE</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
+                }
+            });
+        }
+
+        function unlockAudio() { ['sound-click', 'sound-win', 'sound-applause'].forEach(id => { const el = document.getElementById(id); el.play().then(() => { el.pause(); el.currentTime = 0; }).catch(()=>{}); }); }
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById(id).classList.add('active-screen'); }
         function listenToTeams() {
             roomRef.child('teams').on('value', snap => {
                 const select = document.getElementById('select-team');
@@ -197,108 +314,6 @@
                 });
             });
         }
-
-        function initAvatarGrid() {
-            const grid = document.getElementById('avatar-grid');
-            avatars.forEach(a => {
-                const div = document.createElement('div');
-                div.className = 'avatar-item'; div.innerText = a;
-                div.onclick = () => {
-                    document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
-                    div.classList.add('selected'); selectedAvatar = a;
-                    document.getElementById('btn-final').classList.remove('btn-disabled');
-                };
-                grid.appendChild(div);
-            });
-        }
-
-        function finalizeSetup() {
-            if(!selectedAvatar) return;
-            unlockAudio(); 
-            const val = document.getElementById('select-team').value.split('|');
-            userTeamName = val[0] || null; userTeamIcon = val[1] || "";
-            localStorage.setItem('presta_pseudo', userPseudo);
-            localStorage.setItem('presta_room', roomID);
-            roomRef.child('scores/' + userPseudo).set({ 
-                pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon, active: true
-            });
-            startBuzzer();
-        }
-
-        function startBuzzer() {
-            document.getElementById('display-pseudo').innerText = userPseudo;
-            document.getElementById('display-avatar').innerText = selectedAvatar;
-            document.getElementById('display-team-label').innerText = (userTeamName === "Solo" || userTeamName === "") ? "Mode Solo" : userTeamName;
-            showScreen('screen-buzzer');
-            
-            roomRef.child('scores/' + userPseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
-            roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlockedLocally = snap.exists(); updateUI(); });
-            roomRef.child('gameState').on('value', snap => {
-                if(snap.val() && snap.val().status === 'endGame') handleEndGame();
-                else { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); }
-            });
-
-            roomRef.child('buzzers').on('value', snap => { 
-                const val = snap.val();
-                if (val && val.pseudo === userPseudo && currentWinner !== userPseudo) {
-                    const winSound = document.getElementById('sound-win');
-                    winSound.currentTime = 0; winSound.play().catch(()=>{});
-                    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]); 
-                }
-                currentWinner = val ? val.pseudo : null; updateUI(); 
-            });
-        }
-
-        function onBuzzerClick(event) {
-            if(event) event.preventDefault();
-            document.getElementById('sound-click').currentTime = 0;
-            document.getElementById('sound-click').play().catch(()=>{});
-            if (navigator.vibrate) navigator.vibrate(30);
-            if(gameState === "ready" && !isBlockedLocally && !currentWinner) {
-                roomRef.child('gameState').update({ status: 'taken' });
-                roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
-            }
-        }
-
-        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById(id).classList.add('active-screen'); }
-        function leaveGame() { if(confirm("Quitter ?")) location.reload(); }
-
-        function updateUI() {
-            const c = document.getElementById('screen-buzzer'); const l = document.getElementById('label');
-            c.classList.remove('ready', 'main-prise', 'blocked');
-            if(isBlockedLocally) { c.classList.add('blocked'); l.innerText = "BLOQUÉ"; }
-            else if (currentWinner) {
-                if(currentWinner === userPseudo) { c.classList.add('main-prise'); l.innerText = "C'EST À TOI !"; }
-                else { l.innerText = "OCCUPÉ"; }
-            } else if(gameState === 'ready') { c.classList.add('ready'); l.innerText = "BUZZEZ !"; }
-            else { l.innerText = "ATTENDEZ"; }
-        }
-
-        function handleEndGame() {
-            const pZone = document.getElementById('podium-zone');
-            pZone.style.display = "flex";
-            roomRef.child('scores').once('value', snap => {
-                const scores = snap.val() || {};
-                const leaderboard = Object.keys(scores).map(p => ({ name: (scores[p].teamName && scores[p].teamName !== "Solo") ? scores[p].teamName : p, pts: scores[p].pts }))
-                    .sort((a, b) => b.pts - a.pts);
-                const myName = (userTeamName && userTeamName !== "Solo") ? userTeamName : userPseudo;
-                const rank = leaderboard.findIndex(e => e.name === myName) + 1;
-
-                if(rank === 1) {
-                    pZone.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img animate-zoom"><h1 class="rank-text">CHAMPION !</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
-                    document.getElementById('sound-applause').play().catch(()=>{});
-                    var duration = 8 * 1000; var animationEnd = Date.now() + duration;
-                    var interval = setInterval(function() {
-                        var timeLeft = animationEnd - Date.now();
-                        if (timeLeft <= 0) return clearInterval(interval);
-                        confetti({ particleCount: 50, origin: { x: Math.random(), y: Math.random() - 0.2 } });
-                    }, 250);
-                } else {
-                    pZone.innerHTML = `<h1 class="rank-text">${rank}ème PLACE</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
-                }
-            });
-        }
-        initAvatarGrid();
     </script>
 </body>
 </html>
