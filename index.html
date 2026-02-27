@@ -28,7 +28,21 @@
         .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; pointer-events: none; }
         .buzzer-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.4; }
         .buzzer-label { position: relative; z-index: 2; color: white; font-size: 1.4rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-        #podium-zone { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; }
+
+        #podium-zone { 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(26, 26, 26, 0.98); 
+            z-index: 10000; 
+            padding: 20px; 
+            box-sizing: border-box; 
+        }
+        .trophy-img { width: 150px; height: 150px; object-fit: contain; margin-bottom: 15px; }
         @keyframes trophyZoom { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 70% { transform: scale(1.4) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
         .animate-zoom { animation: trophyZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     </style>
@@ -137,11 +151,7 @@
                 roomRef.child('scores/' + userPseudo).once('value', snap => {
                     const data = snap.val();
                     if(data) {
-                        // RESTAURATION MESSAGE BANNI
-                        if(data.kicked === true) { 
-                            alert("Vous avez été expulsé de cette partie par le MJ. Vous ne pouvez plus rejoindre avec ce pseudo."); 
-                            return; 
-                        }
+                        if(data.kicked === true) { alert("Vous avez été expulsé de cette partie par le MJ. Vous ne pouvez plus rejoindre avec ce pseudo."); return; }
                         if(confirm("Reprendre votre partie ?")) {
                             selectedAvatar = data.avatar;
                             userTeamName = data.teamName || "Solo";
@@ -150,7 +160,6 @@
                         } else showScreen('screen-setup');
                     } else {
                         roomRef.child('scores').once('value', scoresSnap => {
-                            // RESTAURATION MESSAGE GUEST
                             if(isGuestRoom && scoresSnap.numChildren() >= 10) {
                                 alert("🔒 Mode Découverte : La limite de 10 joueurs est atteinte.");
                                 return;
@@ -250,11 +259,14 @@
                 currentWinner = val ? val.pseudo : null; updateUI(); 
             });
             
-            // RESTAURATION ALERTE BANNI LIVE
+            // ÉCOUTEUR D'EXPULSION AVEC REDIRECTION LIEN MJ
             roomRef.child('scores/' + userPseudo + '/kicked').on('value', snap => {
                 if(snap.exists() && snap.val() === true) { 
-                    alert("Vous avez été expulsé de la partie par le MJ."); 
-                    location.reload(); 
+                    roomRef.child('mjLink').once('value', linkSnap => {
+                        const redirectUrl = linkSnap.val() || window.location.origin + window.location.pathname;
+                        alert("Vous avez été expulsé de la partie par le MJ."); 
+                        window.location.href = redirectUrl;
+                    });
                 }
             });
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
@@ -283,22 +295,41 @@
         function handleEndGame() {
             const pZone = document.getElementById('podium-zone');
             pZone.style.display = "flex";
-            roomRef.child('scores').once('value', snap => {
-                const leaderboard = Object.keys(snap.val() || {}).map(p => ({ name: p, pts: snap.val()[p].pts })).sort((a, b) => b.pts - a.pts);
-                const rank = leaderboard.findIndex(e => e.name === userPseudo) + 1;
-                if(rank === 1) {
-                    pZone.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img animate-zoom"><h1 style="color:gold; font-size:2.5rem;">CHAMPION !</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
-                    document.getElementById('sound-applause').play().catch(()=>{});
-                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                } else pZone.innerHTML = `<h1 style="color:white; font-size:2rem;">${rank}ème PLACE</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
+            
+            roomRef.child('mjLink').once('value', linkSnap => {
+                const redirectUrl = linkSnap.val() || window.location.origin + window.location.pathname;
+
+                roomRef.child('scores').once('value', snap => {
+                    const leaderboard = Object.keys(snap.val() || {}).map(p => ({ name: p, pts: snap.val()[p].pts })).sort((a, b) => b.pts - a.pts);
+                    const rank = leaderboard.findIndex(e => e.name === userPseudo) + 1;
+                    let content = "";
+
+                    if(rank === 1) {
+                        content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img animate-zoom"><h1 style="color:gold;">CHAMPION !</h1>`;
+                        document.getElementById('sound-applause').play().catch(()=>{});
+                        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                    } else if (rank === 2) {
+                        content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img animate-zoom"><h1 style="color:silver;">2ème PLACE</h1>`;
+                    } else if (rank === 3) {
+                        content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img animate-zoom"><h1 style="color:#cd7f32;">3ème PLACE</h1>`;
+                    } else {
+                        content = `<h1 style="color:white;">${rank}ème PLACE</h1><p>Merci d'avoir joué !</p>`;
+                    }
+                    
+                    pZone.innerHTML = `${content}<button onclick="window.location.href='${redirectUrl}'" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
+                });
             });
         }
 
         function leaveGame() {
-            // RESTAURATION MESSAGE QUITTER
-            if(confirm("Voulez-vous vraiment quitter la partie ?\n\nSachez que vous pourrez revenir avec le même appareil et le même pseudo pour récupérer votre score !")) {
+            if(confirm("Quitter la partie ?\n\nSachez que vous pourrez revenir avec le même appareil et le même pseudo pour récupérer votre score !")) {
                 if(roomRef && userPseudo) {
-                    roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => { location.reload(); });
+                    roomRef.child('mjLink').once('value', linkSnap => {
+                        const redirectUrl = linkSnap.val() || window.location.origin + window.location.pathname;
+                        roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => { 
+                            window.location.href = redirectUrl; 
+                        });
+                    });
                 } else location.reload();
             }
         }
