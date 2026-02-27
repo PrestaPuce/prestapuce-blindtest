@@ -170,6 +170,7 @@
 
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {};
+        let currentBlocked = {}; // NOUVEAU : Suivi des joueurs bloqués localement pour le MJ
         let editingTeamKey = null;
         let mjProfileData = {};
 
@@ -263,7 +264,6 @@
             document.getElementById(previousScreen).style.display = "block";
         }
 
-        // Upload Base64 (contourne les règles de Storage pour le logo Profil)
         function uploadProfileLogo(input) {
             if (!input.files || !input.files[0]) return;
             const file = input.files[0];
@@ -322,11 +322,9 @@
             const loginLogo = document.getElementById('login-mj-logo');
             if(loginLogo) loginLogo.src = finalUrl;
 
-            // Mise à jour du favicon de la page MJ
             const favicon = document.getElementById('page-favicon');
             if(favicon) favicon.href = finalUrl;
 
-            // Envoi dans la salle active pour mise à jour des joueurs / scores
             if(roomRef && roomID) {
                 roomRef.child('mjLogo').set(finalUrl);
                 if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink);
@@ -349,19 +347,16 @@
             db.ref('activeRooms/' + roomID).set({ status: 'open' });
             roomRef = db.ref('roomsData/' + id);
             
-            // On s'assure que le logo est injecté dans la salle à l'ouverture
             const currentLogo = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
             roomRef.child('mjLogo').set(currentLogo);
             if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink);
 
             initMJLogic(); 
             loadCrestGrid();
-            // Ouverture de l'onglet des scores
             const scoreURL = window.location.origin + window.location.pathname.replace('mj', 'scores') + "?room=" + id;
             window.open(scoreURL, '_blank');
         }
 
-        // Upload classique (Storage) pour les blasons d'équipe
         function uploadCustomTeamLogo(input) {
             if (!input.files || !input.files[0]) return;
             const file = input.files[0];
@@ -463,6 +458,12 @@
             });
             roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
             roomRef.child('scores').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
+            
+            // Écouteur pour savoir qui est bloqué (pour l'UI du MJ)
+            roomRef.child('blockedPlayers').on('value', snap => {
+                currentBlocked = snap.val() || {};
+                renderLobby();
+            });
         }
 
         function renderLobby() {
@@ -487,9 +488,56 @@
                 const d = allPlayersData[pseudo]; if(d.active === false) return;
                 let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
                 Object.keys(globalTeams).forEach(t => { teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; });
-                l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;"><span style="font-size:1.2rem; margin-right:8px; flex-shrink:0;">${d.avatar}</span><b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${pseudo}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--blue)" onclick="adj('${pseudo}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${pseudo}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${pseudo}')">✖</button></div></div>`;
+                
+                // Style dynamique pour le bouton "Bloquer"
+                const isBlocked = currentBlocked[pseudo];
+                const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
+                const blockTitle = isBlocked ? "Débloquer" : "Bloquer pour ce titre";
+
+                l.innerHTML += `
+                    <div class="score-row">
+                        <div style="display:flex; align-items:center; flex:1; overflow:hidden;">
+                            <span style="font-size:1.2rem; margin-right:8px; flex-shrink:0;">${d.avatar}</span>
+                            <b style="margin-right:10px;">${pseudo}</b>
+                            <select class="mini-select" onchange="togglePlayerTeam('${pseudo}', this.value)">${teamOptions}</select>
+                        </div>
+                        <div class="player-controls">
+                            <span>(${d.pts || 0} pts)</span>
+                            <button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${pseudo}')" title="Forcer la main">⚡</button>
+                            <button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')" title="${blockTitle}">🛑</button>
+                            <button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${pseudo}',-1)">-</button>
+                            <button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${pseudo}',1)">+</button>
+                            <button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${pseudo}')">✖</button>
+                        </div>
+                    </div>`;
             });
         }
+
+        // --- NOUVELLES FONCTIONS DE CONTRÔLE MJ ---
+
+        // 1. Force un joueur à prendre la main
+        function forceBuzzer(pseudo) {
+            const pData = allPlayersData[pseudo];
+            if(!pData) return;
+            // On déclare le joueur comme preneur de main officiel (ferme les autres buzzers)
+            roomRef.child('gameState').update({ status: 'taken' });
+            roomRef.child('buzzers').set({ 
+                pseudo: pseudo, 
+                avatar: pData.avatar || "", 
+                teamName: pData.teamName || "Solo", 
+                teamIcon: pData.teamIcon || "" 
+            });
+        }
+
+        // 2. Bloque/Débloque manuellement un joueur
+        function toggleBlockPlayer(pseudo) {
+            if(currentBlocked[pseudo]) {
+                roomRef.child('blockedPlayers/' + pseudo).remove(); // Débloque si déjà bloqué
+            } else {
+                roomRef.child('blockedPlayers/' + pseudo).set(true); // Bloque
+            }
+        }
+        // ------------------------------------------
 
         function triggerEndGame() {
             if(confirm("Voulez-vous figer les scores et enregistrer l'historique pour ce MJ ?")) {
@@ -532,16 +580,12 @@
             });
         }
 
-        // --- CORRECTION AJOUTÉE ICI ---
         function handleError() {
             if(currentPlayer && currentPlayer.pseudo) {
-                // Ajoute le joueur actuel à la liste des bloqués pour ce titre
                 roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
-                // Relance les buzzers pour les autres joueurs
                 statusUpdate('ready');
             }
         }
-        // ------------------------------
 
         function handleReward(pts, mode) {
             roomRef.child('scores/' + currentPlayer.pseudo).transaction(c => { return { pts: (c ? c.pts : 0) + pts, avatar: c.avatar, teamName: c.teamName, teamIcon: c.teamIcon, active: true }; });

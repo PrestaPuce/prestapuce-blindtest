@@ -84,6 +84,7 @@
 
     <audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
     <audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/2831/2831-preview.mp3" preload="auto"></audio>
+    <audio id="sound-applause" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3" preload="auto"></audio>
 
     <script>
         const firebaseConfig = {
@@ -111,7 +112,8 @@
         };
 
         function unlockAudio() {
-            ['sound-click', 'sound-win'].forEach(id => {
+            // Ajout du son d'applaudissement dans la boucle de déverrouillage
+            ['sound-click', 'sound-win', 'sound-applause'].forEach(id => {
                 const el = document.getElementById(id);
                 el.volume = 0;
                 const playPromise = el.play();
@@ -392,17 +394,32 @@
                         <h1 style="color:#f1c40f; font-size:2.5rem; text-shadow: 0 0 20px rgba(241,196,15,0.5);">CHAMPION !</h1>
                     `;
                     
+                    // --- DÉCLENCHEMENT AUDIO (Applaudissements) ---
+                    const applauseSound = document.getElementById('sound-applause');
+                    applauseSound.currentTime = 0;
+                    applauseSound.play().catch(()=>{});
+
+                    // --- CANON A CONFETTIS SPECTACULAIRE ---
                     setTimeout(() => {
                         if (typeof confetti === 'function') {
-                            var duration = 5 * 1000;
-                            var end = Date.now() + duration;
-                            (function frame() {
-                              confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0, y: 0.6 }, colors: ['#f1c40f', '#ffffff', '#3498db'] });
-                              confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors: ['#f1c40f', '#ffffff', '#3498db'] });
-                              if (Date.now() < end) { requestAnimationFrame(frame); }
-                            }());
+                            var duration = 8 * 1000; // 8 secondes de confettis en continu
+                            var animationEnd = Date.now() + duration;
+                            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+                            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+                            var interval = setInterval(function() {
+                                var timeLeft = animationEnd - Date.now();
+                                if (timeLeft <= 0) { return clearInterval(interval); }
+
+                                var particleCount = 50 * (timeLeft / duration);
+                                // Tir depuis la gauche et la droite
+                                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                            }, 250);
                         }
                     }, 200);
+
                 } else if(rank === 2) {
                     content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583350.png" style="width:130px;"><h1 style="color:#f1c40f;">2ème PLACE</h1>`;
                 } else if(rank === 3) {
