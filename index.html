@@ -95,8 +95,8 @@
         <button class="btn-exit" onclick="leaveGame()">×</button>
     </div>
 
-    <audio id="sound-click" src="https://actions.google.com/sounds/v1/ui/pop.ogg" preload="auto"></audio>
-    <audio id="sound-win" src="https://actions.google.com/sounds/v1/alarms/ding_dong.ogg" preload="auto"></audio>
+    <audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+    <audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" preload="auto"></audio>
 
     <script>
         const firebaseConfig = {
@@ -218,16 +218,19 @@
             });
         }
 
-        // Astuce pour contourner le blocage des sons sur Safari/Mobile
+        // Astuce sécurisée pour forcer le navigateur à autoriser les sons
         function unlockAudio() {
             ['sound-click', 'sound-win'].forEach(id => {
                 const el = document.getElementById(id);
-                el.volume = 0; // Mute le son
-                el.play().then(() => {
-                    el.pause();
-                    el.currentTime = 0;
-                    el.volume = 1; // Remet le volume
-                }).catch(() => {});
+                el.muted = true; // On utilise muted plutôt que volume = 0 (plus fiable)
+                const playPromise = el.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        el.pause();
+                        el.currentTime = 0;
+                        el.muted = false; // On rétablit le son pour quand il servira vraiment
+                    }).catch(() => {});
+                }
             });
         }
 
@@ -306,9 +309,11 @@
                 const newWinner = val ? val.pseudo : null;
                 
                 if (newWinner === userPseudo && currentWinner !== userPseudo) {
-                    // C'EST MOI QUI AI LA MAIN ! (Déclenché par Firebase = 100% fiable)
-                    document.getElementById('sound-win').play().catch(()=>{});
-                    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]); // Grosse vibration spéciale "Main prise"
+                    // C'EST MOI QUI AI LA MAIN ! 
+                    const winSound = document.getElementById('sound-win');
+                    winSound.currentTime = 0; // Remise à zéro forçée
+                    winSound.play().catch(()=>{});
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]); // Grosse vibration spéciale
                 }
                 
                 currentWinner = newWinner; 
@@ -327,7 +332,10 @@
 
         function onBuzzerClick() {
             // Un petit son et une petite vibration instantanés à chaque toucher de bouton
-            document.getElementById('sound-click').play().catch(()=>{});
+            const clickSound = document.getElementById('sound-click');
+            clickSound.currentTime = 0; // Remise à zéro forçée pour pouvoir mitrailler le bouton
+            clickSound.play().catch(()=>{});
+            
             if (navigator.vibrate) navigator.vibrate(30);
 
             if(gameState === "ready" && !isBlockedLocally && !currentWinner) {
