@@ -17,22 +17,20 @@
         input, select { width: 100%; max-width: 280px; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); font-size: 1.1rem; background: var(--card-bg); color: white; text-align: center; outline: none; }
         .btn-ui { width: 100%; max-width: 280px; padding: 18px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: 900; cursor: pointer; background-color: var(--primary-color); color: white; box-shadow: 0 8px 0 #2980b9; text-transform: uppercase; margin-bottom: 10px; }
         .btn-disabled { background-color: #7f8c8d !important; box-shadow: 0 8px 0 #636e72 !important; cursor: not-allowed; opacity: 0.6; }
-        
         .avatar-scroll { width: 100%; max-width: 320px; max-height: 200px; overflow-y: auto; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 20px; }
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .avatar-item { width: 60px; height: 60px; background: var(--card-bg); border-radius: 15px; cursor: pointer; border: 3px solid transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 2rem; }
         .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); }
         .avatar-item img { width: 100%; height: 100%; object-fit: cover; }
-
         .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; outline: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
         .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
         .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; pointer-events: none; }
-        
         .buzzer-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.4; }
         .buzzer-label { position: relative; z-index: 2; color: white; font-size: 1.4rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-
         #podium-zone { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; }
+        @keyframes trophyZoom { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 70% { transform: scale(1.4) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
+        .animate-zoom { animation: trophyZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
@@ -68,8 +66,8 @@
         <h3 style="margin:0 0 10px 0;">AVATAR</h3>
         <div class="avatar-scroll">
             <div class="avatar-grid" id="avatar-grid">
-                <div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold;" onclick="document.getElementById('file-input').click()">+
-                    <input type="file" id="file-input" accept="image/*" capture="user" style="display:none" onchange="handleFileUpload(this)">
+                <div class="avatar-item" style="background:var(--primary-color); color:white;" onclick="document.getElementById('file-input').click()">+
+                    <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
                 </div>
             </div>
         </div>
@@ -110,14 +108,10 @@
         let gameState = "waiting", currentWinner = null;
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
-        // RECONNAISSANCE QR CODE AUTOMATIQUE
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
             const r = urlParams.get('room');
-            if(r) { 
-                document.getElementById('room-code-input').value = r; 
-                validateRoom(); 
-            }
+            if(r) { document.getElementById('room-code-input').value = r; validateRoom(); }
             renderAvatarGrid();
         };
 
@@ -149,10 +143,10 @@
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        canvas.width = 120; canvas.height = 120; // Plus petit pour éviter les bugs d'affichage capture
+                        canvas.width = 120; canvas.height = 120;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, 120, 120);
-                        selectedAvatar = canvas.toDataURL('image/jpeg', 0.6); // Compression forte pour la base de données
+                        selectedAvatar = canvas.toDataURL('image/jpeg', 0.6);
                         renderAvatarGrid(selectedAvatar);
                         document.getElementById('btn-final').classList.remove('btn-disabled');
                     };
@@ -164,7 +158,7 @@
 
         function renderAvatarGrid(customImg = null) {
             const grid = document.getElementById('avatar-grid');
-            grid.innerHTML = `<div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold;" onclick="document.getElementById('file-input').click()">+<input type="file" id="file-input" accept="image/*" capture="user" style="display:none" onchange="handleFileUpload(this)"></div>`;
+            grid.innerHTML = `<div class="avatar-item" style="background:var(--primary-color); color:white;" onclick="document.getElementById('file-input').click()">+<input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)"></div>`;
             if(customImg) {
                 const div = document.createElement('div');
                 div.className = 'avatar-item selected';
@@ -185,37 +179,26 @@
             unlockAudio();
             const val = document.getElementById('select-team').value.split('|');
             userTeamName = val[0];
-            roomRef.child('scores/' + userPseudo).set({ 
-                pts: 0, avatar: selectedAvatar, teamName: userTeamName, active: true
-            });
+            roomRef.child('scores/' + userPseudo).set({ pts: 0, avatar: selectedAvatar, teamName: userTeamName, active: true });
             startBuzzer();
         }
 
         function startBuzzer() {
-            const avatarContainer = document.getElementById('display-avatar-container');
-            avatarContainer.style.display = "flex"; // On ne l'affiche qu'ici pour éviter le rond noir au début
-            if(selectedAvatar.startsWith('data:image')) avatarContainer.innerHTML = `<img src="${selectedAvatar}" style="width:100%; height:100%; object-fit:cover;">`;
-            else avatarContainer.innerText = selectedAvatar;
-
+            const container = document.getElementById('display-avatar-container');
+            container.style.display = "flex";
+            if(selectedAvatar && selectedAvatar.startsWith('data:image')) container.innerHTML = `<img src="${selectedAvatar}" style="width:100%; height:100%; object-fit:cover;">`;
+            else container.innerText = selectedAvatar || "👤";
             document.getElementById('display-pseudo').innerText = userPseudo;
-            document.getElementById('display-team-label').innerText = userTeamName === "Solo" ? "" : userTeamName;
-            
-            if(selectedAvatar.startsWith('data:image')) {
-                document.getElementById('buzzer-img-placeholder').innerHTML = `<img src="${selectedAvatar}" class="buzzer-img">`;
-            }
-
+            if(selectedAvatar && selectedAvatar.startsWith('data:image')) document.getElementById('buzzer-img-placeholder').innerHTML = `<img src="${selectedAvatar}" class="buzzer-img">`;
             showScreen('screen-buzzer');
             roomRef.child('scores/' + userPseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
             roomRef.child('gameState').on('value', snap => {
                 if(snap.val() && snap.val().status === 'endGame') handleEndGame();
                 else { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); }
             });
-
             roomRef.child('buzzers').on('value', snap => { 
                 const val = snap.val();
-                if (val && val.pseudo === userPseudo && currentWinner !== userPseudo) {
-                    document.getElementById('sound-win').play().catch(()=>{});
-                }
+                if (val && val.pseudo === userPseudo && currentWinner !== userPseudo) document.getElementById('sound-win').play().catch(()=>{});
                 currentWinner = val ? val.pseudo : null; updateUI(); 
             });
         }
@@ -246,23 +229,26 @@
                 const scores = snap.val() || {};
                 const leaderboard = Object.keys(scores).map(p => ({ name: p, pts: scores[p].pts })).sort((a, b) => b.pts - a.pts);
                 const rank = leaderboard.findIndex(e => e.name === userPseudo) + 1;
+                
                 if(rank === 1) {
-                    pZone.innerHTML = `<h1 style="color:gold">CHAMPION !</h1><button onclick="location.reload()" class="btn-ui">RETOUR</button>`;
+                    pZone.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img animate-zoom"><h1 style="color:gold; font-size:2.5rem;">CHAMPION !</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
                     document.getElementById('sound-applause').play().catch(()=>{});
-                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                    
+                    // --- RE-DÉCLENCHEMENT DES CONFETTIS SPECTACULAIRES ---
+                    var duration = 8 * 1000;
+                    var animationEnd = Date.now() + duration;
+                    var interval = setInterval(function() {
+                        var timeLeft = animationEnd - Date.now();
+                        if (timeLeft <= 0) return clearInterval(interval);
+                        confetti({ particleCount: 40, spread: 70, origin: { x: Math.random(), y: Math.random() - 0.2 }, zIndex: 10000 });
+                    }, 250);
                 } else {
-                    pZone.innerHTML = `<h1 style="color:white">${rank}ème PLACE</h1><button onclick="location.reload()" class="btn-ui">RETOUR</button>`;
+                    pZone.innerHTML = `<h1 style="color:white; font-size:2rem;">${rank}ème PLACE</h1><button onclick="location.reload()" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
                 }
             });
         }
 
-        function unlockAudio() {
-            ['sound-click', 'sound-win', 'sound-applause'].forEach(id => {
-                const el = document.getElementById(id);
-                el.play().then(() => { el.pause(); el.currentTime = 0; }).catch(()=>{});
-            });
-        }
-
+        function unlockAudio() { ['sound-click', 'sound-win', 'sound-applause'].forEach(id => { const el = document.getElementById(id); el.play().then(() => { el.pause(); el.currentTime = 0; }).catch(()=>{}); }); }
         function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById(id).classList.add('active-screen'); }
         function listenToTeams() {
             roomRef.child('teams').on('value', snap => {
