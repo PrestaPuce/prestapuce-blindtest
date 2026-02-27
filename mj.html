@@ -138,8 +138,14 @@
             <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
             <div id="mj-team-list-display"></div>
         </div>
+        
         <h3>Lobby Joueurs</h3>
         <div id="score-list"></div>
+
+        <div id="banned-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); border-radius: 12px;">
+            <h3 style="color:var(--danger); margin-top:0;">Joueurs Expulsés</h3>
+            <div id="banned-list"></div>
+        </div>
 
         <div style="margin-top:20px; padding: 15px; border: 2px solid var(--gold); border-radius: 12px; background: rgba(243, 156, 18, 0.1); text-align: center;">
             <h3 style="color:var(--gold); margin-top:0;">PODIUM & RÉSULTATS</h3>
@@ -449,7 +455,6 @@
                     currentPlayer = realData; currentPlayer.pseudo = pseudo;
                     
                     const avatarContainer = document.getElementById('p-avatar');
-                    // MODIFICATION : Utilisation de length > 20 pour garantir l'affichage correct des photos
                     if(realData.avatar && realData.avatar.length > 20) {
                         avatarContainer.innerHTML = `<img src="${realData.avatar}" style="width:70px; height:70px; border-radius:50%; object-fit:cover;">`;
                     } else {
@@ -475,6 +480,10 @@
         function renderLobby() {
             const l = document.getElementById('score-list'); l.innerHTML = "";
             const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
+            const bSection = document.getElementById('banned-section');
+            const bList = document.getElementById('banned-list'); bList.innerHTML = "";
+            
+            let hasBanned = false;
             
             Object.keys(globalTeams).forEach(tKey => {
                 tList.innerHTML += `
@@ -491,7 +500,22 @@
             });
 
             Object.keys(allPlayersData).forEach(pseudo => {
-                const d = allPlayersData[pseudo]; if(d.active === false) return;
+                const d = allPlayersData[pseudo]; 
+                
+                // MODIFICATION : Gestion des joueurs exclus
+                if(d.kicked === true) {
+                    hasBanned = true;
+                    bList.innerHTML += `
+                        <div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;">
+                            <span style="color:var(--danger)"><b>${pseudo}</b></span>
+                            <button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem;" onclick="unkickPlayer('${pseudo}')">Réhabiliter</button>
+                        </div>`;
+                    return; // On ne l'affiche pas dans le lobby normal
+                }
+
+                // S'il est juste parti de lui-même, on ne l'affiche pas non plus
+                if(d.active === false) return; 
+
                 let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
                 Object.keys(globalTeams).forEach(t => { teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; });
                 
@@ -499,7 +523,6 @@
                 const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
                 
                 let avHtml = "";
-                // MODIFICATION : Utilisation de length > 20 pour le lobby
                 if(d.avatar && d.avatar.length > 20) {
                     avHtml = `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">`;
                 } else {
@@ -523,6 +546,9 @@
                         </div>
                     </div>`;
             });
+
+            // Afficher ou cacher la zone des bannis
+            bSection.style.display = hasBanned ? "block" : "none";
         }
 
         function forceBuzzer(pseudo) {
@@ -574,7 +600,19 @@
         function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
         function deleteTeam(n) { roomRef.child('teams/' + n).remove(); }
-        function kickPlayer(p) { roomRef.child('scores/' + p).update({ active: false }); }
+        
+        // MODIFICATION : Kick passe active à false ET kicked à true avec confirmation
+        function kickPlayer(p) { 
+            if(confirm("Voulez-vous expulser définitivement le joueur : " + p + " ?")) {
+                roomRef.child('scores/' + p).update({ active: false, kicked: true }); 
+            }
+        }
+
+        // NOUVEAU : Réhabilite un joueur exclu
+        function unkickPlayer(p) {
+            roomRef.child('scores/' + p).update({ kicked: false });
+            // Le joueur reste active: false jusqu'à ce qu'il se reconnecte avec son téléphone.
+        }
 
         function togglePlayerTeam(pseudo, choice) {
             const icon = (choice === "Solo") ? "" : (globalTeams[choice] ? globalTeams[choice].icon : "");
