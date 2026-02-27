@@ -66,9 +66,7 @@
         <h3 style="margin:0 0 10px 0;">AVATAR</h3>
         <div class="avatar-scroll">
             <div class="avatar-grid" id="avatar-grid">
-                <div class="avatar-item" style="background:var(--primary-color); color:white;" onclick="document.getElementById('file-input').click()">+
-                    <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
-                </div>
+                <div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('file-input').click()"><span style="font-size:2rem;">+</span><input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)"></div>
             </div>
         </div>
         <h3 style="margin:0 0 10px 0;">ÉQUIPE</h3>
@@ -97,14 +95,12 @@
             authDomain: "prestapuce-buzz.firebaseapp.com",
             databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "prestapuce-buzz",
-            storageBucket: "prestapuce-buzz.firebasestorage.app",
-            messagingSenderId: "907270883505",
-            appId: "1:907270883505:web:197efec0b99db28180ba90"
+            storageBucket: "prestapuce-buzz.firebasestorage.app"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", selectedAvatar = null;
+        let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
         let gameState = "waiting", currentWinner = null;
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
@@ -133,7 +129,28 @@
             unlockAudio();
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return;
-            showScreen('screen-setup');
+            
+            // On vérifie si le joueur existe déjà pour le reconnecter correctement avec ses infos
+            roomRef.child('scores/' + userPseudo).once('value', snap => {
+                if(snap.exists()) {
+                    if(confirm("Reprendre votre partie ?")) {
+                        const data = snap.val();
+                        selectedAvatar = data.avatar;
+                        userTeamName = data.teamName || "Solo";
+                        userTeamIcon = data.teamIcon || "";
+                        
+                        roomRef.child('scores/' + userPseudo).update({ 
+                            active: true,
+                            teamName: userTeamName,
+                            teamIcon: userTeamIcon 
+                        }).then(() => { startBuzzer(); });
+                    } else {
+                        showScreen('screen-setup');
+                    }
+                } else {
+                    showScreen('screen-setup');
+                }
+            });
         }
 
         function handleFileUpload(input) {
@@ -158,7 +175,7 @@
 
         function renderAvatarGrid(customImg = null) {
             const grid = document.getElementById('avatar-grid');
-            grid.innerHTML = `<div class="avatar-item" style="background:var(--primary-color); color:white;" onclick="document.getElementById('file-input').click()">+<input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)"></div>`;
+            grid.innerHTML = `<div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('file-input').click()"><span style="font-size:2rem;">+</span><input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)"></div>`;
             if(customImg) {
                 const div = document.createElement('div');
                 div.className = 'avatar-item selected';
@@ -179,30 +196,65 @@
             unlockAudio();
             const val = document.getElementById('select-team').value.split('|');
             userTeamName = val[0];
-            roomRef.child('scores/' + userPseudo).set({ pts: 0, avatar: selectedAvatar, teamName: userTeamName, active: true });
+            userTeamIcon = val[1] || "";
+            
+            roomRef.child('scores/' + userPseudo).set({ 
+                pts: 0, 
+                avatar: selectedAvatar, 
+                teamName: userTeamName, 
+                teamIcon: userTeamIcon, 
+                active: true 
+            });
             startBuzzer();
         }
+
+        // Nouvelle fonction pour mettre à jour l'affichage de l'équipe avec le blason
+        const updateTeamDisplay = (name, icon) => {
+            const teamLabel = document.getElementById('display-team-label');
+            if (name && name !== "Solo" && name !== "") {
+                const iconHtml = icon ? `<img src="${icon}" style="height:15px; vertical-align:middle; margin-right:5px;">` : "";
+                teamLabel.innerHTML = `${iconHtml}${name}`;
+            } else {
+                teamLabel.innerText = "Mode Solo";
+            }
+        };
 
         function startBuzzer() {
             const container = document.getElementById('display-avatar-container');
             container.style.display = "flex";
             if(selectedAvatar && selectedAvatar.startsWith('data:image')) container.innerHTML = `<img src="${selectedAvatar}" style="width:100%; height:100%; object-fit:cover;">`;
             else container.innerText = selectedAvatar || "👤";
+            
             document.getElementById('display-pseudo').innerText = userPseudo;
+            updateTeamDisplay(userTeamName, userTeamIcon);
+            
             if(selectedAvatar && selectedAvatar.startsWith('data:image')) document.getElementById('buzzer-img-placeholder').innerHTML = `<img src="${selectedAvatar}" class="buzzer-img">`;
+            
             showScreen('screen-buzzer');
+            
             roomRef.child('scores/' + userPseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
+            
+            // NOUVEAU : Écoute en direct des changements sur le profil du joueur (ex: si le MJ le change d'équipe)
+            roomRef.child('scores/' + userPseudo).on('value', snap => {
+                const d = snap.val();
+                if(d) {
+                    userTeamName = d.teamName || "Solo";
+                    userTeamIcon = d.teamIcon || "";
+                    updateTeamDisplay(userTeamName, userTeamIcon);
+                }
+            });
+
             roomRef.child('gameState').on('value', snap => {
                 if(snap.val() && snap.val().status === 'endGame') handleEndGame();
                 else { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); }
             });
+            
             roomRef.child('buzzers').on('value', snap => { 
                 const val = snap.val();
                 if (val && val.pseudo === userPseudo && currentWinner !== userPseudo) document.getElementById('sound-win').play().catch(()=>{});
                 currentWinner = val ? val.pseudo : null; updateUI(); 
             });
 
-            // MODIFICATION : Écouteur pour détecter si le MJ expulse le joueur
             roomRef.child('scores/' + userPseudo + '/active').on('value', snap => {
                 if(snap.exists() && snap.val() === false) {
                     alert("Vous avez été expulsé de la partie par le MJ.");
@@ -216,7 +268,7 @@
             document.getElementById('sound-click').play().catch(()=>{});
             if(gameState === "ready" && !currentWinner) {
                 roomRef.child('gameState').update({ status: 'taken' });
-                roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName });
+                roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
             }
         }
 
@@ -255,7 +307,6 @@
             });
         }
 
-        // MODIFICATION : Nouvelle fonction de déconnexion volontaire
         function leaveGame() {
             if(confirm("Voulez-vous vraiment quitter la partie ?")) {
                 if(roomRef && userPseudo) {
