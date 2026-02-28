@@ -13,14 +13,15 @@
         
         /* HEADER - Plus compact */
         .header-scores { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; gap: 15px; height: 60px; }
-        .header-scores h1 { font-size: 1.5rem; margin: 0; }
-        #display-mj-logo { width: 50px; height: 50px; object-fit: contain; border-radius: 6px; }
+        .header-scores h1 { font-size: 1.8rem; margin: 0; }
+        #display-mj-logo { width: 55px; height: 55px; object-fit: contain; border-radius: 6px; }
         
         /* GRILLE PRINCIPALE */
-        .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: calc(100vh - 90px); }
+        .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: calc(100vh - 85px); }
         
         .column-wrapper { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-        .column-title { text-align: center; font-size: 1.2rem; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid var(--accent); flex-shrink: 0; padding-bottom: 2px; }
+        /* Ligne dorée ajustée */
+        .column-title { text-align: center; font-size: 1.2rem; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid var(--accent); flex-shrink: 0; padding-bottom: 5px; margin-top: 10px; }
         
         /* ZONE DE LISTE DÉFILANTE */
         #player-list, #global-list { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
@@ -35,18 +36,18 @@
             background: var(--card-bg); 
             display: flex; 
             align-items: center; 
-            padding: 0 10px; /* Pas de padding vertical, le flex center gère */
+            padding: 0 10px; 
             border-radius: 6px; 
-            margin-bottom: 4px; /* Marge entre les cartes réduite */
+            margin-bottom: 4px; 
             border-left: 3px solid var(--accent); 
-            height: 36px; /* Hauteur forcée très fine */
+            height: 36px; 
             transition: all 0.2s ease; 
         }
         
         /* ÉLÉMENTS INTERNES */
         .avatar, .crest { width: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; }
         .crest-bg { background: white; padding: 1px; border-radius: 4px; display: flex; }
-        .crest img, .avatar img { width: 28px; height: 28px; object-fit: contain; } /* Mini Images */
+        .crest img, .avatar img { width: 28px; height: 28px; object-fit: contain; } 
         
         .info { 
             flex: 1; 
@@ -57,7 +58,7 @@
             display: flex; 
             align-items: baseline; 
             gap: 6px;
-            line-height: 1; /* Force l'alignement texte */
+            line-height: 1;
         }
         
         .info b { font-size: 0.95rem; }
@@ -75,12 +76,38 @@
             line-height: 1.4;
         }
         
-        /* ÉTATS SPÉCIAUX */
         .last-buzzed { border: 3px solid #2ecc71 !important; background: rgba(46, 204, 113, 0.4); box-shadow: 0 0 10px #2ecc71; transform: scale(1.01); z-index: 2; }
         .inactive-card { opacity: 0.3; filter: grayscale(1); border-left-color: #7f8c8d; }
 
-        /* QR CODE MINI */
-        #qr-box { position: fixed; bottom: 10px; right: 10px; background: white; padding: 5px; border-radius: 6px; text-align: center; color: black; z-index: 100; transform: scale(0.8); transform-origin: bottom right; }
+        /* QR CODE - HAUT DROITE OPTIMISÉ */
+        #qr-box { 
+            position: fixed; 
+            top: 10px; /* Remonté au maximum */
+            right: 15px; 
+            background: white; 
+            padding: 5px; /* Padding réduit */
+            border-radius: 6px; 
+            text-align: center; 
+            color: black; 
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        /* BOUTON HOF - HAUT GAUCHE */
+        #btn-hof { 
+            position: fixed; 
+            top: 20px; 
+            left: 20px; 
+            background: var(--card-bg); 
+            border: 1px solid var(--accent); 
+            color: white; 
+            padding: 8px 15px; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            z-index: 100; 
+            font-size: 0.8rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
 
         /* PODIUM & NAVIGATION */
         #podium-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 20, 0.98); z-index: 50; flex-direction: column; align-items: center; justify-content: center; }
@@ -105,7 +132,6 @@
         #hof-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
         .hof-content { width: 500px; background: #2c3e50; padding: 30px; border-radius: 20px; border: 3px solid var(--accent); }
         .hof-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.2rem; }
-        #btn-hof { position: fixed; bottom: 15px; left: 15px; background: var(--card-bg); border: 1px solid var(--accent); color: white; padding: 6px 12px; border-radius: 20px; cursor: pointer; z-index: 100; font-size: 0.7rem; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
@@ -143,7 +169,7 @@
 
     <div id="qr-box">
         <div id="qrcode"></div>
-        <div style="font-size: 0.7rem; font-weight: bold; margin-top: 5px;">REJOINDRE</div>
+        <div style="font-size: 0.6rem; font-weight: bold; margin-top: 3px;">REJOINDRE</div>
     </div>
 
     <button id="btn-hof" onclick="toggleHOF()">🏆 Hall of Fame</button>
@@ -179,6 +205,7 @@
         
         const currentPath = window.location.href.split('?')[0].replace('scores', 'index');
         const playURL = currentPath + "?room=" + roomID;
+        // QR Code ajusté à 80px pour ne pas dépasser
         new QRCode(document.getElementById("qrcode"), { text: playURL, width: 80, height: 80 });
 
         let scoresData = {}, teamsData = {}, currentBuzzer = null;
