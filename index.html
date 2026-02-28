@@ -11,7 +11,7 @@
         :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; touch-action: manipulation; }
         
-        /* HEADER AVEC BOUTON EDIT */
+        /* HEADER */
         .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 95px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; border-bottom: 2px solid rgba(255,255,255,0.1); z-index: 1000; }
         .logo-presta { width: 45px; height: auto; border-radius: 5px; }
         
@@ -40,9 +40,17 @@
         @keyframes trophyZoom { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 70% { transform: scale(1.4) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
         .animate-zoom { animation: trophyZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-        /* BOUTON EDIT */
-        .btn-edit-profile { background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-left: 5px; opacity: 0.7; transition: 0.2s; }
-        .btn-edit-profile:hover { opacity: 1; transform: scale(1.1); }
+        /* BOUTON EDIT PRO (SVG) */
+        #btn-edit-container { display: none; margin-left: 8px; vertical-align: middle; }
+        .btn-edit-icon {
+            background: none; border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 50%; width: 24px; height: 24px; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; padding: 4px;
+        }
+        .btn-edit-icon svg { fill: #bdc3c7; width: 14px; height: 14px; }
+        .btn-edit-icon:hover { border-color: var(--accent-color); background: rgba(241, 196, 15, 0.1); }
+        .btn-edit-icon:hover svg { fill: var(--accent-color); }
 
         /* VERSION TAG */
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
@@ -51,18 +59,23 @@
 </head>
 <body>
     
-    <div class="version-tag">v1.020</div>
+    <div class="version-tag">v1.021</div>
 
     <div id="podium-zone"></div>
     
     <div class="header-bar">
         <div style="flex:1; line-height: 1.2; display: flex; align-items: center; gap: 10px;">
             <div id="display-avatar-container" style="display:none; width:40px; height:40px; border-radius:50%; overflow:hidden; background: #333; align-items: center; justify-content: center; font-size: 1.2rem;"></div>
-            <div>
-                <span id="display-pseudo" style="font-weight: bold;"></span>
-                <button class="btn-edit-profile" onclick="editProfile()">✏️</button>
-                <br>
-                <span id="display-team-label" style="font-size: 0.7rem; color: var(--accent-color); font-style: italic;"></span>
+            <div style="display:flex; align-items:center;">
+                <div>
+                    <span id="display-pseudo" style="font-weight: bold;"></span><br>
+                    <span id="display-team-label" style="font-size: 0.7rem; color: var(--accent-color); font-style: italic;"></span>
+                </div>
+                <div id="btn-edit-container">
+                    <button class="btn-edit-icon" onclick="editProfile()" title="Modifier mon profil">
+                        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
         <div style="flex:0; padding: 0 10px;">
@@ -124,10 +137,10 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
+        let roomID = "", roomRef = null, userPseudo = "", activePseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let mjRedirectUrl = window.location.origin + window.location.pathname;
-        let isEditing = false; // Flag pour savoir si on modifie le profil
+        let isEditing = false;
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
         window.onload = () => {
@@ -151,10 +164,12 @@
             });
         }
 
-        // FONCTION POUR REVENIR EN ARRIERE (EDIT)
+        // --- FONCTION ÉDITION (Active le mode edit) ---
         function editProfile() {
-            isEditing = true; // Active le mode édition
-            document.getElementById('input-pseudo').value = userPseudo; // Pré-remplit le pseudo
+            isEditing = true;
+            document.getElementById('input-pseudo').value = activePseudo; // On met le pseudo actuel
+            // On cache le bouton edit car on est en train d'éditer
+            document.getElementById('btn-edit-container').style.display = 'none';
             showScreen('screen-login');
         }
 
@@ -163,29 +178,41 @@
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return;
             
-            // Si on est en mode édition et que le pseudo n'a pas changé, on saute la vérification DB
-            if(isEditing) {
+            // Si on est en édition et que le pseudo est le même, on passe direct au setup
+            if(isEditing && userPseudo === activePseudo) {
                 showScreen('screen-setup');
-                renderAvatarGrid(selectedAvatar && selectedAvatar.startsWith('data:image') ? selectedAvatar : null);
                 return;
             }
 
             roomRef.child('isGuestRoom').once('value', guestSnap => {
                 const isGuestRoom = guestSnap.val() === true;
+                
+                // Vérifier si le NOUVEAU pseudo existe déjà (si on le change)
                 roomRef.child('scores/' + userPseudo).once('value', snap => {
                     const data = snap.val();
+                    
+                    // Si le pseudo existe déjà ET ce n'est pas le nôtre
                     if(data) {
-                        if(data.kicked === true) { alert("Vous avez été expulsé de cette partie."); return; }
-                        if(confirm("Reprendre votre partie ?")) {
-                            selectedAvatar = data.avatar;
-                            userTeamName = data.teamName || "Solo";
-                            userTeamIcon = data.teamIcon || "";
-                            roomRef.child('scores/' + userPseudo).update({ active: true }).then(() => { startBuzzer(); });
-                        } else showScreen('screen-setup');
+                        if(data.kicked === true) { alert("Ce pseudo est banni."); return; }
+                        
+                        // Si c'est une reconnexion standard (pas en mode edit)
+                        if(!isEditing) {
+                            if(confirm("Reprendre votre partie ?")) {
+                                selectedAvatar = data.avatar;
+                                userTeamName = data.teamName || "Solo";
+                                userTeamIcon = data.teamIcon || "";
+                                activePseudo = userPseudo; // On valide ce pseudo
+                                roomRef.child('scores/' + userPseudo).update({ active: true }).then(() => { startBuzzer(); });
+                            } else showScreen('screen-setup');
+                        } else {
+                            // En mode edit, si le nouveau pseudo est pris, on bloque
+                            alert("Ce pseudo est déjà pris par un autre joueur.");
+                        }
                     } else {
+                        // Nouveau pseudo libre
                         roomRef.child('scores').once('value', scoresSnap => {
-                            if(isGuestRoom && scoresSnap.numChildren() >= 10) {
-                                alert("🔒 Mode Découverte : La limite de 10 joueurs est atteinte.");
+                            if(isGuestRoom && scoresSnap.numChildren() >= 10 && !isEditing) {
+                                alert("🔒 Mode Découverte : Limite atteinte.");
                                 return;
                             }
                             showScreen('screen-setup');
@@ -199,10 +226,7 @@
             if (input.files && input.files[0]) {
                 const file = input.files[0];
                 const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-                if (!validImageTypes.includes(file.type)) {
-                    alert("Image invalide.");
-                    input.value = ""; return;
-                }
+                if (!validImageTypes.includes(file.type)) { alert("Image invalide."); input.value = ""; return; }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = new Image();
@@ -240,28 +264,57 @@
             });
         }
 
+        // --- FINALISATION INTELLIGENTE (Gère le renommage) ---
         function finalizeSetup() {
             unlockAudio();
             const val = document.getElementById('select-team').value.split('|');
             userTeamName = val[0]; userTeamIcon = val[1] || "";
-            
-            // On récupère le score actuel avant d'écraser les infos (pour ne pas remettre à 0 en cas d'edit)
-            roomRef.child('scores/' + userPseudo).once('value', snap => {
-                let currentPts = 0;
-                if(snap.exists()) currentPts = snap.val().pts || 0;
+            const newPseudo = document.getElementById('input-pseudo').value.trim();
 
-                roomRef.child('scores/' + userPseudo).set({ 
-                    pts: currentPts, // On garde les points existants !
-                    avatar: selectedAvatar, 
-                    teamName: userTeamName, 
-                    teamIcon: userTeamIcon, 
-                    active: true, 
-                    kicked: false
-                }).then(() => {
-                    isEditing = false; // Reset du mode édition
-                    startBuzzer();
+            if (isEditing && activePseudo && activePseudo !== newPseudo) {
+                // CAS 1 : RENOMMAGE (On copie les data de l'ancien vers le nouveau)
+                roomRef.child('scores/' + activePseudo).once('value', snap => {
+                    let oldData = snap.val() || {};
+                    let currentPts = oldData.pts || 0;
+
+                    // Créer le nouveau
+                    roomRef.child('scores/' + newPseudo).set({
+                        pts: currentPts,
+                        avatar: selectedAvatar,
+                        teamName: userTeamName,
+                        teamIcon: userTeamIcon,
+                        active: true,
+                        kicked: false
+                    }).then(() => {
+                        // Supprimer l'ancien
+                        roomRef.child('scores/' + activePseudo).remove();
+                        activePseudo = newPseudo;
+                        userPseudo = newPseudo;
+                        isEditing = false;
+                        startBuzzer();
+                    });
                 });
-            });
+            } else {
+                // CAS 2 : CRÉATION OU MISE A JOUR SIMPLE
+                roomRef.child('scores/' + newPseudo).once('value', snap => {
+                    let currentPts = 0;
+                    if(snap.exists()) currentPts = snap.val().pts || 0;
+
+                    roomRef.child('scores/' + newPseudo).set({ 
+                        pts: currentPts, 
+                        avatar: selectedAvatar, 
+                        teamName: userTeamName, 
+                        teamIcon: userTeamIcon, 
+                        active: true, 
+                        kicked: false
+                    }).then(() => {
+                        activePseudo = newPseudo; // On confirme le pseudo actif
+                        userPseudo = newPseudo;
+                        isEditing = false;
+                        startBuzzer();
+                    });
+                });
+            }
         }
 
         const updateTeamDisplay = (name, icon) => {
@@ -277,7 +330,11 @@
             container.style.display = "flex";
             if(selectedAvatar && selectedAvatar.startsWith('data:image')) container.innerHTML = `<img src="${selectedAvatar}" style="width:100%; height:100%; object-fit:cover;">`;
             else container.innerText = selectedAvatar || "👤";
-            document.getElementById('display-pseudo').innerText = userPseudo;
+            document.getElementById('display-pseudo').innerText = activePseudo;
+            
+            // AFFICHER LE BOUTON EDIT SEULEMENT MAINTENANT
+            document.getElementById('btn-edit-container').style.display = 'inline-block';
+
             updateTeamDisplay(userTeamName, userTeamIcon);
             if(selectedAvatar && selectedAvatar.startsWith('data:image')) document.getElementById('buzzer-img-placeholder').innerHTML = `<img src="${selectedAvatar}" class="buzzer-img">`;
             showScreen('screen-buzzer');
@@ -293,8 +350,8 @@
                 }
             });
 
-            roomRef.child('scores/' + userPseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
-            roomRef.child('scores/' + userPseudo).on('value', snap => {
+            roomRef.child('scores/' + activePseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
+            roomRef.child('scores/' + activePseudo).on('value', snap => {
                 const d = snap.val();
                 if(d) { userTeamName = d.teamName || "Solo"; userTeamIcon = d.teamIcon || ""; updateTeamDisplay(userTeamName, userTeamIcon); }
             });
@@ -304,17 +361,17 @@
             });
             roomRef.child('buzzers').on('value', snap => { 
                 const val = snap.val();
-                if (val && val.pseudo === userPseudo && currentWinner !== userPseudo) document.getElementById('sound-win').play().catch(()=>{});
+                if (val && val.pseudo === activePseudo && currentWinner !== activePseudo) document.getElementById('sound-win').play().catch(()=>{});
                 currentWinner = val ? val.pseudo : null; updateUI(); 
             });
             
-            roomRef.child('scores/' + userPseudo + '/kicked').on('value', snap => {
+            roomRef.child('scores/' + activePseudo + '/kicked').on('value', snap => {
                 if(snap.exists() && snap.val() === true) { 
                     alert("Vous avez été expulsé de la partie par le MJ."); 
                     window.location.href = mjRedirectUrl;
                 }
             });
-            roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
+            roomRef.child('blockedPlayers/' + activePseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
 
         function onBuzzerClick(event) {
@@ -322,7 +379,7 @@
             document.getElementById('sound-click').play().catch(()=>{});
             if(gameState === "ready" && !currentWinner && !isBlocked) {
                 roomRef.child('gameState').update({ status: 'taken' });
-                roomRef.child('buzzers').set({ pseudo: userPseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
+                roomRef.child('buzzers').set({ pseudo: activePseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
             }
         }
 
@@ -331,7 +388,7 @@
             c.classList.remove('ready', 'main-prise', 'blocked');
             
             if (currentWinner) {
-                if(currentWinner === userPseudo) { 
+                if(currentWinner === activePseudo) { 
                     c.classList.add('main-prise'); 
                     l.innerText = "C'EST À TOI !"; 
                 }
@@ -358,7 +415,7 @@
             
             roomRef.child('scores').once('value', snap => {
                 const leaderboard = Object.keys(snap.val() || {}).map(p => ({ name: p, pts: snap.val()[p].pts })).sort((a, b) => b.pts - a.pts);
-                const rank = leaderboard.findIndex(e => e.name === userPseudo) + 1;
+                const rank = leaderboard.findIndex(e => e.name === activePseudo) + 1;
                 let content = "";
 
                 if(rank === 1) {
@@ -379,8 +436,8 @@
 
         function leaveGame() {
             if(confirm("Quitter la partie ?\n\nSachez que vous pourrez revenir avec le même appareil et le même pseudo pour récupérer votre score !")) {
-                if(roomRef && userPseudo) {
-                    roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => { 
+                if(roomRef && activePseudo) {
+                    roomRef.child('scores/' + activePseudo).update({ active: false }).then(() => { 
                         window.location.href = mjRedirectUrl; 
                     });
                 } else location.reload();
