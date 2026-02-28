@@ -39,14 +39,26 @@
         .step-number { background: var(--accent); color: black; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; }
         .step-content h4 { margin: 0 0 5px 0; font-size: 1.1rem; }
         
-        /* TIPS */
+        /* FEATURES GRID */
+        .feature-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
+        .feature { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border-left: 3px solid var(--mj); }
+        .feature-icon { font-size: 1.5rem; margin-right: 10px; vertical-align: middle; }
+        .feature h4 { margin: 0 0 5px 0; color: var(--mj); display: inline-block; vertical-align: middle; }
+        .feature p { margin: 5px 0 0 0; font-size: 0.9rem; color: #ccc; }
+
+        /* TIP BOX */
         .tip-box { background: rgba(241, 196, 15, 0.1); border-left: 4px solid var(--accent); padding: 15px; margin: 20px 0; font-size: 0.95rem; }
         
+        /* RECONNECT BOX */
+        .reconnect-box { background: rgba(52, 152, 219, 0.1); border-left: 4px solid var(--blue); padding: 15px; margin: 20px 0; font-size: 0.95rem; }
+
         /* BOUTON D'ACTION */
         .btn-start { display: block; width: 200px; margin: 40px auto; padding: 15px; background: var(--accent); color: black; text-align: center; font-weight: bold; text-decoration: none; border-radius: 30px; transition: 0.3s; }
         .btn-start:hover { background: #d4ac0d; transform: scale(1.05); }
 
         footer { text-align: center; font-size: 0.8rem; color: #7f8c8d; margin-top: 50px; }
+
+        @media (max-width: 600px) { .feature-container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -54,34 +66,30 @@
     <div class="container">
         <header>
             <h1>Presta'Puce</h1>
-            <div class="subtitle">La Suite Blind Test Ultime • v1.000</div>
+            <div class="subtitle">La Suite Blind Test Ultime • v1.012</div>
         </header>
 
         <h2 style="text-align:center;">🧩 L'Écosystème</h2>
         <div class="grid-4">
             <div class="card b-mj">
                 <span class="icon">🎛️</span>
-                <h3>1. Console MJ</h3>
-                <p>Le cerveau. Gestion des points, des équipes et de la musique. C'est ici que tout commence.</p>
-                <code>mj.html</code>
+                <h3>Console MJ</h3>
+                <p>Le poste de pilotage. Gestion des points, des équipes, des buzzers et de la sécurité.</p>
             </div>
             <div class="card b-screen">
                 <span class="icon">📺</span>
-                <h3>2. Écran Géant</h3>
+                <h3>Écran Géant</h3>
                 <p>Affichage public. Scores en direct, QR Code géant et Podium animé.</p>
-                <code>scores.html</code>
             </div>
             <div class="card b-player">
                 <span class="icon">📱</span>
-                <h3>3. Joueur</h3>
-                <p>Le buzzer. Interface mobile pour les participants avec avatars et sons.</p>
-                <code>index.html</code>
+                <h3>Joueur</h3>
+                <p>Le buzzer interactif. Interface mobile pour les participants avec avatars et sons.</p>
             </div>
             <div class="card b-remote">
                 <span class="icon">📡</span>
-                <h3>4. Remote</h3>
-                <p>La télécommande. Pour l'animateur en salle : valider ou refuser les réponses.</p>
-                <code>remote.html</code>
+                <h3>Remote</h3>
+                <p>La télécommande de l'animateur. Pour piloter le jeu depuis le centre de la piste.</p>
             </div>
         </div>
 
@@ -90,48 +98,72 @@
             <div class="step">
                 <div class="step-number">1</div>
                 <div class="step-content">
-                    <h4>Lancer la Console (mj.html)</h4>
-                    <p>Connectez-vous. Cliquez sur <b>"🆕 Créer une nouvelle salle"</b>. Le code salle (ex: 4589) s'affiche.</p>
+                    <h4>Création de la Salle</h4>
+                    <p>Connectez-vous à la Console MJ. Cliquez sur <b>"🆕 Créer une nouvelle salle"</b>. <br>L'onglet d'affichage des scores s'ouvre <b>automatiquement</b>.</p>
                 </div>
             </div>
             <div class="step">
                 <div class="step-number">2</div>
                 <div class="step-content">
-                    <h4>Ouvrir l'Affichage (scores.html)</h4>
-                    <p>Depuis la console, cliquez sur le bouton orange <b>"📺 Ouvrir Écran"</b>. Projetez cette page sur la TV/Projecteur.</p>
+                    <h4>Diffusion</h4>
+                    <p>Projetez l'onglet "Scores" sur votre TV/Projecteur. Si vous l'avez fermé par erreur, cliquez sur le bouton orange <b>"📺 Écran"</b> depuis la Console pour le rouvrir sans perdre les données.</p>
                 </div>
             </div>
             <div class="step">
                 <div class="step-number">3</div>
                 <div class="step-content">
-                    <h4>Connexion des Joueurs</h4>
-                    <p>Les joueurs scannent le QR Code sur l'écran géant. Ils choisissent un pseudo et un avatar. Ils apparaissent instantanément dans le lobby.</p>
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-number">4</div>
-                <div class="step-content">
-                    <h4>Connexion de l'Animateur (Optionnel)</h4>
-                    <p>Sur la console, cliquez sur <b>"📱 QR Télécommande"</b>. L'animateur scanne ce code spécifique pour piloter le jeu depuis la salle.</p>
+                    <h4>Connexion Joueurs & Selfies</h4>
+                    <p>Les joueurs scannent le QR Code. Ils choisissent un pseudo. Ils peuvent sélectionner un avatar fun ou <b>prendre un selfie/uploader une photo</b> pour apparaître sur grand écran !</p>
                 </div>
             </div>
         </div>
 
-        <h2 style="border-bottom: 1px solid #333; padding-bottom: 10px;">💡 Astuces de Pro</h2>
+        <div class="reconnect-box">
+            <b>🔄 Reconnexion Automatique :</b>
+            Rassurez vos joueurs ! S'ils quittent le jeu pour lire un SMS, prendre un appel ou si leur téléphone se met en veille, il leur suffit de <b>re-scanner le QR Code</b>. 
+            En remettant le même pseudo, ils récupèrent instantanément leur score et leur équipe.
+        </div>
+
+        <h2 style="border-bottom: 1px solid #333; padding-bottom: 10px;">⚡ Maitrise Totale & Arbitrage</h2>
+        <p style="margin-bottom:20px; color:#bdc3c7;">Dans le "Lobby Joueurs", chaque ligne de joueur dispose d'outils puissants pour l'animateur :</p>
         
-        <div class="tip-box">
-            <b>🔥 Gestion des Équipes :</b>
-            Vous pouvez créer des équipes (ex: "Table 1") avec un blason personnalisé dans la console. Dans le lobby, assignez les joueurs à ces équipes. Le classement affichera les points cumulés !
+        <div class="feature-container">
+            <div class="feature">
+                <span class="feature-icon">⚡</span>
+                <h4>Forçage de Main</h4>
+                <p>Un joueur crie la bonne réponse mais a oublié de buzzer ? Cliquez sur l'éclair pour <b>lui attribuer la main de force</b>. Son téléphone s'allume en vert et les autres se bloquent.</p>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🛑</span>
+                <h4>Blocage Temporaire</h4>
+                <p>Un joueur spam le buzzer ? Cliquez sur le panneau Stop. Son buzzer devient inactif (gris) jusqu'à ce que vous le débloquiez. Idéal pour les pénalités.</p>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">➕</span>
+                <h4>Correction de Score</h4>
+                <p>Utilisez les boutons <b>[+]</b> et <b>[-]</b> pour ajuster manuellement les points d'un joueur en cas d'erreur ou de bonus spécial.</p>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">✖</span>
+                <h4>Expulsion & Réhabilitation</h4>
+                <p>Un joueur gêne ? Cliquez sur la croix rouge. Il est <b>éjecté de la partie</b> et son téléphone est redirigé. Il apparaît dans la liste "Bannis" et peut être réintégré si vous le pardonnez.</p>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🛡️</span>
+                <h4>Gestion des Équipes</h4>
+                <p>Créez des équipes avec un blason (logo) personnalisé. Dans la liste, utilisez le menu déroulant à côté du pseudo pour assigner un joueur à une équipe. Le classement affichera les scores cumulés !</p>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">📡</span>
+                <h4>Animateur Mobile</h4>
+                <p>Cliquez sur le bouton violet <b>"📱 QR Remote"</b>. L'animateur scanne ce code avec son téléphone pour avoir les boutons de validation dans sa poche.</p>
+            </div>
         </div>
 
         <div class="tip-box">
-            <b>⚡ Buzzers Dynamiques :</b>
-            Quand un joueur buzze, son téléphone vibre et s'allume en vert ("C'EST À TOI"). Tous les autres téléphones se grisent ("OCCUPÉ") instantanément.
-        </div>
-
-        <div class="tip-box">
-            <b>🚪 Fin de Soirée Propre :</b>
-            Quand vous cliquez sur <b>"SUPPRIMER LA SALLE"</b> ou finissez la partie, tous les téléphones des joueurs sont automatiquement redirigés vers votre Logo/Site Web.
+            <b>🏁 Fin de Soirée Propre :</b>
+            Cliquez sur <b>"Fin de partie"</b> pour lancer l'animation Podium sur l'écran géant. <br>
+            Cliquez sur <b>"SUPPRIMER LA SALLE"</b> pour déconnecter tous les joueurs et rediriger leurs téléphones vers votre Logo/Site Web.
         </div>
 
         <a href="mj.html" class="btn-start">LANCER LA CONSOLE</a>
