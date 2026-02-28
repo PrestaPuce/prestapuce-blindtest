@@ -71,7 +71,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.014</div>
+    <div class="version-tag">v1.015</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -187,7 +187,7 @@
 
     <div id="overlay-guide" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:20000; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
         <div style="background:var(--card-bg); max-width:800px; width:100%; height:90%; border-radius:15px; border:2px solid var(--accent); position:relative; overflow:hidden;">
-            <iframe src="guide.html" style="width:100%; height:100%; border:none;"></iframe>
+            <iframe id="guide-iframe" src="" style="width:100%; height:100%; border:none;"></iframe>
             
             <button onclick="toggleGuide()" style="position:absolute; top:10px; left:10px; width:40px; height:40px; border-radius:50%; background:var(--danger); color:white; font-weight:bold; font-size:1.2rem; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 10;">✖</button>
         </div>
@@ -423,17 +423,24 @@
             window.open(scoreUrl, '_blank');
         }
 
+        // --- TOGGLE GUIDE (AVEC CACHE BUSTING) ---
         function toggleGuide() {
             const overlay = document.getElementById('overlay-guide');
-            if(overlay.style.display === 'flex') overlay.style.display = 'none';
-            else overlay.style.display = 'flex';
+            const iframe = document.getElementById('guide-iframe');
+            
+            if(overlay.style.display === 'flex') {
+                overlay.style.display = 'none';
+            } else {
+                overlay.style.display = 'flex';
+                // Force reload pour éviter le cache
+                iframe.src = "guide.html?t=" + new Date().getTime();
+            }
         }
 
         function showRemoteQR() {
             const overlay = document.getElementById('overlay-remote-qr');
             const qrContainer = document.getElementById('qrcode-remote');
             
-            // Construit lien Remote CORRIGÉ
             const currentUrl = window.location.href.split('?')[0];
             let basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
             let remoteUrl = basePath + "/remote.html?room=" + roomID;
