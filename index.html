@@ -68,7 +68,7 @@
 </head>
 <body>
     
-    <div class="version-tag">v1.032</div>
+    <div class="version-tag">v1.033</div>
 
     <div id="podium-zone"></div>
     
@@ -135,7 +135,7 @@
                 📤 Ou uploader une image perso
                 <input type="file" id="team-icon-input" accept="image/*" style="display:none" onchange="handleTeamIconUpload(this)">
             </div>
-            <button class="btn-ui" style="background:var(--success); font-size:1rem; padding:12px;" onclick="createNewTeam()">✅ Valider Création</button>
+            <button id="btn-create-team" type="button" class="btn-ui" style="background:var(--success); font-size:1rem; padding:12px;" onclick="createNewTeam()">✅ Valider Création</button>
         </div>
 
         <button id="btn-final" class="btn-ui btn-disabled" onclick="finalizeSetup()">C'est parti !</button>
@@ -157,7 +157,6 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        // VARIABLES GLOBALES (Définies en premier pour éviter les erreurs)
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
         const defaultTeamCrests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png"];
         
@@ -249,30 +248,38 @@
             const teamName = document.getElementById('new-team-name').value.trim();
             if(teamName.length < 2) return alert("Nom d'équipe trop court !");
             
+            const btn = document.getElementById('btn-create-team');
+            const oldText = btn.innerText;
+            btn.innerText = "⏳ Création...";
+            btn.disabled = true;
+
             roomRef.child('teams/' + teamName).once('value', snap => {
                 if(snap.exists()) {
                     alert("Ce nom d'équipe existe déjà !");
+                    btn.innerText = oldText; btn.disabled = false;
                 } else {
                     const icon = selectedTeamCrest || defaultTeamCrests[0];
                     roomRef.child('teams/' + teamName).set({ icon: icon }).then(() => {
-                        alert("Équipe créée !");
-                        
-                        // MISE A JOUR IMMEDIATE VARIABLES LOCALES
-                        userTeamName = teamName;
-                        userTeamIcon = icon;
+                        // SUCCÈS
+                        userTeamName = teamName; userTeamIcon = icon;
                         updateTeamDisplay(userTeamName, userTeamIcon);
 
-                        // UI RESET
                         document.getElementById('new-team-name').value = "";
                         switchTeamTab('join');
-                        
-                        // Sélectionner automatiquement dans le drop down
+
+                        // Force Select
                         setTimeout(() => {
                             const select = document.getElementById('select-team');
                             for (let i = 0; i < select.options.length; i++) {
                                 if (select.options[i].text === teamName) { select.selectedIndex = i; break; }
                             }
+                            btn.innerText = oldText; btn.disabled = false;
                         }, 500);
+
+                    }).catch(err => {
+                        // ERREUR ECRITURE
+                        alert("Erreur lors de la création : " + err.message);
+                        btn.innerText = oldText; btn.disabled = false;
                     });
                 }
             });
@@ -369,8 +376,6 @@
             unlockAudio();
             
             const val = document.getElementById('select-team').value.split('|');
-            // Si on vient de créer une équipe, userTeamName est déjà set correctement via createNewTeam
-            // Sinon on prend la valeur du select
             if(!userTeamName || userTeamName === "Solo") {
                 userTeamName = val[0]; userTeamIcon = val[1] || "";
             }
