@@ -6,7 +6,7 @@
     <title>Guide Utilisateur - Presta'Puce</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <style>
-        :root { --bg-color: #1a1a1a; --card-bg: #2c3e50; --accent: #f1c40f; --text: #ecf0f1; --mj: #2ecc71; --blue: #3498db; }
+        :root { --bg-color: #1a1a1a; --card-bg: #2c3e50; --accent: #f1c40f; --text: #ecf0f1; --mj: #2ecc71; --blue: #3498db; --danger: #e74c3c; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: var(--text); margin: 0; padding: 20px; line-height: 1.6; }
         
         /* CONTAINER */
@@ -49,8 +49,9 @@
         /* TIP BOX */
         .tip-box { background: rgba(241, 196, 15, 0.1); border-left: 4px solid var(--accent); padding: 15px; margin: 20px 0; font-size: 0.95rem; }
         
-        /* RECONNECT BOX */
-        .reconnect-box { background: rgba(52, 152, 219, 0.1); border-left: 4px solid var(--blue); padding: 15px; margin: 20px 0; font-size: 0.95rem; }
+        /* INFO JOUEUR BOX */
+        .player-info-box { background: rgba(52, 152, 219, 0.1); border: 1px solid var(--blue); border-radius: 10px; padding: 20px; margin: 30px 0; }
+        .player-info-title { color: var(--blue); font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; display: flex; align-items: center; }
 
         /* BOUTON D'ACTION */
         .btn-start { display: block; width: 200px; margin: 40px auto; padding: 15px; background: var(--accent); color: black; text-align: center; font-weight: bold; text-decoration: none; border-radius: 30px; transition: 0.3s; }
@@ -66,7 +67,7 @@
     <div class="container">
         <header>
             <h1>Presta'Puce</h1>
-            <div class="subtitle">La Suite Blind Test Ultime • v1.014</div>
+            <div class="subtitle">La Suite Blind Test Ultime • v1.022</div>
         </header>
 
         <h2 style="text-align:center;">🧩 L'Écosystème</h2>
@@ -118,10 +119,15 @@
             </div>
         </div>
 
-        <div class="reconnect-box">
-            <b>🔄 Reconnexion Automatique :</b>
-            Rassurez vos joueurs ! S'ils quittent le jeu pour lire un SMS, prendre un appel ou si leur téléphone se met en veille, il leur suffit de <b>re-scanner le QR Code</b>. 
-            En remettant le même pseudo, ils récupèrent instantanément leur score et leur équipe.
+        <div class="player-info-box">
+            <div class="player-info-title"><span style="font-size:1.5rem; margin-right:10px;">🦸</span> Côté Joueur : Flexibilité & Sécurité</div>
+            <p><b>✏️ Modification en Direct :</b> Une fois connecté, une petite icône "Paramètres" apparaît à côté du pseudo sur le téléphone du joueur. Il peut cliquer dessus pour corriger son nom, changer d'avatar ou d'équipe.</p>
+            <ul style="color:#bdc3c7; font-size:0.9rem;">
+                <li><b>Conservation du Score :</b> Si un joueur change de pseudo, ses points sont automatiquement transférés vers le nouveau nom.</li>
+                <li><b>Pas de Doublons :</b> L'ancien pseudo est immédiatement supprimé de la console MJ pour garder une liste propre.</li>
+            </ul>
+            <hr style="border:0; border-top:1px solid rgba(52, 152, 219, 0.3); margin:15px 0;">
+            <p><b>🔄 Reconnexion Automatique :</b> Rassurez vos joueurs ! S'ils quittent le jeu (SMS, appel, veille), il leur suffit de <b>re-scanner le QR Code</b> et de remettre leur pseudo. Ils récupéreront instantanément leur score et leur équipe.</p>
         </div>
 
         <h2 style="border-bottom: 1px solid #333; padding-bottom: 10px;">⚡ Maitrise Totale & Arbitrage</h2>
