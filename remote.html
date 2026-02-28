@@ -10,7 +10,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
         :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; }
-        body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; touch-action: manipulation; }
+        
+        /* Correction Mobile : 100dvh prend en compte la barre d'adresse */
+        body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; touch-action: manipulation; }
         
         /* LOGIN SCREEN */
         #screen-login { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 20px; background: var(--bg-color); z-index: 100; position: absolute; width: 100%; box-sizing: border-box; }
@@ -18,33 +20,69 @@
         .btn-login { width: 100%; padding: 15px; background: var(--mj-color); border: none; border-radius: 8px; color: white; font-size: 1.2rem; font-weight: bold; }
 
         /* HEADER */
-        .top-bar { height: 40px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 0.8rem; border-bottom: 1px solid #333; }
+        .top-bar { height: 40px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 0.8rem; border-bottom: 1px solid #333; flex-shrink: 0; }
         
-        /* ZONE HAUTE : INFO JOUEUR (25% env) */
-        .player-zone { flex: 0 0 25%; background: var(--card-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; border-bottom: 2px solid var(--accent); padding: 10px; position: relative; }
-        .avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #333; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 5px; border: 2px solid white; }
-        .p-name { font-weight: bold; font-size: 1.3rem; margin-bottom: 5px; color: white; }
+        /* ZONE HAUTE : INFO JOUEUR (Compacte) */
+        .player-zone { 
+            flex: 0 0 auto; /* Ne prend que la place nécessaire */
+            height: 25vh; /* Max 1/4 de l'écran */
+            min-height: 140px;
+            background: var(--card-bg); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            border-bottom: 2px solid var(--accent); 
+            padding: 10px; 
+            position: relative; 
+        }
+        .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; background: #333; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 5px; border: 2px solid white; }
+        .p-name { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; color: white; }
         
         /* BARRE D'ACTIONS RAPIDES */
         .quick-actions { display: flex; gap: 15px; margin-top: 5px; }
-        .mini-btn { width: 45px; height: 45px; border-radius: 50%; border: none; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 5px rgba(0,0,0,0.3); cursor: pointer; color: white; }
+        .mini-btn { width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 4px rgba(0,0,0,0.3); cursor: pointer; color: white; }
         .mini-btn:active { transform: scale(0.95); }
 
-        /* ZONE BASSE : COMMANDES (75% env) */
-        .controls-zone { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 10px; background: #111; overflow-y: auto; }
+        /* ZONE BASSE : COMMANDES (Rempli le reste) */
+        .controls-zone { 
+            flex: 1; 
+            padding: 8px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            background: #111; 
+            overflow-y: auto; /* Scroll si vraiment petit écran */
+        }
         
-        .big-btn { width: 100%; flex: 1; border: none; border-radius: 12px; font-size: 1.3rem; font-weight: 900; color: white; text-transform: uppercase; box-shadow: 0 4px 0 rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; min-height: 60px; cursor: pointer; transition: 0.1s; }
-        .big-btn:active { transform: translateY(4px); box-shadow: none; }
+        .big-btn { 
+            width: 100%; 
+            flex: 1; /* Les boutons se partagent l'espace équitablement */
+            border: none; 
+            border-radius: 10px; 
+            font-size: 1.1rem; /* Police un peu plus petite */
+            font-weight: 800; 
+            color: white; 
+            text-transform: uppercase; 
+            box-shadow: 0 3px 0 rgba(0,0,0,0.3); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 45px; /* Hauteur min réduite */
+            cursor: pointer; 
+            transition: 0.1s; 
+        }
+        .big-btn:active { transform: translateY(3px); box-shadow: none; }
         
         /* COULEURS BOUTONS */
-        .btn-open { background: var(--blue); font-size: 1.5rem; }
+        .btn-open { background: var(--blue); font-size: 1.3rem; }
         .btn-gold { background: var(--gold); color: black; }
         .btn-green { background: var(--mj-color); }
         .btn-cyan { background: #3498db; }
         .btn-error { background: var(--danger); }
-        .btn-reset { background: #34495e; color: #ccc; font-size: 1rem; flex: 0 0 50px; }
+        .btn-reset { background: #34495e; color: #ccc; font-size: 0.9rem; flex: 0 0 40px; min-height: 40px; } /* Reset plus petit */
 
-        .waiting-msg { color: #7f8c8d; font-style: italic; font-size: 1.2rem; }
+        .waiting-msg { color: #7f8c8d; font-style: italic; font-size: 1rem; }
     </style>
 </head>
 <body>
