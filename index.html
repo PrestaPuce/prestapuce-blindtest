@@ -22,9 +22,7 @@
         
         .btn-ui { width: 100%; max-width: 280px; padding: 18px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: 900; cursor: pointer; background-color: var(--primary-color); color: white; box-shadow: 0 8px 0 #2980b9; text-transform: uppercase; margin-bottom: 10px; transition: 0.2s; }
         .btn-ui:active { transform: translateY(4px); box-shadow: 0 4px 0 #2980b9; }
-        
-        /* CLASSE DESACTIVEE STRICTE */
-        .btn-disabled { background-color: #7f8c8d !important; box-shadow: none !important; cursor: not-allowed; opacity: 0.5; pointer-events: none; }
+        .btn-disabled { background-color: #7f8c8d !important; box-shadow: none !important; cursor: not-allowed; opacity: 0.5; }
         
         .avatar-scroll { width: 100%; max-width: 320px; max-height: 180px; overflow-y: auto; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 20px; }
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
@@ -39,12 +37,11 @@
         .team-panel { display: none; width: 100%; flex-direction: column; align-items: center; }
         .team-panel.active { display: flex; }
 
-        /* CREATION EQUIPE : SELECTEUR ICONES */
+        /* CREATION EQUIPE */
         .team-icon-picker { display: flex; gap: 10px; overflow-x: auto; width: 100%; max-width: 300px; padding-bottom: 10px; margin-bottom: 15px; }
         .team-icon-opt { width: 50px; height: 50px; flex-shrink: 0; background: white; border-radius: 8px; padding: 2px; cursor: pointer; border: 3px solid transparent; }
         .team-icon-opt.selected { border-color: var(--success); transform: scale(1.1); }
         .team-icon-opt img { width: 100%; height: 100%; object-fit: contain; }
-
         .upload-team-btn { width: 100%; max-width: 280px; padding: 10px; border: 2px dashed #aaa; border-radius: 10px; text-align: center; color: #aaa; cursor: pointer; margin-bottom: 15px; font-size: 0.9rem; }
         
         .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; outline: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
@@ -71,7 +68,7 @@
 </head>
 <body>
     
-    <div class="version-tag">v1.031</div>
+    <div class="version-tag">v1.032</div>
 
     <div id="podium-zone"></div>
     
@@ -132,15 +129,12 @@
 
         <div id="panel-create" class="team-panel">
             <input type="text" id="new-team-name" placeholder="Nom de l'équipe" maxlength="15">
-            
             <p style="margin:0 0 5px 0; font-size:0.8rem; color:#aaa;">Choisir un blason :</p>
             <div class="team-icon-picker" id="team-crest-list"></div>
-            
             <div class="upload-team-btn" onclick="document.getElementById('team-icon-input').click()">
                 📤 Ou uploader une image perso
                 <input type="file" id="team-icon-input" accept="image/*" style="display:none" onchange="handleTeamIconUpload(this)">
             </div>
-            
             <button class="btn-ui" style="background:var(--success); font-size:1rem; padding:12px;" onclick="createNewTeam()">✅ Valider Création</button>
         </div>
 
@@ -163,6 +157,10 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
+        // VARIABLES GLOBALES (Définies en premier pour éviter les erreurs)
+        const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
+        const defaultTeamCrests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png"];
+        
         const firebaseConfig = {
             apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o",
             authDomain: "prestapuce-buzz.firebaseapp.com",
@@ -177,10 +175,7 @@
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let mjRedirectUrl = window.location.origin + window.location.pathname;
         let isEditing = false;
-        
-        let selectedTeamCrest = ""; // Pour création équipe
-        const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
-        const defaultTeamCrests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png"];
+        let selectedTeamCrest = "";
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -204,7 +199,6 @@
             });
         }
 
-        // --- GESTION CREATION EQUIPE ---
         function switchTeamTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.team-panel').forEach(p => p.classList.remove('active'));
@@ -224,11 +218,10 @@
                     img.classList.add('selected');
                     selectedTeamCrest = url;
                 };
-                // Selectionner le premier par défaut
                 if(container.children.length === 0) { img.classList.add('selected'); selectedTeamCrest = url; }
                 const wrap = document.createElement('div');
                 wrap.appendChild(img);
-                container.appendChild(img);
+                container.appendChild(wrap);
             });
         }
 
@@ -239,12 +232,9 @@
                 reader.onload = function(e) {
                     const img = new Image();
                     img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = 150; canvas.height = 150;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, 150, 150);
+                        const canvas = document.createElement('canvas'); canvas.width = 150; canvas.height = 150;
+                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, 150, 150);
                         selectedTeamCrest = canvas.toDataURL('image/jpeg', 0.7);
-                        // Visuel feedback
                         document.querySelectorAll('.team-icon-opt').forEach(i => i.classList.remove('selected'));
                         alert("Image chargée !");
                     };
@@ -255,6 +245,7 @@
         }
 
         function createNewTeam() {
+            if (!roomRef) return alert("Erreur : Vous n'êtes pas connecté à la salle.");
             const teamName = document.getElementById('new-team-name').value.trim();
             if(teamName.length < 2) return alert("Nom d'équipe trop court !");
             
@@ -265,27 +256,28 @@
                     const icon = selectedTeamCrest || defaultTeamCrests[0];
                     roomRef.child('teams/' + teamName).set({ icon: icon }).then(() => {
                         alert("Équipe créée !");
-                        // Reset form
+                        
+                        // MISE A JOUR IMMEDIATE VARIABLES LOCALES
+                        userTeamName = teamName;
+                        userTeamIcon = icon;
+                        updateTeamDisplay(userTeamName, userTeamIcon);
+
+                        // UI RESET
                         document.getElementById('new-team-name').value = "";
                         switchTeamTab('join');
-                        // Sélectionner automatiquement la nouvelle équipe dans le drop down
-                        // On attend un court instant que Firebase notifie le listener
+                        
+                        // Sélectionner automatiquement dans le drop down
                         setTimeout(() => {
                             const select = document.getElementById('select-team');
                             for (let i = 0; i < select.options.length; i++) {
-                                if (select.options[i].text === teamName) {
-                                    select.selectedIndex = i;
-                                    onTeamSelectChange(); // Mise à jour variables locales
-                                    break;
-                                }
+                                if (select.options[i].text === teamName) { select.selectedIndex = i; break; }
                             }
-                        }, 300);
+                        }, 500);
                     });
                 }
             });
         }
 
-        // --- FONCTION ÉDITION ---
         function editProfile() {
             isEditing = true;
             document.getElementById('input-pseudo').value = activePseudo; 
@@ -297,7 +289,6 @@
             unlockAudio();
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return;
-            
             if(isEditing && userPseudo === activePseudo) { showScreen('screen-setup'); return; }
 
             roomRef.child('isGuestRoom').once('value', guestSnap => {
@@ -334,13 +325,11 @@
                 reader.onload = function(e) {
                     const img = new Image();
                     img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = 150; canvas.height = 150;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, 150, 150);
+                        const canvas = document.createElement('canvas'); canvas.width = 150; canvas.height = 150;
+                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, 150, 150);
                         selectedAvatar = canvas.toDataURL('image/jpeg', 0.7);
                         renderAvatarGrid(selectedAvatar);
-                        checkFinalBtn(); // Verif bouton
+                        checkFinalBtn();
                     };
                     img.src = e.target.result;
                 };
@@ -370,21 +359,22 @@
         }
 
         function onTeamSelectChange() {
-            // Met à jour les variables locales quand on change le select
             const val = document.getElementById('select-team').value.split('|');
-            userTeamName = val[0]; 
-            userTeamIcon = val[1] || "";
+            userTeamName = val[0]; userTeamIcon = val[1] || "";
             updateTeamDisplay(userTeamName, userTeamIcon);
         }
 
         function finalizeSetup() {
-            // SÉCURITÉ : Si le bouton est disabled, on ne fait RIEN
-            if(document.getElementById('btn-final').classList.contains('btn-disabled')) return;
-
+            if(!selectedAvatar) return alert("Choisis ton avatar d'abord !");
             unlockAudio();
-            // On s'assure d'avoir les valeurs du select
+            
             const val = document.getElementById('select-team').value.split('|');
-            userTeamName = val[0]; userTeamIcon = val[1] || "";
+            // Si on vient de créer une équipe, userTeamName est déjà set correctement via createNewTeam
+            // Sinon on prend la valeur du select
+            if(!userTeamName || userTeamName === "Solo") {
+                userTeamName = val[0]; userTeamIcon = val[1] || "";
+            }
+            
             const newPseudo = document.getElementById('input-pseudo').value.trim();
 
             if (isEditing && activePseudo && activePseudo !== newPseudo) {
@@ -501,9 +491,7 @@
                     opt.innerText = child.key;
                     select.appendChild(opt);
                 });
-                // Tentative de restauration
                 if(currentVal) {
-                    // Check si la valeur existe toujours
                     let exists = false;
                     for(let i=0; i<select.options.length; i++) { if(select.options[i].value === currentVal) exists = true; }
                     if(exists) select.value = currentVal;
