@@ -42,9 +42,23 @@
         .show-pass-container input { width: 18px; height: 18px; margin: 0; cursor: pointer; flex-shrink: 0; }
         .upload-zone { margin: 10px 0; padding: 10px; border: 2px dashed var(--mj-color); border-radius: 8px; text-align: center; background: rgba(0,0,0,0.2); transition: 0.2s; }
         .upload-zone:hover { background: rgba(46, 204, 113, 0.1); }
+        
+        /* STYLE DU NUMÉRO DE VERSION */
+        .version-tag {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.8rem;
+            font-family: monospace;
+            z-index: 9999;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
+
+    <div class="version-tag">v1.000</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -379,7 +393,6 @@
         
         function openScoreBoard() {
             if(!roomID) return;
-            // Ouvre scores.html avec le roomID
             const currentUrl = window.location.href.split('?')[0];
             let basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
             const scoreUrl = basePath + "/scores.html?room=" + roomID;
@@ -390,7 +403,7 @@
             const overlay = document.getElementById('overlay-remote-qr');
             const qrContainer = document.getElementById('qrcode-remote');
             
-            // Construit lien Remote
+            // Construit lien Remote CORRIGÉ
             const currentUrl = window.location.href.split('?')[0];
             let basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
             let remoteUrl = basePath + "/remote.html?room=" + roomID;
