@@ -10,18 +10,24 @@
     <style>
         :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; touch-action: manipulation; }
+        
+        /* HEADER AVEC BOUTON EDIT */
         .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 95px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; border-bottom: 2px solid rgba(255,255,255,0.1); z-index: 1000; }
         .logo-presta { width: 45px; height: auto; border-radius: 5px; }
+        
         .screen { display: none; height: 100%; width: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; padding-top: 100px; box-sizing: border-box; }
         .active-screen { display: flex !important; }
+        
         input, select { width: 100%; max-width: 280px; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); font-size: 1.1rem; background: var(--card-bg); color: white; text-align: center; outline: none; }
         .btn-ui { width: 100%; max-width: 280px; padding: 18px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: 900; cursor: pointer; background-color: var(--primary-color); color: white; box-shadow: 0 8px 0 #2980b9; text-transform: uppercase; margin-bottom: 10px; }
         .btn-disabled { background-color: #7f8c8d !important; box-shadow: 0 8px 0 #636e72 !important; cursor: not-allowed; opacity: 0.6; }
+        
         .avatar-scroll { width: 100%; max-width: 320px; max-height: 200px; overflow-y: auto; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 20px; }
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .avatar-item { width: 60px; height: 60px; background: var(--card-bg); border-radius: 15px; cursor: pointer; border: 3px solid transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 2rem; }
         .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); }
         .avatar-item img { width: 100%; height: 100%; object-fit: cover; }
+        
         .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; outline: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
         .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
@@ -29,32 +35,33 @@
         .buzzer-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.4; }
         .buzzer-label { position: relative; z-index: 2; color: white; font-size: 1.4rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
-        #podium-zone { 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(26, 26, 26, 0.98); 
-            z-index: 10000; 
-            padding: 20px; 
-            box-sizing: border-box; 
-        }
+        #podium-zone { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 26, 26, 0.98); z-index: 10000; padding: 20px; box-sizing: border-box; }
         .trophy-img { width: 150px; height: 150px; object-fit: contain; margin-bottom: 15px; }
         @keyframes trophyZoom { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 70% { transform: scale(1.4) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
         .animate-zoom { animation: trophyZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        /* BOUTON EDIT */
+        .btn-edit-profile { background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-left: 5px; opacity: 0.7; transition: 0.2s; }
+        .btn-edit-profile:hover { opacity: 1; transform: scale(1.1); }
+
+        /* VERSION TAG */
+        .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
+    
+    <div class="version-tag">v1.020</div>
+
     <div id="podium-zone"></div>
+    
     <div class="header-bar">
         <div style="flex:1; line-height: 1.2; display: flex; align-items: center; gap: 10px;">
             <div id="display-avatar-container" style="display:none; width:40px; height:40px; border-radius:50%; overflow:hidden; background: #333; align-items: center; justify-content: center; font-size: 1.2rem;"></div>
             <div>
-                <span id="display-pseudo" style="font-weight: bold;"></span><br>
+                <span id="display-pseudo" style="font-weight: bold;"></span>
+                <button class="btn-edit-profile" onclick="editProfile()">✏️</button>
+                <br>
                 <span id="display-team-label" style="font-size: 0.7rem; color: var(--accent-color); font-style: italic;"></span>
             </div>
         </div>
@@ -120,6 +127,7 @@
         let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let mjRedirectUrl = window.location.origin + window.location.pathname;
+        let isEditing = false; // Flag pour savoir si on modifie le profil
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
         window.onload = () => {
@@ -143,16 +151,31 @@
             });
         }
 
+        // FONCTION POUR REVENIR EN ARRIERE (EDIT)
+        function editProfile() {
+            isEditing = true; // Active le mode édition
+            document.getElementById('input-pseudo').value = userPseudo; // Pré-remplit le pseudo
+            showScreen('screen-login');
+        }
+
         function checkPseudo() {
             unlockAudio();
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return;
+            
+            // Si on est en mode édition et que le pseudo n'a pas changé, on saute la vérification DB
+            if(isEditing) {
+                showScreen('screen-setup');
+                renderAvatarGrid(selectedAvatar && selectedAvatar.startsWith('data:image') ? selectedAvatar : null);
+                return;
+            }
+
             roomRef.child('isGuestRoom').once('value', guestSnap => {
                 const isGuestRoom = guestSnap.val() === true;
                 roomRef.child('scores/' + userPseudo).once('value', snap => {
                     const data = snap.val();
                     if(data) {
-                        if(data.kicked === true) { alert("Vous avez été expulsé de cette partie par le MJ. Vous ne pouvez plus rejoindre avec ce pseudo."); return; }
+                        if(data.kicked === true) { alert("Vous avez été expulsé de cette partie."); return; }
                         if(confirm("Reprendre votre partie ?")) {
                             selectedAvatar = data.avatar;
                             userTeamName = data.teamName || "Solo";
@@ -177,9 +200,8 @@
                 const file = input.files[0];
                 const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
                 if (!validImageTypes.includes(file.type)) {
-                    alert("Erreur : Veuillez choisir un fichier image (JPG, PNG ou WEBP).");
-                    input.value = "";
-                    return;
+                    alert("Image invalide.");
+                    input.value = ""; return;
                 }
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -222,10 +244,24 @@
             unlockAudio();
             const val = document.getElementById('select-team').value.split('|');
             userTeamName = val[0]; userTeamIcon = val[1] || "";
-            roomRef.child('scores/' + userPseudo).set({ 
-                pts: 0, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon, active: true, kicked: false
+            
+            // On récupère le score actuel avant d'écraser les infos (pour ne pas remettre à 0 en cas d'edit)
+            roomRef.child('scores/' + userPseudo).once('value', snap => {
+                let currentPts = 0;
+                if(snap.exists()) currentPts = snap.val().pts || 0;
+
+                roomRef.child('scores/' + userPseudo).set({ 
+                    pts: currentPts, // On garde les points existants !
+                    avatar: selectedAvatar, 
+                    teamName: userTeamName, 
+                    teamIcon: userTeamIcon, 
+                    active: true, 
+                    kicked: false
+                }).then(() => {
+                    isEditing = false; // Reset du mode édition
+                    startBuzzer();
+                });
             });
-            startBuzzer();
         }
 
         const updateTeamDisplay = (name, icon) => {
@@ -328,7 +364,6 @@
                 if(rank === 1) {
                     content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img animate-zoom"><h1 style="color:gold;">CHAMPION !</h1>`;
                     document.getElementById('sound-applause').play().catch(()=>{});
-                    // Correction Confetti : Z-Index 20000 pour passer au dessus du podium
                     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 20000 });
                 } else if (rank === 2) {
                     content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img"><h1 style="color:silver;">2ème PLACE</h1>`;
