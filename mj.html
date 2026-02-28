@@ -97,7 +97,8 @@
     <div id="screen-dashboard" class="dashboard">
         <div class="room-info">SALLE : <span id="display-room">----</span></div>
         
-        <div style="text-align: right; margin-bottom: 15px;">
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom: 15px;">
+            <button onclick="openScoreBoard()" style="width: auto; background: #d35400; padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">📺 Ouvrir Écran</button>
             <button onclick="showRemoteQR()" style="width: auto; background: #8e44ad; padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">📱 QR Télécommande</button>
         </div>
 
@@ -371,24 +372,28 @@
             roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true);
             initMJLogic(); 
             loadCrestGrid();
-            const scoreURL = window.location.origin + window.location.pathname.replace('mj', 'scores') + "?room=" + id;
-            window.open(scoreURL, '_blank');
+            openScoreBoard(); // Ouvre automatiquement au lancement
         }
 
-        // --- FONCTION QR CODE REMOTE CORRIGÉE ---
+        // --- FONCTIONS OUTILS (ECRAN & REMOTE) ---
+        
+        function openScoreBoard() {
+            if(!roomID) return;
+            // Ouvre scores.html avec le roomID
+            const currentUrl = window.location.href.split('?')[0];
+            let basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+            const scoreUrl = basePath + "/scores.html?room=" + roomID;
+            window.open(scoreUrl, '_blank');
+        }
+
         function showRemoteQR() {
             const overlay = document.getElementById('overlay-remote-qr');
             const qrContainer = document.getElementById('qrcode-remote');
             
-            // 1. On récupère l'URL actuelle sans les paramètres
-            let currentUrl = window.location.href.split('?')[0];
-            
-            // 2. On construit l'URL de la remote
+            // Construit lien Remote
+            const currentUrl = window.location.href.split('?')[0];
             let basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
-            let remoteUrl = basePath + "/remote.html";
-
-            // 3. On ajoute l'ID de la salle
-            remoteUrl += "?room=" + roomID;
+            let remoteUrl = basePath + "/remote.html?room=" + roomID;
             
             console.log("Lien Remote : ", remoteUrl);
 
