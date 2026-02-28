@@ -12,7 +12,7 @@
     <style>
         :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; }
         body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        .box { max-width: 400px; margin: 80px auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .box { max-width: 400px; margin: 80px auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; }
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; margin-bottom: 15px; }
         input:disabled { opacity: 0.5; cursor: not-allowed; }
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s; text-transform: uppercase; margin-bottom: 10px; position: relative; top: 0; box-shadow: 0 4px rgba(0,0,0,0.3); }
@@ -44,27 +44,27 @@
         .upload-zone:hover { background: rgba(46, 204, 113, 0.1); }
         
         /* STYLE DU NUMÉRO DE VERSION */
-        .version-tag {
-            position: fixed;
-            bottom: 10px;
-            right: 15px;
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 0.8rem;
-            font-family: monospace;
-            z-index: 9999;
-            pointer-events: none;
-        }
+        .version-tag { position: fixed; bottom: 10px; right: 15px; color: rgba(255, 255, 255, 0.3); font-size: 0.8rem; font-family: monospace; z-index: 9999; pointer-events: none; }
+
+        /* GUIDE OVERLAY STYLES */
+        .guide-step { display: flex; align-items: flex-start; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; text-align: left; }
+        .guide-num { background: var(--accent); color: black; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; flex-shrink: 0; font-size: 0.9rem; }
+        .guide-content h4 { margin: 0 0 3px 0; color: var(--accent); font-size: 1rem; }
+        .guide-content p { margin: 0; font-size: 0.9rem; color: #ddd; }
+        .tip-box { background: rgba(241, 196, 15, 0.1); border-left: 3px solid var(--accent); padding: 10px; margin: 10px 0; font-size: 0.9rem; text-align: left; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.000</div>
+    <div class="version-tag">v1.010</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
     </div>
 
     <div id="screen-login" class="box">
+        <div style="position:absolute; top:15px; right:15px; cursor:pointer; font-size:1.5rem;" onclick="toggleGuide()">❓</div>
+        
         <img id="login-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px; border-radius: 10px;">
         <h2>Accès MJ Sécurisé</h2>
         <input type="email" id="mj-email" placeholder="Email MJ">
@@ -112,8 +112,9 @@
         <div class="room-info">SALLE : <span id="display-room">----</span></div>
         
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom: 15px;">
-            <button onclick="openScoreBoard()" style="width: auto; background: #d35400; padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">📺 Ouvrir Écran</button>
-            <button onclick="showRemoteQR()" style="width: auto; background: #8e44ad; padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">📱 QR Télécommande</button>
+            <button onclick="openScoreBoard()" style="width: auto; background: #d35400; padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">📺 Écran</button>
+            <button onclick="showRemoteQR()" style="width: auto; background: #8e44ad; padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">📱 Remote</button>
+            <button onclick="toggleGuide()" style="width: auto; background: #34495e; padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">❓ Aide</button>
         </div>
 
         <div style="display:flex; gap:10px; margin-bottom:20px;">
@@ -167,6 +168,43 @@
         <div id="qrcode-remote" style="background:white; padding:20px; border-radius:15px; box-shadow: 0 0 30px rgba(142, 68, 173, 0.5);"></div>
         <p style="color:#ccc; margin-top:15px; font-style:italic;">Scannez pour piloter depuis un mobile</p>
         <button onclick="document.getElementById('overlay-remote-qr').style.display='none'" style="margin-top:30px; width:auto; background:var(--danger); padding:10px 30px;">FERMER</button>
+    </div>
+
+    <div id="overlay-guide" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:20000; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
+        <div style="background:var(--card-bg); max-width:600px; width:100%; max-height:90vh; overflow-y:auto; border-radius:15px; border:2px solid var(--accent); padding:20px; position:relative;">
+            <h2 style="color:var(--accent); text-align:center; margin-top:0;">🚀 Guide Rapide</h2>
+            
+            <div class="guide-step">
+                <div class="guide-num">1</div>
+                <div class="guide-content">
+                    <h4>Créer une salle</h4>
+                    <p>Cliquez sur "Créer une nouvelle salle". Le code (ex: 1234) s'affiche.</p>
+                </div>
+            </div>
+            <div class="guide-step">
+                <div class="guide-num">2</div>
+                <div class="guide-content">
+                    <h4>Lancer l'affichage</h4>
+                    <p>Cliquez sur <b>"📺 Écran"</b> pour ouvrir la page des scores sur la TV. Les joueurs scannent le QR Code affiché dessus.</p>
+                </div>
+            </div>
+            <div class="guide-step">
+                <div class="guide-num">3</div>
+                <div class="guide-content">
+                    <h4>Gérer le jeu</h4>
+                    <p><b>"Ouvrir Buzzers"</b> lance la manche. Quand un joueur buzz, son nom s'affiche. Donnez les points ou signalez une erreur.</p>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <b>💡 Astuce Équipes :</b> Créez vos équipes (ex: Table 1) avec un blason. Dans la liste des joueurs, assignez-les. Les scores se cumulent !
+            </div>
+            <div class="tip-box">
+                <b>📡 Mode Animateur :</b> Cliquez sur <b>"📱 Remote"</b> pour afficher un QR Code spécial. Scannez-le avec votre mobile pour piloter le jeu depuis la salle !
+            </div>
+
+            <button onclick="toggleGuide()" style="width:100%; background:var(--accent); color:black; font-weight:bold; margin-top:20px;">FERMER L'AIDE</button>
+        </div>
     </div>
 
     <script>
@@ -389,7 +427,7 @@
             openScoreBoard(); // Ouvre automatiquement au lancement
         }
 
-        // --- FONCTIONS OUTILS (ECRAN & REMOTE) ---
+        // --- FONCTIONS OUTILS (ECRAN / REMOTE / GUIDE) ---
         
         function openScoreBoard() {
             if(!roomID) return;
@@ -399,24 +437,21 @@
             window.open(scoreUrl, '_blank');
         }
 
+        function toggleGuide() {
+            const overlay = document.getElementById('overlay-guide');
+            if(overlay.style.display === 'flex') overlay.style.display = 'none';
+            else overlay.style.display = 'flex';
+        }
+
         function showRemoteQR() {
             const overlay = document.getElementById('overlay-remote-qr');
             const qrContainer = document.getElementById('qrcode-remote');
-            
-            // Construit lien Remote CORRIGÉ
             const currentUrl = window.location.href.split('?')[0];
             let basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
             let remoteUrl = basePath + "/remote.html?room=" + roomID;
-            
             console.log("Lien Remote : ", remoteUrl);
-
             qrContainer.innerHTML = "";
-            new QRCode(qrContainer, {
-                text: remoteUrl,
-                width: 250,
-                height: 250
-            });
-            
+            new QRCode(qrContainer, { text: remoteUrl, width: 250, height: 250 });
             overlay.style.display = 'flex';
         }
 
