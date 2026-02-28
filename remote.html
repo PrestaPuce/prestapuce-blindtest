@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Remote MJ - Presta'Puce</title>
+    <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <style>
+        :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; }
+        body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; touch-action: manipulation; }
+        
+        /* LOGIN SCREEN */
+        #screen-login { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 20px; background: var(--bg-color); z-index: 100; position: absolute; width: 100%; box-sizing: border-box; }
+        input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #555; background: #333; color: white; font-size: 1.1rem; box-sizing: border-box; }
+        .btn-login { width: 100%; padding: 15px; background: var(--mj-color); border: none; border-radius: 8px; color: white; font-size: 1.2rem; font-weight: bold; }
+
+        /* HEADER */
+        .top-bar { height: 40px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 0.8rem; border-bottom: 1px solid #333; }
+        
+        /* ZONE HAUTE : INFO JOUEUR (25% env) */
+        .player-zone { flex: 0 0 25%; background: var(--card-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; border-bottom: 2px solid var(--accent); padding: 10px; position: relative; }
+        .avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #333; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 5px; border: 2px solid white; }
+        .p-name { font-weight: bold; font-size: 1.3rem; margin-bottom: 5px; color: white; }
+        
+        /* BARRE D'ACTIONS RAPIDES */
+        .quick-actions { display: flex; gap: 15px; margin-top: 5px; }
+        .mini-btn { width: 45px; height: 45px; border-radius: 50%; border: none; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 5px rgba(0,0,0,0.3); cursor: pointer; color: white; }
+        .mini-btn:active { transform: scale(0.95); }
+
+        /* ZONE BASSE : COMMANDES (75% env) */
+        .controls-zone { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 10px; background: #111; overflow-y: auto; }
+        
+        .big-btn { width: 100%; flex: 1; border: none; border-radius: 12px; font-size: 1.3rem; font-weight: 900; color: white; text-transform: uppercase; box-shadow: 0 4px 0 rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; min-height: 60px; cursor: pointer; transition: 0.1s; }
+        .big-btn:active { transform: translateY(4px); box-shadow: none; }
+        
+        /* COULEURS BOUTONS */
+        .btn-open { background: var(--blue); font-size: 1.5rem; }
+        .btn-gold { background: var(--gold); color: black; }
+        .btn-green { background: var(--mj-color); }
+        .btn-cyan { background: #3498db; } /* Bleu ciel */
+        .btn-error { background: var(--danger); }
+        .btn-reset { background: #34495e; color: #ccc; font-size: 1rem; flex: 0 0 50px; }
+
+        .waiting-msg { color: #7f8c8d; font-style: italic; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <div id="screen-login">
+        <h2 style="color:var(--accent);">REMOTE ANIMATEUR</h2>
+        <input type="email" id="mj-email" placeholder="Email MJ">
+        <input type="password" id="mj-pass" placeholder="Mot de passe">
+        <button class="btn-login" onclick="login()">CONNEXION</button>
+    </div>
+
+    <div id="screen-remote" style="display:none; height:100%; flex-direction:column;">
+        <div class="top-bar">
+            <span>📡 REMOTE</span>
+            <span style="color:var(--accent); font-weight:bold;">SALLE : <span id="display-room">----</span></span>
+        </div>
+
+        <div class="player-zone" id="zone-player">
+            <div class="waiting-msg">En attente de buzz...</div>
+        </div>
+
+        <div class="controls-zone">
+            <button class="big-btn btn-open" onclick="statusUpdate('ready')">🔊 OUVRIR BUZZERS</button>
+            <button class="big-btn btn-gold" onclick="handleReward(3, 'finish')">+3 (Terminé)</button>
+            <button class="big-btn btn-green" onclick="handleReward(1, 'finish')">+1 (Terminé)</button>
+            <button class="big-btn btn-cyan" onclick="handleReward(1, 'partial')">+1 (On continue)</button>
+            <button class="big-btn btn-error" onclick="handleError()">❌ ERREUR</button>
+            <button class="big-btn btn-reset" onclick="fullReset()">🔄 RESET BUZZERS</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o",
+            authDomain: "prestapuce-buzz.firebaseapp.com",
+            databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "prestapuce-buzz",
+            storageBucket: "prestapuce-buzz.firebasestorage.app"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        let roomID = "", roomRef = null, currentPlayer = null;
+        let currentBlocked = {}; // Pour gérer l'état du bouton bloquer
+
+        // Gestion URL Room
+        const urlParams = new URLSearchParams(window.location.search);
+        roomID = urlParams.get('room');
+
+        auth.onAuthStateChanged(user => {
+            if(user && roomID) {
+                document.getElementById('screen-login').style.display = 'none';
+                document.getElementById('screen-remote').style.display = 'flex';
+                document.getElementById('display-room').innerText = roomID;
+                launchRemote(roomID);
+            }
+        });
+
+        function login() {
+            const email = document.getElementById('mj-email').value.trim();
+            const pass = document.getElementById('mj-pass').value;
+            auth.signInWithEmailAndPassword(email, pass).catch(e => alert("Erreur : " + e.message));
+        }
+
+        function launchRemote(id) {
+            roomRef = db.ref('roomsData/' + id);
+            
+            // Écouteur Joueur Actif
+            roomRef.child('buzzers').on('value', snap => {
+                const b = snap.val();
+                updatePlayerZone(b);
+            });
+
+            // Écouteur Bloqués (pour le bouton stop)
+            roomRef.child('blockedPlayers').on('value', snap => {
+                currentBlocked = snap.val() || {};
+                // Si un joueur est affiché, on met à jour l'état de son bouton stop
+                if(currentPlayer) updateBlockButton(currentPlayer.pseudo);
+            });
+        }
+
+        function updatePlayerZone(b) {
+            const zone = document.getElementById('zone-player');
+            currentPlayer = b; // Mise à jour globale
+
+            if(!b) {
+                zone.innerHTML = `<div class="waiting-msg">En attente de buzz...</div>`;
+                return;
+            }
+
+            let avatarDisplay = b.avatar || '👤';
+            if(b.avatar && b.avatar.startsWith('data:image')) {
+                avatarDisplay = `<img src="${b.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+
+            // Bouton Stop dynamique
+            const isBlocked = currentBlocked[b.pseudo] ? true : false;
+            const stopColor = isBlocked ? 'var(--danger)' : '#7f8c8d'; // Rouge si bloqué, Gris sinon
+
+            zone.innerHTML = `
+                <div class="avatar">${avatarDisplay}</div>
+                <div class="p-name">${b.pseudo}</div>
+                <div class="quick-actions">
+                    <button class="mini-btn" style="background:${stopColor}" onclick="toggleBlock('${b.pseudo}')">🛑</button>
+                    <button class="mini-btn" style="background:var(--blue)" onclick="adj('${b.pseudo}', -1)">-1</button>
+                    <button class="mini-btn" style="background:var(--mj-color)" onclick="adj('${b.pseudo}', 1)">+1</button>
+                    <button class="mini-btn" style="background:var(--danger)" onclick="kickPlayer('${b.pseudo}')">✖</button>
+                </div>
+            `;
+        }
+
+        function updateBlockButton(pseudo) {
+            // Fonction utilitaire pour rafraichir juste la couleur du bouton stop si besoin
+            // (Simplifié ici : on recharge toute la zone pour faire simple)
+            // updatePlayerZone(currentPlayer); 
+        }
+
+        // --- ACTIONS DE JEU (Mêmes que MJ) ---
+
+        function statusUpdate(st) { 
+            roomRef.child('gameState').set({ status: st }); 
+            if(st === 'ready') roomRef.child('buzzers').remove(); 
+        }
+
+        function fullReset() { 
+            roomRef.child('blockedPlayers').remove(); 
+            roomRef.child('buzzers').remove(); 
+            statusUpdate('waiting'); 
+        }
+
+        function handleReward(pts, mode) {
+            if(!currentPlayer) return;
+            roomRef.child('scores/' + currentPlayer.pseudo + '/pts').transaction(x => (x||0)+pts);
+            if(mode === 'partial') {
+                roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
+                statusUpdate('ready');
+            } else fullReset();
+        }
+
+        function handleError() {
+            if(!currentPlayer) return;
+            roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
+            statusUpdate('ready');
+        }
+
+        // --- ACTIONS JOUEUR ---
+
+        function toggleBlock(p) {
+            if(currentBlocked[p]) roomRef.child('blockedPlayers/' + p).remove();
+            else roomRef.child('blockedPlayers/' + p).set(true);
+        }
+
+        function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
+
+        function kickPlayer(p) {
+            if(confirm("Expulser " + p + " ?")) {
+                roomRef.child('scores/' + p).update({ kicked: true }).then(() => {
+                    setTimeout(() => { roomRef.child('scores/' + p).update({ active: false }); }, 1500);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

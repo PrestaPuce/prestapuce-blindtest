@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; }
         body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
@@ -19,7 +20,7 @@
         button:active:not(:disabled) { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; }
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
-        .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
+        .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 1.2rem; }
         .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 150px; overflow-y: auto; }
         .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; }
         .crest-selected { border-color: var(--accent) !important; background: var(--accent) !important; transform: scale(1.1); }
@@ -35,7 +36,7 @@
         .btn-del { color: var(--danger); }
         .player-controls { display: flex; align-items: center; gap: 5px; }
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: #34495e; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
-        .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); }
+        .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; }
         .lobby-btn:active { top: 1px; box-shadow: 0 1px rgba(0,0,0,0.3); }
         .show-pass-container { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 0.9rem; cursor: pointer; text-align: left; width: 100%; padding-left: 5px; }
         .show-pass-container input { width: 18px; height: 18px; margin: 0; cursor: pointer; flex-shrink: 0; }
@@ -46,7 +47,7 @@
 <body>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
-        <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Ouvrir / Fermer Mon Profil">
+        <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
     </div>
 
     <div id="screen-login" class="box">
@@ -94,11 +95,17 @@
     </div>
 
     <div id="screen-dashboard" class="dashboard">
-        <div class="room-info" style="margin-bottom:20px; text-align:center;">SALLE : <span id="display-room">----</span></div>
+        <div class="room-info">SALLE : <span id="display-room">----</span></div>
+        
+        <div style="text-align: right; margin-bottom: 15px;">
+            <button onclick="showRemoteQR()" style="width: auto; background: #8e44ad; padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">📱 QR Télécommande</button>
+        </div>
+
         <div style="display:flex; gap:10px; margin-bottom:20px;">
             <button style="background:var(--blue); flex:1;" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
             <button style="background:var(--danger); flex:1;" onclick="fullReset()">RESET TITRE</button>
         </div>
+        
         <div id="player-box" class="current-player">
             <div id="p-avatar" style="font-size:3.5rem; display:flex; justify-content:center; align-items:center;"></div>
             <h2 id="p-name" style="margin:5px 0;"></h2>
@@ -140,6 +147,13 @@
         </div>
     </div>
 
+    <div id="overlay-remote-qr" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:20000; flex-direction:column; align-items:center; justify-content:center;">
+        <h2 style="color:white; margin-bottom:20px; text-transform:uppercase; color: #8e44ad;">Télécommande Animateur</h2>
+        <div id="qrcode-remote" style="background:white; padding:20px; border-radius:15px; box-shadow: 0 0 30px rgba(142, 68, 173, 0.5);"></div>
+        <p style="color:#ccc; margin-top:15px; font-style:italic;">Scannez pour piloter depuis un mobile</p>
+        <button onclick="document.getElementById('overlay-remote-qr').style.display='none'" style="margin-top:30px; width:auto; background:var(--danger); padding:10px 30px;">FERMER</button>
+    </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o",
@@ -156,11 +170,7 @@
         const storage = firebase.storage();
 
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
-        let allPlayersData = {};
-        let currentBlocked = {};
-        let editingTeamKey = null;
-        let mjProfileData = {};
-
+        let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
         const defaultCrests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png"];
 
         document.getElementById('mj-pass').addEventListener('keypress', (e) => { if (e.key === 'Enter') login(); });
@@ -172,22 +182,18 @@
             auth.signInWithEmailAndPassword(email, pass).then(res => { loadMjData(res.user); }).catch(e => { alert("Erreur connexion"); });
         }
 
-        // MODIFICATION : Ajout de la fonction pour le mot de passe oublié
         function forgotPassword() {
             const email = document.getElementById('mj-email').value.trim();
             if(!email) return alert("Veuillez saisir votre email pour réinitialiser le mot de passe.");
-            auth.sendPasswordResetEmail(email).then(() => {
-                alert("Email de réinitialisation envoyé !");
-            }).catch(e => alert("Erreur : " + e.message));
+            auth.sendPasswordResetEmail(email).then(() => { alert("Email de réinitialisation envoyé !"); }).catch(e => alert("Erreur : " + e.message));
         }
 
         function loadMjData(user) {
             db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
                 mjProfileData = data;
-                if(mjProfileData.isGuest === true) {
-                    cleanGuestData(user.uid);
-                } else {
+                if(mjProfileData.isGuest === true) { cleanGuestData(user.uid); }
+                else {
                     document.getElementById('mj-display-name').innerText = data.prenom || "MJ";
                     updateLogos(data.customLogo);
                     checkUserRoom(user.uid);
@@ -336,10 +342,8 @@
         function updateLogos(url) {
             const finalUrl = url || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
             document.getElementById('global-mj-logo').src = finalUrl;
-            const loginLogo = document.getElementById('login-mj-logo');
-            if(loginLogo) loginLogo.src = finalUrl;
-            const favicon = document.getElementById('page-favicon');
-            if(favicon) favicon.href = finalUrl;
+            document.getElementById('login-mj-logo').src = finalUrl;
+            document.getElementById('page-favicon').href = finalUrl;
             if(roomRef && roomID) {
                 roomRef.child('mjLogo').set(finalUrl);
                 if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink);
@@ -369,6 +373,24 @@
             loadCrestGrid();
             const scoreURL = window.location.origin + window.location.pathname.replace('mj', 'scores') + "?room=" + id;
             window.open(scoreURL, '_blank');
+        }
+
+        // --- FONCTION QR CODE REMOTE ---
+        function showRemoteQR() {
+            const overlay = document.getElementById('overlay-remote-qr');
+            const qrContainer = document.getElementById('qrcode-remote');
+            
+            // URL vers remote.html
+            const remoteUrl = window.location.href.replace('mj.html', 'remote.html') + "?room=" + roomID;
+            
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
+                text: remoteUrl,
+                width: 250,
+                height: 250
+            });
+            
+            overlay.style.display = 'flex';
         }
 
         function uploadCustomTeamLogo(input) {
@@ -498,13 +520,11 @@
 
         function triggerEndGame() {
             if(mjProfileData.isGuest === true) {
-                // GUEST : Pas d'archivage proposé
                 if(confirm("Fin de partie ? Les scores vont être figés sur l'écran d'affichage.")) {
                     roomRef.child('gameState').set({ status: 'endGame', timestamp: Date.now() });
                     roomRef.child('buzzers').remove();
                 }
             } else {
-                // MJ PRO : Archivage proposé
                 if(confirm("Voulez-vous figer les scores et enregistrer l'historique ?")) {
                     const uid = auth.currentUser.uid;
                     const historyData = { date: new Date().toLocaleString('fr-FR'), roomID: roomID, scores: allPlayersData, teams: globalTeams };
@@ -520,8 +540,14 @@
         function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
         function deleteTeam(n) { roomRef.child('teams/' + n).remove(); }
-        function kickPlayer(p) { if(confirm("Expulser " + p + " ?")) roomRef.child('scores/' + p).update({ active: false, kicked: true }); }
-        function unkickPlayer(p) { roomRef.child('scores/' + p).update({ kicked: false }); }
+        function kickPlayer(p) { 
+            if(confirm("Expulser " + p + " ?")) {
+                roomRef.child('scores/' + p).update({ kicked: true }).then(() => {
+                    setTimeout(() => { roomRef.child('scores/' + p).update({ active: false }); }, 1500);
+                });
+            }
+        }
+        function unkickPlayer(p) { roomRef.child('scores/' + p).update({ kicked: false, active: false }); }
         function togglePlayerTeam(pseudo, choice) {
             const icon = (choice === "Solo") ? "" : (globalTeams[choice] ? globalTeams[choice].icon : "");
             roomRef.child('scores/' + pseudo).update({ teamName: choice, teamIcon: icon, active: true });
