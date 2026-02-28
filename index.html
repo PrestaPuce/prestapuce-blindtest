@@ -29,7 +29,6 @@
         .buzzer-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.4; }
         .buzzer-label { position: relative; z-index: 2; color: white; font-size: 1.4rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
-        /* Styles Podium Corrigés pour éviter les déformations */
         #podium-zone { 
             display: none; 
             flex-direction: column; 
@@ -120,6 +119,7 @@
 
         let roomID = "", roomRef = null, userPseudo = "", userTeamName = "Solo", userTeamIcon = "", selectedAvatar = null;
         let gameState = "waiting", currentWinner = null, isBlocked = false;
+        let mjRedirectUrl = window.location.origin + window.location.pathname; // Lien de redirection par défaut
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
 
         window.onload = () => {
@@ -245,6 +245,20 @@
             updateTeamDisplay(userTeamName, userTeamIcon);
             if(selectedAvatar && selectedAvatar.startsWith('data:image')) document.getElementById('buzzer-img-placeholder').innerHTML = `<img src="${selectedAvatar}" class="buzzer-img">`;
             showScreen('screen-buzzer');
+            
+            // 1. On récupère en temps réel le lien MJ pour être prêt en cas de suppression
+            roomRef.child('mjLink').on('value', snap => {
+                if(snap.val()) mjRedirectUrl = snap.val();
+            });
+
+            // 2. ÉCOUTEUR DE SUPPRESSION DE SALLE (Fermeture MJ)
+            roomRef.on('value', snap => {
+                if(snap.val() === null) {
+                    alert("La session a été clôturée par l'animateur.\nMerci d'avoir joué !");
+                    window.location.href = mjRedirectUrl;
+                }
+            });
+
             roomRef.child('scores/' + userPseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
             roomRef.child('scores/' + userPseudo).on('value', snap => {
                 const d = snap.val();
@@ -260,14 +274,11 @@
                 currentWinner = val ? val.pseudo : null; updateUI(); 
             });
             
-            // Écouteur d'expulsion avec redirection MJ
+            // Écouteur d'expulsion INDIVIDUELLE avec redirection MJ
             roomRef.child('scores/' + userPseudo + '/kicked').on('value', snap => {
                 if(snap.exists() && snap.val() === true) { 
-                    roomRef.child('mjLink').once('value', linkSnap => {
-                        const redirectUrl = linkSnap.val() || window.location.origin + window.location.pathname;
-                        alert("Vous avez été expulsé de la partie par le MJ."); 
-                        window.location.href = redirectUrl;
-                    });
+                    alert("Vous avez été expulsé de la partie par le MJ."); 
+                    window.location.href = mjRedirectUrl;
                 }
             });
             roomRef.child('blockedPlayers/' + userPseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
@@ -312,43 +323,35 @@
             const pZone = document.getElementById('podium-zone');
             pZone.style.display = "flex";
             
-            // Récupération du lien MJ
-            roomRef.child('mjLink').once('value', linkSnap => {
-                const redirectUrl = linkSnap.val() || window.location.origin + window.location.pathname;
+            roomRef.child('scores').once('value', snap => {
+                const leaderboard = Object.keys(snap.val() || {}).map(p => ({ name: p, pts: snap.val()[p].pts })).sort((a, b) => b.pts - a.pts);
+                const rank = leaderboard.findIndex(e => e.name === userPseudo) + 1;
+                let content = "";
 
-                roomRef.child('scores').once('value', snap => {
-                    const leaderboard = Object.keys(snap.val() || {}).map(p => ({ name: p, pts: snap.val()[p].pts })).sort((a, b) => b.pts - a.pts);
-                    const rank = leaderboard.findIndex(e => e.name === userPseudo) + 1;
-                    let content = "";
-
-                    if(rank === 1) {
-                        // Vainqueur : Zoom + Cotillons + Son
-                        content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img animate-zoom"><h1 style="color:gold;">CHAMPION !</h1>`;
-                        document.getElementById('sound-applause').play().catch(()=>{});
-                        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                    } else if (rank === 2) {
-                        // 2ème : Pas de zoom
-                        content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img"><h1 style="color:silver;">2ème PLACE</h1>`;
-                    } else if (rank === 3) {
-                        // 3ème : Pas de zoom
-                        content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img"><h1 style="color:#cd7f32;">3ème PLACE</h1>`;
-                    } else {
-                        content = `<h1 style="color:white;">${rank}ème PLACE</h1><p>Merci d'avoir joué !</p>`;
-                    }
-                    
-                    pZone.innerHTML = `${content}<button onclick="window.location.href='${redirectUrl}'" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
-                });
+                if(rank === 1) {
+                    // Vainqueur : Zoom + Cotillons + Son
+                    content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img animate-zoom"><h1 style="color:gold;">CHAMPION !</h1>`;
+                    document.getElementById('sound-applause').play().catch(()=>{});
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                } else if (rank === 2) {
+                    // 2ème : Pas de zoom
+                    content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img"><h1 style="color:silver;">2ème PLACE</h1>`;
+                } else if (rank === 3) {
+                    // 3ème : Pas de zoom
+                    content = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img"><h1 style="color:#cd7f32;">3ème PLACE</h1>`;
+                } else {
+                    content = `<h1 style="color:white;">${rank}ème PLACE</h1><p>Merci d'avoir joué !</p>`;
+                }
+                
+                pZone.innerHTML = `${content}<button onclick="window.location.href='${mjRedirectUrl}'" class="btn-ui" style="margin-top:20px;">RETOUR</button>`;
             });
         }
 
         function leaveGame() {
             if(confirm("Quitter la partie ?\n\nSachez que vous pourrez revenir avec le même appareil et le même pseudo pour récupérer votre score !")) {
                 if(roomRef && userPseudo) {
-                    roomRef.child('mjLink').once('value', linkSnap => {
-                        const redirectUrl = linkSnap.val() || window.location.origin + window.location.pathname;
-                        roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => { 
-                            window.location.href = redirectUrl; 
-                        });
+                    roomRef.child('scores/' + userPseudo).update({ active: false }).then(() => { 
+                        window.location.href = mjRedirectUrl; 
                     });
                 } else location.reload();
             }
