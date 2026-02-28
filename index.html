@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
-        :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; }
+        :root { --primary-color: #3498db; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --accent-color: #f1c40f; --success: #27ae60; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; touch-action: manipulation; }
         
         /* HEADER */
@@ -19,25 +19,33 @@
         .active-screen { display: flex !important; }
         
         input, select { width: 100%; max-width: 280px; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); font-size: 1.1rem; background: var(--card-bg); color: white; text-align: center; outline: none; }
-        .btn-ui { width: 100%; max-width: 280px; padding: 18px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: 900; cursor: pointer; background-color: var(--primary-color); color: white; box-shadow: 0 8px 0 #2980b9; text-transform: uppercase; margin-bottom: 10px; }
-        .btn-disabled { background-color: #7f8c8d !important; box-shadow: 0 8px 0 #636e72 !important; cursor: not-allowed; opacity: 0.6; }
+        
+        .btn-ui { width: 100%; max-width: 280px; padding: 18px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: 900; cursor: pointer; background-color: var(--primary-color); color: white; box-shadow: 0 8px 0 #2980b9; text-transform: uppercase; margin-bottom: 10px; transition: 0.2s; }
+        .btn-ui:active { transform: translateY(4px); box-shadow: 0 4px 0 #2980b9; }
+        
+        /* CLASSE DESACTIVEE STRICTE */
+        .btn-disabled { background-color: #7f8c8d !important; box-shadow: none !important; cursor: not-allowed; opacity: 0.5; pointer-events: none; }
         
         .avatar-scroll { width: 100%; max-width: 320px; max-height: 180px; overflow-y: auto; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 20px; }
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .avatar-item { width: 60px; height: 60px; background: var(--card-bg); border-radius: 15px; cursor: pointer; border: 3px solid transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 2rem; }
-        .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); }
+        .avatar-item.selected { border-color: var(--accent-color); transform: scale(1.1); background: var(--accent-color); }
         .avatar-item img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* SECTION EQUIPE TABS */
+        /* SECTION EQUIPE */
         .team-tabs { display: flex; gap: 10px; margin-bottom: 15px; width: 100%; max-width: 280px; }
         .tab-btn { flex: 1; padding: 10px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #aaa; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
         .tab-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); font-weight: bold; }
         .team-panel { display: none; width: 100%; flex-direction: column; align-items: center; }
         .team-panel.active { display: flex; }
 
-        /* CREATION EQUIPE */
-        .new-team-icon-zone { width: 80px; height: 80px; border: 2px dashed #aaa; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; cursor: pointer; position: relative; overflow: hidden; }
-        .new-team-icon-zone img { width: 100%; height: 100%; object-fit: cover; }
+        /* CREATION EQUIPE : SELECTEUR ICONES */
+        .team-icon-picker { display: flex; gap: 10px; overflow-x: auto; width: 100%; max-width: 300px; padding-bottom: 10px; margin-bottom: 15px; }
+        .team-icon-opt { width: 50px; height: 50px; flex-shrink: 0; background: white; border-radius: 8px; padding: 2px; cursor: pointer; border: 3px solid transparent; }
+        .team-icon-opt.selected { border-color: var(--success); transform: scale(1.1); }
+        .team-icon-opt img { width: 100%; height: 100%; object-fit: contain; }
+
+        .upload-team-btn { width: 100%; max-width: 280px; padding: 10px; border: 2px dashed #aaa; border-radius: 10px; text-align: center; color: #aaa; cursor: pointer; margin-bottom: 15px; font-size: 0.9rem; }
         
         .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; outline: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
@@ -51,26 +59,19 @@
         @keyframes trophyZoom { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 70% { transform: scale(1.4) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
         .animate-zoom { animation: trophyZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-        /* BOUTON EDIT PRO (SVG) */
         #btn-edit-container { display: none; margin-left: 8px; vertical-align: middle; }
-        .btn-edit-icon {
-            background: none; border: 1px solid rgba(255,255,255,0.2); 
-            border-radius: 50%; width: 24px; height: 24px; 
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s; padding: 4px;
-        }
+        .btn-edit-icon { background: none; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; padding: 4px; }
         .btn-edit-icon svg { fill: #bdc3c7; width: 14px; height: 14px; }
         .btn-edit-icon:hover { border-color: var(--accent-color); background: rgba(241, 196, 15, 0.1); }
         .btn-edit-icon:hover svg { fill: var(--accent-color); }
 
-        /* VERSION TAG */
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     
-    <div class="version-tag">v1.030</div>
+    <div class="version-tag">v1.031</div>
 
     <div id="podium-zone"></div>
     
@@ -108,7 +109,7 @@
     </div>
 
     <div id="screen-setup" class="screen">
-        <h3 style="margin:0 0 10px 0;">AVATAR</h3>
+        <h3 style="margin:0 0 10px 0;">CHOISIS TON AVATAR</h3>
         <div class="avatar-scroll">
             <div class="avatar-grid" id="avatar-grid">
                 <div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('file-input').click()">
@@ -118,7 +119,7 @@
             </div>
         </div>
         
-        <h3 style="margin:0 0 10px 0;">ÉQUIPE</h3>
+        <h3 style="margin:0 0 10px 0;">TON ÉQUIPE</h3>
         
         <div class="team-tabs">
             <button class="tab-btn active" id="tab-join" onclick="switchTeamTab('join')">Rejoindre</button>
@@ -126,16 +127,21 @@
         </div>
 
         <div id="panel-join" class="team-panel active">
-            <select id="select-team"><option value="Solo|">Mode Solo</option></select>
+            <select id="select-team" onchange="onTeamSelectChange()"><option value="Solo|">Mode Solo</option></select>
         </div>
 
         <div id="panel-create" class="team-panel">
             <input type="text" id="new-team-name" placeholder="Nom de l'équipe" maxlength="15">
-            <div class="new-team-icon-zone" onclick="document.getElementById('team-icon-input').click()">
-                <span id="team-icon-preview" style="font-size:1.5rem;">🛡️</span>
+            
+            <p style="margin:0 0 5px 0; font-size:0.8rem; color:#aaa;">Choisir un blason :</p>
+            <div class="team-icon-picker" id="team-crest-list"></div>
+            
+            <div class="upload-team-btn" onclick="document.getElementById('team-icon-input').click()">
+                📤 Ou uploader une image perso
                 <input type="file" id="team-icon-input" accept="image/*" style="display:none" onchange="handleTeamIconUpload(this)">
             </div>
-            <button class="btn-ui" style="background:#27ae60; font-size:1rem; padding:12px;" onclick="createNewTeam()">Valider Création</button>
+            
+            <button class="btn-ui" style="background:var(--success); font-size:1rem; padding:12px;" onclick="createNewTeam()">✅ Valider Création</button>
         </div>
 
         <button id="btn-final" class="btn-ui btn-disabled" onclick="finalizeSetup()">C'est parti !</button>
@@ -171,14 +177,17 @@
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let mjRedirectUrl = window.location.origin + window.location.pathname;
         let isEditing = false;
-        let newTeamIconBase64 = ""; // Stockage temporaire pour création équipe
+        
+        let selectedTeamCrest = ""; // Pour création équipe
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
+        const defaultTeamCrests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png"];
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
             const r = urlParams.get('room');
             if(r) { document.getElementById('room-code-input').value = r; validateRoom(); }
             renderAvatarGrid();
+            renderTeamCrestPicker();
         };
 
         function validateRoom() {
@@ -195,12 +204,32 @@
             });
         }
 
-        // --- GESTION DES TABS EQUIPE ---
+        // --- GESTION CREATION EQUIPE ---
         function switchTeamTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.team-panel').forEach(p => p.classList.remove('active'));
             document.getElementById('tab-' + tab).classList.add('active');
             document.getElementById('panel-' + tab).classList.add('active');
+        }
+
+        function renderTeamCrestPicker() {
+            const container = document.getElementById('team-crest-list');
+            container.innerHTML = "";
+            defaultTeamCrests.forEach(url => {
+                const img = document.createElement('img');
+                img.className = "team-icon-opt";
+                img.src = url;
+                img.onclick = () => {
+                    document.querySelectorAll('.team-icon-opt').forEach(i => i.classList.remove('selected'));
+                    img.classList.add('selected');
+                    selectedTeamCrest = url;
+                };
+                // Selectionner le premier par défaut
+                if(container.children.length === 0) { img.classList.add('selected'); selectedTeamCrest = url; }
+                const wrap = document.createElement('div');
+                wrap.appendChild(img);
+                container.appendChild(img);
+            });
         }
 
         function handleTeamIconUpload(input) {
@@ -214,8 +243,10 @@
                         canvas.width = 150; canvas.height = 150;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, 150, 150);
-                        newTeamIconBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                        document.getElementById('team-icon-preview').innerHTML = `<img src="${newTeamIconBase64}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
+                        selectedTeamCrest = canvas.toDataURL('image/jpeg', 0.7);
+                        // Visuel feedback
+                        document.querySelectorAll('.team-icon-opt').forEach(i => i.classList.remove('selected'));
+                        alert("Image chargée !");
                     };
                     img.src = e.target.result;
                 };
@@ -231,32 +262,30 @@
                 if(snap.exists()) {
                     alert("Ce nom d'équipe existe déjà !");
                 } else {
-                    const icon = newTeamIconBase64 || "https://cdn-icons-png.flaticon.com/512/166/166258.png"; // Icône par défaut
+                    const icon = selectedTeamCrest || defaultTeamCrests[0];
                     roomRef.child('teams/' + teamName).set({ icon: icon }).then(() => {
                         alert("Équipe créée !");
                         // Reset form
                         document.getElementById('new-team-name').value = "";
-                        document.getElementById('team-icon-preview').innerHTML = "🛡️";
-                        newTeamIconBase64 = "";
-                        // Basculer sur l'onglet rejoindre et sélectionner la nouvelle équipe
                         switchTeamTab('join');
-                        // Petite pause pour laisser Firebase se mettre à jour
+                        // Sélectionner automatiquement la nouvelle équipe dans le drop down
+                        // On attend un court instant que Firebase notifie le listener
                         setTimeout(() => {
                             const select = document.getElementById('select-team');
-                            // Tente de trouver l'option et de la sélectionner
                             for (let i = 0; i < select.options.length; i++) {
                                 if (select.options[i].text === teamName) {
                                     select.selectedIndex = i;
+                                    onTeamSelectChange(); // Mise à jour variables locales
                                     break;
                                 }
                             }
-                        }, 500);
+                        }, 300);
                     });
                 }
             });
         }
 
-        // --- FONCTION ÉDITION (Active le mode edit) ---
+        // --- FONCTION ÉDITION ---
         function editProfile() {
             isEditing = true;
             document.getElementById('input-pseudo').value = activePseudo; 
@@ -269,20 +298,14 @@
             userPseudo = document.getElementById('input-pseudo').value.trim();
             if(userPseudo.length < 2) return;
             
-            if(isEditing && userPseudo === activePseudo) {
-                showScreen('screen-setup');
-                return;
-            }
+            if(isEditing && userPseudo === activePseudo) { showScreen('screen-setup'); return; }
 
             roomRef.child('isGuestRoom').once('value', guestSnap => {
                 const isGuestRoom = guestSnap.val() === true;
-                
                 roomRef.child('scores/' + userPseudo).once('value', snap => {
                     const data = snap.val();
-                    
                     if(data) {
                         if(data.kicked === true) { alert("Ce pseudo est banni."); return; }
-                        
                         if(!isEditing) {
                             if(confirm("Reprendre votre partie ?")) {
                                 selectedAvatar = data.avatar;
@@ -291,15 +314,10 @@
                                 activePseudo = userPseudo; 
                                 roomRef.child('scores/' + userPseudo).update({ active: true }).then(() => { startBuzzer(); });
                             } else showScreen('screen-setup');
-                        } else {
-                            alert("Ce pseudo est déjà pris par un autre joueur.");
-                        }
+                        } else { alert("Ce pseudo est déjà pris."); }
                     } else {
                         roomRef.child('scores').once('value', scoresSnap => {
-                            if(isGuestRoom && scoresSnap.numChildren() >= 10 && !isEditing) {
-                                alert("🔒 Mode Découverte : Limite atteinte.");
-                                return;
-                            }
+                            if(isGuestRoom && scoresSnap.numChildren() >= 10 && !isEditing) { alert("🔒 Mode Découverte : Limite atteinte."); return; }
                             showScreen('screen-setup');
                         });
                     }
@@ -322,7 +340,7 @@
                         ctx.drawImage(img, 0, 0, 150, 150);
                         selectedAvatar = canvas.toDataURL('image/jpeg', 0.7);
                         renderAvatarGrid(selectedAvatar);
-                        document.getElementById('btn-final').classList.remove('btn-disabled');
+                        checkFinalBtn(); // Verif bouton
                     };
                     img.src = e.target.result;
                 };
@@ -334,26 +352,37 @@
             const grid = document.getElementById('avatar-grid');
             grid.innerHTML = `<div class="avatar-item" style="background:var(--primary-color); color:white; font-weight:bold; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('file-input').click()"><span style="font-size:2rem;">+</span><input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)"></div>`;
             if(customImg) {
-                const div = document.createElement('div');
-                div.className = 'avatar-item selected';
-                div.innerHTML = `<img src="${customImg}">`;
-                div.onclick = () => { selectedAvatar = customImg; renderAvatarGrid(customImg); };
+                const div = document.createElement('div'); div.className = 'avatar-item selected'; div.innerHTML = `<img src="${customImg}">`;
+                div.onclick = () => { selectedAvatar = customImg; renderAvatarGrid(customImg); checkFinalBtn(); };
                 grid.appendChild(div);
             }
             avatars.forEach(a => {
-                const div = document.createElement('div');
-                div.className = 'avatar-item' + (selectedAvatar === a ? ' selected' : '');
-                div.innerText = a;
-                div.onclick = () => { selectedAvatar = a; renderAvatarGrid(customImg); document.getElementById('btn-final').classList.remove('btn-disabled'); };
+                const div = document.createElement('div'); div.className = 'avatar-item' + (selectedAvatar === a ? ' selected' : ''); div.innerText = a;
+                div.onclick = () => { selectedAvatar = a; renderAvatarGrid(customImg); checkFinalBtn(); };
                 grid.appendChild(div);
             });
         }
 
-        // --- FINALISATION INTELLIGENTE ---
+        function checkFinalBtn() {
+            const btn = document.getElementById('btn-final');
+            if(selectedAvatar) btn.classList.remove('btn-disabled');
+            else btn.classList.add('btn-disabled');
+        }
+
+        function onTeamSelectChange() {
+            // Met à jour les variables locales quand on change le select
+            const val = document.getElementById('select-team').value.split('|');
+            userTeamName = val[0]; 
+            userTeamIcon = val[1] || "";
+            updateTeamDisplay(userTeamName, userTeamIcon);
+        }
+
         function finalizeSetup() {
+            // SÉCURITÉ : Si le bouton est disabled, on ne fait RIEN
+            if(document.getElementById('btn-final').classList.contains('btn-disabled')) return;
+
             unlockAudio();
-            // Si on est dans l'onglet création mais qu'on a cliqué sur "C'est parti", on check le select
-            // Mais logiquement, on doit avoir choisi une équipe dans le select (même celle qu'on vient de créer)
+            // On s'assure d'avoir les valeurs du select
             const val = document.getElementById('select-team').value.split('|');
             userTeamName = val[0]; userTeamIcon = val[1] || "";
             const newPseudo = document.getElementById('input-pseudo').value.trim();
@@ -464,7 +493,6 @@
         function listenToTeams() {
             roomRef.child('teams').on('value', snap => {
                 const select = document.getElementById('select-team');
-                // On garde la sélection actuelle si possible lors d'un update
                 const currentVal = select.value;
                 select.innerHTML = '<option value="Solo|">Mode Solo</option>';
                 snap.forEach(child => {
@@ -473,7 +501,13 @@
                     opt.innerText = child.key;
                     select.appendChild(opt);
                 });
-                if(currentVal) select.value = currentVal;
+                // Tentative de restauration
+                if(currentVal) {
+                    // Check si la valeur existe toujours
+                    let exists = false;
+                    for(let i=0; i<select.options.length; i++) { if(select.options[i].value === currentVal) exists = true; }
+                    if(exists) select.value = currentVal;
+                }
             });
         }
     </script>
