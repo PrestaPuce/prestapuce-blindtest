@@ -375,14 +375,23 @@
             window.open(scoreURL, '_blank');
         }
 
-        // --- FONCTION QR CODE REMOTE ---
+        // --- FONCTION QR CODE REMOTE CORRIGÉE ---
         function showRemoteQR() {
             const overlay = document.getElementById('overlay-remote-qr');
             const qrContainer = document.getElementById('qrcode-remote');
             
-            // URL vers remote.html
-            const remoteUrl = window.location.href.replace('mj.html', 'remote.html') + "?room=" + roomID;
+            // 1. On récupère l'URL actuelle sans les paramètres
+            let currentUrl = window.location.href.split('?')[0];
             
+            // 2. On construit l'URL de la remote
+            let basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+            let remoteUrl = basePath + "/remote.html";
+
+            // 3. On ajoute l'ID de la salle
+            remoteUrl += "?room=" + roomID;
+            
+            console.log("Lien Remote : ", remoteUrl);
+
             qrContainer.innerHTML = "";
             new QRCode(qrContainer, {
                 text: remoteUrl,
