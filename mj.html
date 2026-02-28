@@ -47,31 +47,13 @@
         .version-tag { position: fixed; bottom: 10px; right: 15px; color: rgba(255, 255, 255, 0.3); font-size: 0.8rem; font-family: monospace; z-index: 9999; pointer-events: none; }
 
         /* BOUTON GHOST (POUR L'AIDE LOGIN) */
-        .btn-ghost {
-            position: absolute; top: 20px; right: 20px;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.3);
-            color: rgba(255,255,255,0.7);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: none !important;
-            width: auto !important;
-            margin: 0 !important;
-            top: 15px !important;
-        }
-        .btn-ghost:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: rgba(255,255,255,0.05);
-        }
+        .btn-ghost { position: absolute; top: 15px !important; right: 15px !important; background: transparent; border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: all 0.3s ease; box-shadow: none !important; width: auto !important; margin: 0 !important; }
+        .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.015</div>
+    <div class="version-tag">v1.030</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -79,7 +61,6 @@
 
     <div id="screen-login" class="box">
         <button class="btn-ghost" onclick="toggleGuide()">AIDE / GUIDE</button>
-        
         <img id="login-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px; border-radius: 10px;">
         <h2>Accès MJ Sécurisé</h2>
         <input type="email" id="mj-email" placeholder="Email MJ">
@@ -538,7 +519,44 @@
                     } else document.getElementById('p-team').innerHTML = "Solo"; 
                 } else box.style.display = "none"; 
             });
-            roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
+            // --- MODIFICATION ICI : ÉCOUTEUR EQUIPES + SAUVEGARDE AUTO ---
+            roomRef.child('teams').on('value', snap => { 
+                globalTeams = snap.val() || {}; 
+                // AUTO-HARVEST : On parcourt les équipes pour trouver les nouveaux logos
+                const mjUid = auth.currentUser ? auth.currentUser.uid : null;
+                if(mjUid && !mjProfileData.isGuest) {
+                    Object.values(globalTeams).forEach(team => {
+                        // Si c'est une image custom (http) et qu'elle n'est pas dans les valeurs déjà connues de customLogos
+                        // Note : Pour faire simple et éviter de lire la DB à chaque fois, on compare avec mjProfileData chargé en local
+                        // Mais mjProfileData n'est pas mis à jour en temps réel.
+                        // On va donc juste vérifier si l'URL est dans une liste temporaire "session" pour ne pas spammer la DB
+                        if(team.icon && team.icon.startsWith('http') && !defaultCrests.includes(team.icon)) {
+                            // C'est un candidat. On vérifie en DB si on l'a déjà.
+                            // Pour éviter de faire 1000 requêtes, on le fait intelligemment : 
+                            // On ne le fait que si on ne l'a pas déjà fait dans cette session.
+                            // (Simplification pour v1.030 : on ajoute sans doublon via push/transaction serait l'idéal, 
+                            // mais ici on va faire un check simple côté client avec les données chargées au login).
+                            
+                            let alreadyKnown = false;
+                            if(mjProfileData.customLogos) {
+                                Object.values(mjProfileData.customLogos).forEach(savedUrl => {
+                                    if(savedUrl === team.icon) alreadyKnown = true;
+                                });
+                            }
+                            
+                            if(!alreadyKnown) {
+                                // On l'ajoute !
+                                db.ref(`users/${mjUid}/customLogos`).push(team.icon);
+                                // On met à jour la copie locale pour ne pas le refaire 10 fois
+                                if(!mjProfileData.customLogos) mjProfileData.customLogos = {};
+                                mjProfileData.customLogos['new_' + Date.now()] = team.icon;
+                                console.log("🏹 Nouveau blason capturé : " + team.icon);
+                            }
+                        }
+                    });
+                }
+                renderLobby(); 
+            });
             roomRef.child('scores').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
         }
