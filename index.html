@@ -44,12 +44,38 @@
         .team-icon-opt img { width: 100%; height: 100%; object-fit: contain; }
         .upload-team-btn { width: 100%; max-width: 280px; padding: 10px; border: 2px dashed #aaa; border-radius: 10px; text-align: center; color: #aaa; cursor: pointer; margin-bottom: 15px; font-size: 0.9rem; }
         
-        .buzzer { width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; border-radius: 50%; border: none; cursor: pointer; background: #e74c3c; box-shadow: 0 15px 0 #c0392b; position: relative; outline: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
+        /* BUZZER AVEC ANIMATION 3D */
+        .buzzer { 
+            width: 65vw; height: 65vw; max-width: 250px; max-height: 250px; 
+            border-radius: 50%; border: none; cursor: pointer; 
+            background: #e74c3c; 
+            box-shadow: 0 15px 0 #c0392b, 0 15px 20px rgba(0,0,0,0.4); 
+            position: relative; outline: none; display: flex; align-items: center; justify-content: center; overflow: hidden; 
+            transition: all 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* CLASSE D'ENFONCEMENT */
+        .buzzer.buzzer-pressed {
+            transform: translateY(15px);
+            box-shadow: 0 0 0 #c0392b, inset 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60, 0 15px 20px rgba(0,0,0,0.4); }
+        .ready .buzzer.buzzer-pressed { box-shadow: 0 0 0 #27ae60; }
+
         .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
-        .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; pointer-events: none; }
-        .buzzer-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.4; }
-        .buzzer-label { position: relative; z-index: 2; color: white; font-size: 1.4rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        
+        .blocked .buzzer { 
+            background: #555 !important; 
+            box-shadow: 0 15px 0 #333 !important; 
+            opacity: 0.6; 
+            pointer-events: none; 
+            cursor: default;
+        }
+        
+        .buzzer-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.4; pointer-events: none; }
+        .buzzer-label { position: relative; z-index: 2; color: white; font-size: 1.4rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); pointer-events: none; }
 
         #podium-zone { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 26, 26, 0.98); z-index: 10000; padding: 20px; box-sizing: border-box; }
         .trophy-img { width: 150px; height: 150px; object-fit: contain; margin-bottom: 15px; }
@@ -68,7 +94,7 @@
 </head>
 <body>
     
-    <div class="version-tag">v1.049</div>
+    <div class="version-tag">v1.051</div>
 
     <div id="podium-zone"></div>
     
@@ -143,7 +169,11 @@
 
     <div id="screen-buzzer" class="screen">
         <div style="flex:1; display:flex; align-items:center;">
-            <button class="buzzer" id="btn-buzz" onpointerdown="onBuzzerClick(event)">
+            <button class="buzzer" id="btn-buzz" 
+                onmousedown="handlePress(event)" 
+                onmouseup="handleRelease(event)" 
+                ontouchstart="handlePress(event)" 
+                ontouchend="handleRelease(event)">
                 <div id="buzzer-img-placeholder"></div>
                 <span id="label" class="buzzer-label">ATTENDEZ</span>
             </button>
@@ -152,7 +182,7 @@
         <button class="btn-exit" style="width:40px; height:40px; border-radius:50%; background:red; color:white; border:none; margin-top:10px;" onclick="leaveGame()">×</button>
     </div>
 
-    <audio id="sound-click" src="https://actions.google.com/sounds/v1/ui/pop.ogg" preload="auto"></audio>
+    <audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3" preload="auto"></audio>
     <audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/2831/2831-preview.mp3" preload="auto"></audio>
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
@@ -434,40 +464,53 @@
             roomRef.child('scores/' + activePseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
             roomRef.child('scores/' + activePseudo).on('value', snap => { const d = snap.val(); if(d) { userTeamName = d.teamName || "Solo"; userTeamIcon = d.teamIcon || ""; updateTeamDisplay(userTeamName, userTeamIcon); } });
             roomRef.child('gameState').on('value', snap => { if(snap.val() && snap.val().status === 'endGame') handleEndGame(); else { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); } });
-            roomRef.child('buzzers').on('value', snap => { const val = snap.val(); if (val && val.pseudo === activePseudo && currentWinner !== activePseudo) document.getElementById('sound-win').play().catch(()=>{}); currentWinner = val ? val.pseudo : null; updateUI(); });
+            roomRef.child('buzzers').on('value', snap => { const val = snap.val(); if (val && val.pseudo === activePseudo && currentWinner !== activePseudo) { document.getElementById('sound-win').play().catch(()=>{}); if(navigator.vibrate) navigator.vibrate([100,50,100]); } currentWinner = val ? val.pseudo : null; updateUI(); });
             roomRef.child('scores/' + activePseudo + '/kicked').on('value', snap => { if(snap.exists() && snap.val() === true) { alert("Vous avez été expulsé de la partie par le MJ."); window.location.href = mjRedirectUrl; } });
             roomRef.child('blockedPlayers/' + activePseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
 
-        // --- MODIFICATION ICI : TRANSACTION ANTI-CONFLIT ---
-        function onBuzzerClick(event) {
-            if(event) event.preventDefault();
-            document.getElementById('sound-click').play().catch(()=>{});
+        // --- NOUVELLE GESTION DU CLIC : SON + VIBREUR + LOGIQUE ---
+        function handlePress(e) {
+            if(e.cancelable) e.preventDefault(); // Empêche zoom
             
-            if(gameState === "ready" && !currentWinner && !isBlocked) {
-                // Utilisation d'une transaction pour garantir l'unicité
-                roomRef.child('buzzers').transaction(function(currentData) {
-                    if (currentData === null) {
-                        // La place est libre, on la prend !
-                        return { 
-                            pseudo: activePseudo, 
-                            avatar: selectedAvatar, 
-                            teamName: userTeamName, 
-                            teamIcon: userTeamIcon 
-                        };
-                    } else {
-                        // Déjà pris, on annule la transaction
-                        return; 
-                    }
-                }, function(error, committed, snapshot) {
-                    if (committed) {
-                        // Si la transaction a réussi, on met à jour l'état du jeu pour info
-                        roomRef.child('gameState').update({ status: 'taken' });
-                    } else {
-                        console.log("Tentative de buzzer échouée : quelqu'un a été plus rapide.");
-                    }
-                });
+            // 1. Si joueur bloqué (MJ ou déjà un gagnant) -> Bouton Inerte
+            if(isBlocked || currentWinner) return;
+
+            // 2. Feedback sensoriel (Joue en Rouge ET en Vert)
+            const btn = document.getElementById('btn-buzz');
+            btn.classList.add('buzzer-pressed'); // Effet 3D
+            document.getElementById('sound-click').play().catch(()=>{}); // Son mécanique
+            if(navigator.vibrate) navigator.vibrate(50); // Vibration courte
+
+            // 3. Logique Serveur (Seulement en Vert)
+            if(gameState === 'ready') {
+                onBuzzerClick();
             }
+        }
+
+        function handleRelease(e) {
+            if(e.cancelable) e.preventDefault();
+            document.getElementById('btn-buzz').classList.remove('buzzer-pressed');
+        }
+
+        // TRANSACTION ANTI-CONFLIT
+        function onBuzzerClick() {
+            roomRef.child('buzzers').transaction(function(currentData) {
+                if (currentData === null) {
+                    return { 
+                        pseudo: activePseudo, 
+                        avatar: selectedAvatar, 
+                        teamName: userTeamName, 
+                        teamIcon: userTeamIcon 
+                    };
+                } else {
+                    return; // Déjà pris
+                }
+            }, function(error, committed, snapshot) {
+                if (committed) {
+                    roomRef.child('gameState').update({ status: 'taken' });
+                }
+            });
         }
 
         function updateUI() {
