@@ -68,7 +68,7 @@
 </head>
 <body>
     
-    <div class="version-tag">v1.033</div>
+    <div class="version-tag">v1.049</div>
 
     <div id="podium-zone"></div>
     
@@ -260,14 +260,10 @@
                 } else {
                     const icon = selectedTeamCrest || defaultTeamCrests[0];
                     roomRef.child('teams/' + teamName).set({ icon: icon }).then(() => {
-                        // SUCCÈS
                         userTeamName = teamName; userTeamIcon = icon;
                         updateTeamDisplay(userTeamName, userTeamIcon);
-
                         document.getElementById('new-team-name').value = "";
                         switchTeamTab('join');
-
-                        // Force Select
                         setTimeout(() => {
                             const select = document.getElementById('select-team');
                             for (let i = 0; i < select.options.length; i++) {
@@ -275,9 +271,7 @@
                             }
                             btn.innerText = oldText; btn.disabled = false;
                         }, 500);
-
                     }).catch(err => {
-                        // ERREUR ECRITURE
                         alert("Erreur lors de la création : " + err.message);
                         btn.innerText = oldText; btn.disabled = false;
                     });
@@ -445,12 +439,34 @@
             roomRef.child('blockedPlayers/' + activePseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
 
+        // --- MODIFICATION ICI : TRANSACTION ANTI-CONFLIT ---
         function onBuzzerClick(event) {
             if(event) event.preventDefault();
             document.getElementById('sound-click').play().catch(()=>{});
+            
             if(gameState === "ready" && !currentWinner && !isBlocked) {
-                roomRef.child('gameState').update({ status: 'taken' });
-                roomRef.child('buzzers').set({ pseudo: activePseudo, avatar: selectedAvatar, teamName: userTeamName, teamIcon: userTeamIcon });
+                // Utilisation d'une transaction pour garantir l'unicité
+                roomRef.child('buzzers').transaction(function(currentData) {
+                    if (currentData === null) {
+                        // La place est libre, on la prend !
+                        return { 
+                            pseudo: activePseudo, 
+                            avatar: selectedAvatar, 
+                            teamName: userTeamName, 
+                            teamIcon: userTeamIcon 
+                        };
+                    } else {
+                        // Déjà pris, on annule la transaction
+                        return; 
+                    }
+                }, function(error, committed, snapshot) {
+                    if (committed) {
+                        // Si la transaction a réussi, on met à jour l'état du jeu pour info
+                        roomRef.child('gameState').update({ status: 'taken' });
+                    } else {
+                        console.log("Tentative de buzzer échouée : quelqu'un a été plus rapide.");
+                    }
+                });
             }
         }
 
