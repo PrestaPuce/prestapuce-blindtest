@@ -94,7 +94,7 @@
 </head>
 <body>
     
-    <div class="version-tag">v1.051</div>
+    <div class="version-tag">v1.054</div>
 
     <div id="podium-zone"></div>
     
@@ -182,8 +182,9 @@
         <button class="btn-exit" style="width:40px; height:40px; border-radius:50%; background:red; color:white; border:none; margin-top:10px;" onclick="leaveGame()">×</button>
     </div>
 
-    <audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3" preload="auto"></audio>
-    <audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/2831/2831-preview.mp3" preload="auto"></audio>
+    <audio id="sound-click" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/BUZZER.WAV?alt=media&token=43ced984-3c6a-4167-b0dc-4cd97d7760dd" preload="auto"></audio>
+    <audio id="sound-win" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Buzzer%20champion.mp3?alt=media&token=8425ad5e-69a3-4a57-966e-58df8ff39701" preload="auto"></audio>
+    
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
@@ -212,6 +213,14 @@
             if(r) { document.getElementById('room-code-input').value = r; validateRoom(); }
             renderAvatarGrid();
             renderTeamCrestPicker();
+
+            // LISTENERS TOUCHE ENTREE
+            document.getElementById('room-code-input').addEventListener('keydown', (e) => {
+                if(e.key === 'Enter') validateRoom();
+            });
+            document.getElementById('input-pseudo').addEventListener('keydown', (e) => {
+                if(e.key === 'Enter') checkPseudo();
+            });
         };
 
         function validateRoom() {
@@ -464,14 +473,25 @@
             roomRef.child('scores/' + activePseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
             roomRef.child('scores/' + activePseudo).on('value', snap => { const d = snap.val(); if(d) { userTeamName = d.teamName || "Solo"; userTeamIcon = d.teamIcon || ""; updateTeamDisplay(userTeamName, userTeamIcon); } });
             roomRef.child('gameState').on('value', snap => { if(snap.val() && snap.val().status === 'endGame') handleEndGame(); else { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); } });
-            roomRef.child('buzzers').on('value', snap => { const val = snap.val(); if (val && val.pseudo === activePseudo && currentWinner !== activePseudo) { document.getElementById('sound-win').play().catch(()=>{}); if(navigator.vibrate) navigator.vibrate([100,50,100]); } currentWinner = val ? val.pseudo : null; updateUI(); });
+            
+            // LOGIQUE WINNER : SON VICTOIRE + VIBREUR LONG
+            roomRef.child('buzzers').on('value', snap => { 
+                const val = snap.val(); 
+                if (val && val.pseudo === activePseudo && currentWinner !== activePseudo) { 
+                    document.getElementById('sound-win').play().catch(()=>{}); 
+                    if(navigator.vibrate) navigator.vibrate([200, 100, 200]); // Vibration Victoire
+                } 
+                currentWinner = val ? val.pseudo : null; 
+                updateUI(); 
+            });
+            
             roomRef.child('scores/' + activePseudo + '/kicked').on('value', snap => { if(snap.exists() && snap.val() === true) { alert("Vous avez été expulsé de la partie par le MJ."); window.location.href = mjRedirectUrl; } });
             roomRef.child('blockedPlayers/' + activePseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
 
-        // --- NOUVELLE GESTION DU CLIC : SON + VIBREUR + LOGIQUE ---
+        // --- GESTION CLICK MANUELLE POUR EFFET 3D + SON CONDITIONNEL ---
         function handlePress(e) {
-            if(e.cancelable) e.preventDefault(); // Empêche zoom
+            if(e.cancelable) e.preventDefault(); // Empêche zoom ou scroll
             
             // 1. Si joueur bloqué (MJ ou déjà un gagnant) -> Bouton Inerte
             if(isBlocked || currentWinner) return;
