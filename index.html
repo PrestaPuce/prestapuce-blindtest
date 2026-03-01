@@ -94,7 +94,7 @@
 </head>
 <body>
     
-    <div class="version-tag">v1.054</div>
+    <div class="version-tag">v1.055</div>
 
     <div id="podium-zone"></div>
     
@@ -233,6 +233,7 @@
                     showScreen('screen-login');
                     document.getElementById('display-room-info').innerText = "SALLE " + roomID;
                     listenToTeams();
+                    setTimeout(() => document.getElementById('input-pseudo').focus(), 500); // Focus auto
                 } else alert("Salle introuvable !");
             });
         }
@@ -493,14 +494,17 @@
         function handlePress(e) {
             if(e.cancelable) e.preventDefault(); // Empêche zoom ou scroll
             
-            // 1. Si joueur bloqué (MJ ou déjà un gagnant) -> Bouton Inerte
             if(isBlocked || currentWinner) return;
 
-            // 2. Feedback sensoriel (Joue en Rouge ET en Vert)
+            // 2. Feedback sensoriel (Joue SEULEMENT en Rouge)
             const btn = document.getElementById('btn-buzz');
             btn.classList.add('buzzer-pressed'); // Effet 3D
-            document.getElementById('sound-click').play().catch(()=>{}); // Son mécanique
             if(navigator.vibrate) navigator.vibrate(50); // Vibration courte
+
+            if(gameState === 'waiting') {
+                // En rouge (Attente), on joue le clic (défouloir)
+                document.getElementById('sound-click').play().catch(()=>{});
+            }
 
             // 3. Logique Serveur (Seulement en Vert)
             if(gameState === 'ready') {
@@ -529,6 +533,10 @@
             }, function(error, committed, snapshot) {
                 if (committed) {
                     roomRef.child('gameState').update({ status: 'taken' });
+                    // GAGNÉ : Le listener 'buzzers' va jouer le son WIN
+                } else {
+                    // PERDU (Trop tard) : On joue le son CLIC pour confirmer l'appui raté
+                    document.getElementById('sound-click').play().catch(()=>{});
                 }
             });
         }
