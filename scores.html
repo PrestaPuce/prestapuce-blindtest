@@ -12,14 +12,15 @@
         :root { --bg-color: #1a1a1a; --accent: #f1c40f; --card-bg: rgba(44, 62, 80, 0.7); --gold: #f1c40f; --silver: #bdc3c7; --bronze: #cd7f32; }
         body { margin: 0; padding: 5px; font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at center, #2c3e50 0%, #1a1a1a 100%); color: white; height: 100vh; overflow: hidden; box-sizing: border-box; }
         
-        /* HEADER - Titre Centré */
+        /* HEADER COMPACT */
+        /* Réduit pour que la grille remonte */
         header { 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            height: 90px; /* Hauteur réservée pour le bandeau du haut */
+            height: 75px; 
             position: relative;
-            margin-bottom: 5px;
+            margin-bottom: 0; /* Pas de marge sous le header */
         }
 
         /* BLOC TITRE */
@@ -31,7 +32,7 @@
             padding: 5px 25px;
             border-radius: 50px;
             border: 1px solid rgba(241, 196, 15, 0.3);
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
         .title-group { display: flex; flex-direction: column; align-items: center; line-height: 1; }
@@ -40,15 +41,15 @@
         .version-text { font-size: 0.65rem; color: rgba(255,255,255,0.4); font-family: monospace; margin-top: 3px; }
         #display-mj-logo { width: 45px; height: 45px; object-fit: contain; border-radius: 6px; }
         
-        /* QR CODE - FIXE HAUT GAUCHE - TAILLE v1.033 */
+        /* QR CODE - REMONTÉ LÉGÈREMENT */
         #qr-box { 
-            position: fixed; top: 10px; left: 10px; background: white; padding: 5px; 
+            position: fixed; top: 5px; left: 10px; background: white; padding: 5px; 
             border-radius: 6px; text-align: center; color: black; z-index: 1000;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5); transform-origin: top left; transition: transform 0.2s;
         }
         #qr-box:hover { transform: scale(1.1); }
 
-        /* BOUTON PLEIN ÉCRAN - INCHANGÉ (Discret Top Droite) */
+        /* BOUTON PLEIN ÉCRAN - STRICTEMENT INCHANGÉ */
         #btn-fullscreen {
             position: fixed; top: 10px; right: 10px; z-index: 2000;
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
@@ -61,10 +62,10 @@
         #btn-fullscreen svg { width: 18px; height: 18px; fill: currentColor; }
         .hide-ui { opacity: 0 !important; pointer-events: none; }
 
-        /* BOUTON HALL OF FAME - ALIGNÉ SUR LE BAS DU QR CODE */
+        /* BOUTON HALL OF FAME - ALIGNÉ AVEC LE BAS DU QR CODE */
         #btn-hof { 
             position: fixed; 
-            top: 85px; /* Calculé pour s'aligner avec le bas du QR Code (10px marge + 80px QR + padding) */
+            top: 75px; /* Ajusté pour coller visuellement au bas du QR Code */
             right: 15px;
             background: rgba(0,0,0,0.5); 
             border: 1px solid var(--accent); 
@@ -79,18 +80,19 @@
         }
         #btn-hof:hover { background: var(--accent); color: black; }
 
-        /* GRILLE PRINCIPALE - COLLÉE AU RESTE */
+        /* GRILLE PRINCIPALE - REMONTÉE AU MAXIMUM */
         .main-container { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
             gap: 20px; 
-            /* Hauteur calculée pour coller juste sous le QR/HoF (~115px du haut) */
-            height: calc(100vh - 120px); 
+            height: calc(100vh - 85px); /* Utilise tout l'espace restant */
             padding: 0 10px; 
-            margin-top: 15px; 
+            margin-top: 5px; /* Espace minimal avec le header/QR */
         }
         
         .column-wrapper { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        
+        /* LIGNE DE SÉPARATION */
         .column-title { 
             text-align: center; font-size: 1.1rem; color: var(--accent); text-transform: uppercase; 
             margin-bottom: 5px; border-bottom: 1px solid rgba(241, 196, 15, 0.5); 
@@ -167,7 +169,7 @@
             </a>
             <div class="title-group">
                 <h1>SALLE : <span id="room-title" class="room-highlight">----</span></h1>
-                <div class="version-text">v1.045</div>
+                <div class="version-text">v1.047</div>
             </div>
         </div>
     </header>
