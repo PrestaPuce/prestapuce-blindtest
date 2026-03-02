@@ -128,7 +128,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.065</div>
+    <div class="version-tag">v1.066</div>
 
     <div class="wizard-container">
 
@@ -179,7 +179,7 @@
                     <div class="choice-icon">🦁</div>
                     <div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div>
                 </div>
-                <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
+                <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
             </div>
             <div id="avatar-gallery-view" class="gallery-container">
                 <div class="avatar-grid" id="avatar-grid"></div>
@@ -225,7 +225,7 @@
                     <div class="choice-icon" style="font-size:2rem;">🛡️</div>
                     <div class="choice-content"><b style="font-size:1.1rem;">Galerie Blasons</b></div>
                 </div>
-                <input type="file" id="team-file-input" accept="image/*" style="display:none" onchange="handleTeamFileUpload(this)">
+                <input type="file" id="team-file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleTeamFileUpload(this)">
             </div>
 
             <div id="team-crest-gallery" class="gallery-container">
@@ -352,7 +352,7 @@
         let player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let selectedTeamCrest = "";
-        let isEditing = false; // MODE MODIFICATION
+        let isEditing = false;
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -405,7 +405,6 @@
             const val = document.getElementById('input-pseudo').value.trim();
             if(val.length < 2) return alert("Pseudo trop court !");
             
-            // Si édition de pseudo, on renomme en base
             if(isEditing) {
                 if(val === player.pseudo) { finishEdit(); return; }
                 roomRef.child('scores/' + val).once('value', snap => {
@@ -422,7 +421,6 @@
                 return;
             }
 
-            // Si inscription
             roomRef.child('scores/' + val).once('value', snap => {
                 if(snap.exists()) {
                     if(snap.val().kicked) return alert("Banni.");
@@ -442,7 +440,6 @@
             });
         }
 
-        // --- AVATAR ---
         function showAvatarGallery() { document.getElementById('avatar-choices').style.display = 'none'; document.getElementById('avatar-gallery-view').style.display = 'flex'; }
         function hideAvatarGallery() { document.getElementById('avatar-gallery-view').style.display = 'none'; document.getElementById('avatar-choices').style.display = 'flex'; }
         function handleFileUpload(input) { if(input.files && input.files[0]) { const reader=new FileReader(); reader.onload=function(e){selectAvatar(e.target.result)}; reader.readAsDataURL(input.files[0]); } }
@@ -456,7 +453,6 @@
             } else nextStep('step-mode'); 
         }
 
-        // --- MODE / TEAMS ---
         function selectMode(mode) {
             player.team = mode; player.teamIcon = "";
             if(isEditing) {
@@ -468,16 +464,8 @@
         }
 
         function goToTeamAction() { nextStep('step-team-action'); }
-        
-        function goToTeamCreate() {
-            toggleCreateUI(true); // Reset UI
-            nextStep('step-team-create');
-        }
-
-        function goToTeamJoin() {
-            nextStep('step-team-join');
-            loadTeamsList();
-        }
+        function goToTeamCreate() { toggleCreateUI(true); nextStep('step-team-create'); }
+        function goToTeamJoin() { nextStep('step-team-join'); loadTeamsList(); }
 
         function loadTeamsList() {
             roomRef.child('teams').once('value', snap => {
@@ -522,22 +510,16 @@
             roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); });
         }
 
-        // --- SETTINGS (EDITION) ---
         function openSettings() { document.getElementById('overlay-settings').style.display = 'flex'; }
         function editStep(stepId) {
             isEditing = true;
             document.getElementById('overlay-settings').style.display = 'none';
-            // Preremplissage si besoin
             if(stepId === 'step-pseudo') document.getElementById('input-pseudo').value = player.pseudo;
             nextStep(stepId);
         }
-        function finishEdit() {
-            isEditing = false;
-            launchGame(true); // Re-render game ui
-        }
+        function finishEdit() { isEditing = false; launchGame(true); }
         function saveProgress() { alert("Fonctionnalité 'Compte Joueur' bientôt disponible !"); }
 
-        // --- RECAP & GAME ---
         function showRecap() {
             nextStep('step-recap');
             document.getElementById('recap-name').innerText = player.pseudo;
@@ -553,7 +535,6 @@
                 roomRef.child('scores/' + player.pseudo).set({ pts: 0, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon, active: true, kicked: false });
                 localStorage.setItem('presta_player_' + roomID, JSON.stringify(player));
             }
-            // Update UI Header
             const miniAv = document.getElementById('game-avatar');
             if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
             else miniAv.innerText = player.avatar;
@@ -561,12 +542,10 @@
             document.getElementById('game-team').innerText = player.team;
             const buzzerBg = document.getElementById('buzzer-bg');
             if(player.avatar.length > 20) { buzzerBg.src = player.avatar; buzzerBg.style.display = "block"; } else { buzzerBg.style.display = "none"; }
-            
             nextStep('step-game');
             startBuzzer();
         }
 
-        // --- MOTEUR JEU ---
         function startBuzzer() {
             roomRef.child('buzzers').off(); roomRef.child('gameState').off(); roomRef.child('scores/'+player.pseudo).off();
             roomRef.child('scores/' + player.pseudo).on('value', snap => {
