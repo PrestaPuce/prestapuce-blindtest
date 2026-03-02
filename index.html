@@ -13,98 +13,58 @@
         :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; --grey: #7f8c8d; }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
         
-        /* --- STRUCTURE SANDWICH (ADAPTATIVE) --- */
+        /* --- STRUCTURE SANDWICH --- */
         .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-        
-        .step-screen { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            display: none; flex-direction: column; align-items: center; 
-            background: var(--bg); z-index: 10;
-        }
+        .step-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; background: var(--bg); z-index: 10; }
         .step-screen.active { display: flex; }
 
         /* ZONES */
         .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
-        
-        /* CONTENU : Centré par défaut, Scrollable si besoin */
-        .screen-content { 
-            flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; 
-            display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; /* ALIGNEMENT CENTRAL PAR DÉFAUT */
-        }
-        /* Classe pour aligner en HAUT (Listes, Galeries) */
-        .content-top { justify-content: flex-start !important; }
-
+        .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .content-top { justify-content: flex-start !important; } /* Pour les listes */
         .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 30px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 85%, transparent); z-index: 20; }
 
-        /* --- TYPO FLUIDE --- */
+        /* TYPO FLUIDE */
         h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
         h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin: 0 0 15px 0; font-weight: normal; color: white; }
         p.desc { font-size: clamp(0.9rem, 3.5vw, 1.1rem); color: #bdc3c7; margin-bottom: 20px; line-height: 1.5; max-width: 500px; font-weight: 500; }
         
-        /* --- INPUTS & BOUTONS --- */
-        input[type="text"], input[type="number"] { 
-            width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); 
-            background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px;
-        }
+        /* INPUTS & BOUTONS */
+        input[type="text"], input[type="number"] { width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px; }
         input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
-
-        .btn-main { 
-            background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; 
-            font-size: clamp(1rem, 4vw, 1.3rem); font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); 
-            transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 350px;
-        }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: clamp(1rem, 4vw, 1.3rem); font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 350px; }
         .btn-main:active { transform: scale(0.95); }
         .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; }
 
-        /* --- NAVIGATION --- */
-        #btn-back-global {
-            position: absolute; top: 15px; left: 15px; z-index: 500;
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1); color: white;
-            display: none; align-items: center; justify-content: center;
-            cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
-            transition: 0.2s; backdrop-filter: blur(5px);
-        }
-        #btn-back-global svg { width: 22px; height: 22px; fill: white; margin-right: 2px; /* leger ajustement optique */ }
+        /* NAVIGATION */
+        #btn-back-global { position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); transition: 0.2s; backdrop-filter: blur(5px); }
+        #btn-back-global svg { width: 22px; height: 22px; fill: white; margin-right: 2px; }
         #btn-back-global:active { background: rgba(255, 255, 255, 0.3); transform: scale(0.9); }
 
-        /* --- CARDS (MENU) --- */
-        .choice-card {
-            background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; width: 100%; max-width: 350px;
-            cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; text-align: left;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); box-sizing: border-box;
-        }
+        /* CARDS */
+        .choice-card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; width: 100%; max-width: 350px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.2); box-sizing: border-box; }
         .choice-card:active { transform: scale(0.98); background: rgba(255,255,255,0.1); border-color: var(--accent); }
         .choice-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
         .choice-content b { display: block; font-size: 1.1rem; margin-bottom: 3px; color: white; }
         .choice-content span { font-size: 0.85rem; color: #bdc3c7; }
 
-        /* --- GALERIES --- */
+        /* GALERIES & GRIDS */
         .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; justify-content: flex-start; }
-
-        /* Grille commune (Avatar & Blasons) */
+        
         .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
-        .grid-item { 
-            aspect-ratio: 1/1; background: rgba(255,255,255,0.1); border-radius: 12px; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; 
-            overflow: hidden; padding: 5px; box-sizing: border-box;
-        }
+        .grid-item { aspect-ratio: 1/1; background: rgba(255,255,255,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; padding: 5px; box-sizing: border-box; }
         .grid-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
-        .grid-item img { width: 100%; height: 100%; object-fit: contain; }
-        .grid-item-emoji { font-size: clamp(1.8rem, 7vw, 2.5rem); }
+        .grid-item img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); } /* Ombre portée pour les blasons */
+        .grid-item-emoji { font-size: clamp(1.8rem, 7vw, 2.5rem); padding: 0; }
 
-        /* --- TEAM LIST (COMPACTE) --- */
+        /* LISTE EQUIPES */
         .team-list-container { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
-        .team-card { 
-            background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; 
-            display: flex; align-items: center; cursor: pointer; border: 2px solid transparent; 
-        }
+        .team-card { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; display: flex; align-items: center; cursor: pointer; border: 2px solid transparent; }
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: white; padding: 2px; border-radius: 6px; }
         .team-card b { font-size: 1rem; }
 
-        /* --- TUTO LIST --- */
+        /* TUTO */
         .tuto-list { text-align: left; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
         .tuto-item { display: flex; align-items: flex-start; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; }
         .dot { width: 18px; height: 18px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; margin-top: 3px; }
@@ -114,29 +74,17 @@
         .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
         .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
 
-        /* --- HEADER JEU (ANTI-COLLISION) --- */
-        .game-header { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 60px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 0 15px; box-sizing: border-box; z-index: 100; 
-            background: rgba(0,0,0,0.3);
-        }
+        /* HEADER JEU */
+        .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
         .mini-profile { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; margin-right: 10px; }
-        .mini-avatar { 
-            width: 40px; height: 40px; flex-shrink: 0; background: #333; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); 
-        }
+        .mini-avatar { width: 40px; height: 40px; flex-shrink: 0; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
         .mini-info { line-height: 1.1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
 
-        /* --- BUZZER --- */
+        /* BUZZER */
         .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 60px; }
-        .buzzer { 
-            width: 65vw; height: 65vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; 
-            background: #e74c3c; box-shadow: 0 15px 0 #c0392b, 0 20px 40px rgba(0,0,0,0.4); 
-            display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.1s; cursor: pointer;
-        }
+        .buzzer { width: 65vw; height: 65vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; background: #e74c3c; box-shadow: 0 15px 0 #c0392b, 0 20px 40px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.1s; cursor: pointer; }
         .buzzer.buzzer-pressed { transform: translateY(15px); box-shadow: 0 0 0 #c0392b; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
         .ready .buzzer.buzzer-pressed { box-shadow: 0 0 0 #27ae60; }
@@ -145,25 +93,21 @@
         .buzzer-label { font-size: clamp(1.2rem, 5vw, 1.8rem); font-weight: bold; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; z-index: 2; position: relative; }
         .buzzer-img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; border-radius: 50%; pointer-events: none; }
 
-        /* --- OVERLAYS --- */
+        /* OVERLAYS */
         .overlay-full { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; padding: 20px; box-sizing: border-box; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
         .qr-card, .settings-content { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 320px; box-sizing: border-box; }
         .settings-btn { display: block; width: 100%; padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: white; font-size: 1rem; cursor: pointer; text-align: left; transition: 0.2s; }
         .settings-btn:hover { background: rgba(255,255,255,0.2); }
-
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.070</div>
+    <div class="version-tag">v1.071</div>
 
     <div class="wizard-container">
-        <div id="btn-back-global" onclick="goBack()">
-            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-        </div>
+        <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
 
         <div id="step-room" class="step-screen active">
             <div class="screen-content">
@@ -186,18 +130,9 @@
         <div id="step-auth" class="step-screen">
             <div class="screen-header"><h2>Que veux-tu faire ?</h2></div>
             <div class="screen-content">
-                <div class="choice-card" onclick="navigateTo('step-pseudo')">
-                    <div class="choice-icon">⚡</div>
-                    <div class="choice-content"><b>Partie Rapide</b><span>Accès invité immédiat.</span></div>
-                </div>
-                <div class="choice-card" onclick="navigateTo('step-pseudo')">
-                    <div class="choice-icon">🔐</div>
-                    <div class="choice-content"><b>Se Connecter</b><span>Récupère ton historique.</span></div>
-                </div>
-                <div class="choice-card" onclick="navigateTo('step-pseudo')">
-                    <div class="choice-icon">✨</div>
-                    <div class="choice-content"><b>Créer un Compte</b><span>Sauvegarde tes scores.</span></div>
-                </div>
+                <div class="choice-card" onclick="navigateTo('step-pseudo')"><div class="choice-icon">⚡</div><div class="choice-content"><b>Partie Rapide</b><span>Accès invité immédiat.</span></div></div>
+                <div class="choice-card" onclick="navigateTo('step-pseudo')"><div class="choice-icon">🔐</div><div class="choice-content"><b>Se Connecter</b><span>Récupère ton historique.</span></div></div>
+                <div class="choice-card" onclick="navigateTo('step-pseudo')"><div class="choice-icon">✨</div><div class="choice-content"><b>Créer un Compte</b><span>Sauvegarde tes scores.</span></div></div>
             </div>
         </div>
 
@@ -211,18 +146,12 @@
 
         <div id="step-avatar" class="step-screen">
             <div class="screen-header"><h2>Ton Look</h2></div>
-            <div class="screen-content content-top"> <div id="avatar-choices" class="selection-mode-container" style="flex:1;">
-                    <div class="choice-card" onclick="document.getElementById('file-input').click()">
-                        <div class="choice-icon">📸</div>
-                        <div class="choice-content"><b>Photo / Selfie</b><span>Ou choisir une image.</span></div>
-                    </div>
-                    <div class="choice-card" onclick="showAvatarGallery()">
-                        <div class="choice-icon">🦁</div>
-                        <div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div>
-                    </div>
+            <div class="screen-content content-top">
+                <div id="avatar-choices" class="selection-mode-container" style="flex:1;">
+                    <div class="choice-card" onclick="document.getElementById('file-input').click()"><div class="choice-icon">📸</div><div class="choice-content"><b>Photo / Selfie</b><span>Ou choisir une image.</span></div></div>
+                    <div class="choice-card" onclick="showAvatarGallery()"><div class="choice-icon">🦁</div><div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div></div>
                     <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
                 </div>
-                
                 <div id="avatar-gallery-view" class="gallery-container">
                     <div class="common-grid" id="avatar-grid"></div>
                 </div>
@@ -232,28 +161,16 @@
         <div id="step-mode" class="step-screen">
             <div class="screen-header"><h2>Ta Stratégie ?</h2></div>
             <div class="screen-content">
-                <div class="choice-card" onclick="selectMode('Solo')">
-                    <div class="choice-icon">👤</div>
-                    <div class="choice-content"><b>Loup Solitaire</b><span>Je joue pour ma gloire.</span></div>
-                </div>
-                <div class="choice-card" onclick="goToTeamAction()">
-                    <div class="choice-icon">🛡️</div>
-                    <div class="choice-content"><b>En Équipe</b><span>On gagne ensemble.</span></div>
-                </div>
+                <div class="choice-card" onclick="selectMode('Solo')"><div class="choice-icon">👤</div><div class="choice-content"><b>Loup Solitaire</b><span>Je joue pour ma gloire.</span></div></div>
+                <div class="choice-card" onclick="goToTeamAction()"><div class="choice-icon">🛡️</div><div class="choice-content"><b>En Équipe</b><span>On gagne ensemble.</span></div></div>
             </div>
         </div>
 
         <div id="step-team-action" class="step-screen">
             <div class="screen-header"><h2>Gestion d'Équipe</h2></div>
             <div class="screen-content">
-                <div class="choice-card" onclick="goToTeamCreate()">
-                    <div class="choice-icon">✨</div>
-                    <div class="choice-content"><b>Créer une Équipe</b><span>Je suis le Capitaine.</span></div>
-                </div>
-                <div class="choice-card" onclick="goToTeamJoin()">
-                    <div class="choice-icon">🤝</div>
-                    <div class="choice-content"><b>Rejoindre une Équipe</b><span>Je suis un Membre.</span></div>
-                </div>
+                <div class="choice-card" onclick="goToTeamCreate()"><div class="choice-icon">✨</div><div class="choice-content"><b>Créer une Équipe</b><span>Je suis le Capitaine.</span></div></div>
+                <div class="choice-card" onclick="goToTeamJoin()"><div class="choice-icon">🤝</div><div class="choice-content"><b>Rejoindre une Équipe</b><span>Je suis un Membre.</span></div></div>
             </div>
         </div>
 
@@ -261,24 +178,15 @@
             <div class="screen-header"><h2>Créer ton Clan</h2></div>
             <div class="screen-content content-top">
                 <input type="text" id="new-team-name" placeholder="Nom de l'équipe">
-                
                 <div id="team-crest-choices" class="selection-mode-container" style="margin-top:20px; width:100%;">
-                    <div class="choice-card" onclick="document.getElementById('team-file-input').click()">
-                        <div class="choice-icon">📤</div>
-                        <div class="choice-content"><b>Uploader Blason</b><span>Image perso.</span></div>
-                    </div>
-                    <div class="choice-card" onclick="showTeamGallery()">
-                        <div class="choice-icon">🛡️</div>
-                        <div class="choice-content"><b>Galerie Blasons</b><span>Choisis un écusson.</span></div>
-                    </div>
+                    <div class="choice-card" onclick="document.getElementById('team-file-input').click()"><div class="choice-icon">📤</div><div class="choice-content"><b>Uploader Blason</b><span>Image perso.</span></div></div>
+                    <div class="choice-card" onclick="showTeamGallery()"><div class="choice-icon">🛡️</div><div class="choice-content"><b>Galerie Blasons</b><span>Choisis un écusson.</span></div></div>
                     <input type="file" id="team-file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleTeamFileUpload(this)">
                 </div>
-
                 <div id="team-crest-gallery" class="gallery-container" style="width:100%;">
                     <p style="margin-bottom:10px;">Choisis ton Blason :</p>
                     <div class="common-grid" id="team-icon-grid"></div>
                 </div>
-
                 <div id="team-preview" style="display:none; align-items:center; justify-content:center; gap:15px; margin:20px 0;">
                     <img id="team-preview-img" style="width:60px; height:60px; object-fit:contain; background:white; border-radius:10px; padding:2px;">
                     <span style="color:var(--success); font-weight:bold;">Image OK !</span>
@@ -313,26 +221,14 @@
             <div class="screen-header"><h2>COMMENT JOUER ?</h2></div>
             <div class="screen-content">
                 <div class="tuto-list">
-                    <div class="tuto-item">
-                        <div class="dot red"></div>
-                        <div class="tuto-text"><b style="color:#e74c3c;">EN ATTENTE</b><span>Attendez que l'animateur active les buzzers au début de chaque titre.</span></div>
-                    </div>
-                    <div class="tuto-item">
-                        <div class="dot green"></div>
-                        <div class="tuto-text"><b style="color:#2ecc71;">C'EST PARTI !</b><span>Soyez le plus rapide pour buzzer !</span></div>
-                    </div>
-                    <div class="tuto-item">
-                        <div class="dot grey"></div>
-                        <div class="tuto-text"><b style="color:#95a5a6;">BLOQUÉ</b><span>Vous avez déjà joué ou fait une erreur. Attendez le prochain titre.</span></div>
-                    </div>
-                    <div class="tuto-item">
-                        <div class="dot grey"></div>
-                        <div class="tuto-text"><b style="color:#95a5a6;">OCCUPÉ</b><span>Trop tard ! Un autre joueur a été plus rapide que toi.</span></div>
-                    </div>
+                    <div class="tuto-item"><div class="dot red"></div><div class="tuto-text"><b style="color:#e74c3c;">EN ATTENTE</b><span>Attendez que l'animateur active les buzzers.</span></div></div>
+                    <div class="tuto-item"><div class="dot green"></div><div class="tuto-text"><b style="color:#2ecc71;">C'EST PARTI !</b><span>Soyez le plus rapide pour buzzer !</span></div></div>
+                    <div class="tuto-item"><div class="dot grey"></div><div class="tuto-text"><b style="color:#95a5a6;">BLOQUÉ</b><span>Vous avez déjà joué ou fait une erreur.</span></div></div>
+                    <div class="tuto-item"><div class="dot grey"></div><div class="tuto-text"><b style="color:#95a5a6;">OCCUPÉ</b><span>Trop tard ! Un autre joueur a été plus rapide.</span></div></div>
                 </div>
             </div>
             <div class="screen-footer">
-                <p class="desc" style="font-size:0.9rem; margin-bottom:15px;">Une question ? N'hésite pas à faire signe à l'animateur !</p>
+                <p class="desc" style="font-size:0.9rem; margin-bottom:15px;">Une question ? Demandez à l'animateur !</p>
                 <button class="btn-main" onclick="launchGame()">C'EST PARTI ! 🚀</button>
             </div>
         </div>
@@ -341,15 +237,12 @@
             <div class="game-header">
                 <div class="mini-profile">
                     <div class="mini-avatar" id="game-avatar"></div>
-                    <div class="mini-info">
-                        <b id="game-pseudo">Joueur</b><br>
-                        <span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span>
-                    </div>
+                    <div class="mini-info"><b id="game-pseudo">Joueur</b><br><span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span></div>
                 </div>
                 <div class="header-actions">
-                    <div class="icon-btn" onclick="openSettings()" title="Paramètres">⚙️</div>
-                    <div class="icon-btn" onclick="showShare()" title="Partager">🔗</div>
-                    <div class="icon-btn" onclick="showQR()" title="QR Code">📱</div>
+                    <div class="icon-btn" onclick="openSettings()">⚙️</div>
+                    <div class="icon-btn" onclick="showShare()">🔗</div>
+                    <div class="icon-btn" onclick="showQR()">📱</div>
                     <div class="icon-btn" onclick="confirmQuit()" style="background:var(--danger);">✕</div>
                 </div>
             </div>
@@ -362,7 +255,6 @@
                 <div id="status-msg" style="margin-top:30px; color:#7f8c8d; font-style:italic; font-size:1.1rem;">En attente de l'animateur...</div>
             </div>
         </div>
-
     </div>
 
     <div id="overlay-qr" class="overlay-full" onclick="this.style.display='none'">
@@ -396,49 +288,46 @@
         </div>
     </div>
 
-    <div id="podium-zone" class="overlay-full">
-        <div id="podium-content"></div>
-        <button class="btn-main" onclick="leaveGame(true)" style="margin-top:30px;">Quitter</button>
-    </div>
+    <div id="podium-zone" class="overlay-full"><div id="podium-content"></div><button class="btn-main" onclick="leaveGame(true)" style="margin-top:30px;">Quitter</button></div>
 
     <audio id="sound-click" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/BUZZER.WAV?alt=media&token=43ced984-3c6a-4167-b0dc-4cd97d7760dd" preload="auto"></audio>
     <audio id="sound-win" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Buzzer%20champion.mp3?alt=media&token=8425ad5e-69a3-4a57-966e-58df8ff39701" preload="auto"></audio>
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        // --- DATA : 40 AVATARS & 30 BLASONS HÉRALDIQUES ---
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
+        // VRAIS BLASONS HÉRALDIQUES (Wikimedia & Sources Stables)
         const heraldicBlasons = [
-            "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", // Lion Or
-            "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", // Aigle Impérial
-            "https://cdn-icons-png.flaticon.com/512/1065/1065553.png", // Loup
-            "https://cdn-icons-png.flaticon.com/512/2608/2608354.png", // Épées Croisées
-            "https://cdn-icons-png.flaticon.com/512/3026/3026369.png", // Viking
-            "https://cdn-icons-png.flaticon.com/512/2316/2316889.png", // Dragon Vert
-            "https://cdn-icons-png.flaticon.com/512/3306/3306606.png", // Couronne
-            "https://cdn-icons-png.flaticon.com/512/862/862835.png",   // Fleur de Lys (Simulé par couronne stylisée si manquant, mais icon standard)
-            "https://cdn-icons-png.flaticon.com/512/2608/2608362.png", // Bouclier Croix Rouge
-            "https://cdn-icons-png.flaticon.com/512/2608/2608404.png", // Tour / Château
-            "https://cdn-icons-png.flaticon.com/512/2316/2316921.png", // Dragon Rouge
-            "https://cdn-icons-png.flaticon.com/512/3026/3026388.png", // Hache
-            "https://cdn-icons-png.flaticon.com/512/893/893539.png",   // Phoenix
-            "https://cdn-icons-png.flaticon.com/512/616/616659.png",   // Griffon (Aigle stylisé)
-            "https://cdn-icons-png.flaticon.com/512/2598/2598851.png", // Casque Chevalier
-            "https://cdn-icons-png.flaticon.com/512/738/738853.png",   // Licorne
-            "https://cdn-icons-png.flaticon.com/512/3466/3466107.png", // Ancre Marine
-            "https://cdn-icons-png.flaticon.com/512/2913/2913527.png", // Trèfle / Nature
-            "https://cdn-icons-png.flaticon.com/512/3418/3418886.png", // Rose
-            "https://cdn-icons-png.flaticon.com/512/1205/1205248.png", // Soleil
-            "https://cdn-icons-png.flaticon.com/512/2213/2213648.png", // Ours
-            "https://cdn-icons-png.flaticon.com/512/2275/2275143.png", // Cerf
-            "https://cdn-icons-png.flaticon.com/512/1998/1998749.png", // Taureau
-            "https://cdn-icons-png.flaticon.com/512/2293/2293026.png", // Sanglier
-            "https://cdn-icons-png.flaticon.com/512/1685/1685230.png", // Hermine (Symbole)
-            "https://cdn-icons-png.flaticon.com/512/2608/2608358.png", // Bouclier Rond Viking
-            "https://cdn-icons-png.flaticon.com/512/2608/2608373.png", // Bouclier Or
-            "https://cdn-icons-png.flaticon.com/512/3026/3026398.png", // Navire
-            "https://cdn-icons-png.flaticon.com/512/3026/3026363.png", // Clefs
-            "https://cdn-icons-png.flaticon.com/512/929/929429.png"    // Main Armure
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Blason_duch%C3%A9_fr_Aquitaine.svg/600px-Blason_duch%C3%A9_fr_Aquitaine.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Escudo_de_Castilla_S._XVI.svg/600px-Escudo_de_Castilla_S._XVI.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Blason_France_moderne.svg/600px-Blason_France_moderne.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Blason_duch%C3%A9_fr_Normandie.svg/600px-Blason_duch%C3%A9_fr_Normandie.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Blason_duch%C3%A9_fr_Bretagne.svg/600px-Blason_duch%C3%A9_fr_Bretagne.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Blason_duch%C3%A9_fr_Lorraine.svg/600px-Blason_duch%C3%A9_fr_Lorraine.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Blason_ville_fr_Toulouse_31.svg/600px-Blason_ville_fr_Toulouse_31.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Blason_ville_fr_Nice_%28Alpes-Maritimes%29.svg/600px-Blason_ville_fr_Nice_%28Alpes-Maritimes%29.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Blason_duch%C3%A9_fr_Savoie.svg/600px-Blason_duch%C3%A9_fr_Savoie.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Coat_of_arms_of_the_Kingdom_of_Scotland.svg/600px-Coat_of_arms_of_the_Kingdom_of_Scotland.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Arms_of_the_Kingdom_of_England_%281198-1340%29.svg/600px-Arms_of_the_Kingdom_of_England_%281198-1340%29.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Blason_Jean_Sans_Terre.svg/600px-Blason_Jean_Sans_Terre.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Blason_Ordre_des_Templiers.svg/600px-Blason_Ordre_des_Templiers.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Blason_ville_fr_Marseille_%28Bouches-du-Rh%C3%B4ne%29.svg/600px-Blason_ville_fr_Marseille_%28Bouches-du-Rh%C3%B4ne%29.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Blason_ville_fr_Lyon_%28Rh%C3%B4ne%29.svg/600px-Blason_ville_fr_Lyon_%28Rh%C3%B4ne%29.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Blason_ville_fr_Bordeaux_%28Gironde%29.svg/600px-Blason_ville_fr_Bordeaux_%28Gironde%29.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Blason_Vicomte_fr_Turenne.svg/600px-Blason_Vicomte_fr_Turenne.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Blason_Corse.svg/600px-Blason_Corse.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Coat_of_Arms_of_the_Knights_Hospitaller.svg/600px-Coat_of_Arms_of_the_Knights_Hospitaller.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blason_Flandre.svg/600px-Blason_Flandre.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Blason_Royaume_de_Jerusalem.svg/600px-Blason_Royaume_de_Jerusalem.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Coa_Hungary_Country_History_%281867-1890%29.svg/450px-Coa_Hungary_Country_History_%281867-1890%29.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Coa_Russia_Empire_1858_Basic.svg/600px-Coa_Russia_Empire_1858_Basic.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Red_Dragon_of_Wales_%281959%29.svg/600px-Red_Dragon_of_Wales_%281959%29.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Imperial_Coat_of_Arms_of_France_%281804-1815%29.svg/600px-Imperial_Coat_of_Arms_of_France_%281804-1815%29.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Blason_Auvergne.svg/600px-Blason_Auvergne.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Royal_Coat_of_Arms_of_the_Kingdom_of_Portugal.svg/600px-Royal_Coat_of_Arms_of_the_Kingdom_of_Portugal.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Blason_ville_fr_Strasbourg_%28Bas-Rhin%29.svg/600px-Blason_ville_fr_Strasbourg_%28Bas-Rhin%29.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Coa_Illustration_Cross_Moline.svg/600px-Coa_Illustration_Cross_Moline.svg.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Coat_of_arms_of_Navarre_1212-1589.svg/600px-Coat_of_arms_of_Navarre_1212-1589.svg.png"
         ];
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app" };
@@ -462,15 +351,12 @@
             document.getElementById('input-pseudo').addEventListener('keypress', (e)=>{if(e.key==='Enter') validatePseudo()});
         };
 
-        // --- NAVIGATION INTELLIGENTE ---
         function navigateTo(targetId, pushToHistory = true) {
             const current = document.querySelector('.step-screen.active');
             if(current && pushToHistory) stepHistory.push(current.id);
-            
             document.querySelectorAll('.gallery-container').forEach(g => g.style.display = 'none');
             document.querySelectorAll('.selection-mode-container').forEach(c => c.style.display = 'flex');
             document.getElementById('team-preview').style.display = 'none';
-
             document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
             document.getElementById(targetId).classList.add('active');
             updateBackButton(targetId);
@@ -480,7 +366,6 @@
             if(isEditing) { finishEdit(); return; }
             const activeScreen = document.querySelector('.step-screen.active');
             const openGallery = activeScreen ? activeScreen.querySelector('.gallery-container[style*="flex"]') : null;
-            
             if(openGallery) {
                 if(activeScreen.id === 'step-avatar') hideAvatarGallery();
                 if(activeScreen.id.includes('team')) hideTeamGallery();
@@ -498,7 +383,6 @@
             else btn.style.display = 'flex';
         }
 
-        // --- ROOM & LOGIN ---
         function validateRoomStep() {
             const val = document.getElementById('input-room').value.trim();
             if(!val) return;
@@ -511,7 +395,6 @@
                 if(snap.exists()) {
                     roomRef = db.ref('roomsData/' + roomID);
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
-                    
                     const saved = localStorage.getItem('presta_player_' + roomID);
                     if(autoLogin && saved) {
                         try {
@@ -534,7 +417,6 @@
         function validatePseudo() {
             const val = document.getElementById('input-pseudo').value.trim();
             if(val.length < 2) return alert("Pseudo trop court !");
-            
             if(isEditing) {
                 if(val === player.pseudo) { finishEdit(); return; }
                 roomRef.child('scores/' + val).once('value', snap => {
@@ -550,7 +432,6 @@
                 });
                 return;
             }
-
             roomRef.child('scores/' + val).once('value', snap => {
                 if(snap.exists()) {
                     if(snap.val().kicked) return alert("Banni.");
@@ -570,11 +451,21 @@
             });
         }
 
-        // --- AVATAR ---
         function showAvatarGallery() { document.getElementById('avatar-choices').style.display = 'none'; document.getElementById('avatar-gallery-view').style.display = 'flex'; }
         function hideAvatarGallery() { document.getElementById('avatar-gallery-view').style.display = 'none'; document.getElementById('avatar-choices').style.display = 'flex'; }
         function handleFileUpload(input) { if(input.files && input.files[0]) { const reader=new FileReader(); reader.onload=function(e){selectAvatar(e.target.result)}; reader.readAsDataURL(input.files[0]); } }
-        function renderAvatarGrid() { const g=document.getElementById('avatar-grid'); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='grid-item grid-item-emoji'; d.innerText=a; d.onclick=()=>selectAvatar(a); g.appendChild(d); }); }
+        
+        // CORRECTION BUG : renderAvatarGrid utilise bien "avatars" et crée du TEXTE (Emoji)
+        function renderAvatarGrid() { 
+            const g=document.getElementById('avatar-grid'); 
+            avatars.forEach(a=>{ 
+                const d=document.createElement('div'); 
+                d.className='grid-item grid-item-emoji'; 
+                d.innerText=a; 
+                d.onclick=()=>selectAvatar(a); 
+                g.appendChild(d); 
+            }); 
+        }
         
         function selectAvatar(av) { 
             player.avatar = av; 
@@ -582,7 +473,6 @@
             else navigateTo('step-mode'); 
         }
 
-        // --- MODE / TEAMS ---
         function selectMode(mode) {
             player.team = mode; player.teamIcon = "";
             if(isEditing) { roomRef.child('scores/'+player.pseudo).update({teamName: "Solo", teamIcon: ""}); finishEdit(); } 
@@ -625,7 +515,22 @@
         function showTeamGallery() { document.getElementById('team-crest-choices').style.display = 'none'; document.getElementById('team-crest-gallery').style.display = 'flex'; }
         function hideTeamGallery() { document.getElementById('team-crest-gallery').style.display = 'none'; document.getElementById('team-crest-choices').style.display = 'flex'; }
         function handleTeamFileUpload(input) { if(input.files[0]) { const r=new FileReader(); r.onload=function(e){selectedTeamCrest=e.target.result; showTeamPreview()}; r.readAsDataURL(input.files[0]); } }
-        function renderTeamCrestPicker() { const c=document.getElementById('team-icon-grid'); c.innerHTML=""; heraldicBlasons.forEach(url=>{ const d=document.createElement('div'); d.className='grid-item'; const i=document.createElement('img'); i.src=url; d.onclick=()=>{selectedTeamCrest=url; showTeamPreview()}; d.appendChild(i); c.appendChild(d); }); }
+        
+        // CORRECTION BUG : renderTeamCrestPicker utilise bien "heraldicBlasons" et crée des IMAGES
+        function renderTeamCrestPicker() { 
+            const c=document.getElementById('team-icon-grid'); 
+            c.innerHTML=""; 
+            heraldicBlasons.forEach(url=>{ 
+                const d=document.createElement('div'); 
+                d.className='grid-item'; 
+                const i=document.createElement('img'); 
+                i.src=url; 
+                d.onclick=()=>{selectedTeamCrest=url; showTeamPreview()}; 
+                d.appendChild(i); 
+                c.appendChild(d); 
+            }); 
+        }
+        
         function showTeamPreview() { document.getElementById('team-crest-choices').style.display='none'; document.getElementById('team-crest-gallery').style.display='none'; document.getElementById('team-preview-img').src=selectedTeamCrest; document.getElementById('team-preview').style.display='flex'; }
         
         function createNewTeam() {
@@ -634,7 +539,6 @@
             roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); });
         }
 
-        // --- SETTINGS & QUIT ---
         function openSettings() { document.getElementById('overlay-settings').style.display = 'flex'; }
         function confirmQuit() { document.getElementById('overlay-quit').style.display = 'flex'; }
         
@@ -647,7 +551,6 @@
         function finishEdit() { isEditing = false; navigateTo('step-game', false); }
         function saveProgress() { alert("Fonctionnalité 'Compte Joueur' bientôt disponible !"); }
 
-        // --- RECAP & GAME ---
         function showRecap() {
             navigateTo('step-recap');
             document.getElementById('recap-name').innerText = player.pseudo;
