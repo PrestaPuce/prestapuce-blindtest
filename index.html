@@ -13,42 +13,35 @@
         :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; --grey: #7f8c8d; }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
         
-        /* STRUCTURE SANDWICH */
         .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         .step-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; background: var(--bg); z-index: 10; }
         .step-screen.active { display: flex; }
 
-        /* ZONES */
         .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
         .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .content-top { justify-content: flex-start !important; }
         .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 30px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 85%, transparent); z-index: 20; }
 
-        /* TYPO FLUIDE */
         h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
         h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin: 0 0 15px 0; font-weight: normal; color: white; }
         p.desc { font-size: clamp(0.9rem, 3.5vw, 1.1rem); color: #bdc3c7; margin-bottom: 20px; line-height: 1.5; max-width: 500px; font-weight: 500; }
         
-        /* INPUTS & BOUTONS */
         input[type="text"], input[type="number"] { width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px; }
         input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
         .btn-main { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: clamp(1rem, 4vw, 1.3rem); font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 350px; }
         .btn-main:active { transform: scale(0.95); }
         .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; }
 
-        /* NAV & ICONS */
         #btn-back-global { position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); transition: 0.2s; backdrop-filter: blur(5px); }
         #btn-back-global svg { width: 22px; height: 22px; fill: white; margin-right: 2px; }
         #btn-back-global:active { background: rgba(255, 255, 255, 0.3); transform: scale(0.9); }
 
-        /* CARDS */
         .choice-card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; width: 100%; max-width: 350px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.2); box-sizing: border-box; }
         .choice-card:active { transform: scale(0.98); background: rgba(255,255,255,0.1); border-color: var(--accent); }
         .choice-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
         .choice-content b { display: block; font-size: 1.1rem; margin-bottom: 3px; color: white; }
         .choice-content span { font-size: 0.85rem; color: #bdc3c7; }
 
-        /* GALERIES */
         .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; justify-content: flex-start; }
         .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
@@ -57,13 +50,11 @@
         .grid-item img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
         .grid-item-emoji { font-size: clamp(1.8rem, 7vw, 2.5rem); padding: 0; }
 
-        /* LISTE EQUIPES */
         .team-list-container { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
         .team-card { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; display: flex; align-items: center; cursor: pointer; border: 2px solid transparent; }
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
         .team-card b { font-size: 1rem; }
 
-        /* TUTO */
         .tuto-list { text-align: left; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
         .tuto-item { display: flex; align-items: flex-start; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; }
         .dot { width: 18px; height: 18px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; margin-top: 3px; }
@@ -73,18 +64,16 @@
         .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
         .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
 
-        /* HEADER JEU */
         .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
         .mini-profile { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; margin-right: 10px; }
-        .mini-avatar { width: 40px; height: 40px; flex-shrink: 0; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
+        .mini-avatar-col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-right: 5px; }
+        .mini-avatar { width: 38px; height: 38px; flex-shrink: 0; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
+        .mini-crest { width: 22px; height: 22px; flex-shrink: 0; object-fit: contain; background: white; border-radius: 4px; padding: 1px; }
         .mini-info { line-height: 1.1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
-        
-        /* ICONS SVG DANS BOUTONS */
         .icon-btn svg { width: 20px; height: 20px; fill: white; }
 
-        /* BUZZER */
         .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 60px; }
         .buzzer { width: 65vw; height: 65vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; background: #e74c3c; box-shadow: 0 15px 0 #c0392b, 0 20px 40px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.1s; cursor: pointer; }
         .buzzer.buzzer-pressed { transform: translateY(15px); box-shadow: 0 0 0 #c0392b; }
@@ -95,7 +84,6 @@
         .buzzer-label { font-size: clamp(1.2rem, 5vw, 1.8rem); font-weight: bold; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; z-index: 2; position: relative; }
         .buzzer-img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; border-radius: 50%; pointer-events: none; }
 
-        /* OVERLAYS */
         .overlay-full { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; padding: 20px; box-sizing: border-box; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .qr-card, .settings-content { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 320px; box-sizing: border-box; }
@@ -106,7 +94,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.074</div>
+    <div class="version-tag">v1.076</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -123,8 +111,8 @@
         <div id="step-welcome" class="step-screen">
             <div class="screen-content">
                 <img id="mj-logo-welcome" src="" style="width:100px; border-radius:15px; margin-bottom:20px; display:none;">
-                <h1>BIENVENUE !</h1>
-                <p class="desc">Ton téléphone va devenir ton buzzer ! 🎧<br>Sois le plus rapide pour gagner !</p>
+                <h1 id="welcome-title">BIENVENUE !</h1>
+                <p class="desc" id="welcome-desc">Ton téléphone va devenir ton buzzer ! 🎧<br>Sois le plus rapide pour gagner !</p>
                 <button class="btn-main" onclick="navigateTo('step-auth')">C'est parti ! 🚀</button>
             </div>
         </div>
@@ -238,7 +226,10 @@
         <div id="step-game" class="step-screen" style="padding:0;">
             <div class="game-header">
                 <div class="mini-profile">
-                    <div class="mini-avatar" id="game-avatar"></div>
+                    <div class="mini-avatar-col">
+                        <div class="mini-avatar" id="game-avatar"></div>
+                        <img id="game-team-crest" class="mini-crest" style="display:none;">
+                    </div>
                     <div class="mini-info"><b id="game-pseudo">Joueur</b><br><span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span></div>
                 </div>
                 <div class="header-actions">
@@ -277,6 +268,7 @@
             <button class="settings-btn" onclick="editStep('step-pseudo')">✏️ Modifier mon Pseudo</button>
             <button class="settings-btn" onclick="editStep('step-avatar')">📷 Changer d'Avatar</button>
             <button class="settings-btn" onclick="editStep('step-mode')">🛡️ Changer Mode (Solo/Team)</button>
+            <button class="settings-btn" onclick="changeRoomAction()" style="border:1px solid var(--blue); color:var(--blue);">🚪 Changer de salle</button>
             <button class="settings-btn" onclick="saveProgress()" style="border:1px solid var(--success); color:var(--success);">💾 Sauvegarder progression</button>
             <button class="btn-secondary" onclick="document.getElementById('overlay-settings').style.display='none'">Annuler</button>
         </div>
@@ -287,8 +279,9 @@
             <h2 style="color:var(--danger);">PARTIR ?</h2>
             <p style="color:#ccc; font-size:0.9rem;">Tu veux vraiment nous quitter ? Tu peux sauvegarder ta progression.</p>
             <button class="settings-btn" onclick="saveProgress()" style="border:1px solid var(--success); color:var(--success);">💾 Créer compte / Sauver</button>
-            <button class="settings-btn" onclick="leaveGame(true)" style="background:var(--danger); color:white; margin-top:10px;">🚪 Quitter sans sauver</button>
-            <button class="btn-secondary" onclick="document.getElementById('overlay-quit').style.display='none'">Annuler</button>
+            <button class="settings-btn" onclick="changeRoomAction()" style="border:1px solid var(--blue); color:var(--blue);">🚪 Changer de salle</button>
+            <button class="settings-btn" onclick="leaveGame(true)" style="background:var(--danger); color:white; margin-top:10px;">✕ Quitter définitivement</button>
+            <button class="btn-secondary" onclick="document.getElementById('overlay-quit').style.display='none'">Rester ici</button>
         </div>
     </div>
 
@@ -353,6 +346,7 @@
         let selectedTeamCrest = "";
         let isEditing = false;
         let stepHistory = [];
+        let previousRoomId = "";
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -407,18 +401,43 @@
             db.ref('activeRooms/' + roomID).once('value', snap => {
                 if(snap.exists()) {
                     roomRef = db.ref('roomsData/' + roomID);
+                    
+                    // Récupération dynamique du nom MJ
+                    roomRef.child('mjName').once('value', s => { 
+                        const name = s.val();
+                        if(name) {
+                            document.getElementById('welcome-title').innerHTML = `Bienvenue chez<br>${name}`;
+                            document.getElementById('welcome-desc').innerHTML = "Ton téléphone va devenir ton buzzer ! 🎧";
+                        }
+                    });
+
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
-                    const saved = localStorage.getItem('presta_player_' + roomID);
+                    
+                    // Gestion intelligente de la reconnexion
+                    const saved = localStorage.getItem('presta_player_current_profile');
                     if(autoLogin && saved) {
                         try {
                             const p = JSON.parse(saved);
-                            if(confirm(`Te revoilà ${p.pseudo} ! Reprendre la partie ?`)) {
-                                player = p;
-                                roomRef.child('scores/'+player.pseudo).once('value', sp => {
-                                    if(sp.exists() && sp.val().kicked !== true) { roomRef.child('scores/'+player.pseudo).update({active:true}); launchGame(true); } 
-                                    else { navigateTo('step-welcome'); }
-                                });
-                                return; 
+                            const lastRoom = localStorage.getItem('presta_last_room_id');
+                            
+                            // Si c'est la même salle, on reprend tout
+                            if(lastRoom === roomID) {
+                                if(confirm(`Te revoilà ${p.pseudo} ! Reprendre la partie ?`)) {
+                                    player = p;
+                                    roomRef.child('scores/'+player.pseudo).once('value', sp => {
+                                        if(sp.exists() && sp.val().kicked !== true) { roomRef.child('scores/'+player.pseudo).update({active:true}); launchGame(true); } 
+                                        else { navigateTo('step-welcome'); }
+                                    });
+                                    return;
+                                }
+                            } else {
+                                // Si c'est une nouvelle salle, on propose de garder le profil mais reset score
+                                if(confirm(`Utiliser le profil "${p.pseudo}" pour cette nouvelle salle ?`)) {
+                                    player = { ...p, team: "Solo", teamIcon: "" }; // On garde pseudo/avatar, on reset team
+                                    // On vérifiera plus tard si le pseudo est libre dans validatePseudo
+                                    navigateTo('step-welcome');
+                                    return;
+                                }
                             }
                         } catch(e) {}
                     }
@@ -430,6 +449,8 @@
         function validatePseudo() {
             const val = document.getElementById('input-pseudo').value.trim();
             if(val.length < 2) return alert("Pseudo trop court !");
+            
+            // Si on est en mode édition (depuis les paramètres)
             if(isEditing) {
                 if(val === player.pseudo) { finishEdit(); return; }
                 roomRef.child('scores/' + val).once('value', snap => {
@@ -440,11 +461,15 @@
                         roomRef.child('scores/' + val).set({ ...data, active:true });
                         roomRef.child('scores/' + oldPseudo).remove();
                         player.pseudo = val;
+                        // Mise à jour immédiate du DOM sans recharger tout
+                        document.getElementById('game-pseudo').innerText = val;
                         finishEdit();
                     });
                 });
                 return;
             }
+
+            // Si c'est une nouvelle connexion
             roomRef.child('scores/' + val).once('value', snap => {
                 if(snap.exists()) {
                     if(snap.val().kicked) return alert("Banni.");
@@ -471,13 +496,24 @@
         
         function selectAvatar(av) { 
             player.avatar = av; 
-            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({avatar: av}); finishEdit(); } 
+            if(isEditing) { 
+                roomRef.child('scores/'+player.pseudo).update({avatar: av}); 
+                // Update local immédiat
+                const miniAv = document.getElementById('game-avatar');
+                if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
+                else miniAv.innerText = player.avatar;
+                
+                finishEdit(); 
+            } 
             else navigateTo('step-mode'); 
         }
 
         function selectMode(mode) {
             player.team = mode; player.teamIcon = "";
-            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({teamName: "Solo", teamIcon: ""}); finishEdit(); } 
+            if(isEditing) { 
+                roomRef.child('scores/'+player.pseudo).update({teamName: "Solo", teamIcon: ""}); 
+                finishEdit(); 
+            } 
             else { if(mode === 'Solo') showRecap(); else goToTeamAction(); }
         }
 
@@ -502,7 +538,10 @@
 
         function joinTeam(name, icon) { 
             player.team = name; player.teamIcon = icon;
-            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({teamName: name, teamIcon: icon}); finishEdit(); } 
+            if(isEditing) { 
+                roomRef.child('scores/'+player.pseudo).update({teamName: name, teamIcon: icon}); 
+                finishEdit(); 
+            } 
             else showRecap(); 
         }
 
@@ -535,8 +574,25 @@
             if(stepId === 'step-pseudo') document.getElementById('input-pseudo').value = player.pseudo;
             navigateTo(stepId);
         }
-        function finishEdit() { isEditing = false; navigateTo('step-game', false); }
+        function finishEdit() { 
+            isEditing = false; 
+            // On ferme juste l'écran actif et on revient au jeu SANS recharger
+            document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('step-game').classList.add('active');
+            updateUI(); // Rafraichir le buzzer si besoin
+        }
+        
         function saveProgress() { alert("Fonctionnalité 'Compte Joueur' bientôt disponible !"); }
+
+        function changeRoomAction() {
+            if(confirm("Changer de salle ?\nVotre pseudo sera conservé, mais votre score repartira à 0 dans la nouvelle salle.")) {
+                if(roomRef) roomRef.child('scores/'+player.pseudo).update({active:false});
+                // On ne supprime PAS 'presta_player_current_profile' pour garder l'avatar
+                // Mais on supprime l'ID de la salle pour forcer le choix
+                localStorage.removeItem('presta_last_room_id'); 
+                location.href = location.pathname; // Recharge la page à zéro
+            }
+        }
 
         function showRecap() {
             navigateTo('step-recap');
@@ -551,13 +607,27 @@
         function launchGame(isReconnect = false) {
             if(!isReconnect) {
                 roomRef.child('scores/' + player.pseudo).set({ pts: 0, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon, active: true, kicked: false });
-                try { localStorage.setItem('presta_player_' + roomID, JSON.stringify(player)); } catch(e) { console.log("Erreur stockage (Quota ?):", e); }
+                try { 
+                    localStorage.setItem('presta_player_current_profile', JSON.stringify(player)); 
+                    localStorage.setItem('presta_last_room_id', roomID);
+                } catch(e) { console.log("Erreur stockage", e); }
             }
             const miniAv = document.getElementById('game-avatar');
             if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
             else miniAv.innerText = player.avatar;
+            
+            // LOGIQUE DOUBLE AFFICHAGE (Avatar + Blason)
+            const crestImg = document.getElementById('game-team-crest');
+            if(player.team !== "Solo" && player.teamIcon) {
+                crestImg.src = player.teamIcon;
+                crestImg.style.display = "block";
+            } else {
+                crestImg.style.display = "none";
+            }
+
             document.getElementById('game-pseudo').innerText = player.pseudo;
             document.getElementById('game-team').innerText = player.team;
+            
             const buzzerBg = document.getElementById('buzzer-bg');
             if(player.avatar.length > 20) { buzzerBg.src = player.avatar; buzzerBg.style.display = "block"; } else { buzzerBg.style.display = "none"; }
             
@@ -567,15 +637,23 @@
 
         function startBuzzer() {
             roomRef.child('buzzers').off(); roomRef.child('gameState').off(); roomRef.child('scores/'+player.pseudo).off();
+            
             roomRef.child('scores/' + player.pseudo).on('value', snap => {
                 const d = snap.val();
                 if(d) {
                     document.getElementById('game-score').innerText = d.pts || 0;
                     if(d.kicked) { alert("Vous avez été exclu."); location.reload(); }
                 } else {
-                    alert("Votre profil a été réinitialisé."); localStorage.removeItem('presta_player_' + roomID); location.reload();
+                    // SI LE JOUEUR EST SUPPRIMÉ PAR LE MJ (d est null mais la connexion est active)
+                    // On vérifie que ce n'est pas juste une déconnexion réseau
+                    if(document.getElementById('step-game').classList.contains('active')) {
+                         alert("🚫 Votre profil a été supprimé par l'animateur.");
+                         localStorage.removeItem('presta_last_room_id');
+                         location.reload();
+                    }
                 }
             });
+
             roomRef.child('gameState').on('value', snap => {
                 const st = snap.val();
                 if (st && st.status === 'endGame') showEndGame();
@@ -664,7 +742,7 @@
         function leaveGame(really = false) {
             if(really) {
                 if(roomRef) roomRef.child('scores/'+player.pseudo).update({active:false});
-                localStorage.removeItem('presta_player_' + roomID);
+                // Ici on garde le localStorage pour reconnexion future, sauf si le joueur efface ses cookies
                 location.reload();
             }
         }
