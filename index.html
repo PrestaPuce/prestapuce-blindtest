@@ -13,97 +13,126 @@
         :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; --grey: #7f8c8d; }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
         
-        /* WIZARD CONTAINER */
-        .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; }
+        /* --- STRUCTURE SANDWICH (Header Fixe / Contenu Scroll / Footer Fixe) --- */
+        .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        
         .step-screen { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            display: none; flex-direction: column; align-items: center; justify-content: center; 
-            padding: 20px; box-sizing: border-box; text-align: center;
-            opacity: 0; transition: opacity 0.4s ease-in-out; overflow-y: auto; background: var(--bg);
+            display: none; flex-direction: column; align-items: center; 
+            background: var(--bg); z-index: 10;
         }
-        .step-screen.active { display: flex; opacity: 1; z-index: 10; }
+        .step-screen.active { display: flex; }
 
-        /* BOUTON RETOUR GLOBAL (Nav) */
+        /* Zones de l'écran */
+        .screen-header { flex-shrink: 0; width: 100%; padding: 20px 20px 10px 20px; text-align: center; box-sizing: border-box; }
+        .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+        .screen-content.centered { justify-content: center; } /* Pour centrer verticalement si peu de contenu */
+        .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 25px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 80%, transparent); z-index: 20; }
+
+        /* --- TYPOGRAPHIE FLUIDE (S'adapte à la largeur) --- */
+        h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
+        h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin: 0 0 15px 0; font-weight: normal; color: white; }
+        p.desc { font-size: clamp(0.9rem, 3vw, 1.1rem); color: #bdc3c7; margin-bottom: 20px; line-height: 1.5; max-width: 500px; font-weight: 500; }
+        
+        /* --- INPUTS & BOUTONS --- */
+        input[type="text"], input[type="number"] { 
+            width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); 
+            background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px;
+        }
+        input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
+
+        .btn-main { 
+            background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; 
+            font-size: clamp(1rem, 4vw, 1.3rem); font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); 
+            transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 350px;
+        }
+        .btn-main:active { transform: scale(0.95); }
+        .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; }
+
+        /* --- NAVIGATION (RETOUR) --- */
         #btn-back-global {
             position: absolute; top: 15px; left: 15px; z-index: 500;
             width: 40px; height: 40px; border-radius: 50%;
             background: rgba(255, 255, 255, 0.1); color: white;
             display: none; align-items: center; justify-content: center;
-            font-size: 1.5rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
-            transition: 0.2s;
+            cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+            transition: 0.2s; backdrop-filter: blur(5px);
         }
+        #btn-back-global svg { width: 20px; height: 20px; fill: white; }
         #btn-back-global:active { background: rgba(255, 255, 255, 0.3); transform: scale(0.9); }
 
-        /* TYPO & INPUTS */
-        h1 { color: var(--accent); font-size: 2.2rem; margin-bottom: 15px; text-transform: uppercase; line-height: 1.1; }
-        h2 { font-size: 1.6rem; margin-bottom: 25px; font-weight: normal; color: white; }
-        p.desc { font-size: 1.15rem; color: #bdc3c7; margin-bottom: 30px; line-height: 1.6; max-width: 500px; font-weight: 500; }
-        
-        input[type="text"], input[type="number"] { 
-            width: 100%; max-width: 320px; padding: 18px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); 
-            background: rgba(255,255,255,0.1); color: white; font-size: 1.3rem; text-align: center; outline: none; margin-bottom: 25px;
-        }
-        input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
-
-        /* BOUTONS */
-        .btn-main { 
-            background: var(--primary); color: white; border: none; padding: 18px 40px; border-radius: 50px; 
-            font-size: 1.3rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); 
-            transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 320px; margin-bottom: 15px; flex-shrink: 0;
-        }
-        .btn-main:active { transform: scale(0.95); }
-        .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 12px 25px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 1rem; font-weight: bold; }
-        
-        /* CHOICE CARDS */
+        /* --- CARDS & MENUS --- */
         .choice-card {
-            background: var(--card); border-radius: 18px; padding: 25px; margin-bottom: 15px; width: 100%; max-width: 340px;
+            background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; width: 100%; max-width: 350px;
             cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; text-align: left;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); box-sizing: border-box;
         }
         .choice-card:active { transform: scale(0.98); background: rgba(255,255,255,0.1); border-color: var(--accent); }
-        .choice-icon { font-size: 2.5rem; margin-right: 20px; width: 50px; text-align: center; }
-        .choice-content b { display: block; font-size: 1.3rem; margin-bottom: 5px; color: white; }
-        .choice-content span { font-size: 0.95rem; color: #bdc3c7; }
+        .choice-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
+        .choice-content b { display: block; font-size: 1.1rem; margin-bottom: 3px; color: white; }
+        .choice-content span { font-size: 0.85rem; color: #bdc3c7; }
 
-        /* SELECTION MODES */
+        /* --- AVATARS & CRESTS --- */
         .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; }
-        .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; }
+        .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; }
 
-        /* GRILLE AVATARS */
-        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-height: 40vh; overflow-y: auto; padding: 5px; width: 100%; max-width: 350px; }
+        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 350px; padding-bottom: 20px; }
         .avatar-item { 
-            width: 65px; height: 65px; background: rgba(255,255,255,0.1); border-radius: 15px; 
-            display: flex; align-items: center; justify-content: center; font-size: 2.2rem; cursor: pointer; border: 2px solid transparent; 
+            aspect-ratio: 1/1; background: rgba(255,255,255,0.1); border-radius: 12px; 
+            display: flex; align-items: center; justify-content: center; font-size: clamp(1.5rem, 6vw, 2.5rem); cursor: pointer; border: 2px solid transparent; 
         }
         .avatar-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
 
-        /* TEAM CREATION */
-        .team-icon-scroll { display: flex; gap: 10px; overflow-x: auto; width: 100%; max-width: 350px; padding: 10px 0; }
-        .team-icon-opt { width: 70px; height: 70px; flex-shrink: 0; background: white; border-radius: 12px; padding: 4px; cursor: pointer; border: 3px solid transparent; }
+        /* --- TEAM LIST (COMPACTE) --- */
+        .team-list-container { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
+        .team-card { 
+            background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; 
+            display: flex; align-items: center; cursor: pointer; border: 2px solid transparent; 
+        }
+        .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: white; padding: 2px; border-radius: 6px; }
+        .team-card b { font-size: 1rem; }
+
+        .team-icon-scroll { display: flex; gap: 10px; overflow-x: auto; width: 100%; max-width: 350px; padding: 10px 0; min-height: 80px; }
+        .team-icon-opt { width: 60px; height: 60px; flex-shrink: 0; background: white; border-radius: 12px; padding: 4px; cursor: pointer; border: 3px solid transparent; }
         .team-icon-opt.selected { border-color: var(--success); transform: scale(1.1); }
 
-        /* TUTO LIST */
-        .tuto-list { text-align: left; width: 100%; max-width: 360px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 15px; }
-        .tuto-item { display: flex; align-items: flex-start; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; }
-        .dot { width: 22px; height: 22px; border-radius: 50%; margin-right: 15px; flex-shrink: 0; margin-top: 3px; }
-        .dot.red { background: #e74c3c; box-shadow: 0 0 10px #e74c3c; }
-        .dot.green { background: #2ecc71; box-shadow: 0 0 10px #2ecc71; }
+        /* --- TUTO LIST --- */
+        .tuto-list { text-align: left; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
+        .tuto-item { display: flex; align-items: flex-start; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; }
+        .dot { width: 18px; height: 18px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; margin-top: 3px; }
+        .dot.red { background: #e74c3c; box-shadow: 0 0 8px #e74c3c; }
+        .dot.green { background: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
         .dot.grey { background: #7f8c8d; }
-        .tuto-text b { display: block; margin-bottom: 4px; font-size: 1.1rem; }
-        .tuto-text span { font-size: 0.95rem; color: #ccc; line-height: 1.3; }
+        .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
+        .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
 
-        /* HEADER JEU */
-        .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 70px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; }
-        .mini-profile { display: flex; align-items: center; gap: 10px; }
-        .mini-avatar { width: 45px; height: 45px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
-        .mini-info { line-height: 1.1; font-size: 1rem; }
-        .header-actions { display: flex; gap: 10px; }
-        .icon-btn { width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.4rem; }
+        /* --- HEADER JEU (ANTI-COLLISION) --- */
+        .game-header { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 60px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 0 15px; box-sizing: border-box; z-index: 100; 
+            background: rgba(0,0,0,0.3); /* Leger fond pour lisibilité */
+        }
+        .mini-profile { 
+            display: flex; align-items: center; gap: 10px; 
+            flex: 1; min-width: 0; /* Permet la troncature */
+            margin-right: 10px;
+        }
+        .mini-avatar { 
+            width: 40px; height: 40px; flex-shrink: 0;
+            background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); 
+        }
+        .mini-info { 
+            line-height: 1.1; font-size: 0.9rem; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* Coupe proprement */
+        }
+        .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
 
-        /* BUZZER */
-        .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+        /* --- BUZZER --- */
+        .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 60px; /* Espace pour header */ }
         .buzzer { 
-            width: 70vw; height: 70vw; max-width: 280px; max-height: 280px; border-radius: 50%; border: none; 
+            width: 65vw; height: 65vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; 
             background: #e74c3c; box-shadow: 0 15px 0 #c0392b, 0 20px 40px rgba(0,0,0,0.4); 
             display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.1s; cursor: pointer;
         }
@@ -112,26 +141,15 @@
         .ready .buzzer.buzzer-pressed { box-shadow: 0 0 0 #27ae60; }
         .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
         .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; pointer-events: none; }
-        .buzzer-label { font-size: 1.8rem; font-weight: bold; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; z-index: 2; position: relative; }
+        .buzzer-label { font-size: clamp(1.2rem, 5vw, 1.8rem); font-weight: bold; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; z-index: 2; position: relative; }
         .buzzer-img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; border-radius: 50%; pointer-events: none; }
 
-        /* OVERLAYS */
-        .overlay-full { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
+        /* --- OVERLAYS --- */
+        .overlay-full { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; padding: 20px; box-sizing: border-box; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .qr-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; max-width: 85%; }
-        #podium-content { text-align: center; }
-        .trophy-img { width: 180px; margin-bottom: 20px; animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
-        /* EQUIPE LISTE */
-        .team-list-container { width: 100%; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
-        .team-card { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; display: flex; align-items: center; cursor: pointer; border: 2px solid transparent; }
-        .team-card.selected { border-color: var(--success); background: rgba(39, 174, 96, 0.2); }
-        .team-icon { width: 50px; height: 50px; object-fit: contain; background: white; padding: 2px; border-radius: 8px; margin-right: 15px; }
-
-        /* SETTINGS OVERLAY */
-        .settings-content { width: 100%; max-width: 320px; background: var(--card); border-radius: 15px; padding: 20px; text-align: center; }
-        .settings-btn { display: block; width: 100%; padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: white; font-size: 1.1rem; cursor: pointer; text-align: left; }
+        
+        .qr-card, .settings-content { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 320px; box-sizing: border-box; }
+        .settings-btn { display: block; width: 100%; padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: white; font-size: 1rem; cursor: pointer; text-align: left; transition: 0.2s; }
         .settings-btn:hover { background: rgba(255,255,255,0.2); }
 
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
@@ -139,156 +157,183 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.067</div>
+    <div class="version-tag">v1.068</div>
 
     <div class="wizard-container">
-        <div id="btn-back-global" onclick="goBack()">⬅</div>
+        <div id="btn-back-global" onclick="goBack()">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        </div>
 
-        <div id="step-room" class="step-screen">
-            <h1>CODE SALLE</h1>
-            <p class="desc">Entre le code affiché sur l'écran principal.</p>
-            <input type="number" id="input-room" placeholder="EX: 1234">
-            <button class="btn-main" onclick="validateRoomStep()">Rejoindre</button>
+        <div id="step-room" class="step-screen active">
+            <div class="screen-content centered">
+                <h1>CODE SALLE</h1>
+                <p class="desc">Entre le code affiché sur l'écran principal.</p>
+                <input type="number" id="input-room" placeholder="EX: 1234">
+                <button class="btn-main" onclick="validateRoomStep()">Rejoindre</button>
+            </div>
         </div>
 
         <div id="step-welcome" class="step-screen">
-            <img id="mj-logo-welcome" src="" style="width:100px; border-radius:15px; margin-bottom:20px; display:none;">
-            <h1>BIENVENUE !</h1>
-            <p class="desc">Ton téléphone va devenir ton buzzer ! 🎧<br>Sois le plus rapide pour gagner !</p>
-            <button class="btn-main" onclick="navigateTo('step-auth')">C'est parti ! 🚀</button>
+            <div class="screen-content centered">
+                <img id="mj-logo-welcome" src="" style="width:100px; border-radius:15px; margin-bottom:20px; display:none;">
+                <h1>BIENVENUE !</h1>
+                <p class="desc">Ton téléphone va devenir ton buzzer ! 🎧<br>Sois le plus rapide pour gagner !</p>
+                <button class="btn-main" onclick="navigateTo('step-auth')">C'est parti ! 🚀</button>
+            </div>
         </div>
 
         <div id="step-auth" class="step-screen">
-            <h2>Que veux-tu faire ?</h2>
-            <div class="choice-card" onclick="navigateTo('step-pseudo')">
-                <div class="choice-icon">⚡</div>
-                <div class="choice-content"><b>Partie Rapide</b><span>Accès invité immédiat.</span></div>
-            </div>
-            <div class="choice-card" onclick="navigateTo('step-pseudo')">
-                <div class="choice-icon">🔐</div>
-                <div class="choice-content"><b>Se Connecter</b><span>Récupère ton historique.</span></div>
-            </div>
-            <div class="choice-card" onclick="navigateTo('step-pseudo')">
-                <div class="choice-icon">✨</div>
-                <div class="choice-content"><b>Créer un Compte</b><span>Sauvegarde tes scores.</span></div>
+            <div class="screen-header"><h2>Que veux-tu faire ?</h2></div>
+            <div class="screen-content">
+                <div class="choice-card" onclick="navigateTo('step-pseudo')">
+                    <div class="choice-icon">⚡</div>
+                    <div class="choice-content"><b>Partie Rapide</b><span>Accès invité immédiat.</span></div>
+                </div>
+                <div class="choice-card" onclick="navigateTo('step-pseudo')">
+                    <div class="choice-icon">🔐</div>
+                    <div class="choice-content"><b>Se Connecter</b><span>Récupère ton historique.</span></div>
+                </div>
+                <div class="choice-card" onclick="navigateTo('step-pseudo')">
+                    <div class="choice-icon">✨</div>
+                    <div class="choice-content"><b>Créer un Compte</b><span>Sauvegarde tes scores.</span></div>
+                </div>
             </div>
         </div>
 
         <div id="step-pseudo" class="step-screen">
-            <h2>Ton Nom de Scène ?</h2>
-            <input type="text" id="input-pseudo" placeholder="Ex: Batman, Zorro..." maxlength="12">
-            <button class="btn-main" onclick="validatePseudo()">Suivant</button>
+            <div class="screen-content centered">
+                <h2>Ton Nom de Scène ?</h2>
+                <input type="text" id="input-pseudo" placeholder="Ex: Batman, Zorro..." maxlength="12">
+                <button class="btn-main" onclick="validatePseudo()">Suivant</button>
+            </div>
         </div>
 
         <div id="step-avatar" class="step-screen">
-            <h2>Ton Look</h2>
-            <div id="avatar-choices" class="selection-mode-container">
-                <div class="choice-card" onclick="document.getElementById('file-input').click()">
-                    <div class="choice-icon">📸</div>
-                    <div class="choice-content"><b>Prendre un Selfie</b><span>Ou choisir une image.</span></div>
+            <div class="screen-header"><h2>Ton Look</h2></div>
+            <div class="screen-content">
+                <div id="avatar-choices" class="selection-mode-container">
+                    <div class="choice-card" onclick="document.getElementById('file-input').click()">
+                        <div class="choice-icon">📸</div>
+                        <div class="choice-content"><b>Photo / Selfie</b><span>Ou choisir une image.</span></div>
+                    </div>
+                    <div class="choice-card" onclick="showAvatarGallery()">
+                        <div class="choice-icon">🦁</div>
+                        <div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div>
+                    </div>
+                    <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
                 </div>
-                <div class="choice-card" onclick="showAvatarGallery()">
-                    <div class="choice-icon">🦁</div>
-                    <div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div>
+                <div id="avatar-gallery-view" class="gallery-container">
+                    <div class="avatar-grid" id="avatar-grid"></div>
                 </div>
-                <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
-            </div>
-            <div id="avatar-gallery-view" class="gallery-container">
-                <div class="avatar-grid" id="avatar-grid"></div>
-                <button class="btn-secondary" onclick="hideAvatarGallery()">Retour</button>
             </div>
         </div>
 
         <div id="step-mode" class="step-screen">
-            <h2>Ta Stratégie ?</h2>
-            <div class="choice-card" onclick="selectMode('Solo')">
-                <div class="choice-icon">👤</div>
-                <div class="choice-content"><b>Loup Solitaire</b><span>Je joue pour ma gloire.</span></div>
-            </div>
-            <div class="choice-card" onclick="goToTeamAction()">
-                <div class="choice-icon">🛡️</div>
-                <div class="choice-content"><b>En Équipe</b><span>On gagne ensemble.</span></div>
+            <div class="screen-header"><h2>Ta Stratégie ?</h2></div>
+            <div class="screen-content centered">
+                <div class="choice-card" onclick="selectMode('Solo')">
+                    <div class="choice-icon">👤</div>
+                    <div class="choice-content"><b>Loup Solitaire</b><span>Je joue pour ma gloire.</span></div>
+                </div>
+                <div class="choice-card" onclick="goToTeamAction()">
+                    <div class="choice-icon">🛡️</div>
+                    <div class="choice-content"><b>En Équipe</b><span>On gagne ensemble.</span></div>
+                </div>
             </div>
         </div>
 
         <div id="step-team-action" class="step-screen">
-            <h2>Gestion d'Équipe</h2>
-            <div class="choice-card" onclick="goToTeamCreate()">
-                <div class="choice-icon">✨</div>
-                <div class="choice-content"><b>Créer une Équipe</b><span>Je suis le Capitaine.</span></div>
-            </div>
-            <div class="choice-card" onclick="goToTeamJoin()">
-                <div class="choice-icon">🤝</div>
-                <div class="choice-content"><b>Rejoindre une Équipe</b><span>Je suis un Membre.</span></div>
+            <div class="screen-header"><h2>Gestion d'Équipe</h2></div>
+            <div class="screen-content centered">
+                <div class="choice-card" onclick="goToTeamCreate()">
+                    <div class="choice-icon">✨</div>
+                    <div class="choice-content"><b>Créer une Équipe</b><span>Je suis le Capitaine.</span></div>
+                </div>
+                <div class="choice-card" onclick="goToTeamJoin()">
+                    <div class="choice-icon">🤝</div>
+                    <div class="choice-content"><b>Rejoindre une Équipe</b><span>Je suis un Membre.</span></div>
+                </div>
             </div>
         </div>
 
         <div id="step-team-create" class="step-screen">
-            <h2>Créer ton Clan</h2>
-            <input type="text" id="new-team-name" placeholder="Nom de l'équipe">
-            
-            <div id="team-crest-choices" class="selection-mode-container">
-                <div class="choice-card" style="padding:15px;" onclick="document.getElementById('team-file-input').click()">
-                    <div class="choice-icon" style="font-size:2rem;">📤</div>
-                    <div class="choice-content"><b style="font-size:1.1rem;">Uploader Blason</b></div>
+            <div class="screen-header"><h2>Créer ton Clan</h2></div>
+            <div class="screen-content">
+                <input type="text" id="new-team-name" placeholder="Nom de l'équipe">
+                
+                <div id="team-crest-choices" class="selection-mode-container" style="margin-top:10px; width:100%;">
+                    <div class="choice-card" onclick="document.getElementById('team-file-input').click()">
+                        <div class="choice-icon">📤</div>
+                        <div class="choice-content"><b>Uploader Blason</b><span>Image perso.</span></div>
+                    </div>
+                    <div class="choice-card" onclick="showTeamGallery()">
+                        <div class="choice-icon">🛡️</div>
+                        <div class="choice-content"><b>Galerie Blasons</b><span>Choisis un écusson.</span></div>
+                    </div>
+                    <input type="file" id="team-file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleTeamFileUpload(this)">
                 </div>
-                <div class="choice-card" style="padding:15px;" onclick="showTeamGallery()">
-                    <div class="choice-icon" style="font-size:2rem;">🛡️</div>
-                    <div class="choice-content"><b style="font-size:1.1rem;">Galerie Blasons</b></div>
+
+                <div id="team-crest-gallery" class="gallery-container" style="width:100%;">
+                    <p style="margin-bottom:5px;">Choisis un blason :</p>
+                    <div class="team-icon-scroll" id="team-icon-list"></div>
                 </div>
-                <input type="file" id="team-file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleTeamFileUpload(this)">
-            </div>
 
-            <div id="team-crest-gallery" class="gallery-container">
-                <p style="margin-bottom:5px;">Choisis un blason :</p>
-                <div class="team-icon-scroll" id="team-icon-list"></div>
-                <button class="btn-secondary" style="margin-top:5px; font-size:0.8rem;" onclick="hideTeamGallery()">Annuler choix</button>
+                <div id="team-preview" style="display:none; align-items:center; justify-content:center; gap:15px; margin:20px 0;">
+                    <img id="team-preview-img" style="width:60px; height:60px; object-fit:contain; background:white; border-radius:10px; padding:2px;">
+                    <span style="color:var(--success); font-weight:bold;">Image OK !</span>
+                </div>
             </div>
-
-            <div id="team-preview" style="display:none; align-items:center; justify-content:center; gap:15px; margin-bottom:20px;">
-                <img id="team-preview-img" style="width:60px; height:60px; object-fit:contain; background:white; border-radius:10px; padding:2px;">
-                <span style="color:var(--success); font-weight:bold;">Image OK !</span>
+            <div class="screen-footer">
+                <button class="btn-main" onclick="createNewTeam()">Créer</button>
             </div>
-
-            <button class="btn-main" onclick="createNewTeam()">Créer</button>
         </div>
 
         <div id="step-team-join" class="step-screen">
-            <h2>Rejoindre ton Clan</h2>
-            <div class="team-list-container" id="team-list"></div>
-            <button class="btn-secondary" onclick="goToTeamCreate()" style="margin-top:20px;">Mon équipe n'est pas là ? La créer</button>
+            <div class="screen-header"><h2>Rejoindre ton Clan</h2></div>
+            <div class="screen-content">
+                <div class="team-list-container" id="team-list"></div>
+            </div>
+            <div class="screen-footer">
+                <button class="btn-secondary" onclick="goToTeamCreate()">Mon équipe n'est pas là ? La créer</button>
+            </div>
         </div>
 
         <div id="step-recap" class="step-screen">
-            <div id="recap-avatar" style="font-size:5rem; margin-bottom:15px;"></div>
-            <h2 id="recap-name" style="color:var(--accent); font-weight:bold; margin:0; font-size:2rem;"></h2>
-            <p id="recap-team" style="color:#aaa; margin-top:5px; margin-bottom:40px; font-size:1.2rem;"></p>
-            <p class="desc">Dernière étape avant le jeu...</p>
-            <button class="btn-main" onclick="navigateTo('step-tutorial')">SUIVANT</button>
+            <div class="screen-content centered">
+                <div id="recap-avatar" style="font-size:clamp(4rem, 15vw, 6rem); margin-bottom:15px;"></div>
+                <h2 id="recap-name" style="color:var(--accent); font-weight:bold; margin:0; font-size:2rem;"></h2>
+                <p id="recap-team" style="color:#aaa; margin-top:5px; margin-bottom:40px; font-size:1.2rem;"></p>
+                <p class="desc">Dernière étape avant le jeu...</p>
+                <button class="btn-main" onclick="navigateTo('step-tutorial')">SUIVANT</button>
+            </div>
         </div>
 
         <div id="step-tutorial" class="step-screen">
-            <h2 style="color:var(--accent); margin-bottom:20px;">COMMENT JOUER ?</h2>
-            <div class="tuto-list">
-                <div class="tuto-item">
-                    <div class="dot red"></div>
-                    <div class="tuto-text"><b style="color:#e74c3c;">EN ATTENTE</b><span>Attendez que l'animateur active les buzzers au début de chaque titre.</span></div>
-                </div>
-                <div class="tuto-item">
-                    <div class="dot green"></div>
-                    <div class="tuto-text"><b style="color:#2ecc71;">C'EST PARTI !</b><span>Soyez le plus rapide pour buzzer !</span></div>
-                </div>
-                <div class="tuto-item">
-                    <div class="dot grey"></div>
-                    <div class="tuto-text"><b style="color:#95a5a6;">BLOQUÉ</b><span>Vous avez déjà joué ou fait une erreur. Attendez le prochain titre.</span></div>
-                </div>
-                <div class="tuto-item">
-                    <div class="dot grey"></div>
-                    <div class="tuto-text"><b style="color:#95a5a6;">OCCUPÉ</b><span>Trop tard ! Un autre joueur a été plus rapide que toi.</span></div>
+            <div class="screen-header"><h2>COMMENT JOUER ?</h2></div>
+            <div class="screen-content">
+                <div class="tuto-list">
+                    <div class="tuto-item">
+                        <div class="dot red"></div>
+                        <div class="tuto-text"><b style="color:#e74c3c;">EN ATTENTE</b><span>Attendez que l'animateur active les buzzers au début de chaque titre.</span></div>
+                    </div>
+                    <div class="tuto-item">
+                        <div class="dot green"></div>
+                        <div class="tuto-text"><b style="color:#2ecc71;">C'EST PARTI !</b><span>Soyez le plus rapide pour buzzer !</span></div>
+                    </div>
+                    <div class="tuto-item">
+                        <div class="dot grey"></div>
+                        <div class="tuto-text"><b style="color:#95a5a6;">BLOQUÉ</b><span>Vous avez déjà joué ou fait une erreur. Attendez le prochain titre.</span></div>
+                    </div>
+                    <div class="tuto-item">
+                        <div class="dot grey"></div>
+                        <div class="tuto-text"><b style="color:#95a5a6;">OCCUPÉ</b><span>Trop tard ! Un autre joueur a été plus rapide que toi.</span></div>
+                    </div>
                 </div>
             </div>
-            <p class="desc" style="font-size:0.9rem; margin-bottom:20px;">Une question ? N'hésite pas à faire signe à l'animateur !</p>
-            <button class="btn-main" onclick="launchGame()">C'EST PARTI ! 🚀</button>
+            <div class="screen-footer">
+                <p class="desc" style="font-size:0.9rem; margin-bottom:15px;">Une question ? N'hésite pas à faire signe à l'animateur !</p>
+                <button class="btn-main" onclick="launchGame()">C'EST PARTI ! 🚀</button>
+            </div>
         </div>
 
         <div id="step-game" class="step-screen" style="padding:0;">
@@ -304,7 +349,7 @@
                     <div class="icon-btn" onclick="openSettings()" title="Paramètres">⚙️</div>
                     <div class="icon-btn" onclick="showShare()" title="Partager">🔗</div>
                     <div class="icon-btn" onclick="showQR()" title="QR Code">📱</div>
-                    <div class="icon-btn" onclick="leaveGame()" style="background:var(--danger);">✕</div>
+                    <div class="icon-btn" onclick="confirmQuit()" style="background:var(--danger);">✕</div>
                 </div>
             </div>
             <div class="buzzer-container">
@@ -340,9 +385,19 @@
         </div>
     </div>
 
+    <div id="overlay-quit" class="overlay-full" onclick="this.style.display='none'">
+        <div class="settings-content" onclick="event.stopPropagation()">
+            <h2 style="color:var(--danger);">PARTIR ?</h2>
+            <p style="color:#ccc; font-size:0.9rem;">Tu veux vraiment nous quitter ? Tu peux sauvegarder ta progression.</p>
+            <button class="settings-btn" onclick="saveProgress()" style="border:1px solid var(--success); color:var(--success);">💾 Créer compte / Sauver</button>
+            <button class="settings-btn" onclick="leaveGame(true)" style="background:var(--danger); color:white; margin-top:10px;">🚪 Quitter sans sauver</button>
+            <button class="btn-secondary" onclick="document.getElementById('overlay-quit').style.display='none'">Annuler</button>
+        </div>
+    </div>
+
     <div id="podium-zone" class="overlay-full">
         <div id="podium-content"></div>
-        <button class="btn-main" onclick="leaveGame()" style="margin-top:30px;">Quitter</button>
+        <button class="btn-main" onclick="leaveGame(true)" style="margin-top:30px;">Quitter</button>
     </div>
 
     <audio id="sound-click" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/BUZZER.WAV?alt=media&token=43ced984-3c6a-4167-b0dc-4cd97d7760dd" preload="auto"></audio>
@@ -350,8 +405,21 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳"];
-        const defaultTeamCrests = ["https://cdn-icons-png.flaticon.com/512/1165/1165187.png", "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", "https://cdn-icons-png.flaticon.com/512/1065/1065553.png"];
+        // CONTENU ENRICHI
+        const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
+        const defaultTeamCrests = [
+            "https://cdn-icons-png.flaticon.com/512/1165/1165187.png", // Bouclier Rouge
+            "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", // Bouclier Bleu
+            "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", // Bouclier Vert
+            "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", // Bouclier Jaune
+            "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", // Lion
+            "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", // Aigle
+            "https://cdn-icons-png.flaticon.com/512/1065/1065553.png", // Loup
+            "https://cdn-icons-png.flaticon.com/512/2608/2608354.png", // Épées
+            "https://cdn-icons-png.flaticon.com/512/3026/3026369.png", // Viking
+            "https://cdn-icons-png.flaticon.com/512/2316/2316889.png", // Dragon
+            "https://cdn-icons-png.flaticon.com/512/3306/3306606.png"  // Couronne
+        ];
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app" };
         firebase.initializeApp(firebaseConfig);
@@ -362,7 +430,7 @@
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let selectedTeamCrest = "";
         let isEditing = false;
-        let stepHistory = []; // STACK HISTORIQUE
+        let stepHistory = [];
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -379,6 +447,11 @@
             const current = document.querySelector('.step-screen.active');
             if(current && pushToHistory) stepHistory.push(current.id);
             
+            // Fermeture auto des galeries lors d'un changement de page
+            document.querySelectorAll('.gallery-container').forEach(g => g.style.display = 'none');
+            document.querySelectorAll('.selection-mode-container').forEach(c => c.style.display = 'flex');
+            document.getElementById('team-preview').style.display = 'none';
+
             document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
             document.getElementById(targetId).classList.add('active');
             
@@ -386,17 +459,26 @@
         }
 
         function goBack() {
-            if(isEditing) { finishEdit(); return; } // Si on édite, retour au jeu
+            if(isEditing) { finishEdit(); return; }
+            
+            // LOGIQUE SOUS-MENUS : Si galerie ouverte, on ferme galerie d'abord
+            const activeScreen = document.querySelector('.step-screen.active');
+            const openGallery = activeScreen ? activeScreen.querySelector('.gallery-container[style*="flex"]') : null;
+            
+            if(openGallery) {
+                if(activeScreen.id === 'step-avatar') hideAvatarGallery();
+                if(activeScreen.id.includes('team')) hideTeamGallery();
+                return;
+            }
+
             if(stepHistory.length === 0) return;
             const prevId = stepHistory.pop();
-            navigateTo(prevId, false); // False = ne pas repousser dans l'historique
+            navigateTo(prevId, false);
         }
 
         function updateBackButton(currentId) {
-            // Liste des écrans "Racine" où le bouton retour est caché
             const noBackScreens = ['step-room', 'step-welcome', 'step-game'];
             const btn = document.getElementById('btn-back-global');
-            
             if(noBackScreens.includes(currentId)) btn.style.display = 'none';
             else btn.style.display = 'flex';
         }
@@ -499,7 +581,7 @@
         }
 
         function goToTeamAction() { navigateTo('step-team-action'); }
-        function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); }
+        function goToTeamCreate() { navigateTo('step-team-create'); }
         function goToTeamJoin() { navigateTo('step-team-join'); loadTeamsList(); }
 
         function loadTeamsList() {
@@ -525,14 +607,6 @@
             } else showRecap(); 
         }
 
-        function toggleCreateUI(show) {
-            if(show) {
-                document.getElementById('team-crest-choices').style.display = 'flex';
-                document.getElementById('team-crest-gallery').style.display = 'none';
-                document.getElementById('team-preview').style.display = 'none';
-                selectedTeamCrest = "";
-            }
-        }
         function showTeamGallery() { document.getElementById('team-crest-choices').style.display = 'none'; document.getElementById('team-crest-gallery').style.display = 'flex'; }
         function hideTeamGallery() { document.getElementById('team-crest-gallery').style.display = 'none'; document.getElementById('team-crest-choices').style.display = 'flex'; }
         function handleTeamFileUpload(input) { if(input.files[0]) { const r=new FileReader(); r.onload=function(e){selectedTeamCrest=e.target.result; showTeamPreview()}; r.readAsDataURL(input.files[0]); } }
@@ -545,15 +619,17 @@
             roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); });
         }
 
-        // --- SETTINGS (EDITION) ---
+        // --- SETTINGS & QUIT ---
         function openSettings() { document.getElementById('overlay-settings').style.display = 'flex'; }
+        function confirmQuit() { document.getElementById('overlay-quit').style.display = 'flex'; }
+        
         function editStep(stepId) {
             isEditing = true;
             document.getElementById('overlay-settings').style.display = 'none';
             if(stepId === 'step-pseudo') document.getElementById('input-pseudo').value = player.pseudo;
-            navigateTo(stepId); // Le bouton Retour gérera le "finishEdit"
+            navigateTo(stepId);
         }
-        function finishEdit() { isEditing = false; navigateTo('step-game', false); } // Retour jeu direct
+        function finishEdit() { isEditing = false; navigateTo('step-game', false); }
         function saveProgress() { alert("Fonctionnalité 'Compte Joueur' bientôt disponible !"); }
 
         // --- RECAP & GAME ---
@@ -584,7 +660,6 @@
             startBuzzer();
         }
 
-        // --- MOTEUR JEU ---
         function startBuzzer() {
             roomRef.child('buzzers').off(); roomRef.child('gameState').off(); roomRef.child('scores/'+player.pseudo).off();
             roomRef.child('scores/' + player.pseudo).on('value', snap => {
@@ -681,8 +756,8 @@
             });
         }
 
-        function leaveGame() {
-            if(confirm("Quitter la partie ?")) {
+        function leaveGame(really = false) {
+            if(really) {
                 if(roomRef) roomRef.child('scores/'+player.pseudo).update({active:false});
                 localStorage.removeItem('presta_player_' + roomID);
                 location.reload();
