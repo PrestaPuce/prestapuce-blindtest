@@ -53,7 +53,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.030</div>
+    <div class="version-tag">v1.031</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -114,7 +114,7 @@
         </div>
 
         <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <button style="background:var(--blue); flex:1;" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
+            <button id="btn-open-buzz" style="background:var(--blue); flex:1;" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
             <button style="background:var(--danger); flex:1;" onclick="fullReset()">RESET TITRE</button>
         </div>
         
@@ -391,11 +391,9 @@
             roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true);
             initMJLogic(); 
             loadCrestGrid();
-            openScoreBoard(); // Ouvre automatiquement au lancement
+            openScoreBoard();
         }
 
-        // --- FONCTIONS OUTILS (ECRAN / REMOTE / GUIDE) ---
-        
         function openScoreBoard() {
             if(!roomID) return;
             const currentUrl = window.location.href.split('?')[0];
@@ -404,7 +402,6 @@
             window.open(scoreUrl, '_blank');
         }
 
-        // --- TOGGLE GUIDE (AVEC CACHE BUSTING) ---
         function toggleGuide() {
             const overlay = document.getElementById('overlay-guide');
             const iframe = document.getElementById('guide-iframe');
@@ -413,7 +410,6 @@
                 overlay.style.display = 'none';
             } else {
                 overlay.style.display = 'flex';
-                // Force reload pour éviter le cache
                 iframe.src = "guide.html?t=" + new Date().getTime();
             }
         }
@@ -426,8 +422,6 @@
             let basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
             let remoteUrl = basePath + "/remote.html?room=" + roomID;
             
-            console.log("Lien Remote : ", remoteUrl);
-
             qrContainer.innerHTML = "";
             new QRCode(qrContainer, {
                 text: remoteUrl,
@@ -519,38 +513,38 @@
                     } else document.getElementById('p-team').innerHTML = "Solo"; 
                 } else box.style.display = "none"; 
             });
-            // --- MODIFICATION ICI : ÉCOUTEUR EQUIPES + SAUVEGARDE AUTO ---
+
+            // GESTION BOUTON OUVRIR BUZZERS
+            roomRef.child('gameState').on('value', snap => {
+                const st = snap.val() ? snap.val().status : 'waiting';
+                const btn = document.getElementById('btn-open-buzz');
+                if(st === 'ready' || st === 'taken') {
+                    btn.innerText = "✅ Buzzers Ouverts";
+                    btn.style.background = "#27ae60"; // Vert Success
+                    btn.disabled = true; // Non-cliquable
+                } else {
+                    btn.innerText = "Ouvrir Buzzers";
+                    btn.style.background = "#3498db"; // Bleu original
+                    btn.disabled = false;
+                }
+            });
+
             roomRef.child('teams').on('value', snap => { 
                 globalTeams = snap.val() || {}; 
-                // AUTO-HARVEST : On parcourt les équipes pour trouver les nouveaux logos
                 const mjUid = auth.currentUser ? auth.currentUser.uid : null;
                 if(mjUid && !mjProfileData.isGuest) {
                     Object.values(globalTeams).forEach(team => {
-                        // Si c'est une image custom (http) et qu'elle n'est pas dans les valeurs déjà connues de customLogos
-                        // Note : Pour faire simple et éviter de lire la DB à chaque fois, on compare avec mjProfileData chargé en local
-                        // Mais mjProfileData n'est pas mis à jour en temps réel.
-                        // On va donc juste vérifier si l'URL est dans une liste temporaire "session" pour ne pas spammer la DB
                         if(team.icon && team.icon.startsWith('http') && !defaultCrests.includes(team.icon)) {
-                            // C'est un candidat. On vérifie en DB si on l'a déjà.
-                            // Pour éviter de faire 1000 requêtes, on le fait intelligemment : 
-                            // On ne le fait que si on ne l'a pas déjà fait dans cette session.
-                            // (Simplification pour v1.030 : on ajoute sans doublon via push/transaction serait l'idéal, 
-                            // mais ici on va faire un check simple côté client avec les données chargées au login).
-                            
                             let alreadyKnown = false;
                             if(mjProfileData.customLogos) {
                                 Object.values(mjProfileData.customLogos).forEach(savedUrl => {
                                     if(savedUrl === team.icon) alreadyKnown = true;
                                 });
                             }
-                            
                             if(!alreadyKnown) {
-                                // On l'ajoute !
                                 db.ref(`users/${mjUid}/customLogos`).push(team.icon);
-                                // On met à jour la copie locale pour ne pas le refaire 10 fois
                                 if(!mjProfileData.customLogos) mjProfileData.customLogos = {};
                                 mjProfileData.customLogos['new_' + Date.now()] = team.icon;
-                                console.log("🏹 Nouveau blason capturé : " + team.icon);
                             }
                         }
                     });
@@ -583,9 +577,18 @@
                 const isBlocked = currentBlocked[pseudo];
                 const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
                 let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
-                l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${pseudo}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${pseudo}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${pseudo}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${pseudo}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${pseudo}')">✖</button></div></div>`;
+                
+                // AJOUT DU BOUTON CORBEILLE
+                l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${pseudo}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${pseudo}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${pseudo}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${pseudo}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${pseudo}')" title="Expulser (Bannir)">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${pseudo}')" title="Supprimer (Libérer Pseudo)">🗑️</button></div></div>`;
             });
             bSection.style.display = hasBanned ? "block" : "none";
+        }
+
+        // --- NOUVELLE FONCTION DELETE ---
+        function deletePlayer(p) {
+            if(confirm("Supprimer DÉFINITIVEMENT " + p + " ?\nCela libèrera le pseudo.")) {
+                roomRef.child('scores/' + p).remove();
+            }
         }
 
         function forceBuzzer(pseudo) {
@@ -623,7 +626,7 @@
         function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
         function deleteTeam(n) { roomRef.child('teams/' + n).remove(); }
         function kickPlayer(p) { 
-            if(confirm("Expulser " + p + " ?")) {
+            if(confirm("Expulser " + p + " ? (Bannissement)")) {
                 roomRef.child('scores/' + p).update({ kicked: true }).then(() => {
                     setTimeout(() => { roomRef.child('scores/' + p).update({ active: false }); }, 1500);
                 });
