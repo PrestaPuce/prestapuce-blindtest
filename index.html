@@ -94,7 +94,7 @@
 </head>
 <body>
     
-    <div class="version-tag">v1.055</div>
+    <div class="version-tag">v1.059</div>
 
     <div id="podium-zone"></div>
     
@@ -472,7 +472,17 @@
             roomRef.child('mjLink').on('value', snap => { if(snap.val()) mjRedirectUrl = snap.val(); });
             roomRef.on('value', snap => { if(snap.val() === null) { alert("La session a été clôturée par l'animateur.\nMerci d'avoir joué !"); window.location.href = mjRedirectUrl; } });
             roomRef.child('scores/' + activePseudo + '/pts').on('value', snap => { document.getElementById('score').innerText = snap.val() || 0; });
-            roomRef.child('scores/' + activePseudo).on('value', snap => { const d = snap.val(); if(d) { userTeamName = d.teamName || "Solo"; userTeamIcon = d.teamIcon || ""; updateTeamDisplay(userTeamName, userTeamIcon); } });
+            // --- MODIFICATION ICI POUR DETECTER SUPPRESSION ---
+            roomRef.child('scores/' + activePseudo).on('value', snap => { 
+                const d = snap.val(); 
+                if(d) {
+                    userTeamName = d.teamName || "Solo"; userTeamIcon = d.teamIcon || ""; updateTeamDisplay(userTeamName, userTeamIcon); 
+                } else {
+                    // DONNÉES EFFACÉES = JOUEUR SUPPRIMÉ
+                    alert("Votre profil a été réinitialisé par l'animateur.\nMerci de vous reconnecter.");
+                    window.location.reload();
+                }
+            });
             roomRef.child('gameState').on('value', snap => { if(snap.val() && snap.val().status === 'endGame') handleEndGame(); else { gameState = snap.val() ? snap.val().status : 'waiting'; updateUI(); } });
             
             // LOGIQUE WINNER : SON VICTOIRE + VIBREUR LONG
