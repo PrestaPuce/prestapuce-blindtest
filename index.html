@@ -20,6 +20,7 @@
         
         .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         .step-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; background: var(--bg); z-index: 10; }
+        /* FIX ECRAN NOIR : La classe active rend visible */
         .step-screen.active { display: flex; }
 
         .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
@@ -60,15 +61,12 @@
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
         .team-card b { font-size: 1rem; }
 
-        /* HEADER JEU */
+        /* HEADER JEU PRO (Badge superposé) */
         .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 70px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
         .mini-profile { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; margin-right: 10px; }
-        
-        /* CONTAINER BADGE */
         .avatar-badge-container { position: relative; width: 45px; height: 45px; }
         .mini-avatar { width: 100%; height: 100%; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; overflow: hidden; border: 2px solid var(--accent); }
         .mini-crest-badge { position: absolute; bottom: -2px; right: -5px; width: 22px; height: 22px; background: white; border-radius: 50%; border: 2px solid var(--card); box-shadow: 0 2px 4px rgba(0,0,0,0.5); object-fit: contain; padding: 2px; }
-
         .mini-info { line-height: 1.2; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; flex-direction: column; justify-content: center; }
         .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
@@ -109,12 +107,12 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.083</div>
+    <div class="version-tag">v1.086</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
 
-        <div id="step-room" class="step-screen">
+        <div id="step-room" class="step-screen active">
             <div class="screen-content">
                 <h1>CODE SALLE</h1>
                 <p class="desc">Entre le code affiché sur l'écran principal.</p>
@@ -321,6 +319,7 @@
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let selectedTeamCrest = "", isEditing = false, stepHistory = [];
         let nsfwModel = null;
+        let mjRedirectUrl = "";
 
         // CHARGEMENT IA ET LISTES
         nsfwjs.load().then(model => { nsfwModel = model; console.log("IA Chargée"); });
@@ -432,6 +431,10 @@
                         const name = s.val();
                         if(name) document.getElementById('welcome-title').innerHTML = `Bienvenue chez<br>${name}`;
                     });
+                    
+                    // STOCKAGE LIEN REDIRECTION MJ
+                    roomRef.child('mjLink').once('value', s => { mjRedirectUrl = s.val() || ""; });
+
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
                     
                     const saved = localStorage.getItem('presta_player_current_profile');
@@ -631,6 +634,18 @@
                 currentWinner = val ? val.pseudo : null; updateUI();
             });
             roomRef.child('blockedPlayers/' + player.pseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
+            
+            // LISTENER FERMETURE SALLE MJ (Modif v1.086)
+            db.ref('activeRooms/' + roomID).on('value', snap => {
+                if(!snap.exists() && roomID !== "") {
+                    alert("L'animateur a fermé la salle.");
+                    if(mjRedirectUrl && mjRedirectUrl.startsWith('http')) {
+                        window.location.href = mjRedirectUrl;
+                    } else {
+                        location.reload();
+                    }
+                }
+            });
         }
 
         function handlePress(e) {
