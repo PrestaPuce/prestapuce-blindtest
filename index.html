@@ -24,18 +24,19 @@
         .content-top { justify-content: flex-start !important; }
         .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 30px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 85%, transparent); z-index: 20; }
 
-        /* TYPO & INPUTS */
+        /* TYPO FLUIDE */
         h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
         h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin: 0 0 15px 0; font-weight: normal; color: white; }
         p.desc { font-size: clamp(0.9rem, 3.5vw, 1.1rem); color: #bdc3c7; margin-bottom: 20px; line-height: 1.5; max-width: 500px; font-weight: 500; }
         
+        /* INPUTS & BOUTONS */
         input[type="text"], input[type="number"] { width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px; }
         input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
         .btn-main { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: clamp(1rem, 4vw, 1.3rem); font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 350px; }
         .btn-main:active { transform: scale(0.95); }
         .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; }
 
-        /* NAV */
+        /* NAVIGATION */
         #btn-back-global { position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); transition: 0.2s; backdrop-filter: blur(5px); }
         #btn-back-global svg { width: 22px; height: 22px; fill: white; margin-right: 2px; }
         #btn-back-global:active { background: rgba(255, 255, 255, 0.3); transform: scale(0.9); }
@@ -47,16 +48,16 @@
         .choice-content b { display: block; font-size: 1.1rem; margin-bottom: 3px; color: white; }
         .choice-content span { font-size: 0.85rem; color: #bdc3c7; }
 
-        /* GALERIES */
+        /* GALERIES & GRIDS */
         .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; justify-content: flex-start; }
         .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
         .grid-item { aspect-ratio: 1/1; background: rgba(255,255,255,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; padding: 5px; box-sizing: border-box; }
         .grid-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
-        .grid-item img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
+        .grid-item img { width: 100%; height: 100%; object-fit: contain; }
         .grid-item-emoji { font-size: clamp(1.8rem, 7vw, 2.5rem); padding: 0; }
 
-        /* EQUIPE LISTE */
+        /* LISTE EQUIPES */
         .team-list-container { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
         .team-card { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; display: flex; align-items: center; cursor: pointer; border: 2px solid transparent; }
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
@@ -72,7 +73,7 @@
         .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
         .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
 
-        /* GAME HEADER */
+        /* HEADER JEU */
         .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
         .mini-profile { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; margin-right: 10px; }
         .mini-avatar { width: 40px; height: 40px; flex-shrink: 0; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
@@ -186,7 +187,7 @@
                     <div class="common-grid" id="team-icon-grid"></div>
                 </div>
                 <div id="team-preview" style="display:none; align-items:center; justify-content:center; gap:15px; margin:20px 0;">
-                    <img id="team-preview-img" style="width:60px; height:60px; object-fit:contain; background:transparent; border-radius:0; padding:0;">
+                    <img id="team-preview-img" style="width:60px; height:60px; object-fit:contain; background:transparent;">
                     <span style="color:var(--success); font-weight:bold;">Image OK !</span>
                 </div>
             </div>
@@ -295,8 +296,8 @@
     <script>
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         
-        // --- GÉNÉRATEUR HÉRALDIQUE (SVG) ---
-        // Cette fonction crée des blasons vectoriels uniques sans images externes
+        // --- GÉNÉRATEUR DE BLASONS SVG (CODE v1.072) ---
+        // Remplace les liens externes cassés par des dessins vectoriels générés
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1']; // Rouge, Bleu, Or, Noir, Vert, Blanc
             const c1 = colors[i % colors.length];
@@ -306,20 +307,20 @@
             let pattern = "";
             const mod = i % 10;
             
-            // Formes géométriques médiévales basées sur l'index
-            if(mod === 0) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`; // Croix sautoir
-            else if(mod === 1) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`; // Croix
-            else if(mod === 2) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 L0 100 Z" fill="${c2}"/>`; // Tranché
-            else if(mod === 3) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="50" width="50" height="100" fill="${c2}"/>`; // Parti
-            else if(mod === 4) pattern = `<rect width="100" height="100" fill="${c1}"/><rect y="50" width="100" height="50" fill="${c2}"/>`; // Coupé
-            else if(mod === 5) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="0" y="0" width="50" height="50" fill="${c2}"/><rect x="50" y="50" width="50" height="50" fill="${c2}"/>`; // Écartelé
-            else if(mod === 6) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 100 L50 0 L100 100 Z" fill="${c2}"/>`; // Pointe
-            else if(mod === 7) pattern = `<rect width="100" height="100" fill="${c1}"/><circle cx="50" cy="50" r="30" fill="${c2}"/>`; // Tourteau
-            else if(mod === 8) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="33" width="33" height="100" fill="${c2}"/>`; // Pal
+            // Motifs géométriques médiévales basés sur l'index (imite le style Loiret)
+            if(mod === 0) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`; // Croix pleine
+            else if(mod === 1) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`; // Sautoir (X)
+            else if(mod === 2) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 L0 100 Z" fill="${c2}"/>`; // Tranché (Diagonale)
+            else if(mod === 3) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="33" width="33" height="100" fill="${c2}"/>`; // Pal (Barre verticale)
+            else if(mod === 4) pattern = `<rect width="100" height="100" fill="${c1}"/><rect y="33" width="100" height="33" fill="${c2}"/>`; // Fasce (Barre horizontale)
+            else if(mod === 5) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="0" y="0" width="50" height="50" fill="${c2}"/><rect x="50" y="50" width="50" height="50" fill="${c2}"/>`; // Écartelé (Damier 2x2)
+            else if(mod === 6) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 100 L50 0 L100 100 Z" fill="${c2}"/>`; // Chevron inversé
+            else if(mod === 7) pattern = `<rect width="100" height="100" fill="${c1}"/><circle cx="50" cy="50" r="30" fill="${c2}"/>`; // Tourteau (Rond central)
+            else if(mod === 8) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L50 50 L0 100 L50 50 L100 0" stroke="${c2}" stroke-width="10"/>`; // Zigzag
             else pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`; // Losange
 
-            // Ajout d'un contour bouclier
-            return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${pattern}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="3"/></svg>`)}`;
+            // Ajout d'un contour bouclier "Ecu Français Ancien"
+            return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${pattern}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`;
         }
 
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app" };
@@ -497,11 +498,11 @@
         function hideTeamGallery() { document.getElementById('team-crest-gallery').style.display = 'none'; document.getElementById('team-crest-choices').style.display = 'flex'; }
         function handleTeamFileUpload(input) { if(input.files[0]) { const r=new FileReader(); r.onload=function(e){selectedTeamCrest=e.target.result; showTeamPreview()}; r.readAsDataURL(input.files[0]); } }
         
-        // --- RENDU BLASONS SVG ---
+        // --- UTILISATION DU GÉNÉRATEUR SVG ---
         function renderTeamCrestPicker() { 
             const c=document.getElementById('team-icon-grid'); 
             c.innerHTML=""; 
-            // On génère 30 blasons différents
+            // On génère 30 blasons via la fonction createBlason()
             for(let i=0; i<30; i++) {
                 const url = createBlason(i);
                 const d=document.createElement('div'); 
