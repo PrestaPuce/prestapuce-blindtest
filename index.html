@@ -13,7 +13,7 @@
         :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; --grey: #7f8c8d; }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
         
-        /* --- STRUCTURE SANDWICH (Header Fixe / Contenu Scroll / Footer Fixe) --- */
+        /* --- STRUCTURE SANDWICH (ADAPTATIVE) --- */
         .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         
         .step-screen { 
@@ -23,16 +23,24 @@
         }
         .step-screen.active { display: flex; }
 
-        /* Zones de l'écran */
-        .screen-header { flex-shrink: 0; width: 100%; padding: 20px 20px 10px 20px; text-align: center; box-sizing: border-box; }
-        .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
-        .screen-content.centered { justify-content: center; } /* Pour centrer verticalement si peu de contenu */
-        .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 25px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 80%, transparent); z-index: 20; }
+        /* ZONES */
+        .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
+        
+        /* CONTENU : Centré par défaut, Scrollable si besoin */
+        .screen-content { 
+            flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; /* ALIGNEMENT CENTRAL PAR DÉFAUT */
+        }
+        /* Classe pour aligner en HAUT (Listes, Galeries) */
+        .content-top { justify-content: flex-start !important; }
 
-        /* --- TYPOGRAPHIE FLUIDE (S'adapte à la largeur) --- */
+        .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 30px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 85%, transparent); z-index: 20; }
+
+        /* --- TYPO FLUIDE --- */
         h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
         h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin: 0 0 15px 0; font-weight: normal; color: white; }
-        p.desc { font-size: clamp(0.9rem, 3vw, 1.1rem); color: #bdc3c7; margin-bottom: 20px; line-height: 1.5; max-width: 500px; font-weight: 500; }
+        p.desc { font-size: clamp(0.9rem, 3.5vw, 1.1rem); color: #bdc3c7; margin-bottom: 20px; line-height: 1.5; max-width: 500px; font-weight: 500; }
         
         /* --- INPUTS & BOUTONS --- */
         input[type="text"], input[type="number"] { 
@@ -49,7 +57,7 @@
         .btn-main:active { transform: scale(0.95); }
         .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; }
 
-        /* --- NAVIGATION (RETOUR) --- */
+        /* --- NAVIGATION --- */
         #btn-back-global {
             position: absolute; top: 15px; left: 15px; z-index: 500;
             width: 40px; height: 40px; border-radius: 50%;
@@ -58,10 +66,10 @@
             cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
             transition: 0.2s; backdrop-filter: blur(5px);
         }
-        #btn-back-global svg { width: 20px; height: 20px; fill: white; }
+        #btn-back-global svg { width: 22px; height: 22px; fill: white; margin-right: 2px; /* leger ajustement optique */ }
         #btn-back-global:active { background: rgba(255, 255, 255, 0.3); transform: scale(0.9); }
 
-        /* --- CARDS & MENUS --- */
+        /* --- CARDS (MENU) --- */
         .choice-card {
             background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; width: 100%; max-width: 350px;
             cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; text-align: left;
@@ -72,16 +80,20 @@
         .choice-content b { display: block; font-size: 1.1rem; margin-bottom: 3px; color: white; }
         .choice-content span { font-size: 0.85rem; color: #bdc3c7; }
 
-        /* --- AVATARS & CRESTS --- */
-        .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; }
-        .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; }
+        /* --- GALERIES --- */
+        .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; justify-content: flex-start; }
 
-        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 350px; padding-bottom: 20px; }
-        .avatar-item { 
+        /* Grille commune (Avatar & Blasons) */
+        .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
+        .grid-item { 
             aspect-ratio: 1/1; background: rgba(255,255,255,0.1); border-radius: 12px; 
-            display: flex; align-items: center; justify-content: center; font-size: clamp(1.5rem, 6vw, 2.5rem); cursor: pointer; border: 2px solid transparent; 
+            display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; 
+            overflow: hidden; padding: 5px; box-sizing: border-box;
         }
-        .avatar-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
+        .grid-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
+        .grid-item img { width: 100%; height: 100%; object-fit: contain; }
+        .grid-item-emoji { font-size: clamp(1.8rem, 7vw, 2.5rem); }
 
         /* --- TEAM LIST (COMPACTE) --- */
         .team-list-container { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
@@ -91,10 +103,6 @@
         }
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: white; padding: 2px; border-radius: 6px; }
         .team-card b { font-size: 1rem; }
-
-        .team-icon-scroll { display: flex; gap: 10px; overflow-x: auto; width: 100%; max-width: 350px; padding: 10px 0; min-height: 80px; }
-        .team-icon-opt { width: 60px; height: 60px; flex-shrink: 0; background: white; border-radius: 12px; padding: 4px; cursor: pointer; border: 3px solid transparent; }
-        .team-icon-opt.selected { border-color: var(--success); transform: scale(1.1); }
 
         /* --- TUTO LIST --- */
         .tuto-list { text-align: left; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
@@ -111,26 +119,19 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 60px; 
             display: flex; justify-content: space-between; align-items: center; 
             padding: 0 15px; box-sizing: border-box; z-index: 100; 
-            background: rgba(0,0,0,0.3); /* Leger fond pour lisibilité */
+            background: rgba(0,0,0,0.3);
         }
-        .mini-profile { 
-            display: flex; align-items: center; gap: 10px; 
-            flex: 1; min-width: 0; /* Permet la troncature */
-            margin-right: 10px;
-        }
+        .mini-profile { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; margin-right: 10px; }
         .mini-avatar { 
-            width: 40px; height: 40px; flex-shrink: 0;
-            background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); 
+            width: 40px; height: 40px; flex-shrink: 0; background: #333; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); 
         }
-        .mini-info { 
-            line-height: 1.1; font-size: 0.9rem; 
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* Coupe proprement */
-        }
+        .mini-info { line-height: 1.1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
 
         /* --- BUZZER --- */
-        .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 60px; /* Espace pour header */ }
+        .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 60px; }
         .buzzer { 
             width: 65vw; height: 65vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; 
             background: #e74c3c; box-shadow: 0 15px 0 #c0392b, 0 20px 40px rgba(0,0,0,0.4); 
@@ -157,7 +158,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.068</div>
+    <div class="version-tag">v1.070</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()">
@@ -165,7 +166,7 @@
         </div>
 
         <div id="step-room" class="step-screen active">
-            <div class="screen-content centered">
+            <div class="screen-content">
                 <h1>CODE SALLE</h1>
                 <p class="desc">Entre le code affiché sur l'écran principal.</p>
                 <input type="number" id="input-room" placeholder="EX: 1234">
@@ -174,7 +175,7 @@
         </div>
 
         <div id="step-welcome" class="step-screen">
-            <div class="screen-content centered">
+            <div class="screen-content">
                 <img id="mj-logo-welcome" src="" style="width:100px; border-radius:15px; margin-bottom:20px; display:none;">
                 <h1>BIENVENUE !</h1>
                 <p class="desc">Ton téléphone va devenir ton buzzer ! 🎧<br>Sois le plus rapide pour gagner !</p>
@@ -201,7 +202,7 @@
         </div>
 
         <div id="step-pseudo" class="step-screen">
-            <div class="screen-content centered">
+            <div class="screen-content">
                 <h2>Ton Nom de Scène ?</h2>
                 <input type="text" id="input-pseudo" placeholder="Ex: Batman, Zorro..." maxlength="12">
                 <button class="btn-main" onclick="validatePseudo()">Suivant</button>
@@ -210,8 +211,7 @@
 
         <div id="step-avatar" class="step-screen">
             <div class="screen-header"><h2>Ton Look</h2></div>
-            <div class="screen-content">
-                <div id="avatar-choices" class="selection-mode-container">
+            <div class="screen-content content-top"> <div id="avatar-choices" class="selection-mode-container" style="flex:1;">
                     <div class="choice-card" onclick="document.getElementById('file-input').click()">
                         <div class="choice-icon">📸</div>
                         <div class="choice-content"><b>Photo / Selfie</b><span>Ou choisir une image.</span></div>
@@ -222,15 +222,16 @@
                     </div>
                     <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
                 </div>
+                
                 <div id="avatar-gallery-view" class="gallery-container">
-                    <div class="avatar-grid" id="avatar-grid"></div>
+                    <div class="common-grid" id="avatar-grid"></div>
                 </div>
             </div>
         </div>
 
         <div id="step-mode" class="step-screen">
             <div class="screen-header"><h2>Ta Stratégie ?</h2></div>
-            <div class="screen-content centered">
+            <div class="screen-content">
                 <div class="choice-card" onclick="selectMode('Solo')">
                     <div class="choice-icon">👤</div>
                     <div class="choice-content"><b>Loup Solitaire</b><span>Je joue pour ma gloire.</span></div>
@@ -244,7 +245,7 @@
 
         <div id="step-team-action" class="step-screen">
             <div class="screen-header"><h2>Gestion d'Équipe</h2></div>
-            <div class="screen-content centered">
+            <div class="screen-content">
                 <div class="choice-card" onclick="goToTeamCreate()">
                     <div class="choice-icon">✨</div>
                     <div class="choice-content"><b>Créer une Équipe</b><span>Je suis le Capitaine.</span></div>
@@ -258,10 +259,10 @@
 
         <div id="step-team-create" class="step-screen">
             <div class="screen-header"><h2>Créer ton Clan</h2></div>
-            <div class="screen-content">
+            <div class="screen-content content-top">
                 <input type="text" id="new-team-name" placeholder="Nom de l'équipe">
                 
-                <div id="team-crest-choices" class="selection-mode-container" style="margin-top:10px; width:100%;">
+                <div id="team-crest-choices" class="selection-mode-container" style="margin-top:20px; width:100%;">
                     <div class="choice-card" onclick="document.getElementById('team-file-input').click()">
                         <div class="choice-icon">📤</div>
                         <div class="choice-content"><b>Uploader Blason</b><span>Image perso.</span></div>
@@ -274,8 +275,8 @@
                 </div>
 
                 <div id="team-crest-gallery" class="gallery-container" style="width:100%;">
-                    <p style="margin-bottom:5px;">Choisis un blason :</p>
-                    <div class="team-icon-scroll" id="team-icon-list"></div>
+                    <p style="margin-bottom:10px;">Choisis ton Blason :</p>
+                    <div class="common-grid" id="team-icon-grid"></div>
                 </div>
 
                 <div id="team-preview" style="display:none; align-items:center; justify-content:center; gap:15px; margin:20px 0;">
@@ -290,7 +291,7 @@
 
         <div id="step-team-join" class="step-screen">
             <div class="screen-header"><h2>Rejoindre ton Clan</h2></div>
-            <div class="screen-content">
+            <div class="screen-content content-top">
                 <div class="team-list-container" id="team-list"></div>
             </div>
             <div class="screen-footer">
@@ -299,7 +300,7 @@
         </div>
 
         <div id="step-recap" class="step-screen">
-            <div class="screen-content centered">
+            <div class="screen-content">
                 <div id="recap-avatar" style="font-size:clamp(4rem, 15vw, 6rem); margin-bottom:15px;"></div>
                 <h2 id="recap-name" style="color:var(--accent); font-weight:bold; margin:0; font-size:2rem;"></h2>
                 <p id="recap-team" style="color:#aaa; margin-top:5px; margin-bottom:40px; font-size:1.2rem;"></p>
@@ -405,20 +406,39 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        // CONTENU ENRICHI
+        // --- DATA : 40 AVATARS & 30 BLASONS HÉRALDIQUES ---
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
-        const defaultTeamCrests = [
-            "https://cdn-icons-png.flaticon.com/512/1165/1165187.png", // Bouclier Rouge
-            "https://cdn-icons-png.flaticon.com/512/1165/1165220.png", // Bouclier Bleu
-            "https://cdn-icons-png.flaticon.com/512/1165/1165191.png", // Bouclier Vert
-            "https://cdn-icons-png.flaticon.com/512/1165/1165207.png", // Bouclier Jaune
-            "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", // Lion
-            "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", // Aigle
+        const heraldicBlasons = [
+            "https://cdn-icons-png.flaticon.com/512/1065/1065545.png", // Lion Or
+            "https://cdn-icons-png.flaticon.com/512/1065/1065549.png", // Aigle Impérial
             "https://cdn-icons-png.flaticon.com/512/1065/1065553.png", // Loup
-            "https://cdn-icons-png.flaticon.com/512/2608/2608354.png", // Épées
+            "https://cdn-icons-png.flaticon.com/512/2608/2608354.png", // Épées Croisées
             "https://cdn-icons-png.flaticon.com/512/3026/3026369.png", // Viking
-            "https://cdn-icons-png.flaticon.com/512/2316/2316889.png", // Dragon
-            "https://cdn-icons-png.flaticon.com/512/3306/3306606.png"  // Couronne
+            "https://cdn-icons-png.flaticon.com/512/2316/2316889.png", // Dragon Vert
+            "https://cdn-icons-png.flaticon.com/512/3306/3306606.png", // Couronne
+            "https://cdn-icons-png.flaticon.com/512/862/862835.png",   // Fleur de Lys (Simulé par couronne stylisée si manquant, mais icon standard)
+            "https://cdn-icons-png.flaticon.com/512/2608/2608362.png", // Bouclier Croix Rouge
+            "https://cdn-icons-png.flaticon.com/512/2608/2608404.png", // Tour / Château
+            "https://cdn-icons-png.flaticon.com/512/2316/2316921.png", // Dragon Rouge
+            "https://cdn-icons-png.flaticon.com/512/3026/3026388.png", // Hache
+            "https://cdn-icons-png.flaticon.com/512/893/893539.png",   // Phoenix
+            "https://cdn-icons-png.flaticon.com/512/616/616659.png",   // Griffon (Aigle stylisé)
+            "https://cdn-icons-png.flaticon.com/512/2598/2598851.png", // Casque Chevalier
+            "https://cdn-icons-png.flaticon.com/512/738/738853.png",   // Licorne
+            "https://cdn-icons-png.flaticon.com/512/3466/3466107.png", // Ancre Marine
+            "https://cdn-icons-png.flaticon.com/512/2913/2913527.png", // Trèfle / Nature
+            "https://cdn-icons-png.flaticon.com/512/3418/3418886.png", // Rose
+            "https://cdn-icons-png.flaticon.com/512/1205/1205248.png", // Soleil
+            "https://cdn-icons-png.flaticon.com/512/2213/2213648.png", // Ours
+            "https://cdn-icons-png.flaticon.com/512/2275/2275143.png", // Cerf
+            "https://cdn-icons-png.flaticon.com/512/1998/1998749.png", // Taureau
+            "https://cdn-icons-png.flaticon.com/512/2293/2293026.png", // Sanglier
+            "https://cdn-icons-png.flaticon.com/512/1685/1685230.png", // Hermine (Symbole)
+            "https://cdn-icons-png.flaticon.com/512/2608/2608358.png", // Bouclier Rond Viking
+            "https://cdn-icons-png.flaticon.com/512/2608/2608373.png", // Bouclier Or
+            "https://cdn-icons-png.flaticon.com/512/3026/3026398.png", // Navire
+            "https://cdn-icons-png.flaticon.com/512/3026/3026363.png", // Clefs
+            "https://cdn-icons-png.flaticon.com/512/929/929429.png"    // Main Armure
         ];
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app" };
@@ -447,21 +467,17 @@
             const current = document.querySelector('.step-screen.active');
             if(current && pushToHistory) stepHistory.push(current.id);
             
-            // Fermeture auto des galeries lors d'un changement de page
             document.querySelectorAll('.gallery-container').forEach(g => g.style.display = 'none');
             document.querySelectorAll('.selection-mode-container').forEach(c => c.style.display = 'flex');
             document.getElementById('team-preview').style.display = 'none';
 
             document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
             document.getElementById(targetId).classList.add('active');
-            
             updateBackButton(targetId);
         }
 
         function goBack() {
             if(isEditing) { finishEdit(); return; }
-            
-            // LOGIQUE SOUS-MENUS : Si galerie ouverte, on ferme galerie d'abord
             const activeScreen = document.querySelector('.step-screen.active');
             const openGallery = activeScreen ? activeScreen.querySelector('.gallery-container[style*="flex"]') : null;
             
@@ -470,7 +486,6 @@
                 if(activeScreen.id.includes('team')) hideTeamGallery();
                 return;
             }
-
             if(stepHistory.length === 0) return;
             const prevId = stepHistory.pop();
             navigateTo(prevId, false);
@@ -559,29 +574,23 @@
         function showAvatarGallery() { document.getElementById('avatar-choices').style.display = 'none'; document.getElementById('avatar-gallery-view').style.display = 'flex'; }
         function hideAvatarGallery() { document.getElementById('avatar-gallery-view').style.display = 'none'; document.getElementById('avatar-choices').style.display = 'flex'; }
         function handleFileUpload(input) { if(input.files && input.files[0]) { const reader=new FileReader(); reader.onload=function(e){selectAvatar(e.target.result)}; reader.readAsDataURL(input.files[0]); } }
-        function renderAvatarGrid() { const g=document.getElementById('avatar-grid'); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='avatar-item'; d.innerText=a; d.onclick=()=>selectAvatar(a); g.appendChild(d); }); }
+        function renderAvatarGrid() { const g=document.getElementById('avatar-grid'); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='grid-item grid-item-emoji'; d.innerText=a; d.onclick=()=>selectAvatar(a); g.appendChild(d); }); }
         
         function selectAvatar(av) { 
             player.avatar = av; 
-            if(isEditing) {
-                roomRef.child('scores/'+player.pseudo).update({avatar: av});
-                finishEdit();
-            } else navigateTo('step-mode'); 
+            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({avatar: av}); finishEdit(); } 
+            else navigateTo('step-mode'); 
         }
 
         // --- MODE / TEAMS ---
         function selectMode(mode) {
             player.team = mode; player.teamIcon = "";
-            if(isEditing) {
-                roomRef.child('scores/'+player.pseudo).update({teamName: "Solo", teamIcon: ""});
-                finishEdit();
-            } else {
-                if(mode === 'Solo') showRecap(); else goToTeamAction();
-            }
+            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({teamName: "Solo", teamIcon: ""}); finishEdit(); } 
+            else { if(mode === 'Solo') showRecap(); else goToTeamAction(); }
         }
 
         function goToTeamAction() { navigateTo('step-team-action'); }
-        function goToTeamCreate() { navigateTo('step-team-create'); }
+        function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); }
         function goToTeamJoin() { navigateTo('step-team-join'); loadTeamsList(); }
 
         function loadTeamsList() {
@@ -601,16 +610,22 @@
 
         function joinTeam(name, icon) { 
             player.team = name; player.teamIcon = icon;
-            if(isEditing) {
-                roomRef.child('scores/'+player.pseudo).update({teamName: name, teamIcon: icon});
-                finishEdit();
-            } else showRecap(); 
+            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({teamName: name, teamIcon: icon}); finishEdit(); } 
+            else showRecap(); 
         }
 
+        function toggleCreateUI(show) {
+            if(show) {
+                document.getElementById('team-crest-choices').style.display = 'flex';
+                document.getElementById('team-crest-gallery').style.display = 'none';
+                document.getElementById('team-preview').style.display = 'none';
+                selectedTeamCrest = "";
+            }
+        }
         function showTeamGallery() { document.getElementById('team-crest-choices').style.display = 'none'; document.getElementById('team-crest-gallery').style.display = 'flex'; }
         function hideTeamGallery() { document.getElementById('team-crest-gallery').style.display = 'none'; document.getElementById('team-crest-choices').style.display = 'flex'; }
         function handleTeamFileUpload(input) { if(input.files[0]) { const r=new FileReader(); r.onload=function(e){selectedTeamCrest=e.target.result; showTeamPreview()}; r.readAsDataURL(input.files[0]); } }
-        function renderTeamCrestPicker() { const c=document.getElementById('team-icon-list'); c.innerHTML=""; defaultTeamCrests.forEach(url=>{ const i=document.createElement('img'); i.src=url; i.className="team-icon-opt"; i.onclick=()=>{selectedTeamCrest=url; showTeamPreview()}; c.appendChild(i); }); }
+        function renderTeamCrestPicker() { const c=document.getElementById('team-icon-grid'); c.innerHTML=""; heraldicBlasons.forEach(url=>{ const d=document.createElement('div'); d.className='grid-item'; const i=document.createElement('img'); i.src=url; d.onclick=()=>{selectedTeamCrest=url; showTeamPreview()}; d.appendChild(i); c.appendChild(d); }); }
         function showTeamPreview() { document.getElementById('team-crest-choices').style.display='none'; document.getElementById('team-crest-gallery').style.display='none'; document.getElementById('team-preview-img').src=selectedTeamCrest; document.getElementById('team-preview').style.display='flex'; }
         
         function createNewTeam() {
