@@ -11,8 +11,8 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/nsfwjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/nsfwjs" defer></script>
 
     <style>
         :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; --grey: #7f8c8d; }
@@ -20,7 +20,7 @@
         
         .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         .step-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; background: var(--bg); z-index: 10; }
-        /* FIX ECRAN NOIR : La classe active rend visible */
+        /* IMPORTANT : Active par défaut pour éviter écran noir */
         .step-screen.active { display: flex; }
 
         .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
@@ -61,7 +61,7 @@
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
         .team-card b { font-size: 1rem; }
 
-        /* HEADER JEU PRO (Badge superposé) */
+        /* HEADER JEU PRO (Badge superposé + Mini QR) */
         .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 70px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
         .mini-profile { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; margin-right: 10px; }
         .avatar-badge-container { position: relative; width: 45px; height: 45px; }
@@ -99,15 +99,15 @@
         .settings-btn:hover { background: rgba(255,255,255,0.2); }
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
         
-        /* DESIGN ACCUEIL ALIGNE */
-        .welcome-grid { display:flex; flex-direction:column; gap:15px; text-align:left; background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; width:100%; max-width:320px; }
+        /* DESIGN ACCUEIL ALIGNE PRO */
+        .welcome-grid { display:flex; flex-direction:column; gap:15px; text-align:left; background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; width:100%; max-width:320px; margin-top:20px; }
         .welcome-item { display:flex; align-items:center; font-size:1.1rem; }
         .welcome-icon { font-size:1.5rem; margin-right:15px; width:30px; text-align:center; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.086</div>
+    <div class="version-tag">v1.087</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -123,14 +123,16 @@
 
         <div id="step-welcome" class="step-screen">
             <div class="screen-content">
-                <img id="mj-logo-welcome" src="" style="width:100px; max-height:100px; object-fit:contain; border-radius:15px; margin-bottom:15px; display:none;">
+                <img id="mj-logo-welcome" src="" style="width:100px; max-height:100px; object-fit:contain; border-radius:15px; display:none;">
                 <h1 id="welcome-title">BIENVENUE !</h1>
                 <p class="desc">Ton téléphone va se transformer en buzzer interactif ! 🎧</p>
+                
                 <div class="welcome-grid">
                     <div class="welcome-item"><span class="welcome-icon">🔊</span><b>Monte le son</b></div>
                     <div class="welcome-item"><span class="welcome-icon">🔓</span><b>Ne verrouille pas</b></div>
                     <div class="welcome-item"><span class="welcome-icon">⚡</span><b>Sois rapide !</b></div>
                 </div>
+
                 <button class="btn-main" onclick="navigateTo('step-auth')" style="margin-top:20px;">C'est parti ! 🚀</button>
             </div>
         </div>
@@ -319,10 +321,12 @@
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let selectedTeamCrest = "", isEditing = false, stepHistory = [];
         let nsfwModel = null;
-        let mjRedirectUrl = "";
+        let mjRedirectUrl = ""; // Lien MJ pour redirection
 
-        // CHARGEMENT IA ET LISTES
-        nsfwjs.load().then(model => { nsfwModel = model; console.log("IA Chargée"); });
+        // CHARGEMENT IA
+        nsfwjs.load().then(model => { nsfwModel = model; console.log("IA Chargée"); }).catch(e=>console.log("Erreur IA",e));
+        
+        // LISTES DONNÉES
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹","😺","😸","😹","😻","😼","😽","🙀","😿","😾"];
 
         // GENERATEUR BLASON SVG (Identique MJ)
@@ -357,16 +361,21 @@
         }
 
         window.onload = () => {
+            // FIX QR CODE / LIEN DIRECT
             const urlParams = new URLSearchParams(window.location.search);
             const r = urlParams.get('room');
-            if(r) { roomID = r; checkRoomAndStart(true); } 
-            else { 
-                // Fix QR Code : On s'assure que step-room est visible si pas de code
-                document.getElementById('step-room').style.display = 'flex'; 
+            if(r) { 
+                roomID = r; 
+                checkRoomAndStart(true); 
+            } else { 
+                document.getElementById('step-room').classList.add('active'); // Sécurité
             }
+            
+            // FIX GALERIES
             renderAvatarGrid(); 
             renderTeamCrestPicker();
-            // Touche Entrée
+            
+            // FIX TOUCHE ENTREE
             document.getElementById('input-room').addEventListener('keypress', (e)=>{if(e.key==='Enter') validateRoomStep()});
             document.getElementById('input-pseudo').addEventListener('keypress', (e)=>{if(e.key==='Enter') validatePseudo()});
             document.getElementById('new-team-name').addEventListener('keypress', (e)=>{if(e.key==='Enter') createNewTeam()});
@@ -432,9 +441,9 @@
                         if(name) document.getElementById('welcome-title').innerHTML = `Bienvenue chez<br>${name}`;
                     });
                     
-                    // STOCKAGE LIEN REDIRECTION MJ
+                    // MEMORISATION LIEN MJ
                     roomRef.child('mjLink').once('value', s => { mjRedirectUrl = s.val() || ""; });
-
+                    
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
                     
                     const saved = localStorage.getItem('presta_player_current_profile');
@@ -461,7 +470,7 @@
                         } catch(e) {}
                     }
                     navigateTo('step-welcome');
-                } else { alert("Salle introuvable !"); document.getElementById('step-room').style.display = 'flex'; }
+                } else { alert("Salle introuvable !"); document.getElementById('step-room').classList.add('active'); }
             });
         }
 
@@ -514,7 +523,7 @@
                 updateHeaderVisuals();
                 finishEdit(); 
             } 
-            else navigateTo('step-mode'); 
+            else navigateTo('step-mode'); // FIX BOUCLE SELFIE
         }
 
         function selectMode(mode) { player.team = mode; player.teamIcon = ""; if(isEditing) { roomRef.child('scores/'+player.pseudo).update({teamName: "Solo", teamIcon: ""}); updateHeaderVisuals(); finishEdit(); } else { if(mode === 'Solo') showRecap(); else goToTeamAction(); } }
@@ -544,7 +553,8 @@
         function handleTeamFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectedTeamCrest=base64; showTeamPreview(); }); } }
         function renderTeamCrestPicker() { const c=document.getElementById('team-icon-grid'); c.innerHTML=""; for(let i=0; i<30; i++) { const url = createBlason(i); const d=document.createElement('div'); d.className='grid-item'; const img=document.createElement('img'); img.src=url; d.onclick=()=>{selectedTeamCrest=url; showTeamPreview()}; d.appendChild(img); c.appendChild(d); } }
         function showTeamPreview() { document.getElementById('team-crest-choices').style.display='none'; document.getElementById('team-crest-gallery').style.display='none'; document.getElementById('team-preview-img').src=selectedTeamCrest; document.getElementById('team-preview').style.display='flex'; }
-        
+        function handleFileUpload(input) { if(input.files && input.files[0]) { compressImage(input.files[0], 300, function(base64, isSensitive) { if(isSensitive) { player.avatar = "⏳"; if(isEditing) roomRef.child('scores/'+player.pseudo).update({avatarPending: base64}); else { player.avatarPending = base64; selectAvatar("⏳"); } } else { selectAvatar(base64); } }); } }
+
         function createNewTeam() {
             const name = document.getElementById('new-team-name').value.trim();
             if(name.length < 2 || !selectedTeamCrest) return alert("Nom et blason requis.");
@@ -634,16 +644,13 @@
                 currentWinner = val ? val.pseudo : null; updateUI();
             });
             roomRef.child('blockedPlayers/' + player.pseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
-            
-            // LISTENER FERMETURE SALLE MJ (Modif v1.086)
+
+            // FIX FERMETURE SALLE (MJ)
             db.ref('activeRooms/' + roomID).on('value', snap => {
                 if(!snap.exists() && roomID !== "") {
                     alert("L'animateur a fermé la salle.");
-                    if(mjRedirectUrl && mjRedirectUrl.startsWith('http')) {
-                        window.location.href = mjRedirectUrl;
-                    } else {
-                        location.reload();
-                    }
+                    if(mjRedirectUrl && mjRedirectUrl.startsWith('http')) window.location.href = mjRedirectUrl;
+                    else location.reload();
                 }
             });
         }
