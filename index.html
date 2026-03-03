@@ -19,12 +19,13 @@
 
         .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
         
-        /* Team Create : Pas de scroll global */
-        #step-team-create .screen-content { overflow: hidden; }
-
+        /* Modif v1.091 Validée : Content Flexible */
         .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .content-top { justify-content: flex-start !important; }
         
+        /* Modif v1.091 Validée : Pas de scroll global sur Team Create */
+        #step-team-create .screen-content { overflow: hidden; }
+
         .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 30px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 85%, transparent); z-index: 20; }
 
         h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
@@ -49,6 +50,7 @@
 
         .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
         
+        /* Modif v1.091 Validée */
         .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; min-height: 0; justify-content: flex-start; }
         
         .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
@@ -62,6 +64,7 @@
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
         .team-card b { font-size: 1rem; }
 
+        /* Modif v1.091 Validée : Grille flexible */
         .crest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 15px 0; width: 100%; max-width: 350px; flex: 1; min-height: 0; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; box-sizing: border-box; }
         .crest-item { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; background: white; padding: 5px; box-sizing: border-box; }
         .crest-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
@@ -76,24 +79,31 @@
         .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
         .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
 
-        /* --- HEADER JEU v1.094 (Placement Précis) --- */
+        /* --- HEADER JEU v1.095 (Correction Alignement & Séparation) --- */
         .game-header { 
             position: absolute; top: 0; left: 0; width: 100%; height: 60px; 
-            display: flex; justify-content: space-between; align-items: center; 
+            display: flex; align-items: center; /* Centrage vertical global */
             padding: 0 15px; box-sizing: border-box; z-index: 100; 
             background: rgba(0,0,0,0.3); 
         }
-        .mini-profile { display: flex; align-items: center; flex: 1; min-width: 0; margin-right: 10px; }
-        
-        /* Conteneur Avatar : Taille fixée 46px (rentre dans 60px) */
+
+        /* 1. Profil Wrapper */
+        .mini-profile {
+            display: flex;
+            align-items: center; /* Pour que l'avatar soit centré verticalement */
+            position: relative; /* Référence pour les éléments internes */
+            flex: 1; /* Prend la place dispo à gauche */
+            height: 100%;
+        }
+
+        /* 2. Avatar Container (Taille réduite pour rentrer dans le noir) */
         .avatar-wrapper { 
             position: relative; 
-            width: 46px; 
-            height: 46px; 
-            flex-shrink: 0; 
+            width: 44px; /* Taille Avatar */
+            height: 44px; 
+            flex-shrink: 0;
         }
         
-        /* Avatar Rond */
         .mini-avatar { 
             width: 100%; height: 100%; 
             background: #333; 
@@ -103,45 +113,47 @@
             border: 2px solid var(--accent); 
         }
         
-        /* Badge : 
-           - bottom: 0 -> Aligné BAS avec le BAS de l'avatar
-           - right: -12px -> Décalé vers la droite, sort du cercle
-        */
+        /* 3. Badge : Aligné Bas/Bas avec avatar, décalé droite */
         #team-badge { 
             position: absolute; 
             bottom: 0; 
-            right: -12px; 
-            width: 22px; height: 22px; 
+            right: -6px; /* Sort légèrement à droite */
+            width: 18px; height: 18px; 
             border-radius: 50%; 
-            border: 2px solid var(--card); /* Bordure sombre */
+            border: 2px solid #2c3e50; 
             background: white; 
             object-fit: cover; 
             display: none; 
             z-index: 5; 
         }
 
-        /* Texte :
-           - margin-left: 20px -> Décalage pour laisser la place au badge
-           - Pseudo commence au bord droit du badge
-        */
-        .mini-info { 
-            margin-left: 20px; 
-            line-height: 1.1; 
-            font-size: 0.9rem; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
+        /* 4. Conteneur Texte (Séparé) */
+        .text-info-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Espace Pseudo (haut) / Equipe (bas) */
+            height: 40px; /* Même hauteur que l'avatar environ pour alignement */
+            margin-left: 16px; /* Décalage pour laisser place au badge */
         }
-        
-        #game-pseudo { margin-bottom: 2px; }
+
+        #game-pseudo { 
+            font-weight: bold; 
+            font-size: 1rem; 
+            line-height: 1.1;
+            white-space: nowrap; 
+        }
+
+        #game-team { 
+            font-size: 0.8rem; 
+            color: var(--accent); 
+            white-space: nowrap; 
+            line-height: 1;
+            /* Le justify-content: space-between va le coller en bas, aligné avec le badge */
+        }
         /* ----------------------------------------------- */
 
-        .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .header-actions { display: flex; gap: 8px; flex-shrink: 0; margin-left: 10px; }
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
-        
         .icon-btn svg { width: 20px; height: 20px; fill: white; }
 
         .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 60px; }
@@ -165,7 +177,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.094</div>
+    <div class="version-tag">v1.095</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -303,9 +315,9 @@
                         <div class="mini-avatar" id="game-avatar"></div>
                         <img id="team-badge" src="" alt="Team">
                     </div>
-                    <div class="mini-info">
-                        <b id="game-pseudo">Joueur</b>
-                        <span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span>
+                    <div class="text-info-col">
+                        <span id="game-pseudo">Joueur</span>
+                        <span id="game-team" style="color:var(--accent);">Solo</span>
                     </div>
                 </div>
                 <div class="header-actions">
@@ -674,18 +686,22 @@
             else miniAv.innerText = player.avatar;
             document.getElementById('game-pseudo').innerText = player.pseudo;
             
-            // MODIF JS : GESTION AFFICHAGE TEAM (v1.094)
+            // MODIF JS : GESTION AFFICHAGE TEAM (v1.095)
+            const teamEl = document.getElementById('game-team');
+            const badgeEl = document.getElementById('team-badge');
+            
             if (player.team !== "Solo") {
-                document.getElementById('game-team').innerText = player.team;
-                // Affiche Badge
-                const badge = document.getElementById('team-badge');
+                teamEl.innerText = player.team;
+                teamEl.style.display = "block"; // Affiche l'équipe
+                
                 if (player.teamIcon) {
-                    badge.src = player.teamIcon;
-                    badge.style.display = "block";
+                    badgeEl.src = player.teamIcon;
+                    badgeEl.style.display = "block";
                 }
             } else {
-                document.getElementById('game-team').innerText = "Solo";
-                document.getElementById('team-badge').style.display = "none";
+                teamEl.innerText = "Solo";
+                teamEl.style.display = "block"; // On peut laisser Solo
+                badgeEl.style.display = "none";
             }
 
             const buzzerBg = document.getElementById('buzzer-bg');
