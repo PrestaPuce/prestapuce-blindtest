@@ -13,42 +13,35 @@
         :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; --grey: #7f8c8d; }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
         
-        /* STRUCTURE SANDWICH */
         .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         .step-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; background: var(--bg); z-index: 10; }
         .step-screen.active { display: flex; }
 
-        /* ZONES */
         .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
         .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .content-top { justify-content: flex-start !important; }
         .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 30px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 85%, transparent); z-index: 20; }
 
-        /* TYPO FLUIDE */
         h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
         h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin: 0 0 15px 0; font-weight: normal; color: white; }
         p.desc { font-size: clamp(0.9rem, 3.5vw, 1.1rem); color: #bdc3c7; margin-bottom: 20px; line-height: 1.5; max-width: 500px; font-weight: 500; }
         
-        /* INPUTS & BOUTONS */
         input[type="text"], input[type="number"] { width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px; }
         input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
         .btn-main { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: clamp(1rem, 4vw, 1.3rem); font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 350px; }
         .btn-main:active { transform: scale(0.95); }
         .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; }
 
-        /* NAV & ICONS */
         #btn-back-global { position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); transition: 0.2s; backdrop-filter: blur(5px); }
         #btn-back-global svg { width: 22px; height: 22px; fill: white; margin-right: 2px; }
         #btn-back-global:active { background: rgba(255, 255, 255, 0.3); transform: scale(0.9); }
 
-        /* CARDS */
         .choice-card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; width: 100%; max-width: 350px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.2); box-sizing: border-box; }
         .choice-card:active { transform: scale(0.98); background: rgba(255,255,255,0.1); border-color: var(--accent); }
         .choice-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
         .choice-content b { display: block; font-size: 1.1rem; margin-bottom: 3px; color: white; }
         .choice-content span { font-size: 0.85rem; color: #bdc3c7; }
 
-        /* GALERIES */
         .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; justify-content: flex-start; }
         .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
@@ -57,17 +50,29 @@
         .grid-item img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
         .grid-item-emoji { font-size: clamp(1.8rem, 7vw, 2.5rem); padding: 0; }
 
-        /* LISTE EQUIPES */
         .team-list-container { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
         .team-card { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; display: flex; align-items: center; cursor: pointer; border: 2px solid transparent; }
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
         .team-card b { font-size: 1rem; }
 
-        /* CSS GRILLE BLASONS (CORRIGÉ v1.087) */
-        .crest-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; width: 100%; max-width: 350px; max-height: 250px; overflow-y: auto; padding: 5px; background: rgba(0,0,0,0.2); border-radius: 10px; box-sizing: border-box; }
+        /* --- CORRECTION CSS GRILLE BLASONS (v1.088) --- */
+        .crest-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); /* Passage à 4 colonnes pour aérer */
+            gap: 10px; 
+            margin: 15px 0; 
+            width: 100%; 
+            max-width: 360px; 
+            max-height: 280px; 
+            overflow-y: auto; 
+            padding: 10px; 
+            background: rgba(0,0,0,0.3); /* Fond plus sombre pour contraste */
+            border-radius: 12px; 
+            box-sizing: border-box; 
+        }
         .crest-item { 
             width: 100%; 
-            aspect-ratio: 1; 
+            aspect-ratio: 1 / 1; /* C'est ça qui force le carré parfait */
             border-radius: 8px; 
             cursor: pointer; 
             border: 2px solid transparent; 
@@ -75,20 +80,26 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            background: white; /* Fond blanc pour éviter transparence */
-            padding: 0; /* Plus de padding */
-            overflow: hidden; 
+            background: white; /* Fond blanc obligatoire pour éviter la transparence */
+            padding: 0; /* Pas de padding interne */
+            overflow: hidden; /* Coupe ce qui dépasse */
             box-sizing: border-box;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .crest-item img { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover; /* Remplissage complet */
-            display: block;
+            object-fit: cover; /* Remplit tout le carré */
+            display: block; 
         }
-        .crest-item.selected { border-color: var(--accent); transform: scale(1.05); box-shadow: 0 0 10px var(--accent); z-index: 2; }
+        .crest-item.selected { 
+            border-color: var(--accent); 
+            transform: scale(0.95); /* Effet d'enfoncement plutôt que grossissement */
+            box-shadow: 0 0 0 3px var(--accent); /* Bordure externe propre */
+            z-index: 2; 
+        }
+        /* ----------------------------------------------- */
 
-        /* TUTO */
         .tuto-list { text-align: left; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
         .tuto-item { display: flex; align-items: flex-start; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; }
         .dot { width: 18px; height: 18px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; margin-top: 3px; }
@@ -98,24 +109,15 @@
         .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
         .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
 
-        /* HEADER JEU (MODIFIÉ v1.087 pour Avatar + Badge) */
         .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
-        .mini-profile { display: flex; align-items: center; gap: 0px; flex: 1; min-width: 0; margin-right: 10px; }
-        
-        /* Nouveau Wrapper Avatar */
-        .avatar-wrapper { position: relative; width: 40px; height: 40px; margin-right: 12px; flex-shrink: 0; }
-        .mini-avatar { width: 100%; height: 100%; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
-        
-        /* Badge Équipe */
-        #team-badge { position: absolute; bottom: -3px; right: -3px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--card); background: white; object-fit: cover; display: none; z-index: 5; }
-
-        .mini-info { line-height: 1.1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; flex-direction: column; justify-content: center; }
+        .mini-profile { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; margin-right: 10px; }
+        .mini-avatar { width: 40px; height: 40px; flex-shrink: 0; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
+        .mini-info { line-height: 1.1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
         
         .icon-btn svg { width: 20px; height: 20px; fill: white; }
 
-        /* BUZZER */
         .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 60px; }
         .buzzer { width: 65vw; height: 65vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; background: #e74c3c; box-shadow: 0 15px 0 #c0392b, 0 20px 40px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.1s; cursor: pointer; }
         .buzzer.buzzer-pressed { transform: translateY(15px); box-shadow: 0 0 0 #c0392b; }
@@ -126,7 +128,6 @@
         .buzzer-label { font-size: clamp(1.2rem, 5vw, 1.8rem); font-weight: bold; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; z-index: 2; position: relative; }
         .buzzer-img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; border-radius: 50%; pointer-events: none; }
 
-        /* OVERLAYS */
         .overlay-full { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; padding: 20px; box-sizing: border-box; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .qr-card, .settings-content { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 320px; box-sizing: border-box; }
@@ -138,7 +139,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.087</div>
+    <div class="version-tag">v1.088</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -272,11 +273,8 @@
         <div id="step-game" class="step-screen" style="padding:0;">
             <div class="game-header">
                 <div class="mini-profile">
-                    <div class="avatar-wrapper">
-                        <div class="mini-avatar" id="game-avatar"></div>
-                        <img id="team-badge" src="" alt="Team">
-                    </div>
-                    <div class="mini-info"><b id="game-pseudo">Joueur</b><span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span></div>
+                    <div class="mini-avatar" id="game-avatar"></div>
+                    <div class="mini-info"><b id="game-pseudo">Joueur</b><br><span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span></div>
                 </div>
                 <div class="header-actions">
                     <div class="icon-btn" onclick="openSettings()">⚙️</div>
@@ -336,7 +334,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
+        const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         function compressImage(file, maxWidth, callback) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -399,7 +397,6 @@
             if(r) { roomID = r; checkRoomAndStart(true); } 
             else { navigateTo('step-room'); }
             renderAvatarGrid(); 
-            // PAS D'APPEL BLOQUANT ICI
             document.getElementById('input-room').addEventListener('keypress', (e)=>{if(e.key==='Enter') validateRoomStep()});
             document.getElementById('input-pseudo').addEventListener('keypress', (e)=>{if(e.key==='Enter') validatePseudo()});
         };
@@ -528,7 +525,7 @@
         }
 
         function goToTeamAction() { navigateTo('step-team-action'); }
-        function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); renderTeamCrestPicker(); } // Appel à la grille (corrigé)
+        function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); renderTeamCrestPicker(); } // Appel à la grille
         function goToTeamJoin() { navigateTo('step-team-join'); loadTeamsList(); }
 
         function loadTeamsList() {
@@ -570,11 +567,9 @@
             const c = document.getElementById('team-icon-grid'); c.innerHTML="";
             
             if(roomRef) {
-                // 1. Config MJ
                 roomRef.child('config/showDefaults').on('value', snap => {
                     const showDefaults = (snap.val() === false) ? false : true;
                     
-                    // 2. Dossier Library
                     roomRef.child('library').on('value', snapLib => {
                         c.innerHTML = "";
                         const libraryImages = snapLib.val() || {};
@@ -583,7 +578,6 @@
                             createCrestItem(url, c);
                         });
 
-                        // 3. Logos par défaut
                         if(showDefaults) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); } }
                     });
                 });
@@ -608,7 +602,6 @@
         function createNewTeam() {
             const name = document.getElementById('new-team-name').value.trim();
             if(name.length < 2 || !selectedTeamCrest) return alert("Nom et blason requis.");
-            // On push aussi dans la library pour les autres joueurs
             roomRef.child('library').push(selectedTeamCrest);
             roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); });
         }
@@ -644,21 +637,7 @@
             if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
             else miniAv.innerText = player.avatar;
             document.getElementById('game-pseudo').innerText = player.pseudo;
-            
-            // MODIF JS : GESTION AFFICHAGE TEAM
-            if (player.team !== "Solo") {
-                document.getElementById('game-team').innerText = player.team;
-                // Affiche Badge
-                const badge = document.getElementById('team-badge');
-                if (player.teamIcon) {
-                    badge.src = player.teamIcon;
-                    badge.style.display = "block";
-                }
-            } else {
-                document.getElementById('game-team').innerText = "Solo";
-                document.getElementById('team-badge').style.display = "none";
-            }
-
+            document.getElementById('game-team').innerText = player.team;
             const buzzerBg = document.getElementById('buzzer-bg');
             if(player.avatar.length > 20) { buzzerBg.src = player.avatar; buzzerBg.style.display = "block"; } else { buzzerBg.style.display = "none"; }
             
@@ -670,7 +649,6 @@
             roomRef.child('buzzers').off();
             roomRef.child('gameState').off(); roomRef.child('scores/'+player.pseudo).off();
             
-            // Messages de fin intelligents
             roomRef.on('value', snap => {
                 if(!snap.exists()) { handleExit("🛑 La partie a été clôturée par " + mjName + ".", true); }
             });
