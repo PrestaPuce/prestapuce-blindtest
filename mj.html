@@ -73,7 +73,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.039</div>
+    <div class="version-tag">v1.040</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -98,7 +98,7 @@
         
         <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:15px 0;">
         
-        <button onclick="openLibraryManager()" style="background:#8e44ad; margin-bottom:15px;">📂 Gérer ma Bibliothèque d'Images</button>
+        <button onclick="openLibraryManager('profile')" style="background:#8e44ad; margin-bottom:15px;">📂 Gérer ma Bibliothèque d'Images</button>
 
         <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">PERSONNALISATION COMPTE</p>
         <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
@@ -155,7 +155,7 @@
             <h3>Gestion Équipes</h3>
             <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
                 <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()" style="margin-bottom:0;">
-                <button class="btn-folder" onclick="openLibraryManager()" title="Ouvrir Bibliothèque">📁</button>
+                <button class="btn-folder" onclick="openLibraryManager('room')" title="Ouvrir Bibliothèque">📁</button>
             </div>
             
             <div class="crest-picker" id="crest-grid"></div>
@@ -207,7 +207,7 @@
                 </label>
             </div>
             
-            <p style="color:#ccc; font-size:0.9rem;">Gérez vos logos personnels (visibles par les joueurs).</p>
+            <p style="color:#ccc; font-size:0.9rem;" id="lib-context-msg">Gérez vos logos personnels (visibles par les joueurs).</p>
             
             <div id="lib-content" class="lib-grid" style="max-height:300px; overflow-y:auto; background:rgba(0,0,0,0.2); border-radius:10px; margin-bottom:20px;">
                 </div>
@@ -226,7 +226,10 @@
 
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
-        let mjLocalCustoms = new Set(); 
+        
+        // NOUVEAU: Données de la bibliothèque centrale
+        let libraryData = {}; 
+        let currentLibMode = 'room'; // 'room' ou 'profile'
         let showDefaults = true;
 
         // GENERATEUR SVG
@@ -261,8 +264,7 @@
                 mjProfileData = data;
                 if(data.settings && data.settings.showDefaults !== undefined) showDefaults = data.settings.showDefaults;
                 else showDefaults = true;
-                mjLocalCustoms.clear();
-                if(data.customLogos) Object.values(data.customLogos).forEach(url => mjLocalCustoms.add(url));
+                
                 if(mjProfileData.isGuest === true) { cleanGuestData(user.uid); }
                 else {
                     document.getElementById('mj-display-name').innerText = data.prenom || "MJ";
@@ -342,6 +344,17 @@
             roomRef.child('mjLogo').set(cl); if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink);
             roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true);
             roomRef.child('config/showDefaults').set(showDefaults);
+
+            // NOUVEAU v1.040 : COPIE DES LOGOS PERSOS VERS LA LIBRARY DE LA SALLE
+            const uid = auth.currentUser.uid;
+            if(!mjProfileData.isGuest) {
+                db.ref(`users/${uid}/customLogos`).once('value', snap => {
+                    if(snap.exists()) {
+                        roomRef.child('library').update(snap.val());
+                    }
+                });
+            }
+
             initMJLogic(); loadCrestGrid(); openScoreBoard();
         }
 
@@ -352,11 +365,19 @@
             q.innerHTML = ""; new QRCode(q, { text: window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/remote.html?room=" + roomID, width: 250, height: 250 }); o.style.display = 'flex'; 
         }
 
-        // --- GESTION BIBLIOTHEQUE ---
-        function openLibraryManager() {
-            const uid = auth.currentUser ? auth.currentUser.uid : null; if(!uid) return;
+        // --- GESTION BIBLIOTHEQUE UNIFIEE ---
+        function openLibraryManager(mode) {
+            // mode = 'profile' (base perso) OU 'room' (base de la salle en direct)
+            if(!auth.currentUser) return;
+            currentLibMode = mode;
             document.getElementById('chk-show-defaults').checked = showDefaults;
-            renderLibrary(); document.getElementById('overlay-library').style.display = 'flex';
+            
+            const msg = document.getElementById('lib-context-msg');
+            if(mode === 'profile') msg.innerText = "Gérez vos images personnelles (Sauvegardées pour toutes vos parties).";
+            else msg.innerText = "Gérez les images de CETTE SALLE (Supprimez ici pour effacer l'image du jeu).";
+
+            renderLibrary();
+            document.getElementById('overlay-library').style.display = 'flex';
         }
 
         function toggleShowDefaults() {
@@ -369,8 +390,14 @@
 
         function renderLibrary() {
             const grid = document.getElementById('lib-content'); grid.innerHTML = "";
-            db.ref(`users/${auth.currentUser.uid}/customLogos`).once('value', snap => {
-                const data = snap.val(); if(!data) { grid.innerHTML = "<p style='grid-column:1/-1; color:#aaa;'>Aucune image.</p>"; return; }
+            let refPath = "";
+            
+            if(currentLibMode === 'profile') refPath = `users/${auth.currentUser.uid}/customLogos`;
+            else refPath = `roomsData/${roomID}/library`;
+
+            db.ref(refPath).once('value', snap => {
+                const data = snap.val();
+                if(!data) { grid.innerHTML = "<p style='grid-column:1/-1; color:#aaa;'>Aucune image.</p>"; return; }
                 Object.keys(data).forEach(key => {
                     const url = data[key]; const item = document.createElement('div'); item.className = 'lib-item';
                     item.innerHTML = `<img src="${url}" class="lib-img"><button class="btn-delete-img" onclick="deleteFromLibrary('${key}')">X</button>`;
@@ -383,28 +410,47 @@
             if(!input.files[0]) return;
             const file = input.files[0]; const uid = auth.currentUser.uid;
             const ref = storage.ref(`mj_icons/${uid}/${Date.now()}_${file.name}`);
+            
             ref.put(file).then(s => s.ref.getDownloadURL()).then(url => {
-                db.ref(`users/${uid}/customLogos`).push(url); mjLocalCustoms.add(url); renderLibrary(); loadCrestGrid();
+                // AJOUT DANS LES DEUX BASES (Sécurité et Confort)
+                // 1. Profil (Pour le futur)
+                db.ref(`users/${uid}/customLogos`).push(url);
+                // 2. Salle (Pour le présent immédiat)
+                if(roomRef) roomRef.child('library').push(url);
+                
+                setTimeout(() => { renderLibrary(); loadCrestGrid(); }, 500);
             });
         }
 
         function deleteFromLibrary(key) {
-            if(confirm("Supprimer cette image de votre bibliothèque ?")) {
-                db.ref(`users/${auth.currentUser.uid}/customLogos/${key}`).remove();
-                loadMjData(auth.currentUser); setTimeout(() => { renderLibrary(); loadCrestGrid(); }, 500);
+            if(confirm("Supprimer cette image ?")) {
+                if(currentLibMode === 'profile') {
+                    db.ref(`users/${auth.currentUser.uid}/customLogos/${key}`).remove();
+                } else {
+                    // Suppression de la salle -> Disparait pour tout le monde
+                    db.ref(`roomsData/${roomID}/library/${key}`).remove();
+                }
+                setTimeout(() => { renderLibrary(); loadCrestGrid(); }, 500);
             }
         }
 
-        // --- CHARGEMENT GRILLE PRINCIPALE ---
+        // --- CHARGEMENT GRILLE PRINCIPALE (Ecoute LIVE de la Library) ---
         function loadCrestGrid() {
-            const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
-            mjLocalCustoms.forEach(url => createCrestItem(url, grid));
-            if(globalTeams) {
-                Object.values(globalTeams).forEach(team => {
-                    if(team.icon && !team.icon.startsWith('data:image/svg') && !mjLocalCustoms.has(team.icon)) { createCrestItem(team.icon, grid); }
-                });
+            const grid = document.getElementById('crest-grid');
+            // Si on n'est pas dans une salle (écran profil), on ne charge rien ici
+            if(!roomRef) return; 
+
+            // Pas de .on ici pour éviter les boucles, l'écouteur est dans initMJLogic
+            const data = libraryData || {};
+            grid.innerHTML = "";
+            
+            // 1. Images de la Library (Custom MJ + Joueurs)
+            Object.values(data).forEach(url => createCrestItem(url, grid));
+            
+            // 2. SVG par défaut (si switch ON)
+            if(showDefaults) {
+                for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); }
             }
-            if(showDefaults) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); } }
         }
 
         function createCrestItem(url, container) {
@@ -416,18 +462,28 @@
         }
 
         function checkTeamForm() { document.getElementById('btn-add-team').disabled = !(document.getElementById('t-name').value.trim().length > 0 && selCrest !== ""); }
-        function editTeam(n) { const t = globalTeams[n]; editingTeamKey = n; document.getElementById('t-name').value = n; selCrest = t.icon; document.getElementById('btn-add-team').innerText = "Modifier"; loadCrestGrid(); checkTeamForm(); }
+        function editTeam(n) { const t = globalTeams[n]; editingTeamKey = n; document.getElementById('t-name').value = n; selCrest = t.icon; document.getElementById('btn-add-team').innerText = "Modifier"; checkTeamForm(); }
         function addTeam() { 
             const n = document.getElementById('t-name').value.trim();
             if(n && selCrest) { 
                 if(mjProfileData.isGuest===true && !editingTeamKey && Object.keys(globalTeams).length>=2) return alert("Limite 2 équipes.");
                 if(editingTeamKey && editingTeamKey!==n) deleteTeam(editingTeamKey);
                 roomRef.child('teams/' + n).set({ icon: selCrest });
-                document.getElementById('t-name').value = ""; selCrest = ""; editingTeamKey = null; document.getElementById('btn-add-team').innerText = "Créer l'Équipe"; loadCrestGrid(); checkTeamForm();
+                document.getElementById('t-name').value = ""; selCrest = ""; editingTeamKey = null; document.getElementById('btn-add-team').innerText = "Créer l'Équipe"; checkTeamForm();
             } 
         }
         
         function initMJLogic() {
+            // ECOUTEUR CENTRAL : LIBRARY
+            roomRef.child('library').on('value', snap => {
+                libraryData = snap.val() || {};
+                loadCrestGrid();
+                // Si le gestionnaire est ouvert sur la salle, on rafraichit aussi
+                if(document.getElementById('overlay-library').style.display === 'flex' && currentLibMode === 'room') {
+                    renderLibrary();
+                }
+            });
+
             roomRef.child('buzzers').on('value', snap => {
                 const d = snap.val(); const b = document.getElementById('player-box');
                 if(d) { 
@@ -447,17 +503,17 @@
             });
             roomRef.child('teams').on('value', snap => { 
                 globalTeams = snap.val() || {}; 
-                const uid = auth.currentUser ? auth.currentUser.uid : null;
-                if(uid && !mjProfileData.isGuest) {
-                    Object.values(globalTeams).forEach(t => {
-                        if(t.icon && !t.icon.startsWith('data:image/svg') && !mjLocalCustoms.has(t.icon)) {
-                            mjLocalCustoms.add(t.icon);
-                            let k=false; if(mjProfileData.customLogos) Object.values(mjProfileData.customLogos).forEach(u=>{if(u===t.icon)k=true;});
-                            if(!k) db.ref(`users/${uid}/customLogos`).push(t.icon);
+                // AUTO-ADD : Si un logo est utilisé mais pas dans la library, on l'ajoute
+                Object.values(globalTeams).forEach(t => {
+                    if(t.icon && !t.icon.startsWith('data:image/svg')) {
+                        // On vérifie si l'URL existe déjà dans libraryData
+                        const exists = Object.values(libraryData).includes(t.icon);
+                        if(!exists) {
+                            roomRef.child('library').push(t.icon);
                         }
-                    });
-                }
-                loadCrestGrid(); renderLobby(); 
+                    }
+                });
+                renderLobby(); 
             });
             roomRef.child('scores').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
@@ -492,11 +548,9 @@
         function handleError() { if(currentPlayer) { roomRef.child('blockedPlayers/'+currentPlayer.pseudo).set(true); statusUpdate('ready'); } }
         function handleReward(pts,m) { roomRef.child('scores/'+currentPlayer.pseudo).transaction(c=>{return{pts:(c?c.pts:0)+pts, avatar:c.avatar, teamName:c.teamName, teamIcon:c.teamIcon, active:true}}); if(m==='partial') { roomRef.child('blockedPlayers/'+currentPlayer.pseudo).set(true); statusUpdate('ready'); } else fullReset(); }
         
-        // --- NOUVEAUX MESSAGES SECURISES v1.039 ---
         function quitRoom() {
             if(mjProfileData.isGuest === true) {
                 if(confirm("⚠️ Attention (Mode Invité)\n\nEn quittant, vous risquez de perdre l'accès à cette salle si vous fermez votre navigateur.\n\nVoulez-vous vraiment quitter ?")) {
-                    // Pour l'invité, on ferme simplement
                     if(roomRef) roomRef.child('buzzers').off();
                     checkUserRoom(auth.currentUser.uid);
                 }
