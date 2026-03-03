@@ -76,7 +76,7 @@
         .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
         .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
 
-        /* --- HEADER JEU v1.093 (Alignement Géométrique) --- */
+        /* --- HEADER JEU v1.094 (Placement Précis) --- */
         .game-header { 
             position: absolute; top: 0; left: 0; width: 100%; height: 60px; 
             display: flex; justify-content: space-between; align-items: center; 
@@ -85,7 +85,7 @@
         }
         .mini-profile { display: flex; align-items: center; flex: 1; min-width: 0; margin-right: 10px; }
         
-        /* Conteneur Avatar : Taille fixée 46px */
+        /* Conteneur Avatar : Taille fixée 46px (rentre dans 60px) */
         .avatar-wrapper { 
             position: relative; 
             width: 46px; 
@@ -104,28 +104,28 @@
         }
         
         /* Badge : 
-           - bottom: 0 -> Aligné bas avec l'avatar 
-           - right: -8px -> Sort vers la droite pour toucher le texte 
+           - bottom: 0 -> Aligné BAS avec le BAS de l'avatar
+           - right: -12px -> Décalé vers la droite, sort du cercle
         */
         #team-badge { 
             position: absolute; 
             bottom: 0; 
-            right: -8px; 
-            width: 20px; height: 20px; 
+            right: -12px; 
+            width: 22px; height: 22px; 
             border-radius: 50%; 
-            border: 2px solid var(--card); /* Découpe propre */
+            border: 2px solid var(--card); /* Bordure sombre */
             background: white; 
             object-fit: cover; 
             display: none; 
             z-index: 5; 
         }
 
-        /* Texte aligné :
-           - margin-left: 18px -> Pour laisser la place au badge qui dépasse
-           - justify-content: center -> Centre verticalement dans le header
+        /* Texte :
+           - margin-left: 20px -> Décalage pour laisser la place au badge
+           - Pseudo commence au bord droit du badge
         */
         .mini-info { 
-            margin-left: 18px; /* LE DÉCALAGE DU PSEUDO */
+            margin-left: 20px; 
             line-height: 1.1; 
             font-size: 0.9rem; 
             white-space: nowrap; 
@@ -134,10 +134,9 @@
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
-            height: 100%; /* Occupe toute la hauteur dispo */
         }
         
-        #game-pseudo { margin-bottom: 2px; } /* Petit espace entre Pseudo et Equipe */
+        #game-pseudo { margin-bottom: 2px; }
         /* ----------------------------------------------- */
 
         .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
@@ -166,7 +165,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.093</div>
+    <div class="version-tag">v1.094</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -675,7 +674,7 @@
             else miniAv.innerText = player.avatar;
             document.getElementById('game-pseudo').innerText = player.pseudo;
             
-            // MODIF JS : GESTION AFFICHAGE TEAM (v1.093)
+            // MODIF JS : GESTION AFFICHAGE TEAM (v1.094)
             if (player.team !== "Solo") {
                 document.getElementById('game-team').innerText = player.team;
                 // Affiche Badge
