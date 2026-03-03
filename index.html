@@ -18,12 +18,10 @@
         .step-screen.active { display: flex; }
 
         .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
-        
-        /* Modif v1.091 : Le content est flexible */
         .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .content-top { justify-content: flex-start !important; }
         
-        /* Modif v1.091 : Specifique pour Création Equipe -> Pas de scroll global */
+        /* Spécifique Team Create : Pas de scroll global */
         #step-team-create .screen-content { overflow: hidden; }
 
         .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 30px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 85%, transparent); z-index: 20; }
@@ -50,7 +48,6 @@
 
         .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
         
-        /* Modif v1.091 : Le conteneur galerie devient une Flex Column pour gérer le scroll interne */
         .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; min-height: 0; justify-content: flex-start; }
         
         .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
@@ -64,51 +61,10 @@
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
         .team-card b { font-size: 1rem; }
 
-        /* --- CSS GRILLE BLASONS (v1.091 : Zone Mobile) --- */
-        .crest-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 12px;
-            margin: 15px 0; 
-            width: 100%; 
-            max-width: 350px;
-            /* Flex:1 + overflow-y:auto permet le scroll interne */
-            flex: 1; 
-            min-height: 0; 
-            overflow-y: auto; 
-            padding: 10px; 
-            background: rgba(0,0,0,0.2); 
-            border-radius: 10px; 
-            box-sizing: border-box;
-        }
-        .crest-item { 
-            width: 100%; 
-            aspect-ratio: 1; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            border: 2px solid transparent; 
-            transition: 0.2s; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background: white; 
-            padding: 5px; 
-            box-sizing: border-box;
-        }
-        .crest-item img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain;
-            display: block; 
-        }
-        .crest-item.selected { 
-            border-color: var(--accent); 
-            transform: scale(1.05); 
-            box-shadow: 0 0 10px var(--accent); 
-            z-index: 2; 
-            background: rgba(255,255,255,0.2);
-        }
-        /* ------------------------------------------- */
+        .crest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 15px 0; width: 100%; max-width: 350px; flex: 1; min-height: 0; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; box-sizing: border-box; }
+        .crest-item { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; background: white; padding: 5px; box-sizing: border-box; }
+        .crest-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .crest-item.selected { border-color: var(--accent); transform: scale(1.05); box-shadow: 0 0 10px var(--accent); z-index: 2; background: rgba(255,255,255,0.2); }
 
         .tuto-list { text-align: left; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
         .tuto-item { display: flex; align-items: flex-start; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; }
@@ -119,14 +75,60 @@
         .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
         .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
 
-        .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
-        .mini-profile { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; margin-right: 10px; }
+        /* --- HEADER JEU v1.092 (CORRIGÉ & AJUSTÉ) --- */
+        .game-header { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 60px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 0 15px; box-sizing: border-box; z-index: 100; 
+            background: rgba(0,0,0,0.3); 
+        }
+        .mini-profile { display: flex; align-items: center; flex: 1; min-width: 0; margin-right: 10px; }
         
-        .avatar-wrapper { position: relative; width: 40px; height: 40px; margin-right: 12px; flex-shrink: 0; }
-        .mini-avatar { width: 100%; height: 100%; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
-        #team-badge { position: absolute; bottom: -3px; right: -3px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--card); background: white; object-fit: cover; display: none; z-index: 5; }
+        /* Conteneur Avatar : Taille fixée pour rentrer dans le header noir */
+        .avatar-wrapper { 
+            position: relative; 
+            width: 42px; /* Taille optimale */
+            height: 42px; 
+            margin-right: 12px; 
+            flex-shrink: 0; 
+        }
+        
+        /* Avatar Rond */
+        .mini-avatar { 
+            width: 100%; height: 100%; 
+            background: #333; 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 1.2rem; overflow: hidden; 
+            border: 2px solid var(--accent); 
+        }
+        
+        /* Badge : Positionné en bas à droite, chevauchant */
+        #team-badge { 
+            position: absolute; 
+            bottom: -3px; right: -3px; 
+            width: 18px; height: 18px; 
+            border-radius: 50%; 
+            border: 2px solid #2c3e50; /* Bordure sombre pour effet "découpe" */
+            background: white; 
+            object-fit: cover; 
+            display: none; 
+            z-index: 5; 
+        }
 
-        .mini-info { line-height: 1.1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; flex-direction: column; justify-content: center; }
+        /* Texte aligné */
+        .mini-info { 
+            line-height: 1.1; 
+            font-size: 0.9rem; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+        }
+        /* ----------------------------------------------- */
+
         .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
         
@@ -153,7 +155,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.091</div>
+    <div class="version-tag">v1.092</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -291,7 +293,10 @@
                         <div class="mini-avatar" id="game-avatar"></div>
                         <img id="team-badge" src="" alt="Team">
                     </div>
-                    <div class="mini-info"><b id="game-pseudo">Joueur</b><span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span></div>
+                    <div class="mini-info">
+                        <b id="game-pseudo">Joueur</b>
+                        <span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span>
+                    </div>
                 </div>
                 <div class="header-actions">
                     <div class="icon-btn" onclick="openSettings()">⚙️</div>
@@ -659,7 +664,7 @@
             else miniAv.innerText = player.avatar;
             document.getElementById('game-pseudo').innerText = player.pseudo;
             
-            // MODIF JS : GESTION AFFICHAGE TEAM (v1.091)
+            // MODIF JS : GESTION AFFICHAGE TEAM (v1.092)
             if (player.team !== "Solo") {
                 document.getElementById('game-team').innerText = player.team;
                 // Affiche Badge
