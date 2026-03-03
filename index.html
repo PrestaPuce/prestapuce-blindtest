@@ -10,227 +10,332 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; box-sizing: border-box; width: 100%; position: absolute; top: 0; left: 0; transition: opacity 0.3s ease; }
-        .active { display: flex; z-index: 10; }
-        input, select { width: 100%; max-width: 300px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; font-size: 1.1rem; margin-bottom: 15px; text-align: center; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--primary); background: rgba(0,0,0,0.5); }
-        button { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%; max-width: 300px; transition: 0.2s; box-shadow: 0 4px 0 rgba(0,0,0,0.2); margin-top: 10px; touch-action: manipulation; }
-        button:active { transform: translateY(2px); box-shadow: none; }
-        .logo-img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 20px; border-radius: 15px; }
+        :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; --grey: #7f8c8d; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
         
-        .welcome-list { list-style: none; padding: 0; text-align: left; width: 100%; max-width: 320px; margin: 20px 0; }
-        .welcome-list li { display: flex; align-items: center; margin-bottom: 15px; font-size: 1.1rem; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; }
-        .welcome-list li span { font-size: 1.5rem; margin-right: 15px; min-width: 40px; text-align: center; }
+        /* STRUCTURE SANDWICH */
+        .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        .step-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; background: var(--bg); z-index: 10; }
+        .step-screen.active { display: flex; }
 
-        /* AJOUT: STYLE GRILLE BLASONS */
+        /* ZONES */
+        .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
+        .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .content-top { justify-content: flex-start !important; }
+        .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 30px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 85%, transparent); z-index: 20; }
+
+        /* TYPO FLUIDE */
+        h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
+        h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin: 0 0 15px 0; font-weight: normal; color: white; }
+        p.desc { font-size: clamp(0.9rem, 3.5vw, 1.1rem); color: #bdc3c7; margin-bottom: 20px; line-height: 1.5; max-width: 500px; font-weight: 500; }
+        
+        /* INPUTS & BOUTONS */
+        input[type="text"], input[type="number"] { width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px; }
+        input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: clamp(1rem, 4vw, 1.3rem); font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 350px; }
+        .btn-main:active { transform: scale(0.95); }
+        .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; }
+
+        /* NAV & ICONS */
+        #btn-back-global { position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); transition: 0.2s; backdrop-filter: blur(5px); }
+        #btn-back-global svg { width: 22px; height: 22px; fill: white; margin-right: 2px; }
+        #btn-back-global:active { background: rgba(255, 255, 255, 0.3); transform: scale(0.9); }
+
+        /* CARDS */
+        .choice-card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; width: 100%; max-width: 350px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.2); box-sizing: border-box; }
+        .choice-card:active { transform: scale(0.98); background: rgba(255,255,255,0.1); border-color: var(--accent); }
+        .choice-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
+        .choice-content b { display: block; font-size: 1.1rem; margin-bottom: 3px; color: white; }
+        .choice-content span { font-size: 0.85rem; color: #bdc3c7; }
+
+        /* GALERIES */
+        .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; justify-content: flex-start; }
+        .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
+        .grid-item { aspect-ratio: 1/1; background: rgba(255,255,255,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; padding: 5px; box-sizing: border-box; }
+        .grid-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
+        .grid-item img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
+        .grid-item-emoji { font-size: clamp(1.8rem, 7vw, 2.5rem); padding: 0; }
+
+        /* LISTE EQUIPES */
+        .team-list-container { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
+        .team-card { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; display: flex; align-items: center; cursor: pointer; border: 2px solid transparent; }
+        .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
+        .team-card b { font-size: 1rem; }
+
+        /* MODIF CSS : GRILLE BLASONS */
         .crest-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; width: 100%; max-width: 350px; max-height: 250px; overflow-y: auto; padding: 5px; background: rgba(0,0,0,0.2); border-radius: 10px; }
         .crest-item { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; background: white; padding: 2px; box-sizing: border-box; }
         .crest-item img { width: 100%; height: 100%; object-fit: contain; }
         .crest-item.selected { border-color: var(--accent); transform: scale(1.1); box-shadow: 0 0 10px var(--accent); z-index: 2; }
 
-        #buzzer-btn { width: 220px; height: 220px; border-radius: 50%; border: 8px solid white; background: var(--danger); color: white; font-size: 2.5rem; font-weight: 900; box-shadow: 0 10px 30px rgba(231, 76, 60, 0.6), inset 0 10px 20px rgba(255,255,255,0.3); text-shadow: 2px 2px 0 rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; transition: all 0.1s; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
-        #buzzer-btn:active { transform: scale(0.92); background: #c0392b; box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4); }
-        .locked { background: #7f8c8d !important; border-color: #95a5a6 !important; box-shadow: none !important; cursor: not-allowed; opacity: 0.6; transform: scale(0.95); }
-        .my-turn { animation: pulse 1s infinite; background: var(--success) !important; box-shadow: 0 0 40px var(--success) !important; border-color: #2ecc71 !important; transform: scale(1.1); }
-        @keyframes pulse { 0% { transform: scale(1.05); } 50% { transform: scale(1.15); } 100% { transform: scale(1.05); } }
+        /* TUTO */
+        .tuto-list { text-align: left; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
+        .tuto-item { display: flex; align-items: flex-start; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; }
+        .dot { width: 18px; height: 18px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; margin-top: 3px; }
+        .dot.red { background: #e74c3c; box-shadow: 0 0 8px #e74c3c; }
+        .dot.green { background: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
+        .dot.grey { background: #7f8c8d; }
+        .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
+        .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
+
+        /* HEADER JEU */
+        .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
+        .mini-profile { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; margin-right: 10px; }
+        .mini-avatar { width: 40px; height: 40px; flex-shrink: 0; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
+        .mini-info { line-height: 1.1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
         
-        #podium-zone { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; animation: popIn 0.5s ease; }
-        .trophy-img { width: 120px; margin-bottom: 20px; animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
-        .version-tag { position: fixed; bottom: 5px; right: 10px; opacity: 0.3; font-size: 0.7rem; pointer-events: none; }
-        .btn-leave { position: absolute; top: 15px; left: 15px; background: transparent; border: 1px solid rgba(255,255,255,0.3); padding: 5px 15px; width: auto; font-size: 0.8rem; margin: 0; }
+        /* ICONS SVG DANS BOUTONS */
+        .icon-btn svg { width: 20px; height: 20px; fill: white; }
+
+        /* BUZZER */
+        .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 60px; }
+        .buzzer { width: 65vw; height: 65vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; background: #e74c3c; box-shadow: 0 15px 0 #c0392b, 0 20px 40px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.1s; cursor: pointer; }
+        .buzzer.buzzer-pressed { transform: translateY(15px); box-shadow: 0 0 0 #c0392b; }
+        .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
+        .ready .buzzer.buzzer-pressed { box-shadow: 0 0 0 #27ae60; }
+        .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
+        .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; pointer-events: none; }
+        .buzzer-label { font-size: clamp(1.2rem, 5vw, 1.8rem); font-weight: bold; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; z-index: 2; position: relative; }
+        .buzzer-img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; border-radius: 50%; pointer-events: none; }
+
+        /* OVERLAYS */
+        .overlay-full { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; padding: 20px; box-sizing: border-box; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .qr-card, .settings-content { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 320px; box-sizing: border-box; }
+        .settings-btn { display: block; width: 100%; padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: white; font-size: 1rem; cursor: pointer; text-align: left; transition: 0.2s; }
+        .settings-btn:hover { background: rgba(255,255,255,0.2); }
+        .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
     </style>
 </head>
 <body>
-    <div class="version-tag">v1.083</div>
 
-    <audio id="sound-applause" src="https://actions.google.com/sounds/v1/crowds/battle_crowd_celebrate_stutter.ogg"></audio>
+    <div class="version-tag">v1.082</div>
 
-    <div id="screen-login" class="screen active">
-        <img id="login-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" class="logo-img">
-        <h2>Rejoindre la salle</h2>
-        <input type="number" id="room-code" placeholder="Code PIN (ex: 1234)" inputmode="numeric" onkeydown="if(event.key==='Enter') verifyRoom()">
-        <button onclick="verifyRoom()">ENTRER</button>
-        <div id="loader" style="display:none; margin-top:20px; color:var(--accent);">Connexion en cours...</div>
-    </div>
+    <div class="wizard-container">
+        <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
 
-    <div id="screen-welcome" class="screen">
-        <img id="welcome-logo" src="" class="logo-img">
-        <h2>Bienvenue !</h2>
-        <ul class="welcome-list">
-            <li><span>🔊</span> Montez le son</li>
-            <li><span>💡</span> Écran toujours allumé</li>
-            <li><span>⚡</span> Soyez le plus rapide</li>
-            <li><span>🍺</span> Amusez-vous !</li>
-        </ul>
-        <input type="text" id="pseudo" placeholder="Votre Pseudo" maxlength="12" onkeydown="if(event.key==='Enter') savePseudo()">
-        <button onclick="savePseudo()">C'EST PARTI !</button>
-    </div>
-
-    <div id="screen-selfie" class="screen">
-        <h2>Votre Avatar</h2>
-        <p>Prenez une photo ou choisissez une image</p>
-        <div style="position:relative; width:150px; height:150px; margin:20px auto; background:#333; border-radius:50%; overflow:hidden; border:4px solid var(--accent);">
-            <img id="selfie-preview" style="width:100%; height:100%; object-fit:cover; display:none;">
-            <span id="selfie-placeholder" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:3rem;">📷</span>
+        <div id="step-room" class="step-screen active">
+            <div class="screen-content">
+                <h1>CODE SALLE</h1>
+                <p class="desc">Entre le code affiché sur l'écran principal.</p>
+                <input type="number" id="input-room" placeholder="EX: 1234">
+                <button class="btn-main" onclick="validateRoomStep()">Rejoindre</button>
+            </div>
         </div>
-        <input type="file" id="selfie-input" accept="image/*" style="display:none" onchange="previewSelfie(this)">
-        <button onclick="document.getElementById('selfie-input').click()" style="background:var(--card); margin-bottom:10px;">📸 Choisir Photo</button>
-        <button onclick="validateSelfie()" id="btn-valid-selfie" style="display:none;">VALIDER</button>
-        <button onclick="skipSelfie()" style="background:transparent; border:1px solid rgba(255,255,255,0.2); font-size:0.9rem; margin-top:10px;">Passer cette étape</button>
-    </div>
 
-    <div id="screen-team" class="screen">
-        <h2 style="color:var(--accent);">Votre Camp</h2>
-        <button onclick="setTeam('Solo')" style="background:#8e44ad; margin-bottom:20px;">👤 Jouer en Solo</button>
-        <div style="width:100%; height:1px; background:rgba(255,255,255,0.2); margin:10px 0;"></div>
-        <h3>Ou créer une équipe</h3>
-        <input type="text" id="team-name" placeholder="Nom de l'équipe" maxlength="15" oninput="checkTeamValid()" onkeydown="if(event.key==='Enter' && !document.getElementById('btn-create-team').disabled) createTeam()">
-        
-        <div class="crest-grid" id="crest-list"></div>
-        
-        <button id="btn-create-team" onclick="createTeam()" disabled style="background:#7f8c8d;">Créer l'équipe</button>
-    </div>
-
-    <div id="screen-buzzer" class="screen" style="background:black;">
-        <button class="btn-leave" onclick="leaveGame()">✖ Quitter</button>
-        <div style="position:absolute; top:20px; width:100%; text-align:center;">
-            <div id="buzzer-status" style="color:#aaa; font-weight:bold; letter-spacing:1px; margin-bottom:5px;">EN ATTENTE...</div>
-            <div id="my-score" style="font-size:1.5rem; color:white;">0 pts</div>
+        <div id="step-welcome" class="step-screen">
+            <div class="screen-content">
+                <img id="mj-logo-welcome" src="" style="width:100px; border-radius:15px; margin-bottom:20px; display:none;">
+                <h1>BIENVENUE !</h1>
+                <p class="desc">Ton téléphone va devenir ton buzzer ! 🎧<br>Sois le plus rapide pour gagner !</p>
+                <button class="btn-main" onclick="navigateTo('step-auth')">C'est parti ! 🚀</button>
+            </div>
         </div>
-        <div id="buzzer-btn" class="locked" ontouchstart="buzz(event)" onmousedown="buzz(event)">BUZZ !</div>
-        <div id="my-identity" style="position:absolute; bottom:20px; display:flex; flex-direction:column; align-items:center; opacity:0.7;">
-            <img id="my-avatar-display" style="width:50px; height:50px; border-radius:50%; border:2px solid white; margin-bottom:5px;">
-            <span id="my-pseudo-display" style="font-weight:bold;"></span>
+
+        <div id="step-auth" class="step-screen">
+            <div class="screen-header"><h2>Que veux-tu faire ?</h2></div>
+            <div class="screen-content">
+                <div class="choice-card" onclick="navigateTo('step-pseudo')"><div class="choice-icon">⚡</div><div class="choice-content"><b>Partie Rapide</b><span>Accès invité immédiat.</span></div></div>
+                <div class="choice-card" onclick="navigateTo('step-pseudo')"><div class="choice-icon">🔐</div><div class="choice-content"><b>Se Connecter</b><span>Récupère ton historique.</span></div></div>
+                <div class="choice-card" onclick="navigateTo('step-pseudo')"><div class="choice-icon">✨</div><div class="choice-content"><b>Créer un Compte</b><span>Sauvegarde tes scores.</span></div></div>
+            </div>
+        </div>
+
+        <div id="step-pseudo" class="step-screen">
+            <div class="screen-content">
+                <h2>Ton Nom de Scène ?</h2>
+                <input type="text" id="input-pseudo" placeholder="Ex: Batman, Zorro..." maxlength="12">
+                <button class="btn-main" onclick="validatePseudo()">Suivant</button>
+            </div>
+        </div>
+
+        <div id="step-avatar" class="step-screen">
+            <div class="screen-header"><h2>Ton Look</h2></div>
+            <div class="screen-content content-top">
+                <div id="avatar-choices" class="selection-mode-container" style="flex:1;">
+                    <div class="choice-card" onclick="document.getElementById('file-input').click()"><div class="choice-icon">📸</div><div class="choice-content"><b>Photo / Selfie</b><span>Ou choisir une image.</span></div></div>
+                    <div class="choice-card" onclick="showAvatarGallery()"><div class="choice-icon">🦁</div><div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div></div>
+                    <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
+                </div>
+                <div id="avatar-gallery-view" class="gallery-container">
+                    <div class="common-grid" id="avatar-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="step-mode" class="step-screen">
+            <div class="screen-header"><h2>Ta Stratégie ?</h2></div>
+            <div class="screen-content">
+                <div class="choice-card" onclick="selectMode('Solo')"><div class="choice-icon">👤</div><div class="choice-content"><b>Loup Solitaire</b><span>Je joue pour ma gloire.</span></div></div>
+                <div class="choice-card" onclick="goToTeamAction()"><div class="choice-icon">🛡️</div><div class="choice-content"><b>En Équipe</b><span>On gagne ensemble.</span></div></div>
+            </div>
+        </div>
+
+        <div id="step-team-action" class="step-screen">
+            <div class="screen-header"><h2>Gestion d'Équipe</h2></div>
+            <div class="screen-content">
+                <div class="choice-card" onclick="goToTeamCreate()"><div class="choice-icon">✨</div><div class="choice-content"><b>Créer une Équipe</b><span>Je suis le Capitaine.</span></div></div>
+                <div class="choice-card" onclick="goToTeamJoin()"><div class="choice-icon">🤝</div><div class="choice-content"><b>Rejoindre une Équipe</b><span>Je suis un Membre.</span></div></div>
+            </div>
+        </div>
+
+        <div id="step-team-create" class="step-screen">
+            <div class="screen-header"><h2>Créer ton Clan</h2></div>
+            <div class="screen-content content-top">
+                <input type="text" id="new-team-name" placeholder="Nom de l'équipe">
+                <div id="team-crest-choices" class="selection-mode-container" style="margin-top:20px; width:100%;">
+                    <div class="choice-card" onclick="document.getElementById('team-file-input').click()"><div class="choice-icon">📤</div><div class="choice-content"><b>Uploader Blason</b><span>Image perso.</span></div></div>
+                    <div class="choice-card" onclick="showTeamGallery()"><div class="choice-icon">🛡️</div><div class="choice-content"><b>Galerie Blasons</b><span>Choisis un écusson.</span></div></div>
+                    <input type="file" id="team-file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleTeamFileUpload(this)">
+                </div>
+                <div id="team-crest-gallery" class="gallery-container" style="width:100%;">
+                    <p style="margin-bottom:10px;">Choisis ton Blason :</p>
+                    <div class="crest-grid" id="team-icon-grid"></div>
+                </div>
+                <div id="team-preview" style="display:none; align-items:center; justify-content:center; gap:15px; margin:20px 0;">
+                    <img id="team-preview-img" style="width:60px; height:60px; object-fit:contain; background:transparent;">
+                    <span style="color:var(--success); font-weight:bold;">Image OK !</span>
+                </div>
+            </div>
+            <div class="screen-footer">
+                <button class="btn-main" onclick="createNewTeam()">Créer</button>
+            </div>
+        </div>
+
+        <div id="step-team-join" class="step-screen">
+            <div class="screen-header"><h2>Rejoindre ton Clan</h2></div>
+            <div class="screen-content content-top">
+                <div class="team-list-container" id="team-list"></div>
+            </div>
+            <div class="screen-footer">
+                <button class="btn-secondary" onclick="goToTeamCreate()">Mon équipe n'est pas là ? La créer</button>
+            </div>
+        </div>
+
+        <div id="step-recap" class="step-screen">
+            <div class="screen-content">
+                <div id="recap-avatar" style="font-size:clamp(4rem, 15vw, 6rem); margin-bottom:15px;"></div>
+                <h2 id="recap-name" style="color:var(--accent); font-weight:bold; margin:0; font-size:2rem;"></h2>
+                <p id="recap-team" style="color:#aaa; margin-top:5px; margin-bottom:40px; font-size:1.2rem;"></p>
+                <p class="desc">Dernière étape avant le jeu...</p>
+                <button class="btn-main" onclick="navigateTo('step-tutorial')">SUIVANT</button>
+            </div>
+        </div>
+
+        <div id="step-tutorial" class="step-screen">
+            <div class="screen-header"><h2>COMMENT JOUER ?</h2></div>
+            <div class="screen-content">
+                <div class="tuto-list">
+                    <div class="tuto-item"><div class="dot red"></div><div class="tuto-text"><b style="color:#e74c3c;">EN ATTENTE</b><span>Attendez que l'animateur active les buzzers.</span></div></div>
+                    <div class="tuto-item"><div class="dot green"></div><div class="tuto-text"><b style="color:#2ecc71;">C'EST PARTI !</b><span>Soyez le plus rapide pour buzzer !</span></div></div>
+                    <div class="tuto-item"><div class="dot grey"></div><div class="tuto-text"><b style="color:#95a5a6;">BLOQUÉ</b><span>Vous avez déjà joué ou fait une erreur.</span></div></div>
+                    <div class="tuto-item"><div class="dot grey"></div><div class="tuto-text"><b style="color:#95a5a6;">OCCUPÉ</b><span>Trop tard ! Un autre joueur a été plus rapide.</span></div></div>
+                </div>
+            </div>
+            <div class="screen-footer">
+                <p class="desc" style="font-size:0.9rem; margin-bottom:15px;">Une question ? Demandez à l'animateur !</p>
+                <button class="btn-main" onclick="launchGame()">C'EST PARTI ! 🚀</button>
+            </div>
+        </div>
+
+        <div id="step-game" class="step-screen" style="padding:0;">
+            <div class="game-header">
+                <div class="mini-profile">
+                    <div class="mini-avatar" id="game-avatar"></div>
+                    <div class="mini-info"><b id="game-pseudo">Joueur</b><br><span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span></div>
+                </div>
+                <div class="header-actions">
+                    <div class="icon-btn" onclick="openSettings()">⚙️</div>
+                    <div class="icon-btn" onclick="showShare()">🔗</div>
+                    <div class="icon-btn" onclick="showQR()" title="QR Code">
+                        <svg viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5zm8 4h2v2h-2v-2zm-2-2h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h2v2h-2v-2zm2-2h2v2h-2v-2z"/></svg>
+                    </div>
+                    <div class="icon-btn" onclick="confirmQuit()" style="background:var(--danger);">✕</div>
+                </div>
+            </div>
+            <div class="buzzer-container">
+                <div style="font-weight: bold; margin-bottom:30px; font-size:1.5rem;">Score : <span id="game-score" style="color:var(--accent); font-size:2rem;">0</span></div>
+                <button class="buzzer" id="btn-buzz" onmousedown="handlePress(event)" onmouseup="handleRelease(event)" ontouchstart="handlePress(event)" ontouchend="handleRelease(event)">
+                    <img id="buzzer-bg" class="buzzer-img" src="" style="display:none;">
+                    <span id="label" class="buzzer-label">ATTENDEZ</span>
+                </button>
+                <div id="status-msg" style="margin-top:30px; color:#7f8c8d; font-style:italic; font-size:1.1rem;">En attente de l'animateur...</div>
+            </div>
         </div>
     </div>
 
-    <div id="podium-zone">
-        <div id="podium-content"></div>
-        <button onclick="location.reload()" style="margin-top:30px; width:auto;">Quitter</button>
+    <div id="overlay-qr" class="overlay-full" onclick="this.style.display='none'">
+        <div class="qr-card" onclick="event.stopPropagation()">
+            <h3 style="color:black; margin-top:0;">Flashez pour rejoindre !</h3>
+            <div id="qrcode-display"></div>
+            <p style="color:#555; margin-bottom:0; margin-top:10px;">Salle : <b id="qr-room-code"></b></p>
+            <button class="btn-main" onclick="showShare()" style="margin-top:20px; font-size:1rem; padding:15px;">Partager le lien</button>
+        </div>
+        <button class="btn-secondary" style="margin-top:20px; background:white; color:black; border:none;" onclick="document.getElementById('overlay-qr').style.display='none'">Fermer</button>
     </div>
+
+    <div id="overlay-settings" class="overlay-full" onclick="this.style.display='none'">
+        <div class="settings-content" onclick="event.stopPropagation()">
+            <h2 style="color:var(--accent);">MODIFIER PROFIL</h2>
+            <button class="settings-btn" onclick="editStep('step-pseudo')">✏️ Modifier mon Pseudo</button>
+            <button class="settings-btn" onclick="editStep('step-avatar')">📷 Changer d'Avatar</button>
+            <button class="settings-btn" onclick="editStep('step-mode')">🛡️ Changer Mode (Solo/Team)</button>
+            <button class="settings-btn" onclick="saveProgress()" style="border:1px solid var(--success); color:var(--success);">💾 Sauvegarder progression</button>
+            <button class="btn-secondary" onclick="document.getElementById('overlay-settings').style.display='none'">Annuler</button>
+        </div>
+    </div>
+
+    <div id="overlay-quit" class="overlay-full" onclick="this.style.display='none'">
+        <div class="settings-content" onclick="event.stopPropagation()">
+            <h2 style="color:var(--danger);">PARTIR ?</h2>
+            <p style="color:#ccc; font-size:0.9rem;">Tu veux vraiment nous quitter ? Tu peux sauvegarder ta progression.</p>
+            <button class="settings-btn" onclick="saveProgress()" style="border:1px solid var(--success); color:var(--success);">💾 Créer compte / Sauver</button>
+            <button class="settings-btn" onclick="leaveGame(true)" style="background:var(--danger); color:white; margin-top:10px;">🚪 Quitter sans sauver</button>
+            <button class="btn-secondary" onclick="document.getElementById('overlay-quit').style.display='none'">Annuler</button>
+        </div>
+    </div>
+
+    <div id="podium-zone" class="overlay-full"><div id="podium-content"></div><button class="btn-main" onclick="leaveGame(true)" style="margin-top:30px;">Quitter</button></div>
+
+    <audio id="sound-click" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/BUZZER.WAV?alt=media&token=43ced984-3c6a-4167-b0dc-4cd97d7760dd" preload="auto"></audio>
+    <audio id="sound-win" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Buzzer%20champion.mp3?alt=media&token=8425ad5e-69a3-4a57-966e-58df8ff39701" preload="auto"></audio>
+    <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        
-        let roomID = "", player = { pseudo: "", avatar: "", teamName: "Solo", teamIcon: "" };
-        let roomRef = null;
-        let selectedCrest = "";
-        
-        // MODIF: Variables pour la fin de partie
-        let mjName = "l'Animateur";
-        let mjLink = "";
-
-        // --- 1. INITIALISATION (CODE 1.074 INTACT) ---
-        window.onload = function() {
-            const params = new URLSearchParams(window.location.search);
-            if(params.has('room')) {
-                document.getElementById('room-code').value = params.get('room');
-                verifyRoom();
-            }
-            // IMPORTANT: Suppression de l'appel qui buggait ici
-        };
-
-        function verifyRoom() {
-            const code = document.getElementById('room-code').value.trim();
-            if(!code) return alert("Code requis");
-            document.getElementById('loader').style.display = 'block';
-            
-            db.ref('activeRooms/' + code).once('value').then(snap => {
-                if(snap.exists()) {
-                    roomID = code;
-                    roomRef = db.ref('roomsData/' + roomID);
-                    
-                    // MODIF: Infos MJ
-                    roomRef.child('mjName').once('value', s => { if(s.exists()) mjName = s.val(); });
-                    roomRef.child('mjLink').once('value', s => { if(s.exists()) mjLink = s.val(); });
-                    roomRef.child('mjLogo').once('value', s => { 
-                        if(s.exists()) document.getElementById('welcome-logo').src = s.val(); 
-                    });
-
-                    showScreen('screen-welcome');
-                } else {
-                    alert("Salle introuvable !");
-                    document.getElementById('loader').style.display = 'none';
-                }
-            });
-        }
-
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        // --- 2. PSEUDO ---
-        function savePseudo() {
-            const p = document.getElementById('pseudo').value.trim();
-            if(!p) return alert("Choisis un pseudo !");
-            player.pseudo = p;
-            
-            roomRef.child('scores').once('value', snap => {
-                if(snap.hasChild(p)) {
-                    alert("Ce pseudo est déjà pris !");
-                } else {
-                    showScreen('screen-selfie');
-                }
-            });
-        }
-
-        // --- 3. SELFIE ---
-        function previewSelfie(input) {
-            if(input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('selfie-preview');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                    document.getElementById('selfie-placeholder').style.display = 'none';
-                    document.getElementById('btn-valid-selfie').style.display = 'block';
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function validateSelfie() {
-            const img = document.getElementById('selfie-preview').src;
-            compressImage(img, 0.5, 300).then(compressed => {
-                player.avatar = compressed;
-                showScreen('screen-team');
-                loadCrests(); // MODIF: Charge la grille
-            });
-        }
-
-        function skipSelfie() {
-            player.avatar = "👤";
-            showScreen('screen-team');
-            loadCrests(); // MODIF: Charge la grille
-        }
-
-        function compressImage(src, quality, maxWidth) {
-            return new Promise((resolve) => {
+        const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
+        function compressImage(file, maxWidth, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
                 const img = new Image();
-                img.src = src;
-                img.onload = () => {
+                img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const scale = maxWidth / img.width;
-                    canvas.width = maxWidth;
-                    canvas.height = img.height * scale;
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
                     const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/jpeg', quality));
+                    ctx.drawImage(img, 0, 0, width, height);
+                    callback(canvas.toDataURL('image/jpeg', 0.7));
                 };
-            });
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
-        // --- 4. EQUIPE & BLASONS (MODIF: GENERATEUR SVG) ---
+        /* MODIF JS : AJOUT createBlason */
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
-            const c1 = colors[i % colors.length]; const c2 = colors[(i+1) % colors.length];
-            let pattern = ""; const mod = i % 10;
+            const c1 = colors[i % colors.length];
+            const c2 = colors[(i+1) % colors.length];
+            let pattern = "";
+            const mod = i % 10;
             if(mod === 0) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`;
             else if(mod === 1) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`;
             else if(mod === 2) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 L0 100 Z" fill="${c2}"/>`;
@@ -244,200 +349,398 @@
             return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${pattern}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`;
         }
 
-        // --- MODIF: CHARGEMENT GRILLE EN TEMPS RÉEL (.on) ---
-        function loadCrests() {
-            const list = document.getElementById('crest-list');
-            
-            // On écoute la config MJ
-            roomRef.child('config/showDefaults').on('value', snapConf => {
-                const showDefaults = (snapConf.val() === false) ? false : true;
+        const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-                // On écoute les équipes en temps réel pour voir les nouveaux logos
-                roomRef.child('teams').on('value', snapTeams => {
-                    list.innerHTML = "";
-                    const teams = snapTeams.val() || {};
-                    const usedIcons = new Set();
+        let roomID = "", roomRef = null;
+        let player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
+        let gameState = "waiting", currentWinner = null, isBlocked = false;
+        let selectedTeamCrest = "";
+        let isEditing = false;
+        let stepHistory = [];
+        /* MODIF JS : AJOUT VARIABLES MJ */
+        let mjName = "l'Animateur";
+        let mjLink = "";
 
-                    // Logos des autres
-                    Object.values(teams).forEach(t => {
-                        if(t.icon && !t.icon.startsWith('data:image/svg')) {
-                            if(!usedIcons.has(t.icon)) {
-                                addCrestItem(t.icon, list);
-                                usedIcons.add(t.icon);
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const r = urlParams.get('room');
+            if(r) { roomID = r; checkRoomAndStart(true); } 
+            else { navigateTo('step-room'); }
+            renderAvatarGrid(); renderTeamCrestPicker();
+            document.getElementById('input-room').addEventListener('keypress', (e)=>{if(e.key==='Enter') validateRoomStep()});
+            document.getElementById('input-pseudo').addEventListener('keypress', (e)=>{if(e.key==='Enter') validatePseudo()});
+        };
+
+        function navigateTo(targetId, pushToHistory = true) {
+            const current = document.querySelector('.step-screen.active');
+            if(current && pushToHistory) stepHistory.push(current.id);
+            document.querySelectorAll('.gallery-container').forEach(g => g.style.display = 'none');
+            document.querySelectorAll('.selection-mode-container').forEach(c => c.style.display = 'flex');
+            document.getElementById('team-preview').style.display = 'none';
+            document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(targetId).classList.add('active');
+            updateBackButton(targetId);
+        }
+
+        function goBack() {
+            if(isEditing) { finishEdit(); return; }
+            const activeScreen = document.querySelector('.step-screen.active');
+            const openGallery = activeScreen ? activeScreen.querySelector('.gallery-container[style*="flex"]') : null;
+            if(openGallery) {
+                if(activeScreen.id === 'step-avatar') hideAvatarGallery();
+                if(activeScreen.id.includes('team')) hideTeamGallery();
+                return;
+            }
+            if(stepHistory.length === 0) return;
+            const prevId = stepHistory.pop();
+            navigateTo(prevId, false);
+        }
+
+        function updateBackButton(currentId) {
+            const noBackScreens = ['step-room', 'step-welcome', 'step-game'];
+            const btn = document.getElementById('btn-back-global');
+            if(noBackScreens.includes(currentId)) btn.style.display = 'none';
+            else btn.style.display = 'flex';
+        }
+
+        function validateRoomStep() {
+            const val = document.getElementById('input-room').value.trim();
+            if(!val) return;
+            roomID = val;
+            checkRoomAndStart(false);
+        }
+
+        function checkRoomAndStart(autoLogin) {
+            db.ref('activeRooms/' + roomID).once('value', snap => {
+                if(snap.exists()) {
+                    roomRef = db.ref('roomsData/' + roomID);
+                    /* MODIF JS : Recuperation infos MJ */
+                    roomRef.child('mjName').once('value', s => { if(s.exists()) mjName = s.val(); });
+                    roomRef.child('mjLink').once('value', s => { if(s.exists()) mjLink = s.val(); });
+                    
+                    roomRef.child('mjLogo').once('value', s => { if(s.val()) { 
+                        document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
+                    const saved = localStorage.getItem('presta_player_' + roomID);
+                    if(autoLogin && saved) {
+                        try {
+                            const p = JSON.parse(saved);
+                            if(confirm(`Te revoilà ${p.pseudo} ! Reprendre la partie ?`)) {
+                                player = p;
+                                roomRef.child('scores/'+player.pseudo).once('value', sp => {
+                                    if(sp.exists() && sp.val().kicked !== true) { roomRef.child('scores/'+player.pseudo).update({active:true}); launchGame(true); } 
+                                    else { navigateTo('step-welcome'); }
+                                });
+                                return; 
                             }
-                        }
-                    });
-
-                    // Logos par défaut
-                    if(showDefaults) {
-                        for(let i=0; i<30; i++) {
-                            addCrestItem(createBlason(i), list);
-                        }
+                        } catch(e) {}
                     }
+                    navigateTo('step-welcome');
+                } else { alert("Salle introuvable !"); navigateTo('step-room'); }
+            });
+        }
+
+        function validatePseudo() {
+            const val = document.getElementById('input-pseudo').value.trim();
+            if(val.length < 2) return alert("Pseudo trop court !");
+            if(isEditing) {
+                if(val === player.pseudo) { finishEdit(); return; }
+                roomRef.child('scores/' + val).once('value', snap => {
+                    if(snap.exists() && snap.val().active) return alert("Pseudo déjà pris.");
+                    const oldPseudo = player.pseudo;
+                    roomRef.child('scores/' + oldPseudo).once('value', oldSnap => {
+                        const data = oldSnap.val();
+                        roomRef.child('scores/' + val).set({ ...data, active:true });
+                        roomRef.child('scores/' + oldPseudo).remove();
+                        player.pseudo = val;
+                        finishEdit();
+                    });
                 });
-            });
-        }
-
-        function addCrestItem(url, container) {
-            const div = document.createElement('div');
-            div.className = 'crest-item';
-            div.innerHTML = `<img src="${url}">`;
-            div.onclick = () => {
-                document.querySelectorAll('.crest-item').forEach(e => e.classList.remove('selected'));
-                div.classList.add('selected');
-                selectedCrest = url;
-                checkTeamValid();
-            };
-            container.appendChild(div);
-        }
-
-        function checkTeamValid() {
-            const n = document.getElementById('team-name').value.trim();
-            const btn = document.getElementById('btn-create-team');
-            btn.disabled = !(n.length > 0 && selectedCrest !== "");
-            btn.style.background = btn.disabled ? "#7f8c8d" : "#2ecc71";
-        }
-
-        function createTeam() {
-            const n = document.getElementById('team-name').value.trim();
-            if(!n || !selectedCrest) return;
-            roomRef.child('teams/' + n).set({ icon: selectedCrest });
-            setTeam(n, selectedCrest);
-        }
-
-        function setTeam(name, icon = "") {
-            player.teamName = name;
-            player.teamIcon = icon;
-            startGame();
-        }
-
-        // --- 5. JEU & BUZZER ---
-        function startGame() {
-            roomRef.child('scores/' + player.pseudo).set({
-                avatar: player.avatar,
-                teamName: player.teamName,
-                teamIcon: player.teamIcon,
-                pts: 0,
-                active: true
-            });
-
-            document.getElementById('my-avatar-display').src = player.avatar.startsWith('data') ? player.avatar : (player.teamIcon || 'https://via.placeholder.com/50');
-            document.getElementById('my-pseudo-display').innerText = player.pseudo + (player.teamName !== "Solo" ? " (" + player.teamName + ")" : "");
-            
-            showScreen('screen-buzzer');
-            listenGame();
-        }
-
-        function listenGame() {
-            roomRef.child('gameState').on('value', snap => {
-                const s = snap.val() ? snap.val().status : 'waiting';
-                const btn = document.getElementById('buzzer-btn');
-                const lbl = document.getElementById('buzzer-status');
-
-                if(s === 'ready') {
-                    btn.classList.remove('locked', 'my-turn');
-                    btn.style.background = "#27ae60"; 
-                    btn.innerText = "BUZZ !";
-                    lbl.innerText = "À VOUS !"; lbl.style.color = "#2ecc71";
-                    if(navigator.vibrate) navigator.vibrate(50);
-                } else if(s === 'taken') {
-                    btn.classList.add('locked');
-                    btn.style.background = "#e74c3c";
-                    btn.innerText = "TROP TARD";
-                    lbl.innerText = "BLOQUÉ"; lbl.style.color = "#e74c3c";
-                } else if(s === 'endGame') {
-                    showPodium();
+                return;
+            }
+            roomRef.child('scores/' + val).once('value', snap => {
+                if(snap.exists()) {
+                    if(snap.val().kicked) return alert("Banni.");
+                    if(snap.val().active) alert("Pseudo déjà actif.");
+                    else {
+                        if(confirm(`Pseudo "${val}" existant (déconnecté). Reprendre ?`)) {
+                            const d = snap.val();
+                            player = { pseudo: val, avatar: d.avatar, team: d.teamName || "Solo", teamIcon: d.teamIcon || "" };
+                            roomRef.child('scores/'+val).update({active:true});
+                            launchGame(true);
+                        } else alert("Changez de pseudo.");
+                    }
                 } else {
-                    btn.classList.add('locked');
-                    btn.style.background = "#95a5a6";
-                    btn.innerText = "ATTENTE";
-                    lbl.innerText = "PAUSE"; lbl.style.color = "#95a5a6";
+                    player.pseudo = val;
+                    navigateTo('step-avatar');
                 }
             });
+        }
 
+        function showAvatarGallery() { document.getElementById('avatar-choices').style.display = 'none'; document.getElementById('avatar-gallery-view').style.display = 'flex'; }
+        function hideAvatarGallery() { document.getElementById('avatar-gallery-view').style.display = 'none'; document.getElementById('avatar-choices').style.display = 'flex'; }
+        function handleFileUpload(input) { if(input.files && input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectAvatar(base64); }); } }
+        function renderAvatarGrid() { const g=document.getElementById('avatar-grid'); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='grid-item grid-item-emoji'; d.innerText=a; d.onclick=()=>selectAvatar(a); g.appendChild(d); }); }
+        
+        function selectAvatar(av) { 
+            player.avatar = av;
+            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({avatar: av}); finishEdit(); } 
+            else navigateTo('step-mode');
+        }
+
+        function selectMode(mode) {
+            player.team = mode;
+            player.teamIcon = "";
+            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({teamName: "Solo", teamIcon: ""}); finishEdit(); } 
+            else { if(mode === 'Solo') showRecap(); else goToTeamAction(); }
+        }
+
+        function goToTeamAction() { navigateTo('step-team-action'); }
+        function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); }
+        function goToTeamJoin() { navigateTo('step-team-join'); loadTeamsList(); }
+
+        function loadTeamsList() {
+            roomRef.child('teams').once('value', snap => {
+                const list = document.getElementById('team-list'); list.innerHTML = "";
+                const teams = snap.val() || {};
+                if(Object.keys(teams).length === 0) list.innerHTML = "<div style='text-align:center; color:#aaa; padding:10px;'>Aucune équipe. Créez-en une !</div>";
+                for(let tName in teams) {
+                    const t = teams[tName];
+                    const div = document.createElement('div'); div.className = 'team-card';
+                    div.innerHTML = `<img src="${t.icon}" class="team-icon"><b>${tName}</b>`;
+                    div.onclick = () => { joinTeam(tName, t.icon); };
+                    list.appendChild(div);
+                }
+            });
+        }
+
+        function joinTeam(name, icon) { 
+            player.team = name;
+            player.teamIcon = icon;
+            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({teamName: name, teamIcon: icon}); finishEdit(); } 
+            else showRecap();
+        }
+
+        function toggleCreateUI(show) {
+            if(show) {
+                document.getElementById('team-crest-choices').style.display = 'flex';
+                document.getElementById('team-crest-gallery').style.display = 'none';
+                document.getElementById('team-preview').style.display = 'none';
+                selectedTeamCrest = "";
+            }
+        }
+        function showTeamGallery() { document.getElementById('team-crest-choices').style.display = 'none'; document.getElementById('team-crest-gallery').style.display = 'flex'; }
+        function hideTeamGallery() { document.getElementById('team-crest-gallery').style.display = 'none'; document.getElementById('team-crest-choices').style.display = 'flex'; }
+        function handleTeamFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectedTeamCrest=base64; showTeamPreview(); }); } }
+        
+        /* MODIF JS : FONCTION renderTeamCrestPicker REMPLACÉE */
+        function renderTeamCrestPicker() { 
+            const c = document.getElementById('team-icon-grid'); c.innerHTML="";
+            let showDefaults = true;
+            if(roomRef) {
+                roomRef.child('config/showDefaults').once('value').then(snap => {
+                    if(snap.exists() && snap.val() === false) showDefaults = false;
+                    roomRef.child('teams').once('value').then(snapTeams => {
+                        const teams = snapTeams.val() || {};
+                        const usedIcons = new Set();
+                        Object.values(teams).forEach(t => {
+                            if(t.icon && !t.icon.startsWith('data:image/svg')) {
+                                if(!usedIcons.has(t.icon)) { createCrestItem(t.icon, c); usedIcons.add(t.icon); }
+                            }
+                        });
+                        if(showDefaults) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); } }
+                    });
+                });
+            } else { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); } }
+        }
+        
+        /* MODIF JS : AJOUT createCrestItem */
+        function createCrestItem(url, container) {
+            const d = document.createElement('div'); d.className='crest-item';
+            const img = document.createElement('img'); img.src=url;
+            d.onclick = () => {
+                document.querySelectorAll('.crest-item').forEach(e=>e.classList.remove('selected'));
+                d.classList.add('selected');
+                selectedTeamCrest=url; showTeamPreview();
+            };
+            d.appendChild(img); container.appendChild(d);
+        }
+
+        function showTeamPreview() { document.getElementById('team-crest-choices').style.display='none'; document.getElementById('team-crest-gallery').style.display='none'; document.getElementById('team-preview-img').src=selectedTeamCrest; document.getElementById('team-preview').style.display='flex'; }
+        
+        function createNewTeam() {
+            const name = document.getElementById('new-team-name').value.trim();
+            if(name.length < 2 || !selectedTeamCrest) return alert("Nom et blason requis.");
+            roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); });
+        }
+
+        function openSettings() { document.getElementById('overlay-settings').style.display = 'flex'; }
+        function confirmQuit() { document.getElementById('overlay-quit').style.display = 'flex'; }
+        
+        function editStep(stepId) {
+            isEditing = true;
+            document.getElementById('overlay-settings').style.display = 'none';
+            if(stepId === 'step-pseudo') document.getElementById('input-pseudo').value = player.pseudo;
+            navigateTo(stepId);
+        }
+        function finishEdit() { isEditing = false; navigateTo('step-game', false); }
+        function saveProgress() { alert("Fonctionnalité 'Compte Joueur' bientôt disponible !"); }
+
+        function showRecap() {
+            navigateTo('step-recap');
+            document.getElementById('recap-name').innerText = player.pseudo;
+            const avDiv = document.getElementById('recap-avatar');
+            if(player.avatar.length > 20) avDiv.innerHTML = `<img src="${player.avatar}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`;
+            else avDiv.innerText = player.avatar;
+            if(player.team === 'Solo') document.getElementById('recap-team').innerText = "Mode Solo";
+            else document.getElementById('recap-team').innerHTML = `Équipe : <b>${player.team}</b>`;
+        }
+
+        function launchGame(isReconnect = false) {
+            if(!isReconnect) {
+                roomRef.child('scores/' + player.pseudo).set({ pts: 0, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon, active: true, kicked: false });
+                try { localStorage.setItem('presta_player_' + roomID, JSON.stringify(player)); } catch(e) { console.log("Erreur stockage (Quota ?):", e); }
+            }
+            const miniAv = document.getElementById('game-avatar');
+            if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
+            else miniAv.innerText = player.avatar;
+            document.getElementById('game-pseudo').innerText = player.pseudo;
+            document.getElementById('game-team').innerText = player.team;
+            const buzzerBg = document.getElementById('buzzer-bg');
+            if(player.avatar.length > 20) { buzzerBg.src = player.avatar; buzzerBg.style.display = "block"; } else { buzzerBg.style.display = "none"; }
+            
+            navigateTo('step-game');
+            startBuzzer();
+        }
+
+        function startBuzzer() {
+            roomRef.child('buzzers').off();
+            roomRef.child('gameState').off(); roomRef.child('scores/'+player.pseudo).off();
+            /* MODIF JS : AJOUT ECOUTEUR ROOM POUR FERMETURE */
+            roomRef.on('value', snap => {
+                if(!snap.exists()) { handleExit("🛑 La partie a été clôturée par " + mjName + ".", true); }
+            });
+            roomRef.child('scores/' + player.pseudo).on('value', snap => {
+                const d = snap.val();
+                if(d) {
+                    document.getElementById('game-score').innerText = d.pts || 0;
+                    if(d.kicked) { handleExit("🚫 Vous avez été exclu de la partie.", false); }
+                } 
+                // Removed the old 'else reset' alert
+            });
+            roomRef.child('gameState').on('value', snap => {
+                const st = snap.val();
+                if (st && st.status === 'endGame') showEndGame();
+                else { gameState = st ? st.status : 'waiting'; document.getElementById('podium-zone').style.display = 'none'; updateUI(); }
+            });
             roomRef.child('buzzers').on('value', snap => {
                 const val = snap.val();
-                if(val && val.pseudo === player.pseudo) {
-                    const btn = document.getElementById('buzzer-btn');
-                    btn.classList.remove('locked');
-                    btn.classList.add('my-turn');
-                    btn.innerText = "C'EST TOI !";
-                    document.getElementById('buzzer-status').innerText = "RÉPONDS !";
-                    if(navigator.vibrate) navigator.vibrate([100,50,100]);
+                if (val && val.pseudo === player.pseudo && currentWinner !== player.pseudo) {
+                    document.getElementById('sound-win').play().catch(()=>{});
+                    if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 }
+                currentWinner = val ? val.pseudo : null; updateUI();
             });
-
-            roomRef.child('scores/' + player.pseudo + '/pts').on('value', snap => {
-                document.getElementById('my-score').innerText = (snap.val() || 0) + " pts";
-            });
-
-            // MODIF: MESSAGES DE FIN INTELLIGENTS
-            roomRef.on('value', snap => {
-                if(!snap.exists()) {
-                    handleExit("🛑 La partie a été clôturée par " + mjName + ".", true);
-                }
-            });
-
-            roomRef.child('scores/' + player.pseudo).on('value', snap => {
-                if(snap.exists() && snap.val().kicked === true) {
-                    handleExit("🚫 Vous avez été exclu de la partie.", false);
-                }
-            });
+            roomRef.child('blockedPlayers/' + player.pseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
 
-        // MODIF: FONCTION SORTIE UNIFIEE
+        /* MODIF JS : AJOUT handleExit */
         function handleExit(message, redirect) {
             if(roomRef) roomRef.off();
             alert(message);
-            if(redirect && mjLink && mjLink.startsWith('http')) window.location.href = mjLink;
-            else location.reload();
+            localStorage.removeItem('presta_player_' + roomID);
+            if(redirect && mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; }
+            else { location.reload(); }
         }
 
-        function buzz(e) {
-            e.preventDefault();
-            const btn = document.getElementById('buzzer-btn');
-            if(btn.classList.contains('locked')) return;
-            
-            roomRef.child('gameState/status').transaction(currentStatus => {
-                if (currentStatus === 'ready') return 'taken';
-                return; 
-            }, (error, committed) => {
-                if (committed) {
-                    roomRef.child('buzzers').set({
-                        pseudo: player.pseudo,
-                        avatar: player.avatar,
-                        teamName: player.teamName,
-                        teamIcon: player.teamIcon
-                    });
-                }
+        function handlePress(e) {
+            if(e.cancelable) e.preventDefault();
+            if(isBlocked || currentWinner) return;
+            const btn = document.getElementById('btn-buzz');
+            btn.classList.add('buzzer-pressed');
+            if(navigator.vibrate) navigator.vibrate(50);
+            if(gameState === 'waiting') document.getElementById('sound-click').play().catch(()=>{});
+            if(gameState === 'ready') onBuzzerClick();
+        }
+
+        function handleRelease(e) {
+            if(e.cancelable) e.preventDefault();
+            document.getElementById('btn-buzz').classList.remove('buzzer-pressed');
+        }
+
+        function onBuzzerClick() {
+            roomRef.child('buzzers').transaction(function(currentData) {
+                if (currentData === null) return { pseudo: player.pseudo, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon };
+                else return;
+            }, function(error, committed, snapshot) {
+                if (committed) roomRef.child('gameState').update({ status: 'taken' });
+                else document.getElementById('sound-click').play().catch(()=>{});
+            });
+        }
+
+        function updateUI() {
+            const c = document.getElementById('btn-buzz');
+            const l = document.getElementById('label');
+            const msg = document.getElementById('status-msg'); const box = c.parentElement.parentElement;
+            box.className = "step-screen active"; c.parentElement.className = "buzzer-container";
+            if (currentWinner) {
+                if(currentWinner === player.pseudo) { box.classList.add('main-prise');
+                    l.innerText = "C'EST À TOI !"; msg.innerText = "🎤 Donne ta réponse !";
+                } 
+                else { box.classList.add('blocked');
+                    l.innerText = "OCCUPÉ"; msg.innerText = `${currentWinner} a la main.`; }
+            } else if (isBlocked) { box.classList.add('blocked');
+                l.innerText = "BLOQUÉ"; msg.innerText = "Attends la prochaine manche."; } 
+            else if (gameState === 'ready') { box.classList.add('ready');
+                l.innerText = "BUZZEZ !"; msg.innerText = "La main est libre !";
+            } 
+            else { l.innerText = "ATTENDEZ";
+                msg.innerText = "L'animateur va lancer le son..."; }
+        }
+
+        function showQR() {
+            const url = window.location.href.split('?')[0] + "?room=" + roomID;
+            document.getElementById('qrcode-display').innerHTML = "";
+            new QRCode(document.getElementById("qrcode-display"), { text: url, width: 200, height: 200 });
+            document.getElementById('qr-room-code').innerText = roomID;
+            document.getElementById('overlay-qr').style.display = 'flex';
+        }
+
+        function showShare() {
+            const url = window.location.href.split('?')[0] + "?room=" + roomID;
+            if (navigator.share) {
+                navigator.share({ title: 'Blind Test - Presta\'Puce', text: `Rejoins ma partie de Blind Test ! Code Salle: ${roomID}`, url: url }).catch(console.error);
+            } else { prompt("Copie ce lien pour le partager :", url);
+            }
+        }
+
+        function showEndGame() {
+            roomRef.child('scores').once('value', snap => {
+                const all = snap.val() || {};
+                const sorted = Object.values(all).sort((a,b) => b.pts - a.pts);
+                const rank = sorted.findIndex(p => p.pseudo === player.pseudo) + 1;
+                let html = "";
+                if(rank === 1) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img"><h1>CHAMPION ! 🏆</h1>`;
+                else if(rank === 2) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img"><h1>VICE-CHAMPION 🥈</h1>`;
+                else if(rank === 3) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img"><h1>3ème PLACE 🥉</h1>`;
+                else html = `<h1>${rank}ème PLACE</h1><p>Bien joué !</p>`;
+                document.getElementById('podium-content').innerHTML = html;
+                document.getElementById('podium-zone').style.display = 'flex';
+                document.getElementById('sound-applause').play().catch(()=>{});
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 3000 });
             });
         }
 
         function leaveGame(really = false) {
             if(really) {
                 if(roomRef) roomRef.child('scores/'+player.pseudo).update({active:false});
+                localStorage.removeItem('presta_player_' + roomID);
                 location.reload();
-            } else if(confirm("Quitter la partie ?")) leaveGame(true);
+            }
         }
 
-        function showPodium() {
-            db.ref('roomsData/'+roomID+'/scores').once('value', snap => {
-                const scores = [];
-                snap.forEach(c => scores.push({ p: c.key, pts: c.val().pts || 0 }));
-                scores.sort((a,b) => b.pts - a.pts);
-                
-                const rank = scores.findIndex(x => x.p === player.pseudo) + 1;
-                let html = "";
-                if(rank === 1) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img"><h1>CHAMPION ! 🏆</h1>`;
-                else if(rank === 2) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img"><h1>VICE-CHAMPION 🥈</h1>`;
-                else if(rank === 3) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img"><h1>3ème PLACE 🥉</h1>`;
-                else html = `<h1>${rank}ème PLACE</h1><p>Bien joué !</p>`;
-                
-                document.getElementById('podium-content').innerHTML = html;
-                document.getElementById('podium-zone').style.display = 'flex';
-                document.getElementById('sound-applause').play().catch(()=>{});
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 6000 });
-            });
+        function unlockAudio() { ['sound-click', 'sound-win', 'sound-applause'].forEach(id => { const el = document.getElementById(id); el.play().then(() => { el.pause(); el.currentTime = 0; }).catch(()=>{}); });
         }
     </script>
 </body>
