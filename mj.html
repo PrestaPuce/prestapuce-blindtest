@@ -73,7 +73,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.037</div>
+    <div class="version-tag">v1.039</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -227,7 +227,6 @@
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
         let mjLocalCustoms = new Set(); 
-        // Par défaut, on affiche les blasons géométriques
         let showDefaults = true;
 
         // GENERATEUR SVG
@@ -260,14 +259,10 @@
             db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
                 mjProfileData = data;
-                
-                // Charger le paramètre "showDefaults" (Vrai par défaut)
                 if(data.settings && data.settings.showDefaults !== undefined) showDefaults = data.settings.showDefaults;
                 else showDefaults = true;
-
                 mjLocalCustoms.clear();
                 if(data.customLogos) Object.values(data.customLogos).forEach(url => mjLocalCustoms.add(url));
-
                 if(mjProfileData.isGuest === true) { cleanGuestData(user.uid); }
                 else {
                     document.getElementById('mj-display-name').innerText = data.prenom || "MJ";
@@ -346,10 +341,7 @@
             const cl = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
             roomRef.child('mjLogo').set(cl); if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink);
             roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true);
-            
-            // SAUVEGARDE DE LA CONFIG SALLE (Pour que les joueurs sachent s'ils doivent afficher les défauts)
             roomRef.child('config/showDefaults').set(showDefaults);
-
             initMJLogic(); loadCrestGrid(); openScoreBoard();
         }
 
@@ -362,33 +354,25 @@
 
         // --- GESTION BIBLIOTHEQUE ---
         function openLibraryManager() {
-            const uid = auth.currentUser ? auth.currentUser.uid : null;
-            if(!uid) return;
+            const uid = auth.currentUser ? auth.currentUser.uid : null; if(!uid) return;
             document.getElementById('chk-show-defaults').checked = showDefaults;
-            renderLibrary();
-            document.getElementById('overlay-library').style.display = 'flex';
+            renderLibrary(); document.getElementById('overlay-library').style.display = 'flex';
         }
 
         function toggleShowDefaults() {
             showDefaults = document.getElementById('chk-show-defaults').checked;
             const uid = auth.currentUser.uid;
-            // Sauvegarde dans le profil MJ
             db.ref(`users/${uid}/settings/showDefaults`).set(showDefaults);
-            // Sauvegarde dans la salle active (pour les joueurs)
             if(roomRef) roomRef.child('config/showDefaults').set(showDefaults);
-            // Rafraichit la grille MJ
             loadCrestGrid();
         }
 
         function renderLibrary() {
-            const grid = document.getElementById('lib-content');
-            grid.innerHTML = "";
+            const grid = document.getElementById('lib-content'); grid.innerHTML = "";
             db.ref(`users/${auth.currentUser.uid}/customLogos`).once('value', snap => {
-                const data = snap.val();
-                if(!data) { grid.innerHTML = "<p style='grid-column:1/-1; color:#aaa;'>Aucune image.</p>"; return; }
+                const data = snap.val(); if(!data) { grid.innerHTML = "<p style='grid-column:1/-1; color:#aaa;'>Aucune image.</p>"; return; }
                 Object.keys(data).forEach(key => {
-                    const url = data[key];
-                    const item = document.createElement('div'); item.className = 'lib-item';
+                    const url = data[key]; const item = document.createElement('div'); item.className = 'lib-item';
                     item.innerHTML = `<img src="${url}" class="lib-img"><button class="btn-delete-img" onclick="deleteFromLibrary('${key}')">X</button>`;
                     grid.appendChild(item);
                 });
@@ -400,39 +384,27 @@
             const file = input.files[0]; const uid = auth.currentUser.uid;
             const ref = storage.ref(`mj_icons/${uid}/${Date.now()}_${file.name}`);
             ref.put(file).then(s => s.ref.getDownloadURL()).then(url => {
-                db.ref(`users/${uid}/customLogos`).push(url);
-                mjLocalCustoms.add(url);
-                renderLibrary(); loadCrestGrid();
+                db.ref(`users/${uid}/customLogos`).push(url); mjLocalCustoms.add(url); renderLibrary(); loadCrestGrid();
             });
         }
 
         function deleteFromLibrary(key) {
             if(confirm("Supprimer cette image de votre bibliothèque ?")) {
-                // On la supprime de la base
                 db.ref(`users/${auth.currentUser.uid}/customLogos/${key}`).remove();
-                // On recharge (nécessaire de recharger les customs locaux pour être propre)
-                loadMjData(auth.currentUser); 
-                setTimeout(() => { renderLibrary(); loadCrestGrid(); }, 500);
+                loadMjData(auth.currentUser); setTimeout(() => { renderLibrary(); loadCrestGrid(); }, 500);
             }
         }
 
         // --- CHARGEMENT GRILLE PRINCIPALE ---
         function loadCrestGrid() {
             const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
-            // 1. Logos Perso (Priorité)
             mjLocalCustoms.forEach(url => createCrestItem(url, grid));
-            // 2. Logos Joueurs Actifs (si pas déjà affichés)
             if(globalTeams) {
                 Object.values(globalTeams).forEach(team => {
-                    if(team.icon && !team.icon.startsWith('data:image/svg') && !mjLocalCustoms.has(team.icon)) {
-                        createCrestItem(team.icon, grid);
-                    }
+                    if(team.icon && !team.icon.startsWith('data:image/svg') && !mjLocalCustoms.has(team.icon)) { createCrestItem(team.icon, grid); }
                 });
             }
-            // 3. SVG par défaut (Seulement si Switch ON)
-            if(showDefaults) {
-                for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); }
-            }
+            if(showDefaults) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); } }
         }
 
         function createCrestItem(url, container) {
@@ -506,21 +478,45 @@
             document.getElementById('banned-section').style.display = hb ? "block" : "none";
         }
         
-        function deletePlayer(p) { if(confirm("Supprimer "+p+" ?")) roomRef.child('scores/'+p).remove(); }
+        function deletePlayer(p) { if(confirm("Supprimer DÉFINITIVEMENT "+p+" ?\nCela libèrera le pseudo pour un autre joueur.")) roomRef.child('scores/'+p).remove(); }
         function forceBuzzer(p) { const d=allPlayersData[p]; if(d) { roomRef.child('gameState').update({status:'taken'}); roomRef.child('buzzers').set({pseudo:p, avatar:d.avatar, teamName:d.teamName||"Solo", teamIcon:d.teamIcon||""}); } }
         function toggleBlockPlayer(p) { if(currentBlocked[p]) roomRef.child('blockedPlayers/'+p).remove(); else roomRef.child('blockedPlayers/'+p).set(true); }
-        function triggerEndGame() { if(confirm("Fin ?")) { roomRef.child('gameState').set({status:'endGame', timestamp:Date.now()}); roomRef.child('buzzers').remove(); } }
+        function triggerEndGame() { if(confirm("Fin de partie ? Les scores vont être figés sur l'écran d'affichage.")) { roomRef.child('gameState').set({status:'endGame', timestamp:Date.now()}); roomRef.child('buzzers').remove(); } }
         function statusUpdate(s) { if(roomRef) { roomRef.child('gameState').set({status:s}); if(s==='ready') roomRef.child('buzzers').remove(); } }
         function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
         function adj(p,v) { roomRef.child('scores/'+p+'/pts').transaction(x=>(x||0)+v); }
         function deleteTeam(n) { roomRef.child('teams/'+n).remove(); }
-        function kickPlayer(p) { if(confirm("Bannir "+p+" ?")) roomRef.child('scores/'+p).update({kicked:true}); setTimeout(()=>roomRef.child('scores/'+p).update({active:false}),1500); }
+        function kickPlayer(p) { if(confirm("Expulser "+p+" ? (Bannissement)")) roomRef.child('scores/'+p).update({kicked:true}); setTimeout(()=>roomRef.child('scores/'+p).update({active:false}),1500); }
         function unkickPlayer(p) { roomRef.child('scores/'+p).update({kicked:false, active:false}); }
         function togglePlayerTeam(p,c) { const i = c==="Solo"?"":(globalTeams[c]?globalTeams[c].icon:""); roomRef.child('scores/'+p).update({teamName:c, teamIcon:i, active:true}); }
         function handleError() { if(currentPlayer) { roomRef.child('blockedPlayers/'+currentPlayer.pseudo).set(true); statusUpdate('ready'); } }
         function handleReward(pts,m) { roomRef.child('scores/'+currentPlayer.pseudo).transaction(c=>{return{pts:(c?c.pts:0)+pts, avatar:c.avatar, teamName:c.teamName, teamIcon:c.teamIcon, active:true}}); if(m==='partial') { roomRef.child('blockedPlayers/'+currentPlayer.pseudo).set(true); statusUpdate('ready'); } else fullReset(); }
-        function quitRoom() { if(mjProfileData.isGuest) resetFullGame(); else { if(roomRef) roomRef.child('buzzers').off(); checkUserRoom(auth.currentUser.uid); } }
-        function resetFullGame() { if(confirm("Supprimer ?")) { roomRef.remove(); db.ref('activeRooms/'+roomID).remove(); db.ref('users/'+auth.currentUser.uid+'/lastRoom').remove().then(()=>{lastSavedRoom=""; checkUserRoom(auth.currentUser.uid);}); } }
+        
+        // --- NOUVEAUX MESSAGES SECURISES v1.039 ---
+        function quitRoom() {
+            if(mjProfileData.isGuest === true) {
+                if(confirm("⚠️ Attention (Mode Invité)\n\nEn quittant, vous risquez de perdre l'accès à cette salle si vous fermez votre navigateur.\n\nVoulez-vous vraiment quitter ?")) {
+                    // Pour l'invité, on ferme simplement
+                    if(roomRef) roomRef.child('buzzers').off();
+                    checkUserRoom(auth.currentUser.uid);
+                }
+            } else {
+                if(confirm("💾 Mettre la partie en pause ?\n\nVos scores, équipes et bibliothèque sont sauvegardés automatiquement.\n\nVous pourrez reprendre cette salle exactement là où vous l'avez laissée en vous reconnectant plus tard.")) {
+                    if(roomRef) roomRef.child('buzzers').off();
+                    checkUserRoom(auth.currentUser.uid);
+                }
+            }
+        }
+
+        function resetFullGame() {
+            if(confirm("⚠️ ATTENTION ! Vous êtes sur le point de supprimer définitivement la salle et toutes les données associées (Scores, Équipes). Cette action est irréversible.")) {
+                roomRef.remove();
+                db.ref('activeRooms/'+roomID).remove();
+                db.ref('users/'+auth.currentUser.uid+'/lastRoom').remove().then(()=>{
+                    lastSavedRoom=""; checkUserRoom(auth.currentUser.uid);
+                });
+            }
+        }
     </script>
 </body>
 </html>
