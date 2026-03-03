@@ -24,7 +24,7 @@
         .welcome-list li { display: flex; align-items: center; margin-bottom: 15px; font-size: 1.1rem; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; }
         .welcome-list li span { font-size: 1.5rem; margin-right: 15px; min-width: 40px; text-align: center; }
 
-        /* STYLE GRILLE BLASONS (NOUVEAU) */
+        /* AJOUT: STYLE GRILLE BLASONS */
         .crest-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; width: 100%; max-width: 350px; max-height: 250px; overflow-y: auto; padding: 5px; background: rgba(0,0,0,0.2); border-radius: 10px; }
         .crest-item { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; background: white; padding: 2px; box-sizing: border-box; }
         .crest-item img { width: 100%; height: 100%; object-fit: contain; }
@@ -44,7 +44,7 @@
     </style>
 </head>
 <body>
-    <div class="version-tag">v1.084</div>
+    <div class="version-tag">v1.083</div>
 
     <audio id="sound-applause" src="https://actions.google.com/sounds/v1/crowds/battle_crowd_celebrate_stutter.ogg"></audio>
 
@@ -121,17 +121,18 @@
         let roomRef = null;
         let selectedCrest = "";
         
-        // NOUVEAU: Variables pour les messages de fin
+        // MODIF: Variables pour la fin de partie
         let mjName = "l'Animateur";
         let mjLink = "";
 
-        // --- 1. INITIALISATION (Code 1.074 Intact) ---
+        // --- 1. INITIALISATION (CODE 1.074 INTACT) ---
         window.onload = function() {
             const params = new URLSearchParams(window.location.search);
             if(params.has('room')) {
                 document.getElementById('room-code').value = params.get('room');
                 verifyRoom();
             }
+            // IMPORTANT: Suppression de l'appel qui buggait ici
         };
 
         function verifyRoom() {
@@ -144,7 +145,7 @@
                     roomID = code;
                     roomRef = db.ref('roomsData/' + roomID);
                     
-                    // NOUVEAU: Récup infos MJ
+                    // MODIF: Infos MJ
                     roomRef.child('mjName').once('value', s => { if(s.exists()) mjName = s.val(); });
                     roomRef.child('mjLink').once('value', s => { if(s.exists()) mjLink = s.val(); });
                     roomRef.child('mjLogo').once('value', s => { 
@@ -199,14 +200,14 @@
             compressImage(img, 0.5, 300).then(compressed => {
                 player.avatar = compressed;
                 showScreen('screen-team');
-                loadCrests(); // NOUVEAU: Charger la grille
+                loadCrests(); // MODIF: Charge la grille
             });
         }
 
         function skipSelfie() {
             player.avatar = "👤";
             showScreen('screen-team');
-            loadCrests(); // NOUVEAU: Charger la grille
+            loadCrests(); // MODIF: Charge la grille
         }
 
         function compressImage(src, quality, maxWidth) {
@@ -225,7 +226,7 @@
             });
         }
 
-        // --- 4. EQUIPE & BLASONS (NOUVEAU SYSTÈME CENTRALISÉ) ---
+        // --- 4. EQUIPE & BLASONS (MODIF: GENERATEUR SVG) ---
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
             const c1 = colors[i % colors.length]; const c2 = colors[(i+1) % colors.length];
@@ -243,25 +244,31 @@
             return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${pattern}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`;
         }
 
-        // NOUVEAU: ÉCOUTE EN TEMPS RÉEL DU DOSSIER 'LIBRARY'
+        // --- MODIF: CHARGEMENT GRILLE EN TEMPS RÉEL (.on) ---
         function loadCrests() {
             const list = document.getElementById('crest-list');
             
-            // 1. Écoute Config MJ
+            // On écoute la config MJ
             roomRef.child('config/showDefaults').on('value', snapConf => {
                 const showDefaults = (snapConf.val() === false) ? false : true;
 
-                // 2. Écoute Dossier Central 'library'
-                roomRef.child('library').on('value', snapLib => {
+                // On écoute les équipes en temps réel pour voir les nouveaux logos
+                roomRef.child('teams').on('value', snapTeams => {
                     list.innerHTML = "";
-                    const libraryImages = snapLib.val() || {};
+                    const teams = snapTeams.val() || {};
+                    const usedIcons = new Set();
 
-                    // Afficher tout ce qui est dans le dossier library
-                    Object.values(libraryImages).forEach(url => {
-                        addCrestItem(url, list);
+                    // Logos des autres
+                    Object.values(teams).forEach(t => {
+                        if(t.icon && !t.icon.startsWith('data:image/svg')) {
+                            if(!usedIcons.has(t.icon)) {
+                                addCrestItem(t.icon, list);
+                                usedIcons.add(t.icon);
+                            }
+                        }
                     });
 
-                    // 3. Logos par défaut (générés)
+                    // Logos par défaut
                     if(showDefaults) {
                         for(let i=0; i<30; i++) {
                             addCrestItem(createBlason(i), list);
@@ -294,9 +301,7 @@
         function createTeam() {
             const n = document.getElementById('team-name').value.trim();
             if(!n || !selectedCrest) return;
-            // On sauvegarde l'équipe ET on ajoute le logo à la library (Auto-Add)
             roomRef.child('teams/' + n).set({ icon: selectedCrest });
-            roomRef.child('library').push(selectedCrest); 
             setTeam(n, selectedCrest);
         }
 
@@ -366,7 +371,7 @@
                 document.getElementById('my-score').innerText = (snap.val() || 0) + " pts";
             });
 
-            // NOUVEAU: Messages de fin intelligents
+            // MODIF: MESSAGES DE FIN INTELLIGENTS
             roomRef.on('value', snap => {
                 if(!snap.exists()) {
                     handleExit("🛑 La partie a été clôturée par " + mjName + ".", true);
@@ -380,7 +385,7 @@
             });
         }
 
-        // NOUVEAU: Fonction de sortie unifiée
+        // MODIF: FONCTION SORTIE UNIFIEE
         function handleExit(message, redirect) {
             if(roomRef) roomRef.off();
             alert(message);
