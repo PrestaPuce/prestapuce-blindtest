@@ -12,29 +12,43 @@
     <style>
         :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; --grey: #7f8c8d; }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+        
+        /* STRUCTURE SANDWICH */
         .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         .step-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; background: var(--bg); z-index: 10; }
         .step-screen.active { display: flex; }
+
+        /* ZONES */
         .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
         .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .content-top { justify-content: flex-start !important; }
         .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 30px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 85%, transparent); z-index: 20; }
+
+        /* TYPO FLUIDE */
         h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
         h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin: 0 0 15px 0; font-weight: normal; color: white; }
         p.desc { font-size: clamp(0.9rem, 3.5vw, 1.1rem); color: #bdc3c7; margin-bottom: 20px; line-height: 1.5; max-width: 500px; font-weight: 500; }
+        
+        /* INPUTS & BOUTONS */
         input[type="text"], input[type="number"] { width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px; }
         input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
         .btn-main { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: clamp(1rem, 4vw, 1.3rem); font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 350px; }
         .btn-main:active { transform: scale(0.95); }
         .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; }
+
+        /* NAV & ICONS */
         #btn-back-global { position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); transition: 0.2s; backdrop-filter: blur(5px); }
         #btn-back-global svg { width: 22px; height: 22px; fill: white; margin-right: 2px; }
         #btn-back-global:active { background: rgba(255, 255, 255, 0.3); transform: scale(0.9); }
+
+        /* CARDS */
         .choice-card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; width: 100%; max-width: 350px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.2); box-sizing: border-box; }
         .choice-card:active { transform: scale(0.98); background: rgba(255,255,255,0.1); border-color: var(--accent); }
         .choice-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
         .choice-content b { display: block; font-size: 1.1rem; margin-bottom: 3px; color: white; }
         .choice-content span { font-size: 0.85rem; color: #bdc3c7; }
+
+        /* GALERIES */
         .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; justify-content: flex-start; }
         .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
@@ -42,10 +56,20 @@
         .grid-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
         .grid-item img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
         .grid-item-emoji { font-size: clamp(1.8rem, 7vw, 2.5rem); padding: 0; }
+
+        /* LISTE EQUIPES */
         .team-list-container { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
         .team-card { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; display: flex; align-items: center; cursor: pointer; border: 2px solid transparent; }
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
         .team-card b { font-size: 1rem; }
+
+        /* MODIF CSS : GRILLE BLASONS */
+        .crest-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; width: 100%; max-width: 350px; max-height: 250px; overflow-y: auto; padding: 5px; background: rgba(0,0,0,0.2); border-radius: 10px; }
+        .crest-item { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; background: white; padding: 2px; box-sizing: border-box; }
+        .crest-item img { width: 100%; height: 100%; object-fit: contain; }
+        .crest-item.selected { border-color: var(--accent); transform: scale(1.1); box-shadow: 0 0 10px var(--accent); z-index: 2; }
+
+        /* TUTO */
         .tuto-list { text-align: left; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
         .tuto-item { display: flex; align-items: flex-start; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; }
         .dot { width: 18px; height: 18px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; margin-top: 3px; }
@@ -54,13 +78,19 @@
         .dot.grey { background: #7f8c8d; }
         .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
         .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
+
+        /* HEADER JEU */
         .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
         .mini-profile { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; margin-right: 10px; }
         .mini-avatar { width: 40px; height: 40px; flex-shrink: 0; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
         .mini-info { line-height: 1.1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
+        
+        /* ICONS SVG DANS BOUTONS */
         .icon-btn svg { width: 20px; height: 20px; fill: white; }
+
+        /* BUZZER */
         .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 60px; }
         .buzzer { width: 65vw; height: 65vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; background: #e74c3c; box-shadow: 0 15px 0 #c0392b, 0 20px 40px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.1s; cursor: pointer; }
         .buzzer.buzzer-pressed { transform: translateY(15px); box-shadow: 0 0 0 #c0392b; }
@@ -70,6 +100,8 @@
         .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; pointer-events: none; }
         .buzzer-label { font-size: clamp(1.2rem, 5vw, 1.8rem); font-weight: bold; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; z-index: 2; position: relative; }
         .buzzer-img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; border-radius: 50%; pointer-events: none; }
+
+        /* OVERLAYS */
         .overlay-full { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; padding: 20px; box-sizing: border-box; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .qr-card, .settings-content { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 320px; box-sizing: border-box; }
@@ -80,7 +112,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.080</div>
+    <div class="version-tag">v1.082</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -161,7 +193,7 @@
                 </div>
                 <div id="team-crest-gallery" class="gallery-container" style="width:100%;">
                     <p style="margin-bottom:10px;">Choisis ton Blason :</p>
-                    <div class="common-grid" id="team-icon-grid"></div>
+                    <div class="crest-grid" id="team-icon-grid"></div>
                 </div>
                 <div id="team-preview" style="display:none; align-items:center; justify-content:center; gap:15px; margin:20px 0;">
                     <img id="team-preview-img" style="width:60px; height:60px; object-fit:contain; background:transparent;">
@@ -297,6 +329,7 @@
             reader.readAsDataURL(file);
         }
 
+        /* MODIF JS : AJOUT createBlason */
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
             const c1 = colors[i % colors.length];
@@ -326,16 +359,16 @@
         let selectedTeamCrest = "";
         let isEditing = false;
         let stepHistory = [];
-        let mjName = "l'Animateur"; // Variable pour le nom du MJ
-        let mjLink = ""; // Variable pour le lien du MJ
+        /* MODIF JS : AJOUT VARIABLES MJ */
+        let mjName = "l'Animateur";
+        let mjLink = "";
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const r = urlParams.get('room'); // ICI : On garde strictement 'room' comme dans la 1.074
+            const r = urlParams.get('room');
             if(r) { roomID = r; checkRoomAndStart(true); } 
             else { navigateTo('step-room'); }
-            renderAvatarGrid(); 
-            renderTeamCrestPicker(); // Sera mis à jour plus tard via la DB
+            renderAvatarGrid(); renderTeamCrestPicker();
             document.getElementById('input-room').addEventListener('keypress', (e)=>{if(e.key==='Enter') validateRoomStep()});
             document.getElementById('input-pseudo').addEventListener('keypress', (e)=>{if(e.key==='Enter') validatePseudo()});
         };
@@ -383,11 +416,10 @@
             db.ref('activeRooms/' + roomID).once('value', snap => {
                 if(snap.exists()) {
                     roomRef = db.ref('roomsData/' + roomID);
-                    
-                    // AJOUT 1.080 : Récupération des infos MJ
+                    /* MODIF JS : Recuperation infos MJ */
                     roomRef.child('mjName').once('value', s => { if(s.exists()) mjName = s.val(); });
                     roomRef.child('mjLink').once('value', s => { if(s.exists()) mjLink = s.val(); });
-
+                    
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { 
                         document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
                     const saved = localStorage.getItem('presta_player_' + roomID);
@@ -465,7 +497,7 @@
         }
 
         function goToTeamAction() { navigateTo('step-team-action'); }
-        function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); renderTeamCrestPicker(); } // Force le refresh de la grille
+        function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); }
         function goToTeamJoin() { navigateTo('step-team-join'); loadTeamsList(); }
 
         function loadTeamsList() {
@@ -502,47 +534,36 @@
         function hideTeamGallery() { document.getElementById('team-crest-gallery').style.display = 'none'; document.getElementById('team-crest-choices').style.display = 'flex'; }
         function handleTeamFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectedTeamCrest=base64; showTeamPreview(); }); } }
         
-        // MODIF 1.080 : NOUVELLE FONCTION DE GENERATION DE LA GRILLE BLASONS
+        /* MODIF JS : FONCTION renderTeamCrestPicker REMPLACÉE */
         function renderTeamCrestPicker() { 
-            const c = document.getElementById('team-icon-grid'); 
-            c.innerHTML="";
-            
-            // 1. Lire Config MJ (ShowDefaults)
+            const c = document.getElementById('team-icon-grid'); c.innerHTML="";
             let showDefaults = true;
             if(roomRef) {
                 roomRef.child('config/showDefaults').once('value').then(snap => {
                     if(snap.exists() && snap.val() === false) showDefaults = false;
-                    
-                    // 2. Charger les logos des autres équipes (Bibliothèque)
                     roomRef.child('teams').once('value').then(snapTeams => {
                         const teams = snapTeams.val() || {};
                         const usedIcons = new Set();
-                        
                         Object.values(teams).forEach(t => {
                             if(t.icon && !t.icon.startsWith('data:image/svg')) {
-                                if(!usedIcons.has(t.icon)) {
-                                    createCrestItem(t.icon, c);
-                                    usedIcons.add(t.icon);
-                                }
+                                if(!usedIcons.has(t.icon)) { createCrestItem(t.icon, c); usedIcons.add(t.icon); }
                             }
                         });
-
-                        // 3. Charger les défauts si autorisé
-                        if(showDefaults) {
-                            for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); }
-                        }
+                        if(showDefaults) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); } }
                     });
                 });
-            } else {
-                // Fallback si pas de roomRef encore (ne devrait pas arriver)
-                for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); }
-            }
+            } else { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); } }
         }
-
+        
+        /* MODIF JS : AJOUT createCrestItem */
         function createCrestItem(url, container) {
-            const d = document.createElement('div'); d.className='grid-item'; 
-            const img = document.createElement('img'); img.src=url; 
-            d.onclick = () => { selectedTeamCrest=url; showTeamPreview() }; 
+            const d = document.createElement('div'); d.className='crest-item';
+            const img = document.createElement('img'); img.src=url;
+            d.onclick = () => {
+                document.querySelectorAll('.crest-item').forEach(e=>e.classList.remove('selected'));
+                d.classList.add('selected');
+                selectedTeamCrest=url; showTeamPreview();
+            };
             d.appendChild(img); container.appendChild(d);
         }
 
@@ -593,33 +614,21 @@
             startBuzzer();
         }
 
-        // MODIF 1.080 : MESSAGES DE FIN DE PARTIE
         function startBuzzer() {
-            roomRef.child('buzzers').off(); roomRef.child('gameState').off(); roomRef.child('scores/'+player.pseudo).off();
-            
-            // 1. Ecoute Score + Kicked
+            roomRef.child('buzzers').off();
+            roomRef.child('gameState').off(); roomRef.child('scores/'+player.pseudo).off();
+            /* MODIF JS : AJOUT ECOUTEUR ROOM POUR FERMETURE */
+            roomRef.on('value', snap => {
+                if(!snap.exists()) { handleExit("🛑 La partie a été clôturée par " + mjName + ".", true); }
+            });
             roomRef.child('scores/' + player.pseudo).on('value', snap => {
                 const d = snap.val();
                 if(d) {
                     document.getElementById('game-score').innerText = d.pts || 0;
-                    if(d.kicked) { 
-                        alert("🚫 Vous avez été exclu de la partie."); 
-                        handleExit(false); 
-                    }
-                } else {
-                    // Profil supprimé mais salle existe ? Probablement reset manuel ou erreur
-                    // Si la salle n'existe plus, le listener ci-dessous le gérera
-                }
+                    if(d.kicked) { handleExit("🚫 Vous avez été exclu de la partie.", false); }
+                } 
+                // Removed the old 'else reset' alert
             });
-
-            // 2. Ecoute Suppression Salle (Clôture)
-            roomRef.on('value', snap => {
-                if(!snap.exists()) {
-                    alert("🛑 La partie a été clôturée par " + mjName + ".");
-                    handleExit(true); // True = Redirect to MJ Link
-                }
-            });
-
             roomRef.child('gameState').on('value', snap => {
                 const st = snap.val();
                 if (st && st.status === 'endGame') showEndGame();
@@ -636,14 +645,13 @@
             roomRef.child('blockedPlayers/' + player.pseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
 
-        // Nouvelle fonction pour gérer la sortie
-        function handleExit(useRedirect) {
+        /* MODIF JS : AJOUT handleExit */
+        function handleExit(message, redirect) {
+            if(roomRef) roomRef.off();
+            alert(message);
             localStorage.removeItem('presta_player_' + roomID);
-            if(useRedirect && mjLink && mjLink.startsWith('http')) {
-                window.location.href = mjLink;
-            } else {
-                location.reload();
-            }
+            if(redirect && mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; }
+            else { location.reload(); }
         }
 
         function handlePress(e) {
@@ -677,11 +685,18 @@
             const msg = document.getElementById('status-msg'); const box = c.parentElement.parentElement;
             box.className = "step-screen active"; c.parentElement.className = "buzzer-container";
             if (currentWinner) {
-                if(currentWinner === player.pseudo) { box.classList.add('main-prise'); l.innerText = "C'EST À TOI !"; msg.innerText = "🎤 Donne ta réponse !"; } 
-                else { box.classList.add('blocked'); l.innerText = "OCCUPÉ"; msg.innerText = `${currentWinner} a la main.`; }
-            } else if (isBlocked) { box.classList.add('blocked'); l.innerText = "BLOQUÉ"; msg.innerText = "Attends la prochaine manche."; } 
-            else if (gameState === 'ready') { box.classList.add('ready'); l.innerText = "BUZZEZ !"; msg.innerText = "La main est libre !"; } 
-            else { l.innerText = "ATTENDEZ"; msg.innerText = "L'animateur va lancer le son..."; }
+                if(currentWinner === player.pseudo) { box.classList.add('main-prise');
+                    l.innerText = "C'EST À TOI !"; msg.innerText = "🎤 Donne ta réponse !";
+                } 
+                else { box.classList.add('blocked');
+                    l.innerText = "OCCUPÉ"; msg.innerText = `${currentWinner} a la main.`; }
+            } else if (isBlocked) { box.classList.add('blocked');
+                l.innerText = "BLOQUÉ"; msg.innerText = "Attends la prochaine manche."; } 
+            else if (gameState === 'ready') { box.classList.add('ready');
+                l.innerText = "BUZZEZ !"; msg.innerText = "La main est libre !";
+            } 
+            else { l.innerText = "ATTENDEZ";
+                msg.innerText = "L'animateur va lancer le son..."; }
         }
 
         function showQR() {
@@ -696,7 +711,8 @@
             const url = window.location.href.split('?')[0] + "?room=" + roomID;
             if (navigator.share) {
                 navigator.share({ title: 'Blind Test - Presta\'Puce', text: `Rejoins ma partie de Blind Test ! Code Salle: ${roomID}`, url: url }).catch(console.error);
-            } else { prompt("Copie ce lien pour le partager :", url); }
+            } else { prompt("Copie ce lien pour le partager :", url);
+            }
         }
 
         function showEndGame() {
@@ -724,7 +740,8 @@
             }
         }
 
-        function unlockAudio() { ['sound-click', 'sound-win', 'sound-applause'].forEach(id => { const el = document.getElementById(id); el.play().then(() => { el.pause(); el.currentTime = 0; }).catch(()=>{}); }); }
+        function unlockAudio() { ['sound-click', 'sound-win', 'sound-applause'].forEach(id => { const el = document.getElementById(id); el.play().then(() => { el.pause(); el.currentTime = 0; }).catch(()=>{}); });
+        }
     </script>
 </body>
 </html>
