@@ -55,15 +55,17 @@
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
         .team-card b { font-size: 1rem; }
 
-        /* --- CSS GRILLE BLASONS (Modif v1.089) --- */
+        /* --- CSS GRILLE BLASONS ELASTIQUE (Modif v1.090) --- */
         .crest-grid { 
             display: grid; 
-            grid-template-columns: repeat(5, 1fr); 
-            gap: 12px; /* Espacement augmenté pour éviter superposition */
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 12px;
             margin: 15px 0; 
             width: 100%; 
-            max-width: 350px; 
-            max-height: 250px; 
+            max-width: 350px;
+            /* PLUS DE MAX-HEIGHT */
+            flex: 1; /* Prend tout l'espace disponible */
+            min-height: 0; /* Important pour le scroll dans flex */
             overflow-y: auto; 
             padding: 10px; 
             background: rgba(0,0,0,0.2); 
@@ -72,7 +74,7 @@
         }
         .crest-item { 
             width: 100%; 
-            aspect-ratio: 1; /* Force le carré strict */
+            aspect-ratio: 1; 
             border-radius: 8px; 
             cursor: pointer; 
             border: 2px solid transparent; 
@@ -80,14 +82,15 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            background: rgba(255,255,255,0.1); /* Fond case visible */
-            padding: 5px; /* Marge interne pour détacher l'image du bord */
+            background: white; 
+            padding: 5px; 
             box-sizing: border-box;
         }
         .crest-item img { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain; /* L'image flotte au centre sans toucher les bords */
+            object-fit: contain;
+            display: block; 
         }
         .crest-item.selected { 
             border-color: var(--accent); 
@@ -109,8 +112,12 @@
 
         .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
         .mini-profile { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; margin-right: 10px; }
-        .mini-avatar { width: 40px; height: 40px; flex-shrink: 0; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
-        .mini-info { line-height: 1.1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .avatar-wrapper { position: relative; width: 40px; height: 40px; margin-right: 12px; flex-shrink: 0; }
+        .mini-avatar { width: 100%; height: 100%; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
+        #team-badge { position: absolute; bottom: -3px; right: -3px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--card); background: white; object-fit: cover; display: none; z-index: 5; }
+
+        .mini-info { line-height: 1.1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; flex-direction: column; justify-content: center; }
         .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
         
@@ -137,7 +144,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.089</div>
+    <div class="version-tag">v1.090</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -271,8 +278,11 @@
         <div id="step-game" class="step-screen" style="padding:0;">
             <div class="game-header">
                 <div class="mini-profile">
-                    <div class="mini-avatar" id="game-avatar"></div>
-                    <div class="mini-info"><b id="game-pseudo">Joueur</b><br><span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span></div>
+                    <div class="avatar-wrapper">
+                        <div class="mini-avatar" id="game-avatar"></div>
+                        <img id="team-badge" src="" alt="Team">
+                    </div>
+                    <div class="mini-info"><b id="game-pseudo">Joueur</b><span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span></div>
                 </div>
                 <div class="header-actions">
                     <div class="icon-btn" onclick="openSettings()">⚙️</div>
@@ -639,7 +649,21 @@
             if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
             else miniAv.innerText = player.avatar;
             document.getElementById('game-pseudo').innerText = player.pseudo;
-            document.getElementById('game-team').innerText = player.team;
+            
+            // MODIF JS : GESTION AFFICHAGE TEAM (v1.090)
+            if (player.team !== "Solo") {
+                document.getElementById('game-team').innerText = player.team;
+                // Affiche Badge
+                const badge = document.getElementById('team-badge');
+                if (player.teamIcon) {
+                    badge.src = player.teamIcon;
+                    badge.style.display = "block";
+                }
+            } else {
+                document.getElementById('game-team').innerText = "Solo";
+                document.getElementById('team-badge').style.display = "none";
+            }
+
             const buzzerBg = document.getElementById('buzzer-bg');
             if(player.avatar.length > 20) { buzzerBg.src = player.avatar; buzzerBg.style.display = "block"; } else { buzzerBg.style.display = "none"; }
             
