@@ -63,11 +63,29 @@
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
         .team-card b { font-size: 1rem; }
 
-        /* CSS GRILLE BLASONS */
-        .crest-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; width: 100%; max-width: 350px; max-height: 250px; overflow-y: auto; padding: 5px; background: rgba(0,0,0,0.2); border-radius: 10px; }
-        .crest-item { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; background: white; padding: 2px; box-sizing: border-box; }
-        .crest-item img { width: 100%; height: 100%; object-fit: contain; }
-        .crest-item.selected { border-color: var(--accent); transform: scale(1.1); box-shadow: 0 0 10px var(--accent); z-index: 2; }
+        /* CSS GRILLE BLASONS (CORRIGÉ v1.086) */
+        .crest-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; width: 100%; max-width: 350px; max-height: 250px; overflow-y: auto; padding: 5px; background: rgba(0,0,0,0.2); border-radius: 10px; box-sizing: border-box; }
+        .crest-item { 
+            width: 100%; 
+            aspect-ratio: 1; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            border: 2px solid transparent; 
+            transition: 0.2s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: rgba(255,255,255,0.1); 
+            padding: 0; /* Suppression padding */
+            overflow: hidden; 
+            box-sizing: border-box;
+        }
+        .crest-item img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; /* Remplissage complet */
+        }
+        .crest-item.selected { border-color: var(--accent); transform: scale(1.05); box-shadow: 0 0 10px var(--accent); z-index: 2; }
 
         /* TUTO */
         .tuto-list { text-align: left; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
@@ -79,10 +97,15 @@
         .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
         .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
 
-        /* HEADER JEU */
+        /* HEADER JEU (MODIFIÉ v1.086 pour BADGE) */
         .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
         .mini-profile { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; margin-right: 10px; }
-        .mini-avatar { width: 40px; height: 40px; flex-shrink: 0; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
+        
+        /* Conteneur Avatar + Badge */
+        .avatar-container { position: relative; width: 45px; height: 45px; flex-shrink: 0; }
+        
+        .mini-avatar { width: 100%; height: 100%; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
+        
         .mini-info { line-height: 1.1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
@@ -107,11 +130,12 @@
         .settings-btn { display: block; width: 100%; padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: white; font-size: 1rem; cursor: pointer; text-align: left; transition: 0.2s; }
         .settings-btn:hover { background: rgba(255,255,255,0.2); }
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
+        .btn-leave { position: absolute; top: 15px; left: 15px; background: transparent; border: 1px solid rgba(255,255,255,0.3); padding: 5px 15px; width: auto; font-size: 0.8rem; margin: 0; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.085</div>
+    <div class="version-tag">v1.086</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -245,7 +269,10 @@
         <div id="step-game" class="step-screen" style="padding:0;">
             <div class="game-header">
                 <div class="mini-profile">
-                    <div class="mini-avatar" id="game-avatar"></div>
+                    <div class="avatar-container">
+                        <div class="mini-avatar" id="game-avatar"></div>
+                        <img id="team-badge" style="position:absolute; bottom:-2px; right:-2px; width:22px; height:22px; border-radius:50%; border:2px solid #2c3e50; background:white; object-fit:cover; display:none;">
+                    </div>
                     <div class="mini-info"><b id="game-pseudo">Joueur</b><br><span id="game-team" style="color:var(--accent); font-size:0.8rem;">Solo</span></div>
                 </div>
                 <div class="header-actions">
@@ -566,7 +593,7 @@
         }
         
         function createCrestItem(url, container) {
-            const d = document.createElement('div'); d.className='grid-item';
+            const d = document.createElement('div'); d.className='crest-item';
             const img = document.createElement('img'); img.src=url;
             d.onclick = () => {
                 document.querySelectorAll('.crest-item').forEach(e=>e.classList.remove('selected'));
@@ -621,6 +648,15 @@
             const buzzerBg = document.getElementById('buzzer-bg');
             if(player.avatar.length > 20) { buzzerBg.src = player.avatar; buzzerBg.style.display = "block"; } else { buzzerBg.style.display = "none"; }
             
+            // MODIF JS : GESTION DU BADGE EQUIPE
+            const badge = document.getElementById('team-badge');
+            if (player.team !== "Solo" && player.teamIcon) {
+                badge.src = player.teamIcon;
+                badge.style.display = "block";
+            } else {
+                badge.style.display = "none";
+            }
+
             navigateTo('step-game');
             startBuzzer();
         }
