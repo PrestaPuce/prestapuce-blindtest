@@ -55,24 +55,24 @@
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
         .team-card b { font-size: 1rem; }
 
-        /* --- CORRECTION CSS GRILLE BLASONS (v1.088) --- */
+        /* --- CSS GRILLE BLASONS (Modif v1.089) --- */
         .crest-grid { 
             display: grid; 
-            grid-template-columns: repeat(4, 1fr); /* Passage à 4 colonnes pour aérer */
-            gap: 10px; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 12px; /* Espacement augmenté pour éviter superposition */
             margin: 15px 0; 
             width: 100%; 
-            max-width: 360px; 
-            max-height: 280px; 
+            max-width: 350px; 
+            max-height: 250px; 
             overflow-y: auto; 
             padding: 10px; 
-            background: rgba(0,0,0,0.3); /* Fond plus sombre pour contraste */
-            border-radius: 12px; 
-            box-sizing: border-box; 
+            background: rgba(0,0,0,0.2); 
+            border-radius: 10px; 
+            box-sizing: border-box;
         }
         .crest-item { 
             width: 100%; 
-            aspect-ratio: 1 / 1; /* C'est ça qui force le carré parfait */
+            aspect-ratio: 1; /* Force le carré strict */
             border-radius: 8px; 
             cursor: pointer; 
             border: 2px solid transparent; 
@@ -80,25 +80,23 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            background: white; /* Fond blanc obligatoire pour éviter la transparence */
-            padding: 0; /* Pas de padding interne */
-            overflow: hidden; /* Coupe ce qui dépasse */
+            background: rgba(255,255,255,0.1); /* Fond case visible */
+            padding: 5px; /* Marge interne pour détacher l'image du bord */
             box-sizing: border-box;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .crest-item img { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover; /* Remplit tout le carré */
-            display: block; 
+            object-fit: contain; /* L'image flotte au centre sans toucher les bords */
         }
         .crest-item.selected { 
             border-color: var(--accent); 
-            transform: scale(0.95); /* Effet d'enfoncement plutôt que grossissement */
-            box-shadow: 0 0 0 3px var(--accent); /* Bordure externe propre */
+            transform: scale(1.05); 
+            box-shadow: 0 0 10px var(--accent); 
             z-index: 2; 
+            background: rgba(255,255,255,0.2);
         }
-        /* ----------------------------------------------- */
+        /* ------------------------------------------- */
 
         .tuto-list { text-align: left; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
         .tuto-item { display: flex; align-items: flex-start; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; }
@@ -139,7 +137,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.088</div>
+    <div class="version-tag">v1.089</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -397,6 +395,7 @@
             if(r) { roomID = r; checkRoomAndStart(true); } 
             else { navigateTo('step-room'); }
             renderAvatarGrid(); 
+            // PAS D'APPEL BLOQUANT ICI
             document.getElementById('input-room').addEventListener('keypress', (e)=>{if(e.key==='Enter') validateRoomStep()});
             document.getElementById('input-pseudo').addEventListener('keypress', (e)=>{if(e.key==='Enter') validatePseudo()});
         };
@@ -567,9 +566,11 @@
             const c = document.getElementById('team-icon-grid'); c.innerHTML="";
             
             if(roomRef) {
+                // 1. Config MJ
                 roomRef.child('config/showDefaults').on('value', snap => {
                     const showDefaults = (snap.val() === false) ? false : true;
                     
+                    // 2. Dossier Library
                     roomRef.child('library').on('value', snapLib => {
                         c.innerHTML = "";
                         const libraryImages = snapLib.val() || {};
@@ -602,6 +603,7 @@
         function createNewTeam() {
             const name = document.getElementById('new-team-name').value.trim();
             if(name.length < 2 || !selectedTeamCrest) return alert("Nom et blason requis.");
+            // On push aussi dans la library pour les autres joueurs
             roomRef.child('library').push(selectedTeamCrest);
             roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); });
         }
@@ -649,6 +651,7 @@
             roomRef.child('buzzers').off();
             roomRef.child('gameState').off(); roomRef.child('scores/'+player.pseudo).off();
             
+            // Messages de fin intelligents
             roomRef.on('value', snap => {
                 if(!snap.exists()) { handleExit("🛑 La partie a été clôturée par " + mjName + ".", true); }
             });
