@@ -21,7 +21,7 @@
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; }
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 1.2rem; }
-        .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 150px; overflow-y: auto; }
+        .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 200px; overflow-y: auto; }
         .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; }
         .crest-selected { border-color: var(--accent) !important; background: var(--accent) !important; transform: scale(1.1); }
         .crest-opt { width: 30px; height: 30px; object-fit: contain; }
@@ -49,7 +49,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.034</div>
+    <div class="version-tag">v1.035</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -186,8 +186,9 @@
 
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
-        
-        // --- NOUVEAU : GENERATEUR SVG (COPIÉ DEPUIS JOUEUR) ---
+        let mjLocalCustoms = new Set(); // Stockage local des images perso (MJ + Joueurs)
+
+        // --- GENERATEUR SVG IDENTIQUE JOUEUR ---
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
             const c1 = colors[i % colors.length];
@@ -225,6 +226,10 @@
             db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
                 mjProfileData = data;
+                mjLocalCustoms.clear();
+                if(data.customLogos) {
+                    Object.values(data.customLogos).forEach(url => mjLocalCustoms.add(url));
+                }
                 if(mjProfileData.isGuest === true) { cleanGuestData(user.uid); }
                 else {
                     document.getElementById('mj-display-name').innerText = data.prenom || "MJ";
@@ -383,7 +388,6 @@
             }
         }
 
-        // --- NOUVEAUTÉ : DEMANDE DU NOM MJ ---
         function askMjNameAndCreate() {
             const defaultName = mjProfileData.prenom || "MJ";
             const mjName = prompt("Quel nom d'animateur afficher aux joueurs ?", defaultName);
@@ -407,7 +411,6 @@
             document.getElementById('display-room').innerText = roomID;
             db.ref('activeRooms/' + roomID).set({ status: 'open' });
             roomRef = db.ref('roomsData/' + id);
-            // Envoi du nom MJ si nouveau
             if(mjName) roomRef.child('mjName').set(mjName);
             const currentLogo = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
             roomRef.child('mjLogo').set(currentLogo);
@@ -429,7 +432,6 @@
         function toggleGuide() {
             const overlay = document.getElementById('overlay-guide');
             const iframe = document.getElementById('guide-iframe');
-            
             if(overlay.style.display === 'flex') {
                 overlay.style.display = 'none';
             } else {
@@ -441,17 +443,11 @@
         function showRemoteQR() {
             const overlay = document.getElementById('overlay-remote-qr');
             const qrContainer = document.getElementById('qrcode-remote');
-            
             const currentUrl = window.location.href.split('?')[0];
             let basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
             let remoteUrl = basePath + "/remote.html?room=" + roomID;
-            
             qrContainer.innerHTML = "";
-            new QRCode(qrContainer, {
-                text: remoteUrl,
-                width: 250,
-                height: 250
-            });
+            new QRCode(qrContainer, { text: remoteUrl, width: 250, height: 250 });
             overlay.style.display = 'flex';
         }
 
@@ -462,22 +458,31 @@
             const storageRef = storage.ref(`mj_icons/${uid}/${Date.now()}_${file.name}`);
             storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
                 db.ref(`users/${uid}/customLogos`).push(url);
+                mjLocalCustoms.add(url);
                 loadCrestGrid();
             }).catch(err => alert("Erreur upload blason"));
         }
 
+        // --- CHARGEMENT GRILLE + ECOUTE NOUVEAUX LOGOS ---
         function loadCrestGrid() {
             const grid = document.getElementById('crest-grid');
             grid.innerHTML = "";
-            const uid = auth.currentUser.uid;
-            // Charge les logos persos (images uploadées)
-            db.ref(`users/${uid}/customLogos`).once('value', snap => {
-                snap.forEach(child => createCrestItem(child.val(), grid));
-                // Charge les blasons SVG générés (comme le joueur)
-                for(let i=0; i<30; i++) {
-                    createCrestItem(createBlason(i), grid);
-                }
-            });
+            // 1. Logos du MJ (bibliothèque persistante)
+            mjLocalCustoms.forEach(url => createCrestItem(url, grid));
+            // 2. Logos des joueurs actifs (si nouveaux)
+            if(globalTeams) {
+                Object.values(globalTeams).forEach(team => {
+                    if(team.icon && !team.icon.startsWith('data:image/svg')) {
+                        if(!mjLocalCustoms.has(team.icon)) {
+                            createCrestItem(team.icon, grid); // Affiche temporairement
+                        }
+                    }
+                });
+            }
+            // 3. SVG par défaut
+            for(let i=0; i<30; i++) {
+                createCrestItem(createBlason(i), grid);
+            }
         }
 
         function createCrestItem(url, container) {
@@ -520,8 +525,7 @@
                 document.getElementById('t-name').value = ""; 
                 selCrest = ""; editingTeamKey = null;
                 document.getElementById('btn-add-team').innerText = "Créer l'Équipe";
-                loadCrestGrid();
-                checkTeamForm(); 
+                loadCrestGrid(); checkTeamForm(); 
             } 
         }
         
@@ -533,7 +537,6 @@
                     const realData = allPlayersData[pseudo] || buzzerData;
                     currentPlayer = realData; currentPlayer.pseudo = pseudo;
                     const avatarContainer = document.getElementById('p-avatar');
-                    
                     if(realData.avatar && realData.avatar.length > 20) avatarContainer.innerHTML = `<img src="${realData.avatar}" style="width:70px; height:70px; border-radius:50%; object-fit:cover;">`;
                     else avatarContainer.innerHTML = realData.avatar || '👤'; 
                     document.getElementById('p-name').innerText = pseudo; box.style.display = "block";
@@ -547,36 +550,32 @@
                 const st = snap.val() ? snap.val().status : 'waiting';
                 const btn = document.getElementById('btn-open-buzz');
                 if(st === 'ready' || st === 'taken') {
-                    btn.innerText = "✅ Buzzers Ouverts";
-                    btn.style.background = "#27ae60"; 
-                    btn.disabled = true;
+                    btn.innerText = "✅ Buzzers Ouverts"; btn.style.background = "#27ae60"; btn.disabled = true;
                 } else {
-                    btn.innerText = "Ouvrir Buzzers";
-                    btn.style.background = "#3498db"; 
-                    btn.disabled = false;
+                    btn.innerText = "Ouvrir Buzzers"; btn.style.background = "#3498db"; btn.disabled = false;
                 }
             });
+            
+            // ECOUTE DES EQUIPES (Mise à jour Auto + Persistence)
             roomRef.child('teams').on('value', snap => { 
                 globalTeams = snap.val() || {}; 
                 const mjUid = auth.currentUser ? auth.currentUser.uid : null;
+                // Si MJ connecté, on sauvegarde les logos des joueurs dans sa biblio
                 if(mjUid && !mjProfileData.isGuest) {
                     Object.values(globalTeams).forEach(team => {
-                        // Sauvegarde uniquement les liens HTTP (images persos), pas les SVG générés (data:image/svg)
-                        if(team.icon && team.icon.startsWith('http')) {
-                            let alreadyKnown = false;
-                            if(mjProfileData.customLogos) {
-                                Object.values(mjProfileData.customLogos).forEach(savedUrl => {
-                                    if(savedUrl === team.icon) alreadyKnown = true;
-                                });
-                            }
-                            if(!alreadyKnown) {
-                                db.ref(`users/${mjUid}/customLogos`).push(team.icon);
-                                if(!mjProfileData.customLogos) mjProfileData.customLogos = {};
-                                mjProfileData.customLogos['new_' + Date.now()] = team.icon;
+                        if(team.icon && !team.icon.startsWith('data:image/svg')) {
+                            // Si image (http), on l'ajoute à la biblio locale
+                            if(!mjLocalCustoms.has(team.icon)) {
+                                mjLocalCustoms.add(team.icon);
+                                // Et on l'envoie en base si pas déjà présente
+                                let knownDB = false;
+                                if(mjProfileData.customLogos) Object.values(mjProfileData.customLogos).forEach(u => { if(u===team.icon) knownDB=true; });
+                                if(!knownDB) db.ref(`users/${mjUid}/customLogos`).push(team.icon);
                             }
                         }
                     });
                 }
+                loadCrestGrid(); // RECHARGE LA GRILLE AUTOMATIQUEMENT
                 renderLobby(); 
             });
             roomRef.child('scores').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
@@ -584,12 +583,9 @@
         }
 
         function renderLobby() {
-            const l = document.getElementById('score-list');
-            l.innerHTML = "";
+            const l = document.getElementById('score-list'); l.innerHTML = "";
             const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
-            const bSection = document.getElementById('banned-section');
-            const bList = document.getElementById('banned-list');
-            bList.innerHTML = "";
+            const bSection = document.getElementById('banned-section'); const bList = document.getElementById('banned-list'); bList.innerHTML = "";
             let hasBanned = false;
             Object.keys(globalTeams).forEach(tKey => {
                 tList.innerHTML += `<div class="team-item"><span><div class="crest-mini-bg"><img src="${globalTeams[tKey].icon}" class="crest-mini"></div> <b>${tKey}</b></span><div><span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span><span class="btn-icon btn-del" onclick="deleteTeam('${tKey}')">✖</span></div></div>`;
@@ -607,95 +603,26 @@
                 const isBlocked = currentBlocked[pseudo];
                 const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
                 let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
-                // AJOUT DU BOUTON CORBEILLE
                 l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${pseudo}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${pseudo}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${pseudo}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${pseudo}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${pseudo}')" title="Expulser (Bannir)">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${pseudo}')" title="Supprimer (Libérer Pseudo)">🗑️</button></div></div>`;
             });
             bSection.style.display = hasBanned ? "block" : "none";
         }
 
-        // --- SUPPRESSION DEFINITIVE DU JOUEUR ---
-        function deletePlayer(p) {
-            if(confirm("Supprimer DÉFINITIVEMENT " + p + " ?\nCela libèrera le pseudo pour un autre joueur.")) {
-                roomRef.child('scores/' + p).remove();
-            }
-        }
-
-        function forceBuzzer(pseudo) {
-            const pData = allPlayersData[pseudo];
-            if(!pData) return;
-            roomRef.child('gameState').update({ status: 'taken' });
-            roomRef.child('buzzers').set({ pseudo: pseudo, avatar: pData.avatar || "", teamName: pData.teamName || "Solo", teamIcon: pData.teamIcon || "" });
-        }
-
-        function toggleBlockPlayer(pseudo) {
-            if(currentBlocked[pseudo]) roomRef.child('blockedPlayers/' + pseudo).remove();
-            else roomRef.child('blockedPlayers/' + pseudo).set(true); 
-        }
-
-        function triggerEndGame() {
-            if(mjProfileData.isGuest === true) {
-                if(confirm("Fin de partie ? Les scores vont être figés sur l'écran d'affichage.")) {
-                    roomRef.child('gameState').set({ status: 'endGame', timestamp: Date.now() });
-                    roomRef.child('buzzers').remove();
-                }
-            } else {
-                if(confirm("Voulez-vous figer les scores et enregistrer l'historique ?")) {
-                    const uid = auth.currentUser.uid;
-                    const historyData = { date: new Date().toLocaleString('fr-FR'), roomID: roomID, scores: allPlayersData, teams: globalTeams };
-                    db.ref(`users/${uid}/history`).push(historyData).then(() => {
-                        roomRef.child('gameState').set({ status: 'endGame', timestamp: Date.now() });
-                        roomRef.child('buzzers').remove(); alert("Partie archivée !");
-                    });
-                }
-            }
-        }
-
-        function statusUpdate(st) { if(roomRef) { roomRef.child('gameState').set({ status: st });
-            if(st === 'ready') roomRef.child('buzzers').remove(); } }
-        function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting');
-        }
-        function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v);
-        }
-        function deleteTeam(n) { roomRef.child('teams/' + n).remove();
-        }
-        function kickPlayer(p) { 
-            if(confirm("Expulser " + p + " ? (Bannissement)")) {
-                roomRef.child('scores/' + p).update({ kicked: true }).then(() => {
-                    setTimeout(() => { roomRef.child('scores/' + p).update({ active: false }); }, 1500);
-                });
-            }
-        }
-        function unkickPlayer(p) { roomRef.child('scores/' + p).update({ kicked: false, active: false });
-        }
-        function togglePlayerTeam(pseudo, choice) {
-            const icon = (choice === "Solo") ? "" : (globalTeams[choice] ? globalTeams[choice].icon : "");
-            roomRef.child('scores/' + pseudo).update({ teamName: choice, teamIcon: icon, active: true });
-        }
-        function handleError() { if(currentPlayer && currentPlayer.pseudo) { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready');
-        } }
-        function handleReward(pts, mode) {
-            roomRef.child('scores/' + currentPlayer.pseudo).transaction(c => { return { pts: (c ? c.pts : 0) + pts, avatar: c.avatar, teamName: c.teamName, teamIcon: c.teamIcon, active: true }; });
-            if(mode === 'partial') { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); } else { fullReset();
-            }
-        }
-
-        function quitRoom() {
-            if(mjProfileData.isGuest === true) resetFullGame();
-            else {
-                if(roomRef) roomRef.child('buzzers').off();
-                checkUserRoom(auth.currentUser.uid);
-            }
-        }
-
-        function resetFullGame() {
-            if(confirm("⚠️ Supprimer la salle et ses données ?")) {
-                roomRef.remove();
-                db.ref('activeRooms/' + roomID).remove();
-                db.ref('users/' + auth.currentUser.uid + '/lastRoom').remove().then(() => {
-                    lastSavedRoom = ""; checkUserRoom(auth.currentUser.uid); 
-                });
-            }
-        }
+        function deletePlayer(p) { if(confirm("Supprimer DÉFINITIVEMENT " + p + " ?")) { roomRef.child('scores/' + p).remove(); } }
+        function forceBuzzer(pseudo) { const pData = allPlayersData[pseudo]; if(!pData) return; roomRef.child('gameState').update({ status: 'taken' }); roomRef.child('buzzers').set({ pseudo: pseudo, avatar: pData.avatar || "", teamName: pData.teamName || "Solo", teamIcon: pData.teamIcon || "" }); }
+        function toggleBlockPlayer(pseudo) { if(currentBlocked[pseudo]) roomRef.child('blockedPlayers/' + pseudo).remove(); else roomRef.child('blockedPlayers/' + pseudo).set(true); }
+        function triggerEndGame() { if(confirm("Fin de partie ?")) { roomRef.child('gameState').set({ status: 'endGame', timestamp: Date.now() }); roomRef.child('buzzers').remove(); } }
+        function statusUpdate(st) { if(roomRef) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); } }
+        function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
+        function adj(p, v) { roomRef.child('scores/'+p+'/pts').transaction(x => (x||0)+v); }
+        function deleteTeam(n) { roomRef.child('teams/' + n).remove(); }
+        function kickPlayer(p) { if(confirm("Expulser " + p + " ?")) { roomRef.child('scores/' + p).update({ kicked: true }).then(() => { setTimeout(() => { roomRef.child('scores/' + p).update({ active: false }); }, 1500); }); } }
+        function unkickPlayer(p) { roomRef.child('scores/' + p).update({ kicked: false, active: false }); }
+        function togglePlayerTeam(pseudo, choice) { const icon = (choice === "Solo") ? "" : (globalTeams[choice] ? globalTeams[choice].icon : ""); roomRef.child('scores/' + pseudo).update({ teamName: choice, teamIcon: icon, active: true }); }
+        function handleError() { if(currentPlayer && currentPlayer.pseudo) { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); } }
+        function handleReward(pts, mode) { roomRef.child('scores/' + currentPlayer.pseudo).transaction(c => { return { pts: (c ? c.pts : 0) + pts, avatar: c.avatar, teamName: c.teamName, teamIcon: c.teamIcon, active: true }; }); if(mode === 'partial') { roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); statusUpdate('ready'); } else { fullReset(); } }
+        function quitRoom() { if(mjProfileData.isGuest === true) resetFullGame(); else { if(roomRef) roomRef.child('buzzers').off(); checkUserRoom(auth.currentUser.uid); } }
+        function resetFullGame() { if(confirm("⚠️ Supprimer la salle ?")) { roomRef.remove(); db.ref('activeRooms/' + roomID).remove(); db.ref('users/' + auth.currentUser.uid + '/lastRoom').remove().then(() => { lastSavedRoom = ""; checkUserRoom(auth.currentUser.uid); }); } }
     </script>
 </body>
 </html>
