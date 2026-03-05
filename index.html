@@ -18,12 +18,9 @@
         .step-screen.active { display: flex; }
 
         .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
-        
-        /* Modif v1.091 Validée */
         .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .content-top { justify-content: flex-start !important; }
         #step-team-create .screen-content { overflow: hidden; }
-
         .screen-footer { flex-shrink: 0; width: 100%; padding: 15px 20px 30px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(to top, var(--bg) 85%, transparent); z-index: 20; }
 
         h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
@@ -59,7 +56,6 @@
         .team-card img { width: 35px; height: 35px; object-fit: contain; margin-right: 15px; background: transparent; }
         .team-card b { font-size: 1rem; }
 
-        /* Modif v1.091 Validée : Grille flexible */
         .crest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 15px 0; width: 100%; max-width: 350px; flex: 1; min-height: 0; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; box-sizing: border-box; }
         .crest-item { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; background: white; padding: 5px; box-sizing: border-box; }
         .crest-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
@@ -74,76 +70,15 @@
         .tuto-text b { display: block; margin-bottom: 3px; font-size: 1rem; }
         .tuto-text span { font-size: 0.85rem; color: #ccc; line-height: 1.3; }
 
-        /* --- HEADER JEU v1.098 (3 Boutons) --- */
-        .game-header { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 60px; 
-            display: flex; align-items: center; 
-            padding: 0 15px; box-sizing: border-box; z-index: 100; 
-            background: rgba(0,0,0,0.3); 
-        }
-
-        .mini-profile {
-            display: flex;
-            align-items: center; 
-            position: relative; 
-            flex: 1; 
-            height: 100%;
-        }
-
-        .avatar-wrapper { 
-            position: relative; 
-            width: 44px; /* Taille Avatar */
-            height: 44px; 
-            flex-shrink: 0;
-        }
+        .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
+        .mini-profile { display: flex; align-items: center; position: relative; flex: 1; height: 100%; }
+        .avatar-wrapper { position: relative; width: 44px; height: 44px; flex-shrink: 0; }
+        .mini-avatar { width: 100%; height: 100%; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
+        #team-badge { position: absolute; bottom: -5px; right: -20px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #2c3e50; background: white; object-fit: cover; display: none; z-index: 5; }
+        .text-info-col { display: flex; flex-direction: column; justify-content: space-between; height: 40px; margin-left: 28px; }
+        #game-pseudo { font-weight: bold; font-size: 1rem; line-height: 1.1; white-space: nowrap; }
+        #game-team { font-size: 0.8rem; color: var(--accent); white-space: nowrap; line-height: 1; }
         
-        .mini-avatar { 
-            width: 100%; height: 100%; 
-            background: #333; 
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 1.2rem; overflow: hidden; 
-            border: 2px solid var(--accent); 
-        }
-        
-        /* Validé v1.097 */
-        #team-badge { 
-            position: absolute; 
-            bottom: -5px; 
-            right: -20px; 
-            width: 18px; height: 18px; 
-            border-radius: 50%; 
-            border: 2px solid #2c3e50; 
-            background: white; 
-            object-fit: cover; 
-            display: none; 
-            z-index: 5; 
-        }
-
-        /* Validé v1.096 */
-        .text-info-col {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; 
-            height: 40px; 
-            margin-left: 28px; 
-        }
-
-        #game-pseudo { 
-            font-weight: bold; 
-            font-size: 1rem; 
-            line-height: 1.1;
-            white-space: nowrap; 
-        }
-
-        #game-team { 
-            font-size: 0.8rem; 
-            color: var(--accent); 
-            white-space: nowrap; 
-            line-height: 1;
-        }
-        /* ----------------------------------------------- */
-
         .header-actions { display: flex; gap: 8px; flex-shrink: 0; margin-left: 10px; }
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
         .icon-btn svg { width: 20px; height: 20px; fill: white; }
@@ -169,7 +104,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.098</div>
+    <div class="version-tag">v1.099</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -318,7 +253,7 @@
                     <div class="icon-btn" onclick="showQR()">🔗</div>
                     <div class="icon-btn" onclick="confirmQuit()" style="background:var(--danger);">✕</div>
                 </div>
-                </div>
+            </div>
             <div class="buzzer-container">
                 <div style="font-weight: bold; margin-bottom:30px; font-size:1.5rem;">Score : <span id="game-score" style="color:var(--accent); font-size:2rem;">0</span></div>
                 <button class="buzzer" id="btn-buzz" onmousedown="handlePress(event)" onmouseup="handleRelease(event)" ontouchstart="handlePress(event)" ontouchend="handleRelease(event)">
@@ -417,6 +352,8 @@
         const db = firebase.database();
 
         let roomID = "", roomRef = null;
+        /* V1.099 : Ajout de playerID et Modification de la structure */
+        let playerID = ""; 
         let player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let selectedTeamCrest = "";
@@ -425,13 +362,17 @@
         let mjName = "l'Animateur";
         let mjLink = "";
 
+        /* Générateur d'ID Unique */
+        function generateID() {
+            return 'user_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+        }
+
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
             const r = urlParams.get('room');
             if(r) { roomID = r; checkRoomAndStart(true); } 
             else { navigateTo('step-room'); }
             renderAvatarGrid(); 
-            // PAS D'APPEL BLOQUANT ICI
             document.getElementById('input-room').addEventListener('keypress', (e)=>{if(e.key==='Enter') validateRoomStep()});
             document.getElementById('input-pseudo').addEventListener('keypress', (e)=>{if(e.key==='Enter') validatePseudo()});
         };
@@ -485,21 +426,41 @@
                     
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { 
                         document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
-                    const saved = localStorage.getItem('presta_player_' + roomID);
-                    if(autoLogin && saved) {
-                        try {
-                            const p = JSON.parse(saved);
-                            if(confirm(`Te revoilà ${p.pseudo} ! Reprendre la partie ?`)) {
-                                player = p;
-                                roomRef.child('scores/'+player.pseudo).once('value', sp => {
-                                    if(sp.exists() && sp.val().kicked !== true) { roomRef.child('scores/'+player.pseudo).update({active:true}); launchGame(true); } 
-                                    else { navigateTo('step-welcome'); }
-                                });
-                                return; 
+                    
+                    /* --- NOUVELLE LOGIQUE ID (v1.099) --- */
+                    const savedID = localStorage.getItem('presta_id_' + roomID);
+                    
+                    if(autoLogin && savedID) {
+                        // On vérifie si l'ID existe toujours chez le MJ
+                        roomRef.child('players/' + savedID).once('value', pSnap => {
+                            if(pSnap.exists()) {
+                                const pData = pSnap.val();
+                                // Si le joueur a été "soft-deleted" (kicked mais pas effacé), on vérifie le flag active/kicked
+                                if(pData.kicked) {
+                                    localStorage.removeItem('presta_id_' + roomID);
+                                    navigateTo('step-welcome');
+                                } else {
+                                    // Reconnexion réussie
+                                    playerID = savedID;
+                                    player = pData;
+                                    roomRef.child('players/' + playerID).update({ active: true });
+                                    roomRef.child('players/' + playerID).onDisconnect().update({ active: false });
+                                    
+                                    if(confirm(`Te revoilà ${player.pseudo} ! Reprendre la partie ?`)) {
+                                        launchGame(true);
+                                    } else {
+                                        navigateTo('step-welcome');
+                                    }
+                                }
+                            } else {
+                                // Le MJ a supprimé le compte ou la salle a été reset
+                                localStorage.removeItem('presta_id_' + roomID);
+                                navigateTo('step-welcome');
                             }
-                        } catch(e) {}
+                        });
+                    } else {
+                        navigateTo('step-welcome');
                     }
-                    navigateTo('step-welcome');
                 } else { alert("Salle introuvable !"); navigateTo('step-room'); }
             });
         }
@@ -507,36 +468,31 @@
         function validatePseudo() {
             const val = document.getElementById('input-pseudo').value.trim();
             if(val.length < 2) return alert("Pseudo trop court !");
-            if(isEditing) {
-                if(val === player.pseudo) { finishEdit(); return; }
-                roomRef.child('scores/' + val).once('value', snap => {
-                    if(snap.exists() && snap.val().active) return alert("Pseudo déjà pris.");
-                    const oldPseudo = player.pseudo;
-                    roomRef.child('scores/' + oldPseudo).once('value', oldSnap => {
-                        const data = oldSnap.val();
-                        roomRef.child('scores/' + val).set({ ...data, active:true });
-                        roomRef.child('scores/' + oldPseudo).remove();
-                        player.pseudo = val;
-                        finishEdit();
-                    });
-                });
-                return;
-            }
-            roomRef.child('scores/' + val).once('value', snap => {
-                if(snap.exists()) {
-                    if(snap.val().kicked) return alert("Banni.");
-                    if(snap.val().active) alert("Pseudo déjà actif.");
-                    else {
-                        if(confirm(`Pseudo "${val}" existant (déconnecté). Reprendre ?`)) {
-                            const d = snap.val();
-                            player = { pseudo: val, avatar: d.avatar, team: d.teamName || "Solo", teamIcon: d.teamIcon || "" };
-                            roomRef.child('scores/'+val).update({active:true});
-                            launchGame(true);
-                        } else alert("Changez de pseudo.");
+            
+            // Check doublons dans la nouvelle structure 'players/{id}/pseudo'
+            roomRef.child('players').once('value', snap => {
+                let pseudoExists = false;
+                snap.forEach(child => {
+                    // On vérifie si le pseudo est pris par QUELQU'UN D'AUTRE (pas nous-mêmes si on édite)
+                    if(child.key !== playerID && child.val().pseudo && child.val().pseudo.toLowerCase() === val.toLowerCase()) {
+                        pseudoExists = true;
                     }
+                });
+
+                if(pseudoExists) {
+                    alert("Ce pseudo est déjà pris dans la salle !");
                 } else {
                     player.pseudo = val;
-                    navigateTo('step-avatar');
+                    // Si on est en mode édition, on met à jour direct
+                    if(isEditing) {
+                        roomRef.child('players/' + playerID).update({ pseudo: val });
+                        finishEdit();
+                    } else {
+                        // Sinon on continue le wizard
+                        // On génère l'ID maintenant si ce n'est pas fait
+                        if(!playerID) playerID = generateID();
+                        navigateTo('step-avatar');
+                    }
                 }
             });
         }
@@ -548,19 +504,19 @@
         
         function selectAvatar(av) { 
             player.avatar = av;
-            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({avatar: av}); finishEdit(); } 
+            if(isEditing) { roomRef.child('players/'+playerID).update({avatar: av}); finishEdit(); } 
             else navigateTo('step-mode');
         }
 
         function selectMode(mode) {
             player.team = mode;
             player.teamIcon = "";
-            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({teamName: "Solo", teamIcon: ""}); finishEdit(); } 
+            if(isEditing) { roomRef.child('players/'+playerID).update({teamName: "Solo", teamIcon: ""}); finishEdit(); } 
             else { if(mode === 'Solo') showRecap(); else goToTeamAction(); }
         }
 
         function goToTeamAction() { navigateTo('step-team-action'); }
-        function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); renderTeamCrestPicker(); } // Appel à la grille
+        function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); renderTeamCrestPicker(); } 
         function goToTeamJoin() { navigateTo('step-team-join'); loadTeamsList(); }
 
         function loadTeamsList() {
@@ -581,7 +537,7 @@
         function joinTeam(name, icon) { 
             player.team = name;
             player.teamIcon = icon;
-            if(isEditing) { roomRef.child('scores/'+player.pseudo).update({teamName: name, teamIcon: icon}); finishEdit(); } 
+            if(isEditing) { roomRef.child('players/'+playerID).update({teamName: name, teamIcon: icon}); finishEdit(); } 
             else showRecap();
         }
 
@@ -597,30 +553,19 @@
         function hideTeamGallery() { document.getElementById('team-crest-gallery').style.display = 'none'; document.getElementById('team-crest-choices').style.display = 'flex'; }
         function handleTeamFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectedTeamCrest=base64; showTeamPreview(); }); } }
         
-        // --- SYNCHRO TEMPS RÉEL SUR 'LIBRARY' ---
         function renderTeamCrestPicker() { 
             const c = document.getElementById('team-icon-grid'); c.innerHTML="";
-            
             if(roomRef) {
-                // 1. Config MJ
                 roomRef.child('config/showDefaults').on('value', snap => {
                     const showDefaults = (snap.val() === false) ? false : true;
-                    
-                    // 2. Dossier Library
                     roomRef.child('library').on('value', snapLib => {
                         c.innerHTML = "";
                         const libraryImages = snapLib.val() || {};
-                        
-                        Object.values(libraryImages).forEach(url => {
-                            createCrestItem(url, c);
-                        });
-
+                        Object.values(libraryImages).forEach(url => { createCrestItem(url, c); });
                         if(showDefaults) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); } }
                     });
                 });
-            } else { 
-                for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); } 
-            }
+            } else { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); } }
         }
         
         function createCrestItem(url, container) {
@@ -639,7 +584,6 @@
         function createNewTeam() {
             const name = document.getElementById('new-team-name').value.trim();
             if(name.length < 2 || !selectedTeamCrest) return alert("Nom et blason requis.");
-            // On push aussi dans la library pour les autres joueurs
             roomRef.child('library').push(selectedTeamCrest);
             roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); });
         }
@@ -668,30 +612,39 @@
 
         function launchGame(isReconnect = false) {
             if(!isReconnect) {
-                roomRef.child('scores/' + player.pseudo).set({ pts: 0, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon, active: true, kicked: false });
-                try { localStorage.setItem('presta_player_' + roomID, JSON.stringify(player)); } catch(e) { console.log("Erreur stockage (Quota ?):", e); }
+                // ECRITURE DANS LE NOUVEAU CHEMIN 'players/ID'
+                roomRef.child('players/' + playerID).set({ 
+                    pts: 0, 
+                    pseudo: player.pseudo, // On stocke le pseudo DANS l'objet
+                    avatar: player.avatar, 
+                    teamName: player.team, 
+                    teamIcon: player.teamIcon, 
+                    active: true, 
+                    kicked: false 
+                });
+                
+                // Sauvegarde de l'ID pour reconnexion future
+                try { localStorage.setItem('presta_id_' + roomID, playerID); } catch(e) { console.log("Erreur stockage:", e); }
+                
+                // Gestion déconnexion automatique (Fermeture navigateur)
+                roomRef.child('players/' + playerID).onDisconnect().update({ active: false });
             }
+
+            // Mise à jour UI
             const miniAv = document.getElementById('game-avatar');
             if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
             else miniAv.innerText = player.avatar;
             document.getElementById('game-pseudo').innerText = player.pseudo;
             
-            // MODIF JS : GESTION AFFICHAGE TEAM (v1.097)
             const teamEl = document.getElementById('game-team');
             const badgeEl = document.getElementById('team-badge');
             
             if (player.team !== "Solo") {
                 teamEl.innerText = player.team;
                 teamEl.style.display = "block"; 
-                
-                if (player.teamIcon) {
-                    badgeEl.src = player.teamIcon;
-                    badgeEl.style.display = "block";
-                }
+                if (player.teamIcon) { badgeEl.src = player.teamIcon; badgeEl.style.display = "block"; }
             } else {
-                teamEl.innerText = "Solo";
-                teamEl.style.display = "block"; 
-                badgeEl.style.display = "none";
+                teamEl.innerText = "Solo"; teamEl.style.display = "block"; badgeEl.style.display = "none";
             }
 
             const buzzerBg = document.getElementById('buzzer-bg');
@@ -703,18 +656,30 @@
 
         function startBuzzer() {
             roomRef.child('buzzers').off();
-            roomRef.child('gameState').off(); roomRef.child('scores/'+player.pseudo).off();
+            roomRef.child('gameState').off(); 
+            // On écoute le compte par ID
+            roomRef.child('players/'+playerID).off();
             
-            // Messages de fin intelligents
             roomRef.on('value', snap => {
                 if(!snap.exists()) { handleExit("🛑 La partie a été clôturée par " + mjName + ".", true); }
             });
-            roomRef.child('scores/' + player.pseudo).on('value', snap => {
+            
+            // Écoute dynamique du compte (si le MJ change le pseudo/score/kick)
+            roomRef.child('players/' + playerID).on('value', snap => {
                 const d = snap.val();
                 if(d) {
+                    player.pseudo = d.pseudo; // Mise à jour locale du pseudo si changé par MJ
+                    player.team = d.teamName;
+                    player.teamIcon = d.teamIcon;
+                    
                     document.getElementById('game-score').innerText = d.pts || 0;
+                    document.getElementById('game-pseudo').innerText = d.pseudo; // Update UI
+                    
                     if(d.kicked) { handleExit("🚫 Vous avez été exclu de la partie.", false); }
-                } 
+                } else {
+                    // Si l'entrée est supprimée (Hard delete par MJ)
+                    handleExit("🚫 Votre compte a été retiré de la partie.", false);
+                }
             });
             
             roomRef.child('gameState').on('value', snap => {
@@ -722,8 +687,10 @@
                 if (st && st.status === 'endGame') showEndGame();
                 else { gameState = st ? st.status : 'waiting'; document.getElementById('podium-zone').style.display = 'none'; updateUI(); }
             });
+            
             roomRef.child('buzzers').on('value', snap => {
                 const val = snap.val();
+                // Comparaison par Pseudo (car le buzzer envoie le pseudo) OU par ID si on change la logique buzzer plus tard
                 if (val && val.pseudo === player.pseudo && currentWinner !== player.pseudo) {
                     document.getElementById('sound-win').play().catch(()=>{});
                     if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
@@ -736,7 +703,7 @@
         function handleExit(message, redirect) {
             if(roomRef) roomRef.off();
             alert(message);
-            localStorage.removeItem('presta_player_' + roomID);
+            localStorage.removeItem('presta_id_' + roomID); // On oublie l'ID
             if(redirect && mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; }
             else { location.reload(); }
         }
@@ -758,7 +725,14 @@
 
         function onBuzzerClick() {
             roomRef.child('buzzers').transaction(function(currentData) {
-                if (currentData === null) return { pseudo: player.pseudo, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon };
+                // On envoie toujours le pseudo pour l'affichage MJ instantané, mais on pourrait envoyer l'ID
+                if (currentData === null) return { 
+                    id: playerID, // Ajout de l'ID pour référence future
+                    pseudo: player.pseudo, 
+                    avatar: player.avatar, 
+                    teamName: player.team, 
+                    teamIcon: player.teamIcon 
+                };
                 else return;
             }, function(error, committed, snapshot) {
                 if (committed) roomRef.child('gameState').update({ status: 'taken' });
@@ -803,7 +777,8 @@
         }
 
         function showEndGame() {
-            roomRef.child('scores').once('value', snap => {
+            // Lecture sur 'players' au lieu de 'scores'
+            roomRef.child('players').once('value', snap => {
                 const all = snap.val() || {};
                 const sorted = Object.values(all).sort((a,b) => b.pts - a.pts);
                 const rank = sorted.findIndex(p => p.pseudo === player.pseudo) + 1;
@@ -821,8 +796,8 @@
 
         function leaveGame(really = false) {
             if(really) {
-                if(roomRef) roomRef.child('scores/'+player.pseudo).update({active:false});
-                localStorage.removeItem('presta_player_' + roomID);
+                if(roomRef) roomRef.child('players/'+playerID).update({active:false});
+                localStorage.removeItem('presta_id_' + roomID); // Suppression ID
                 location.reload();
             }
         }
