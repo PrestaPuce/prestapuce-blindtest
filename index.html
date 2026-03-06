@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.100)</title>
+    <title>Presta'Puce - Blind Test (v1.103)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -104,7 +104,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.100</div>
+    <div class="version-tag">v1.103</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div>
@@ -358,7 +358,7 @@
         const db = firebase.database();
 
         let roomID = "", roomRef = null;
-        let myUserID = ""; // ID UNIQUE
+        let myUserID = ""; 
         let player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let selectedTeamCrest = "";
@@ -369,7 +369,6 @@
 
         // --- GESTION USER ID & INIT ---
         window.onload = () => {
-            // 1. Initialisation ID Unique (Téléphone)
             let storedId = localStorage.getItem('buzz_userId');
             if (!storedId) {
                 storedId = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
@@ -429,15 +428,14 @@
         function checkRoomAndStart(autoLogin) {
             db.ref('activeRooms/' + roomID).once('value', snap => {
                 if(snap.exists()) {
-                    roomRef = db.ref('roomsData/' + roomID);
+                    // CORRECTIF CRITIQUE: RETOUR VERS 'rooms/'
+                    roomRef = db.ref('rooms/' + roomID);
                     
-                    // --- GESTION CHANGEMENT DE SALLE v1.100 ---
                     const lastRoom = localStorage.getItem('buzz_lastRoom');
                     if(lastRoom !== roomID) {
-                        // Nouvelle salle = on reset la session mais on garde l'ID
-                        localStorage.removeItem('presta_player_session'); // on efface les infos pseudo locale
+                        localStorage.removeItem('presta_player_session');
                         localStorage.setItem('buzz_lastRoom', roomID);
-                        autoLogin = false; // On force la réinscription
+                        autoLogin = false;
                     }
                     
                     roomRef.child('mjName').once('value', s => { if(s.exists()) mjName = s.val(); });
@@ -445,10 +443,8 @@
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { 
                         document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
                     
-                    // Tentative Reconnexion
                     roomRef.child('players/' + myUserID).once('value', snapUser => {
                         if(snapUser.exists()) {
-                            // Je suis déjà connu dans cette salle avec cet ID
                             const data = snapUser.val();
                             if(data.banned) { showBannedScreen(); return; }
                             
@@ -470,7 +466,6 @@
             const val = document.getElementById('input-pseudo').value.trim();
             if(val.length < 2) return alert("Pseudo trop court !");
             
-            // --- VERIFICATION NOM DUPLIQUÉ (v1.100) ---
             roomRef.child('players').once('value', snap => {
                 const players = snap.val() || {};
                 let nameTaken = false;
@@ -482,15 +477,12 @@
 
                 if(nameTaken) return alert("Ce pseudo est déjà pris par un autre joueur.");
 
-                // Si on édite
                 if(isEditing) {
                     roomRef.child('players/' + myUserID).update({ name: val });
                     player.pseudo = val;
                     finishEdit();
                     return;
                 }
-
-                // Nouveau joueur (ou mise à jour)
                 player.pseudo = val;
                 navigateTo('step-avatar');
             });
@@ -614,7 +606,6 @@
         }
 
         function launchGame(isReconnect = false) {
-            // STOCKAGE DANS "players/USER_ID" au lieu de "scores/PSEUDO"
             if(!isReconnect) {
                 roomRef.child('players/' + myUserID).set({ 
                     name: player.pseudo, 
@@ -660,12 +651,10 @@
             roomRef.child('gameState').off(); 
             roomRef.child('players/' + myUserID).off();
             
-            // Écoute état salle
             roomRef.on('value', snap => {
                 if(!snap.exists()) { handleExit("🛑 La partie a été clôturée par " + mjName + ".", true); }
             });
             
-            // Écoute Mes Infos (Score + BAN) sur ID
             roomRef.child('players/' + myUserID).on('value', snap => {
                 const d = snap.val();
                 if(d) {
@@ -682,7 +671,6 @@
 
             roomRef.child('buzzers').on('value', snap => {
                 const val = snap.val();
-                // Check ID s'il existe dans le buzzer, sinon check pseudo (rétrocompatibilité)
                 let buzzId = val ? (val.id || "") : null;
                 let buzzPseudo = val ? val.pseudo : null;
                 
@@ -704,7 +692,6 @@
         function handleExit(message, redirect) {
             if(roomRef) roomRef.off();
             alert(message);
-            // On nettoie la session mais pas l'ID
             localStorage.removeItem('presta_player_session');
             if(redirect && mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; }
             else { location.reload(); }
@@ -728,7 +715,7 @@
         function onBuzzerClick() {
             roomRef.child('buzzers').transaction(function(currentData) {
                 if (currentData === null) return { 
-                    id: myUserID, // On envoie l'ID
+                    id: myUserID, 
                     pseudo: player.pseudo, 
                     avatar: player.avatar, 
                     teamName: player.team, 
