@@ -49,7 +49,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.103</div>
+    <div class="version-tag">v1.104</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -148,6 +148,16 @@
             <h3 style="color:var(--gold); margin-top:0;">PODIUM & RÉSULTATS</h3>
             <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 1.1rem;" onclick="triggerEndGame()">🏁 Fin de partie</button>
         </div>
+
+        <div style="margin-top:20px; border: 1px solid #7f8c8d; padding: 20px; border-radius: 12px; background: rgba(127, 140, 141, 0.1);">
+            <h3 style="color:#bdc3c7; margin-top:0;">Administration Version (Cache)</h3>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="text" id="sys-version-input" placeholder="1.xxx" style="margin:0; width:100px;">
+                <button style="background:#7f8c8d; width:auto; margin:0;" onclick="updateAppVersion()">Mettre à jour</button>
+                <span style="font-size:0.8rem; color:#aaa;">Actuelle : <b id="current-version-display">...</b></span>
+            </div>
+        </div>
+
         <div style="margin-top:40px; border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 12px;">
             <h3 style="color:var(--danger); margin-top:0;">Clôturer la partie</h3>
             <button style="background:var(--blue);" onclick="quitRoom()">🚪 Quitter la salle (Conserver données)</button>
@@ -413,9 +423,30 @@
             roomRef.child('mjLogo').set(currentLogo);
             if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink);
             roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true);
+            
             initMJLogic(); 
+            initAdminListener(); // AJOUT v1.104
+            
             loadCrestGrid();
             openScoreBoard();
+        }
+
+        // --- GESTION VERSION (v1.104) ---
+        function initAdminListener() {
+            db.ref('config/minVersion').on('value', snap => {
+                const v = snap.val() || "1.000";
+                document.getElementById('current-version-display').innerText = v;
+                if(document.getElementById('sys-version-input').value === "") {
+                    document.getElementById('sys-version-input').value = v;
+                }
+            });
+        }
+
+        function updateAppVersion() {
+            const newV = document.getElementById('sys-version-input').value.trim();
+            if(newV && confirm("⚠️ ATTENTION : Cela va forcer le rechargement de TOUS les joueurs vers la version " + newV + ".\n\nConfirmer ?")) {
+                db.ref('config/minVersion').set(newV);
+            }
         }
 
         function openScoreBoard() {
