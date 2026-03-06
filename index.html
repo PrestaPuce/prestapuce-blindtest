@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.113)</title>
+    <title>Presta'Puce - Blind Test (v1.114)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -96,7 +96,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.113</div>
+    <div class="version-tag">v1.114</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -344,7 +344,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.113";
+        const CLIENT_VERSION = "1.114";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         
         function compressImage(file, maxWidth, callback) {
@@ -385,18 +385,13 @@
         let html5QrCode = null;
 
         window.onload = () => {
-            // VERIFICATION VERSION (Correctif v1.113 - ANTI-BOUCLE)
             db.ref('config/minVersion').once('value', snap => {
                 const serverVer = snap.val();
                 const url = new URL(window.location.href);
-                // Si la version serveur diffère ET qu'on n'a pas déjà essayé de forcer cette version spécifiquement
                 if(serverVer && serverVer !== CLIENT_VERSION && url.searchParams.get('force_ver') !== serverVer) {
-                    console.log("Mise à jour requise : " + serverVer);
                     url.searchParams.set('force_ver', serverVer);
-                    url.searchParams.set('t', Date.now()); // Cache buster
+                    url.searchParams.set('t', Date.now());
                     window.location.href = url.toString();
-                } else {
-                    console.log("Version OK ou Cache Têtu (Loop prevented)");
                 }
             });
 
@@ -692,8 +687,23 @@
 
         function startBuzzer() {
             roomRef.child('buzzers').off(); roomRef.child('gameState').off(); roomRef.child('players/' + myUserID).off();
+            
+            // Écouteur global pour la fermeture de salle
             roomRef.on('value', snap => { if(!snap.exists()) { handleExit("🛑 La partie a été clôturée.", true); } });
-            roomRef.child('players/' + myUserID).on('value', snap => { const d = snap.val(); if(d) { document.getElementById('game-score').innerText = d.pts || 0; if(d.banned) { showBannedScreen(); } } });
+            
+            // --- NOUVEL ÉCOUTEUR JOUEUR (v1.114) ---
+            roomRef.child('players/' + myUserID).on('value', snap => { 
+                const d = snap.val(); 
+                if(d) { 
+                    // Joueur existe -> Mise à jour UI
+                    document.getElementById('game-score').innerText = d.pts || 0; 
+                    if(d.banned) { showBannedScreen(); } 
+                } else {
+                    // Joueur n'existe plus (et salle existe encore car l'autre listener n'a pas trigger)
+                    handlePlayerDeleted();
+                }
+            });
+
             roomRef.child('gameState').on('value', snap => { const st = snap.val(); if (st && st.status === 'endGame') showEndGame(); else { gameState = st ? st.status : 'waiting'; document.getElementById('podium-zone').style.display = 'none'; updateUI(); } });
             roomRef.child('buzzers').on('value', snap => {
                 const val = snap.val();
@@ -707,6 +717,19 @@
 
         function showBannedScreen() { if(roomRef) roomRef.off(); document.getElementById('banned-screen').style.display = 'flex'; }
         
+        // --- NOUVELLE FONCTION DE SUPPRESSION (v1.114) ---
+        function handlePlayerDeleted() {
+            if(roomRef) roomRef.off(); // Couper les ponts Firebase
+            alert("Votre compte a été supprimé par l'animateur.");
+            
+            // Nettoyage complet
+            localStorage.clear();
+            
+            // Redirection
+            if(mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; } 
+            else { window.location.href = "https://google.com"; }
+        }
+
         function handleExit(message, redirect) {
             if(roomRef) roomRef.off(); alert(message); localStorage.removeItem('presta_player_session');
             if(redirect && mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; } else { location.reload(); }
