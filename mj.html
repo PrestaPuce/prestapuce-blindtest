@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce</title>
+    <title>Console MJ Pro - Presta'Puce (v1.105)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -49,7 +49,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.104</div>
+    <div class="version-tag">v1.105</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -138,8 +138,15 @@
             <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
             <div id="mj-team-list-display"></div>
         </div>
+        
         <h3>Lobby Joueurs</h3>
         <div id="score-list"></div>
+        
+        <div id="inactive-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border: 1px dashed #7f8c8d; border-radius: 12px;">
+            <h3 style="color:#bdc3c7; margin-top:0; font-size:1rem;">Joueurs Inactifs / Partis</h3>
+            <div id="inactive-list"></div>
+        </div>
+
         <div id="banned-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); border-radius: 12px;">
             <h3 style="color:var(--danger); margin-top:0;">Joueurs Expulsés</h3>
             <div id="banned-list"></div>
@@ -415,7 +422,6 @@
             document.getElementById('screen-dashboard').style.display = "block";
             document.getElementById('display-room').innerText = roomID;
             db.ref('activeRooms/' + roomID).set({ status: 'open' });
-            // CORRECTIF CRITIQUE: RETOUR VERS 'rooms/'
             roomRef = db.ref('rooms/' + id);
             
             if(mjName) roomRef.child('mjName').set(mjName);
@@ -425,7 +431,7 @@
             roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true);
             
             initMJLogic(); 
-            initAdminListener(); // AJOUT v1.104
+            initAdminListener();
             
             loadCrestGrid();
             openScoreBoard();
@@ -615,10 +621,14 @@
 
         function renderLobby() {
             const l = document.getElementById('score-list'); l.innerHTML = "";
+            const iList = document.getElementById('inactive-list'); iList.innerHTML = ""; // v1.105
+            const iSection = document.getElementById('inactive-section'); // v1.105
+            
             const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
             const bSection = document.getElementById('banned-section');
             const bList = document.getElementById('banned-list'); bList.innerHTML = "";
             let hasBanned = false;
+            let hasInactive = false; // v1.105
 
             Object.keys(globalTeams).forEach(tKey => {
                 tList.innerHTML += `<div class="team-item"><span><div class="crest-mini-bg"><img src="${globalTeams[tKey].icon}" class="crest-mini"></div> <b>${tKey}</b></span><div><span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span><span class="btn-icon btn-del" onclick="deleteTeam('${tKey}')">✖</span></div></div>`;
@@ -629,13 +639,21 @@
                 const d = allPlayersData[uid]; 
                 const pseudo = d.name; 
 
+                // CAS 1: BANNIS
                 if(d.banned === true) {
                     hasBanned = true;
                     bList.innerHTML += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem;" onclick="unkickPlayer('${uid}')">Réhabiliter</button></div>`;
                     return; 
                 }
-                if(d.active === false) return; 
+                
+                // CAS 2: INACTIFS (v1.105)
+                if(d.active === false) {
+                    hasInactive = true;
+                    iList.innerHTML += `<div class="score-row" style="opacity:0.7;"><div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts} pts)</small></div><button class="lobby-btn" style="background:gray;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div>`;
+                    return;
+                }
 
+                // CAS 3: ACTIFS (Le reste du code)
                 let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
                 Object.keys(globalTeams).forEach(t => { teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; });
                 
@@ -643,14 +661,25 @@
                 const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
                 let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
                 
-                l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}')" title="Supprimer (Reset)">🗑️</button></div></div>`;
+                // Note: deletePlayer appel avec 'true' pour dire qu'il est actif (Soft Delete)
+                l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Mettre à la corbeille">✖</button></div></div>`;
             });
             bSection.style.display = hasBanned ? "block" : "none";
+            iSection.style.display = hasInactive ? "block" : "none"; // v1.105
         }
 
-        function deletePlayer(uid, name) {
-            if(confirm("Supprimer " + name + " ?\nCela effacera ses données mais il pourra revenir.")) {
-                roomRef.child('players/' + uid).remove();
+        // --- MODIFICATION v1.105 : LOGIQUE SUPPRESSION 2 ETAPES ---
+        function deletePlayer(uid, name, isActive) {
+            if(isActive) {
+                // Etape 1 : Soft Delete (Vers Inactifs)
+                if(confirm("Retirer " + name + " de la liste active ?\n(Il sera déplacé dans les joueurs inactifs)")) {
+                    roomRef.child('players/' + uid).update({ active: false });
+                }
+            } else {
+                // Etape 2 : Hard Delete (Suppression définitive)
+                if(confirm("⚠️ ATTENTION : Supprimer définitivement " + name + " ?\nSes données seront perdues et son téléphone sera réinitialisé.")) {
+                    roomRef.child('players/' + uid).remove();
+                }
             }
         }
 
