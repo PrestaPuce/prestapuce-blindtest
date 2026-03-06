@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.111)</title>
+    <title>Presta'Puce - Blind Test (v1.109)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -25,6 +25,7 @@
         .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .content-top { justify-content: flex-start !important; }
         
+        /* Elements UI */
         h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
         h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin: 0 0 15px 0; font-weight: normal; color: white; }
         p.desc { font-size: clamp(0.9rem, 3.5vw, 1.1rem); color: #bdc3c7; margin-bottom: 20px; line-height: 1.5; max-width: 500px; font-weight: 500; }
@@ -36,15 +37,18 @@
         .btn-main:active { transform: scale(0.95); }
         .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; }
 
+        /* QR SCANNER */
         #reader { width: 100%; max-width: 350px; margin-bottom: 15px; border-radius: 15px; overflow: hidden; display: none; border: 2px solid var(--accent); }
         .btn-scan { background: #8e44ad; color: white; border: none; padding: 10px 20px; border-radius: 50px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 350px; margin-bottom: 15px; }
 
+        /* CARDS */
         .choice-card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; width: 100%; max-width: 350px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.2); box-sizing: border-box; flex-shrink: 0; }
         .choice-card:active { transform: scale(0.98); background: rgba(255,255,255,0.1); border-color: var(--accent); }
         .choice-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
         .choice-content b { display: block; font-size: 1.1rem; margin-bottom: 3px; color: white; }
         .choice-content span { font-size: 0.85rem; color: #bdc3c7; }
 
+        /* GRIDS & LISTS */
         .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
         .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; min-height: 0; justify-content: flex-start; }
         .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
@@ -58,6 +62,7 @@
         .crest-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
         .crest-item.selected { border-color: var(--accent); transform: scale(1.05); box-shadow: 0 0 10px var(--accent); z-index: 2; background: rgba(255,255,255,0.2); }
 
+        /* GAME HEADER & BUZZER */
         .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
         .mini-profile { display: flex; align-items: center; position: relative; flex: 1; height: 100%; }
         .avatar-wrapper { position: relative; width: 44px; height: 44px; flex-shrink: 0; }
@@ -79,6 +84,7 @@
         .buzzer-label { font-size: clamp(1.2rem, 5vw, 1.8rem); font-weight: bold; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; z-index: 2; position: relative; }
         .buzzer-img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; border-radius: 50%; pointer-events: none; }
 
+        /* OVERLAYS */
         .overlay-full { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; padding: 20px; box-sizing: border-box; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .qr-card, .settings-content { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 320px; box-sizing: border-box; }
@@ -87,18 +93,18 @@
         .btn-save-quit { border: 1px solid var(--success); color: var(--success); }
         .btn-change-room { border: 1px solid var(--accent); color: var(--accent); }
         .btn-exit-def { background: rgba(231, 76, 60, 0.2); border: 1px solid var(--danger); color: var(--danger); }
-        
-        /* BOUTON RETOUR BUZZER (Ajout v1.111) */
+        /* Nouveau bouton Retour Buzzer (v1.109) */
         .btn-return-game { background: var(--success); color: white; font-weight: bold; margin-bottom: 20px; text-align: center; justify-content: center; border: none; }
         
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
         
+        /* Reuse Profile Overlay */
         #reuse-avatar-preview, #reconnect-avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 15px auto; border: 3px solid var(--accent); }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.111</div>
+    <div class="version-tag">v1.109</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -545,7 +551,7 @@
             }
         }
 
-        // --- VALIDATION FUNCTIONS (v1.111: Call finishEdit(true)) ---
+        // --- VALIDATION FUNCTIONS (v1.109: Call finishEdit(true)) ---
         function validatePseudo() {
             const val = document.getElementById('input-pseudo').value.trim();
             if(val.length < 2) return alert("Pseudo trop court !");
@@ -635,7 +641,7 @@
         function confirmQuit() { document.getElementById('overlay-quit').style.display = 'flex'; }
         function editStep(stepId) { isEditing = true; document.getElementById('overlay-settings').style.display = 'none'; if(stepId === 'step-pseudo') document.getElementById('input-pseudo').value = player.pseudo; navigateTo(stepId); }
         
-        // --- LOGIQUE DE BOUCLE SETTINGS (v1.111) ---
+        // --- LOGIQUE DE BOUCLE SETTINGS (v1.109) ---
         function finishEdit(stayInMenu = false) { 
             // 1. Sauvegarde & Update
             localStorage.setItem('presta_player_session', JSON.stringify(player));
@@ -644,12 +650,12 @@
             if(roomRef && myUserID) roomRef.child('players/' + myUserID).update({active:true});
 
             if(stayInMenu) {
-                // 2A. On reste dans le menu
+                // 2A. On reste dans le menu : On ferme l'étape spécifique et on rouvre l'overlay
                 document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
                 navigateTo('step-game', false); // Le jeu passe en fond
                 document.getElementById('overlay-settings').style.display = 'flex'; // Le menu revient au premier plan
             } else {
-                // 2B. On quitte
+                // 2B. On quitte : On ferme tout et on va au jeu
                 isEditing = false;
                 document.getElementById('overlay-settings').style.display = 'none';
                 navigateTo('step-game', false); 
