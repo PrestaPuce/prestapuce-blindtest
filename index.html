@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.114)</title>
+    <title>Presta'Puce - Blind Test (v1.116)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -96,7 +96,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.114</div>
+    <div class="version-tag">v1.116</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -337,14 +337,8 @@
     <audio id="sound-win" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Buzzer%20champion.mp3?alt=media&token=8425ad5e-69a3-4a57-966e-58df8ff39701" preload="auto"></audio>
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
-    <div id="banned-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: red; text-align: center; padding: 20px;">
-        <h1 style="font-size: 4rem;">🚫</h1>
-        <h2>ACCÈS REFUSÉ</h2>
-        <p>Vous avez été banni de cette salle par le Maître du Jeu.</p>
-    </div>
-
     <script>
-        const CLIENT_VERSION = "1.114";
+        const CLIENT_VERSION = "1.116";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         
         function compressImage(file, maxWidth, callback) {
@@ -494,7 +488,14 @@
                     roomRef.child('players/' + myUserID).once('value', snapUser => {
                         if(snapUser.exists()) {
                             const data = snapUser.val();
-                            if(data.banned) { showBannedScreen(); return; }
+                            
+                            // CHECK BANNI À L'ENTRÉE (v1.116)
+                            if(data.banned) { 
+                                alert("Accès refusé.\nVous êtes banni de cette salle par l'animateur.");
+                                window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
+                                return; 
+                            }
+                            
                             player = { pseudo: data.name, avatar: data.avatar, team: data.teamName || "Solo", teamIcon: data.teamIcon || "" };
                             showReconnectScreen(); 
                             return;
@@ -687,21 +688,41 @@
 
         function startBuzzer() {
             roomRef.child('buzzers').off(); roomRef.child('gameState').off(); roomRef.child('players/' + myUserID).off();
-            
-            // Écouteur global pour la fermeture de salle
             roomRef.on('value', snap => { if(!snap.exists()) { handleExit("🛑 La partie a été clôturée.", true); } });
             
-            // --- NOUVEL ÉCOUTEUR JOUEUR (v1.114) ---
+            // --- ÉCOUTEUR JOUEUR AMÉLIORÉ (v1.116) ---
             roomRef.child('players/' + myUserID).on('value', snap => { 
                 const d = snap.val(); 
-                if(d) { 
-                    // Joueur existe -> Mise à jour UI
-                    document.getElementById('game-score').innerText = d.pts || 0; 
-                    if(d.banned) { showBannedScreen(); } 
-                } else {
-                    // Joueur n'existe plus (et salle existe encore car l'autre listener n'a pas trigger)
-                    handlePlayerDeleted();
+                
+                // 1. SUPPRESSION DEFINITIVE (HARD DELETE)
+                if(!d) {
+                    if(roomRef) roomRef.off();
+                    alert("Votre compte a été supprimé définitivement.");
+                    localStorage.clear(); // Clean
+                    window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
+                    return;
                 }
+
+                // 2. BANNI (BANNED)
+                if(d.banned) {
+                    if(roomRef) roomRef.off();
+                    alert(`🚫 Vous avez été banni par ${mjName}.`);
+                    // Pas de nettoyage localStorage (pour bloquer le retour)
+                    window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
+                    return;
+                }
+
+                // 3. INACTIF / PAUSE (SOFT DELETE)
+                if(d.active === false) {
+                    if(roomRef) roomRef.off();
+                    alert(`⏸️ Vous avez été désactivé par ${mjName}.\n\nSi c'est une erreur, vous pouvez vous reconnecter à la salle.`);
+                    // Pas de nettoyage localStorage (pour faciliter le retour)
+                    window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
+                    return;
+                }
+
+                // 4. ACTIF (Jeu Normal)
+                document.getElementById('game-score').innerText = d.pts || 0; 
             });
 
             roomRef.child('gameState').on('value', snap => { const st = snap.val(); if (st && st.status === 'endGame') showEndGame(); else { gameState = st ? st.status : 'waiting'; document.getElementById('podium-zone').style.display = 'none'; updateUI(); } });
@@ -714,22 +735,7 @@
             });
             roomRef.child('blockedPlayers/' + player.pseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
-
-        function showBannedScreen() { if(roomRef) roomRef.off(); document.getElementById('banned-screen').style.display = 'flex'; }
         
-        // --- NOUVELLE FONCTION DE SUPPRESSION (v1.114) ---
-        function handlePlayerDeleted() {
-            if(roomRef) roomRef.off(); // Couper les ponts Firebase
-            alert("Votre compte a été supprimé par l'animateur.");
-            
-            // Nettoyage complet
-            localStorage.clear();
-            
-            // Redirection
-            if(mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; } 
-            else { window.location.href = "https://google.com"; }
-        }
-
         function handleExit(message, redirect) {
             if(roomRef) roomRef.off(); alert(message); localStorage.removeItem('presta_player_session');
             if(redirect && mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; } else { location.reload(); }
