@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.110)</title>
+    <title>Presta'Puce - Blind Test (v1.111)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -88,7 +88,7 @@
         .btn-change-room { border: 1px solid var(--accent); color: var(--accent); }
         .btn-exit-def { background: rgba(231, 76, 60, 0.2); border: 1px solid var(--danger); color: var(--danger); }
         
-        /* BOUTON RETOUR BUZZER (MODIF v1.110) */
+        /* BOUTON RETOUR BUZZER (Ajout v1.111) */
         .btn-return-game { background: var(--success); color: white; font-weight: bold; margin-bottom: 20px; text-align: center; justify-content: center; border: none; }
         
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
@@ -98,7 +98,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.110</div>
+    <div class="version-tag">v1.111</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -302,8 +302,11 @@
     <div id="overlay-settings" class="overlay-full" onclick="this.style.display='none'">
         <div class="settings-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--accent);">MODIFIER PROFIL</h2>
+            
             <button class="settings-btn btn-return-game" onclick="finishEdit(false)">⬅️ RETOUR AU BUZZER</button>
+            
             <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+
             <button class="settings-btn" onclick="editStep('step-pseudo')">✏️ Modifier mon Pseudo</button>
             <button class="settings-btn" onclick="editStep('step-avatar')">📷 Changer d'Avatar</button>
             <button class="settings-btn" onclick="editStep('step-mode')">🛡️ Changer Mode (Solo/Team)</button>
@@ -314,10 +317,25 @@
         <div class="settings-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--danger);">QUITTER ?</h2>
             <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px;">Que veux-tu faire ?</p>
+            
             <button class="settings-btn btn-save-quit" onclick="handleExitAction('save')">💾 Sauvegarder & Quitter <small>(Bientôt)</small></button>
             <button class="settings-btn btn-change-room" onclick="handleExitAction('change')">🔄 Changer de Salle</button>
             <button class="settings-btn btn-exit-def" onclick="handleExitAction('exit')">🚪 Sortie Définitive (Sans sauvegarde)</button>
+            
             <button class="btn-secondary" style="margin-top:10px; width:100%; border-color:white; color:white;" onclick="document.getElementById('overlay-quit').style.display='none'">❌ Annuler (Retour au jeu)</button>
+        </div>
+    </div>
+
+    <div id="overlay-reuse" class="overlay-full" style="z-index: 3000;">
+        <div class="settings-content">
+            <h2 style="color:var(--accent);">On se connait ?</h2>
+            <p style="color:#ccc;">Nous avons retrouvé ton dernier profil.</p>
+            <img id="reuse-avatar-preview" src="">
+            <h3 id="reuse-pseudo-display" style="color:white; margin:10px 0;"></h3>
+            <p style="color:#aaa; font-size:0.9rem;">Veux-tu le réutiliser dans cette salle ?</p>
+            
+            <button class="btn-main" onclick="handleProfileReuse(true)">Oui, c'est moi !</button>
+            <button class="btn-secondary" onclick="handleProfileReuse(false)">Non, nouveau joueur</button>
         </div>
     </div>
 
@@ -336,6 +354,7 @@
     <script>
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","👸","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         
+        /* Outils image et SVG */
         function compressImage(file, maxWidth, callback) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -371,7 +390,7 @@
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let selectedTeamCrest = "", isEditing = false, stepHistory = [];
         let mjName = "l'Animateur", mjLink = "";
-        let html5QrCode = null;
+        let html5QrCode = null; // Scanner
 
         window.onload = () => {
             let storedId = localStorage.getItem('buzz_userId');
@@ -456,7 +475,6 @@
                     roomRef.child('mjLink').once('value', s => { if(s.exists()) mjLink = s.val(); });
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
                     
-                    // GESTION CHANGEMENT SALLE (REUSE)
                     const savedProfile = localStorage.getItem('buzz_lastProfile');
                     if(!autoLogin && savedProfile) {
                         try {
@@ -466,9 +484,8 @@
                                 const avImg = document.getElementById('reuse-avatar-preview');
                                 if(p.avatar.length > 20) { avImg.src = p.avatar; avImg.style.display='block'; }
                                 else { avImg.style.display='none'; }
-                                // On n'utilise plus l'ancien overlay, mais on détecte qu'on peut reuse
-                                // Mais le flow demande de passer par reconnect si ID existe DEJA
-                                // Si ID existe pas (nouveau tel), on peut proposer reuse
+                                document.getElementById('overlay-reuse').style.display = 'flex';
+                                return;
                             }
                         } catch(e) {}
                     }
@@ -477,14 +494,10 @@
                         if(snapUser.exists()) {
                             const data = snapUser.val();
                             if(data.banned) { showBannedScreen(); return; }
-                            
-                            // MODIFICATION v1.107 : Écran de Reconnexion personnalisé
                             player = { pseudo: data.name, avatar: data.avatar, team: data.teamName || "Solo", teamIcon: data.teamIcon || "" };
                             showReconnectScreen(); 
                             return;
                         }
-                        // Si pas d'user, mais profil sauvé, on pourrait proposer reuse, 
-                        // mais simplifions : nouveau joueur = welcome
                         navigateTo('step-welcome');
                     });
                 } else { alert("Salle introuvable !"); navigateTo('step-room'); }
@@ -519,7 +532,20 @@
             }
         }
 
-        // --- VALIDATION FUNCTIONS (v1.110: Call finishEdit(true)) ---
+        function handleProfileReuse(reuse) {
+            document.getElementById('overlay-reuse').style.display = 'none';
+            if(reuse) {
+                const p = JSON.parse(localStorage.getItem('buzz_lastProfile'));
+                player.pseudo = p.pseudo;
+                player.avatar = p.avatar;
+                navigateTo('step-mode');
+            } else {
+                localStorage.removeItem('buzz_lastProfile');
+                navigateTo('step-welcome');
+            }
+        }
+
+        // --- VALIDATION FUNCTIONS (v1.111: Call finishEdit(true)) ---
         function validatePseudo() {
             const val = document.getElementById('input-pseudo').value.trim();
             if(val.length < 2) return alert("Pseudo trop court !");
@@ -609,23 +635,21 @@
         function confirmQuit() { document.getElementById('overlay-quit').style.display = 'flex'; }
         function editStep(stepId) { isEditing = true; document.getElementById('overlay-settings').style.display = 'none'; if(stepId === 'step-pseudo') document.getElementById('input-pseudo').value = player.pseudo; navigateTo(stepId); }
         
-        // --- LOGIQUE DE BOUCLE SETTINGS (v1.110) ---
+        // --- LOGIQUE DE BOUCLE SETTINGS (v1.111) ---
         function finishEdit(stayInMenu = false) { 
-            // 1. Sauvegarde locale
+            // 1. Sauvegarde & Update
             localStorage.setItem('presta_player_session', JSON.stringify(player));
             localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar}));
-            // 2. Mise à jour de l'affichage
             updateGameHeader();
-            // 3. Activation Firebase (Important !)
             if(roomRef && myUserID) roomRef.child('players/' + myUserID).update({active:true});
 
             if(stayInMenu) {
-                // 2A. On reste dans le menu : On ferme l'étape spécifique et on rouvre l'overlay
+                // 2A. On reste dans le menu
                 document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
                 navigateTo('step-game', false); // Le jeu passe en fond
                 document.getElementById('overlay-settings').style.display = 'flex'; // Le menu revient au premier plan
             } else {
-                // 2B. On quitte : On ferme tout et on va au jeu
+                // 2B. On quitte
                 isEditing = false;
                 document.getElementById('overlay-settings').style.display = 'none';
                 navigateTo('step-game', false); 
