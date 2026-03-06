@@ -705,7 +705,7 @@
         function deletePlayer(uid, name, isActive) {
             if(isActive) {
                 // Etape 1 : Soft Delete (Vers Inactifs)
-                if(confirm("Voulez-vous rendre " + name + " inactif ?\n\nIl restera visible dans la section 'Joueurs Inactifs' de votre console.")) {
+                if(confirm("Voulez-vous rendre " + name + " inactif ?\n\nIl restera visible dans la section 'Joueurs Inactifs' de votre console. Il conservera ses données et son score tant que vous ne le supprimez pas définitivement.")) {
                     roomRef.child('players/' + uid).update({ active: false });
                 }
             } else {

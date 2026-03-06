@@ -747,7 +747,7 @@
                 // 3. INACTIF / PAUSE
                 if(d.active === false) {
                     if(roomRef) roomRef.off();
-                    alert(`⏸️ Vous avez été désactivé par ${mjName}.\n\nSi c'est une erreur, vous pouvez vous reconnecter à la salle.`);
+                    alert(`⏸️ Vous avez été désactivé par ${mjName}.\n\nSi c'est une erreur, vous pouvez vous reconnecter à la salle. Vous retrouverez vos données et votre score tant que ${mjName} ne vous supprime pas définitivement`);
                     window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
                     return;
                 }
