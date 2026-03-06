@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.106)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.107)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -49,7 +49,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.106</div>
+    <div class="version-tag">v1.107</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -151,6 +151,7 @@
             <h3 style="color:var(--danger); margin-top:0;">Joueurs Expulsés</h3>
             <div id="banned-list"></div>
         </div>
+
         <div style="margin-top:20px; padding: 15px; border: 2px solid var(--gold); border-radius: 12px; background: rgba(243, 156, 18, 0.1); text-align: center;">
             <h3 style="color:var(--gold); margin-top:0;">PODIUM & RÉSULTATS</h3>
             <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 1.1rem;" onclick="triggerEndGame()">🏁 Fin de partie</button>
@@ -621,14 +622,14 @@
 
         function renderLobby() {
             const l = document.getElementById('score-list'); l.innerHTML = "";
-            const iList = document.getElementById('inactive-list'); iList.innerHTML = ""; // v1.106
-            const iSection = document.getElementById('inactive-section'); // v1.106
+            const iList = document.getElementById('inactive-list'); iList.innerHTML = ""; // v1.107
+            const iSection = document.getElementById('inactive-section'); // v1.107
             
             const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
             const bSection = document.getElementById('banned-section');
             const bList = document.getElementById('banned-list'); bList.innerHTML = "";
             let hasBanned = false;
-            let hasInactive = false; // v1.106
+            let hasInactive = false; // v1.107
 
             Object.keys(globalTeams).forEach(tKey => {
                 tList.innerHTML += `<div class="team-item"><span><div class="crest-mini-bg"><img src="${globalTeams[tKey].icon}" class="crest-mini"></div> <b>${tKey}</b></span><div><span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span><span class="btn-icon btn-del" onclick="deleteTeam('${tKey}')">✖</span></div></div>`;
@@ -642,16 +643,16 @@
                 // CAS 1: BANNIS
                 if(d.banned === true) {
                     hasBanned = true;
-                    bList.innerHTML += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem;" onclick="unkickPlayer('${uid}')">Réhabiliter</button></div>`;
+                    // v1.107 : AJOUT BOUTON SUPPRESSION TOTALE
+                    bList.innerHTML += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')">Réhabiliter</button><button style="background:#c0392b; width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
                     return; 
                 }
                 
-                // CAS 2: INACTIFS (v1.106)
+                // CAS 2: INACTIFS (v1.107 - AFFICHAGE COMPLET)
                 if(d.active === false) {
                     hasInactive = true;
-                    // Affichage Complet pour Inactifs (Score, +/-, Ban, Delete)
                     iList.innerHTML += `
-                    <div class="score-row" style="opacity:0.8;">
+                    <div class="score-row" style="opacity:0.8; background:rgba(255,255,255,0.05);">
                         <div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts || 0} pts)</small></div>
                         <div class="player-controls">
                             <button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button>
@@ -663,7 +664,7 @@
                     return;
                 }
 
-                // CAS 3: ACTIFS (Le reste du code)
+                // CAS 3: ACTIFS
                 let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
                 Object.keys(globalTeams).forEach(t => { teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; });
                 
@@ -671,14 +672,14 @@
                 const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
                 let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
                 
-                // Note: deletePlayer appel avec 'true' pour dire qu'il est actif (Soft Delete)
+                // v1.107 : BOUTON TRASH = RENDRE INACTIF (isSoftDelete = true)
                 l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Rendre inactif">🗑️</button></div></div>`;
             });
             bSection.style.display = hasBanned ? "block" : "none";
-            iSection.style.display = hasInactive ? "block" : "none"; // v1.106
+            iSection.style.display = hasInactive ? "block" : "none"; 
         }
 
-        // --- MODIFICATION v1.106 : LOGIQUE SUPPRESSION 2 ETAPES ---
+        // --- MODIFICATION v1.107 : LOGIQUE SUPPRESSION 2 ETAPES ---
         function deletePlayer(uid, name, isActive) {
             if(isActive) {
                 // Etape 1 : Soft Delete (Vers Inactifs)
@@ -734,14 +735,11 @@
         
         function kickPlayer(uid, name) { 
             if(confirm("Bannir " + name + " ? Il ne pourra plus rejoindre la salle.")) {
-                // v1.106 FIX: On s'assure de passer active: false en même temps
                 roomRef.child('players/' + uid).update({ banned: true, active: false });
             }
         }
         
         function unkickPlayer(uid) { 
-            // Quand on débannit, on le laisse inactif par sécurité (il devra rescanner ou MJ devra activer... ah non pas de bouton activer)
-            // Donc on le laisse active: false, il apparaitra dans Inactifs
             roomRef.child('players/' + uid).update({ banned: false, active: false }); 
         }
         
