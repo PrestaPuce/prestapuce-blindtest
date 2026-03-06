@@ -49,7 +49,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.100 (UserID)</div>
+    <div class="version-tag">v1.101 (MJ Correctif)</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -187,7 +187,7 @@
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
         
-        // --- GENERATEUR SVG ---
+        /* GENERATEUR SVG */
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
             const c1 = colors[i % colors.length];
@@ -514,22 +514,22 @@
             roomRef.child('buzzers').on('value', snap => {
                 const buzzerData = snap.val(); const box = document.getElementById('player-box');
                 if(buzzerData) { 
-                    // ADAPTATION USER ID
+                    // RECUPERATION VIA ID ou PSEUDO
                     const id = buzzerData.id; 
                     const pseudo = buzzerData.pseudo;
-                    
-                    // On essaie de trouver le joueur par ID, sinon par pseudo (fallback)
                     let realData = null;
+                    
+                    // Si on a l'ID (Nouveau systeme)
                     if(id && allPlayersData[id]) realData = allPlayersData[id];
+                    // Fallback Pseudo
                     else if(pseudo) {
-                        // Recherche manuelle si pas d'ID direct
                         for(const [uid, pData] of Object.entries(allPlayersData)) {
                             if(pData.name === pseudo) { realData = pData; currentPlayer = { id: uid, ...realData }; break; }
                         }
                     }
 
                     if(realData) {
-                        currentPlayer = { id: id, ...realData }; // Stocke l'ID pour les actions
+                        currentPlayer = { id: id, ...realData }; 
                         const avatarContainer = document.getElementById('p-avatar');
                         if(realData.avatar && realData.avatar.length > 20) avatarContainer.innerHTML = `<img src="${realData.avatar}" style="width:70px; height:70px; border-radius:50%; object-fit:cover;">`;
                         else avatarContainer.innerHTML = realData.avatar || '👤'; 
@@ -572,7 +572,7 @@
                 }
                 renderLobby(); 
             });
-            // CHANGE: Lecture de 'players' au lieu de 'scores'
+            // ICI: On écoute 'players' au lieu de 'scores'
             roomRef.child('players').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
         }
@@ -588,34 +588,37 @@
                 tList.innerHTML += `<div class="team-item"><span><div class="crest-mini-bg"><img src="${globalTeams[tKey].icon}" class="crest-mini"></div> <b>${tKey}</b></span><div><span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span><span class="btn-icon btn-del" onclick="deleteTeam('${tKey}')">✖</span></div></div>`;
             });
 
-            // CHANGE: Boucle sur les UserID
+            // Boucle sur les UserID
             Object.keys(allPlayersData).forEach(uid => {
                 const d = allPlayersData[uid]; 
-                const pseudo = d.name; // Récupération du pseudo dans l'objet
+                const pseudo = d.name; // Le pseudo est dans l'objet
 
-                if(d.banned === true) { // CHANGE: kicked -> banned
+                // Joueur Banni ?
+                if(d.banned === true) {
                     hasBanned = true;
                     bList.innerHTML += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem;" onclick="unkickPlayer('${uid}')">Réhabiliter</button></div>`;
                     return; 
                 }
+                
+                // On affiche si actif
                 if(d.active === false) return; 
 
                 let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
                 Object.keys(globalTeams).forEach(t => { teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; });
                 
-                const isBlocked = currentBlocked[pseudo]; // Block reste sur pseudo car visuel
+                const isBlocked = currentBlocked[pseudo];
                 const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
                 let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
                 
-                // CHANGE: Passage de 'uid' aux fonctions au lieu de 'pseudo'
-                l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Expulser (Bannir)">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}')" title="Supprimer (Libérer Pseudo)">🗑️</button></div></div>`;
+                // ICI: On passe 'uid' dans les fonctions au lieu de 'pseudo'
+                l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}')" title="Supprimer (Reset)">🗑️</button></div></div>`;
             });
             bSection.style.display = hasBanned ? "block" : "none";
         }
 
-        // --- FONCTIONS ACTIONS (Mises à jour avec UserID) ---
+        // --- FONCTIONS MODIFIÉES POUR ACCEPTER UID ---
         function deletePlayer(uid, name) {
-            if(confirm("Supprimer DÉFINITIVEMENT " + name + " ?\nCela libèrera le pseudo pour un autre joueur.")) {
+            if(confirm("Supprimer " + name + " ?\nCela effacera ses données mais il pourra revenir.")) {
                 roomRef.child('players/' + uid).remove();
             }
         }
@@ -660,7 +663,7 @@
         function deleteTeam(n) { roomRef.child('teams/' + n).remove(); }
         
         function kickPlayer(uid, name) { 
-            if(confirm("Expulser " + name + " ? (Bannissement)")) {
+            if(confirm("Bannir " + name + " ? Il ne pourra plus rejoindre la salle.")) {
                 roomRef.child('players/' + uid).update({ banned: true }).then(() => {
                     setTimeout(() => { roomRef.child('players/' + uid).update({ active: false }); }, 1500);
                 });
@@ -677,7 +680,7 @@
         }
         
         function handleError() { 
-            if(currentPlayer && currentPlayer.name) { // Adapté name
+            if(currentPlayer && currentPlayer.name) { 
                 roomRef.child('blockedPlayers/' + currentPlayer.name).set(true); 
                 statusUpdate('ready'); 
             } 
@@ -685,10 +688,10 @@
         
         function handleReward(pts, mode) {
             if(!currentPlayer || !currentPlayer.id) return;
-            roomRef.child('players/' + currentPlayer.id).transaction(c => { // Adapté Path
+            roomRef.child('players/' + currentPlayer.id).transaction(c => { 
                 return { 
                     pts: (c ? c.pts : 0) + pts, 
-                    name: c.name, // Garde le nom
+                    name: c.name, 
                     avatar: c.avatar, 
                     teamName: c.teamName, 
                     teamIcon: c.teamIcon, 
