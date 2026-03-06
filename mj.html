@@ -2,145 +2,162 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Animateur - Presta'Puce (v1.104)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MJ Interface - Presta'Puce (v1.104)</title>
     <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
+    
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #2c3e50; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; color:white; }
         
         /* HEADER */
-        header { background: #2c3e50; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 100; height: 60px; }
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        .logo { height: 40px; border-radius: 5px; }
-        h1 { margin: 0; font-size: 1.2rem; color: #f1c40f; text-transform: uppercase; }
-        .room-badge { background: #e74c3c; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
-        
+        header { background: #1a252f; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; }
+        .header-title { display: flex; align-items: center; gap: 15px; }
+        .header-title img { height: 50px; border-radius: 5px; }
+        .header-title h1 { margin: 0; font-size: 1.5rem; color: #f1c40f; text-transform: uppercase; }
+        .room-display { background: #e74c3c; padding: 10px 20px; border-radius: 50px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: 2px solid white; }
+
         /* LAYOUT */
         .main-container { display: flex; flex: 1; overflow: hidden; }
         
-        /* COLONNE GAUCHE (Contrôles) */
-        .controls-panel { width: 350px; background: #222; padding: 20px; display: flex; flex-direction: column; gap: 15px; border-right: 1px solid #444; overflow-y: auto; }
-        .card { background: #333; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        .card h3 { margin-top: 0; color: #bdc3c7; border-bottom: 1px solid #555; padding-bottom: 5px; font-size: 1rem; }
+        /* COLONNE GAUCHE */
+        .left-panel { width: 320px; background: #34495e; padding: 20px; display: flex; flex-direction: column; gap: 15px; border-right: 2px solid #1a252f; overflow-y: auto; }
         
-        button { cursor: pointer; border: none; padding: 10px; border-radius: 5px; font-weight: bold; color: white; transition: 0.2s; width: 100%; margin-bottom: 5px; }
-        button:hover { filter: brightness(1.2); }
-        
-        .btn-green { background: #27ae60; height: 60px; font-size: 1.2rem; }
-        .btn-red { background: #c0392b; }
-        .btn-blue { background: #2980b9; }
-        .btn-orange { background: #e67e22; }
-        .btn-grey { background: #7f8c8d; }
-        
-        .state-indicator { text-align: center; padding: 10px; border-radius: 5px; font-weight: bold; margin-bottom: 10px; background: #2c3e50; color: #7f8c8d; }
-        .state-indicator.ready { background: #27ae60; color: white; }
-        .state-indicator.blocked { background: #c0392b; color: white; }
-        .state-indicator.taken { background: #2980b9; color: white; }
+        /* COLONNE DROITE */
+        .right-panel { flex: 1; padding: 20px; overflow-y: auto; background: #2c3e50; position: relative; }
 
-        /* COLONNE DROITE (Joueurs) */
-        .players-panel { flex: 1; padding: 20px; overflow-y: auto; background: #1a1a1a; position: relative; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; background: #333; padding: 10px; text-align: center; cursor: pointer; border-radius: 5px; color: #aaa; }
-        .tab-btn.active { background: #f1c40f; color: black; font-weight: bold; }
+        /* ELEMENTS UI */
+        .control-card { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .control-card h3 { margin-top: 0; color: #bdc3c7; font-size: 0.9rem; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
         
-        .grid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
-        .player-card { background: #2c3e50; padding: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; border-left: 5px solid #bdc3c7; }
-        .player-card.buzzed { background: #2980b9; border-color: #f1c40f; transform: scale(1.02); box-shadow: 0 0 15px rgba(241, 196, 15, 0.5); }
-        .player-card.active { border-color: #27ae60; }
-        .player-card.inactive { opacity: 0.5; border-color: #7f8c8d; }
-        .player-info { display: flex; align-items: center; gap: 10px; overflow: hidden; }
-        .avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #000; }
-        .p-name { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
-        .p-score { background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; color: #f1c40f; font-weight: bold; }
+        .btn { width: 100%; padding: 12px; margin-bottom: 8px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; transition: 0.2s; text-transform: uppercase; }
+        .btn:hover { filter: brightness(1.1); transform: scale(1.02); }
+        .btn-green { background: #27ae60; box-shadow: 0 4px 0 #219150; }
+        .btn-red { background: #c0392b; box-shadow: 0 4px 0 #a93226; }
+        .btn-blue { background: #2980b9; box-shadow: 0 4px 0 #2471a3; }
+        .btn-orange { background: #d35400; box-shadow: 0 4px 0 #a04000; }
+        .btn-grey { background: #7f8c8d; box-shadow: 0 4px 0 #616a6b; }
+
+        .state-display { text-align: center; font-size: 1.2rem; font-weight: bold; padding: 15px; background: #1a252f; border-radius: 10px; margin-bottom: 10px; color: #bdc3c7; border: 2px solid #1a252f; }
+        .state-display.ready { color: #2ecc71; border-color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
+        .state-display.blocked { color: #e74c3c; border-color: #e74c3c; background: rgba(231, 76, 60, 0.1); }
+        .state-display.taken { color: #3498db; border-color: #3498db; background: rgba(52, 152, 219, 0.1); animation: pulse 1s infinite; }
+
+        /* LISTE JOUEURS */
+        .tabs { display: flex; margin-bottom: 15px; gap: 10px; }
+        .tab { flex: 1; padding: 10px; background: rgba(0,0,0,0.2); text-align: center; cursor: pointer; border-radius: 8px; color: #95a5a6; font-weight: bold; }
+        .tab.active { background: #f1c40f; color: #2c3e50; }
+
+        .grid-players { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        .player-card { background: white; color: #2c3e50; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; border-left: 5px solid #bdc3c7; position: relative; }
+        .player-card.active { border-left-color: #2ecc71; }
+        .player-card.buzzed { background: #3498db; color: white; transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.3); z-index: 10; border: 3px solid #f1c40f; }
+        .player-card.inactive { opacity: 0.6; filter: grayscale(1); }
         
-        .actions { display: flex; gap: 5px; }
-        .mini-btn { padding: 5px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .p-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #eee; margin-right: 10px; }
+        .p-info { flex: 1; overflow: hidden; }
+        .p-name { font-weight: bold; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .p-team { font-size: 0.8rem; color: #7f8c8d; }
+        .player-card.buzzed .p-team { color: #d6eaf8; }
+
+        .p-actions { display: flex; gap: 5px; align-items: center; }
+        .score-badge { background: #2c3e50; color: #f1c40f; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 1.1rem; min-width: 30px; text-align: center; }
+        .btn-mini { padding: 5px 8px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; color: white; }
 
         /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; }
-        .modal-content { background: #2c3e50; padding: 30px; border-radius: 15px; width: 400px; text-align: center; border: 2px solid #f1c40f; }
-        input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; font-size: 1rem; text-align: center; }
+        #setup-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .modal-box { background: white; color: #2c3e50; padding: 40px; border-radius: 20px; text-align: center; width: 400px; }
+        .input-setup { width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #bdc3c7; border-radius: 8px; font-size: 1.1rem; box-sizing: border-box; }
+        
+        #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; }
+        .qr-content { background: white; padding: 20px; border-radius: 15px; text-align: center; }
 
-        /* ZONE TECHNIQUE (Ajout v1.104) */
-        .admin-zone { margin-top: 20px; border-top: 1px solid #555; padding-top: 15px; }
-        .admin-row { display: flex; gap: 5px; align-items: center; }
-        .admin-input { background: #000; color: #f1c40f; font-family: monospace; border: 1px solid #555; width: 80px !important; padding: 5px !important; margin: 0 !important; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
+    <div id="setup-modal">
+        <div class="modal-box">
+            <h2 style="color:#e74c3c; margin-top:0;">CONFIGURATION SALLE</h2>
+            <input type="text" id="setup-mj" class="input-setup" placeholder="Votre Nom (MJ)">
+            <input type="number" id="setup-room" class="input-setup" placeholder="Code Salle (ex: 1234)">
+            <input type="text" id="setup-logo" class="input-setup" placeholder="URL Logo (Facultatif)">
+            <input type="text" id="setup-link" class="input-setup" placeholder="Lien Site Web (Facultatif)">
+            <button class="btn btn-green" onclick="createRoom()">OUVRIR LA SALLE</button>
+        </div>
+    </div>
+
+    <div id="qr-modal" onclick="this.style.display='none'">
+        <div class="qr-content" onclick="event.stopPropagation()">
+            <div id="qrcode"></div>
+            <h2 id="qr-text" style="color:#2c3e50; margin-bottom:0;"></h2>
+        </div>
+    </div>
+
     <header>
-        <div class="header-left">
-            <img id="mj-logo-display" class="logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
+        <div class="header-title">
+            <img id="mj-logo-img" src="" style="display:none;">
             <div>
                 <h1>ESPACE ANIMATEUR</h1>
-                <small style="color:#aaa;">v1.104</small>
+                <div style="font-size:0.8rem; color:#bdc3c7;">Connecté en tant que : <span id="mj-name-display" style="color:white; font-weight:bold;">...</span></div>
             </div>
         </div>
-        <div class="room-badge" onclick="showRoomQR()" title="Afficher QR">SALLE : <span id="room-id-display">----</span></div>
+        <div class="room-display" onclick="showQR()">
+            SALLE : <span id="room-code-display">----</span> 🔗
+        </div>
     </header>
 
     <div class="main-container">
-        <div class="controls-panel">
-            <div class="card">
-                <h3>🎮 ETAT DU BUZZER</h3>
-                <div id="state-display" class="state-indicator">EN ATTENTE</div>
-                <button class="btn-green" onclick="setGameState('ready')">🟢 OUVRIR (BUZZ)</button>
-                <button class="btn-red" onclick="setGameState('blocked')">🔴 BLOQUER</button>
-                <button class="btn-orange" onclick="resetBuzzer()">🔄 RESET MANCHE</button>
+        <div class="left-panel">
+            
+            <div class="control-card">
+                <h3>ÉTAT DU BUZZER</h3>
+                <div id="status-box" class="state-display blocked">BLOQUÉ</div>
+                <button class="btn btn-green" onclick="setGameState('ready')">🟢 LIBÉRER (BUZZ)</button>
+                <button class="btn btn-red" onclick="setGameState('blocked')">🔴 BLOQUER</button>
+                <button class="btn btn-orange" onclick="resetBuzz()">🔄 RESET MANCHE</button>
             </div>
 
-            <div class="card">
-                <h3>🏆 ACTIONS</h3>
-                <button class="btn-blue" onclick="showScores()">📊 Afficher Scores</button>
-                <button class="btn-blue" onclick="showPodium()">🏅 Afficher Podium</button>
-                <button class="btn-grey" onclick="cleanBuzzers()">🧹 Nettoyer Buzzers</button>
-                <button class="btn-red" style="margin-top:10px;" onclick="closeRoom()">❌ Fermer la Salle</button>
+            <div class="control-card">
+                <h3>AFFICHAGE</h3>
+                <button class="btn btn-blue" onclick="openScores()">📊 ÉCRAN SCORES</button>
+                <button class="btn btn-blue" onclick="triggerPodium()">🏆 LANCER PODIUM</button>
             </div>
 
-            <div class="card admin-zone">
-                <h3>🛠️ ADMINISTRATION</h3>
-                <p style="font-size:0.8rem; color:#aaa; margin:5px 0;">Version App (Cache Busting)</p>
-                <div class="admin-row">
-                    <input type="text" id="sys-version" class="admin-input" placeholder="1.xxx">
-                    <button class="btn-grey" style="width: auto; padding: 5px 10px; font-size: 0.8rem;" onclick="updateAppVersion()">Mettre à jour</button>
+            <div class="control-card">
+                <h3>GESTION</h3>
+                <button class="btn btn-grey" onclick="cleanInactive()">🧹 Nettoyer Inactifs</button>
+                <button class="btn btn-red" onclick="deleteRoom()">❌ FERMER SALLE</button>
+            </div>
+
+            <div class="control-card" style="border-color:#f39c12;">
+                <h3 style="color:#f39c12;">ADMIN VERSION</h3>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="sys-version-input" style="width:100%; padding:5px; border-radius:4px; border:none;" placeholder="1.xxx">
+                    <button class="btn-mini btn-grey" onclick="updateVersion()" style="width:auto; white-space:nowrap;">Mettre à jour</button>
                 </div>
+                <div style="font-size:0.7rem; color:#aaa; margin-top:5px;">Actuelle: <span id="current-version-display">...</span></div>
             </div>
+
         </div>
 
-        <div class="players-panel">
+        <div class="right-panel">
             <div class="tabs">
-                <div class="tab-btn active" onclick="switchTab('players')">Joueurs (<span id="count-players">0</span>)</div>
-                <div class="tab-btn" onclick="switchTab('teams')">Équipes (<span id="count-teams">0</span>)</div>
+                <div id="tab-players" class="tab active" onclick="switchTab('players')">JOUEURS (<span id="count-players">0</span>)</div>
+                <div id="tab-teams" class="tab" onclick="switchTab('teams')">ÉQUIPES (<span id="count-teams">0</span>)</div>
             </div>
 
-            <div id="view-players" class="grid-list"></div>
-            <div id="view-teams" class="grid-list" style="display:none;"></div>
-        </div>
-    </div>
-
-    <div id="modal-login" class="modal-overlay" style="display:flex;">
-        <div class="modal-content">
-            <h2 style="color:#f1c40f;">CONFIGURATION</h2>
-            <input type="text" id="mj-name" placeholder="Nom de l'animateur">
-            <input type="text" id="room-code" placeholder="Code Salle (ex: 1234)">
-            <input type="text" id="mj-logo" placeholder="URL Logo (Optionnel)">
-            <input type="text" id="mj-link" placeholder="Lien Site Web (Optionnel)">
-            <button class="btn-green" style="margin-top:15px;" onclick="initRoom()">CRÉER / REJOINDRE</button>
-        </div>
-    </div>
-
-    <div id="modal-qr" class="modal-overlay" onclick="this.style.display='none'">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div id="qrcode" style="background:white; padding:10px; display:inline-block;"></div>
-            <h3 id="qr-label" style="color:white; margin-top:10px;"></h3>
+            <div id="list-players" class="grid-players"></div>
+            <div id="list-teams" class="grid-players" style="display:none;"></div>
         </div>
     </div>
 
     <script>
-        // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o",
             authDomain: "prestapuce-buzz.firebaseapp.com",
@@ -153,215 +170,243 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let roomID = "";
+        let roomID = null;
         let roomRef = null;
-        let configRef = db.ref('config'); // Référence globale config
+        let currentTab = 'players';
 
-        // --- INIT & CONNEXION ---
-        function initRoom() {
-            const name = document.getElementById('mj-name').value.trim();
-            const code = document.getElementById('room-code').value.trim();
-            const logo = document.getElementById('mj-logo').value.trim();
-            const link = document.getElementById('mj-link').value.trim();
+        // --- INIT ---
+        function createRoom() {
+            const mj = document.getElementById('setup-mj').value.trim();
+            const code = document.getElementById('setup-room').value.trim();
+            const logo = document.getElementById('setup-logo').value.trim();
+            const link = document.getElementById('setup-link').value.trim();
 
-            if(!name || !code) return alert("Nom et Code obligatoires");
+            if (!mj || !code) return alert("Nom et Code obligatoires.");
 
             roomID = code;
             roomRef = db.ref('rooms/' + roomID);
 
+            // Mise à jour des infos de la salle
             roomRef.update({
-                mjName: name,
+                mjName: mj,
                 mjLogo: logo,
                 mjLink: link,
                 createdAt: firebase.database.ServerValue.TIMESTAMP
             });
-            
-            // Enregistrement dans la liste publique
+
+            // Enregistrement dans la liste des salles actives (pour que le joueur la trouve)
             db.ref('activeRooms/' + roomID).set({
-                mj: name,
+                mj: mj,
                 started: Date.now()
             });
 
-            document.getElementById('room-id-display').innerText = roomID;
-            if(logo) document.getElementById('mj-logo-display').src = logo;
-            
-            document.getElementById('modal-login').style.display = 'none';
-            
-            startListeners();
-            initAdminListener(); // Lancer l'écoute de la version
+            // UI
+            document.getElementById('setup-modal').style.display = 'none';
+            document.getElementById('mj-name-display').innerText = mj;
+            document.getElementById('room-code-display').innerText = roomID;
+            if(logo) {
+                document.getElementById('mj-logo-img').src = logo;
+                document.getElementById('mj-logo-img').style.display = 'block';
+            }
+
+            listenRoom();
+            listenConfig(); // Ajout v1.104
         }
 
-        // --- ECOUTEURS FIREBASE ---
-        function startListeners() {
-            // Etat du jeu
+        // --- LISTENERS ---
+        function listenRoom() {
+            // Game State
             roomRef.child('gameState').on('value', snap => {
                 const state = snap.val() ? snap.val().status : 'waiting';
-                const ind = document.getElementById('state-display');
-                ind.className = 'state-indicator ' + state;
-                if(state === 'ready') ind.innerText = "🟢 OUVERT (BUZZ)";
-                else if(state === 'blocked') ind.innerText = "🔴 BLOQUÉ";
-                else if(state === 'taken') ind.innerText = "🔵 BUZZÉ !";
-                else ind.innerText = "⏳ EN ATTENTE";
+                const box = document.getElementById('status-box');
+                box.className = 'state-display ' + state;
+                if(state === 'ready') box.innerText = "BUZZER OUVERT !";
+                else if(state === 'blocked') box.innerText = "BLOQUÉ";
+                else if(state === 'taken') box.innerText = "BUZZÉ !";
+                else box.innerText = "EN ATTENTE";
             });
 
-            // Joueurs
+            // Players
             roomRef.child('players').on('value', snap => {
                 renderPlayers(snap.val() || {});
             });
 
-            // Equipes
+            // Teams
             roomRef.child('teams').on('value', snap => {
                 renderTeams(snap.val() || {});
             });
 
-            // Buzzers (qui a la main)
+            // Buzzers (Highlighter celui qui buzze)
             roomRef.child('buzzers').on('value', snap => {
                 highlightBuzzer(snap.val());
             });
         }
 
-        // --- FONCTIONS ADMIN SYSTEME (v1.104) ---
-        function initAdminListener() {
-            configRef.child('minVersion').on('value', snap => {
-                const v = snap.val() || "1.000";
-                document.getElementById('sys-version').value = v;
+        // --- GESTION VERSION (v1.104) ---
+        function listenConfig() {
+            db.ref('config/minVersion').on('value', snap => {
+                const v = snap.val() || "?.???";
+                document.getElementById('current-version-display').innerText = v;
+                // Si l'input est vide, on met la version courante
+                if(document.getElementById('sys-version-input').value === "") {
+                    document.getElementById('sys-version-input').value = v;
+                }
             });
         }
 
-        function updateAppVersion() {
-            const newV = document.getElementById('sys-version').value.trim();
-            if(confirm("⚠️ ATTENTION : Cela va forcer le rechargement de TOUS les joueurs connectés vers la version " + newV + ".\n\nConfirmer ?")) {
-                configRef.update({ minVersion: newV });
+        function updateVersion() {
+            const v = document.getElementById('sys-version-input').value;
+            if(confirm("Confirmer la mise à jour forcée vers la version " + v + " ?")) {
+                db.ref('config/minVersion').set(v);
             }
         }
 
-        // --- AFFICHAGE ---
+        // --- RENDERING ---
         function renderPlayers(players) {
-            const container = document.getElementById('view-players');
-            container.innerHTML = "";
-            let count = 0;
-            
-            // Tri: Actifs d'abord, puis par score
-            const sorted = Object.entries(players).sort(([,a], [,b]) => {
+            const list = document.getElementById('list-players');
+            list.innerHTML = "";
+            const keys = Object.keys(players);
+            document.getElementById('count-players').innerText = keys.length;
+
+            // Trier : Actifs d'abord, puis par score
+            const sorted = keys.map(k => ({uid: k, ...players[k]})).sort((a,b) => {
                 if(a.active !== b.active) return b.active ? 1 : -1;
                 return b.pts - a.pts;
             });
 
-            sorted.forEach(([uid, p]) => {
-                count++;
-                const isActive = p.active !== false; // Default true
+            sorted.forEach(p => {
+                const isActive = p.active !== false;
+                const isBanned = p.banned === true;
                 const div = document.createElement('div');
                 div.className = `player-card ${isActive ? 'active' : 'inactive'}`;
-                div.id = `card-${uid}`;
+                div.id = `card-${p.uid}`; // ID pour l'effet buzz
+                
                 div.innerHTML = `
-                    <div class="player-info">
-                        <img src="${p.avatar || ''}" class="avatar-img" onerror="this.style.display='none'">
-                        <div>
-                            <div class="p-name">${p.name}</div>
-                            <small>${p.teamName !== 'Solo' ? p.teamName : 'Solo'}</small>
+                    <div style="display:flex; align-items:center; overflow:hidden;">
+                        <img src="${p.avatar || ''}" class="p-avatar" onerror="this.style.display='none'">
+                        <div class="p-info">
+                            <div class="p-name" style="${isBanned ? 'text-decoration:line-through; color:red;' : ''}">${p.name}</div>
+                            <div class="p-team">${p.teamName !== 'Solo' ? p.teamName : 'Solo'}</div>
                         </div>
                     </div>
-                    <div class="actions">
-                        <div class="p-score">${p.pts || 0}</div>
-                        <button class="mini-btn btn-green" onclick="addPoints('${uid}', 1)">+</button>
-                        <button class="mini-btn btn-red" onclick="addPoints('${uid}', -1)">-</button>
-                        <button class="mini-btn btn-grey" onclick="toggleBan('${uid}', ${p.banned})">${p.banned ? '🔓' : '🚫'}</button>
+                    <div class="p-actions">
+                        <div class="score-badge">${p.pts || 0}</div>
+                        <button class="btn-mini btn-green" onclick="updateScore('${p.uid}', 1)">+</button>
+                        <button class="btn-mini btn-red" onclick="updateScore('${p.uid}', -1)">-</button>
+                        <button class="btn-mini btn-grey" onclick="toggleBan('${p.uid}', ${isBanned})">${isBanned ? '🔓' : '🚫'}</button>
                     </div>
                 `;
-                container.appendChild(div);
+                list.appendChild(div);
             });
-            document.getElementById('count-players').innerText = count;
         }
 
         function renderTeams(teams) {
-            // (Logique simple pour l'instant, à développer si besoin)
-            document.getElementById('count-teams').innerText = Object.keys(teams).length;
+            const list = document.getElementById('list-teams');
+            list.innerHTML = "";
+            const keys = Object.keys(teams);
+            document.getElementById('count-teams').innerText = keys.length;
+
+            keys.forEach(k => {
+                const t = teams[k];
+                const div = document.createElement('div');
+                div.className = 'player-card active'; // Reuse style
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center;">
+                        <img src="${t.icon || ''}" class="p-avatar">
+                        <div class="p-info">
+                            <div class="p-name">${k}</div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
         }
 
-        function highlightBuzzer(buzzerData) {
-            // Retirer l'effet sur tous
-            document.querySelectorAll('.player-card').forEach(d => d.classList.remove('buzzed'));
+        function highlightBuzzer(val) {
+            // Reset visuals
+            document.querySelectorAll('.player-card').forEach(e => e.classList.remove('buzzed'));
             
-            if(buzzerData && buzzerData.id) {
-                const card = document.getElementById(`card-${buzzerData.id}`);
+            if (val && val.id) {
+                // Si on a un ID joueur (mode solo ou team)
+                const card = document.getElementById('card-' + val.id);
                 if(card) {
                     card.classList.add('buzzed');
                     card.scrollIntoView({behavior: "smooth", block: "center"});
                 }
+                
+                // Jouer un son (Optionnel, à voir plus tard)
             }
         }
 
-        // --- ACTIONS JEU ---
-        function setGameState(state) {
-            roomRef.child('gameState').update({ status: state });
-            if(state === 'ready') {
-                // On vide le buzzer courant
+        // --- ACTIONS ---
+        function setGameState(status) {
+            roomRef.child('gameState').update({ status: status });
+            if(status === 'ready') {
+                // On vide le buzzer quand on ouvre
                 roomRef.child('buzzers').remove();
             }
         }
 
-        function resetBuzzer() {
+        function resetBuzz() {
             roomRef.child('gameState').update({ status: 'waiting' });
             roomRef.child('buzzers').remove();
         }
 
-        function cleanBuzzers() {
-            if(confirm("Supprimer tous les joueurs inactifs ?")) {
-                // Logique de nettoyage à implémenter si besoin
-                // Pour l'instant, on reset juste l'état
-                resetBuzzer();
-            }
-        }
-
-        function addPoints(uid, val) {
+        function updateScore(uid, val) {
             roomRef.child('players/' + uid + '/pts').transaction(pts => (pts || 0) + val);
         }
 
         function toggleBan(uid, currentStatus) {
-            if(confirm(currentStatus ? "Débannir ce joueur ?" : "Bannir ce joueur de la salle ?")) {
-                roomRef.child('players/' + uid).update({ banned: !currentStatus, active: false });
+            roomRef.child('players/' + uid).update({ banned: !currentStatus, active: false });
+        }
+
+        function cleanInactive() {
+            if(confirm("Supprimer tous les joueurs inactifs ?")) {
+                roomRef.child('players').once('value', snap => {
+                    snap.forEach(child => {
+                        if(child.val().active === false) {
+                            child.ref.remove();
+                        }
+                    });
+                });
             }
         }
 
-        function closeRoom() {
-            if(confirm("Fermer définitivement la salle ?")) {
+        function deleteRoom() {
+            if(confirm("ATTENTION: Cela supprimera la salle et tous les scores. Continuer ?")) {
                 roomRef.remove();
                 db.ref('activeRooms/' + roomID).remove();
                 location.reload();
             }
         }
 
-        // --- NAVIGATION ---
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.grid-list').forEach(d => d.style.display = 'none');
-            
-            if(tab === 'players') {
-                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
-                document.getElementById('view-players').style.display = 'grid';
-            } else {
-                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
-                document.getElementById('view-teams').style.display = 'grid';
+        function openScores() {
+            window.open('scores.html?room=' + roomID, '_blank');
+        }
+        
+        function triggerPodium() {
+            if(confirm("Afficher le podium sur l'écran des scores ? (Cela met fin à la partie)")) {
+                roomRef.child('gameState').update({ status: 'endGame' });
             }
         }
 
-        function showRoomQR() {
+        // --- UI ---
+        function switchTab(target) {
+            currentTab = target;
+            document.getElementById('tab-players').className = target === 'players' ? 'tab active' : 'tab';
+            document.getElementById('tab-teams').className = target === 'teams' ? 'tab active' : 'tab';
+            
+            document.getElementById('list-players').style.display = target === 'players' ? 'grid' : 'none';
+            document.getElementById('list-teams').style.display = target === 'teams' ? 'grid' : 'none';
+        }
+
+        function showQR() {
             const url = window.location.href.replace('mj.html', 'index.html') + "?room=" + roomID;
             document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { text: url, width: 200, height: 200 });
-            document.getElementById('qr-label').innerText = "Salle : " + roomID;
-            document.getElementById('modal-qr').style.display = 'flex';
+            new QRCode(document.getElementById("qrcode"), { text: url, width: 250, height: 250 });
+            document.getElementById('qr-text').innerText = "Salle : " + roomID;
+            document.getElementById('qr-modal').style.display = 'flex';
         }
-
-        function showScores() {
-            const url = window.location.href.replace('mj.html', 'scores.html') + "?room=" + roomID;
-            window.open(url, '_blank');
-        }
-        
-        function showPodium() {
-            roomRef.child('gameState').update({ status: 'endGame' });
-        }
-
     </script>
 </body>
 </html>
