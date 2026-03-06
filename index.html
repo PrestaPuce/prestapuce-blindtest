@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.120)</title>
+    <title>Presta'Puce - Blind Test (v1.121)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -96,7 +96,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.120</div>
+    <div class="version-tag">v1.121</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -344,7 +344,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.118";
+        const CLIENT_VERSION = "1.121";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         
         function compressImage(file, maxWidth, callback) {
@@ -365,19 +365,10 @@
 
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
-            const c1 = colors[i % colors.length];
-            const c2 = colors[(i+1) % colors.length];
-            let pattern = "";
-            const mod = i % 10;
+            const c1 = colors[i % colors.length]; const c2 = colors[(i+1) % colors.length];
+            let pattern = ""; const mod = i % 10;
             if(mod === 0) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`;
             else if(mod === 1) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`;
-            else if(mod === 2) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 L0 100 Z" fill="${c2}"/>`;
-            else if(mod === 3) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="33" width="33" height="100" fill="${c2}"/>`;
-            else if(mod === 4) pattern = `<rect width="100" height="100" fill="${c1}"/><rect y="33" width="100" height="33" fill="${c2}"/>`;
-            else if(mod === 5) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="0" y="0" width="50" height="50" fill="${c2}"/><rect x="50" y="50" width="50" height="50" fill="${c2}"/>`;
-            else if(mod === 6) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 100 L50 0 L100 100 Z" fill="${c2}"/>`;
-            else if(mod === 7) pattern = `<rect width="100" height="100" fill="${c1}"/><circle cx="50" cy="50" r="30" fill="${c2}"/>`;
-            else if(mod === 8) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L50 50 L0 100 L50 50 L100 0" stroke="${c2}" stroke-width="10"/>`;
             else pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`;
             return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${pattern}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`;
         }
@@ -503,14 +494,11 @@
                     roomRef.child('players/' + myUserID).once('value', snapUser => {
                         if(snapUser.exists()) {
                             const data = snapUser.val();
-                            
-                            // CHECK BANNI À L'ENTRÉE (v1.118)
                             if(data.banned) { 
                                 alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter.");
                                 window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
                                 return; 
                             }
-                            
                             player = { pseudo: data.name, avatar: data.avatar, team: data.teamName || "Solo", teamIcon: data.teamIcon || "" };
                             showReconnectScreen(); 
                             return;
@@ -529,15 +517,11 @@
             navigateTo('step-reconnect');
         }
 
-        // --- CORRECTION BUG "UNDEFINED" (v1.118) ---
         function resumeGame() {
             roomRef.child('players/' + myUserID).once('value', snap => {
                 if(snap.exists()) {
-                    // Joueur existe toujours (juste inactif) -> On réactive
                     snap.ref.update({ active: true });
                 } else {
-                    // Joueur supprimé par le MJ pendant l'écran d'attente
-                    // On recrée proprement avec les données locales
                     roomRef.child('players/' + myUserID).set({
                         name: player.pseudo,
                         avatar: player.avatar,
@@ -558,6 +542,9 @@
 
         function resetAndNewPlayer() {
             if(confirm("Attention : Vous allez perdre votre progression actuelle sur ce téléphone et un nouveau joueur sera créé.")) {
+                if(roomRef && myUserID) {
+                    roomRef.child('players/' + myUserID).update({active: false});
+                }
                 myUserID = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
                 localStorage.setItem('buzz_userId', myUserID);
                 localStorage.removeItem('presta_player_session');
@@ -575,13 +562,21 @@
                 player.avatar = p.avatar;
                 navigateTo('step-mode');
             } else {
+                if(roomRef && myUserID) {
+                    roomRef.child('players/' + myUserID).update({active: false});
+                }
+                myUserID = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('buzz_userId', myUserID);
                 localStorage.removeItem('buzz_lastProfile');
+                player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
                 navigateTo('step-welcome');
             }
         }
 
         function validatePseudo() {
             const val = document.getElementById('input-pseudo').value.trim();
+            const regex = /^[a-zA-Z0-9À-ÿ\s\-_]+$/;
+            if (!regex.test(val)) return alert("Caractères autorisés : Lettres, Chiffres, Espaces, Tirets (-), Underscore (_).");
             if(val.length < 2) return alert("Pseudo trop court !");
             roomRef.child('players').once('value', snap => {
                 const players = snap.val() || {};
@@ -723,11 +718,9 @@
             roomRef.child('buzzers').off(); roomRef.child('gameState').off(); roomRef.child('players/' + myUserID).off();
             roomRef.on('value', snap => { if(!snap.exists()) { handleExit("🛑 La partie a été clôturée.", true); } });
             
-            // --- ÉCOUTEUR JOUEUR AMÉLIORÉ (v1.118) ---
             roomRef.child('players/' + myUserID).on('value', snap => { 
                 const d = snap.val(); 
                 
-                // 1. SUPPRESSION DEFINITIVE
                 if(!d) {
                     if(roomRef) roomRef.off();
                     alert("Votre compte a été supprimé définitivement.");
@@ -736,7 +729,6 @@
                     return;
                 }
 
-                // 2. BANNI - MESSAGE MODIFIÉ (v1.118)
                 if(d.banned) {
                     if(roomRef) roomRef.off();
                     alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter.");
@@ -744,15 +736,13 @@
                     return;
                 }
 
-                // 3. INACTIF / PAUSE
                 if(d.active === false) {
                     if(roomRef) roomRef.off();
-                    alert(`⏸️ Vous avez été désactivé par ${mjName}.\n\nSi c'est une erreur, vous pouvez vous reconnecter à la salle.\n\nVous retrouverez vos données et votre score tant que ${mjName} ne vous supprime pas définitivement`);
+                    alert(`⏸️ Vous avez été désactivé par ${mjName}.\n\nSi c'est une erreur, vous pouvez vous reconnecter à la salle.`);
                     window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
                     return;
                 }
 
-                // 4. ACTIF
                 document.getElementById('game-score').innerText = d.pts || 0; 
             });
 
