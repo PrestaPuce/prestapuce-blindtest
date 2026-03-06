@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.106)</title>
+    <title>Presta'Puce - Blind Test (v1.107)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -90,7 +90,6 @@
         .qr-card, .settings-content { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 320px; box-sizing: border-box; }
         .settings-btn { display: block; width: 100%; padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: white; font-size: 1rem; cursor: pointer; text-align: left; transition: 0.2s; }
         
-        /* Boutons spéciaux Menu Quitter (v1.106) */
         .btn-save-quit { border: 1px solid var(--success); color: var(--success); }
         .btn-change-room { border: 1px solid var(--accent); color: var(--accent); }
         .btn-exit-def { background: rgba(231, 76, 60, 0.2); border: 1px solid var(--danger); color: var(--danger); }
@@ -98,12 +97,12 @@
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
         
         /* Reuse Profile Overlay */
-        #reuse-avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 15px auto; border: 3px solid var(--accent); }
+        #reuse-avatar-preview, #reconnect-avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 15px auto; border: 3px solid var(--accent); }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.106</div>
+    <div class="version-tag">v1.107</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -114,16 +113,30 @@
             <div class="screen-content">
                 <h1>CODE SALLE</h1>
                 <p class="desc">Entre le code ou scanne le QR de l'écran.</p>
-                
                 <div id="reader"></div>
-                
                 <button class="btn-scan" onclick="startQRScan()">
                     <svg style="width:24px;height:24px;fill:white" viewBox="0 0 24 24"><path d="M3 5v4h2V5h4V3H5c-1.1 0-2 .9-2 2zm2 10H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm14 4h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zm0-16h-4v2h4v4h2V5c0-1.1-.9-2-2-2z"/></svg>
                     Scanner un QR Code
                 </button>
-
                 <input type="number" id="input-room" placeholder="EX: 1234">
                 <button class="btn-main" onclick="validateRoomStep()">Rejoindre</button>
+            </div>
+        </div>
+
+        <div id="step-reconnect" class="step-screen">
+            <div class="screen-content">
+                <h1 style="font-size: 2rem;">TE REVOILÀ !</h1>
+                <img id="reconnect-avatar-preview" src="">
+                <h2 id="reconnect-pseudo-display" style="color:white; margin:10px 0;"></h2>
+                <p class="desc" style="margin-bottom:30px;">Ton score et ton équipe t'attendent.</p>
+                
+                <button class="btn-main" onclick="resumeGame()">RETOURNER AU BUZZER</button>
+                <button class="btn-secondary" onclick="modifyProfile()" style="margin-top:15px;">✏️ Modifier mon Profil</button>
+                
+                <div style="margin-top:40px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px; width:100%; text-align:center;">
+                    <p style="color:#7f8c8d; font-size:0.9rem; margin-bottom:10px;">Ce n'est pas toi ?</p>
+                    <button class="btn-secondary" style="border-color:var(--danger); color:var(--danger);" onclick="resetAndNewPlayer()">Nouveau Joueur</button>
+                </div>
             </div>
         </div>
 
@@ -428,7 +441,6 @@
                 (decodedText) => {
                     html5QrCode.stop().then(() => {
                         document.getElementById('reader').style.display = 'none';
-                        // Extraction du paramètre room=XXXX
                         let match = decodedText.match(/[?&]room=([^&]+)/);
                         if (match) {
                             document.getElementById('input-room').value = match[1];
@@ -463,7 +475,7 @@
                     roomRef.child('mjLink').once('value', s => { if(s.exists()) mjLink = s.val(); });
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
                     
-                    // CHECK PROFIL REUSE
+                    // GESTION CHANGEMENT SALLE (REUSE)
                     const savedProfile = localStorage.getItem('buzz_lastProfile');
                     if(!autoLogin && savedProfile) {
                         try {
@@ -483,17 +495,56 @@
                         if(snapUser.exists()) {
                             const data = snapUser.val();
                             if(data.banned) { showBannedScreen(); return; }
-                            if(autoLogin || confirm(`Te revoilà ${data.name} ! Reprendre ?`)) {
-                                player = { pseudo: data.name, avatar: data.avatar, team: data.teamName || "Solo", teamIcon: data.teamIcon || "" };
-                                roomRef.child('players/' + myUserID).update({active:true});
-                                launchGame(true);
-                                return;
-                            }
+                            
+                            // MODIFICATION v1.107 : Écran de Reconnexion personnalisé
+                            player = { pseudo: data.name, avatar: data.avatar, team: data.teamName || "Solo", teamIcon: data.teamIcon || "" };
+                            showReconnectScreen(); 
+                            return;
                         }
                         navigateTo('step-welcome');
                     });
                 } else { alert("Salle introuvable !"); navigateTo('step-room'); }
             });
+        }
+        
+        // --- NOUVELLES FONCTIONS v1.107 ---
+        
+        function showReconnectScreen() {
+            document.getElementById('reconnect-pseudo-display').innerText = player.pseudo;
+            const avImg = document.getElementById('reconnect-avatar-preview');
+            if(player.avatar && player.avatar.length > 20) { avImg.src = player.avatar; avImg.style.display='block'; }
+            else { avImg.style.display='none'; }
+            navigateTo('step-reconnect');
+        }
+
+        function resumeGame() {
+            // Le joueur a confirmé, on le repasse en actif et on lance
+            roomRef.child('players/' + myUserID).update({active:true});
+            launchGame(true);
+        }
+
+        function modifyProfile() {
+            isEditing = true;
+            document.getElementById('input-pseudo').value = player.pseudo;
+            navigateTo('step-pseudo');
+        }
+
+        function resetAndNewPlayer() {
+            if(confirm("Attention : Vous allez perdre votre progression actuelle sur ce téléphone et un nouveau joueur sera créé.")) {
+                // 1. Générer NOUVEL ID (Crucial !)
+                myUserID = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('buzz_userId', myUserID);
+                
+                // 2. Nettoyer session locale
+                localStorage.removeItem('presta_player_session');
+                localStorage.removeItem('buzz_lastProfile');
+                
+                // 3. Reset objet player
+                player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
+                
+                // 4. Redirection
+                navigateTo('step-welcome');
+            }
         }
 
         function handleProfileReuse(reuse) {
@@ -502,7 +553,6 @@
                 const p = JSON.parse(localStorage.getItem('buzz_lastProfile'));
                 player.pseudo = p.pseudo;
                 player.avatar = p.avatar;
-                // On saute direct au choix mode
                 navigateTo('step-mode');
             } else {
                 localStorage.removeItem('buzz_lastProfile');
@@ -586,7 +636,6 @@
             if(!isReconnect) {
                 roomRef.child('players/' + myUserID).set({ name: player.pseudo, pts: 0, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon, active: true, banned: false });
                 localStorage.setItem('presta_player_session', JSON.stringify(player));
-                // Sauvegarde pour réutilisation future
                 localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar}));
             }
             updateGameHeader();
@@ -629,20 +678,19 @@
             if(redirect && mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; } else { location.reload(); }
         }
 
-        // --- GESTION SORTIE (v1.106) ---
         function setInactiveAndAction(callback) {
             if(roomRef && myUserID) {
-                // On met active:false avant toute chose
                 roomRef.child('players/' + myUserID).update({ active: false })
                 .then(() => { callback(); })
-                .catch(() => { callback(); }); // Fallback si erreur réseau
+                .catch(() => { callback(); }); 
             } else { callback(); }
         }
 
+        // --- MISE À JOUR v1.107 : TEXTES & ACTIONS ---
         function handleExitAction(action) {
             if(action === 'save') {
                 alert("La création de compte arrive très bientôt !");
-                if(confirm("Voulez-vous vraiment quitter la partie maintenant ?")) {
+                if(confirm("Tant que l'animateur n'a pas fermé la salle, vous pourrez revenir et récupérer votre score.\n\nVoulez-vous quitter ?")) {
                     setInactiveAndAction(() => {
                         window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
                     });
@@ -651,7 +699,6 @@
             else if(action === 'change') {
                 if(confirm("Quitter cette salle pour en rejoindre une autre ?\nVotre profil sera conservé.")) {
                     setInactiveAndAction(() => {
-                        // On garde buzz_lastProfile mais on vire la session de salle
                         localStorage.removeItem('presta_player_session');
                         localStorage.removeItem('buzz_lastRoom');
                         location.reload();
@@ -661,7 +708,7 @@
             else if(action === 'exit') {
                 if(confirm("⚠️ Tout effacer et quitter définitivement ?")) {
                     setInactiveAndAction(() => {
-                        localStorage.clear(); // On efface tout, même l'ID
+                        localStorage.clear(); 
                         window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
                     });
                 }
