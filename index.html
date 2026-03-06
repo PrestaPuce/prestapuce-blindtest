@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.108)</title>
+    <title>Presta'Puce - Blind Test (v1.109)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -93,6 +93,8 @@
         .btn-save-quit { border: 1px solid var(--success); color: var(--success); }
         .btn-change-room { border: 1px solid var(--accent); color: var(--accent); }
         .btn-exit-def { background: rgba(231, 76, 60, 0.2); border: 1px solid var(--danger); color: var(--danger); }
+        /* Nouveau bouton Retour Buzzer (v1.109) */
+        .btn-return-game { background: var(--success); color: white; font-weight: bold; margin-bottom: 20px; text-align: center; justify-content: center; border: none; }
         
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
         
@@ -102,7 +104,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.108</div>
+    <div class="version-tag">v1.109</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -306,10 +308,14 @@
     <div id="overlay-settings" class="overlay-full" onclick="this.style.display='none'">
         <div class="settings-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--accent);">MODIFIER PROFIL</h2>
+            
+            <button class="settings-btn btn-return-game" onclick="finishEdit(false)">⬅️ RETOUR AU BUZZER</button>
+            
+            <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+
             <button class="settings-btn" onclick="editStep('step-pseudo')">✏️ Modifier mon Pseudo</button>
             <button class="settings-btn" onclick="editStep('step-avatar')">📷 Changer d'Avatar</button>
             <button class="settings-btn" onclick="editStep('step-mode')">🛡️ Changer Mode (Solo/Team)</button>
-            <button class="btn-secondary" onclick="document.getElementById('overlay-settings').style.display='none'">Annuler</button>
         </div>
     </div>
 
@@ -422,7 +428,7 @@
         }
 
         function goBack() {
-            if(isEditing) { finishEdit(); return; }
+            if(isEditing) { finishEdit(true); return; } // Retourne au menu settings
             if(stepHistory.length === 0) return;
             navigateTo(stepHistory.pop(), false);
         }
@@ -475,7 +481,6 @@
                     roomRef.child('mjLink').once('value', s => { if(s.exists()) mjLink = s.val(); });
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
                     
-                    // GESTION CHANGEMENT SALLE (REUSE)
                     const savedProfile = localStorage.getItem('buzz_lastProfile');
                     if(!autoLogin && savedProfile) {
                         try {
@@ -495,8 +500,6 @@
                         if(snapUser.exists()) {
                             const data = snapUser.val();
                             if(data.banned) { showBannedScreen(); return; }
-                            
-                            // MODIFICATION v1.107 : Écran de Reconnexion personnalisé
                             player = { pseudo: data.name, avatar: data.avatar, team: data.teamName || "Solo", teamIcon: data.teamIcon || "" };
                             showReconnectScreen(); 
                             return;
@@ -507,8 +510,6 @@
             });
         }
         
-        // --- NOUVELLES FONCTIONS v1.107 ---
-        
         function showReconnectScreen() {
             document.getElementById('reconnect-pseudo-display').innerText = player.pseudo;
             const avImg = document.getElementById('reconnect-avatar-preview');
@@ -518,31 +519,21 @@
         }
 
         function resumeGame() {
-            // Le joueur a confirmé, on le repasse en actif et on lance
             roomRef.child('players/' + myUserID).update({active:true});
             launchGame(true);
         }
 
-        // --- CORRECTION v1.108 : MODIFICATION FLUIDE ---
         function modifyProfile() {
-            // Au lieu d'envoyer sur le pseudo, on ouvre le menu settings directement
             document.getElementById('overlay-settings').style.display = 'flex';
         }
 
         function resetAndNewPlayer() {
             if(confirm("Attention : Vous allez perdre votre progression actuelle sur ce téléphone et un nouveau joueur sera créé.")) {
-                // 1. Générer NOUVEL ID (Crucial !)
                 myUserID = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
                 localStorage.setItem('buzz_userId', myUserID);
-                
-                // 2. Nettoyer session locale
                 localStorage.removeItem('presta_player_session');
                 localStorage.removeItem('buzz_lastProfile');
-                
-                // 3. Reset objet player
                 player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
-                
-                // 4. Redirection
                 navigateTo('step-welcome');
             }
         }
@@ -560,6 +551,7 @@
             }
         }
 
+        // --- VALIDATION FUNCTIONS (v1.109: Call finishEdit(true)) ---
         function validatePseudo() {
             const val = document.getElementById('input-pseudo').value.trim();
             if(val.length < 2) return alert("Pseudo trop court !");
@@ -570,7 +562,12 @@
                     if(uid !== myUserID && players[uid].name && players[uid].name.toLowerCase() === val.toLowerCase()) nameTaken = true;
                 });
                 if(nameTaken) return alert("Ce pseudo est déjà pris.");
-                if(isEditing) { roomRef.child('players/' + myUserID).update({ name: val }); player.pseudo = val; finishEdit(); return; }
+                if(isEditing) { 
+                    roomRef.child('players/' + myUserID).update({ name: val }); 
+                    player.pseudo = val; 
+                    finishEdit(true); // RESTE DANS LE MENU
+                    return; 
+                }
                 player.pseudo = val;
                 navigateTo('step-avatar');
             });
@@ -579,8 +576,23 @@
         function showAvatarGallery() { document.getElementById('avatar-choices').style.display = 'none'; document.getElementById('avatar-gallery-view').style.display = 'flex'; }
         function handleFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectAvatar(base64); }); } }
         function renderAvatarGrid() { const g=document.getElementById('avatar-grid'); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='grid-item grid-item-emoji'; d.innerText=a; d.onclick=()=>selectAvatar(a); g.appendChild(d); }); }
-        function selectAvatar(av) { player.avatar = av; if(isEditing) { roomRef.child('players/' + myUserID).update({avatar: av}); finishEdit(); } else navigateTo('step-mode'); }
-        function selectMode(mode) { player.team = mode; player.teamIcon = ""; if(isEditing) { roomRef.child('players/' + myUserID).update({teamName: "Solo", teamIcon: ""}); finishEdit(); } else { if(mode === 'Solo') showRecap(); else goToTeamAction(); } }
+        
+        function selectAvatar(av) { 
+            player.avatar = av; 
+            if(isEditing) { 
+                roomRef.child('players/' + myUserID).update({avatar: av}); 
+                finishEdit(true); // RESTE DANS LE MENU
+            } else navigateTo('step-mode'); 
+        }
+        
+        function selectMode(mode) { 
+            player.team = mode; player.teamIcon = ""; 
+            if(isEditing) { 
+                roomRef.child('players/' + myUserID).update({teamName: "Solo", teamIcon: ""}); 
+                finishEdit(true); // RESTE DANS LE MENU
+            } else { if(mode === 'Solo') showRecap(); else goToTeamAction(); } 
+        }
+        
         function goToTeamAction() { navigateTo('step-team-action'); }
         function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); renderTeamCrestPicker(); } 
         function goToTeamJoin() { navigateTo('step-team-join'); loadTeamsList(); }
@@ -601,7 +613,14 @@
             });
         }
 
-        function joinTeam(name, icon) { player.team = name; player.teamIcon = icon; if(isEditing) { roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon}); finishEdit(); } else showRecap(); }
+        function joinTeam(name, icon) { 
+            player.team = name; player.teamIcon = icon; 
+            if(isEditing) { 
+                roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon}); 
+                finishEdit(true); // RESTE DANS LE MENU
+            } else showRecap(); 
+        }
+        
         function toggleCreateUI(show) { if(show) { document.getElementById('team-crest-choices').style.display = 'flex'; document.getElementById('team-crest-gallery').style.display = 'none'; document.getElementById('team-preview').style.display = 'none'; selectedTeamCrest = ""; } }
         function showTeamGallery() { document.getElementById('team-crest-choices').style.display = 'none'; document.getElementById('team-crest-gallery').style.display = 'flex'; }
         function handleTeamFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectedTeamCrest=base64; showTeamPreview(); }); } }
@@ -622,18 +641,25 @@
         function confirmQuit() { document.getElementById('overlay-quit').style.display = 'flex'; }
         function editStep(stepId) { isEditing = true; document.getElementById('overlay-settings').style.display = 'none'; if(stepId === 'step-pseudo') document.getElementById('input-pseudo').value = player.pseudo; navigateTo(stepId); }
         
-        // --- CORRECTION v1.108 : FINISHEDIT ---
-        function finishEdit() { 
-            isEditing = false;
-            // 1. Sauvegarde locale
+        // --- LOGIQUE DE BOUCLE SETTINGS (v1.109) ---
+        function finishEdit(stayInMenu = false) { 
+            // 1. Sauvegarde & Update
             localStorage.setItem('presta_player_session', JSON.stringify(player));
             localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar}));
-            // 2. Mise à jour de l'affichage
             updateGameHeader();
-            // 3. Activation Firebase (Important !)
             if(roomRef && myUserID) roomRef.child('players/' + myUserID).update({active:true});
-            // 4. Navigation
-            navigateTo('step-game', false); 
+
+            if(stayInMenu) {
+                // 2A. On reste dans le menu : On ferme l'étape spécifique et on rouvre l'overlay
+                document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
+                navigateTo('step-game', false); // Le jeu passe en fond
+                document.getElementById('overlay-settings').style.display = 'flex'; // Le menu revient au premier plan
+            } else {
+                // 2B. On quitte : On ferme tout et on va au jeu
+                isEditing = false;
+                document.getElementById('overlay-settings').style.display = 'none';
+                navigateTo('step-game', false); 
+            }
         }
 
         function showRecap() {
