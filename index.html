@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.109)</title>
+    <title>Presta'Puce - Blind Test (v1.112)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -93,7 +93,7 @@
         .btn-save-quit { border: 1px solid var(--success); color: var(--success); }
         .btn-change-room { border: 1px solid var(--accent); color: var(--accent); }
         .btn-exit-def { background: rgba(231, 76, 60, 0.2); border: 1px solid var(--danger); color: var(--danger); }
-        /* Nouveau bouton Retour Buzzer (v1.109) */
+        /* Nouveau bouton Retour Buzzer */
         .btn-return-game { background: var(--success); color: white; font-weight: bold; margin-bottom: 20px; text-align: center; justify-content: center; border: none; }
         
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
@@ -104,7 +104,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.109</div>
+    <div class="version-tag">v1.112</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -358,9 +358,11 @@
     </div>
 
     <script>
+        // --- CONSTANTE VERSION POUR LE CACHE BUSTING (v1.112) ---
+        const CLIENT_VERSION = "1.112";
+
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","👸","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         
-        /* Outils image et SVG */
         function compressImage(file, maxWidth, callback) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -396,9 +398,22 @@
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let selectedTeamCrest = "", isEditing = false, stepHistory = [];
         let mjName = "l'Animateur", mjLink = "";
-        let html5QrCode = null; // Scanner
+        let html5QrCode = null;
 
         window.onload = () => {
+            // --- VERIFICATION VERSION (v1.112) ---
+            db.ref('config/minVersion').once('value', snap => {
+                const serverVer = snap.val();
+                if(serverVer && serverVer !== CLIENT_VERSION) {
+                    // Forcer la mise à jour par cache busting
+                    console.log("Nouvelle version détectée:", serverVer);
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('v', serverVer);
+                    url.searchParams.set('t', Date.now());
+                    window.location.href = url.toString();
+                }
+            });
+
             let storedId = localStorage.getItem('buzz_userId');
             if (!storedId) {
                 storedId = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
@@ -551,7 +566,7 @@
             }
         }
 
-        // --- VALIDATION FUNCTIONS (v1.109: Call finishEdit(true)) ---
+        // --- VALIDATION FUNCTIONS (v1.112: Call finishEdit(true)) ---
         function validatePseudo() {
             const val = document.getElementById('input-pseudo').value.trim();
             if(val.length < 2) return alert("Pseudo trop court !");
@@ -641,21 +656,23 @@
         function confirmQuit() { document.getElementById('overlay-quit').style.display = 'flex'; }
         function editStep(stepId) { isEditing = true; document.getElementById('overlay-settings').style.display = 'none'; if(stepId === 'step-pseudo') document.getElementById('input-pseudo').value = player.pseudo; navigateTo(stepId); }
         
-        // --- LOGIQUE DE BOUCLE SETTINGS (v1.109) ---
+        // --- LOGIQUE DE BOUCLE SETTINGS (v1.112) ---
         function finishEdit(stayInMenu = false) { 
-            // 1. Sauvegarde & Update
+            // 1. Sauvegarde locale
             localStorage.setItem('presta_player_session', JSON.stringify(player));
             localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar}));
+            // 2. Mise à jour de l'affichage
             updateGameHeader();
+            // 3. Activation Firebase (Important !)
             if(roomRef && myUserID) roomRef.child('players/' + myUserID).update({active:true});
 
             if(stayInMenu) {
-                // 2A. On reste dans le menu : On ferme l'étape spécifique et on rouvre l'overlay
+                // 2A. On reste dans le menu
                 document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
                 navigateTo('step-game', false); // Le jeu passe en fond
                 document.getElementById('overlay-settings').style.display = 'flex'; // Le menu revient au premier plan
             } else {
-                // 2B. On quitte : On ferme tout et on va au jeu
+                // 2B. On quitte
                 isEditing = false;
                 document.getElementById('overlay-settings').style.display = 'none';
                 navigateTo('step-game', false); 
