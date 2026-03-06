@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Scores - Presta'Puce</title>
+    <title>Scores - Presta'Puce (v1.103)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -180,7 +180,7 @@
             </a>
             <div class="title-group">
                 <h1>SALLE : <span id="room-title" class="room-highlight">----</span></h1>
-                <div class="version-text">v1.056</div>
+                <div class="version-text">v1.103</div>
             </div>
         </div>
     </header>
@@ -229,18 +229,22 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
+        // --- RESTAURATION DE LA LOGIQUE DE DEMANDE DE SALLE (v1.103) ---
         const urlParams = new URLSearchParams(window.location.search);
         let roomID = urlParams.get('room');
-        if (!roomID) { roomID = prompt("Entrez le nom de la salle :"); if (roomID) window.location.search = "?room=" + roomID; }
+        if (!roomID) { 
+            roomID = prompt("Entrez le nom de la salle :"); 
+            if (roomID) window.location.search = "?room=" + roomID; 
+        }
         
         document.getElementById('room-title').innerText = roomID;
-        const roomRef = db.ref('roomsData/' + roomID);
+        
+        // MODIFICATION v1.103 : 'rooms/' au lieu de 'roomsData/'
+        const roomRef = db.ref('rooms/' + roomID);
         
         const currentPath = window.location.href.split('?')[0].replace('scores', 'index');
         const playURL = currentPath + "?room=" + roomID;
         
-        // GÉNÉRATION QR CODE HAUTE QUALITÉ (250px)
-        // Mais affiché petit via CSS (width: 90px)
         new QRCode(document.getElementById("qrcode"), { 
             text: playURL, 
             width: 250, 
@@ -262,7 +266,7 @@
             }
         }
 
-        let scoresData = {}, teamsData = {}, currentBuzzer = null;
+        let scoresData = {}, teamsData = {}, currentBuzzer = null, currentBuzzerId = null;
         let buzzHistory = [];
         let isGameFinished = false;
 
@@ -299,7 +303,6 @@
             if(e.key.toLowerCase() === 'f') toggleFullScreen();
         });
 
-        // Auto-Hide du bouton
         let uiTimer;
         document.onmousemove = () => {
             document.getElementById('btn-fullscreen').classList.remove('hide-ui');
@@ -324,7 +327,7 @@
             document.getElementById('main-view').style.display = 'none';
             document.getElementById('qr-box').style.display = 'none';
             document.getElementById('btn-return-podium').style.display = 'none';
-            document.getElementById('blur-overlay').style.display = 'none'; // Cacher l'overlay zoom si actif
+            document.getElementById('blur-overlay').style.display = 'none';
             
             const podiumScreen = document.getElementById('podium-screen');
             podiumScreen.style.display = 'flex';
@@ -367,14 +370,16 @@
             document.getElementById('podium-screen').style.display = 'none';
             document.getElementById('main-view').style.display = 'grid';
             document.getElementById('qr-box').style.display = 'block';
-            document.getElementById('blur-overlay').style.display = 'block'; // Réactiver l'élément overlay (invisible par défaut)
+            document.getElementById('blur-overlay').style.display = 'block';
             if (isGameFinished) document.getElementById('btn-return-podium').style.display = 'block';
             else document.getElementById('btn-return-podium').style.display = 'none';
         }
 
         function calculateRanking() {
             const listEquipes = Object.keys(teamsData);
-            const allPlayers = Object.entries(scoresData).map(([k,v]) => ({name: k, ...v}));
+            // MODIFICATION v1.103 : Conversion Objet {UID: Data} en Array [Data avec name]
+            const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
+            
             let rankingMap = new Map();
 
             listEquipes.forEach(tName => { rankingMap.set("TEAM_" + tName, { name: tName, pts: 0, icon: teamsData[tName].icon, isTeam: true, count: 0 }); });
@@ -400,13 +405,16 @@
             const pList = document.getElementById('player-list'); pList.innerHTML = "";
             const gList = document.getElementById('global-list'); gList.innerHTML = "";
             const listEquipes = Object.keys(teamsData);
-            const allPlayers = Object.entries(scoresData).map(([k,v]) => ({name: k, ...v}));
+            
+            // MODIFICATION v1.103 : Gestion UID
+            const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
 
             allPlayers.sort((a, b) => {
                 if (a.active === false && b.active !== false) return 1;
                 if (a.active !== false && b.active === false) return -1;
-                if (a.name === currentBuzzer) return -1;
-                if (b.name === currentBuzzer) return 1;
+                // Check ID pour buzzer
+                if (a.uid === currentBuzzerId) return -1;
+                if (b.uid === currentBuzzerId) return 1;
                 let indexA = buzzHistory.indexOf(a.name);
                 let indexB = buzzHistory.indexOf(b.name);
                 if (indexA !== -1 && indexB !== -1) return indexB - indexA;
@@ -415,7 +423,8 @@
                 return 0;
             }).forEach(p => {
                 const isInactive = p.active === false;
-                const buzzedClass = (p.name === currentBuzzer) ? "last-buzzed" : "";
+                // Highlight basé sur l'ID
+                const buzzedClass = (p.uid === currentBuzzerId) ? "last-buzzed" : "";
                 const inactiveClass = isInactive ? "inactive-card" : "";
                 const enEquipe = p.teamName && listEquipes.includes(p.teamName);
                 const labelSub = enEquipe ? p.teamName : "Solo";
@@ -446,7 +455,10 @@
         
         roomRef.child('buzzers').on('value', snap => {
             const val = snap.val();
+            // MODIFICATION v1.103 : Récupération ID + Pseudo
             currentBuzzer = val ? val.pseudo : null;
+            currentBuzzerId = val ? val.id : null;
+            
             if (currentBuzzer) {
                 if (!buzzHistory.includes(currentBuzzer)) { buzzHistory.push(currentBuzzer); } 
                 else { buzzHistory = buzzHistory.filter(name => name !== currentBuzzer); buzzHistory.push(currentBuzzer); }
@@ -454,7 +466,8 @@
             updateDisplay();
         });
 
-        roomRef.child('scores').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
+        // MODIFICATION v1.103 : Écoute 'players' au lieu de 'scores'
+        roomRef.child('players').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
         roomRef.child('teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
 
         function toggleHOF() {
