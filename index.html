@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.121)</title>
+    <title>Presta'Puce - Blind Test (v1.123)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -25,10 +25,24 @@
         .screen-content { flex-grow: 1; width: 100%; overflow-y: auto; padding: 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .content-top { justify-content: flex-start !important; }
         
+        /* LAYOUT ACCUEIL (v1.123) */
+        .welcome-layout { justify-content: flex-start !important; padding-top: 12vh !important; }
+        
         h1 { color: var(--accent); font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 10px 0; text-transform: uppercase; line-height: 1.1; }
         h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin: 0 0 15px 0; font-weight: normal; color: white; }
         p.desc { font-size: clamp(0.9rem, 3.5vw, 1.1rem); color: #bdc3c7; margin-bottom: 20px; line-height: 1.5; max-width: 500px; font-weight: 500; }
         
+        /* STYLES TITRES ACCUEIL */
+        .welcome-title-main { color: white; margin-bottom: 5px; font-weight: 800; letter-spacing: 2px; }
+        .welcome-subtitle { color: #bdc3c7; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px; }
+        .welcome-mj-name { color: var(--accent); font-size: clamp(2rem, 7vw, 3.5rem); font-weight: 900; margin-bottom: 25px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase; line-height: 1.1; }
+
+        /* EFFET TYPEWRITER */
+        .typing-container { min-height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        .typing-text { font-size: 1.1rem; color: white; font-weight: 500; display: inline; }
+        .cursor { display: inline-block; width: 2px; height: 1.2rem; background-color: var(--accent); animation: blink 1s infinite; margin-left: 2px; vertical-align: middle; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
         input[type="text"], input[type="number"] { width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px; flex-shrink: 0; }
         input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
         
@@ -92,11 +106,15 @@
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
         
         #reuse-avatar-preview, #reconnect-avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 15px auto; border: 3px solid var(--accent); }
+        
+        /* CORRECTION LISIBILITE QR (v1.123) */
+        .qr-card h3 { color: white !important; }
+        .qr-card p { color: white !important; font-size: 1.1rem; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.121</div>
+    <div class="version-tag">v1.123</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -135,11 +153,18 @@
         </div>
 
         <div id="step-welcome" class="step-screen">
-            <div class="screen-content">
-                <img id="mj-logo-welcome" src="" style="width:100px; border-radius:15px; margin-bottom:20px; display:none;">
-                <h1>BIENVENUE !</h1>
-                <p class="desc">Ton téléphone va devenir ton buzzer ! 🎧<br>Sois le plus rapide pour gagner !</p>
-                <button class="btn-main" onclick="navigateTo('step-auth')">C'est parti ! 🚀</button>
+            <div class="screen-content welcome-layout">
+                <img id="mj-logo-welcome" src="" style="width:140px; border-radius:15px; margin-bottom:20px; display:none; box-shadow: 0 5px 20px rgba(0,0,0,0.5);">
+                
+                <h1 class="welcome-title-main">BIENVENUE !</h1>
+                <p class="welcome-subtitle">DANS LE BLIND TEST DE</p>
+                <h1 id="welcome-mj-name" class="welcome-mj-name">...</h1>
+                
+                <div class="typing-container">
+                    <div id="typing-text" class="typing-text"></div><div class="cursor"></div>
+                </div>
+                
+                <button class="btn-main" onclick="navigateTo('step-auth')" style="width:100%; max-width:320px; margin-top:20px; font-size:1.3rem; padding:18px;">C'est parti ! 🚀</button>
             </div>
         </div>
 
@@ -344,7 +369,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.121";
+        const CLIENT_VERSION = "1.123";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         
         function compressImage(file, maxWidth, callback) {
@@ -384,6 +409,29 @@
         let mjName = "l'Animateur", mjLink = "";
         let html5QrCode = null;
 
+        // ANIMATION TYPEWRITER (v1.123)
+        const phrases = ["Transforme ton mobile en buzzer ! 🎧", "Joue en Solo pour la gloire ! 👤", "Rejoins une Équipe ! 🤝", "Ou crée ton propre Clan ! 🛡️"];
+        let pIndex = 0, charIndex = 0, isDeleting = false;
+        function typeEffect() {
+            const currentPhrase = phrases[pIndex];
+            const textEl = document.getElementById('typing-text');
+            if(!textEl) return;
+            
+            if (isDeleting) {
+                textEl.innerText = currentPhrase.substring(0, charIndex--);
+            } else {
+                textEl.innerText = currentPhrase.substring(0, charIndex++);
+            }
+
+            let speed = isDeleting ? 30 : 50;
+            if (!isDeleting && charIndex === currentPhrase.length + 1) {
+                speed = 2000; isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false; pIndex = (pIndex + 1) % phrases.length; speed = 500;
+            }
+            setTimeout(typeEffect, speed);
+        }
+
         window.onload = () => {
             db.ref('config/minVersion').once('value', snap => {
                 const serverVer = snap.val();
@@ -401,6 +449,9 @@
                 localStorage.setItem('buzz_userId', storedId);
             }
             myUserID = storedId;
+
+            // Start Typing Effect immediately if on welcome screen
+            typeEffect();
 
             const urlParams = new URLSearchParams(window.location.search);
             const r = urlParams.get('room');
@@ -472,7 +523,13 @@
                         autoLogin = false;
                     }
                     
-                    roomRef.child('mjName').once('value', s => { if(s.exists()) mjName = s.val(); });
+                    roomRef.child('mjName').once('value', s => { 
+                        if(s.exists()) {
+                            mjName = s.val();
+                            document.getElementById('welcome-mj-name').innerText = mjName.toUpperCase();
+                        }
+                    });
+                    
                     roomRef.child('mjLink').once('value', s => { if(s.exists()) mjLink = s.val(); });
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
                     
