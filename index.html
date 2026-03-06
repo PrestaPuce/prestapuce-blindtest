@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.116)</title>
+    <title>Presta'Puce - Blind Test (v1.118)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -96,7 +96,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.116</div>
+    <div class="version-tag">v1.118</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -337,8 +337,14 @@
     <audio id="sound-win" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Buzzer%20champion.mp3?alt=media&token=8425ad5e-69a3-4a57-966e-58df8ff39701" preload="auto"></audio>
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
+    <div id="banned-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: red; text-align: center; padding: 20px;">
+        <h1 style="font-size: 4rem;">🚫</h1>
+        <h2>ACCÈS REFUSÉ</h2>
+        <p>Vous avez été banni de cette salle par le Maître du Jeu.</p>
+    </div>
+
     <script>
-        const CLIENT_VERSION = "1.116";
+        const CLIENT_VERSION = "1.118";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         
         function compressImage(file, maxWidth, callback) {
@@ -359,10 +365,19 @@
 
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
-            const c1 = colors[i % colors.length]; const c2 = colors[(i+1) % colors.length];
-            let pattern = ""; const mod = i % 10;
+            const c1 = colors[i % colors.length];
+            const c2 = colors[(i+1) % colors.length];
+            let pattern = "";
+            const mod = i % 10;
             if(mod === 0) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`;
             else if(mod === 1) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`;
+            else if(mod === 2) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 L0 100 Z" fill="${c2}"/>`;
+            else if(mod === 3) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="33" width="33" height="100" fill="${c2}"/>`;
+            else if(mod === 4) pattern = `<rect width="100" height="100" fill="${c1}"/><rect y="33" width="100" height="33" fill="${c2}"/>`;
+            else if(mod === 5) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="0" y="0" width="50" height="50" fill="${c2}"/><rect x="50" y="50" width="50" height="50" fill="${c2}"/>`;
+            else if(mod === 6) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 100 L50 0 L100 100 Z" fill="${c2}"/>`;
+            else if(mod === 7) pattern = `<rect width="100" height="100" fill="${c1}"/><circle cx="50" cy="50" r="30" fill="${c2}"/>`;
+            else if(mod === 8) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L50 50 L0 100 L50 50 L100 0" stroke="${c2}" stroke-width="10"/>`;
             else pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`;
             return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${pattern}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`;
         }
@@ -489,9 +504,9 @@
                         if(snapUser.exists()) {
                             const data = snapUser.val();
                             
-                            // CHECK BANNI À L'ENTRÉE (v1.116)
+                            // CHECK BANNI À L'ENTRÉE (v1.118)
                             if(data.banned) { 
-                                alert("Accès refusé.\nVous êtes banni de cette salle par l'animateur.");
+                                alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter.");
                                 window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
                                 return; 
                             }
@@ -514,9 +529,27 @@
             navigateTo('step-reconnect');
         }
 
+        // --- CORRECTION BUG "UNDEFINED" (v1.118) ---
         function resumeGame() {
-            roomRef.child('players/' + myUserID).update({active:true});
-            launchGame(true);
+            roomRef.child('players/' + myUserID).once('value', snap => {
+                if(snap.exists()) {
+                    // Joueur existe toujours (juste inactif) -> On réactive
+                    snap.ref.update({ active: true });
+                } else {
+                    // Joueur supprimé par le MJ pendant l'écran d'attente
+                    // On recrée proprement avec les données locales
+                    roomRef.child('players/' + myUserID).set({
+                        name: player.pseudo,
+                        avatar: player.avatar,
+                        teamName: player.team,
+                        teamIcon: player.teamIcon,
+                        pts: 0,
+                        active: true,
+                        banned: false
+                    });
+                }
+                launchGame(true);
+            });
         }
 
         function modifyProfile() {
@@ -690,38 +723,36 @@
             roomRef.child('buzzers').off(); roomRef.child('gameState').off(); roomRef.child('players/' + myUserID).off();
             roomRef.on('value', snap => { if(!snap.exists()) { handleExit("🛑 La partie a été clôturée.", true); } });
             
-            // --- ÉCOUTEUR JOUEUR AMÉLIORÉ (v1.116) ---
+            // --- ÉCOUTEUR JOUEUR AMÉLIORÉ (v1.118) ---
             roomRef.child('players/' + myUserID).on('value', snap => { 
                 const d = snap.val(); 
                 
-                // 1. SUPPRESSION DEFINITIVE (HARD DELETE)
+                // 1. SUPPRESSION DEFINITIVE
                 if(!d) {
                     if(roomRef) roomRef.off();
                     alert("Votre compte a été supprimé définitivement.");
-                    localStorage.clear(); // Clean
+                    localStorage.clear(); 
                     window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
                     return;
                 }
 
-                // 2. BANNI (BANNED)
+                // 2. BANNI - MESSAGE MODIFIÉ (v1.118)
                 if(d.banned) {
                     if(roomRef) roomRef.off();
-                    alert(`🚫 Vous avez été banni par ${mjName}.`);
-                    // Pas de nettoyage localStorage (pour bloquer le retour)
+                    alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter.");
                     window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
                     return;
                 }
 
-                // 3. INACTIF / PAUSE (SOFT DELETE)
+                // 3. INACTIF / PAUSE
                 if(d.active === false) {
                     if(roomRef) roomRef.off();
                     alert(`⏸️ Vous avez été désactivé par ${mjName}.\n\nSi c'est une erreur, vous pouvez vous reconnecter à la salle.`);
-                    // Pas de nettoyage localStorage (pour faciliter le retour)
                     window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
                     return;
                 }
 
-                // 4. ACTIF (Jeu Normal)
+                // 4. ACTIF
                 document.getElementById('game-score').innerText = d.pts || 0; 
             });
 
