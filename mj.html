@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.114)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.115)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -67,7 +67,7 @@
         .lib-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
         .lib-del { position: absolute; top: 0; right: 0; background: var(--danger); color: white; width: 22px; height: 22px; border-bottom-left-radius: 6px; cursor: pointer; font-size: 0.8rem; line-height: 22px; box-shadow: -1px 1px 3px rgba(0,0,0,0.3); font-weight: bold; z-index: 5; }
         
-        .switch-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px; font-size: 1rem; color: white; font-weight: bold; }
+        .switch-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; font-size: 1rem; color: white; font-weight: bold; }
         .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #c0392b; -webkit-transition: .4s; transition: .4s; border-radius: 34px; }
@@ -87,17 +87,30 @@
         .password-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; fill: #bdc3c7; width: 20px; height: 20px; user-select: none; }
         .password-icon:hover { fill: var(--accent); }
 
-        /* DROP ZONE STYLE (v1.114) */
-        .drop-zone { border: 3px dashed #7f8c8d; padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.2); transition: 0.3s; position: relative; }
+        /* DROP ZONE STYLE CORRIGÉ (v1.115) */
+        .drop-zone { 
+            display: block; /* ESSENTIEL POUR LA BOITE */
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+            border: 3px dashed #7f8c8d; 
+            padding: 20px; 
+            border-radius: 10px; 
+            background: rgba(0,0,0,0.2); 
+            transition: 0.3s; 
+            position: relative; 
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
         .drop-zone.drag-active { border-color: #27ae60; background: rgba(39, 174, 96, 0.2); transform: scale(1.02); }
         .drop-zone-text { font-size: 1.2rem; font-weight: bold; display: block; margin-bottom: 5px; color: var(--gold); text-transform: uppercase; }
-        .drop-zone-sub { font-size: 0.9rem; color: #ccc; }
+        .drop-zone-sub { font-size: 0.9rem; color: #ccc; display: block; margin-bottom: 5px; }
         .drop-zone-info { font-size: 0.8rem; color: #7f8c8d; margin-top: 5px; display: block; font-style: italic; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.114</div>
+    <div class="version-tag">v1.115</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -283,54 +296,29 @@
         let mjLibrary = {}; 
         let showDefaultCrests = true; 
 
-        // --- DRAG & DROP LOGIC (v1.114) ---
+        // --- DRAG & DROP LOGIC ---
         window.onload = function() {
             const dz = document.getElementById('drop-zone');
-            
-            // Empêcher l'ouverture du fichier dans le navigateur
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                 dz.addEventListener(eventName, preventDefaults, false);
                 document.body.addEventListener(eventName, preventDefaults, false);
             });
-
-            // Effets Visuels
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dz.addEventListener(eventName, highlight, false);
-            });
-            ['dragleave', 'drop'].forEach(eventName => {
-                dz.addEventListener(eventName, unhighlight, false);
-            });
-
-            // Action au drop
+            ['dragenter', 'dragover'].forEach(eventName => { dz.addEventListener(eventName, highlight, false); });
+            ['dragleave', 'drop'].forEach(eventName => { dz.addEventListener(eventName, unhighlight, false); });
             dz.addEventListener('drop', handleDrop, false);
         };
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        function highlight(e) {
-            document.getElementById('drop-zone').classList.add('drag-active');
-        }
-
-        function unhighlight(e) {
-            document.getElementById('drop-zone').classList.remove('drag-active');
-        }
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            handleFiles(files);
-        }
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        function highlight(e) { document.getElementById('drop-zone').classList.add('drag-active'); }
+        function unhighlight(e) { document.getElementById('drop-zone').classList.remove('drag-active'); }
+        function handleDrop(e) { const dt = e.dataTransfer; const files = dt.files; handleFiles(files); }
 
         async function handleFiles(files) {
             if(!files || files.length === 0) return;
-            
             const title = document.getElementById('dz-title');
             const sub = document.getElementById('dz-sub');
-            const originalTitle = title.innerText;
-            const originalSub = sub.innerText;
+            const originalTitle = "GLISSEZ VOS IMAGES ICI";
+            const originalSub = "ou Cliquez pour parcourir";
             
             const uid = auth.currentUser.uid;
             let count = 0;
@@ -339,26 +327,18 @@
             title.innerText = `⏳ Envoi : 0 / ${total}...`;
             sub.innerText = "Veuillez patienter...";
 
-            // Traitement séquentiel pour éviter surcharge
             for (let i = 0; i < total; i++) {
                 try {
                     await uploadSingleFile(files[i], uid);
                     count++;
                     title.innerText = `⏳ Envoi : ${count} / ${total}...`;
-                } catch (err) {
-                    console.error("Erreur fichier " + i, err);
-                }
+                } catch (err) { console.error("Erreur fichier " + i, err); }
             }
 
-            // Fin
             title.innerText = "✅ TERMINÉ !";
             sub.innerText = `${count} images ajoutées.`;
             refreshLibraryData();
-            
-            setTimeout(() => {
-                title.innerText = originalTitle;
-                sub.innerText = originalSub;
-            }, 2000);
+            setTimeout(() => { title.innerText = originalTitle; sub.innerText = originalSub; }, 2000);
         }
 
         function uploadSingleFile(file, uid) {
@@ -366,9 +346,7 @@
                 const storageRef = storage.ref(`mj_library/${uid}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}_${file.name}`);
                 storageRef.put(file)
                     .then(snapshot => snapshot.ref.getDownloadURL())
-                    .then(url => {
-                        db.ref(`users/${uid}/library`).push(url).then(() => resolve(url));
-                    })
+                    .then(url => { db.ref(`users/${uid}/library`).push(url).then(() => resolve(url)); })
                     .catch(err => reject(err));
             });
         }
