@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.109)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.111)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -21,32 +21,53 @@
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; }
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 1.2rem; }
+        
+        /* PICKER BLASONS */
         .crest-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 150px; overflow-y: auto; }
         .crest-wrapper { background: white; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid transparent; }
         .crest-selected { border-color: var(--accent) !important; background: var(--accent) !important; transform: scale(1.1); }
         .crest-opt { width: 30px; height: 30px; object-fit: contain; }
+        
         .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 20px 0; text-align: center; display: none; }
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .team-item { display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin-bottom: 8px; justify-content: space-between; }
+        
+        /* LISTES */
+        .team-item { display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin-bottom: 8px; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .team-item.banned { border: 2px solid var(--danger); background: rgba(231, 76, 60, 0.15); opacity: 0.7; }
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; }
+        
         .crest-mini-bg { background: white; padding: 2px; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; }
         .crest-mini { width: 22px; height: 22px; object-fit: contain; }
         .btn-icon { cursor: pointer; font-weight: bold; font-size: 1.1rem; margin-left: 10px; transition: 0.2s; }
         .btn-edit { color: var(--blue); }
         .btn-del { color: var(--danger); }
+        
+        /* CONTROLES EQUIPE (v1.111) */
+        .team-score-ctrl { display: flex; align-items: center; background: rgba(0,0,0,0.3); border-radius: 5px; padding: 2px; }
+        .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: #7f8c8d; box-shadow: none; border-radius: 4px; }
+        .team-bonus-val { font-size: 0.9rem; font-weight: bold; margin: 0 8px; color: var(--accent); min-width: 20px; text-align: center; }
+        
         .player-controls { display: flex; align-items: center; gap: 5px; }
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: #34495e; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
         .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; }
-        .lobby-btn:active { top: 1px; box-shadow: 0 1px rgba(0,0,0,0.3); }
+        
+        /* BIBLIOTHEQUE (v1.111) */
+        .btn-folder { background: var(--gold); color: black; font-size: 1.2rem; width: 45px; padding: 10px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; margin-left: 5px; box-shadow: 0 4px rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer; flex-shrink: 0; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; }
+        .modal-box { background: var(--card-bg); padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; text-align: center; border: 2px solid var(--gold); position: relative; max-height: 90vh; overflow-y: auto; }
+        .lib-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+        .lib-item { position: relative; width: 100%; aspect-ratio: 1; background: white; border-radius: 5px; padding: 5px; box-sizing: border-box; }
+        .lib-item img { width: 100%; height: 100%; object-fit: contain; }
+        .lib-del { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 0.8rem; line-height: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); font-weight: bold; }
+        .switch-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; font-size: 0.9rem; color: #ccc; }
+
         .show-pass-container { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 0.9rem; cursor: pointer; text-align: left; width: 100%; padding-left: 5px; }
         .show-pass-container input { width: 18px; height: 18px; margin: 0; cursor: pointer; flex-shrink: 0; }
-        .upload-zone { margin: 10px 0; padding: 10px; border: 2px dashed var(--mj-color); border-radius: 8px; text-align: center; background: rgba(0,0,0,0.2); transition: 0.2s; }
-        .upload-zone:hover { background: rgba(46, 204, 113, 0.1); }
+        
         .version-tag { position: fixed; bottom: 10px; right: 15px; color: rgba(255, 255, 255, 0.3); font-size: 0.8rem; font-family: monospace; z-index: 9999; pointer-events: none; }
         .btn-ghost { position: absolute; top: 15px !important; right: 15px !important; background: transparent; border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: all 0.3s ease; box-shadow: none !important; width: auto !important; margin: 0 !important; }
         .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,255,255,0.05); }
         
-        /* CSS PASSWORD TOGGLE */
         .password-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
         .password-wrapper input { margin-bottom: 0; padding-right: 45px; }
         .password-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; fill: #bdc3c7; width: 20px; height: 20px; user-select: none; }
@@ -55,7 +76,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.110</div>
+    <div class="version-tag">v1.111</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -66,14 +87,12 @@
         <img id="login-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px; border-radius: 10px;">
         <h2>Accès MJ Sécurisé</h2>
         <input type="email" id="mj-email" placeholder="Email MJ">
-        
         <div class="password-wrapper">
             <input type="password" id="mj-pass" placeholder="Mot de passe">
             <div class="password-icon" onclick="togglePasswordVisibility('mj-pass', this)">
                 <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
             </div>
         </div>
-
         <button id="btn-login-submit" onclick="login()">Se Connecter</button>
         <p onclick="forgotPassword()" style="color:var(--accent); cursor:pointer; font-size:0.8rem; text-decoration: underline; margin-top: 10px;">Mot de passe oublié ?</p>
     </div>
@@ -92,6 +111,9 @@
             <input type="file" id="prof-logo-upload" accept="image/*" style="display:none;" onchange="uploadProfileLogo(this)">
         </div>
         <input type="text" id="prof-link" placeholder="Lien de redirection au clic">
+        
+        <button onclick="openLibrary()" style="background:var(--gold); color:black; margin-top:10px;">📁 Gérer mes Blasons</button>
+
         <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:15px 0;">
         <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">MOT DE PASSE (Optionnel)</p>
         <input type="password" id="prof-pass" placeholder="Nouveau mot de passe">
@@ -137,15 +159,14 @@
         </div>
         <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-top: 20px;">
             <h3>Gestion Équipes</h3>
-            <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()">
-            <div class="upload-zone">
-                <label for="upload-logo" style="cursor:pointer; font-weight:bold; color:var(--mj-color); font-size:0.8rem;">
-                    ➕ AJOUTER UN FICHIER IMAGE (BLASON)
-                </label>
-                <input type="file" id="upload-logo" accept="image/*" style="display:none;" onchange="uploadCustomTeamLogo(this)">
+            <div style="display:flex; align-items: center; gap: 10px;">
+                <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()" style="margin-bottom: 0;">
+                <div class="btn-folder" onclick="openLibrary()" title="Bibliothèque de Blasons">📁</div>
             </div>
-            <div class="crest-picker" id="crest-grid"></div>
+            
+            <div class="crest-picker" id="crest-grid" style="margin-top: 15px;"></div>
             <button id="btn-add-team" disabled onclick="addTeam()">Créer l'Équipe</button>
+            
             <div id="mj-team-list-display"></div>
         </div>
         
@@ -183,6 +204,25 @@
         </div>
     </div>
 
+    <div id="modal-library" class="modal-overlay">
+        <div class="modal-box">
+            <h2 style="color:var(--gold); margin-top:0;">MA BIBLIOTHÈQUE</h2>
+            <div class="switch-container">
+                <input type="checkbox" id="check-hide-default" onchange="toggleDefaultCrests(this.checked)">
+                <label for="check-hide-default">Masquer les blasons par défaut</label>
+            </div>
+            <div style="border: 2px dashed #7f8c8d; padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.2);">
+                <label for="lib-upload" style="cursor:pointer; display:block;">
+                    📤 <b>AJOUTER UNE IMAGE</b><br>
+                    <span style="font-size:0.8rem; color:#aaa;">JPG, PNG, GIF</span>
+                </label>
+                <input type="file" id="lib-upload" accept="image/*" style="display:none;" onchange="uploadToLibrary(this)">
+            </div>
+            <div id="lib-grid" class="lib-grid"></div>
+            <button onclick="document.getElementById('modal-library').style.display='none'" style="margin-top:20px; background:var(--danger);">FERMER</button>
+        </div>
+    </div>
+
     <div id="overlay-remote-qr" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:20000; flex-direction:column; align-items:center; justify-content:center;">
         <h2 style="color:white; margin-bottom:20px; text-transform:uppercase; color: #8e44ad;">Télécommande Animateur</h2>
         <div id="qrcode-remote" style="background:white; padding:20px; border-radius:15px; box-shadow: 0 0 30px rgba(142, 68, 173, 0.5);"></div>
@@ -214,7 +254,9 @@
 
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
-        
+        let mjLibrary = {}; // Stockage local de la bibliothèque
+        let hideDefaultCrests = false;
+
         /* GENERATEUR SVG */
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
@@ -243,7 +285,6 @@
             auth.signInWithEmailAndPassword(email, pass).then(res => { loadMjData(res.user); }).catch(e => { alert("Erreur connexion"); });
         }
 
-        // TOGGLE PASSWORD
         function togglePasswordVisibility(inputId, icon) {
             const input = document.getElementById(inputId);
             if(input.type === 'password') {
@@ -265,6 +306,12 @@
             db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
                 mjProfileData = data;
+                
+                // Chargement de la bibliothèque (v1.111)
+                mjLibrary = data.library || {};
+                hideDefaultCrests = data.hideDefaultCrests || false;
+                document.getElementById('check-hide-default').checked = hideDefaultCrests;
+
                 if(mjProfileData.isGuest === true) { cleanGuestData(user.uid); }
                 else {
                     document.getElementById('mj-display-name').innerText = data.prenom || "MJ";
@@ -277,10 +324,10 @@
         function cleanGuestData(uid) {
             const updates = {};
             updates[`users/${uid}/lastRoom`] = null;
-            updates[`users/${uid}/customLogos`] = null;
+            updates[`users/${uid}/library`] = null;
             db.ref().update(updates).then(() => {
                 mjProfileData.lastRoom = "";
-                mjProfileData.customLogos = {};
+                mjLibrary = {};
                 document.getElementById('mj-display-name').innerText = mjProfileData.prenom || "MJ";
                 updateLogos(mjProfileData.customLogo);
                 checkUserRoom(uid);
@@ -302,6 +349,87 @@
                     document.getElementById('btn-resume').style.display = "none";
                 }
             });
+        }
+
+        // --- GESTION BIBLIOTHEQUE & MODALE (v1.111) ---
+        function openLibrary() {
+            document.getElementById('modal-library').style.display = 'flex';
+            renderLibraryGrid();
+        }
+
+        function renderLibraryGrid() {
+            const grid = document.getElementById('lib-grid');
+            grid.innerHTML = "";
+            Object.keys(mjLibrary).forEach(key => {
+                const url = mjLibrary[key];
+                const item = document.createElement('div');
+                item.className = 'lib-item';
+                item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteFromLibrary('${key}')">X</div>`;
+                grid.appendChild(item);
+            });
+        }
+
+        function uploadToLibrary(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const uid = auth.currentUser.uid;
+            const storageRef = storage.ref(`mj_library/${uid}/${Date.now()}_${file.name}`);
+            
+            storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
+                db.ref(`users/${uid}/library`).push(url).then(() => {
+                    // Update local & Sync
+                    refreshLibraryData();
+                });
+            }).catch(err => alert("Erreur upload"));
+        }
+
+        function deleteFromLibrary(key) {
+            if(confirm("Supprimer cette image définitivement de votre bibliothèque ?")) {
+                const uid = auth.currentUser.uid;
+                db.ref(`users/${uid}/library/${key}`).remove().then(() => {
+                    refreshLibraryData();
+                });
+            }
+        }
+
+        function toggleDefaultCrests(checked) {
+            hideDefaultCrests = checked;
+            const uid = auth.currentUser.uid;
+            db.ref(`users/${uid}/hideDefaultCrests`).set(checked);
+            mjProfileData.hideDefaultCrests = checked;
+            loadCrestGrid(); // Rafraichit le picker du dashboard
+        }
+
+        function refreshLibraryData() {
+            const uid = auth.currentUser.uid;
+            db.ref(`users/${uid}/library`).once('value').then(snap => {
+                mjLibrary = snap.val() || {};
+                renderLibraryGrid();
+                loadCrestGrid();
+                syncLibraryToRoom(); // Copie vers la salle active pour les joueurs
+            });
+        }
+
+        function syncLibraryToRoom() {
+            if(roomID && roomRef) {
+                // Copie silencieuse pour les joueurs
+                roomRef.child('library').update(mjLibrary);
+            }
+        }
+
+        function loadCrestGrid() {
+            const grid = document.getElementById('crest-grid');
+            grid.innerHTML = "";
+            
+            // 1. Images Perso
+            Object.values(mjLibrary).forEach(url => {
+                createCrestItem(url, grid);
+            });
+
+            // 2. Images Par Défaut (si non masquées)
+            if (!hideDefaultCrests) {
+                for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); }
+            }
         }
 
         let previousScreen = "screen-choice";
@@ -332,17 +460,14 @@
                 document.getElementById('prof-logo').value = currentLogo;
                 updateLogoPreview(currentLogo);
                 document.getElementById('prof-link').value = mjProfileData.customLink || "";
-                document.getElementById('prof-pass').value = "";
-                document.getElementById('prof-pass-conf').value = "";
+                
                 const isGuest = mjProfileData.isGuest === true;
-                document.getElementById('prof-nom').disabled = isGuest;
-                document.getElementById('prof-prenom').disabled = isGuest;
-                document.getElementById('prof-logo').disabled = isGuest;
-                document.getElementById('prof-link').disabled = isGuest;
-                document.getElementById('prof-pass').disabled = isGuest; 
-                document.getElementById('prof-pass-conf').disabled = isGuest; 
+                // Désactivation des champs en mode invité
+                const inputs = ['prof-nom','prof-prenom','prof-logo','prof-link','prof-pass','prof-pass-conf'];
+                inputs.forEach(id => document.getElementById(id).disabled = isGuest);
                 document.getElementById('btn-save-profile').disabled = isGuest;
                 document.getElementById('label-logo-upload').style.display = isGuest ? 'none' : 'flex';
+                
                 let warnMsg = document.getElementById('guest-warning');
                 if(isGuest) {
                     if(!warnMsg) {
@@ -453,6 +578,8 @@
             if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink);
             roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true);
             
+            syncLibraryToRoom();
+            
             initMJLogic(); 
             initAdminListener();
             
@@ -460,7 +587,6 @@
             openScoreBoard();
         }
 
-        // --- GESTION VERSION (v1.104) ---
         function initAdminListener() {
             db.ref('config/minVersion').on('value', snap => {
                 const v = snap.val() || "1.000";
@@ -508,27 +634,6 @@
             overlay.style.display = 'flex';
         }
 
-        function uploadCustomTeamLogo(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            const uid = auth.currentUser.uid;
-            const storageRef = storage.ref(`mj_icons/${uid}/${Date.now()}_${file.name}`);
-            storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
-                db.ref(`users/${uid}/customLogos`).push(url);
-                loadCrestGrid();
-            }).catch(err => alert("Erreur upload blason"));
-        }
-
-        function loadCrestGrid() {
-            const grid = document.getElementById('crest-grid');
-            grid.innerHTML = "";
-            const uid = auth.currentUser.uid;
-            db.ref(`users/${uid}/customLogos`).once('value', snap => {
-                snap.forEach(child => createCrestItem(child.val(), grid));
-                for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); }
-            });
-        }
-
         function createCrestItem(url, container) {
             const wrap = document.createElement('div');
             wrap.className = 'crest-wrapper';
@@ -564,7 +669,7 @@
                     alert("🔒 Limité à 2 équipes en Découverte."); return;
                 }
                 if(editingTeamKey && editingTeamKey !== n) deleteTeam(editingTeamKey);
-                roomRef.child('teams/' + n).set({ icon: selCrest }); 
+                roomRef.child('teams/' + n).update({ icon: selCrest, banned: false, bonus: 0 }); 
                 document.getElementById('t-name').value = ""; 
                 selCrest = ""; editingTeamKey = null;
                 document.getElementById('btn-add-team').innerText = "Créer l'Équipe";
@@ -621,22 +726,6 @@
 
             roomRef.child('teams').on('value', snap => { 
                 globalTeams = snap.val() || {}; 
-                const mjUid = auth.currentUser ? auth.currentUser.uid : null;
-                if(mjUid && !mjProfileData.isGuest) {
-                    Object.values(globalTeams).forEach(team => {
-                        if(team.icon && team.icon.startsWith('http')) {
-                            let alreadyKnown = false;
-                            if(mjProfileData.customLogos) {
-                                Object.values(mjProfileData.customLogos).forEach(savedUrl => { if(savedUrl === team.icon) alreadyKnown = true; });
-                            }
-                            if(!alreadyKnown) {
-                                db.ref(`users/${mjUid}/customLogos`).push(team.icon);
-                                if(!mjProfileData.customLogos) mjProfileData.customLogos = {};
-                                mjProfileData.customLogos['new_' + Date.now()] = team.icon;
-                            }
-                        }
-                    });
-                }
                 renderLobby(); 
             });
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
@@ -644,19 +733,48 @@
 
         function renderLobby() {
             const l = document.getElementById('score-list'); l.innerHTML = "";
-            const iList = document.getElementById('inactive-list'); iList.innerHTML = ""; // v1.109
-            const iSection = document.getElementById('inactive-section'); // v1.109
+            const iList = document.getElementById('inactive-list'); iList.innerHTML = ""; 
+            const iSection = document.getElementById('inactive-section'); 
             
             const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
             const bSection = document.getElementById('banned-section');
             const bList = document.getElementById('banned-list'); bList.innerHTML = "";
             let hasBanned = false;
-            let hasInactive = false; // v1.109
+            let hasInactive = false;
 
+            // RENDER TEAMS (v1.111)
             Object.keys(globalTeams).forEach(tKey => {
-                tList.innerHTML += `<div class="team-item"><span><div class="crest-mini-bg"><img src="${globalTeams[tKey].icon}" class="crest-mini"></div> <b>${tKey}</b></span><div><span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span><span class="btn-icon btn-del" onclick="deleteTeam('${tKey}')">✖</span></div></div>`;
+                const team = globalTeams[tKey];
+                const isBanned = team.banned === true;
+                const bonus = team.bonus || 0;
+                
+                const bannedClass = isBanned ? 'banned' : '';
+                const btnBan = isBanned 
+                    ? `<button class="btn-small" style="background:var(--mj-color)" onclick="banTeam('${tKey}', false)">✅</button>` 
+                    : `<button class="btn-small" style="background:#e74c3c" onclick="banTeam('${tKey}', true)" title="Bannir et éjecter joueurs">🚫</button>`;
+
+                tList.innerHTML += `
+                <div class="team-item ${bannedClass}">
+                    <div style="display:flex; align-items:center;">
+                        <div class="crest-mini-bg"><img src="${team.icon}" class="crest-mini"></div>
+                        <b style="margin-left:5px;">${tKey}</b>
+                    </div>
+                    
+                    <div class="team-controls">
+                        <div class="team-score-ctrl">
+                            <button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button>
+                            <span class="team-bonus-val">${bonus}</span>
+                            <button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button>
+                        </div>
+                        
+                        ${btnBan}
+                        <span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span>
+                        <span class="btn-icon btn-del" onclick="deleteTeam('${tKey}')">✖</span>
+                    </div>
+                </div>`;
             });
 
+            // RENDER PLAYERS
             Object.keys(allPlayersData).forEach(uid => {
                 if (!allPlayersData[uid]) return;
                 const d = allPlayersData[uid]; 
@@ -665,12 +783,11 @@
                 // CAS 1: BANNIS
                 if(d.banned === true) {
                     hasBanned = true;
-                    // v1.109 : AJOUT BOUTON SUPPRESSION TOTALE
                     bList.innerHTML += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')">Réhabiliter</button><button style="background:#c0392b; width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
                     return; 
                 }
                 
-                // CAS 2: INACTIFS (v1.109 - AFFICHAGE COMPLET)
+                // CAS 2: INACTIFS
                 if(d.active === false) {
                     hasInactive = true;
                     iList.innerHTML += `
@@ -688,28 +805,49 @@
 
                 // CAS 3: ACTIFS
                 let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
-                Object.keys(globalTeams).forEach(t => { teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; });
+                Object.keys(globalTeams).forEach(t => { 
+                    // On n'affiche pas les équipes bannies dans la liste
+                    if(globalTeams[t].banned !== true) {
+                        teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; 
+                    }
+                });
                 
                 const isBlocked = currentBlocked[pseudo];
                 const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
                 let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
                 
-                // v1.109 : BOUTON TRASH = RENDRE INACTIF (isSoftDelete = true)
                 l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Rendre inactif">🗑️</button></div></div>`;
             });
             bSection.style.display = hasBanned ? "block" : "none";
             iSection.style.display = hasInactive ? "block" : "none"; 
         }
 
-        // --- MODIFICATION v1.109 : MESSAGE DE CONFIRMATION MIS À JOUR ---
+        function updateTeamBonus(teamName, delta) {
+            roomRef.child('teams/' + teamName + '/bonus').transaction(val => (val || 0) + delta);
+        }
+
+        function banTeam(teamName, doBan) {
+            if(doBan) {
+                if(confirm("Bloquer l'équipe " + teamName + " ?\nTous ses joueurs seront passés en mode Solo.")) {
+                    roomRef.child('teams/' + teamName).update({ banned: true });
+                    // Ejection des joueurs
+                    Object.keys(allPlayersData).forEach(uid => {
+                        if(allPlayersData[uid].teamName === teamName) {
+                            togglePlayerTeam(uid, "Solo");
+                        }
+                    });
+                }
+            } else {
+                roomRef.child('teams/' + teamName).update({ banned: false });
+            }
+        }
+
         function deletePlayer(uid, name, isActive) {
             if(isActive) {
-                // Etape 1 : Soft Delete (Vers Inactifs)
-                if(confirm("Voulez-vous rendre " + name + " inactif ?\n\nIl restera visible dans la section 'Joueurs Inactifs' de votre console. Il conservera ses données et son score tant que vous ne le supprimez pas définitivement.")) {
+                if(confirm("Voulez-vous rendre " + name + " inactif ?\n\nIl restera visible dans la section 'Joueurs Inactifs' de votre console.")) {
                     roomRef.child('players/' + uid).update({ active: false });
                 }
             } else {
-                // Etape 2 : Hard Delete (Suppression définitive)
                 if(confirm("⚠️ ATTENTION : Supprimer définitivement " + name + " ?\nSes données seront perdues et son téléphone sera réinitialisé.")) {
                     roomRef.child('players/' + uid).remove();
                 }
