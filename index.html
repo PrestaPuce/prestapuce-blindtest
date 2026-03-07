@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.125)</title>
+    <title>Presta'Puce - Blind Test (v1.128)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -36,7 +36,6 @@
         .welcome-subtitle { color: #bdc3c7; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px; }
         .welcome-mj-name { color: var(--accent); font-size: clamp(2rem, 7vw, 3.5rem); font-weight: 900; margin-bottom: 25px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase; line-height: 1.1; }
 
-        /* TYPEWRITER ACCUMULATIF */
         .typewriter-box { text-align: center; display: flex; flex-direction: column; align-items: center; min-height: 90px; }
         .type-line { font-size: 1.1rem; color: white; font-weight: 500; margin-bottom: 5px; min-height: 1.5rem; display: flex; align-items: center; justify-content: center; }
         .cursor { width: 2px; height: 1.2rem; background-color: var(--accent); animation: blink 1s infinite; margin-left: 4px; display: inline-block; }
@@ -61,16 +60,37 @@
 
         .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
         .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; min-height: 0; justify-content: flex-start; }
-        .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
-        .grid-item { aspect-ratio: 1/1; background: rgba(255,255,255,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; padding: 5px; box-sizing: border-box; }
-        .grid-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
-        .grid-item img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
-        .grid-item-emoji { font-size: clamp(1.8rem, 7vw, 2.5rem); padding: 0; }
         
+        /* GRILLES OPTIMISÉES (v1.128) */
+        .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
+        .grid-item { 
+            aspect-ratio: 1/1; 
+            background: #ecf0f1; /* Gris clair */
+            border-radius: 12px; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; border: 2px solid transparent; overflow: hidden; 
+            padding: 0; /* Pas de marge */
+            box-sizing: border-box; 
+        }
+        .grid-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
+        .grid-item img { width: 100%; height: 100%; object-fit: contain; }
+        .grid-item-emoji { font-size: clamp(1.8rem, 7vw, 2.5rem); padding: 0; background: rgba(255,255,255,0.1); }
+        
+        /* GRILLE BLASON TEAM OPTIMISÉE */
         .crest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 15px 0; width: 100%; max-width: 350px; flex: 1; min-height: 0; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; box-sizing: border-box; }
-        .crest-item { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; background: white; padding: 5px; box-sizing: border-box; }
+        .crest-item { 
+            width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; 
+            border: 2px solid transparent; transition: 0.2s; 
+            display: flex; align-items: center; justify-content: center; 
+            background: #ecf0f1; /* Gris clair neutre comme le MJ */
+            padding: 0; /* Pas de padding pour affichage max */
+            box-sizing: border-box; overflow: hidden;
+        }
         .crest-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
-        .crest-item.selected { border-color: var(--accent); transform: scale(1.05); box-shadow: 0 0 10px var(--accent); z-index: 2; background: rgba(255,255,255,0.2); }
+        .crest-item.selected { border-color: var(--accent); transform: scale(1.05); box-shadow: 0 0 10px var(--accent); z-index: 2; }
+
+        /* AVERTISSEMENT MODERATION (v1.128) */
+        .moderation-warning { font-size: 0.75rem; color: #e74c3c; margin-top: 5px; margin-bottom: 5px; text-align: center; max-width: 320px; line-height: 1.3; font-weight: bold; background: rgba(231, 76, 60, 0.1); padding: 8px; border-radius: 8px; border: 1px dashed rgba(231, 76, 60, 0.3); }
 
         .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
         .mini-profile { display: flex; align-items: center; position: relative; flex: 1; height: 100%; }
@@ -93,7 +113,6 @@
         .buzzer-label { font-size: clamp(1.2rem, 5vw, 1.8rem); font-weight: bold; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; z-index: 2; position: relative; }
         .buzzer-img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; border-radius: 50%; pointer-events: none; }
 
-        /* SCORE DISPLAY UNIFORMISÉ (v1.125) */
         .score-container { margin-bottom: 20px; text-align: center; display: flex; flex-direction: column; gap: 5px; }
         .score-row { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.1rem; }
         .score-label { font-style: italic; color: #bdc3c7; font-weight: normal; }
@@ -119,7 +138,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.125</div>
+    <div class="version-tag">v1.128</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -197,6 +216,7 @@
             <div class="screen-content content-top">
                 <div id="avatar-choices" class="selection-mode-container" style="flex:1;">
                     <div class="choice-card" onclick="document.getElementById('file-input').click()"><div class="choice-icon">📸</div><div class="choice-content"><b>Photo / Selfie</b><span>Ou choisir une image.</span></div></div>
+                    <div class="moderation-warning">⚠️ Images modérées par l'animateur. Tout contenu vulgaire entraînera un bannissement.</div>
                     <div class="choice-card" onclick="showAvatarGallery()"><div class="choice-icon">🦁</div><div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div></div>
                     <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
                 </div>
@@ -228,6 +248,7 @@
                 <input type="text" id="new-team-name" placeholder="Nom de l'équipe">
                 <div id="team-crest-choices" class="selection-mode-container" style="margin-top:20px; width:100%;">
                     <div class="choice-card" onclick="document.getElementById('team-file-input').click()"><div class="choice-icon">📤</div><div class="choice-content"><b>Uploader Blason</b><span>Image perso.</span></div></div>
+                    <div class="moderation-warning">⚠️ Images modérées par l'animateur. Tout contenu vulgaire entraînera un bannissement.</div>
                     <div class="choice-card" onclick="showTeamGallery()"><div class="choice-icon">🛡️</div><div class="choice-content"><b>Galerie Blasons</b><span>Choisis un écusson.</span></div></div>
                     <input type="file" id="team-file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleTeamFileUpload(this)">
                 </div>
@@ -309,7 +330,6 @@
                 </div>
             </div>
             <div class="buzzer-container">
-                
                 <div class="score-container">
                     <div class="score-row">
                         <span class="score-label">Mon Score : </span>
@@ -387,7 +407,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.125";
+        const CLIENT_VERSION = "1.128";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         
         function compressImage(file, maxWidth, callback) {
@@ -426,8 +446,8 @@
         let selectedTeamCrest = "", isEditing = false, stepHistory = [];
         let mjName = "l'Animateur", mjLink = "";
         let html5QrCode = null;
+        let roomLibrary = {};
 
-        // TYPEWRITER (v1.125 - Textes complets)
         const lines = ["Transforme ton mobile en buzzer ! 🎧", "Joue en Solo, rejoins une Équipe...", "...ou crée ton propre Clan ! 🛡️"];
         let lineIndex = 0, charIndex = 0;
         
@@ -554,6 +574,13 @@
                     roomRef.child('mjLink').once('value', s => { if(s.exists()) mjLink = s.val(); });
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
                     
+                    roomRef.child('library').on('value', snap => {
+                        roomLibrary = snap.val() || {};
+                        if(document.getElementById('step-team-create').classList.contains('active')) {
+                            renderTeamCrestPicker();
+                        }
+                    });
+
                     const savedProfile = localStorage.getItem('buzz_lastProfile');
                     if(!autoLogin && savedProfile) {
                         try {
@@ -707,7 +734,7 @@
                     const t = teams[tName];
                     const div = document.createElement('div'); div.className = 'team-card';
                     div.style.cssText = "background:rgba(255,255,255,0.1); padding:10px; border-radius:8px; display:flex; align-items:center; cursor:pointer;";
-                    div.innerHTML = `<img src="${t.icon}" style="width:30px;height:30px;margin-right:10px;"><b>${tName}</b>`;
+                    div.innerHTML = `<img src="${t.icon}" style="width:30px;height:30px;margin-right:10px;object-fit:contain;"><b>${tName}</b>`;
                     div.onclick = () => { joinTeam(tName, t.icon); };
                     list.appendChild(div);
                 }
@@ -725,10 +752,17 @@
         function toggleCreateUI(show) { if(show) { document.getElementById('team-crest-choices').style.display = 'flex'; document.getElementById('team-crest-gallery').style.display = 'none'; document.getElementById('team-preview').style.display = 'none'; selectedTeamCrest = ""; } }
         function showTeamGallery() { document.getElementById('team-crest-choices').style.display = 'none'; document.getElementById('team-crest-gallery').style.display = 'flex'; }
         function handleTeamFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectedTeamCrest=base64; showTeamPreview(); }); } }
+        
         function renderTeamCrestPicker() { 
             const c = document.getElementById('team-icon-grid'); c.innerHTML="";
+            
+            Object.values(roomLibrary).forEach(url => {
+                createCrestItem(url, c);
+            });
+
             for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); }
         }
+
         function createCrestItem(url, container) {
             const d = document.createElement('div'); d.className='crest-item';
             const img = document.createElement('img'); img.src=url;
@@ -736,7 +770,20 @@
             d.appendChild(img); container.appendChild(d);
         }
         function showTeamPreview() { document.getElementById('team-crest-choices').style.display='none'; document.getElementById('team-crest-gallery').style.display='none'; document.getElementById('team-preview-img').src=selectedTeamCrest; document.getElementById('team-preview').style.display='flex'; }
-        function createNewTeam() { const name = document.getElementById('new-team-name').value.trim(); if(name.length < 2 || !selectedTeamCrest) return alert("Nom et blason requis."); roomRef.child('library').push(selectedTeamCrest); roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); }); }
+        
+        function createNewTeam() { 
+            const name = document.getElementById('new-team-name').value.trim(); 
+            if(name.length < 2 || !selectedTeamCrest) return alert("Nom et blason requis."); 
+            
+            // Si c'est une image perso (Base64), on l'ajoute à la bibliothèque de la salle
+            if (selectedTeamCrest.startsWith('data:image')) {
+                roomRef.child('library').push(selectedTeamCrest);
+            }
+
+            roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ 
+                joinTeam(name, selectedTeamCrest); 
+            }); 
+        }
 
         function openSettings() { document.getElementById('overlay-settings').style.display = 'flex'; }
         function confirmQuit() { document.getElementById('overlay-quit').style.display = 'flex'; }
@@ -796,23 +843,19 @@
             roomRef.child('buzzers').off(); roomRef.child('gameState').off(); roomRef.child('players/' + myUserID).off();
             roomRef.on('value', snap => { if(!snap.exists()) { handleExit("🛑 La partie a été clôturée.", true); } });
             
-            // --- ECOUTEUR JOUEUR LOCAL (v1.125) ---
             roomRef.child('players/' + myUserID).on('value', snap => { 
                 const d = snap.val(); 
                 if(!d) { if(roomRef) roomRef.off(); alert("Votre compte a été supprimé définitivement."); localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
                 if(d.banned) { if(roomRef) roomRef.off(); alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
                 if(d.active === false) { if(roomRef) roomRef.off(); alert(`⏸️ Vous avez été désactivé par ${mjName}.\n\nSi c'est une erreur, vous pouvez vous reconnecter à la salle.`); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
 
-                // SYNC DONNEES
                 player.team = d.teamName;
                 player.teamIcon = d.teamIcon;
                 player.avatar = d.avatar;
                 updateGameHeader();
 
-                // SCORE SOLO (Toujours)
                 document.getElementById('game-score').innerText = d.pts || 0; 
                 
-                // AFFICHAGE TEAM (Conditionnel)
                 const rowTeam = document.getElementById('row-team-score');
                 if(player.team !== "Solo") {
                     rowTeam.style.display = "flex";
@@ -822,7 +865,6 @@
                 }
             });
 
-            // --- ECOUTEUR GLOBAL SCORES (v1.125) ---
             roomRef.child('players').on('value', snap => {
                 if(player.team === "Solo") return;
                 const all = snap.val() || {};
