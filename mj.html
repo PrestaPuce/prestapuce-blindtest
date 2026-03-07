@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.115)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.117)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -13,7 +13,7 @@
         :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; }
         body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         .box { max-width: 400px; margin: 80px auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; }
-        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; margin-bottom: 15px; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; margin-bottom: 5px; } /* Marge réduite pour helper text */
         input:disabled { opacity: 0.5; cursor: not-allowed; }
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s; text-transform: uppercase; margin-bottom: 10px; position: relative; top: 0; box-shadow: 0 4px rgba(0,0,0,0.3); }
         button:hover:not(:disabled) { opacity: 0.9; }
@@ -87,30 +87,37 @@
         .password-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; fill: #bdc3c7; width: 20px; height: 20px; user-select: none; }
         .password-icon:hover { fill: var(--accent); }
 
-        /* DROP ZONE STYLE CORRIGÉ (v1.115) */
         .drop-zone { 
-            display: block; /* ESSENTIEL POUR LA BOITE */
-            width: 100%;
-            text-align: center;
-            box-sizing: border-box;
-            border: 3px dashed #7f8c8d; 
-            padding: 20px; 
-            border-radius: 10px; 
-            background: rgba(0,0,0,0.2); 
-            transition: 0.3s; 
-            position: relative; 
-            margin-bottom: 20px;
-            cursor: pointer;
+            display: block; width: 100%; text-align: center; box-sizing: border-box;
+            border: 3px dashed #7f8c8d; padding: 20px; border-radius: 10px; 
+            background: rgba(0,0,0,0.2); transition: 0.3s; position: relative; 
+            margin-bottom: 20px; cursor: pointer;
         }
         .drop-zone.drag-active { border-color: #27ae60; background: rgba(39, 174, 96, 0.2); transform: scale(1.02); }
         .drop-zone-text { font-size: 1.2rem; font-weight: bold; display: block; margin-bottom: 5px; color: var(--gold); text-transform: uppercase; }
         .drop-zone-sub { font-size: 0.9rem; color: #ccc; display: block; margin-bottom: 5px; }
         .drop-zone-info { font-size: 0.8rem; color: #7f8c8d; margin-top: 5px; display: block; font-style: italic; }
+
+        .profile-drop {
+            width: 150px; height: 150px; 
+            margin: 0 auto 5px auto; /* Marge bas réduite pour texte explicatif */
+            padding: 0; 
+            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            background: #ecf0f1; 
+            border: 3px dashed #7f8c8d;
+        }
+        .profile-drop img { width: 100%; height: 100%; object-fit: contain; }
+        .profile-drop-content { padding: 10px; color: #7f8c8d; }
+        
+        /* HELPER TEXT STYLE (v1.117) */
+        .input-helper { display: block; font-size: 0.8rem; color: #95a5a6; margin-bottom: 15px; font-style: italic; text-align: left; padding-left: 5px; }
+        .section-title { margin: 20px 0 10px 0; font-size: 0.9rem; color: var(--accent); text-align: left; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.115</div>
+    <div class="version-tag">v1.117</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -132,30 +139,41 @@
     </div>
 
     <div id="screen-profile" class="box" style="display:none;">
-        <h2 style="margin-bottom:20px;">Paramètres MJ</h2>
-        <input type="text" id="prof-nom" placeholder="Nom">
-        <input type="text" id="prof-prenom" placeholder="Prénom">
-        <input type="email" id="prof-email" placeholder="Email" disabled style="color:#aaa;">
-        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:15px 0;">
-        <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">PERSONNALISATION</p>
-        <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
-            <img id="prof-logo-preview" src="" style="width:40px; height:40px; object-fit:contain; border-radius:5px; display:none; background:var(--card-bg); padding:2px;">
-            <input type="text" id="prof-logo" placeholder="URL de votre Logo" style="margin-bottom:0; flex-grow:1;" oninput="updateLogoPreview(this.value)">
-            <label for="prof-logo-upload" id="label-logo-upload" style="background:var(--mj-color); padding:10px 15px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.2rem; box-shadow: 0 4px rgba(0,0,0,0.3); transition:0.2s; margin-bottom:0;" title="Uploader une image locale">📁</label>
-            <input type="file" id="prof-logo-upload" accept="image/*" style="display:none;" onchange="uploadProfileLogo(this)">
-        </div>
-        <input type="text" id="prof-link" placeholder="Lien de redirection au clic">
+        <h2 style="margin-bottom:20px; color:white;">MA CARTE DE VISITE</h2>
         
-        <button onclick="openLibrary()" style="background:var(--gold); color:black; margin-top:10px;">📁 Gérer mes Blasons</button>
+        <p class="section-title">👤 IDENTITÉ</p>
+        <input type="text" id="prof-nom" placeholder="Nom">
+        <input type="text" id="prof-prenom" placeholder="Prénom (Affiché aux joueurs)">
+        <input type="email" id="prof-email" placeholder="Email" disabled style="color:#aaa;">
+        
+        <p class="section-title">🖼️ IMAGE DE MARQUE</p>
+        <label for="prof-logo-upload" id="profile-drop-zone" class="drop-zone profile-drop">
+            <img id="prof-logo-preview" src="" style="display:none;">
+            <div id="prof-logo-placeholder" class="profile-drop-content">
+                <span style="font-size:2rem; display:block; margin-bottom:5px;">🖼️</span>
+                <span style="font-size:0.8rem; font-weight:bold; text-transform:uppercase;">VOTRE LOGO<br>OU AVATAR</span>
+            </div>
+            <input type="file" id="prof-logo-upload" accept="image/*" style="display:none;" onchange="handleProfileFile(this.files)">
+        </label>
+        <span class="input-helper">Ce visuel sera affiché sur les téléphones des joueurs et sur l'écran géant.</span>
+        <input type="hidden" id="prof-logo-url"> 
 
-        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:15px 0;">
-        <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">MOT DE PASSE (Optionnel)</p>
+        <p class="section-title">🌐 PUBLICITÉ / RÉSEAUX</p>
+        <input type="text" id="prof-link" placeholder="Ex: https://monsite.com ou @moninsta">
+        <span class="input-helper">Lien d'ouverture si un joueur clique sur votre logo (Optionnel).</span>
+        
+        <p class="section-title">📁 BIBLIOTHÈQUE</p>
+        <button onclick="openLibrary()" style="background:var(--gold); color:black; margin-top:0;">Gérer mes Blasons d'Équipes</button>
+        <span class="input-helper">Gérez ici vos images pour les équipes (Logos personnalisés).</span>
+
+        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:20px 0;">
+        <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">SÉCURITÉ (Changer Mot de passe)</p>
         <input type="password" id="prof-pass" placeholder="Nouveau mot de passe">
         <input type="password" id="prof-pass-conf" placeholder="Confirmer mot de passe">
         <label class="show-pass-container">
-            <input type="checkbox" onchange="const t = this.checked ? 'text' : 'password'; document.getElementById('prof-pass').type = t; document.getElementById('prof-pass-conf').type = t;"> Afficher le mot de passe
+            <input type="checkbox" onchange="const t = this.checked ? 'text' : 'password'; document.getElementById('prof-pass').type = t; document.getElementById('prof-pass-conf').type = t;"> Afficher
         </label>
-        <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER</button>
+        <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER TOUT</button>
         <button onclick="closeProfile()" style="background:var(--danger);">Retour</button>
     </div>
 
@@ -298,27 +316,35 @@
 
         // --- DRAG & DROP LOGIC ---
         window.onload = function() {
-            const dz = document.getElementById('drop-zone');
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dz.addEventListener(eventName, preventDefaults, false);
-                document.body.addEventListener(eventName, preventDefaults, false);
-            });
-            ['dragenter', 'dragover'].forEach(eventName => { dz.addEventListener(eventName, highlight, false); });
-            ['dragleave', 'drop'].forEach(eventName => { dz.addEventListener(eventName, unhighlight, false); });
-            dz.addEventListener('drop', handleDrop, false);
+            // LIBRARY DROP ZONE
+            setupDragDrop('drop-zone', handleFiles);
+            // PROFILE DROP ZONE
+            setupDragDrop('profile-drop-zone', handleProfileFile);
         };
 
-        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
-        function highlight(e) { document.getElementById('drop-zone').classList.add('drag-active'); }
-        function unhighlight(e) { document.getElementById('drop-zone').classList.remove('drag-active'); }
-        function handleDrop(e) { const dt = e.dataTransfer; const files = dt.files; handleFiles(files); }
+        function setupDragDrop(id, handler) {
+            const el = document.getElementById(id);
+            if(!el) return;
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(n => {
+                el.addEventListener(n, preventDefaults, false);
+                document.body.addEventListener(n, preventDefaults, false);
+            });
+            ['dragenter', 'dragover'].forEach(n => el.addEventListener(n, ()=>el.classList.add('drag-active'), false));
+            ['dragleave', 'drop'].forEach(n => el.addEventListener(n, ()=>el.classList.remove('drag-active'), false));
+            el.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                handler(dt.files);
+            }, false);
+        }
 
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+        // LIBRARY HANDLER
         async function handleFiles(files) {
             if(!files || files.length === 0) return;
             const title = document.getElementById('dz-title');
             const sub = document.getElementById('dz-sub');
             const originalTitle = "GLISSEZ VOS IMAGES ICI";
-            const originalSub = "ou Cliquez pour parcourir";
             
             const uid = auth.currentUser.uid;
             let count = 0;
@@ -338,7 +364,7 @@
             title.innerText = "✅ TERMINÉ !";
             sub.innerText = `${count} images ajoutées.`;
             refreshLibraryData();
-            setTimeout(() => { title.innerText = originalTitle; sub.innerText = originalSub; }, 2000);
+            setTimeout(() => { title.innerText = originalTitle; sub.innerText = "ou Cliquez pour parcourir"; }, 2000);
         }
 
         function uploadSingleFile(file, uid) {
@@ -349,6 +375,27 @@
                     .then(url => { db.ref(`users/${uid}/library`).push(url).then(() => resolve(url)); })
                     .catch(err => reject(err));
             });
+        }
+
+        // PROFILE LOGO HANDLER
+        function handleProfileFile(files) {
+            if(!files || files.length === 0) return;
+            const file = files[0]; 
+            const uid = auth.currentUser.uid;
+            const storageRef = storage.ref(`mj_profile_logos/${uid}/logo`); 
+            
+            document.getElementById('prof-logo-placeholder').style.opacity = '0.3';
+            
+            storageRef.put(file)
+                .then(snapshot => snapshot.ref.getDownloadURL())
+                .then(url => {
+                    document.getElementById('prof-logo-placeholder').style.display = 'none';
+                    const img = document.getElementById('prof-logo-preview');
+                    img.src = url;
+                    img.style.display = 'block';
+                    document.getElementById('prof-logo-url').value = url;
+                })
+                .catch(err => alert("Erreur upload profil : " + err.message));
         }
         // ------------------------------------
 
@@ -402,7 +449,6 @@
                 const data = snap.val() || {};
                 mjProfileData = data;
                 
-                // MIGRATION AUTO
                 if (!data.library && data.customLogos) {
                     let migratedLib = {};
                     Object.values(data.customLogos).forEach((url, idx) => {
@@ -476,12 +522,6 @@
             });
         }
 
-        // Ancienne fonction conservée pour bouton input classique
-        function uploadToLibrary(input) {
-            if (!input.files) return;
-            handleFiles(input.files);
-        }
-
         function deleteFromLibrary(key) {
             if(confirm("Supprimer cette image définitivement de votre bibliothèque ?")) {
                 const uid = auth.currentUser.uid;
@@ -535,8 +575,15 @@
 
         function updateLogoPreview(url) {
             const preview = document.getElementById('prof-logo-preview');
-            if(url) { preview.src = url; preview.style.display = 'block'; }
-            else { preview.style.display = 'none'; }
+            const placeholder = document.getElementById('prof-logo-placeholder');
+            if(url) { 
+                preview.src = url; 
+                preview.style.display = 'block'; 
+                placeholder.style.display = 'none';
+            } else { 
+                preview.style.display = 'none'; 
+                placeholder.style.display = 'block';
+            }
         }
 
         function showProfile() {
@@ -551,54 +598,26 @@
                 document.getElementById('prof-nom').value = mjProfileData.nom || "";
                 document.getElementById('prof-prenom').value = mjProfileData.prenom || "";
                 const currentLogo = mjProfileData.customLogo || "";
-                document.getElementById('prof-logo').value = currentLogo;
+                
+                document.getElementById('prof-logo-url').value = currentLogo;
                 updateLogoPreview(currentLogo);
+                
                 document.getElementById('prof-link').value = mjProfileData.customLink || "";
                 
                 const isGuest = mjProfileData.isGuest === true;
-                const inputs = ['prof-nom','prof-prenom','prof-logo','prof-link','prof-pass','prof-pass-conf'];
+                const inputs = ['prof-nom','prof-prenom','prof-link','prof-pass','prof-pass-conf'];
                 inputs.forEach(id => document.getElementById(id).disabled = isGuest);
                 document.getElementById('btn-save-profile').disabled = isGuest;
-                document.getElementById('label-logo-upload').style.display = isGuest ? 'none' : 'flex';
                 
-                let warnMsg = document.getElementById('guest-warning');
-                if(isGuest) {
-                    if(!warnMsg) {
-                        warnMsg = document.createElement('div');
-                        warnMsg.id = 'guest-warning';
-                        warnMsg.style.background = 'rgba(241, 196, 15, 0.2)';
-                        warnMsg.style.border = '1px solid var(--accent)';
-                        warnMsg.style.padding = '10px';
-                        warnMsg.style.borderRadius = '8px';
-                        warnMsg.style.color = 'var(--accent)';
-                        warnMsg.style.marginBottom = '15px';
-                        warnMsg.innerHTML = "<b>🔒 Mode Découverte</b><br><small>Personnalisation et changement de mot de passe désactivés.</small>";
-                        document.getElementById('prof-nom').parentNode.insertBefore(warnMsg, document.getElementById('prof-nom'));
-                    }
-                } else if(warnMsg) warnMsg.remove();
+                const dz = document.getElementById('profile-drop-zone');
+                if(isGuest) { dz.style.opacity = '0.5'; dz.style.pointerEvents = 'none'; }
+                else { dz.style.opacity = '1'; dz.style.pointerEvents = 'auto'; }
             }
         }
 
         function closeProfile() {
             document.getElementById('screen-profile').style.display = "none";
             document.getElementById(previousScreen).style.display = "block";
-        }
-
-        function uploadProfileLogo(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            const reader = new FileReader();
-            const btnLabel = document.getElementById('label-logo-upload');
-            const oldText = btnLabel.innerText;
-            btnLabel.innerText = "⏳";
-            reader.onloadend = function() {
-                const base64String = reader.result;
-                document.getElementById('prof-logo').value = base64String;
-                updateLogoPreview(base64String);
-                btnLabel.innerText = "✅";
-                setTimeout(() => btnLabel.innerText = oldText, 2000);
-            };
-            reader.readAsDataURL(file);
         }
 
         function saveProfile() {
@@ -618,7 +637,7 @@
             const updates = {
                 nom: document.getElementById('prof-nom').value.trim(),
                 prenom: document.getElementById('prof-prenom').value.trim(),
-                customLogo: document.getElementById('prof-logo').value.trim(),
+                customLogo: document.getElementById('prof-logo-url').value.trim(), // From hidden input
                 customLink: document.getElementById('prof-link').value.trim()
             };
             db.ref('users/' + user.uid).update(updates).then(() => {
