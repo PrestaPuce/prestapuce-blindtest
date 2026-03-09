@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.134)</title>
+    <title>Presta'Puce - Blind Test (v1.135)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -166,7 +166,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.134</div>
+    <div class="version-tag">v1.135</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -442,9 +442,9 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.134";
+        const CLIENT_VERSION = "1.135";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
-        let isExiting = false; // [v1.134] Flag pour sortie volontaire
+        let isExiting = false; 
 
         function compressImage(file, maxWidth, callback) {
             const reader = new FileReader();
@@ -801,14 +801,36 @@
         function showTeamGallery() { document.getElementById('team-crest-choices').style.display = 'none'; document.getElementById('team-crest-gallery').style.display = 'flex'; }
         function handleTeamFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectedTeamCrest=base64; showTeamPreview(); }); } }
         
+        /* CORRECTION DOUBLON (v1.135) */
         function renderTeamCrestPicker() { 
             const c = document.getElementById('team-icon-grid'); c.innerHTML="";
             
-            Object.values(roomLibrary).forEach(url => {
-                createCrestItem(url, c);
-            });
+            const seen = new Set(); 
 
-            for(let i=0; i<30; i++) { createCrestItem(createBlason(i), c); }
+            // 1. Image locale
+            if(selectedTeamCrest && selectedTeamCrest.length > 0) {
+                seen.add(selectedTeamCrest);
+                createCrestItem(selectedTeamCrest, c);
+            }
+
+            // 2. Bibliothèque MJ (Anti-Doublon)
+            if(roomLibrary) {
+                Object.values(roomLibrary).reverse().forEach(url => {
+                    if(!seen.has(url)) {
+                        seen.add(url);
+                        createCrestItem(url, c);
+                    }
+                });
+            }
+
+            // 3. Formes par défaut
+            for(let i=0; i<30; i++) { 
+                const svg = createBlason(i);
+                if(!seen.has(svg)) {
+                    seen.add(svg);
+                    createCrestItem(svg, c); 
+                }
+            }
         }
 
         function createCrestItem(url, container) {
@@ -895,7 +917,7 @@
             roomRef.on('value', snap => { if(!snap.exists()) { handleExit("🛑 La partie a été clôturée.", true); } });
             
             roomRef.child('players/' + myUserID).on('value', snap => { 
-                if (isExiting) return; // [v1.134] Empêche l'alerte si le joueur part volontairement
+                if (isExiting) return; 
                 const d = snap.val(); 
                 if(!d) { if(roomRef) roomRef.off(); alert("Votre compte a été supprimé définitivement."); localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
                 if(d.banned) { if(roomRef) roomRef.off(); alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
