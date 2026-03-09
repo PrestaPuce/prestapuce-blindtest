@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.123)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.124)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -98,7 +98,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.123</div>
+    <div class="version-tag">v1.124</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -390,36 +390,54 @@
         }
 
         function openLibrary() { document.getElementById('modal-library').style.display = 'flex'; renderLibraryGrid(); }
-        function renderLibraryGrid() { const grid = document.getElementById('lib-grid'); grid.innerHTML = ""; Object.keys(mjLibrary).forEach(key => { const url = mjLibrary[key]; const item = document.createElement('div'); item.className = 'lib-item'; item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteFromLibrary('${key}')">X</div>`; grid.appendChild(item); }); }
+        
+        /* CORRECTION TRI BIBLIOTHEQUE (v1.124) */
+        function renderLibraryGrid() { 
+            const grid = document.getElementById('lib-grid'); 
+            grid.innerHTML = ""; 
+            
+            // 1. Recup entrées
+            const entries = Object.entries(mjLibrary);
+            
+            // 2. Separer Nouveaux / Anciens
+            const recent = entries.filter(e => e[0].startsWith('-'));
+            const old = entries.filter(e => !e[0].startsWith('-'));
+            
+            // 3. Trier Nouveaux Chrono Inverse
+            recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
+            
+            // 4. Fusionner
+            const finalOrder = [...recent, ...old];
+            
+            // 5. Afficher
+            finalOrder.forEach(entry => { 
+                const key = entry[0];
+                const url = entry[1];
+                const item = document.createElement('div'); 
+                item.className = 'lib-item'; 
+                item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteFromLibrary('${key}')">X</div>`; 
+                grid.appendChild(item); 
+            }); 
+        }
+
         function deleteFromLibrary(key) { if(confirm("Supprimer cette image définitivement de votre bibliothèque ?")) { const uid = auth.currentUser.uid; db.ref(`users/${uid}/library/${key}`).remove().then(() => { refreshLibraryData(); }); } }
         function toggleDefaultCrests(checked) { showDefaultCrests = checked; const uid = auth.currentUser.uid; db.ref(`users/${uid}/showDefaultCrests`).set(checked); mjProfileData.showDefaultCrests = checked; loadCrestGrid(); }
         function refreshLibraryData() { const uid = auth.currentUser.uid; db.ref(`users/${uid}/library`).once('value').then(snap => { mjLibrary = snap.val() || {}; renderLibraryGrid(); loadCrestGrid(); syncLibraryToRoom(); }); }
         function syncLibraryToRoom() { if(roomID && roomRef) { roomRef.child('library').update(mjLibrary); } }
 
-        /* TRI PAR TIMESTAMP AMELIORÉ (v1.123) */
+        /* CORRECTION TRI SELECTION BLASON (v1.124) */
         function loadCrestGrid() {
             const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
-            
-            // 1. Récupérer les entrées
             const entries = Object.entries(mjLibrary);
-            
-            // 2. Séparer en deux wagons : Nouveaux (tiret) et Anciens (migrés)
             const recent = entries.filter(e => e[0].startsWith('-'));
             const old = entries.filter(e => !e[0].startsWith('-'));
-            
-            // 3. Trier les récents par clé chrono (puis inverser)
             recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
-            
-            // 4. Fusionner : [Plus Récents --> Plus Vieux] + [Archives]
             const finalOrder = [...recent, ...old];
-            
-            // 5. Afficher
             finalOrder.forEach(entry => { createCrestItem(entry[1], grid); });
-            
             if (showDefaultCrests) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); } }
         }
 
-        /* AUTO-SAVE & ECOUTE */
+        /* AUTO-SAVE & ECOUTE (v1.121) */
         function initLibrarySync() {
             roomRef.child('library').on('value', snap => {
                 const roomLib = snap.val() || {};
@@ -565,14 +583,12 @@
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
         }
 
-        /* GESTION AVANCEE EQUIPES (v1.123 - CORRECTION DEFINITIVE) */
+        /* GESTION AVANCEE EQUIPES (v1.124 - CORRECTION TRI + BAN) */
         function renderLobby() {
-            // PANIERS
             let htmlActive = "";
             let htmlInactive = "";
             let htmlBanned = "";
             
-            // SECTIONS
             const scoreList = document.getElementById('score-list'); 
             const iList = document.getElementById('inactive-list'); 
             const bList = document.getElementById('banned-list');
@@ -582,7 +598,7 @@
             let hasBanned = false; 
             let hasInactive = false;
 
-            // --- 1. EQUIPES ---
+            // 1. EQUIPES
             const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
             const inactList = document.getElementById('mj-team-inactive-display'); inactList.innerHTML = "";
             const inactSection = document.getElementById('mj-team-inactive-section');
@@ -614,23 +630,23 @@
             inactSection.style.display = hasTeamInactive ? 'block' : 'none';
             banSection.style.display = hasTeamBanned ? 'block' : 'none';
 
-            // --- 2. JOUEURS (HIERARCHIE STRICTE) ---
+            // 2. JOUEURS
             Object.keys(allPlayersData).forEach(uid => {
                 if (!allPlayersData[uid]) return;
                 const d = allPlayersData[uid]; 
                 const pseudo = d.name; 
 
-                // PRIORITE 1 : BANNI
+                // PANIER 1 : BANNIS
                 if(d.banned === true) {
                     hasBanned = true;
                     htmlBanned += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')">Réhabiliter</button><button style="background:#c0392b; width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
                 }
-                // PRIORITE 2 : INACTIF
+                // PANIER 2 : INACTIFS
                 else if(d.active === false) {
                     hasInactive = true;
                     htmlInactive += `<div class="score-row" style="opacity:0.8; background:rgba(255,255,255,0.05);"><div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts || 0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:#c0392b; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
                 }
-                // PRIORITE 3 : ACTIF
+                // PANIER 3 : ACTIFS
                 else {
                     let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
                     Object.keys(globalTeams).forEach(t => { 
@@ -652,7 +668,7 @@
             iList.innerHTML = htmlInactive;
             bList.innerHTML = htmlBanned;
 
-            // FORCAGE AFFICHAGE
+            // FORCAGE
             bSection.style.display = hasBanned ? "block" : "none";
             iSection.style.display = hasInactive ? "block" : "none"; 
         }
