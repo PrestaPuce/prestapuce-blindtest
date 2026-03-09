@@ -26,32 +26,8 @@
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 1.2rem; }
         
         /* GRILLE BLASONS FLEXBOX (Inverse) */
-        .crest-picker { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 10px; 
-            margin: 10px 0; 
-            background: rgba(0,0,0,0.3); 
-            padding: 15px; 
-            border-radius: 10px; 
-            max-height: 200px; 
-            overflow-y: auto; 
-            justify-content: flex-start;
-        }
-        .crest-wrapper { 
-            width: 50px; 
-            height: 50px;
-            background: #ecf0f1; 
-            padding: 0; 
-            border-radius: 6px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            border: 2px solid transparent; 
-            overflow: hidden;
-            flex-shrink: 0;
-        }
+        .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 200px; overflow-y: auto; justify-content: flex-start; }
+        .crest-wrapper { width: 50px; height: 50px; background: #ecf0f1; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; flex-shrink: 0; }
         .crest-selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: scale(1.1); z-index: 2; }
         .crest-opt { width: 100%; height: 100%; object-fit: contain; }
         
@@ -85,23 +61,7 @@
         .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; }
         
         /* BOUTON DOSSIER OPTIMISÉ (v1.119) */
-        .btn-folder { 
-            background: var(--gold); 
-            color: black; 
-            font-size: 1.4rem; 
-            width: 46px; /* Ajusté */
-            height: 46px; /* Carré */
-            padding: 0; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            margin-bottom: 0; 
-            margin-left: 5px; 
-            box-shadow: 0 4px rgba(0,0,0,0.3); 
-            border-radius: 8px; 
-            cursor: pointer !important; /* Main forcée */
-            flex-shrink: 0; 
-        }
+        .btn-folder { background: var(--gold); color: black; font-size: 1.4rem; width: 46px; height: 46px; padding: 0; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; margin-left: 5px; box-shadow: 0 4px rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer !important; flex-shrink: 0; }
         .btn-folder:hover { transform: scale(1.05); }
 
         .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed #7f8c8d; padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.2); transition: 0.3s; position: relative; margin-bottom: 20px; cursor: pointer; }
@@ -313,6 +273,18 @@
         </div>
     </div>
 
+    <div id="modal-restore-team" class="modal-overlay">
+        <div class="modal-box" style="max-width: 400px;">
+            <h2 style="color:var(--blue); margin-top:0;">RESTAURATION</h2>
+            <p id="restore-team-msg" style="margin-bottom:20px;">Que souhaitez-vous faire ?</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button onclick="confirmRestoreAction('active')" style="background:var(--mj-color);">🟢 RÉACTIVER COMPLÈTEMENT (Score + Joueurs)</button>
+                <button onclick="confirmRestoreAction('inactive')" style="background:#7f8c8d;">⚪ RESTER INACTIVE (Débannir seulement)</button>
+                <button onclick="closeRestoreModal()" style="background:var(--danger);">🔴 ANNULER</button>
+            </div>
+        </div>
+    </div>
+
     <div id="overlay-remote-qr" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:20000; flex-direction:column; align-items:center; justify-content:center;">
         <h2 style="color:white; margin-bottom:20px; text-transform:uppercase; color: #8e44ad;">Télécommande Animateur</h2>
         <div id="qrcode-remote" style="background:white; padding:20px; border-radius:15px; box-shadow: 0 0 30px rgba(142, 68, 173, 0.5);"></div>
@@ -337,7 +309,8 @@
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
         let mjLibrary = {}; 
-        let showDefaultCrests = true; 
+        let showDefaultCrests = true;
+        let pendingRestoreTeam = null; 
 
         /* DRAG & DROP */
         window.onload = function() {
@@ -426,7 +399,6 @@
         /* TRI INVERSÉ ICI (v1.119) */
         function loadCrestGrid() {
             const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
-            // Reverse pour avoir les derniers ajouts en premier
             Object.values(mjLibrary).reverse().forEach(url => { createCrestItem(url, grid); });
             if (showDefaultCrests) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); } }
         }
@@ -437,10 +409,8 @@
                 const roomLib = snap.val() || {};
                 const uid = auth.currentUser.uid;
                 if(!uid) return;
-                
                 const myLibValues = Object.values(mjLibrary);
                 let hasNew = false;
-                
                 Object.values(roomLib).forEach(url => {
                     if(!myLibValues.includes(url)) {
                         db.ref(`users/${uid}/library`).push(url);
@@ -552,7 +522,6 @@
             const n = document.getElementById('t-name').value.trim();
             if(n && selCrest) { 
                 if(mjProfileData.isGuest === true && !editingTeamKey && Object.keys(globalTeams).length >= 2) { alert("🔒 Limité à 2 équipes en Découverte."); return; }
-                
                 if(editingTeamKey && editingTeamKey !== n) { roomRef.child('teams/' + editingTeamKey).remove(); }
                 roomRef.child('teams/' + n).update({ icon: selCrest, active: true, bonus: 0 }); 
                 cancelEdit();
@@ -611,7 +580,7 @@
                             <b style="margin-left:5px; color:var(--danger);">${tKey}</b>
                         </div>
                         <div class="team-controls">
-                            <span class="btn-icon btn-restore" onclick="restoreTeam('${tKey}')" title="Réhabiliter l'équipe">✅</span>
+                            <span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réhabiliter l'équipe">✅</span>
                             <span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span>
                         </div>
                     </div>`;
@@ -629,7 +598,7 @@
                         <div class="team-controls">
                             <button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button>
                             <button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button>
-                            <span class="btn-icon btn-restore" onclick="restoreTeam('${tKey}')" title="Réactiver l'équipe">▶️</span>
+                            <span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réactiver l'équipe">▶️</span>
                             <span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">🚫</span>
                             <span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span>
                         </div>
@@ -649,7 +618,7 @@
                                 <span class="team-bonus-val">${bonus}</span>
                                 <button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button>
                             </div>
-                            <span class="btn-icon btn-pause" onclick="archiveTeam('${tKey}')" title="Désactiver (Pause)">⏸️</span>
+                            <span class="btn-icon btn-pause" onclick="archiveTeam('${tKey}')" title="Désactiver (Pause)">✖</span>
                             <span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">🚫</span>
                             <span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span>
                         </div>
@@ -694,18 +663,28 @@
             iSection.style.display = hasInactive ? "block" : "none"; 
         }
 
-        // --- NOUVELLE LOGIQUE EQUIPE (v1.119) ---
+        // --- LOGIQUE ARCHIVAGE / BAN ---
         function archiveTeam(teamName) {
             if(confirm("Mettre l'équipe " + teamName + " en pause ?\n- Score figé.\n- Joueurs déplacés en Solo.")) {
-                let currentScore = (globalTeams[teamName].bonus || 0);
+                let currentScore = 0;
+                // Calcul du score total réel (Joueurs + Bonus) pour le figer
+                let sumPlayers = 0;
+                Object.values(allPlayersData).forEach(p => {
+                    if(p.teamName === teamName) sumPlayers += (p.pts || 0);
+                });
+                currentScore = sumPlayers + (globalTeams[teamName].bonus || 0);
+
                 let members = [];
                 Object.entries(allPlayersData).forEach(([uid, p]) => {
-                    if(p.teamName === teamName) {
-                        currentScore += (p.pts || 0);
-                        members.push(uid);
-                    }
+                    if(p.teamName === teamName) members.push(uid);
                 });
-                roomRef.child('teams/' + teamName).update({ active: false, frozenScore: currentScore, previousMembers: members });
+
+                roomRef.child('teams/' + teamName).update({ 
+                    active: false, 
+                    frozenScore: currentScore, 
+                    previousMembers: members,
+                    lastState: 'active' // Mémoire
+                });
                 members.forEach(uid => { roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "" }); });
             }
         }
@@ -713,29 +692,88 @@
         function banTeam(teamName) {
             if(confirm("BANNIR l'équipe " + teamName + " ?\n- Invisible pour les joueurs.\n- Joueurs déplacés en Solo.")) {
                 let members = [];
-                Object.entries(allPlayersData).forEach(([uid, p]) => {
-                    if(p.teamName === teamName) {
-                        members.push(uid);
-                    }
+                Object.entries(allPlayersData).forEach(([uid, p]) => { if(p.teamName === teamName) members.push(uid); });
+                
+                // On détermine l'état précédent
+                const wasActive = (globalTeams[teamName].active !== false);
+                const prevState = wasActive ? 'active' : 'inactive';
+
+                roomRef.child('teams/' + teamName).update({ 
+                    active: false, 
+                    banned: true, 
+                    previousMembers: members,
+                    lastState: prevState 
                 });
-                roomRef.child('teams/' + teamName).update({ active: false, banned: true, previousMembers: members });
                 members.forEach(uid => { roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "" }); });
             }
         }
 
-        function restoreTeam(teamName) {
-            if(confirm("Restaurer l'équipe " + teamName + " ?\n- Rappel des anciens membres.")) {
-                const team = globalTeams[teamName];
-                const members = team.previousMembers || [];
-                members.forEach(uid => { if(allPlayersData[uid]) { roomRef.child('players/' + uid).update({ teamName: teamName, teamIcon: team.icon }); } });
+        // --- LOGIQUE RESTAURATION INTELLIGENTE ---
+        function openRestoreModal(teamName) {
+            const team = globalTeams[teamName];
+            // Si l'équipe était active juste avant d'être bannie, ou si elle est inactive : restauration simple
+            if (team.lastState === 'active' || (!team.banned && !team.active)) {
+                if(confirm("Confirmer la réactivation de l'équipe " + teamName + " ?")) {
+                    performRestore(teamName, 'active');
+                }
+            } 
+            // Cas spécial : Elle était inactive avant d'être bannie
+            else {
+                pendingRestoreTeam = teamName;
+                document.getElementById('restore-team-msg').innerText = `L'équipe ${teamName} était EN PAUSE avant d'être bannie.`;
+                document.getElementById('modal-restore-team').style.display = 'flex';
+            }
+        }
+
+        function confirmRestoreAction(mode) {
+            if(pendingRestoreTeam) {
+                performRestore(pendingRestoreTeam, mode);
+                closeRestoreModal();
+            }
+        }
+
+        function closeRestoreModal() {
+            document.getElementById('modal-restore-team').style.display = 'none';
+            pendingRestoreTeam = null;
+        }
+
+        function performRestore(teamName, targetState) {
+            const team = globalTeams[teamName];
+            const members = team.previousMembers || [];
+            
+            if (targetState === 'active') {
+                // On remet les joueurs
+                members.forEach(uid => { 
+                    if(allPlayersData[uid]) { 
+                        roomRef.child('players/' + uid).update({ teamName: teamName, teamIcon: team.icon }); 
+                    } 
+                });
+                // On active tout
                 roomRef.child('teams/' + teamName).update({ active: true, banned: false, frozenScore: null, previousMembers: null });
+            } 
+            else if (targetState === 'inactive') {
+                // On débannit juste, mais on reste inactif (pas de joueurs, score figé)
+                roomRef.child('teams/' + teamName).update({ active: false, banned: false });
             }
         }
 
         function deleteTeamDefinitive(teamName) { if(confirm("⚠️ Supprimer DÉFINITIVEMENT l'équipe " + teamName + " ?")) { roomRef.child('teams/' + teamName).remove(); } }
         // ------------------------------------------
 
-        function updateTeamBonus(teamName, delta) { roomRef.child('teams/' + teamName + '/bonus').transaction(val => (val || 0) + delta); }
+        function updateTeamBonus(teamName, delta) { 
+            const team = globalTeams[teamName];
+            // Si équipe active : on touche au bonus
+            if(team.active !== false) {
+                roomRef.child('teams/' + teamName + '/bonus').transaction(val => (val || 0) + delta); 
+            } else {
+                // Si équipe inactive : on touche au frozenScore ET au bonus (pour la cohérence future)
+                roomRef.child('teams/' + teamName).update({
+                    frozenScore: (team.frozenScore || 0) + delta,
+                    bonus: (team.bonus || 0) + delta
+                });
+            }
+        }
+
         function deletePlayer(uid, name, isActive) { if(isActive) { if(confirm("Voulez-vous rendre " + name + " inactif ?")) roomRef.child('players/' + uid).update({ active: false }); } else { if(confirm("⚠️ ATTENTION : Supprimer définitivement " + name + " ?")) roomRef.child('players/' + uid).remove(); } }
         function forceBuzzer(uid) { const pData = allPlayersData[uid]; if(!pData) return; roomRef.child('gameState').update({ status: 'taken' }); roomRef.child('buzzers').set({ id: uid, pseudo: pData.name, avatar: pData.avatar || "", teamName: pData.teamName || "Solo", teamIcon: pData.teamIcon || "" }); }
         function toggleBlockPlayer(pseudo) { if(currentBlocked[pseudo]) roomRef.child('blockedPlayers/' + pseudo).remove(); else roomRef.child('blockedPlayers/' + pseudo).set(true); }
