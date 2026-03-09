@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.135)</title>
+    <title>Presta'Puce - Blind Test (v1.136)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -166,7 +166,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.135</div>
+    <div class="version-tag">v1.136</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -442,7 +442,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.135";
+        const CLIENT_VERSION = "1.136";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
 
@@ -801,7 +801,7 @@
         function showTeamGallery() { document.getElementById('team-crest-choices').style.display = 'none'; document.getElementById('team-crest-gallery').style.display = 'flex'; }
         function handleTeamFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectedTeamCrest=base64; showTeamPreview(); }); } }
         
-        /* CORRECTION DOUBLON (v1.135) */
+        /* CORRECTION TRI CHRONO (v1.136) */
         function renderTeamCrestPicker() { 
             const c = document.getElementById('team-icon-grid'); c.innerHTML="";
             
@@ -813,9 +813,21 @@
                 createCrestItem(selectedTeamCrest, c);
             }
 
-            // 2. Bibliothèque MJ (Anti-Doublon)
+            // 2. Bibliothèque MJ (Tri Chronologique)
             if(roomLibrary) {
-                Object.values(roomLibrary).reverse().forEach(url => {
+                const entries = Object.entries(roomLibrary);
+                
+                // Separer Nouveaux vs Anciens
+                const recent = entries.filter(e => e[0].startsWith('-'));
+                const old = entries.filter(e => !e[0].startsWith('-'));
+                
+                // Trier les récents (plus récent en premier)
+                recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
+                
+                const finalOrder = [...recent, ...old];
+                
+                finalOrder.forEach(entry => {
+                    const url = entry[1];
                     if(!seen.has(url)) {
                         seen.add(url);
                         createCrestItem(url, c);
