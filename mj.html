@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.121)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.122)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -60,24 +60,8 @@
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: #34495e; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
         .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; }
         
-        /* BOUTON DOSSIER OPTIMISÉ (v1.121) */
-        .btn-folder { 
-            background: var(--gold); 
-            color: black; 
-            font-size: 1.4rem; 
-            width: 45px; /* Hauteur champ texte approx */
-            height: 45px; 
-            padding: 0; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            margin-bottom: 0; 
-            margin-left: 5px; 
-            box-shadow: 0 4px rgba(0,0,0,0.3); 
-            border-radius: 8px; 
-            cursor: pointer !important; 
-            flex-shrink: 0; 
-        }
+        /* BOUTON DOSSIER OPTIMISÉ */
+        .btn-folder { background: var(--gold); color: black; font-size: 1.4rem; width: 45px; height: 45px; padding: 0; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; margin-left: 5px; box-shadow: 0 4px rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer !important; flex-shrink: 0; }
         .btn-folder:hover { transform: scale(1.05); }
 
         .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed #7f8c8d; padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.2); transition: 0.3s; position: relative; margin-bottom: 20px; cursor: pointer; }
@@ -114,7 +98,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.121</div>
+    <div class="version-tag">v1.122</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -412,10 +396,22 @@
         function refreshLibraryData() { const uid = auth.currentUser.uid; db.ref(`users/${uid}/library`).once('value').then(snap => { mjLibrary = snap.val() || {}; renderLibraryGrid(); loadCrestGrid(); syncLibraryToRoom(); }); }
         function syncLibraryToRoom() { if(roomID && roomRef) { roomRef.child('library').update(mjLibrary); } }
 
-        /* TRI INVERSÉ ICI (v1.121) */
+        /* TRI PAR TIMESTAMP (Clé Firebase) (v1.122) */
         function loadCrestGrid() {
             const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
-            Object.values(mjLibrary).reverse().forEach(url => { createCrestItem(url, grid); });
+            
+            // 1. Récupérer les entrées [Clé, URL]
+            const entries = Object.entries(mjLibrary);
+            
+            // 2. Trier par clé (chronologique)
+            entries.sort((a, b) => a[0].localeCompare(b[0]));
+            
+            // 3. Inverser pour avoir le plus récent en premier
+            entries.reverse();
+            
+            // 4. Afficher
+            entries.forEach(entry => { createCrestItem(entry[1], grid); });
+            
             if (showDefaultCrests) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); } }
         }
 
@@ -565,117 +561,98 @@
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
         }
 
-        /* GESTION AVANCEE EQUIPES (v1.121) */
+        /* GESTION AVANCEE EQUIPES (v1.122 - CORRECTION BANNIS) */
         function renderLobby() {
-            const l = document.getElementById('score-list'); l.innerHTML = "";
-            const iList = document.getElementById('inactive-list'); iList.innerHTML = ""; 
+            // PANIERS DE STOCKAGE
+            let htmlActive = "";
+            let htmlInactive = "";
+            let htmlBanned = "";
+            
             const iSection = document.getElementById('inactive-section'); 
+            const bSection = document.getElementById('banned-section');
+            const scoreList = document.getElementById('score-list'); 
+            const iList = document.getElementById('inactive-list'); 
+            const bList = document.getElementById('banned-list');
+            
+            // VIDE LES LISTES HTML
+            scoreList.innerHTML = "";
+            iList.innerHTML = "";
+            bList.innerHTML = "";
+            
+            let hasBanned = false; 
+            let hasInactive = false;
+
+            // --- 1. RENDU EQUIPES ---
             const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
             const inactList = document.getElementById('mj-team-inactive-display'); inactList.innerHTML = "";
             const inactSection = document.getElementById('mj-team-inactive-section');
             const banList = document.getElementById('mj-team-banned-display'); banList.innerHTML = "";
             const banSection = document.getElementById('mj-team-banned-section');
-            const bList = document.getElementById('banned-list'); bList.innerHTML = "";
             
-            let hasBanned = false; let hasInactive = false; let hasTeamInactive = false; let hasTeamBanned = false;
+            let hasTeamInactive = false; 
+            let hasTeamBanned = false;
 
-            // Rendu des équipes
             Object.keys(globalTeams).forEach(tKey => {
                 const team = globalTeams[tKey];
                 const isActive = team.active !== false; 
                 const isBanned = team.banned === true;
                 const bonus = team.bonus || 0;
                 
-                // 1. Equipe Bannie
                 if(isBanned) {
                     hasTeamBanned = true;
-                    banList.innerHTML += `
-                    <div class="team-item banned">
-                        <div style="display:flex; align-items:center;">
-                            <div class="crest-mini-bg" style="opacity:0.6;"><img src="${team.icon}" class="crest-mini"></div>
-                            <b style="margin-left:5px; color:var(--danger);">${tKey}</b>
-                        </div>
-                        <div class="team-controls">
-                            <span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réhabiliter l'équipe">✅</span>
-                            <span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span>
-                        </div>
-                    </div>`;
+                    banList.innerHTML += `<div class="team-item banned"><div style="display:flex; align-items:center;"><div class="crest-mini-bg" style="opacity:0.6;"><img src="${team.icon}" class="crest-mini"></div><b style="margin-left:5px; color:var(--danger);">${tKey}</b></div><div class="team-controls"><span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réhabiliter l'équipe">✅</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span></div></div>`;
                 }
-                // 2. Equipe Inactive (Pause)
                 else if(!isActive) {
                     hasTeamInactive = true;
                     const frozenScore = team.frozenScore || 0;
-                    inactList.innerHTML += `
-                    <div class="team-item inactive">
-                        <div style="display:flex; align-items:center;">
-                            <div class="crest-mini-bg" style="opacity:0.6;"><img src="${team.icon}" class="crest-mini"></div>
-                            <b style="margin-left:5px; color:#95a5a6;">${tKey}</b> <small style="margin-left:5px;">(Score: ${frozenScore})</small>
-                        </div>
-                        <div class="team-controls">
-                            <button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button>
-                            <button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button>
-                            <span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réactiver l'équipe">▶️</span>
-                            <span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">✖</span>
-                            <span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span>
-                        </div>
-                    </div>`;
+                    inactList.innerHTML += `<div class="team-item inactive"><div style="display:flex; align-items:center;"><div class="crest-mini-bg" style="opacity:0.6;"><img src="${team.icon}" class="crest-mini"></div><b style="margin-left:5px; color:#95a5a6;">${tKey}</b> <small style="margin-left:5px;">(Score: ${frozenScore})</small></div><div class="team-controls"><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button><span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réactiver l'équipe">▶️</span><span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">✖</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span></div></div>`;
                 }
-                // 3. Equipe Active
                 else {
-                    tList.innerHTML += `
-                    <div class="team-item">
-                        <div style="display:flex; align-items:center;">
-                            <div class="crest-mini-bg"><img src="${team.icon}" class="crest-mini"></div>
-                            <b style="margin-left:5px;">${tKey}</b>
-                        </div>
-                        <div class="team-controls">
-                            <div class="team-score-ctrl">
-                                <button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button>
-                                <span class="team-bonus-val">${bonus}</span>
-                                <button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button>
-                            </div>
-                            <span class="btn-icon btn-pause" onclick="archiveTeam('${tKey}')" title="Désactiver (Pause)">✖</span>
-                            <span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">🚫</span>
-                            <span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span>
-                        </div>
-                    </div>`;
+                    tList.innerHTML += `<div class="team-item"><div style="display:flex; align-items:center;"><div class="crest-mini-bg"><img src="${team.icon}" class="crest-mini"></div><b style="margin-left:5px;">${tKey}</b></div><div class="team-controls"><div class="team-score-ctrl"><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button><span class="team-bonus-val">${bonus}</span><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button></div><span class="btn-icon btn-pause" onclick="archiveTeam('${tKey}')" title="Désactiver (Pause)">✖</span><span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">🚫</span><span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span></div></div>`;
                 }
             });
             inactSection.style.display = hasTeamInactive ? 'block' : 'none';
             banSection.style.display = hasTeamBanned ? 'block' : 'none';
 
-            // Rendu des joueurs
+            // --- 2. RENDU JOUEURS (SYSTEME PANIERS) ---
             Object.keys(allPlayersData).forEach(uid => {
                 if (!allPlayersData[uid]) return;
                 const d = allPlayersData[uid]; 
                 const pseudo = d.name; 
 
-                // PRIORITE JOUEUR BANNI (v1.121)
+                // --- PANIER 1 : BANNIS ---
                 if(d.banned === true) {
                     hasBanned = true;
-                    bList.innerHTML += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')">Réhabiliter</button><button style="background:#c0392b; width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
-                    return; 
+                    htmlBanned += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')">Réhabiliter</button><button style="background:#c0392b; width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
                 }
-                
-                if(d.active === false) {
+                // --- PANIER 2 : INACTIFS ---
+                else if(d.active === false) {
                     hasInactive = true;
-                    iList.innerHTML += `<div class="score-row" style="opacity:0.8; background:rgba(255,255,255,0.05);"><div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts || 0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:#c0392b; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
-                    return;
+                    htmlInactive += `<div class="score-row" style="opacity:0.8; background:rgba(255,255,255,0.05);"><div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts || 0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:#c0392b; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
                 }
-
-                let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
-                Object.keys(globalTeams).forEach(t => { 
-                    if(globalTeams[t].active !== false && globalTeams[t].banned !== true) { 
-                        teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; 
-                    }
-                });
-                
-                const isBlocked = currentBlocked[pseudo];
-                const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
-                let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
-                
-                l.innerHTML += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Rendre inactif">🗑️</button></div></div>`;
+                // --- PANIER 3 : ACTIFS ---
+                else {
+                    let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
+                    Object.keys(globalTeams).forEach(t => { 
+                        if(globalTeams[t].active !== false && globalTeams[t].banned !== true) { 
+                            teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; 
+                        }
+                    });
+                    
+                    const isBlocked = currentBlocked[pseudo];
+                    const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
+                    let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
+                    
+                    htmlActive += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Rendre inactif">🗑️</button></div></div>`;
+                }
             });
+
+            // INJECTION
+            scoreList.innerHTML = htmlActive;
+            iList.innerHTML = htmlInactive;
+            bList.innerHTML = htmlBanned;
+
+            // AFFICHAGE DES SECTIONS
             bSection.style.display = hasBanned ? "block" : "none";
             iSection.style.display = hasInactive ? "block" : "none"; 
         }
@@ -720,7 +697,6 @@
                     lastState: prevState 
                 });
                 members.forEach(uid => { 
-                    // PAS DE BAN JOUEUR, JUSTE SOLO (v1.121)
                     roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", active: true, banned: false }); 
                 });
             }
@@ -758,7 +734,6 @@
             const members = team.previousMembers || [];
             
             if (targetState === 'active') {
-                // On remet les joueurs si dispo
                 members.forEach(uid => { 
                     if(allPlayersData[uid]) { 
                         roomRef.child('players/' + uid).update({ teamName: teamName, teamIcon: team.icon }); 
