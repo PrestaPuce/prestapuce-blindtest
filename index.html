@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.133)</title>
+    <title>Presta'Puce - Blind Test (v1.134)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -57,7 +57,7 @@
         .choice-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
         .choice-content b { 
             display: block; 
-            font-size: 1.2rem; /* RETOUR A UNE TAILLE NORMALE ET LISIBLE (v1.133) */
+            font-size: 1.2rem; 
             margin-bottom: 3px; 
             color: white; 
             white-space: nowrap; 
@@ -166,7 +166,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.133</div>
+    <div class="version-tag">v1.134</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -442,9 +442,10 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.133";
+        const CLIENT_VERSION = "1.134";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
-        
+        let isExiting = false; // [v1.134] Flag pour sortie volontaire
+
         function compressImage(file, maxWidth, callback) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -471,7 +472,7 @@
             return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${pattern}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`;
         }
 
-        const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app" };
+        const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -894,6 +895,7 @@
             roomRef.on('value', snap => { if(!snap.exists()) { handleExit("🛑 La partie a été clôturée.", true); } });
             
             roomRef.child('players/' + myUserID).on('value', snap => { 
+                if (isExiting) return; // [v1.134] Empêche l'alerte si le joueur part volontairement
                 const d = snap.val(); 
                 if(!d) { if(roomRef) roomRef.off(); alert("Votre compte a été supprimé définitivement."); localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
                 if(d.banned) { if(roomRef) roomRef.off(); alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
@@ -958,6 +960,7 @@
             if(action === 'save') {
                 alert("La création de compte arrive très bientôt !");
                 if(confirm("Tant que l'animateur n'a pas fermé la salle, vous pourrez revenir et récupérer votre score.\n\nVoulez-vous quitter ?")) {
+                    isExiting = true; // [v1.134]
                     setInactiveAndAction(() => {
                         window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
                     });
@@ -965,6 +968,7 @@
             }
             else if(action === 'change') {
                 if(confirm("Quitter cette salle pour en rejoindre une autre ?\nVotre profil sera conservé.")) {
+                    isExiting = true; // [v1.134]
                     setInactiveAndAction(() => {
                         localStorage.removeItem('presta_player_session');
                         localStorage.removeItem('buzz_lastRoom');
@@ -974,6 +978,7 @@
             }
             else if(action === 'exit') {
                 if(confirm("⚠️ Tout effacer et quitter définitivement ?")) {
+                    isExiting = true; // [v1.134]
                     setInactiveAndAction(() => {
                         localStorage.clear(); 
                         window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
