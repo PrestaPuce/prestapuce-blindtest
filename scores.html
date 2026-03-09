@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Scores - Presta'Puce (v1.105)</title>
+    <title>Scores - Presta'Puce (v1.106)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -99,23 +99,17 @@
         
         .pts { font-size: clamp(1rem, 3vh, 2rem); font-weight: 800; background: rgba(0,0,0,0.3); padding: 0 1vw; border-radius: 6px; color: var(--accent); min-width: 4vw; text-align: center; line-height: 1.4; }
         
-        /* --- CORRECTION VISUELLE CADRE VERT (v1.105) --- */
-        /* On utilise box-shadow (inset) pour créer le cadre vert. 
-           Cela garantit un cadre fermé parfait, par dessus la bordure d'origine. */
         .last-buzzed { 
-            border-color: transparent !important; /* On cache la bordure jaune d'origine */
+            border-color: transparent !important; 
             background: rgba(46, 204, 113, 0.4); 
-            
-            /* L'ombre interne (inset) crée le cadre vert, l'autre crée la lueur externe */
-            box-shadow: 
-                inset 0 0 0 0.5vw #2ecc71, 
-                0 0 2vh #2ecc71 !important;
-                
+            box-shadow: inset 0 0 0 0.5vw #2ecc71, 0 0 2vh #2ecc71 !important;
             transform: scale(1.02); 
             z-index: 2; 
         }
         
-        .inactive-card { opacity: 0.3; filter: grayscale(1); border-left-color: #7f8c8d; }
+        /* Style Inactif / Pause */
+        .inactive-card { opacity: 0.6; filter: grayscale(0.8); border-left-color: #7f8c8d; }
+        .pause-badge { background: #7f8c8d; color: white; font-size: 0.5em; padding: 2px 5px; border-radius: 4px; margin-left: 10px; vertical-align: middle; }
 
         /* PODIUM */
         #podium-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 20, 0.98); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; }
@@ -163,7 +157,7 @@
             </a>
             <div class="title-group">
                 <h1>SALLE : <span id="room-title" class="room-highlight">----</span></h1>
-                <div class="version-text">v1.105 (Fix CSS Box-Shadow)</div>
+                <div class="version-text">v1.106 (Active/Inactive/Banned Support)</div>
             </div>
         </div>
     </header>
@@ -199,146 +193,73 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o",
-            authDomain: "prestapuce-buzz.firebaseapp.com",
-            databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "prestapuce-buzz",
-            storageBucket: "prestapuce-buzz.firebasestorage.app",
-            messagingSenderId: "907270883505",
-            appId: "1:907270883505:web:197efec0b99db28180ba90",
-            measurementId: "G-J04SC2DFFF"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90", measurementId: "G-J04SC2DFFF" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
         const urlParams = new URLSearchParams(window.location.search);
         let roomID = urlParams.get('room');
-        if (!roomID) { 
-            roomID = prompt("Entrez le nom de la salle :"); 
-            if (roomID) window.location.search = "?room=" + roomID; 
-        }
+        if (!roomID) { roomID = prompt("Entrez le nom de la salle :"); if (roomID) window.location.search = "?room=" + roomID; }
         
         document.getElementById('room-title').innerText = roomID;
-        
         const roomRef = db.ref('rooms/' + roomID);
-        
         const currentPath = window.location.href.split('?')[0].replace('scores', 'index');
         const playURL = currentPath + "?room=" + roomID;
         
-        new QRCode(document.getElementById("qrcode"), { 
-            text: playURL, 
-            width: 250, 
-            height: 250,
-            correctLevel : QRCode.CorrectLevel.H
-        });
+        new QRCode(document.getElementById("qrcode"), { text: playURL, width: 250, height: 250, correctLevel : QRCode.CorrectLevel.H });
 
         function toggleQRZoom() {
             const qrBox = document.getElementById('qr-box');
             const overlay = document.getElementById('blur-overlay');
-            
-            if (qrBox.classList.contains('zoomed')) {
-                qrBox.classList.remove('zoomed');
-                overlay.classList.remove('active');
-            } else {
-                qrBox.classList.add('zoomed');
-                overlay.classList.add('active');
-            }
+            if (qrBox.classList.contains('zoomed')) { qrBox.classList.remove('zoomed'); overlay.classList.remove('active'); } 
+            else { qrBox.classList.add('zoomed'); overlay.classList.add('active'); }
         }
 
         let scoresData = {}, teamsData = {}, currentBuzzer = null, currentBuzzerId = null;
         let buzzHistory = [];
         let isGameFinished = false;
 
-        roomRef.child('mjLogo').on('value', snap => {
-            if(snap.exists()) {
-                document.getElementById('display-mj-logo').src = snap.val();
-                document.getElementById('page-favicon').href = snap.val();
-            }
-        });
-        
+        roomRef.child('mjLogo').on('value', snap => { if(snap.exists()) { document.getElementById('display-mj-logo').src = snap.val(); document.getElementById('page-favicon').href = snap.val(); } });
         roomRef.child('mjLink').on('value', snap => {
             const linkElement = document.getElementById('mj-logo-link');
-            if(snap.exists() && snap.val() !== "") {
-                linkElement.href = snap.val();
-                linkElement.style.pointerEvents = "auto";
-                document.getElementById('display-mj-logo').style.cursor = "pointer";
-            } else {
-                linkElement.href = "#";
-                linkElement.style.pointerEvents = "none";
-                document.getElementById('display-mj-logo').style.cursor = "default";
-            }
+            if(snap.exists() && snap.val() !== "") { linkElement.href = snap.val(); linkElement.style.pointerEvents = "auto"; document.getElementById('display-mj-logo').style.cursor = "pointer"; } 
+            else { linkElement.href = "#"; linkElement.style.pointerEvents = "none"; document.getElementById('display-mj-logo').style.cursor = "default"; }
         });
 
         function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => { console.log(err); });
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-            }
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => { console.log(err); }); } 
+            else { if (document.exitFullscreen) document.exitFullscreen(); }
         }
-
-        document.addEventListener('keydown', (e) => {
-            if(e.key.toLowerCase() === 'f') toggleFullScreen();
-        });
+        document.addEventListener('keydown', (e) => { if(e.key.toLowerCase() === 'f') toggleFullScreen(); });
 
         let uiTimer;
         document.onmousemove = () => {
             document.getElementById('btn-fullscreen').classList.remove('hide-ui');
             clearTimeout(uiTimer);
-            uiTimer = setTimeout(() => {
-                if(document.fullscreenElement) document.getElementById('btn-fullscreen').classList.add('hide-ui');
-            }, 3000);
+            uiTimer = setTimeout(() => { if(document.fullscreenElement) document.getElementById('btn-fullscreen').classList.add('hide-ui'); }, 3000);
         };
 
         roomRef.child('gameState').on('value', snap => {
             const state = snap.val();
-            if (state && state.status === 'endGame') {
-                isGameFinished = true;
-                showPodium();
-            } else {
-                isGameFinished = false;
-                showLeaderboard();
-            }
+            if (state && state.status === 'endGame') { isGameFinished = true; showPodium(); } 
+            else { isGameFinished = false; showLeaderboard(); }
         });
 
         function showPodium() {
-            document.getElementById('main-view').style.display = 'none';
-            document.getElementById('qr-box').style.display = 'none';
-            document.getElementById('btn-return-podium').style.display = 'none';
-            document.getElementById('blur-overlay').style.display = 'none';
-            
-            const podiumScreen = document.getElementById('podium-screen');
-            podiumScreen.style.display = 'flex';
-
-            let ranking = calculateRanking();
-            const top3 = ranking.slice(0, 3);
-            const container = document.getElementById('podium-display');
-            container.innerHTML = "";
-
+            document.getElementById('main-view').style.display = 'none'; document.getElementById('qr-box').style.display = 'none'; document.getElementById('btn-return-podium').style.display = 'none'; document.getElementById('blur-overlay').style.display = 'none';
+            const podiumScreen = document.getElementById('podium-screen'); podiumScreen.style.display = 'flex';
+            let ranking = calculateRanking(); const top3 = ranking.slice(0, 3); const container = document.getElementById('podium-display'); container.innerHTML = "";
             const visualOrder = [1, 0, 2]; 
-
             visualOrder.forEach(idx => {
                 if (top3[idx]) {
-                    const item = top3[idx];
-                    const rank = idx + 1;
-                    
+                    const item = top3[idx]; const rank = idx + 1;
                     let imgHtml = "";
                     if(rank === 1) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img">`;
                     if(rank === 2) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img">`;
                     if(rank === 3) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img">`;
-
                     let avatarDisplay = item.isTeam ? `<div class="crest-bg" style="width:10vh; height:10vh; margin:0 auto;"><img src="${item.icon}" style="width:100%; height:100%; object-fit:contain;"></div>` : renderAvatar(item.avatar, 50);
-
-                    const div = document.createElement('div');
-                    div.className = `step rank-${rank}`;
-                    div.innerHTML = `
-                        ${imgHtml}
-                        <div class="winner-name">${item.name}</div>
-                        ${avatarDisplay}
-                        <div class="winner-score">${item.pts} pts</div>
-                        <div class="step-block">${rank}</div>
-                    `;
+                    const div = document.createElement('div'); div.className = `step rank-${rank}`;
+                    div.innerHTML = `${imgHtml}<div class="winner-name">${item.name}</div>${avatarDisplay}<div class="winner-score">${item.pts} pts</div><div class="step-block">${rank}</div>`;
                     container.appendChild(div);
                 }
             });
@@ -346,29 +267,66 @@
         }
 
         function showLeaderboard() {
-            document.getElementById('podium-screen').style.display = 'none';
-            document.getElementById('main-view').style.display = 'grid';
-            document.getElementById('qr-box').style.display = 'block';
-            document.getElementById('blur-overlay').style.display = 'block';
-            if (isGameFinished) document.getElementById('btn-return-podium').style.display = 'block';
-            else document.getElementById('btn-return-podium').style.display = 'none';
+            document.getElementById('podium-screen').style.display = 'none'; document.getElementById('main-view').style.display = 'grid'; document.getElementById('qr-box').style.display = 'block'; document.getElementById('blur-overlay').style.display = 'block';
+            if (isGameFinished) document.getElementById('btn-return-podium').style.display = 'block'; else document.getElementById('btn-return-podium').style.display = 'none';
         }
 
+        /* --- CALCUL INTELLIGENT SCORES (v1.106) --- */
         function calculateRanking() {
             const listEquipes = Object.keys(teamsData);
             const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
-            
             let rankingMap = new Map();
 
-            listEquipes.forEach(tName => { rankingMap.set("TEAM_" + tName, { name: tName, pts: 0, icon: teamsData[tName].icon, isTeam: true, count: 0 }); });
+            // 1. Initialiser les équipes
+            listEquipes.forEach(tName => {
+                const team = teamsData[tName];
+                
+                // Si BANNIE => On ignore totalement (invisible)
+                if (team.banned === true) return;
 
+                let score = 0;
+                let active = true;
+
+                if (team.active === false) {
+                    // Si INACTIVE => Score Figé
+                    score = (team.frozenScore || 0);
+                    active = false;
+                } else {
+                    // Si ACTIVE => Bonus de base (les joueurs seront ajoutés après)
+                    score = (team.bonus || 0);
+                }
+
+                rankingMap.set("TEAM_" + tName, { 
+                    name: tName, 
+                    pts: score, 
+                    icon: team.icon, 
+                    isTeam: true, 
+                    count: 0,
+                    isActive: active
+                });
+            });
+
+            // 2. Ajouter les joueurs
             allPlayers.forEach(p => {
                 const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
-                if (statutEquipe !== "Solo") {
-                    let team = rankingMap.get("TEAM_" + statutEquipe);
-                    if (team) { team.pts += (p.pts || 0); if (p.active !== false) team.count++; }
-                } else {
-                    rankingMap.set("SOLO_" + p.name, { name: p.name, pts: (p.pts || 0), avatar: p.avatar, isTeam: false });
+                
+                // Si joueur dans une équipe existante DANS LE MAP (donc non bannie)
+                // ET si l'équipe est ACTIVE (sinon les joueurs ont été kickés en solo normalement, mais sécurité)
+                if (statutEquipe !== "Solo" && rankingMap.has("TEAM_" + statutEquipe)) {
+                    let teamEntry = rankingMap.get("TEAM_" + statutEquipe);
+                    
+                    // On n'ajoute les points des joueurs QUE si l'équipe est active
+                    if (teamEntry.isActive) {
+                        teamEntry.pts += (p.pts || 0);
+                        if (p.active !== false) teamEntry.count++;
+                    }
+                } 
+                // Sinon c'est un Solo
+                else {
+                    // Pour l'affichage Solo, on prend tout le monde sauf les bannis/inactifs
+                    if (p.active !== false && !p.banned) {
+                        rankingMap.set("SOLO_" + p.name, { name: p.name, pts: (p.pts || 0), avatar: p.avatar, isTeam: false, isActive: true });
+                    }
                 }
             });
             return Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts);
@@ -417,10 +375,18 @@
             calculateRanking().forEach(item => {
                 const iconHtml = item.isTeam ? `<div class="crest-bg"><img src="${item.icon}" style="width:4vh; height:4vh;"></div>` : `<span>${renderAvatar(item.avatar)}</span>`;
                 const labelJoueur = (item.count === 1) ? "joueur" : "joueurs";
-                const finalName = item.isTeam ? `${item.name} (${item.count} ${labelJoueur})` : `${item.name} (Solo)`;
+                
+                let finalName = item.name;
+                if (item.isTeam) {
+                    finalName += item.isActive ? ` (${item.count} ${labelJoueur})` : ` <span class="pause-badge">EN PAUSE</span>`;
+                } else {
+                    finalName += " (Solo)";
+                }
+
+                let inactiveClass = item.isActive ? "" : " inactive-card";
 
                 gList.innerHTML += `
-                    <div class="card">
+                    <div class="card${inactiveClass}">
                         <div class="crest">${iconHtml}</div>
                         <div class="info"><b>${finalName}</b></div>
                         <div class="pts">${item.pts}</div>
@@ -445,12 +411,8 @@
 
         function toggleHOF() {
             const overlay = document.getElementById('hof-overlay');
-            if(overlay.style.display === "flex") {
-                overlay.style.display = "none";
-            } else {
-                overlay.style.display = "flex";
-                document.getElementById('hof-list').innerHTML = "<p style='text-align:center;'>Historique global en construction...</p>";
-            }
+            if(overlay.style.display === "flex") { overlay.style.display = "none"; } 
+            else { overlay.style.display = "flex"; document.getElementById('hof-list').innerHTML = "<p style='text-align:center;'>Historique global en construction...</p>"; }
         }
     </script>
 </body>
