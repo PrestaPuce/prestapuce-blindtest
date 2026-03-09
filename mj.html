@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.119)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.120)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -60,7 +60,7 @@
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: #34495e; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
         .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; }
         
-        /* BOUTON DOSSIER OPTIMISÉ (v1.119) */
+        /* BOUTON DOSSIER OPTIMISÉ (v1.120) */
         .btn-folder { background: var(--gold); color: black; font-size: 1.4rem; width: 46px; height: 46px; padding: 0; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; margin-left: 5px; box-shadow: 0 4px rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer !important; flex-shrink: 0; }
         .btn-folder:hover { transform: scale(1.05); }
 
@@ -98,7 +98,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.119</div>
+    <div class="version-tag">v1.120</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -396,14 +396,14 @@
         function refreshLibraryData() { const uid = auth.currentUser.uid; db.ref(`users/${uid}/library`).once('value').then(snap => { mjLibrary = snap.val() || {}; renderLibraryGrid(); loadCrestGrid(); syncLibraryToRoom(); }); }
         function syncLibraryToRoom() { if(roomID && roomRef) { roomRef.child('library').update(mjLibrary); } }
 
-        /* TRI INVERSÉ ICI (v1.119) */
+        /* TRI INVERSÉ ICI (v1.120) */
         function loadCrestGrid() {
             const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
             Object.values(mjLibrary).reverse().forEach(url => { createCrestItem(url, grid); });
             if (showDefaultCrests) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); } }
         }
 
-        /* AUTO-SAVE & ECOUTE (v1.119) */
+        /* AUTO-SAVE & ECOUTE (v1.120) */
         function initLibrarySync() {
             roomRef.child('library').on('value', snap => {
                 const roomLib = snap.val() || {};
@@ -549,7 +549,7 @@
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
         }
 
-        /* GESTION AVANCEE EQUIPES (v1.119) */
+        /* GESTION AVANCEE EQUIPES (v1.120) */
         function renderLobby() {
             const l = document.getElementById('score-list'); l.innerHTML = "";
             const iList = document.getElementById('inactive-list'); iList.innerHTML = ""; 
@@ -663,11 +663,10 @@
             iSection.style.display = hasInactive ? "block" : "none"; 
         }
 
-        // --- LOGIQUE ARCHIVAGE / BAN ---
+        // --- NOUVELLE LOGIQUE EQUIPE (v1.120) ---
         function archiveTeam(teamName) {
             if(confirm("Mettre l'équipe " + teamName + " en pause ?\n- Score figé.\n- Joueurs déplacés en Solo.")) {
                 let currentScore = 0;
-                // Calcul du score total réel (Joueurs + Bonus) pour le figer
                 let sumPlayers = 0;
                 Object.values(allPlayersData).forEach(p => {
                     if(p.teamName === teamName) sumPlayers += (p.pts || 0);
@@ -683,7 +682,7 @@
                     active: false, 
                     frozenScore: currentScore, 
                     previousMembers: members,
-                    lastState: 'active' // Mémoire
+                    lastState: 'active' 
                 });
                 members.forEach(uid => { roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "" }); });
             }
@@ -694,7 +693,6 @@
                 let members = [];
                 Object.entries(allPlayersData).forEach(([uid, p]) => { if(p.teamName === teamName) members.push(uid); });
                 
-                // On détermine l'état précédent
                 const wasActive = (globalTeams[teamName].active !== false);
                 const prevState = wasActive ? 'active' : 'inactive';
 
@@ -711,13 +709,11 @@
         // --- LOGIQUE RESTAURATION INTELLIGENTE ---
         function openRestoreModal(teamName) {
             const team = globalTeams[teamName];
-            // Si l'équipe était active juste avant d'être bannie, ou si elle est inactive : restauration simple
             if (team.lastState === 'active' || (!team.banned && !team.active)) {
                 if(confirm("Confirmer la réactivation de l'équipe " + teamName + " ?")) {
                     performRestore(teamName, 'active');
                 }
             } 
-            // Cas spécial : Elle était inactive avant d'être bannie
             else {
                 pendingRestoreTeam = teamName;
                 document.getElementById('restore-team-msg').innerText = `L'équipe ${teamName} était EN PAUSE avant d'être bannie.`;
@@ -742,17 +738,14 @@
             const members = team.previousMembers || [];
             
             if (targetState === 'active') {
-                // On remet les joueurs
                 members.forEach(uid => { 
                     if(allPlayersData[uid]) { 
                         roomRef.child('players/' + uid).update({ teamName: teamName, teamIcon: team.icon }); 
                     } 
                 });
-                // On active tout
                 roomRef.child('teams/' + teamName).update({ active: true, banned: false, frozenScore: null, previousMembers: null });
             } 
             else if (targetState === 'inactive') {
-                // On débannit juste, mais on reste inactif (pas de joueurs, score figé)
                 roomRef.child('teams/' + teamName).update({ active: false, banned: false });
             }
         }
