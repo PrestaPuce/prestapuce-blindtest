@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Scores - Presta'Puce (v1.106)</title>
+    <title>Scores - Presta'Puce (v1.109)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -18,16 +18,20 @@
         #blur-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 4000; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
         #blur-overlay.active { opacity: 1; pointer-events: auto; }
 
-        /* HEADER (12% de la hauteur) */
+        /* HEADER (Taille conservée, Marge négative pour remonter le contenu) */
         header { 
             display: flex; align-items: center; justify-content: center; 
-            height: 12vh; position: relative; margin-bottom: 1vh; flex-shrink: 0;
+            height: 12vh; position: relative; 
+            margin-bottom: -2vh; /* REMONTE LE TABLEAU VERS LA BULLE */
+            flex-shrink: 0;
+            z-index: 10; /* Assure que la bulle reste au-dessus */
         }
 
         .header-center {
             display: flex; align-items: center; gap: 2vw;
             background: rgba(0,0,0,0.3); padding: 1vh 3vw;
             border-radius: 50px; border: 1px solid rgba(241, 196, 15, 0.3);
+            backdrop-filter: blur(5px); /* Effet moderne si chevauchement */
         }
 
         .title-group { display: flex; flex-direction: column; align-items: center; line-height: 1; }
@@ -67,12 +71,13 @@
         .main-container { 
             display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; 
             flex-grow: 1; padding: 0 1vw; overflow: hidden; 
+            margin-top: 0; /* Colle au header */
         }
         .column-wrapper { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
         
         .column-title { 
             text-align: center; font-size: clamp(1rem, 3vh, 2rem); color: var(--accent); text-transform: uppercase; 
-            margin-bottom: 1vh; border-bottom: 1px solid rgba(241, 196, 15, 0.5); padding-bottom: 0.5vh; flex-shrink: 0; letter-spacing: 1px;
+            margin-bottom: 0.5vh; border-bottom: 1px solid rgba(241, 196, 15, 0.5); padding-bottom: 0.2vh; flex-shrink: 0; letter-spacing: 1px;
         }
         
         #player-list, #global-list { overflow-y: auto; overflow-x: hidden; flex-grow: 1; padding-right: 5px; padding-bottom: 10px; }
@@ -157,7 +162,7 @@
             </a>
             <div class="title-group">
                 <h1>SALLE : <span id="room-title" class="room-highlight">----</span></h1>
-                <div class="version-text">v1.106 (Active/Inactive/Banned Support)</div>
+                <div class="version-text">v1.109</div>
             </div>
         </div>
     </header>
@@ -271,7 +276,7 @@
             if (isGameFinished) document.getElementById('btn-return-podium').style.display = 'block'; else document.getElementById('btn-return-podium').style.display = 'none';
         }
 
-        /* --- CALCUL INTELLIGENT SCORES (v1.106) --- */
+        /* --- CALCUL INTELLIGENT SCORES (v1.106/109) --- */
         function calculateRanking() {
             const listEquipes = Object.keys(teamsData);
             const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
@@ -311,11 +316,10 @@
                 const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
                 
                 // Si joueur dans une équipe existante DANS LE MAP (donc non bannie)
-                // ET si l'équipe est ACTIVE (sinon les joueurs ont été kickés en solo normalement, mais sécurité)
+                // ET si l'équipe est ACTIVE
                 if (statutEquipe !== "Solo" && rankingMap.has("TEAM_" + statutEquipe)) {
                     let teamEntry = rankingMap.get("TEAM_" + statutEquipe);
                     
-                    // On n'ajoute les points des joueurs QUE si l'équipe est active
                     if (teamEntry.isActive) {
                         teamEntry.pts += (p.pts || 0);
                         if (p.active !== false) teamEntry.count++;
