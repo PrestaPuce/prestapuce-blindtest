@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.120)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.121)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -60,8 +60,24 @@
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: #34495e; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
         .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; }
         
-        /* BOUTON DOSSIER OPTIMISÉ (v1.120) */
-        .btn-folder { background: var(--gold); color: black; font-size: 1.4rem; width: 46px; height: 46px; padding: 0; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; margin-left: 5px; box-shadow: 0 4px rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer !important; flex-shrink: 0; }
+        /* BOUTON DOSSIER OPTIMISÉ (v1.121) */
+        .btn-folder { 
+            background: var(--gold); 
+            color: black; 
+            font-size: 1.4rem; 
+            width: 45px; /* Hauteur champ texte approx */
+            height: 45px; 
+            padding: 0; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-bottom: 0; 
+            margin-left: 5px; 
+            box-shadow: 0 4px rgba(0,0,0,0.3); 
+            border-radius: 8px; 
+            cursor: pointer !important; 
+            flex-shrink: 0; 
+        }
         .btn-folder:hover { transform: scale(1.05); }
 
         .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed #7f8c8d; padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.2); transition: 0.3s; position: relative; margin-bottom: 20px; cursor: pointer; }
@@ -98,7 +114,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.120</div>
+    <div class="version-tag">v1.121</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -396,14 +412,14 @@
         function refreshLibraryData() { const uid = auth.currentUser.uid; db.ref(`users/${uid}/library`).once('value').then(snap => { mjLibrary = snap.val() || {}; renderLibraryGrid(); loadCrestGrid(); syncLibraryToRoom(); }); }
         function syncLibraryToRoom() { if(roomID && roomRef) { roomRef.child('library').update(mjLibrary); } }
 
-        /* TRI INVERSÉ ICI (v1.120) */
+        /* TRI INVERSÉ ICI (v1.121) */
         function loadCrestGrid() {
             const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
             Object.values(mjLibrary).reverse().forEach(url => { createCrestItem(url, grid); });
             if (showDefaultCrests) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); } }
         }
 
-        /* AUTO-SAVE & ECOUTE (v1.120) */
+        /* AUTO-SAVE & ECOUTE (v1.121) */
         function initLibrarySync() {
             roomRef.child('library').on('value', snap => {
                 const roomLib = snap.val() || {};
@@ -549,7 +565,7 @@
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
         }
 
-        /* GESTION AVANCEE EQUIPES (v1.120) */
+        /* GESTION AVANCEE EQUIPES (v1.121) */
         function renderLobby() {
             const l = document.getElementById('score-list'); l.innerHTML = "";
             const iList = document.getElementById('inactive-list'); iList.innerHTML = ""; 
@@ -599,7 +615,7 @@
                             <button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button>
                             <button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button>
                             <span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réactiver l'équipe">▶️</span>
-                            <span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">🚫</span>
+                            <span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">✖</span>
                             <span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span>
                         </div>
                     </div>`;
@@ -634,6 +650,7 @@
                 const d = allPlayersData[uid]; 
                 const pseudo = d.name; 
 
+                // PRIORITE JOUEUR BANNI (v1.121)
                 if(d.banned === true) {
                     hasBanned = true;
                     bList.innerHTML += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')">Réhabiliter</button><button style="background:#c0392b; width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
@@ -663,7 +680,7 @@
             iSection.style.display = hasInactive ? "block" : "none"; 
         }
 
-        // --- NOUVELLE LOGIQUE EQUIPE (v1.120) ---
+        // --- NOUVELLE LOGIQUE EQUIPE (v1.121) ---
         function archiveTeam(teamName) {
             if(confirm("Mettre l'équipe " + teamName + " en pause ?\n- Score figé.\n- Joueurs déplacés en Solo.")) {
                 let currentScore = 0;
@@ -702,7 +719,10 @@
                     previousMembers: members,
                     lastState: prevState 
                 });
-                members.forEach(uid => { roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "" }); });
+                members.forEach(uid => { 
+                    // PAS DE BAN JOUEUR, JUSTE SOLO (v1.121)
+                    roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", active: true, banned: false }); 
+                });
             }
         }
 
@@ -738,6 +758,7 @@
             const members = team.previousMembers || [];
             
             if (targetState === 'active') {
+                // On remet les joueurs si dispo
                 members.forEach(uid => { 
                     if(allPlayersData[uid]) { 
                         roomRef.child('players/' + uid).update({ teamName: teamName, teamIcon: team.icon }); 
@@ -755,11 +776,9 @@
 
         function updateTeamBonus(teamName, delta) { 
             const team = globalTeams[teamName];
-            // Si équipe active : on touche au bonus
             if(team.active !== false) {
                 roomRef.child('teams/' + teamName + '/bonus').transaction(val => (val || 0) + delta); 
             } else {
-                // Si équipe inactive : on touche au frozenScore ET au bonus (pour la cohérence future)
                 roomRef.child('teams/' + teamName).update({
                     frozenScore: (team.frozenScore || 0) + delta,
                     bonus: (team.bonus || 0) + delta
