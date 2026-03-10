@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.146)</title>
+    <title>Presta'Puce - Blind Test (v1.147)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -14,7 +14,7 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
-        :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; --grey: #7f8c8d; }
+        :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; --grey: #7f8c8d; --gold: #f39c12; }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
         
         .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; }
@@ -41,6 +41,9 @@
         .cursor { width: 2px; height: 1.2rem; background-color: var(--accent); animation: blink 1s infinite; margin-left: 4px; display: inline-block; }
         .cursor.hidden { display: none; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .pulse { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity:1; transform: scale(1); } 50% { opacity:0.4; transform: scale(0.9); } 100% { opacity:1; transform: scale(1); } }
 
         input[type="text"], input[type="number"] { width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px; flex-shrink: 0; }
         input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
@@ -119,7 +122,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.146</div>
+    <div class="version-tag">v1.147</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -184,6 +187,16 @@
                 <h2>Ton Nom de Scène ?</h2>
                 <input type="text" id="input-pseudo" placeholder="Ex: Batman, Zorro..." maxlength="12">
                 <button class="btn-main" onclick="validatePseudo()">Suivant</button>
+            </div>
+        </div>
+
+        <div id="step-recovery-wait" class="step-screen">
+            <div class="screen-content">
+                <h1 style="color:var(--gold); font-size:2rem; letter-spacing:1px;">EN ATTENTE</h1>
+                <h2 id="recovery-name" style="margin-bottom:10px; color:white; font-size:2.5rem; text-transform:uppercase;">...</h2>
+                <div class="pulse" style="font-size:5rem; margin:20px 0;">⏳</div>
+                <p class="desc" style="font-size:1.1rem; text-align:center;">Demande de récupération envoyée à l'animateur.<br><br>Veuillez patienter pendant qu'il valide votre accès...</p>
+                <button class="btn-secondary" onclick="cancelRecovery()" style="margin-top:40px; border-color:var(--danger); color:var(--danger); font-size:1rem; padding:12px 25px;">❌ Annuler la demande</button>
             </div>
         </div>
 
@@ -401,17 +414,19 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.146";
+        const CLIENT_VERSION = "1.147";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
 
-        // Variables de contrôle pour l'Étape 1.7 et 1.8 (Isolées et protégées)
         let kickedFromTeam = "";
         let reinstatedTeamRef = null;
         let reinstatedTeamCallback = null; 
         let activeTeamRef = null;
         let activeTeamCallback = null; 
         let isRecovering = false; 
+        
+        let recoveryRef = null;
+        let pendingRecoveryUid = null;
 
         let wakeLock = null;
 
@@ -513,7 +528,7 @@
         }
 
         function updateBackButton(currentId) {
-            const noBackScreens = ['step-room', 'step-welcome', 'step-game'];
+            const noBackScreens = ['step-room', 'step-welcome', 'step-game', 'step-recovery-wait'];
             document.getElementById('btn-back-global').style.display = noBackScreens.includes(currentId) ? 'none' : 'flex';
         }
 
@@ -612,19 +627,86 @@
             }
         }
 
+        /* ---------------- ÉTAPE 1.9 : LE SAS DE VALIDATION (v1.147) ---------------- */
         function validatePseudo() {
             const val = document.getElementById('input-pseudo').value.trim();
             const regex = /^[a-zA-Z0-9À-ÿ\s\-_]+$/;
             if (!regex.test(val)) return alert("Caractères autorisés : Lettres, Chiffres, Espaces, Tirets (-), Underscore (_).");
             if(val.length < 2) return alert("Pseudo trop court !");
+            
             roomRef.child('players').once('value', snap => {
-                const players = snap.val() || {}; let nameTaken = false;
-                Object.keys(players).forEach(uid => { if(uid !== myUserID && players[uid].name && players[uid].name.toLowerCase() === val.toLowerCase()) nameTaken = true; });
-                if(nameTaken) return alert("Ce pseudo est déjà pris.");
+                const players = snap.val() || {};
+                let takenUid = null;
+                let isInactive = false;
+                let targetData = null;
+                
+                Object.keys(players).forEach(uid => {
+                    if(uid !== myUserID && players[uid].name && players[uid].name.toLowerCase() === val.toLowerCase()) {
+                        takenUid = uid;
+                        isInactive = (players[uid].active === false);
+                        targetData = players[uid];
+                    }
+                });
+                
+                if(takenUid) {
+                    if (isEditing) { return alert("Ce pseudo est déjà pris."); }
+                    
+                    if(!isInactive) {
+                        return alert("Ce pseudo est déjà pris et le joueur est actuellement en ligne.");
+                    } else {
+                        if (confirm("Ce profil existe déjà mais est inactif.\nVoulez-vous demander à l'animateur de le récupérer ?")) {
+                            startRecoveryProcess(takenUid, targetData);
+                        }
+                        return;
+                    }
+                }
+                
                 if(isEditing) { roomRef.child('players/' + myUserID).update({ name: val }); player.pseudo = val; finishEdit(true); return; }
                 player.pseudo = val; navigateTo('step-avatar');
             });
         }
+
+        function startRecoveryProcess(targetUid, data) {
+            pendingRecoveryUid = targetUid;
+            roomRef.child('players/' + targetUid).update({ recoveryRequest: true });
+            
+            navigateTo('step-recovery-wait');
+            document.getElementById('recovery-name').innerText = data.name;
+            
+            recoveryRef = roomRef.child('players/' + targetUid);
+            recoveryRef.on('value', snap => {
+                const p = snap.val();
+                if(!p) { cancelRecovery("Le profil a été supprimé par l'animateur."); return; }
+                
+                // Le MJ a cliqué sur Accepter
+                if(p.active === true && !p.recoveryRequest) {
+                    if(recoveryRef) recoveryRef.off();
+                    pendingRecoveryUid = null;
+                    
+                    // On vole l'ID du joueur inactif
+                    myUserID = targetUid; 
+                    localStorage.setItem('buzz_userId', myUserID);
+                    player = { pseudo: p.name, avatar: p.avatar, team: p.teamName || "Solo", teamIcon: p.teamIcon || "" };
+                    
+                    showReconnectScreen(); 
+                } 
+                // Le MJ a cliqué sur Refuser (il a retiré la requête mais laissé inactif)
+                else if (p.active === false && p.recoveryRequest == null) {
+                    cancelRecovery("L'animateur a refusé votre demande de reconnexion.");
+                }
+            });
+        }
+
+        function cancelRecovery(msg) {
+            if(recoveryRef) recoveryRef.off();
+            if(pendingRecoveryUid) {
+                roomRef.child('players/' + pendingRecoveryUid).update({ recoveryRequest: null });
+                pendingRecoveryUid = null;
+            }
+            if(msg && typeof msg === 'string') alert(msg);
+            navigateTo('step-pseudo', false);
+        }
+        /* ---------------- FIN ÉTAPE 1.9 ---------------- */
 
         function showAvatarGallery() { document.getElementById('avatar-choices').style.display = 'none'; document.getElementById('avatar-gallery-view').style.display = 'flex'; }
         function handleFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectAvatar(base64); }); } }
@@ -732,7 +814,6 @@
             if(bgImg.length > 20) { buzzerBg.src = bgImg; buzzerBg.style.display = "block"; } else { buzzerBg.style.display = "none"; }
         }
 
-        /* FIX 1.146 : ISOLATION DES CALLBACKS */
         function monitorTeamChanges(teamName) {
             if (currentWatchedTeam === teamName) return; 
             if (activeTeamRef && activeTeamCallback) { activeTeamRef.off('value', activeTeamCallback); activeTeamRef = null; activeTeamCallback = null; }
@@ -751,7 +832,7 @@
 
         function checkWhyKickedAndShowModal(teamName) {
             kickedFromTeam = teamName; 
-            monitorReinstatedTeam(teamName); // Armement du traqueur
+            monitorReinstatedTeam(teamName);
             roomRef.child('teams/' + teamName).once('value', snap => {
                 const t = snap.val(); const msgEl = document.getElementById('kicked-msg');
                 if (!t || t.banned) { msgEl.innerHTML = `L'animateur a banni l'équipe <b>${teamName}</b>.<br><br>S'il décide de la réhabiliter, tu auras la possibilité de la rejoindre à nouveau. Que veux-tu faire en attendant ?`; } 
@@ -767,7 +848,6 @@
             else if (choice === 'change') { isRecovering = true; navigateTo('step-team-action'); }
         }
 
-        /* LE TRAQUEUR GLOBAL (INDEPENDANT ET SECURISÉ) */
         function monitorReinstatedTeam(teamName) {
             if (reinstatedTeamRef && reinstatedTeamCallback) { reinstatedTeamRef.off('value', reinstatedTeamCallback); }
             reinstatedTeamRef = roomRef.child('teams/' + teamName);
