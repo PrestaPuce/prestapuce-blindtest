@@ -464,8 +464,9 @@
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
 
+        // Variables pour l'Étape 1.7 et 1.8
         let kickedFromTeam = "";
-        let reinstatedTeamRef = null; // Traqueur Étape 1.8
+        let reinstatedTeamRef = null;
 
         let wakeLock = null;
 
@@ -1066,7 +1067,7 @@
                     document.getElementById('reinstated-msg').innerHTML = `L'équipe <b>${teamName}</b> a été réhabilitée par l'animateur !<br><br>Veux-tu la réintégrer ?`;
                     document.getElementById('overlay-team-reinstated').style.display = 'flex';
                     
-                    // On arrête le traqueur
+                    // On arrête le traqueur pour ne pas boucler
                     reinstatedTeamRef.off();
                     reinstatedTeamRef = null;
                 }
@@ -1077,7 +1078,7 @@
             document.getElementById('overlay-team-reinstated').style.display = 'none';
             
             if (choice === 'yes' && kickedFromTeam) {
-                // On récupère le blason (au cas où il ait changé)
+                // On récupère le blason actuel (au cas où il ait changé)
                 roomRef.child('teams/' + kickedFromTeam).once('value', snap => {
                     const t = snap.val();
                     if(t && t.active && !t.banned) {
@@ -1120,6 +1121,7 @@
 
                 const newTeamName = d.teamName || "Solo";
 
+                // Détection de l'éviction par le MJ
                 if (player.team !== "Solo" && newTeamName === "Solo") {
                     checkWhyKickedAndShowModal(player.team);
                 }
