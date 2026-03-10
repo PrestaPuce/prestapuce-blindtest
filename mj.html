@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.133)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.134)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -62,7 +62,6 @@
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: #34495e; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
         .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; cursor:pointer; }
         
-        /* Cacher les flèches de l'input type number */
         input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
@@ -74,8 +73,9 @@
         .profile-drop { width: 150px; height: 150px; margin: 0 auto 5px auto; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #ecf0f1; border: 3px dashed #7f8c8d; }
         .profile-drop img { width: 100%; height: 100%; object-fit: contain; }
         
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; }
-        .modal-box { background: var(--card-bg); padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; text-align: center; border: 2px solid var(--gold); position: relative; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .modal-box { background: var(--card-bg); padding: 30px; border-radius: 15px; width: 100%; max-width: 500px; text-align: center; border: 2px solid var(--gold); position: relative; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
+        
         .lib-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
         .lib-item { position: relative; width: 100%; aspect-ratio: 1; background: #ecf0f1; border-radius: 5px; padding: 0; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #95a5a6; }
         .lib-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
@@ -103,7 +103,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.133</div>
+    <div class="version-tag">v1.134</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -254,6 +254,22 @@
         </div>
     </div>
 
+    <div id="modal-edit-player" class="modal-overlay">
+        <div class="modal-box">
+            <h2 style="color:var(--blue); margin-top:0;">ÉDITER LE JOUEUR</h2>
+            <div id="edit-player-avatar-preview" style="font-size:4rem; margin:10px 0; height:80px; display:flex; justify-content:center; align-items:center;"></div>
+            <button onclick="censorPlayerAvatar()" style="background:var(--danger); width:auto; padding:8px 15px; font-size:0.8rem; margin-bottom:20px;">🚫 Censurer l'Avatar</button>
+
+            <p style="margin:0 0 5px 0; text-align:left; color:#bdc3c7; font-size: 0.9rem;">Pseudo :</p>
+            <input type="text" id="edit-player-name" placeholder="Pseudo du joueur" maxlength="15" style="margin-bottom: 20px;">
+
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button onclick="savePlayerEdit()" style="flex:2; background:var(--mj-color);">💾 ENREGISTRER</button>
+                <button onclick="closeEditPlayerModal()" style="flex:1; background:#7f8c8d;">ANNULER</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-library" class="modal-overlay">
         <div class="modal-box">
             <h2 style="color:var(--gold); margin-top:0;">MA BIBLIOTHÈQUE</h2>
@@ -319,6 +335,11 @@
 
         let currentBuzzerId = null;
         let buzzHistory = [];
+
+        // Variables pour l'édition de joueur (v1.134)
+        let editingPlayerUid = null;
+        let editingPlayerOriginalPseudo = "";
+        let editingPlayerAvatar = "";
 
         /* DRAG & DROP */
         window.onload = function() {
@@ -657,6 +678,7 @@
                 return a.name.localeCompare(b.name);
             });
 
+            // JOUEURS ACTIFS
             activePlayers.forEach(d => {
                 const uid = d.uid; const pseudo = d.name;
                 let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
@@ -665,7 +687,6 @@
                 const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
                 let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
                 const rowClass = (uid === currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
-                
                 const isWarned = d.hasBeenWarned === true;
                 const sanctionBtn = isWarned 
                     ? `<button class="lobby-btn" style="background:#c0392b; margin:0 2px;" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir ce joueur (Carton Rouge)">🟥</button>`
@@ -694,42 +715,130 @@
                 </div>`;
             });
 
+            // SAS DE RECONNEXION
             recoveryPlayers.forEach(d => {
                 hasInactive = true; const uid = d.uid; const pseudo = d.name;
-                htmlInactive += `<div class="score-row airlock-row"><div style="flex:1;"><b>${pseudo}</b> <small style="color:var(--gold); display:block; font-style:italic;">Tentative de reconnexion...</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--success); width:auto; padding:0 10px;" onclick="acceptRecovery('${uid}')" title="Accepter la connexion">✅ Accepter</button><button class="lobby-btn" style="background:var(--danger); width:auto; padding:0 10px; margin-left:5px;" onclick="rejectRecovery('${uid}')" title="Refuser la connexion">❌ Refuser</button></div></div>`;
+                htmlInactive += `
+                <div class="score-row airlock-row">
+                    <div style="flex:1;"><b>${pseudo}</b> <small style="color:var(--gold); display:block; font-style:italic;">Tentative de reconnexion...</small></div>
+                    <div class="player-controls">
+                        <button class="lobby-btn" style="background:var(--blue); width:auto; padding:0 10px; margin-right:5px;" onclick="openEditModal('${uid}')" title="Éditer le profil">✏️</button>
+                        <button class="lobby-btn" style="background:var(--success); width:auto; padding:0 10px;" onclick="acceptRecovery('${uid}')" title="Accepter la connexion">✅ Accepter</button>
+                        <button class="lobby-btn" style="background:var(--danger); width:auto; padding:0 10px; margin-left:5px;" onclick="rejectRecovery('${uid}')" title="Refuser la connexion">❌ Refuser</button>
+                    </div>
+                </div>`;
             });
 
+            // JOUEURS INACTIFS
             inactivePlayers.forEach(d => {
                 hasInactive = true; const uid = d.uid; const pseudo = d.name;
-                htmlInactive += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts || 0} pts)</small></div><div class="player-controls">
-                    <button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${uid}')" title="Réactiver ce joueur">✅</button>
-                    <button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir ce joueur (Carton Rouge)">🟥</button>
-                    <button class="lobby-btn" style="background:gray;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button>
-                </div></div>`;
+                htmlInactive += `
+                <div class="score-row" style="opacity:0.6;">
+                    <div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts || 0} pts)</small></div>
+                    <div class="player-controls">
+                        <button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${uid}')" title="Éditer le profil">✏️</button>
+                        <button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${uid}')" title="Réactiver ce joueur">✅</button>
+                        <button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir ce joueur (Carton Rouge)">🟥</button>
+                        <button class="lobby-btn" style="background:gray;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button>
+                    </div>
+                </div>`;
             });
 
+            // JOUEURS BANNIS
             bannedPlayers.forEach(d => {
                 hasBanned = true; const uid = d.uid; const pseudo = d.name;
-                htmlBanned += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')" title="Réactiver ce joueur">Réhabiliter</button><button style="background:#c0392b; width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
+                htmlBanned += `
+                <div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;">
+                    <span style="color:var(--danger)"><b>${pseudo}</b></span>
+                    <div>
+                        <button style="background:var(--blue); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="openEditModal('${uid}')" title="Éditer le profil">✏️ Éditer</button>
+                        <button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')" title="Réactiver ce joueur">Réhabiliter</button>
+                        <button style="background:#c0392b; width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button>
+                    </div>
+                </div>`;
             });
 
             scoreList.innerHTML = htmlActive; iList.innerHTML = htmlInactive; bList.innerHTML = htmlBanned;
             bSection.style.display = hasBanned ? "block" : "none"; iSection.style.display = hasInactive ? "block" : "none"; 
         }
 
-        function setPlayerScore(uid, val) {
-            let num = parseInt(val, 10);
-            if (isNaN(num)) num = 0;
-            roomRef.child('players/' + uid).update({ pts: num });
+        /* ---------------------------------------------------- */
+        /* MODERATION AVANCÉE (v1.134) - ÉDITION DU PROFIL      */
+        /* ---------------------------------------------------- */
+        function openEditModal(uid) {
+            const pData = allPlayersData[uid];
+            if(!pData) return;
+            editingPlayerUid = uid;
+            editingPlayerOriginalPseudo = pData.name;
+            editingPlayerAvatar = pData.avatar || "";
+
+            document.getElementById('edit-player-name').value = pData.name;
+            updateEditAvatarPreview();
+            document.getElementById('modal-edit-player').style.display = 'flex';
         }
 
+        function closeEditPlayerModal() {
+            document.getElementById('modal-edit-player').style.display = 'none';
+            editingPlayerUid = null;
+        }
+
+        function updateEditAvatarPreview() {
+            const container = document.getElementById('edit-player-avatar-preview');
+            if(editingPlayerAvatar.length > 20) {
+                container.innerHTML = `<img src="${editingPlayerAvatar}" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">`;
+            } else {
+                container.innerText = editingPlayerAvatar || '👤';
+            }
+        }
+
+        function censorPlayerAvatar() {
+            const defaultLogo = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
+            editingPlayerAvatar = defaultLogo;
+            updateEditAvatarPreview();
+        }
+
+        function savePlayerEdit() {
+            if(!editingPlayerUid) return;
+            const val = document.getElementById('edit-player-name').value.trim();
+            const regex = /^[a-zA-Z0-9À-ÿ\s\-_]+$/;
+            if (!regex.test(val)) return alert("Caractères autorisés : Lettres, Chiffres, Espaces, Tirets (-), Underscore (_).");
+            if(val.length < 2) return alert("Pseudo trop court !");
+
+            // Vérification anti-doublon
+            let isTaken = false;
+            Object.keys(allPlayersData).forEach(uid => {
+                if(uid !== editingPlayerUid && allPlayersData[uid].name && allPlayersData[uid].name.toLowerCase() === val.toLowerCase()) {
+                    isTaken = true;
+                }
+            });
+            if(isTaken) return alert("Ce pseudo est déjà utilisé par un autre joueur.");
+
+            const updates = { name: val, avatar: editingPlayerAvatar };
+            roomRef.child('players/' + editingPlayerUid).update(updates).then(() => {
+                
+                // Transfert de la sanction "Bloqué" si le pseudo change
+                if(val !== editingPlayerOriginalPseudo && currentBlocked[editingPlayerOriginalPseudo]) {
+                    roomRef.child('blockedPlayers/' + editingPlayerOriginalPseudo).remove();
+                    roomRef.child('blockedPlayers/' + val).set(true);
+                }
+
+                // Si le joueur est en train de buzzer, on actualise le buzzer
+                if(currentBuzzerId === editingPlayerUid) {
+                    roomRef.child('buzzers').update({ pseudo: val, avatar: editingPlayerAvatar });
+                }
+
+                closeEditPlayerModal();
+            });
+        }
+        /* ---------------------------------------------------- */
+
+        function setPlayerScore(uid, val) { let num = parseInt(val, 10); if (isNaN(num)) num = 0; roomRef.child('players/' + uid).update({ pts: num }); }
+        
         function warnPlayer(uid, name) {
             if(confirm(`Envoyer un avertissement (Carton Jaune) à ${name} ?\nSon écran sera temporairement bloqué par un message d'alerte.`)) {
                 roomRef.child('players/' + uid).update({ hasBeenWarned: true, pendingWarning: true });
             }
         }
-
-        function openEditModal(uid) { alert("La modale d'édition arrivera à l'Étape 2 !"); }
 
         function acceptRecovery(uid) { roomRef.child('players/' + uid).update({ active: true, recoveryRequest: null, reconnectedAt: Date.now() }); }
         function rejectRecovery(uid) { if(confirm("Refuser la reconnexion de ce joueur ?\n(Il restera Inactif)")) { roomRef.child('players/' + uid).update({ recoveryRequest: null }); } }
