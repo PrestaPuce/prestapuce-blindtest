@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.140)</title>
+    <title>Presta'Puce - Blind Test (v1.141)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -166,7 +166,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.140</div>
+    <div class="version-tag">v1.141</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -429,24 +429,29 @@
         </div>
     </div>
 
+    <div id="overlay-team-kicked" class="overlay-full" style="z-index: 3500;">
+        <div class="settings-content" onclick="event.stopPropagation()">
+            <h2 style="color:var(--accent);">ÉQUIPE INDISPONIBLE</h2>
+            <p style="color:#ccc; font-size:1rem; margin-bottom: 25px; line-height: 1.4;" id="kicked-msg">L'animateur a désactivé ton équipe.</p>
+            <button class="btn-main" onclick="handleKickedChoice('solo')" style="margin-bottom: 12px; width: 100%;">Jouer en Solo</button>
+            <button class="settings-btn" onclick="handleKickedChoice('change')" style="border: 1px solid white; text-align: center;">Changer d'Équipe</button>
+        </div>
+    </div>
+
     <div id="podium-zone" class="overlay-full"><div id="podium-content"></div><button class="btn-main" onclick="leaveGame(true)" style="margin-top:30px;">Quitter</button></div>
 
     <audio id="sound-click" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/BUZZER.WAV?alt=media&token=43ced984-3c6a-4167-b0dc-4cd97d7760dd" preload="auto"></audio>
     <audio id="sound-win" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Buzzer%20champion.mp3?alt=media&token=8425ad5e-69a3-4a57-966e-58df8ff39701" preload="auto"></audio>
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
-    <div id="banned-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: red; text-align: center; padding: 20px;">
-        <h1 style="font-size: 4rem;">🚫</h1>
-        <h2>ACCÈS REFUSÉ</h2>
-        <p>Vous avez été banni de cette salle par le Maître du Jeu.</p>
-    </div>
-
     <script>
-        const CLIENT_VERSION = "1.140";
+        const CLIENT_VERSION = "1.141";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
 
-        /* ÉTAPE 1.6 : ANTI-VEILLE (WAKE LOCK) */
+        // Variable pour l'Étape 1.7 et 1.8
+        let kickedFromTeam = "";
+
         let wakeLock = null;
 
         async function requestWakeLock() {
@@ -467,7 +472,6 @@
             }
         }
 
-        // Si le joueur réduit Safari et revient, on relance le Wake Lock s'il est sur le buzzer
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && document.getElementById('step-game').classList.contains('active')) {
                 requestWakeLock();
@@ -939,7 +943,7 @@
             }
             updateGameHeader();
             navigateTo('step-game');
-            requestWakeLock(); // [v1.140] Activation de l'anti-veille
+            requestWakeLock();
             startBuzzer();
         }
 
@@ -1001,6 +1005,40 @@
             }
         }
 
+        /* ÉTAPE 1.7 : FONCTIONS POUR LA MODALE D'INTERRUPTION D'ÉQUIPE */
+        function checkWhyKickedAndShowModal(teamName) {
+            kickedFromTeam = teamName; // Préparation Étape 1.8
+            
+            roomRef.child('teams/' + teamName).once('value', snap => {
+                const t = snap.val();
+                const msgEl = document.getElementById('kicked-msg');
+                
+                if (!t || t.banned) {
+                    msgEl.innerHTML = `L'animateur a dissous l'équipe <b>${teamName}</b>.<br><br>Que veux-tu faire ?`;
+                } else if (t.active === false) {
+                    msgEl.innerHTML = `L'animateur a mis l'équipe <b>${teamName}</b> en pause.<br><br>Tu pourras la retrouver si elle est réactivée. Que veux-tu faire en attendant ?`;
+                } else {
+                    msgEl.innerHTML = `Tu as été retiré de l'équipe <b>${teamName}</b>.<br><br>Que veux-tu faire ?`;
+                }
+                
+                document.getElementById('overlay-team-kicked').style.display = 'flex';
+            });
+        }
+
+        function handleKickedChoice(choice) {
+            document.getElementById('overlay-team-kicked').style.display = 'none';
+            if (choice === 'solo') {
+                // Le joueur accepte de jouer en Solo (Firebase a déjà été mis à jour par le MJ)
+                player.team = "Solo";
+                player.teamIcon = "";
+                updateGameHeader();
+            } else if (choice === 'change') {
+                // Le joueur veut changer, on le renvoie au menu de sélection d'équipe
+                isEditing = true; 
+                navigateTo('step-team-action');
+            }
+        }
+
         function startBuzzer() {
             roomRef.child('buzzers').off(); roomRef.child('gameState').off(); roomRef.child('players/' + myUserID).off();
             roomRef.on('value', snap => { if(!snap.exists()) { handleExit("🛑 La partie a été clôturée.", true); } });
@@ -1017,9 +1055,16 @@
                     return; 
                 }
 
-                player.team = d.teamName;
-                player.teamIcon = d.teamIcon;
-                player.avatar = d.avatar;
+                const newTeamName = d.teamName || "Solo";
+
+                /* ÉTAPE 1.7 : DÉTECTION DE L'ÉVICTION FORCEE */
+                if (player.team !== "Solo" && newTeamName === "Solo") {
+                    checkWhyKickedAndShowModal(player.team);
+                }
+
+                player.team = newTeamName;
+                player.teamIcon = d.teamIcon || "";
+                player.avatar = d.avatar || "";
                 
                 updateGameHeader();
                 monitorTeamChanges(player.team); 
@@ -1070,7 +1115,7 @@
         }
 
         function handleExitAction(action) {
-            releaseWakeLock(); // [v1.140] On libère la veille en quittant
+            releaseWakeLock(); 
             
             if(action === 'save') {
                 alert("La création de compte arrive très bientôt !");
