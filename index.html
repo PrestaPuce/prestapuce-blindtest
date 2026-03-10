@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.147)</title>
+    <title>Presta'Puce - Blind Test (v1.148)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -122,7 +122,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.147</div>
+    <div class="version-tag">v1.148</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -401,22 +401,26 @@
         </div>
     </div>
 
+    <div id="overlay-closing" class="overlay-full" style="z-index: 4000;">
+        <div class="settings-content" onclick="event.stopPropagation()">
+            <h2 style="color:var(--gold); margin-top:0;">PARTIE TERMINÉE 🏁</h2>
+            <p style="color:#ccc; font-size:1rem; margin-bottom: 25px; line-height: 1.4;">L'animateur clôture la salle.<br><br>Veux-tu sauvegarder ton profil et ton score pour tes futures parties ?</p>
+            <button class="btn-main" onclick="handleFinalSave()" style="margin-bottom: 12px; width: 100%; background: var(--success);">💾 Créer un compte <small>(Bientôt)</small></button>
+            <button class="settings-btn" onclick="handleFinalLeave()" style="border: 1px solid var(--danger); color: var(--danger); text-align: center;">🚪 Quitter sans sauvegarder</button>
+        </div>
+    </div>
+
     <div id="podium-zone" class="overlay-full"><div id="podium-content"></div><button class="btn-main" onclick="leaveGame(true)" style="margin-top:30px;">Quitter</button></div>
 
     <audio id="sound-click" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/BUZZER.WAV?alt=media&token=43ced984-3c6a-4167-b0dc-4cd97d7760dd" preload="auto"></audio>
     <audio id="sound-win" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Buzzer%20champion.mp3?alt=media&token=8425ad5e-69a3-4a57-966e-58df8ff39701" preload="auto"></audio>
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
-    <div id="banned-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: red; text-align: center; padding: 20px;">
-        <h1 style="font-size: 4rem;">🚫</h1>
-        <h2>ACCÈS REFUSÉ</h2>
-        <p>Vous avez été banni de cette salle par le Maître du Jeu.</p>
-    </div>
-
     <script>
-        const CLIENT_VERSION = "1.147";
+        const CLIENT_VERSION = "1.148";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
+        let isRoomClosing = false; // v1.148 : Bouclier anti-destruction
 
         let kickedFromTeam = "";
         let reinstatedTeamRef = null;
@@ -627,7 +631,6 @@
             }
         }
 
-        /* ---------------- ÉTAPE 1.9 : LE SAS DE VALIDATION (v1.147) ---------------- */
         function validatePseudo() {
             const val = document.getElementById('input-pseudo').value.trim();
             const regex = /^[a-zA-Z0-9À-ÿ\s\-_]+$/;
@@ -650,13 +653,9 @@
                 
                 if(takenUid) {
                     if (isEditing) { return alert("Ce pseudo est déjà pris."); }
-                    
-                    if(!isInactive) {
-                        return alert("Ce pseudo est déjà pris et le joueur est actuellement en ligne.");
-                    } else {
-                        if (confirm("Ce profil existe déjà mais est inactif.\nVoulez-vous demander à l'animateur de le récupérer ?")) {
-                            startRecoveryProcess(takenUid, targetData);
-                        }
+                    if(!isInactive) { return alert("Ce pseudo est déjà pris et le joueur est actuellement en ligne."); } 
+                    else {
+                        if (confirm("Ce profil existe déjà mais est inactif.\nVoulez-vous demander à l'animateur de le récupérer ?")) { startRecoveryProcess(takenUid, targetData); }
                         return;
                     }
                 }
@@ -677,20 +676,14 @@
             recoveryRef.on('value', snap => {
                 const p = snap.val();
                 if(!p) { cancelRecovery("Le profil a été supprimé par l'animateur."); return; }
-                
-                // Le MJ a cliqué sur Accepter
                 if(p.active === true && !p.recoveryRequest) {
                     if(recoveryRef) recoveryRef.off();
                     pendingRecoveryUid = null;
-                    
-                    // On vole l'ID du joueur inactif
                     myUserID = targetUid; 
                     localStorage.setItem('buzz_userId', myUserID);
                     player = { pseudo: p.name, avatar: p.avatar, team: p.teamName || "Solo", teamIcon: p.teamIcon || "" };
-                    
                     showReconnectScreen(); 
                 } 
-                // Le MJ a cliqué sur Refuser (il a retiré la requête mais laissé inactif)
                 else if (p.active === false && p.recoveryRequest == null) {
                     cancelRecovery("L'animateur a refusé votre demande de reconnexion.");
                 }
@@ -699,14 +692,10 @@
 
         function cancelRecovery(msg) {
             if(recoveryRef) recoveryRef.off();
-            if(pendingRecoveryUid) {
-                roomRef.child('players/' + pendingRecoveryUid).update({ recoveryRequest: null });
-                pendingRecoveryUid = null;
-            }
+            if(pendingRecoveryUid) { roomRef.child('players/' + pendingRecoveryUid).update({ recoveryRequest: null }); pendingRecoveryUid = null; }
             if(msg && typeof msg === 'string') alert(msg);
             navigateTo('step-pseudo', false);
         }
-        /* ---------------- FIN ÉTAPE 1.9 ---------------- */
 
         function showAvatarGallery() { document.getElementById('avatar-choices').style.display = 'none'; document.getElementById('avatar-gallery-view').style.display = 'flex'; }
         function handleFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectAvatar(base64); }); } }
@@ -882,12 +871,16 @@
             } else { kickedFromTeam = ""; }
         }
 
+        /* FIX 1.148 : LE BOUCLIER ANTI-DESTRUCTION DE SALLE */
         function startBuzzer() {
             roomRef.child('buzzers').off(); roomRef.child('gameState').off(); roomRef.child('players/' + myUserID).off();
-            roomRef.on('value', snap => { if(!snap.exists()) { handleExit("🛑 La partie a été clôturée.", true); } });
+            
+            roomRef.on('value', snap => { 
+                if(!snap.exists() && !isExiting && !isRoomClosing) { handleExit("🛑 La partie a été clôturée.", true); } 
+            });
             
             roomRef.child('players/' + myUserID).on('value', snap => { 
-                if (isExiting) return; 
+                if (isExiting || isRoomClosing) return; 
                 const d = snap.val(); 
                 if(!d) { if(roomRef) roomRef.off(); alert("Votre compte a été supprimé définitivement."); localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
                 if(d.banned) { if(roomRef) roomRef.off(); alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
@@ -911,7 +904,13 @@
                 document.getElementById('val-team-score').innerText = total;
             });
 
-            roomRef.child('gameState').on('value', snap => { const st = snap.val(); if (st && st.status === 'endGame') showEndGame(); else { gameState = st ? st.status : 'waiting'; document.getElementById('podium-zone').style.display = 'none'; updateUI(); } });
+            roomRef.child('gameState').on('value', snap => { 
+                const st = snap.val(); 
+                if (st && st.status === 'endGame') showEndGame(); 
+                else if (st && st.status === 'closing') showClosingScreen(); // APPEL DE L'ÉCRAN DE FIN DE PARTIE
+                else { gameState = st ? st.status : 'waiting'; document.getElementById('podium-zone').style.display = 'none'; updateUI(); } 
+            });
+
             roomRef.child('buzzers').on('value', snap => {
                 const val = snap.val(); let buzzId = val ? (val.id || "") : null; let buzzPseudo = val ? val.pseudo : null;
                 if (val && (buzzId === myUserID || buzzPseudo === player.pseudo) && currentWinner !== player.pseudo) { document.getElementById('sound-win').play().catch(()=>{}); if(navigator.vibrate) navigator.vibrate([200, 100, 200]); }
@@ -933,6 +932,20 @@
             } else if(action === 'exit') {
                 if(confirm("⚠️ Tout effacer et quitter définitivement ?")) { isExiting = true; setInactiveAndAction(() => { localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; }); }
             }
+        }
+
+        /* ACTIONS ÉCRAN DE FERMETURE DE SALLE (v1.148) */
+        function showClosingScreen() {
+            isRoomClosing = true;
+            document.getElementById('overlay-closing').style.display = 'flex';
+        }
+        function handleFinalSave() {
+            alert("La création de compte arrive très bientôt !\nTon profil reste néanmoins mémorisé sur ce téléphone pour ta prochaine partie.");
+            window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
+        }
+        function handleFinalLeave() {
+            localStorage.clear();
+            window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
         }
 
         function handlePress(e) { if(e.cancelable) e.preventDefault(); if(isBlocked || currentWinner) return; const btn = document.getElementById('btn-buzz'); btn.classList.add('buzzer-pressed'); if(navigator.vibrate) navigator.vibrate(50); if(gameState === 'waiting') document.getElementById('sound-click').play().catch(()=>{}); if(gameState === 'ready') onBuzzerClick(); }
