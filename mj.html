@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.132)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.133)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -55,13 +55,17 @@
         
         .team-controls { display: flex; align-items: center; gap: 2px; }
         .team-score-ctrl { display: flex; align-items: center; background: rgba(0,0,0,0.3); border-radius: 5px; padding: 2px; margin-right: 5px; }
-        .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: #7f8c8d; box-shadow: none; border-radius: 4px; }
+        .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: #7f8c8d; box-shadow: none; border-radius: 4px; cursor: pointer; color: white; border: none; }
         .team-bonus-val { font-size: 0.9rem; font-weight: bold; margin: 0 8px; color: var(--accent); min-width: 20px; text-align: center; }
 
         .player-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: #34495e; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
         .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; cursor:pointer; }
         
+        /* Cacher les flèches de l'input type number */
+        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+
         .btn-folder { background: var(--gold); color: black; font-size: 1.4rem; width: 45px; height: 45px; padding: 0; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; margin-left: 5px; box-shadow: 0 4px rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer !important; flex-shrink: 0; }
         .btn-folder:hover { transform: scale(1.05); }
 
@@ -99,7 +103,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.132</div>
+    <div class="version-tag">v1.133</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -617,7 +621,6 @@
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
         }
 
-        /* ----- V1.132 : REFONTE DES BOUTONS ET SCORE MODIFIABLE ----- */
         function renderLobby() {
             let htmlActive = ""; let htmlInactive = ""; let htmlBanned = "";
             const scoreList = document.getElementById('score-list'); const iList = document.getElementById('inactive-list'); const bList = document.getElementById('banned-list');
@@ -654,7 +657,6 @@
                 return a.name.localeCompare(b.name);
             });
 
-            // JOUEURS ACTIFS AVEC NOUVELLE DISPOSITION
             activePlayers.forEach(d => {
                 const uid = d.uid; const pseudo = d.name;
                 let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
@@ -697,10 +699,9 @@
                 htmlInactive += `<div class="score-row airlock-row"><div style="flex:1;"><b>${pseudo}</b> <small style="color:var(--gold); display:block; font-style:italic;">Tentative de reconnexion...</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--success); width:auto; padding:0 10px;" onclick="acceptRecovery('${uid}')" title="Accepter la connexion">✅ Accepter</button><button class="lobby-btn" style="background:var(--danger); width:auto; padding:0 10px; margin-left:5px;" onclick="rejectRecovery('${uid}')" title="Refuser la connexion">❌ Refuser</button></div></div>`;
             });
 
-            // UI MODERNISÉE POUR LES INACTIFS (v1.132)
             inactivePlayers.forEach(d => {
                 hasInactive = true; const uid = d.uid; const pseudo = d.name;
-                htmlInactive += `<div class="score-row inactive-card" style="opacity:0.6;"><div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts || 0} pts)</small></div><div class="player-controls">
+                htmlInactive += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts || 0} pts)</small></div><div class="player-controls">
                     <button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${uid}')" title="Réactiver ce joueur">✅</button>
                     <button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir ce joueur (Carton Rouge)">🟥</button>
                     <button class="lobby-btn" style="background:gray;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button>
@@ -716,7 +717,6 @@
             bSection.style.display = hasBanned ? "block" : "none"; iSection.style.display = hasInactive ? "block" : "none"; 
         }
 
-        /* NOUVELLES FONCTIONS DE MODERATION (v1.132) */
         function setPlayerScore(uid, val) {
             let num = parseInt(val, 10);
             if (isNaN(num)) num = 0;
