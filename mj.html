@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.126)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.127)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; }
+        :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; --success: #27ae60; }
         body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         .box { max-width: 400px; margin: 80px auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; }
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: #1a1a1a; color: white; font-size: 1rem; outline: none; margin-bottom: 5px; }
@@ -25,7 +25,6 @@
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 1.2rem; }
         
-        /* GRILLE BLASONS FLEXBOX (Inverse) */
         .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 200px; overflow-y: auto; justify-content: flex-start; }
         .crest-wrapper { width: 50px; height: 50px; background: #ecf0f1; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; flex-shrink: 0; }
         .crest-selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: scale(1.1); z-index: 2; }
@@ -39,11 +38,11 @@
         .team-item.inactive { border: 1px dashed #7f8c8d; background: rgba(0,0,0,0.2); opacity: 0.8; }
         
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; }
+        .score-row.airlock-row { background: rgba(243, 156, 18, 0.15); border: 1px solid var(--gold); }
         
         .crest-mini-bg { background: white; padding: 0; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; width: 30px; height: 30px; align-items: center; justify-content: center; overflow: hidden; }
         .crest-mini { width: 100%; height: 100%; object-fit: contain; }
         
-        /* BOUTONS ACTIONS */
         .btn-icon { cursor: pointer; font-weight: bold; font-size: 1.2rem; margin-left: 8px; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 4px; }
         .btn-icon:hover { background: rgba(255,255,255,0.1); }
         .btn-edit { color: var(--blue); }
@@ -58,9 +57,8 @@
 
         .player-controls { display: flex; align-items: center; gap: 5px; }
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: #34495e; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
-        .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; }
+        .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; cursor:pointer; }
         
-        /* BOUTON DOSSIER OPTIMISÉ */
         .btn-folder { background: var(--gold); color: black; font-size: 1.4rem; width: 45px; height: 45px; padding: 0; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; margin-left: 5px; box-shadow: 0 4px rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer !important; flex-shrink: 0; }
         .btn-folder:hover { transform: scale(1.05); }
 
@@ -98,7 +96,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.126</div>
+    <div class="version-tag">v1.127</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -311,6 +309,10 @@
         let mjLibrary = {}; 
         let showDefaultCrests = true;
         let pendingRestoreTeam = null; 
+
+        // Variables pour le tri (v1.127)
+        let currentBuzzerId = null;
+        let buzzHistory = [];
 
         /* DRAG & DROP */
         window.onload = function() {
@@ -573,25 +575,45 @@
         
         function initMJLogic() {
             roomRef.child('players').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
+            
+            // v1.127 : Enregistrement de l'historique des buzzs pour le tri
             roomRef.child('buzzers').on('value', snap => {
-                const buzzerData = snap.val(); const box = document.getElementById('player-box');
+                const buzzerData = snap.val(); 
+                const box = document.getElementById('player-box');
+                
                 if(buzzerData) { 
-                    let id = buzzerData.id; let pseudo = buzzerData.pseudo; let realData = null;
+                    currentBuzzerId = buzzerData.id;
+                    const pseudo = buzzerData.pseudo;
+                    
+                    // Mise à jour de l'historique
+                    if (pseudo) {
+                        if (!buzzHistory.includes(pseudo)) { buzzHistory.push(pseudo); }
+                        else { buzzHistory = buzzHistory.filter(name => name !== pseudo); buzzHistory.push(pseudo); }
+                    }
+
+                    let id = buzzerData.id; let realData = null;
                     if(id && allPlayersData[id]) { realData = allPlayersData[id]; currentPlayer = { id: id, ...realData }; }
                     else if(pseudo) { for(const [uid, pData] of Object.entries(allPlayersData)) { if(pData.name === pseudo) { realData = pData; currentPlayer = { id: uid, ...realData }; break; } } }
+                    
                     if(realData) {
                         const avatarContainer = document.getElementById('p-avatar');
                         if(realData.avatar && realData.avatar.length > 20) avatarContainer.innerHTML = `<img src="${realData.avatar}" style="width:70px; height:70px; border-radius:50%; object-fit:cover;">`; else avatarContainer.innerHTML = realData.avatar || '👤'; 
                         document.getElementById('p-name').innerText = realData.name; box.style.display = "block";
                         if(realData.teamName && realData.teamName !== "Solo") { const iconUrl = globalTeams[realData.teamName] ? globalTeams[realData.teamName].icon : realData.teamIcon; document.getElementById('p-team').innerHTML = `<div class="crest-mini-bg"><img src="${iconUrl}" class="crest-mini"></div><span>${realData.teamName}</span>`; } else document.getElementById('p-team').innerHTML = "Solo"; 
                     }
-                } else box.style.display = "none"; 
+                } else {
+                    currentBuzzerId = null;
+                    box.style.display = "none"; 
+                }
+                renderLobby(); // On rafraîchit le tri à chaque buzz
             });
+            
             roomRef.child('gameState').on('value', snap => { const st = snap.val() ? snap.val().status : 'waiting'; const btn = document.getElementById('btn-open-buzz'); if(st === 'ready' || st === 'taken') { btn.innerText = "✅ Buzzers Ouverts"; btn.style.background = "#27ae60"; btn.disabled = true; } else { btn.innerText = "Ouvrir Buzzers"; btn.style.background = "#3498db"; btn.disabled = false; } });
             roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
         }
 
+        /* GESTION AVANCEE EQUIPES ET TRI DES LOBBYS (v1.127) */
         function renderLobby() {
             let htmlActive = "";
             let htmlInactive = "";
@@ -615,6 +637,7 @@
             let hasTeamInactive = false; 
             let hasTeamBanned = false;
 
+            // --- EQUIPES ---
             Object.keys(globalTeams).forEach(tKey => {
                 const team = globalTeams[tKey];
                 const isActive = team.active !== false; 
@@ -637,33 +660,95 @@
             inactSection.style.display = hasTeamInactive ? 'block' : 'none';
             banSection.style.display = hasTeamBanned ? 'block' : 'none';
 
-            Object.keys(allPlayersData).forEach(uid => {
-                if (!allPlayersData[uid]) return;
-                const d = allPlayersData[uid]; 
-                const pseudo = d.name; 
+            // --- TRI ET SEPARATION DES JOUEURS (v1.127) ---
+            const activePlayers = [];
+            const inactivePlayers = [];
+            const recoveryPlayers = [];
+            const bannedPlayers = [];
 
-                if(d.banned === true) {
-                    hasBanned = true;
-                    htmlBanned += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')">Réhabiliter</button><button style="background:#c0392b; width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
+            Object.keys(allPlayersData).forEach(uid => {
+                const d = allPlayersData[uid];
+                if (!d) return;
+                d.uid = uid; // Injection de l'ID
+                
+                if (d.banned === true) {
+                    bannedPlayers.push(d);
+                } else if (d.active === false) {
+                    if (d.recoveryRequest === true) recoveryPlayers.push(d); // Le SAS
+                    else inactivePlayers.push(d);
+                } else {
+                    activePlayers.push(d);
                 }
-                else if(d.active === false) {
-                    hasInactive = true;
-                    htmlInactive += `<div class="score-row" style="opacity:0.8; background:rgba(255,255,255,0.05);"><div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts || 0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:#c0392b; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
-                }
-                else {
-                    let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
-                    Object.keys(globalTeams).forEach(t => { 
-                        if(globalTeams[t].active !== false && globalTeams[t].banned !== true) { 
-                            teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; 
-                        }
-                    });
-                    
-                    const isBlocked = currentBlocked[pseudo];
-                    const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
-                    let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
-                    
-                    htmlActive += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Rendre inactif">🗑️</button></div></div>`;
-                }
+            });
+
+            // Tri du Lobby Actif
+            activePlayers.sort((a, b) => {
+                // 1. Le joueur en train de buzzer en haut
+                if (a.uid === currentBuzzerId) return -1;
+                if (b.uid === currentBuzzerId) return 1;
+                
+                // 2. Historique des buzz
+                let indexA = buzzHistory.indexOf(a.name);
+                let indexB = buzzHistory.indexOf(b.name);
+                if (indexA !== -1 && indexB !== -1) return indexB - indexA;
+                if (indexA !== -1) return -1;
+                if (indexB !== -1) return 1;
+                
+                // 3. Les reconnectés tout en bas
+                let recA = a.reconnectedAt || 0;
+                let recB = b.reconnectedAt || 0;
+                if (recA === 0 && recB > 0) return -1; // 'a' est un joueur normal, 'b' est reconnecté
+                if (recA > 0 && recB === 0) return 1;
+                if (recA > 0 && recB > 0) return recA - recB; // Les plus anciens reconnectés en premier
+                
+                // 4. Ordre d'inscription (Tri par défaut)
+                return a.name.localeCompare(b.name);
+            });
+
+            // --- GENERATION HTML JOUEURS ACTIFS ---
+            activePlayers.forEach(d => {
+                const uid = d.uid; const pseudo = d.name;
+                
+                let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
+                Object.keys(globalTeams).forEach(t => { 
+                    if(globalTeams[t].active !== false && globalTeams[t].banned !== true) { 
+                        teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; 
+                    }
+                });
+                
+                const isBlocked = currentBlocked[pseudo];
+                const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
+                let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
+                
+                htmlActive += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Rendre inactif">🗑️</button></div></div>`;
+            });
+
+            // --- GENERATION HTML LE SAS DE VALIDATION (v1.127) ---
+            recoveryPlayers.forEach(d => {
+                hasInactive = true;
+                const uid = d.uid; const pseudo = d.name;
+                htmlInactive += `
+                    <div class="score-row airlock-row">
+                        <div style="flex:1;"><b>${pseudo}</b> <small style="color:var(--gold); display:block; font-style:italic;">Tentative de reconnexion...</small></div>
+                        <div class="player-controls">
+                            <button class="lobby-btn" style="background:var(--success); width:auto; padding:0 10px;" onclick="acceptRecovery('${uid}')">✅ Accepter</button>
+                            <button class="lobby-btn" style="background:var(--danger); width:auto; padding:0 10px; margin-left:5px;" onclick="rejectRecovery('${uid}')">❌ Refuser</button>
+                        </div>
+                    </div>`;
+            });
+
+            // --- GENERATION HTML INACTIFS NORMAUX ---
+            inactivePlayers.forEach(d => {
+                hasInactive = true;
+                const uid = d.uid; const pseudo = d.name;
+                htmlInactive += `<div class="score-row" style="opacity:0.8; background:rgba(255,255,255,0.05);"><div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts || 0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:#c0392b; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
+            });
+
+            // --- GENERATION HTML BANNIS ---
+            bannedPlayers.forEach(d => {
+                hasBanned = true;
+                const uid = d.uid; const pseudo = d.name;
+                htmlBanned += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')">Réhabiliter</button><button style="background:#c0392b; width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
             });
 
             scoreList.innerHTML = htmlActive;
@@ -674,102 +759,66 @@
             iSection.style.display = hasInactive ? "block" : "none"; 
         }
 
+        /* ACTIONS DU SAS DE VALIDATION (v1.127) */
+        function acceptRecovery(uid) {
+            // Le joueur passe en Actif, on efface sa demande, et on lui donne le tag de reconnexion pour le mettre en bas du tri
+            roomRef.child('players/' + uid).update({ active: true, recoveryRequest: null, reconnectedAt: Date.now() });
+        }
+
+        function rejectRecovery(uid) {
+            if(confirm("Refuser la reconnexion de ce joueur ?\n(Il restera Inactif)")) {
+                // On efface sa demande, son téléphone comprendra qu'il a été refusé (étape 1.9)
+                roomRef.child('players/' + uid).update({ recoveryRequest: null });
+            }
+        }
+
+        // --- M.1 CORRIGÉ (v1.126) ---
         function archiveTeam(teamName) {
             if(confirm("Mettre l'équipe " + teamName + " en pause ?\n- Score figé.\n- Joueurs déplacés en Solo.")) {
-                let currentScore = 0;
-                let sumPlayers = 0;
-                Object.values(allPlayersData).forEach(p => {
-                    if(p.teamName === teamName) sumPlayers += (p.pts || 0);
-                });
+                let currentScore = 0; let sumPlayers = 0;
+                Object.values(allPlayersData).forEach(p => { if(p.teamName === teamName) sumPlayers += (p.pts || 0); });
                 currentScore = sumPlayers + (globalTeams[teamName].bonus || 0);
-
-                let members = [];
-                Object.entries(allPlayersData).forEach(([uid, p]) => {
-                    if(p.teamName === teamName) members.push(uid);
-                });
-
-                roomRef.child('teams/' + teamName).update({ 
-                    active: false, 
-                    frozenScore: currentScore, 
-                    previousMembers: members,
-                    lastState: 'active' 
-                });
+                let members = []; Object.entries(allPlayersData).forEach(([uid, p]) => { if(p.teamName === teamName) members.push(uid); });
+                roomRef.child('teams/' + teamName).update({ active: false, frozenScore: currentScore, previousMembers: members, lastState: 'active' });
                 members.forEach(uid => { roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "" }); });
             }
         }
 
         function banTeam(teamName) {
             if(confirm("BANNIR l'équipe " + teamName + " ?\n- Invisible pour les joueurs.\n- Joueurs déplacés en Solo.")) {
-                let members = [];
-                Object.entries(allPlayersData).forEach(([uid, p]) => { if(p.teamName === teamName) members.push(uid); });
-                
-                const wasActive = (globalTeams[teamName].active !== false);
-                const prevState = wasActive ? 'active' : 'inactive';
-
-                roomRef.child('teams/' + teamName).update({ 
-                    active: false, 
-                    banned: true, 
-                    previousMembers: members,
-                    lastState: prevState 
-                });
-                members.forEach(uid => { 
-                    roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", active: true, banned: false }); 
-                });
+                let members = []; Object.entries(allPlayersData).forEach(([uid, p]) => { if(p.teamName === teamName) members.push(uid); });
+                const wasActive = (globalTeams[teamName].active !== false); const prevState = wasActive ? 'active' : 'inactive';
+                roomRef.child('teams/' + teamName).update({ active: false, banned: true, previousMembers: members, lastState: prevState });
+                members.forEach(uid => { roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", active: true, banned: false }); });
             }
         }
 
         function openRestoreModal(teamName) {
             const team = globalTeams[teamName];
             if (team.lastState === 'active' || (!team.banned && !team.active)) {
-                if(confirm("Confirmer la réactivation de l'équipe " + teamName + " ?")) {
-                    performRestore(teamName, 'active');
-                }
-            } 
-            else {
+                if(confirm("Confirmer la réactivation de l'équipe " + teamName + " ?")) { performRestore(teamName, 'active'); }
+            } else {
                 pendingRestoreTeam = teamName;
                 document.getElementById('restore-team-msg').innerText = `L'équipe ${teamName} était EN PAUSE avant d'être bannie.`;
                 document.getElementById('modal-restore-team').style.display = 'flex';
             }
         }
 
-        function confirmRestoreAction(mode) {
-            if(pendingRestoreTeam) {
-                performRestore(pendingRestoreTeam, mode);
-                closeRestoreModal();
-            }
-        }
+        function confirmRestoreAction(mode) { if(pendingRestoreTeam) { performRestore(pendingRestoreTeam, mode); closeRestoreModal(); } }
+        function closeRestoreModal() { document.getElementById('modal-restore-team').style.display = 'none'; pendingRestoreTeam = null; }
 
-        function closeRestoreModal() {
-            document.getElementById('modal-restore-team').style.display = 'none';
-            pendingRestoreTeam = null;
-        }
-
-        /* ÉTAPE M.1 : MODIFICATION DE LA RESTAURATION (v1.126) */
         function performRestore(teamName, targetState) {
             const team = globalTeams[teamName];
-            
-            if (targetState === 'active') {
-                // On réactive l'équipe sans toucher aux joueurs. 
-                // C'est le téléphone du joueur qui décidera de le remettre dedans (Étape 1.8 index).
-                roomRef.child('teams/' + teamName).update({ active: true, banned: false, frozenScore: null, previousMembers: null });
-            } 
-            else if (targetState === 'inactive') {
-                roomRef.child('teams/' + teamName).update({ active: false, banned: false });
-            }
+            if (targetState === 'active') { roomRef.child('teams/' + teamName).update({ active: true, banned: false, frozenScore: null, previousMembers: null }); } 
+            else if (targetState === 'inactive') { roomRef.child('teams/' + teamName).update({ active: false, banned: false }); }
         }
 
         function deleteTeamDefinitive(teamName) { if(confirm("⚠️ Supprimer DÉFINITIVEMENT l'équipe " + teamName + " ?")) { roomRef.child('teams/' + teamName).remove(); } }
-
+        
         function updateTeamBonus(teamName, delta) { 
             const team = globalTeams[teamName];
-            if(team.active !== false) {
-                roomRef.child('teams/' + teamName + '/bonus').transaction(val => (val || 0) + delta); 
-            } else {
-                roomRef.child('teams/' + teamName).update({
-                    frozenScore: (team.frozenScore || 0) + delta,
-                    bonus: (team.bonus || 0) + delta
-                });
-            }
+            if(team.active !== false) { roomRef.child('teams/' + teamName + '/bonus').transaction(val => (val || 0) + delta); } 
+            else { roomRef.child('teams/' + teamName).update({ frozenScore: (team.frozenScore || 0) + delta, bonus: (team.bonus || 0) + delta }); }
         }
 
         function deletePlayer(uid, name, isActive) { if(isActive) { if(confirm("Voulez-vous rendre " + name + " inactif ?")) roomRef.child('players/' + uid).update({ active: false }); } else { if(confirm("⚠️ ATTENTION : Supprimer définitivement " + name + " ?")) roomRef.child('players/' + uid).remove(); } }
