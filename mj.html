@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.127)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.128)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -37,8 +37,18 @@
         .team-item.banned { border: 2px solid var(--danger); background: rgba(231, 76, 60, 0.15); opacity: 0.8; }
         .team-item.inactive { border: 1px dashed #7f8c8d; background: rgba(0,0,0,0.2); opacity: 0.8; }
         
-        .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; }
-        .score-row.airlock-row { background: rgba(243, 156, 18, 0.15); border: 1px solid var(--gold); }
+        .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 5px; transition: all 0.2s ease; border: 2px solid transparent; }
+        .score-row.airlock-row { background: rgba(243, 156, 18, 0.15); border: 2px solid var(--gold); }
+        
+        /* EFFET LUMIERE VERTE POUR LE JOUEUR QUI BUZZ (v1.128) */
+        .score-row.buzzer-active-row { 
+            background: rgba(46, 204, 113, 0.2) !important; 
+            border: 2px solid var(--success) !important; 
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); 
+            transform: scale(1.02); 
+            z-index: 10; 
+            position: relative; 
+        }
         
         .crest-mini-bg { background: white; padding: 0; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; width: 30px; height: 30px; align-items: center; justify-content: center; overflow: hidden; }
         .crest-mini { width: 100%; height: 100%; object-fit: contain; }
@@ -96,7 +106,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.127</div>
+    <div class="version-tag">v1.128</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -310,7 +320,7 @@
         let showDefaultCrests = true;
         let pendingRestoreTeam = null; 
 
-        // Variables pour le tri (v1.127)
+        // Variables pour le tri 
         let currentBuzzerId = null;
         let buzzHistory = [];
 
@@ -576,7 +586,6 @@
         function initMJLogic() {
             roomRef.child('players').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
             
-            // v1.127 : Enregistrement de l'historique des buzzs pour le tri
             roomRef.child('buzzers').on('value', snap => {
                 const buzzerData = snap.val(); 
                 const box = document.getElementById('player-box');
@@ -585,7 +594,6 @@
                     currentBuzzerId = buzzerData.id;
                     const pseudo = buzzerData.pseudo;
                     
-                    // Mise à jour de l'historique
                     if (pseudo) {
                         if (!buzzHistory.includes(pseudo)) { buzzHistory.push(pseudo); }
                         else { buzzHistory = buzzHistory.filter(name => name !== pseudo); buzzHistory.push(pseudo); }
@@ -605,7 +613,7 @@
                     currentBuzzerId = null;
                     box.style.display = "none"; 
                 }
-                renderLobby(); // On rafraîchit le tri à chaque buzz
+                renderLobby(); 
             });
             
             roomRef.child('gameState').on('value', snap => { const st = snap.val() ? snap.val().status : 'waiting'; const btn = document.getElementById('btn-open-buzz'); if(st === 'ready' || st === 'taken') { btn.innerText = "✅ Buzzers Ouverts"; btn.style.background = "#27ae60"; btn.disabled = true; } else { btn.innerText = "Ouvrir Buzzers"; btn.style.background = "#3498db"; btn.disabled = false; } });
@@ -613,7 +621,7 @@
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
         }
 
-        /* GESTION AVANCEE EQUIPES ET TRI DES LOBBYS (v1.127) */
+        /* GESTION AVANCEE EQUIPES ET TRI DES LOBBYS */
         function renderLobby() {
             let htmlActive = "";
             let htmlInactive = "";
@@ -660,7 +668,7 @@
             inactSection.style.display = hasTeamInactive ? 'block' : 'none';
             banSection.style.display = hasTeamBanned ? 'block' : 'none';
 
-            // --- TRI ET SEPARATION DES JOUEURS (v1.127) ---
+            // --- TRI ET SEPARATION DES JOUEURS ---
             const activePlayers = [];
             const inactivePlayers = [];
             const recoveryPlayers = [];
@@ -669,12 +677,12 @@
             Object.keys(allPlayersData).forEach(uid => {
                 const d = allPlayersData[uid];
                 if (!d) return;
-                d.uid = uid; // Injection de l'ID
+                d.uid = uid; 
                 
                 if (d.banned === true) {
                     bannedPlayers.push(d);
                 } else if (d.active === false) {
-                    if (d.recoveryRequest === true) recoveryPlayers.push(d); // Le SAS
+                    if (d.recoveryRequest === true) recoveryPlayers.push(d); 
                     else inactivePlayers.push(d);
                 } else {
                     activePlayers.push(d);
@@ -683,25 +691,21 @@
 
             // Tri du Lobby Actif
             activePlayers.sort((a, b) => {
-                // 1. Le joueur en train de buzzer en haut
                 if (a.uid === currentBuzzerId) return -1;
                 if (b.uid === currentBuzzerId) return 1;
                 
-                // 2. Historique des buzz
                 let indexA = buzzHistory.indexOf(a.name);
                 let indexB = buzzHistory.indexOf(b.name);
                 if (indexA !== -1 && indexB !== -1) return indexB - indexA;
                 if (indexA !== -1) return -1;
                 if (indexB !== -1) return 1;
                 
-                // 3. Les reconnectés tout en bas
                 let recA = a.reconnectedAt || 0;
                 let recB = b.reconnectedAt || 0;
-                if (recA === 0 && recB > 0) return -1; // 'a' est un joueur normal, 'b' est reconnecté
+                if (recA === 0 && recB > 0) return -1; 
                 if (recA > 0 && recB === 0) return 1;
-                if (recA > 0 && recB > 0) return recA - recB; // Les plus anciens reconnectés en premier
+                if (recA > 0 && recB > 0) return recA - recB; 
                 
-                // 4. Ordre d'inscription (Tri par défaut)
                 return a.name.localeCompare(b.name);
             });
 
@@ -720,10 +724,13 @@
                 const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
                 let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
                 
-                htmlActive += `<div class="score-row"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Rendre inactif">🗑️</button></div></div>`;
+                // v1.128 : Injection de la classe lumière verte si le joueur a le buzzer
+                const rowClass = (uid === currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
+                
+                htmlActive += `<div class="${rowClass}"><div style="display:flex; align-items:center; flex:1; overflow:hidden;">${avHtml}<b style="margin-right:10px;">${pseudo}</b><select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select></div><div class="player-controls"><span>(${d.pts || 0} pts)</span><button class="lobby-btn" style="background:var(--accent); color:black; border:none; margin:0 2px;" onclick="forceBuzzer('${uid}')">⚡</button><button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')">🛑</button><button class="lobby-btn" style="background:var(--blue); margin-left: 5px;" onclick="adj('${uid}',-1)">-</button><button class="lobby-btn" style="background:var(--mj-color)" onclick="adj('${uid}',1)">+</button><button class="lobby-btn" style="background:var(--danger)" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir">✖</button><button class="lobby-btn" style="background:gray; margin-left:5px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Rendre inactif">🗑️</button></div></div>`;
             });
 
-            // --- GENERATION HTML LE SAS DE VALIDATION (v1.127) ---
+            // --- GENERATION HTML LE SAS DE VALIDATION ---
             recoveryPlayers.forEach(d => {
                 hasInactive = true;
                 const uid = d.uid; const pseudo = d.name;
@@ -759,20 +766,10 @@
             iSection.style.display = hasInactive ? "block" : "none"; 
         }
 
-        /* ACTIONS DU SAS DE VALIDATION (v1.127) */
-        function acceptRecovery(uid) {
-            // Le joueur passe en Actif, on efface sa demande, et on lui donne le tag de reconnexion pour le mettre en bas du tri
-            roomRef.child('players/' + uid).update({ active: true, recoveryRequest: null, reconnectedAt: Date.now() });
-        }
+        /* ACTIONS DU SAS DE VALIDATION */
+        function acceptRecovery(uid) { roomRef.child('players/' + uid).update({ active: true, recoveryRequest: null, reconnectedAt: Date.now() }); }
+        function rejectRecovery(uid) { if(confirm("Refuser la reconnexion de ce joueur ?\n(Il restera Inactif)")) { roomRef.child('players/' + uid).update({ recoveryRequest: null }); } }
 
-        function rejectRecovery(uid) {
-            if(confirm("Refuser la reconnexion de ce joueur ?\n(Il restera Inactif)")) {
-                // On efface sa demande, son téléphone comprendra qu'il a été refusé (étape 1.9)
-                roomRef.child('players/' + uid).update({ recoveryRequest: null });
-            }
-        }
-
-        // --- M.1 CORRIGÉ (v1.126) ---
         function archiveTeam(teamName) {
             if(confirm("Mettre l'équipe " + teamName + " en pause ?\n- Score figé.\n- Joueurs déplacés en Solo.")) {
                 let currentScore = 0; let sumPlayers = 0;
