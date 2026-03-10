@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.130)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.131)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -22,6 +22,9 @@
         button:active:not(:disabled) { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; }
         
+        /* Override pour le bouton de suppression (v1.131) */
+        .countdown-btn { background: #e67e22 !important; cursor: wait !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(230, 126, 34, 0.6) !important; }
+
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 1.2rem; }
         
@@ -105,7 +108,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.130</div>
+    <div class="version-tag">v1.131</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -516,6 +519,18 @@
 
         function launchDashboard(id, mjName = null) {
             roomID = id;
+            
+            // FIX v1.131 : Nettoyage des variables et des boutons (Correction Effet Fantôme SPA)
+            buzzHistory = [];
+            currentBuzzerId = null;
+            currentPlayer = null;
+            const btnDel = document.getElementById('btn-delete-room');
+            if(btnDel) {
+                btnDel.classList.remove('countdown-btn');
+                btnDel.disabled = false;
+                btnDel.innerText = "⚠️ SUPPRIMER LA SALLE (Effacer tout)";
+            }
+
             document.getElementById('screen-choice').style.display = "none"; 
             document.getElementById('screen-dashboard').style.display = "block";
             document.getElementById('display-room').innerText = roomID;
@@ -812,7 +827,6 @@
         function toggleBlockPlayer(pseudo) { if(currentBlocked[pseudo]) roomRef.child('blockedPlayers/' + pseudo).remove(); else roomRef.child('blockedPlayers/' + pseudo).set(true); }
         function triggerEndGame() { if(confirm("Fin de partie ? Les scores vont être figés.")) { roomRef.child('gameState').set({ status: 'endGame', timestamp: Date.now() }); roomRef.child('buzzers').remove(); } }
         function statusUpdate(st) { if(roomRef) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); } }
-        
         function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
         function adj(uid, v) { roomRef.child('players/'+uid+'/pts').transaction(x => (x||0)+v); }
         function kickPlayer(uid, name) { if(confirm("Bannir " + name + " ?")) roomRef.child('players/' + uid).update({ banned: true, active: false }); }
@@ -822,16 +836,13 @@
         function handleReward(pts, mode) { if(!currentPlayer || !currentPlayer.id) return; roomRef.child('players/' + currentPlayer.id).transaction(c => { return { pts: (c ? c.pts : 0) + pts, name: c.name, avatar: c.avatar, teamName: c.teamName, teamIcon: c.teamIcon, active: true }; }); if(mode === 'partial') { roomRef.child('blockedPlayers/' + currentPlayer.name).set(true); statusUpdate('ready'); } else { fullReset(); } }
         function quitRoom() { if(mjProfileData.isGuest === true) resetFullGame(); else { if(roomRef) roomRef.child('buzzers').off(); checkUserRoom(auth.currentUser.uid); } }
         
-        /* FIX M.4 (v1.130) : SAS DE SORTIE (FERMETURE DOUCE) */
         function resetFullGame() { 
             if(confirm("⚠️ Fermer la salle ?\n\nLes joueurs auront 10 secondes pour sauvegarder leur profil avant la suppression définitive.")) { 
-                
                 roomRef.child('gameState').set({ status: 'closing', timestamp: Date.now() });
-                
                 const btn = document.getElementById('btn-delete-room');
                 if(btn) {
                     btn.disabled = true;
-                    btn.style.background = "#e67e22";
+                    btn.classList.add('countdown-btn');
                     let timeLeft = 10;
                     btn.innerText = `⏳ SUPPRESSION DANS ${timeLeft}s...`;
                     
