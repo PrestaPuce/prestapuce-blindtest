@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.129)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.130)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -105,7 +105,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.129</div>
+    <div class="version-tag">v1.130</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -252,7 +252,7 @@
         <div style="margin-top:40px; border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 12px;">
             <h3 style="color:var(--danger); margin-top:0;">Clôturer la partie</h3>
             <button style="background:var(--blue);" onclick="quitRoom()">🚪 Quitter la salle (Conserver données)</button>
-            <button style="background:var(--danger);" onclick="resetFullGame()">⚠️ SUPPRIMER LA SALLE (Effacer tout)</button>
+            <button id="btn-delete-room" style="background:var(--danger);" onclick="resetFullGame()">⚠️ SUPPRIMER LA SALLE (Effacer tout)</button>
         </div>
     </div>
 
@@ -319,6 +319,7 @@
         let showDefaultCrests = true;
         let pendingRestoreTeam = null; 
 
+        // Variables pour le tri 
         let currentBuzzerId = null;
         let buzzHistory = [];
 
@@ -811,6 +812,7 @@
         function toggleBlockPlayer(pseudo) { if(currentBlocked[pseudo]) roomRef.child('blockedPlayers/' + pseudo).remove(); else roomRef.child('blockedPlayers/' + pseudo).set(true); }
         function triggerEndGame() { if(confirm("Fin de partie ? Les scores vont être figés.")) { roomRef.child('gameState').set({ status: 'endGame', timestamp: Date.now() }); roomRef.child('buzzers').remove(); } }
         function statusUpdate(st) { if(roomRef) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); } }
+        
         function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
         function adj(uid, v) { roomRef.child('players/'+uid+'/pts').transaction(x => (x||0)+v); }
         function kickPlayer(uid, name) { if(confirm("Bannir " + name + " ?")) roomRef.child('players/' + uid).update({ banned: true, active: false }); }
@@ -819,7 +821,42 @@
         function handleError() { if(currentPlayer && currentPlayer.name) { roomRef.child('blockedPlayers/' + currentPlayer.name).set(true); statusUpdate('ready'); } }
         function handleReward(pts, mode) { if(!currentPlayer || !currentPlayer.id) return; roomRef.child('players/' + currentPlayer.id).transaction(c => { return { pts: (c ? c.pts : 0) + pts, name: c.name, avatar: c.avatar, teamName: c.teamName, teamIcon: c.teamIcon, active: true }; }); if(mode === 'partial') { roomRef.child('blockedPlayers/' + currentPlayer.name).set(true); statusUpdate('ready'); } else { fullReset(); } }
         function quitRoom() { if(mjProfileData.isGuest === true) resetFullGame(); else { if(roomRef) roomRef.child('buzzers').off(); checkUserRoom(auth.currentUser.uid); } }
-        function resetFullGame() { if(confirm("⚠️ Supprimer la salle et ses données ?")) { roomRef.remove(); db.ref('activeRooms/' + roomID).remove(); db.ref('users/' + auth.currentUser.uid + '/lastRoom').remove().then(() => { lastSavedRoom = ""; checkUserRoom(auth.currentUser.uid); }); } }
+        
+        /* FIX M.4 (v1.130) : SAS DE SORTIE (FERMETURE DOUCE) */
+        function resetFullGame() { 
+            if(confirm("⚠️ Fermer la salle ?\n\nLes joueurs auront 10 secondes pour sauvegarder leur profil avant la suppression définitive.")) { 
+                
+                roomRef.child('gameState').set({ status: 'closing', timestamp: Date.now() });
+                
+                const btn = document.getElementById('btn-delete-room');
+                if(btn) {
+                    btn.disabled = true;
+                    btn.style.background = "#e67e22";
+                    let timeLeft = 10;
+                    btn.innerText = `⏳ SUPPRESSION DANS ${timeLeft}s...`;
+                    
+                    const interval = setInterval(() => {
+                        timeLeft--;
+                        btn.innerText = `⏳ SUPPRESSION DANS ${timeLeft}s...`;
+                        if(timeLeft <= 0) {
+                            clearInterval(interval);
+                            executeRoomDeletion();
+                        }
+                    }, 1000);
+                } else {
+                    setTimeout(executeRoomDeletion, 10000);
+                }
+            } 
+        }
+
+        function executeRoomDeletion() {
+            roomRef.remove(); 
+            db.ref('activeRooms/' + roomID).remove(); 
+            db.ref('users/' + auth.currentUser.uid + '/lastRoom').remove().then(() => { 
+                lastSavedRoom = ""; 
+                checkUserRoom(auth.currentUser.uid); 
+            });
+        }
     </script>
 </body>
 </html>
