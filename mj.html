@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.125)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.126)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -98,7 +98,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.125</div>
+    <div class="version-tag">v1.126</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -278,7 +278,7 @@
             <h2 style="color:var(--blue); margin-top:0;">RESTAURATION</h2>
             <p id="restore-team-msg" style="margin-bottom:20px;">Que souhaitez-vous faire ?</p>
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <button onclick="confirmRestoreAction('active')" style="background:var(--mj-color);">🟢 RÉACTIVER COMPLÈTEMENT (Score + Joueurs)</button>
+                <button onclick="confirmRestoreAction('active')" style="background:var(--mj-color);">🟢 RÉACTIVER L'ÉQUIPE</button>
                 <button onclick="confirmRestoreAction('inactive')" style="background:#7f8c8d;">⚪ RESTER INACTIVE (Débannir seulement)</button>
                 <button onclick="closeRestoreModal()" style="background:var(--danger);">🔴 ANNULER</button>
             </div>
@@ -391,7 +391,6 @@
 
         function openLibrary() { document.getElementById('modal-library').style.display = 'flex'; renderLibraryGrid(); }
         
-        /* TRI BIBLIOTHEQUE (v1.124) */
         function renderLibraryGrid() { 
             const grid = document.getElementById('lib-grid'); 
             grid.innerHTML = ""; 
@@ -411,18 +410,15 @@
             }); 
         }
 
-        /* MODERATION AUTOMATIQUE (v1.125) */
         function deleteFromLibrary(key) {
             if(confirm("Supprimer cette image ?\nSi elle est utilisée par une équipe, elle sera remplacée par votre logo.")) {
                 const uid = auth.currentUser.uid;
                 const urlToDelete = mjLibrary[key];
 
                 if(urlToDelete) {
-                    // 1. SCAN & REMPLACEMENT
                     if(globalTeams) {
                         Object.keys(globalTeams).forEach(tKey => {
                             if(globalTeams[tKey].icon === urlToDelete) {
-                                // Fallback : Logo MJ ou Logo par défaut du site
                                 const fallbackUrl = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
                                 roomRef.child('teams/' + tKey).update({ icon: fallbackUrl });
                             }
@@ -430,7 +426,6 @@
                     }
                 }
 
-                // 2. SUPPRESSION
                 db.ref(`users/${uid}/library/${key}`).remove().then(() => {
                     refreshLibraryData();
                 });
@@ -441,7 +436,6 @@
         function refreshLibraryData() { const uid = auth.currentUser.uid; db.ref(`users/${uid}/library`).once('value').then(snap => { mjLibrary = snap.val() || {}; renderLibraryGrid(); loadCrestGrid(); syncLibraryToRoom(); }); }
         function syncLibraryToRoom() { if(roomID && roomRef) { roomRef.child('library').update(mjLibrary); } }
 
-        /* TRI SELECTION BLASON (v1.124) */
         function loadCrestGrid() {
             const grid = document.getElementById('crest-grid'); grid.innerHTML = "";
             const entries = Object.entries(mjLibrary);
@@ -453,7 +447,6 @@
             if (showDefaultCrests) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); } }
         }
 
-        /* AUTO-SAVE & ECOUTE (v1.121) */
         function initLibrarySync() {
             roomRef.child('library').on('value', snap => {
                 const roomLib = snap.val() || {};
@@ -599,7 +592,6 @@
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
         }
 
-        /* GESTION AVANCEE EQUIPES (v1.125) */
         function renderLobby() {
             let htmlActive = "";
             let htmlInactive = "";
@@ -682,7 +674,6 @@
             iSection.style.display = hasInactive ? "block" : "none"; 
         }
 
-        // --- NOUVELLE LOGIQUE EQUIPE (v1.121) ---
         function archiveTeam(teamName) {
             if(confirm("Mettre l'équipe " + teamName + " en pause ?\n- Score figé.\n- Joueurs déplacés en Solo.")) {
                 let currentScore = 0;
@@ -727,7 +718,6 @@
             }
         }
 
-        // --- LOGIQUE RESTAURATION INTELLIGENTE ---
         function openRestoreModal(teamName) {
             const team = globalTeams[teamName];
             if (team.lastState === 'active' || (!team.banned && !team.active)) {
@@ -754,16 +744,13 @@
             pendingRestoreTeam = null;
         }
 
+        /* ÉTAPE M.1 : MODIFICATION DE LA RESTAURATION (v1.126) */
         function performRestore(teamName, targetState) {
             const team = globalTeams[teamName];
-            const members = team.previousMembers || [];
             
             if (targetState === 'active') {
-                members.forEach(uid => { 
-                    if(allPlayersData[uid]) { 
-                        roomRef.child('players/' + uid).update({ teamName: teamName, teamIcon: team.icon }); 
-                    } 
-                });
+                // On réactive l'équipe sans toucher aux joueurs. 
+                // C'est le téléphone du joueur qui décidera de le remettre dedans (Étape 1.8 index).
                 roomRef.child('teams/' + teamName).update({ active: true, banned: false, frozenScore: null, previousMembers: null });
             } 
             else if (targetState === 'inactive') {
@@ -772,7 +759,6 @@
         }
 
         function deleteTeamDefinitive(teamName) { if(confirm("⚠️ Supprimer DÉFINITIVEMENT l'équipe " + teamName + " ?")) { roomRef.child('teams/' + teamName).remove(); } }
-        // ------------------------------------------
 
         function updateTeamBonus(teamName, delta) { 
             const team = globalTeams[teamName];
