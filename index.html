@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.145)</title>
+    <title>Presta'Puce - Blind Test (v1.146)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -55,66 +55,20 @@
         .choice-card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; width: 100%; max-width: 350px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.2); box-sizing: border-box; flex-shrink: 0; }
         .choice-card:active { transform: scale(0.98); background: rgba(255,255,255,0.1); border-color: var(--accent); }
         .choice-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
-        .choice-content b { 
-            display: block; 
-            font-size: 1.2rem; 
-            margin-bottom: 3px; 
-            color: white; 
-            white-space: nowrap; 
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .choice-content b { display: block; font-size: 1.2rem; margin-bottom: 3px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .choice-content span { font-size: 0.85rem; color: #bdc3c7; }
 
         .selection-mode-container { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
         .gallery-container { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; min-height: 0; justify-content: flex-start; }
         
         .common-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; padding-bottom: 20px; }
-        .grid-item { 
-            aspect-ratio: 1/1; 
-            background: #ecf0f1; 
-            border-radius: 12px; 
-            display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; border: 2px solid transparent; overflow: hidden; 
-            padding: 0; 
-            box-sizing: border-box; 
-        }
+        .grid-item { aspect-ratio: 1/1; background: #ecf0f1; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; padding: 0; box-sizing: border-box; }
         .grid-item.selected { border-color: var(--accent); background: rgba(241, 196, 15, 0.2); }
         .grid-item img { width: 100%; height: 100%; object-fit: contain; }
         .grid-item-emoji { font-size: clamp(1.8rem, 7vw, 2.5rem); padding: 0; background: rgba(255,255,255,0.1); }
         
-        /* GRILLE BLASON TEAM FLEXBOX */
-        .crest-grid { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 10px; 
-            justify-content: center; 
-            margin: 15px 0; 
-            width: 100%; 
-            max-width: 350px; 
-            flex: 1; 
-            min-height: 0; 
-            overflow-y: auto; 
-            padding: 10px; 
-            background: rgba(0,0,0,0.2); 
-            border-radius: 10px; 
-            box-sizing: border-box; 
-        }
-        .crest-item { 
-            width: calc(25% - 10px); 
-            aspect-ratio: 1 / 1; 
-            height: auto; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            border: 2px solid transparent; 
-            transition: 0.2s; 
-            display: flex; align-items: center; justify-content: center; 
-            background: #ecf0f1; 
-            padding: 0; 
-            box-sizing: border-box; 
-            overflow: hidden;
-            flex-shrink: 0; 
-        }
+        .crest-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 15px 0; width: 100%; max-width: 350px; flex: 1; min-height: 0; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; box-sizing: border-box; }
+        .crest-item { width: calc(25% - 10px); aspect-ratio: 1 / 1; height: auto; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; background: #ecf0f1; padding: 0; box-sizing: border-box; overflow: hidden; flex-shrink: 0; }
         .crest-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
         .crest-item.selected { border-color: var(--accent); transform: scale(1.05); box-shadow: 0 0 10px var(--accent); z-index: 2; }
 
@@ -159,14 +113,13 @@
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.2); font-size: 0.7rem; font-family: monospace; pointer-events: none; z-index: 50; }
         
         #reuse-avatar-preview, #reconnect-avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 15px auto; border: 3px solid var(--accent); }
-        
         .qr-card h3 { color: white !important; }
         .qr-card p { color: white !important; font-size: 1.1rem; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.145</div>
+    <div class="version-tag">v1.146</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -193,10 +146,8 @@
                 <img id="reconnect-avatar-preview" src="">
                 <h2 id="reconnect-pseudo-display" style="color:white; margin:10px 0;"></h2>
                 <p class="desc" style="margin-bottom:30px;">Ton score et ton équipe t'attendent.</p>
-                
                 <button class="btn-main" onclick="resumeGame()">RETOURNER AU BUZZER</button>
                 <button class="btn-secondary" onclick="modifyProfile()" style="margin-top:15px;">✏️ Modifier mon Profil</button>
-                
                 <div style="margin-top:40px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px; width:100%; text-align:center;">
                     <p style="color:#7f8c8d; font-size:0.9rem; margin-bottom:10px;">Ce n'est pas toi ?</p>
                     <button class="btn-secondary" style="border-color:var(--danger); color:var(--danger);" onclick="resetAndNewPlayer()">Nouveau Joueur</button>
@@ -207,17 +158,14 @@
         <div id="step-welcome" class="step-screen">
             <div class="screen-content welcome-layout">
                 <img id="mj-logo-welcome" src="" style="width:140px; border-radius:15px; margin-bottom:20px; display:none; box-shadow: 0 5px 20px rgba(0,0,0,0.5);">
-                
                 <h1 class="welcome-title-main">BIENVENUE !</h1>
                 <p class="welcome-subtitle">DANS LE BLIND TEST DE</p>
                 <h1 id="welcome-mj-name" class="welcome-mj-name">...</h1>
-                
                 <div class="typewriter-box">
                     <div id="line-1" class="type-line"></div>
                     <div id="line-2" class="type-line"></div>
                     <div id="line-3" class="type-line"></div>
                 </div>
-                
                 <button class="btn-main" onclick="navigateTo('step-auth')" style="width:100%; max-width:320px; margin-top:20px; font-size:1.3rem; padding:18px;">C'est parti ! 🚀</button>
             </div>
         </div>
@@ -274,25 +222,19 @@
             <div class="screen-header"><h2>Créer ton Clan</h2></div>
             <div class="screen-content content-top">
                 <input type="text" id="new-team-name" placeholder="Nom de l'équipe">
-                
                 <div id="team-crest-choices" class="selection-mode-container" style="margin-top:20px; width:100%;">
                     <div class="choice-card" onclick="document.getElementById('team-file-input').click()">
                         <div class="choice-icon">📸</div>
-                        <div class="choice-content">
-                            <b style="font-size: 0.95rem; letter-spacing: -1px;">PHOTO D'ÉQUIPE / IMAGE PERSO</b>
-                            <span>Selfie, Logo, ou Image de ta galerie...</span>
-                        </div>
+                        <div class="choice-content"><b style="font-size: 0.95rem; letter-spacing: -1px;">PHOTO D'ÉQUIPE / IMAGE PERSO</b><span>Selfie, Logo...</span></div>
                     </div>
                     <div class="moderation-warning">⚠️ Images modérées par l'animateur. Tout contenu vulgaire entraînera un bannissement.</div>
                     <div class="choice-card" onclick="showTeamGallery()"><div class="choice-icon">🛡️</div><div class="choice-content"><b>Galerie Blasons</b><span>Choisis un écusson.</span></div></div>
                     <input type="file" id="team-file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleTeamFileUpload(this)">
                 </div>
-                
                 <div id="team-crest-gallery" class="gallery-container" style="width:100%;">
                     <p style="margin-bottom:10px; flex-shrink: 0;">Choisis ton Blason :</p>
                     <div class="crest-grid" id="team-icon-grid"></div>
                 </div>
-                
                 <div id="team-preview" style="display:none; align-items:center; justify-content:center; gap:15px; margin:20px 0; flex-shrink: 0;">
                     <img id="team-preview-img" style="width:60px; height:60px; object-fit:contain; background:transparent;">
                     <span style="color:var(--success); font-weight:bold;">Image OK !</span>
@@ -375,7 +317,6 @@
                         <span class="score-value" id="val-team-score">0</span>
                     </div>
                 </div>
-                
                 <button class="buzzer" id="btn-buzz" onmousedown="handlePress(event)" onmouseup="handleRelease(event)" ontouchstart="handlePress(event)" ontouchend="handleRelease(event)">
                     <img id="buzzer-bg" class="buzzer-img" src="" style="display:none;">
                     <span id="label" class="buzzer-label">ATTENDEZ</span>
@@ -460,11 +401,11 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.145";
+        const CLIENT_VERSION = "1.146";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
 
-        // Variables de contrôle pour l'Étape 1.7 et 1.8
+        // Variables de contrôle pour l'Étape 1.7 et 1.8 (Isolées et protégées)
         let kickedFromTeam = "";
         let reinstatedTeamRef = null;
         let reinstatedTeamCallback = null; 
@@ -475,27 +416,13 @@
         let wakeLock = null;
 
         async function requestWakeLock() {
-            if ('wakeLock' in navigator) {
-                try {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Wake Lock is active!');
-                } catch (err) {
-                    console.log('Wake Lock error:', err);
-                }
-            }
+            if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
         }
-
         function releaseWakeLock() {
-            if (wakeLock !== null) {
-                wakeLock.release().catch(()=>{});
-                wakeLock = null;
-            }
+            if (wakeLock !== null) { wakeLock.release().catch(()=>{}); wakeLock = null; }
         }
-
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && document.getElementById('step-game').classList.contains('active')) {
-                requestWakeLock();
-            }
+            if (document.visibilityState === 'visible' && document.getElementById('step-game').classList.contains('active')) requestWakeLock();
         });
 
         function compressImage(file, maxWidth, callback) {
@@ -503,21 +430,17 @@
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width; let height = img.height;
+                    const canvas = document.createElement('canvas'); let width = img.width; let height = img.height;
                     if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
-                    canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    callback(canvas.toDataURL('image/jpeg', 0.7));
+                    canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/jpeg', 0.7));
                 }; img.src = e.target.result;
             }; reader.readAsDataURL(file);
         }
 
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
-            const c1 = colors[i % colors.length]; const c2 = colors[(i+1) % colors.length];
-            let pattern = ""; const mod = i % 10;
+            const c1 = colors[i % colors.length]; const c2 = colors[(i+1) % colors.length]; let pattern = ""; const mod = i % 10;
             if(mod === 0) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`;
             else if(mod === 1) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`;
             else pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`;
@@ -535,79 +458,46 @@
         let mjName = "l'Animateur", mjLink = "";
         let html5QrCode = null;
         let roomLibrary = {};
-
         let currentWatchedTeam = "";
 
         const lines = ["Transforme ton mobile en buzzer ! 🎧", "Joue en Solo, rejoins une Équipe...", "...ou crée ton propre Clan ! 🛡️"];
         let lineIndex = 0, charIndex = 0;
         
         function typeWriterSequence() {
-            if(lineIndex >= lines.length) {
-                document.querySelectorAll('.cursor').forEach(c => c.classList.add('hidden'));
-                return; 
-            }
-            const currentLineText = lines[lineIndex];
+            if(lineIndex >= lines.length) { document.querySelectorAll('.cursor').forEach(c => c.classList.add('hidden')); return; }
             const lineElement = document.getElementById(`line-${lineIndex + 1}`);
-            
             if(lineElement) {
                 document.querySelectorAll('.cursor').forEach(c => c.remove());
-                lineElement.innerHTML = currentLineText.substring(0, charIndex) + '<div class="cursor"></div>';
-                
-                if(charIndex < currentLineText.length) {
-                    charIndex++;
-                    setTimeout(typeWriterSequence, 40);
-                } else {
-                    charIndex = 0;
-                    lineIndex++;
-                    setTimeout(typeWriterSequence, 400); 
-                }
+                lineElement.innerHTML = lines[lineIndex].substring(0, charIndex) + '<div class="cursor"></div>';
+                if(charIndex < lines[lineIndex].length) { charIndex++; setTimeout(typeWriterSequence, 40); } 
+                else { charIndex = 0; lineIndex++; setTimeout(typeWriterSequence, 400); }
             }
         }
 
         window.onload = () => {
             db.ref('config/minVersion').once('value', snap => {
-                const serverVer = snap.val();
-                const url = new URL(window.location.href);
+                const serverVer = snap.val(); const url = new URL(window.location.href);
                 if(serverVer && serverVer !== CLIENT_VERSION && url.searchParams.get('force_ver') !== serverVer) {
-                    url.searchParams.set('force_ver', serverVer);
-                    url.searchParams.set('t', Date.now());
-                    window.location.href = url.toString();
+                    url.searchParams.set('force_ver', serverVer); url.searchParams.set('t', Date.now()); window.location.href = url.toString();
                 }
             });
-
             let storedId = localStorage.getItem('buzz_userId');
-            if (!storedId) {
-                storedId = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-                localStorage.setItem('buzz_userId', storedId);
-            }
+            if (!storedId) { storedId = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5); localStorage.setItem('buzz_userId', storedId); }
             myUserID = storedId;
-
             typeWriterSequence();
-
             const urlParams = new URLSearchParams(window.location.search);
             const r = urlParams.get('room');
-            if(r) { roomID = r; checkRoomAndStart(true); } 
-            else { navigateTo('step-room'); }
+            if(r) { roomID = r; checkRoomAndStart(true); } else { navigateTo('step-room'); }
             renderAvatarGrid();
             document.getElementById('input-room').addEventListener('keypress', (e)=>{if(e.key==='Enter') validateRoomStep()});
             document.getElementById('input-pseudo').addEventListener('keypress', (e)=>{if(e.key==='Enter') validatePseudo()});
-            
-            window.addEventListener('popstate', (event) => {
-                if(stepHistory.length > 0) {
-                    goBack();
-                }
-            });
+            window.addEventListener('popstate', (event) => { if(stepHistory.length > 0) goBack(); });
         };
 
         function navigateTo(targetId, pushToHistory = true) {
             if(html5QrCode) { try { html5QrCode.stop(); document.getElementById('reader').style.display='none'; } catch(e){} }
             const current = document.querySelector('.step-screen.active');
-            
-            if (pushToHistory) {
-                history.pushState({ step: targetId }, "", "#" + targetId);
-                if(current) stepHistory.push(current.id);
-            }
-
+            if (pushToHistory) { history.pushState({ step: targetId }, "", "#" + targetId); if(current) stepHistory.push(current.id); }
             document.querySelectorAll('.gallery-container').forEach(g => g.style.display = 'none');
             document.querySelectorAll('.selection-mode-container').forEach(c => c.style.display = 'flex');
             document.getElementById('team-preview').style.display = 'none';
@@ -619,14 +509,12 @@
         function goBack() {
             if(isEditing) { finishEdit(true); return; }
             if(stepHistory.length === 0) return;
-            const previous = stepHistory.pop();
-            navigateTo(previous, false); 
+            const previous = stepHistory.pop(); navigateTo(previous, false); 
         }
 
         function updateBackButton(currentId) {
             const noBackScreens = ['step-room', 'step-welcome', 'step-game'];
-            const btn = document.getElementById('btn-back-global');
-            btn.style.display = noBackScreens.includes(currentId) ? 'none' : 'flex';
+            document.getElementById('btn-back-global').style.display = noBackScreens.includes(currentId) ? 'none' : 'flex';
         }
 
         function startQRScan() {
@@ -637,51 +525,28 @@
                     html5QrCode.stop().then(() => {
                         document.getElementById('reader').style.display = 'none';
                         let match = decodedText.match(/[?&]room=([^&]+)/);
-                        if (match) {
-                            document.getElementById('input-room').value = match[1];
-                            validateRoomStep();
-                        } else { alert("Code QR invalide pour ce jeu."); }
+                        if (match) { document.getElementById('input-room').value = match[1]; validateRoomStep(); } 
+                        else { alert("Code QR invalide pour ce jeu."); }
                     });
-                },
-                (errorMessage) => { /* ignore errors */ })
+                }, (errorMessage) => { })
             .catch(err => alert("Erreur caméra : " + err));
         }
 
         function validateRoomStep() {
             const val = document.getElementById('input-room').value.trim();
-            if(!val) return;
-            roomID = val;
-            checkRoomAndStart(false);
+            if(!val) return; roomID = val; checkRoomAndStart(false);
         }
 
         function checkRoomAndStart(autoLogin) {
             db.ref('activeRooms/' + roomID).once('value', snap => {
                 if(snap.exists()) {
                     roomRef = db.ref('rooms/' + roomID);
-                    
                     const lastRoom = localStorage.getItem('buzz_lastRoom');
-                    if(lastRoom !== roomID) {
-                        localStorage.removeItem('presta_player_session');
-                        localStorage.setItem('buzz_lastRoom', roomID);
-                        autoLogin = false;
-                    }
-                    
-                    roomRef.child('mjName').once('value', s => { 
-                        if(s.exists()) {
-                            mjName = s.val();
-                            document.getElementById('welcome-mj-name').innerText = mjName.toUpperCase();
-                        }
-                    });
-                    
+                    if(lastRoom !== roomID) { localStorage.removeItem('presta_player_session'); localStorage.setItem('buzz_lastRoom', roomID); autoLogin = false; }
+                    roomRef.child('mjName').once('value', s => { if(s.exists()) { mjName = s.val(); document.getElementById('welcome-mj-name').innerText = mjName.toUpperCase(); } });
                     roomRef.child('mjLink').once('value', s => { if(s.exists()) mjLink = s.val(); });
                     roomRef.child('mjLogo').once('value', s => { if(s.val()) { document.getElementById('mj-logo-welcome').src = s.val(); document.getElementById('mj-logo-welcome').style.display = 'block'; } });
-                    
-                    roomRef.child('library').on('value', snap => {
-                        roomLibrary = snap.val() || {};
-                        if(document.getElementById('step-team-create').classList.contains('active')) {
-                            renderTeamCrestPicker();
-                        }
-                    });
+                    roomRef.child('library').on('value', snap => { roomLibrary = snap.val() || {}; if(document.getElementById('step-team-create').classList.contains('active')) renderTeamCrestPicker(); });
 
                     const savedProfile = localStorage.getItem('buzz_lastProfile');
                     if(!autoLogin && savedProfile) {
@@ -690,10 +555,8 @@
                             if(p.pseudo && p.avatar) {
                                 document.getElementById('reuse-pseudo-display').innerText = p.pseudo;
                                 const avImg = document.getElementById('reuse-avatar-preview');
-                                if(p.avatar.length > 20) { avImg.src = p.avatar; avImg.style.display='block'; }
-                                else { avImg.style.display='none'; }
-                                document.getElementById('overlay-reuse').style.display = 'flex';
-                                return;
+                                if(p.avatar.length > 20) { avImg.src = p.avatar; avImg.style.display='block'; } else { avImg.style.display='none'; }
+                                document.getElementById('overlay-reuse').style.display = 'flex'; return;
                             }
                         } catch(e) {}
                     }
@@ -701,14 +564,9 @@
                     roomRef.child('players/' + myUserID).once('value', snapUser => {
                         if(snapUser.exists()) {
                             const data = snapUser.val();
-                            if(data.banned) { 
-                                alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter.");
-                                window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
-                                return; 
-                            }
+                            if(data.banned) { alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
                             player = { pseudo: data.name, avatar: data.avatar, team: data.teamName || "Solo", teamIcon: data.teamIcon || "" };
-                            showReconnectScreen(); 
-                            return;
+                            showReconnectScreen(); return;
                         }
                         navigateTo('step-welcome');
                     });
@@ -719,64 +577,38 @@
         function showReconnectScreen() {
             document.getElementById('reconnect-pseudo-display').innerText = player.pseudo;
             const avImg = document.getElementById('reconnect-avatar-preview');
-            if(player.avatar && player.avatar.length > 20) { avImg.src = player.avatar; avImg.style.display='block'; }
-            else { avImg.style.display='none'; }
+            if(player.avatar && player.avatar.length > 20) { avImg.src = player.avatar; avImg.style.display='block'; } else { avImg.style.display='none'; }
             navigateTo('step-reconnect');
         }
 
         function resumeGame() {
             roomRef.child('players/' + myUserID).once('value', snap => {
-                if(snap.exists()) {
-                    snap.ref.update({ active: true });
-                } else {
-                    roomRef.child('players/' + myUserID).set({
-                        name: player.pseudo,
-                        avatar: player.avatar,
-                        teamName: player.team,
-                        teamIcon: player.teamIcon,
-                        pts: 0,
-                        active: true,
-                        banned: false
-                    });
-                }
+                if(snap.exists()) { snap.ref.update({ active: true }); } 
+                else { roomRef.child('players/' + myUserID).set({ name: player.pseudo, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon, pts: 0, active: true, banned: false }); }
                 launchGame(true);
             });
         }
 
-        function modifyProfile() {
-            document.getElementById('overlay-settings').style.display = 'flex';
-        }
+        function modifyProfile() { document.getElementById('overlay-settings').style.display = 'flex'; }
 
         function resetAndNewPlayer() {
             if(confirm("Attention : Vous allez perdre votre progression actuelle sur ce téléphone et un nouveau joueur sera créé.")) {
-                if(roomRef && myUserID) {
-                    roomRef.child('players/' + myUserID).update({active: false});
-                }
+                if(roomRef && myUserID) roomRef.child('players/' + myUserID).update({active: false});
                 myUserID = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-                localStorage.setItem('buzz_userId', myUserID);
-                localStorage.removeItem('presta_player_session');
-                localStorage.removeItem('buzz_lastProfile');
-                player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
-                navigateTo('step-welcome');
+                localStorage.setItem('buzz_userId', myUserID); localStorage.removeItem('presta_player_session'); localStorage.removeItem('buzz_lastProfile');
+                player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" }; navigateTo('step-welcome');
             }
         }
 
         function handleProfileReuse(reuse) {
             document.getElementById('overlay-reuse').style.display = 'none';
             if(reuse) {
-                const p = JSON.parse(localStorage.getItem('buzz_lastProfile'));
-                player.pseudo = p.pseudo;
-                player.avatar = p.avatar;
-                navigateTo('step-mode');
+                const p = JSON.parse(localStorage.getItem('buzz_lastProfile')); player.pseudo = p.pseudo; player.avatar = p.avatar; navigateTo('step-mode');
             } else {
-                if(roomRef && myUserID) {
-                    roomRef.child('players/' + myUserID).update({active: false});
-                }
+                if(roomRef && myUserID) roomRef.child('players/' + myUserID).update({active: false});
                 myUserID = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-                localStorage.setItem('buzz_userId', myUserID);
-                localStorage.removeItem('buzz_lastProfile');
-                player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
-                navigateTo('step-welcome');
+                localStorage.setItem('buzz_userId', myUserID); localStorage.removeItem('buzz_lastProfile');
+                player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" }; navigateTo('step-welcome');
             }
         }
 
@@ -786,20 +618,11 @@
             if (!regex.test(val)) return alert("Caractères autorisés : Lettres, Chiffres, Espaces, Tirets (-), Underscore (_).");
             if(val.length < 2) return alert("Pseudo trop court !");
             roomRef.child('players').once('value', snap => {
-                const players = snap.val() || {};
-                let nameTaken = false;
-                Object.keys(players).forEach(uid => {
-                    if(uid !== myUserID && players[uid].name && players[uid].name.toLowerCase() === val.toLowerCase()) nameTaken = true;
-                });
+                const players = snap.val() || {}; let nameTaken = false;
+                Object.keys(players).forEach(uid => { if(uid !== myUserID && players[uid].name && players[uid].name.toLowerCase() === val.toLowerCase()) nameTaken = true; });
                 if(nameTaken) return alert("Ce pseudo est déjà pris.");
-                if(isEditing) { 
-                    roomRef.child('players/' + myUserID).update({ name: val }); 
-                    player.pseudo = val; 
-                    finishEdit(true); 
-                    return; 
-                }
-                player.pseudo = val;
-                navigateTo('step-avatar');
+                if(isEditing) { roomRef.child('players/' + myUserID).update({ name: val }); player.pseudo = val; finishEdit(true); return; }
+                player.pseudo = val; navigateTo('step-avatar');
             });
         }
 
@@ -807,21 +630,8 @@
         function handleFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectAvatar(base64); }); } }
         function renderAvatarGrid() { const g=document.getElementById('avatar-grid'); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='grid-item grid-item-emoji'; d.innerText=a; d.onclick=()=>selectAvatar(a); g.appendChild(d); }); }
         
-        function selectAvatar(av) { 
-            player.avatar = av; 
-            if(isEditing) { 
-                roomRef.child('players/' + myUserID).update({avatar: av}); 
-                finishEdit(true); 
-            } else navigateTo('step-mode'); 
-        }
-        
-        function selectMode(mode) { 
-            player.team = mode; player.teamIcon = ""; 
-            if(isEditing) { 
-                roomRef.child('players/' + myUserID).update({teamName: "Solo", teamIcon: ""}); 
-                finishEdit(true); 
-            } else { if(mode === 'Solo') showRecap(); else goToTeamAction(); } 
-        }
+        function selectAvatar(av) { player.avatar = av; if(isEditing) { roomRef.child('players/' + myUserID).update({avatar: av}); finishEdit(true); } else navigateTo('step-mode'); }
+        function selectMode(mode) { player.team = mode; player.teamIcon = ""; if(isEditing) { roomRef.child('players/' + myUserID).update({teamName: "Solo", teamIcon: ""}); finishEdit(true); } else { if(mode === 'Solo') showRecap(); else goToTeamAction(); } }
         
         function goToTeamAction() { navigateTo('step-team-action'); }
         function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); renderTeamCrestPicker(); } 
@@ -829,40 +639,26 @@
 
         function loadTeamsList() {
             roomRef.child('teams').once('value', snap => {
-                const list = document.getElementById('team-list'); list.innerHTML = "";
-                const teams = snap.val() || {};
-                let validTeamsCount = 0;
-                
+                const list = document.getElementById('team-list'); list.innerHTML = ""; const teams = snap.val() || {}; let validTeamsCount = 0;
                 for(let tName in teams) {
-                    const t = teams[tName];
-                    if (t.banned === true || t.active === false) continue;
-                    
-                    validTeamsCount++;
-                    const div = document.createElement('div'); div.className = 'team-card';
+                    const t = teams[tName]; if (t.banned === true || t.active === false) continue;
+                    validTeamsCount++; const div = document.createElement('div'); div.className = 'team-card';
                     div.style.cssText = "background:rgba(255,255,255,0.1); padding:10px; border-radius:8px; display:flex; align-items:center; cursor:pointer;";
                     div.innerHTML = `<img src="${t.icon}" style="width:30px;height:30px;margin-right:10px;object-fit:contain;"><b>${tName}</b>`;
-                    div.onclick = () => { joinTeam(tName, t.icon); };
-                    list.appendChild(div);
+                    div.onclick = () => { joinTeam(tName, t.icon); }; list.appendChild(div);
                 }
-                
-                if(validTeamsCount === 0) {
-                    list.innerHTML = "<div style='text-align:center; color:#aaa; padding:10px;'>Aucune équipe disponible. Créez-en une !</div>";
-                }
+                if(validTeamsCount === 0) list.innerHTML = "<div style='text-align:center; color:#aaa; padding:10px;'>Aucune équipe disponible. Créez-en une !</div>";
             });
         }
 
         function joinTeam(name, icon) { 
             player.team = name; player.teamIcon = icon; 
             if(isEditing) { 
-                roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon}); 
-                finishEdit(true); 
+                roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon}); finishEdit(true); 
             } else if (isRecovering) {
                 roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon}); 
-                isRecovering = false;
-                finishEdit(false); 
-            } else { 
-                showRecap(); 
-            } 
+                isRecovering = false; finishEdit(false); 
+            } else { showRecap(); } 
         }
         
         function toggleCreateUI(show) { if(show) { document.getElementById('team-crest-choices').style.display = 'flex'; document.getElementById('team-crest-gallery').style.display = 'none'; document.getElementById('team-preview').style.display = 'none'; selectedTeamCrest = ""; } }
@@ -870,44 +666,19 @@
         function handleTeamFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectedTeamCrest=base64; showTeamPreview(); }); } }
         
         function renderTeamCrestPicker() { 
-            const c = document.getElementById('team-icon-grid'); c.innerHTML="";
-            
-            const seen = new Set(); 
-
-            if(selectedTeamCrest && selectedTeamCrest.length > 0) {
-                seen.add(selectedTeamCrest);
-                createCrestItem(selectedTeamCrest, c);
-            }
-
+            const c = document.getElementById('team-icon-grid'); c.innerHTML=""; const seen = new Set(); 
+            if(selectedTeamCrest && selectedTeamCrest.length > 0) { seen.add(selectedTeamCrest); createCrestItem(selectedTeamCrest, c); }
             if(roomLibrary) {
                 const entries = Object.entries(roomLibrary);
-                const recent = entries.filter(e => e[0].startsWith('-'));
-                const old = entries.filter(e => !e[0].startsWith('-'));
+                const recent = entries.filter(e => e[0].startsWith('-')); const old = entries.filter(e => !e[0].startsWith('-'));
                 recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
-                
-                const finalOrder = [...recent, ...old];
-                
-                finalOrder.forEach(entry => {
-                    const url = entry[1];
-                    if(!seen.has(url)) {
-                        seen.add(url);
-                        createCrestItem(url, c);
-                    }
-                });
+                [...recent, ...old].forEach(entry => { if(!seen.has(entry[1])) { seen.add(entry[1]); createCrestItem(entry[1], c); } });
             }
-
-            for(let i=0; i<30; i++) { 
-                const svg = createBlason(i);
-                if(!seen.has(svg)) {
-                    seen.add(svg);
-                    createCrestItem(svg, c); 
-                }
-            }
+            for(let i=0; i<30; i++) { const svg = createBlason(i); if(!seen.has(svg)) { seen.add(svg); createCrestItem(svg, c); } }
         }
 
         function createCrestItem(url, container) {
-            const d = document.createElement('div'); d.className='crest-item';
-            const img = document.createElement('img'); img.src=url;
+            const d = document.createElement('div'); d.className='crest-item'; const img = document.createElement('img'); img.src=url;
             d.onclick = () => { document.querySelectorAll('.crest-item').forEach(e=>e.classList.remove('selected')); d.classList.add('selected'); selectedTeamCrest=url; showTeamPreview(); };
             d.appendChild(img); container.appendChild(d);
         }
@@ -916,18 +687,9 @@
         function createNewTeam() { 
             const name = document.getElementById('new-team-name').value.trim(); 
             if(name.length < 2 || !selectedTeamCrest) return alert("Nom et blason requis."); 
-            
             if (selectedTeamCrest.startsWith('data:image')) {
-                roomRef.child('library').push(selectedTeamCrest).then(() => {
-                     roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ 
-                        joinTeam(name, selectedTeamCrest); 
-                    }); 
-                });
-            } else {
-                roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ 
-                    joinTeam(name, selectedTeamCrest); 
-                }); 
-            }
+                roomRef.child('library').push(selectedTeamCrest).then(() => { roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); }); });
+            } else { roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); }); }
         }
 
         function openSettings() { document.getElementById('overlay-settings').style.display = 'flex'; }
@@ -939,93 +701,49 @@
             localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar}));
             updateGameHeader();
             if(roomRef && myUserID) roomRef.child('players/' + myUserID).update({active:true});
-
-            if(stayInMenu) {
-                document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
-                navigateTo('step-game', false); 
-                document.getElementById('overlay-settings').style.display = 'flex'; 
-            } else {
-                isEditing = false;
-                document.getElementById('overlay-settings').style.display = 'none';
-                navigateTo('step-game', false); 
-            }
+            if(stayInMenu) { document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active')); navigateTo('step-game', false); document.getElementById('overlay-settings').style.display = 'flex'; } 
+            else { isEditing = false; document.getElementById('overlay-settings').style.display = 'none'; navigateTo('step-game', false); }
         }
 
         function showRecap() {
-            navigateTo('step-recap');
-            document.getElementById('recap-name').innerText = player.pseudo;
-            const avDiv = document.getElementById('recap-avatar');
-            if(player.avatar.length > 20) avDiv.innerHTML = `<img src="${player.avatar}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`;
-            else avDiv.innerText = player.avatar;
+            navigateTo('step-recap'); document.getElementById('recap-name').innerText = player.pseudo; const avDiv = document.getElementById('recap-avatar');
+            if(player.avatar.length > 20) avDiv.innerHTML = `<img src="${player.avatar}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; else avDiv.innerText = player.avatar;
             document.getElementById('recap-team').innerHTML = (player.team === 'Solo') ? "Mode Solo" : `Équipe : <b>${player.team}</b>`;
         }
 
         function launchGame(isReconnect = false) {
             if(!isReconnect) {
                 roomRef.child('players/' + myUserID).set({ name: player.pseudo, pts: 0, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon, active: true, banned: false });
-                localStorage.setItem('presta_player_session', JSON.stringify(player));
-                localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar}));
+                localStorage.setItem('presta_player_session', JSON.stringify(player)); localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar}));
             }
-            updateGameHeader();
-            navigateTo('step-game');
-            requestWakeLock();
-            startBuzzer();
+            updateGameHeader(); navigateTo('step-game'); requestWakeLock(); startBuzzer();
         }
 
         function updateGameHeader() {
             const miniAv = document.getElementById('game-avatar');
-            if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
-            else miniAv.innerText = player.avatar;
-            
+            if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`; else miniAv.innerText = player.avatar;
             document.getElementById('game-pseudo').innerText = player.pseudo;
-            const teamEl = document.getElementById('game-team');
-            const badgeEl = document.getElementById('team-badge');
-            const buzzerBg = document.getElementById('buzzer-bg');
-            
+            const teamEl = document.getElementById('game-team'); const badgeEl = document.getElementById('team-badge'); const buzzerBg = document.getElementById('buzzer-bg');
             let bgImg = player.avatar;
-
             if (player.team !== "Solo") { 
-                teamEl.innerText = player.team; 
-                teamEl.style.display = "block"; 
-                if (player.teamIcon) { 
-                    badgeEl.src = player.teamIcon; 
-                    badgeEl.style.display = "block";
-                    if(player.teamIcon.length > 20) bgImg = player.teamIcon;
-                } 
-            } else { 
-                teamEl.innerText = "Solo"; 
-                teamEl.style.display = "block"; 
-                badgeEl.style.display = "none"; 
-            }
-            
-            if(bgImg.length > 20) { 
-                buzzerBg.src = bgImg; 
-                buzzerBg.style.display = "block"; 
-            } else { 
-                buzzerBg.style.display = "none"; 
-            }
+                teamEl.innerText = player.team; teamEl.style.display = "block"; 
+                if (player.teamIcon) { badgeEl.src = player.teamIcon; badgeEl.style.display = "block"; if(player.teamIcon.length > 20) bgImg = player.teamIcon; } 
+            } else { teamEl.innerText = "Solo"; teamEl.style.display = "block"; badgeEl.style.display = "none"; }
+            if(bgImg.length > 20) { buzzerBg.src = bgImg; buzzerBg.style.display = "block"; } else { buzzerBg.style.display = "none"; }
         }
 
+        /* FIX 1.146 : ISOLATION DES CALLBACKS */
         function monitorTeamChanges(teamName) {
             if (currentWatchedTeam === teamName) return; 
-
-            if (activeTeamRef && activeTeamCallback) {
-                activeTeamRef.off('value', activeTeamCallback);
-                activeTeamRef = null;
-                activeTeamCallback = null;
-            }
-
+            if (activeTeamRef && activeTeamCallback) { activeTeamRef.off('value', activeTeamCallback); activeTeamRef = null; activeTeamCallback = null; }
             currentWatchedTeam = teamName;
-
             if (teamName && teamName !== "Solo") {
                 activeTeamRef = roomRef.child('teams/' + teamName);
                 activeTeamCallback = activeTeamRef.on('value', snap => {
                     const tData = snap.val();
                     if (tData && tData.icon && tData.icon !== player.teamIcon) {
-                        player.teamIcon = tData.icon;
-                        updateGameHeader();
-                        roomRef.child('players/' + myUserID).update({ teamIcon: tData.icon });
-                        localStorage.setItem('presta_player_session', JSON.stringify(player));
+                        player.teamIcon = tData.icon; updateGameHeader();
+                        roomRef.child('players/' + myUserID).update({ teamIcon: tData.icon }); localStorage.setItem('presta_player_session', JSON.stringify(player));
                     }
                 });
             }
@@ -1033,90 +751,55 @@
 
         function checkWhyKickedAndShowModal(teamName) {
             kickedFromTeam = teamName; 
-            
-            monitorReinstatedTeam(teamName);
-
+            monitorReinstatedTeam(teamName); // Armement du traqueur
             roomRef.child('teams/' + teamName).once('value', snap => {
-                const t = snap.val();
-                const msgEl = document.getElementById('kicked-msg');
-                
-                if (!t || t.banned) {
-                    msgEl.innerHTML = `L'animateur a banni l'équipe <b>${teamName}</b>.<br><br>S'il décide de la réhabiliter, tu auras la possibilité de la rejoindre à nouveau. Que veux-tu faire en attendant ?`;
-                } else if (t.active === false) {
-                    msgEl.innerHTML = `L'animateur a mis l'équipe <b>${teamName}</b> en pause.<br><br>Tu pourras la retrouver si elle est réactivée. Que veux-tu faire en attendant ?`;
-                } else {
-                    msgEl.innerHTML = `Tu as été retiré de l'équipe <b>${teamName}</b>.<br><br>Que veux-tu faire ?`;
-                }
-                
+                const t = snap.val(); const msgEl = document.getElementById('kicked-msg');
+                if (!t || t.banned) { msgEl.innerHTML = `L'animateur a banni l'équipe <b>${teamName}</b>.<br><br>S'il décide de la réhabiliter, tu auras la possibilité de la rejoindre à nouveau. Que veux-tu faire en attendant ?`; } 
+                else if (t.active === false) { msgEl.innerHTML = `L'animateur a mis l'équipe <b>${teamName}</b> en pause.<br><br>Tu pourras la retrouver si elle est réactivée. Que veux-tu faire en attendant ?`; } 
+                else { msgEl.innerHTML = `Tu as été retiré de l'équipe <b>${teamName}</b>.<br><br>Que veux-tu faire ?`; }
                 document.getElementById('overlay-team-kicked').style.display = 'flex';
             });
         }
 
         function handleKickedChoice(choice) {
             document.getElementById('overlay-team-kicked').style.display = 'none';
-            if (choice === 'solo') {
-                player.team = "Solo";
-                player.teamIcon = "";
-                updateGameHeader();
-            } else if (choice === 'change') {
-                isRecovering = true;
-                navigateTo('step-team-action');
-            }
+            if (choice === 'solo') { player.team = "Solo"; player.teamIcon = ""; updateGameHeader(); } 
+            else if (choice === 'change') { isRecovering = true; navigateTo('step-team-action'); }
         }
 
+        /* LE TRAQUEUR GLOBAL (INDEPENDANT ET SECURISÉ) */
         function monitorReinstatedTeam(teamName) {
-            if (reinstatedTeamRef && reinstatedTeamCallback) {
-                reinstatedTeamRef.off('value', reinstatedTeamCallback);
-            }
-            
+            if (reinstatedTeamRef && reinstatedTeamCallback) { reinstatedTeamRef.off('value', reinstatedTeamCallback); }
             reinstatedTeamRef = roomRef.child('teams/' + teamName);
             let hasSeenBannedState = false; 
-
             reinstatedTeamCallback = reinstatedTeamRef.on('value', snap => {
                 const t = snap.val();
-                
-                if (t && (t.active === false || t.banned === true)) {
-                    hasSeenBannedState = true; 
-                }
-                
-                if (hasSeenBannedState && t && t.active !== false && t.banned !== true) {
+                if (!t) return;
+                if (t.active === false || t.banned === true) { hasSeenBannedState = true; }
+                if (hasSeenBannedState && t.active !== false && t.banned !== true) {
                     document.getElementById('reinstated-msg').innerHTML = `L'équipe <b>${teamName}</b> a été réhabilitée par l'animateur !<br><br>Veux-tu la réintégrer ?`;
                     document.getElementById('overlay-team-reinstated').style.display = 'flex';
-                    
-                    reinstatedTeamRef.off('value', reinstatedTeamCallback);
-                    reinstatedTeamRef = null;
-                    reinstatedTeamCallback = null;
+                    reinstatedTeamRef.off('value', reinstatedTeamCallback); reinstatedTeamRef = null; reinstatedTeamCallback = null;
                 }
             });
         }
 
         function handleReinstatedChoice(choice) {
             document.getElementById('overlay-team-reinstated').style.display = 'none';
-            
             if (choice === 'yes' && kickedFromTeam) {
                 roomRef.child('teams/' + kickedFromTeam).once('value', snap => {
                     const t = snap.val();
                     if(t && t.active !== false && t.banned !== true) {
-                        player.team = kickedFromTeam;
-                        player.teamIcon = t.icon || "";
-                        
-                        updateGameHeader();
-                        roomRef.child('players/' + myUserID).update({ 
-                            teamName: player.team, 
-                            teamIcon: player.teamIcon 
-                        });
-                        
+                        player.team = kickedFromTeam; player.teamIcon = t.icon || ""; updateGameHeader();
+                        roomRef.child('players/' + myUserID).update({ teamName: player.team, teamIcon: player.teamIcon });
                         localStorage.setItem('presta_player_session', JSON.stringify(player));
                         monitorTeamChanges(player.team);
-                        
                         document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
                         navigateTo('step-game', false);
                     }
                     kickedFromTeam = ""; 
                 });
-            } else {
-                kickedFromTeam = ""; 
-            }
+            } else { kickedFromTeam = ""; }
         }
 
         function startBuzzer() {
@@ -1128,101 +811,47 @@
                 const d = snap.val(); 
                 if(!d) { if(roomRef) roomRef.off(); alert("Votre compte a été supprimé définitivement."); localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
                 if(d.banned) { if(roomRef) roomRef.off(); alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
-                if(d.active === false) { 
-                    if(roomRef) roomRef.off(); 
-                    alert(`⏸️ Vous avez été désactivé par ${mjName}.\nTant que la partie continue, vous pouvez vous reconnecter et récupérer vos données (score et équipe).\n\nSi c'est une erreur, relancez la page.`); 
-                    window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; 
-                    return; 
-                }
+                if(d.active === false) { if(roomRef) roomRef.off(); alert(`⏸️ Vous avez été désactivé par ${mjName}.\nTant que la partie continue, vous pouvez vous reconnecter et récupérer vos données.\n\nSi c'est une erreur, relancez la page.`); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
 
                 const newTeamName = d.teamName || "Solo";
+                if (player.team !== "Solo" && newTeamName === "Solo") { checkWhyKickedAndShowModal(player.team); }
 
-                if (player.team !== "Solo" && newTeamName === "Solo") {
-                    checkWhyKickedAndShowModal(player.team);
-                }
-
-                player.team = newTeamName;
-                player.teamIcon = d.teamIcon || "";
-                player.avatar = d.avatar || "";
-                
-                updateGameHeader();
-                monitorTeamChanges(player.team); 
-
+                player.team = newTeamName; player.teamIcon = d.teamIcon || ""; player.avatar = d.avatar || "";
+                updateGameHeader(); monitorTeamChanges(player.team); 
                 document.getElementById('game-score').innerText = d.pts || 0; 
                 
                 const rowTeam = document.getElementById('row-team-score');
-                if(player.team !== "Solo") {
-                    rowTeam.style.display = "flex";
-                    document.getElementById('label-team-score').innerText = "Score " + player.team + " : ";
-                } else {
-                    rowTeam.style.display = "none";
-                }
+                if(player.team !== "Solo") { rowTeam.style.display = "flex"; document.getElementById('label-team-score').innerText = "Score " + player.team + " : "; } else { rowTeam.style.display = "none"; }
             });
 
             roomRef.child('players').on('value', snap => {
                 if(player.team === "Solo") return;
-                const all = snap.val() || {};
-                let total = 0;
-                Object.values(all).forEach(p => {
-                    if(p.teamName === player.team) total += (p.pts || 0);
-                });
+                const all = snap.val() || {}; let total = 0;
+                Object.values(all).forEach(p => { if(p.teamName === player.team) total += (p.pts || 0); });
                 document.getElementById('val-team-score').innerText = total;
             });
 
             roomRef.child('gameState').on('value', snap => { const st = snap.val(); if (st && st.status === 'endGame') showEndGame(); else { gameState = st ? st.status : 'waiting'; document.getElementById('podium-zone').style.display = 'none'; updateUI(); } });
             roomRef.child('buzzers').on('value', snap => {
-                const val = snap.val();
-                let buzzId = val ? (val.id || "") : null;
-                let buzzPseudo = val ? val.pseudo : null;
+                const val = snap.val(); let buzzId = val ? (val.id || "") : null; let buzzPseudo = val ? val.pseudo : null;
                 if (val && (buzzId === myUserID || buzzPseudo === player.pseudo) && currentWinner !== player.pseudo) { document.getElementById('sound-win').play().catch(()=>{}); if(navigator.vibrate) navigator.vibrate([200, 100, 200]); }
                 currentWinner = val ? val.pseudo : null; updateUI();
             });
             roomRef.child('blockedPlayers/' + player.pseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
         
-        function handleExit(message, redirect) {
-            if(roomRef) roomRef.off(); alert(message); localStorage.removeItem('presta_player_session');
-            if(redirect && mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; } else { location.reload(); }
-        }
-
-        function setInactiveAndAction(callback) {
-            if(roomRef && myUserID) {
-                roomRef.child('players/' + myUserID).update({ active: false })
-                .then(() => { callback(); })
-                .catch(() => { callback(); }); 
-            } else { callback(); }
-        }
+        function handleExit(message, redirect) { if(roomRef) roomRef.off(); alert(message); localStorage.removeItem('presta_player_session'); if(redirect && mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; } else { location.reload(); } }
+        function setInactiveAndAction(callback) { if(roomRef && myUserID) { roomRef.child('players/' + myUserID).update({ active: false }).then(() => { callback(); }).catch(() => { callback(); }); } else { callback(); } }
 
         function handleExitAction(action) {
             releaseWakeLock(); 
-            
             if(action === 'save') {
                 alert("La création de compte arrive très bientôt !");
-                if(confirm("Tant que l'animateur n'a pas fermé la salle, vous pourrez revenir et récupérer votre score.\n\nVoulez-vous quitter ?")) {
-                    isExiting = true; 
-                    setInactiveAndAction(() => {
-                        window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
-                    });
-                }
-            }
-            else if(action === 'change') {
-                if(confirm("Quitter cette salle pour en rejoindre une autre ?\nVotre profil sera conservé.")) {
-                    isExiting = true; 
-                    setInactiveAndAction(() => {
-                        localStorage.removeItem('presta_player_session');
-                        localStorage.removeItem('buzz_lastRoom');
-                        location.reload();
-                    });
-                }
-            }
-            else if(action === 'exit') {
-                if(confirm("⚠️ Tout effacer et quitter définitivement ?")) {
-                    isExiting = true; 
-                    setInactiveAndAction(() => {
-                        localStorage.clear(); 
-                        window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
-                    });
-                }
+                if(confirm("Tant que l'animateur n'a pas fermé la salle, vous pourrez revenir et récupérer votre score.\n\nVoulez-vous quitter ?")) { isExiting = true; setInactiveAndAction(() => { window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; }); }
+            } else if(action === 'change') {
+                if(confirm("Quitter cette salle pour en rejoindre une autre ?\nVotre profil sera conservé.")) { isExiting = true; setInactiveAndAction(() => { localStorage.removeItem('presta_player_session'); localStorage.removeItem('buzz_lastRoom'); location.reload(); }); }
+            } else if(action === 'exit') {
+                if(confirm("⚠️ Tout effacer et quitter définitivement ?")) { isExiting = true; setInactiveAndAction(() => { localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; }); }
             }
         }
 
