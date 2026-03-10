@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.139)</title>
+    <title>Presta'Puce - Blind Test (v1.140)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -166,7 +166,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.139</div>
+    <div class="version-tag">v1.140</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -442,9 +442,37 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.139";
+        const CLIENT_VERSION = "1.140";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
+
+        /* ÉTAPE 1.6 : ANTI-VEILLE (WAKE LOCK) */
+        let wakeLock = null;
+
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock is active!');
+                } catch (err) {
+                    console.log('Wake Lock error:', err);
+                }
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release().catch(()=>{});
+                wakeLock = null;
+            }
+        }
+
+        // Si le joueur réduit Safari et revient, on relance le Wake Lock s'il est sur le buzzer
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && document.getElementById('step-game').classList.contains('active')) {
+                requestWakeLock();
+            }
+        });
 
         function compressImage(file, maxWidth, callback) {
             const reader = new FileReader();
@@ -776,7 +804,6 @@
         function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); renderTeamCrestPicker(); } 
         function goToTeamJoin() { navigateTo('step-team-join'); loadTeamsList(); }
 
-        /* ÉTAPE 1.5 : FILTRE DES ÉQUIPES INACTIVES/BANNIES (v1.139) */
         function loadTeamsList() {
             roomRef.child('teams').once('value', snap => {
                 const list = document.getElementById('team-list'); list.innerHTML = "";
@@ -785,8 +812,6 @@
                 
                 for(let tName in teams) {
                     const t = teams[tName];
-                    
-                    // Si bannie ou inactive, on ne l'affiche pas
                     if (t.banned === true || t.active === false) continue;
                     
                     validTeamsCount++;
@@ -914,6 +939,7 @@
             }
             updateGameHeader();
             navigateTo('step-game');
+            requestWakeLock(); // [v1.140] Activation de l'anti-veille
             startBuzzer();
         }
 
@@ -1044,6 +1070,8 @@
         }
 
         function handleExitAction(action) {
+            releaseWakeLock(); // [v1.140] On libère la veille en quittant
+            
             if(action === 'save') {
                 alert("La création de compte arrive très bientôt !");
                 if(confirm("Tant que l'animateur n'a pas fermé la salle, vous pourrez revenir et récupérer votre score.\n\nVoulez-vous quitter ?")) {
