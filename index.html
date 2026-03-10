@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.136)</title>
+    <title>Presta'Puce - Blind Test (v1.138)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -132,7 +132,7 @@
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
         
         .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 60px; }
-        .buzzer { width: 65vw; height: 65vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; background: #e74c3c; box-shadow: 0 15px 0 #c0392b, 0 20px 40px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.1s; cursor: pointer; }
+        .buzzer { width: 65vw; height: 65vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; background: #e74c3c; box-shadow: 0 15px 0 #c0392b, 0 20px 40px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.1s; cursor: pointer; overflow: hidden; }
         .buzzer.buzzer-pressed { transform: translateY(15px); box-shadow: 0 0 0 #c0392b; }
         .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
         .ready .buzzer.buzzer-pressed { box-shadow: 0 0 0 #27ae60; }
@@ -166,7 +166,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.136</div>
+    <div class="version-tag">v1.138</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -442,7 +442,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.136";
+        const CLIENT_VERSION = "1.138";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
 
@@ -483,6 +483,10 @@
         let mjName = "l'Animateur", mjLink = "";
         let html5QrCode = null;
         let roomLibrary = {};
+
+        // Variables Écouteur d'équipe (v1.138)
+        let currentWatchedTeam = "";
+        let activeTeamRef = null;
 
         const lines = ["Transforme ton mobile en buzzer ! 🎧", "Joue en Solo, rejoins une Équipe...", "...ou crée ton propre Clan ! 🛡️"];
         let lineIndex = 0, charIndex = 0;
@@ -801,27 +805,20 @@
         function showTeamGallery() { document.getElementById('team-crest-choices').style.display = 'none'; document.getElementById('team-crest-gallery').style.display = 'flex'; }
         function handleTeamFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectedTeamCrest=base64; showTeamPreview(); }); } }
         
-        /* CORRECTION TRI CHRONO (v1.136) */
         function renderTeamCrestPicker() { 
             const c = document.getElementById('team-icon-grid'); c.innerHTML="";
             
             const seen = new Set(); 
 
-            // 1. Image locale
             if(selectedTeamCrest && selectedTeamCrest.length > 0) {
                 seen.add(selectedTeamCrest);
                 createCrestItem(selectedTeamCrest, c);
             }
 
-            // 2. Bibliothèque MJ (Tri Chronologique)
             if(roomLibrary) {
                 const entries = Object.entries(roomLibrary);
-                
-                // Separer Nouveaux vs Anciens
                 const recent = entries.filter(e => e[0].startsWith('-'));
                 const old = entries.filter(e => !e[0].startsWith('-'));
-                
-                // Trier les récents (plus récent en premier)
                 recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
                 
                 const finalOrder = [...recent, ...old];
@@ -835,7 +832,6 @@
                 });
             }
 
-            // 3. Formes par défaut
             for(let i=0; i<30; i++) { 
                 const svg = createBlason(i);
                 if(!seen.has(svg)) {
@@ -911,17 +907,64 @@
             startBuzzer();
         }
 
+        /* MISE A JOUR AFFICHAGE (v1.138) */
         function updateGameHeader() {
             const miniAv = document.getElementById('game-avatar');
             if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
             else miniAv.innerText = player.avatar;
+            
             document.getElementById('game-pseudo').innerText = player.pseudo;
             const teamEl = document.getElementById('game-team');
             const badgeEl = document.getElementById('team-badge');
-            if (player.team !== "Solo") { teamEl.innerText = player.team; teamEl.style.display = "block"; if (player.teamIcon) { badgeEl.src = player.teamIcon; badgeEl.style.display = "block"; } } 
-            else { teamEl.innerText = "Solo"; teamEl.style.display = "block"; badgeEl.style.display = "none"; }
             const buzzerBg = document.getElementById('buzzer-bg');
-            if(player.avatar.length > 20) { buzzerBg.src = player.avatar; buzzerBg.style.display = "block"; } else { buzzerBg.style.display = "none"; }
+            
+            let bgImg = player.avatar;
+
+            if (player.team !== "Solo") { 
+                teamEl.innerText = player.team; 
+                teamEl.style.display = "block"; 
+                if (player.teamIcon) { 
+                    badgeEl.src = player.teamIcon; 
+                    badgeEl.style.display = "block";
+                    if(player.teamIcon.length > 20) bgImg = player.teamIcon; // Priorité à l'écusson sur le buzzer
+                } 
+            } else { 
+                teamEl.innerText = "Solo"; 
+                teamEl.style.display = "block"; 
+                badgeEl.style.display = "none"; 
+            }
+            
+            if(bgImg.length > 20) { 
+                buzzerBg.src = bgImg; 
+                buzzerBg.style.display = "block"; 
+            } else { 
+                buzzerBg.style.display = "none"; 
+            }
+        }
+
+        /* ECOUTEUR D'EQUIPE (v1.138) */
+        function monitorTeamChanges(teamName) {
+            if (currentWatchedTeam === teamName) return; 
+
+            if (activeTeamRef) {
+                activeTeamRef.off();
+                activeTeamRef = null;
+            }
+
+            currentWatchedTeam = teamName;
+
+            if (teamName && teamName !== "Solo") {
+                activeTeamRef = roomRef.child('teams/' + teamName);
+                activeTeamRef.on('value', snap => {
+                    const tData = snap.val();
+                    if (tData && tData.icon && tData.icon !== player.teamIcon) {
+                        player.teamIcon = tData.icon;
+                        updateGameHeader();
+                        roomRef.child('players/' + myUserID).update({ teamIcon: tData.icon });
+                        localStorage.setItem('presta_player_session', JSON.stringify(player));
+                    }
+                });
+            }
         }
 
         function startBuzzer() {
@@ -943,7 +986,9 @@
                 player.team = d.teamName;
                 player.teamIcon = d.teamIcon;
                 player.avatar = d.avatar;
+                
                 updateGameHeader();
+                monitorTeamChanges(player.team); // Activation de la surveillance MJ
 
                 document.getElementById('game-score').innerText = d.pts || 0; 
                 
