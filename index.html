@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.138)</title>
+    <title>Presta'Puce - Blind Test (v1.139)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -166,7 +166,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.138</div>
+    <div class="version-tag">v1.139</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -442,7 +442,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.138";
+        const CLIENT_VERSION = "1.139";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
 
@@ -484,7 +484,6 @@
         let html5QrCode = null;
         let roomLibrary = {};
 
-        // Variables Écouteur d'équipe (v1.138)
         let currentWatchedTeam = "";
         let activeTeamRef = null;
 
@@ -777,18 +776,29 @@
         function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); renderTeamCrestPicker(); } 
         function goToTeamJoin() { navigateTo('step-team-join'); loadTeamsList(); }
 
+        /* ÉTAPE 1.5 : FILTRE DES ÉQUIPES INACTIVES/BANNIES (v1.139) */
         function loadTeamsList() {
             roomRef.child('teams').once('value', snap => {
                 const list = document.getElementById('team-list'); list.innerHTML = "";
                 const teams = snap.val() || {};
-                if(Object.keys(teams).length === 0) list.innerHTML = "<div style='text-align:center; color:#aaa; padding:10px;'>Aucune équipe. Créez-en une !</div>";
+                let validTeamsCount = 0;
+                
                 for(let tName in teams) {
                     const t = teams[tName];
+                    
+                    // Si bannie ou inactive, on ne l'affiche pas
+                    if (t.banned === true || t.active === false) continue;
+                    
+                    validTeamsCount++;
                     const div = document.createElement('div'); div.className = 'team-card';
                     div.style.cssText = "background:rgba(255,255,255,0.1); padding:10px; border-radius:8px; display:flex; align-items:center; cursor:pointer;";
                     div.innerHTML = `<img src="${t.icon}" style="width:30px;height:30px;margin-right:10px;object-fit:contain;"><b>${tName}</b>`;
                     div.onclick = () => { joinTeam(tName, t.icon); };
                     list.appendChild(div);
+                }
+                
+                if(validTeamsCount === 0) {
+                    list.innerHTML = "<div style='text-align:center; color:#aaa; padding:10px;'>Aucune équipe disponible. Créez-en une !</div>";
                 }
             });
         }
@@ -907,7 +917,6 @@
             startBuzzer();
         }
 
-        /* MISE A JOUR AFFICHAGE (v1.138) */
         function updateGameHeader() {
             const miniAv = document.getElementById('game-avatar');
             if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
@@ -926,7 +935,7 @@
                 if (player.teamIcon) { 
                     badgeEl.src = player.teamIcon; 
                     badgeEl.style.display = "block";
-                    if(player.teamIcon.length > 20) bgImg = player.teamIcon; // Priorité à l'écusson sur le buzzer
+                    if(player.teamIcon.length > 20) bgImg = player.teamIcon;
                 } 
             } else { 
                 teamEl.innerText = "Solo"; 
@@ -942,7 +951,6 @@
             }
         }
 
-        /* ECOUTEUR D'EQUIPE (v1.138) */
         function monitorTeamChanges(teamName) {
             if (currentWatchedTeam === teamName) return; 
 
@@ -988,7 +996,7 @@
                 player.avatar = d.avatar;
                 
                 updateGameHeader();
-                monitorTeamChanges(player.team); // Activation de la surveillance MJ
+                monitorTeamChanges(player.team); 
 
                 document.getElementById('game-score').innerText = d.pts || 0; 
                 
@@ -1039,7 +1047,7 @@
             if(action === 'save') {
                 alert("La création de compte arrive très bientôt !");
                 if(confirm("Tant que l'animateur n'a pas fermé la salle, vous pourrez revenir et récupérer votre score.\n\nVoulez-vous quitter ?")) {
-                    isExiting = true; // [v1.134]
+                    isExiting = true; 
                     setInactiveAndAction(() => {
                         window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
                     });
@@ -1047,7 +1055,7 @@
             }
             else if(action === 'change') {
                 if(confirm("Quitter cette salle pour en rejoindre une autre ?\nVotre profil sera conservé.")) {
-                    isExiting = true; // [v1.134]
+                    isExiting = true; 
                     setInactiveAndAction(() => {
                         localStorage.removeItem('presta_player_session');
                         localStorage.removeItem('buzz_lastRoom');
@@ -1057,7 +1065,7 @@
             }
             else if(action === 'exit') {
                 if(confirm("⚠️ Tout effacer et quitter définitivement ?")) {
-                    isExiting = true; // [v1.134]
+                    isExiting = true; 
                     setInactiveAndAction(() => {
                         localStorage.clear(); 
                         window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com";
