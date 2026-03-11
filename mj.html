@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.145)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.146)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -26,8 +26,13 @@
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s; text-transform: uppercase; margin-bottom: 10px; position: relative; top: 0; box-shadow: 0 4px rgba(0,0,0,0.3); }
         button:hover:not(:disabled) { opacity: 0.9; }
         button:active:not(:disabled) { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
+        /* Règle UI stricte : Gris uniquement pour les désactivés */
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; }
         
+        /* Boutons d'annulation/retour (Non gris) */
+        .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: white !important; box-shadow: none !important; }
+        .btn-cancel:hover { background: rgba(231, 76, 60, 0.2) !important; }
+
         .countdown-btn { background: #e67e22 !important; cursor: wait !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(230, 126, 34, 0.6) !important; }
 
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
@@ -61,11 +66,11 @@
         
         .team-controls { display: flex; align-items: center; gap: 2px; }
         .team-score-ctrl { display: flex; align-items: center; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 2px; margin-right: 5px; }
-        .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: #34495e; box-shadow: none; border-radius: 4px; cursor: pointer; color: white; border: none; }
+        .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue); box-shadow: none; border-radius: 4px; cursor: pointer; color: white; border: none; }
         .team-bonus-val { font-size: 0.9rem; font-weight: bold; margin: 0 8px; color: var(--accent); min-width: 20px; text-align: center; }
 
         .player-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
-        .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: #34495e; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
+        .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
         .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; cursor:pointer; }
         
         input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -122,7 +127,7 @@
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
 
-    <div class="version-tag">v1.145</div>
+    <div class="version-tag">v1.146</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -178,7 +183,7 @@
             </div>
         </div>
         <div class="password-wrapper">
-            <input type="password" id="prof-pass" placeholder="Nouveau mot de passe (Optionnel)">
+            <input type="password" id="prof-pass" placeholder="Nouveau mot de passe">
             <div class="password-icon" onclick="togglePasswordVisibility('prof-pass', this)">
                 <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
             </div>
@@ -189,9 +194,10 @@
                 <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
             </div>
         </div>
+        <span class="input-helper" style="margin-top:0; margin-bottom:15px;">Le mot de passe doit contenir 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.</span>
         
         <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER TOUT</button>
-        <button onclick="closeProfile()" style="background:#34495e;">Retour</button>
+        <button class="btn-cancel" onclick="closeProfile()">Retour</button>
         <button onclick="profileLogout()" style="background:var(--danger); margin-top:20px; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);">🚪 DÉCONNEXION</button>
     </div>
 
@@ -202,14 +208,14 @@
         
         <button onclick="askMjNameAndCreate()" style="margin-top:15px;">🆕 Créer une nouvelle salle</button>
         <button id="btn-resume" onclick="resumeRoom()" style="display:none; background:var(--blue)">🔄 Reprendre la salle <span id="last-room-id"></span></button>
-        <button onclick="profileLogout()" style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.3); font-size:0.8rem; margin-top:15px; width:auto; padding:8px 15px;">Déconnexion</button>
+        <button class="btn-cancel" onclick="profileLogout()" style="font-size:0.8rem; margin-top:15px; width:auto; padding:8px 15px;">Déconnexion</button>
     </div>
 
     <div id="screen-super-admin" class="dashboard" style="display:none; max-width: 900px;">
         <div class="room-info" style="background: #c0392b; color: white;">👑 GESTION SUPER ADMIN - ABONNEMENTS</div>
         <div style="display:flex; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
             <button style="background:var(--blue); width:auto;" onclick="document.getElementById('modal-sa-create').style.display='flex'">➕ Créer un nouveau compte MJ</button>
-            <button style="background:#34495e; width:auto;" onclick="closeSuperAdmin()">Retour Accueil</button>
+            <button style="background:var(--blue); width:auto;" onclick="closeSuperAdmin()">Retour Accueil</button>
         </div>
         
         <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
@@ -255,7 +261,7 @@
             <div class="crest-picker" id="crest-grid" style="margin-top: 15px;"></div>
             <div style="display:flex; gap:10px;">
                 <button id="btn-add-team" disabled onclick="addTeam()" style="flex:2;">CRÉER L'ÉQUIPE</button>
-                <button id="btn-cancel-edit" onclick="cancelEdit()" style="flex:1; background:var(--danger); display:none;">ANNULER</button>
+                <button id="btn-cancel-edit" class="btn-cancel" onclick="cancelEdit()" style="flex:1; display:none;">ANNULER</button>
             </div>
             
             <div id="mj-team-list-display"></div>
@@ -308,7 +314,7 @@
 
             <div style="display:flex; gap:10px; margin-bottom: 10px;">
                 <button id="btn-apply-bg" style="background:var(--blue); flex:2; margin:0;" onclick="saveCustomBg()" disabled>APPLIQUER LA SÉLECTION</button>
-                <button style="background:#34495e; border: 1px solid rgba(255,255,255,0.4); flex:1; margin:0;" onclick="resetCustomBg()">Fond par défaut</button>
+                <button class="btn-cancel" style="flex:1; margin:0;" onclick="resetCustomBg()">Fond par défaut</button>
             </div>
             
             <div style="display:flex; flex-direction:column; gap:8px; margin-top:15px; background:rgba(0,0,0,0.3); padding:15px; border-radius:8px;">
@@ -325,7 +331,7 @@
             <h3 style="color:#bdc3c7; margin-top:0;">Administration Version (Cache)</h3>
             <div style="display:flex; gap:10px; align-items:center;">
                 <input type="text" id="sys-version-input" placeholder="1.xxx" style="margin:0; width:100px; display:none;">
-                <button id="btn-update-version" style="background:#34495e; width:auto; margin:0; display:none;" onclick="updateAppVersion()">Mettre à jour</button>
+                <button id="btn-update-version" style="background:var(--blue); width:auto; margin:0; display:none;" onclick="updateAppVersion()">Mettre à jour</button>
                 <span style="font-size:0.8rem; color:#aaa;">Actuelle : <b id="current-version-display">...</b></span>
             </div>
         </div>
@@ -351,7 +357,7 @@
            
            <div style="display:flex; gap:10px; margin-top:15px;">
                <button onclick="verifyVaultPassword()" style="background:var(--danger); flex:2;">DÉVERROUILLER</button>
-               <button onclick="document.getElementById('modal-sa-vault').style.display='none'" style="background:#34495e; flex:1;">ANNULER</button>
+               <button class="btn-cancel" onclick="document.getElementById('modal-sa-vault').style.display='none'" style="flex:1;">ANNULER</button>
            </div>
        </div>
     </div>
@@ -367,35 +373,49 @@
                <input type="text" id="sa-det-nom" placeholder="Nom" style="margin-bottom:0;">
            </div>
            <input type="email" id="sa-det-email" placeholder="Email (Identifiant)" style="margin-bottom:5px; border-color:var(--accent);">
-           <span class="input-helper" style="margin-top:0; margin-bottom:15px;">Modifier l'email ou le mot de passe nécessitera l'ancien mot de passe Mémo.</span>
            
            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);">
                <h3 style="margin-top:0; color:var(--gold);">Abonnement (Jours restants)</h3>
                
                <div style="display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom:15px;">
-                   <button onclick="adjSaDays(-1)" style="width:45px; height:45px; font-size:1.8rem; font-weight:bold; background:#34495e; margin:0; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.5);">-</button>
+                   <button onclick="adjSaDays(-1)" style="width:45px; height:45px; font-size:1.8rem; font-weight:bold; background:var(--blue); margin:0; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.5);">-</button>
                    <input type="number" id="sa-det-days-input" style="width:100px; text-align:center; font-size:2rem; font-weight:bold; color:var(--accent); margin:0; background:transparent; border:none; outline:none;">
-                   <button onclick="adjSaDays(1)" style="width:45px; height:45px; font-size:1.8rem; font-weight:bold; background:#34495e; margin:0; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.5);">+</button>
+                   <button onclick="adjSaDays(1)" style="width:45px; height:45px; font-size:1.8rem; font-weight:bold; background:var(--blue); margin:0; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.5);">+</button>
                </div>
 
                <div style="display:flex; gap:10px; margin-bottom:10px;">
-                   <button onclick="adjSaDays(30)" style="background:var(--success); flex:1; margin:0; padding:10px; font-size:0.8rem;">+ 30 Jours</button>
-                   <button id="btn-sa-block" onclick="toggleBlockMj()" style="background:var(--danger); flex:1; margin:0; padding:10px; font-size:0.8rem;">BLOQUER L'ACCÈS</button>
+                   <button onclick="adjSaDays(30)" style="background:var(--success); flex:2; margin:0; padding:10px; font-size:0.8rem;">+ 30 Jours</button>
+                   <button onclick="setUnlimited()" style="background:var(--gold); color:black; flex:1; margin:0; padding:10px; font-size:0.8rem;">∞ Illimité</button>
+                   <button id="btn-sa-block" onclick="toggleBlockMj()" style="background:var(--danger); flex:2; margin:0; padding:10px; font-size:0.8rem;">BLOQUER L'ACCÈS</button>
                </div>
            </div>
 
            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
-               <h4 style="margin-top:0; color:#bdc3c7; text-align:left;">Mot de passe attribué (Identifiant Firebase)</h4>
-               <div class="password-wrapper" style="margin-bottom:0;">
-                   <input type="password" id="sa-det-memo" placeholder="Modifier le mot de passe ici..." style="margin-bottom:0;">
-                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-memo', this)">
+               <h4 style="margin-top:0; color:#bdc3c7; text-align:left;">Modifier les identifiants (Email ou MDP)</h4>
+               
+               <div class="password-wrapper">
+                   <input type="password" id="sa-det-pass-current" placeholder="Mot de passe ACTUEL du MJ (Obligatoire pour modifier)" style="border-color:var(--danger);">
+                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-current', this)">
                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                    </div>
                </div>
+               <div class="password-wrapper">
+                   <input type="password" id="sa-det-pass-new" placeholder="Nouveau mot de passe">
+                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-new', this)">
+                       <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                   </div>
+               </div>
+               <div class="password-wrapper" style="margin-bottom:0;">
+                   <input type="password" id="sa-det-pass-conf" placeholder="Confirmer le nouveau mot de passe" style="margin-bottom:0;">
+                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-conf', this)">
+                       <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                   </div>
+               </div>
+               <span class="input-helper" style="margin-top:5px; margin-bottom:0;">Le nouveau mot de passe doit contenir 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial. Firebase exige l'ancien mot de passe pour le changer. Si perdu, le MJ doit utiliser "Mot de passe oublié" à la connexion.</span>
            </div>
            
            <button id="btn-sa-save" onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);">💾 ENREGISTRER LES MODIFICATIONS</button>
-           <button onclick="deleteMjAccount()" style="background:rgba(0,0,0,0.5); border:1px solid var(--danger); color:var(--danger); width:100%; margin-top:20px; margin-bottom:0;">🗑️ SUPPRIMER CE COMPTE MJ</button>
+           <button class="btn-cancel" onclick="deleteMjAccount()" style="width:100%; margin-top:20px; margin-bottom:0;">🗑️ SUPPRIMER CE COMPTE MJ</button>
        </div>
     </div>
 
@@ -405,17 +425,18 @@
            <input type="email" id="sa-create-email" placeholder="Email du MJ (Sert d'identifiant)">
            
            <div class="password-wrapper">
-               <input type="password" id="sa-create-pass" placeholder="Mot de passe temporaire">
+               <input type="password" id="sa-create-pass" placeholder="Mot de passe">
                <div class="password-icon" onclick="togglePasswordVisibility('sa-create-pass', this)">
                    <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                </div>
            </div>
+           <span class="input-helper" style="margin-top:0; margin-bottom:10px;">8 caractères min, 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial.</span>
 
            <input type="text" id="sa-create-prenom" placeholder="Prénom (Affiché aux joueurs)">
            
            <div style="display:flex; gap:10px; margin-top:15px;">
                <button onclick="createMjAction()" style="background:var(--mj-color); flex:2;">CRÉER (30 Jours Offerts)</button>
-               <button onclick="document.getElementById('modal-sa-create').style.display='none'" style="background:#34495e; flex:1;">ANNULER</button>
+               <button class="btn-cancel" onclick="document.getElementById('modal-sa-create').style.display='none'" style="flex:1;">ANNULER</button>
            </div>
        </div>
     </div>
@@ -442,7 +463,7 @@
 
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button onclick="savePlayerEdit()" style="background:var(--mj-color); flex:2;">💾 ENREGISTRER</button>
-                <button onclick="closeEditPlayerModal()" style="background:#34495e; flex:1;">ANNULER</button>
+                <button class="btn-cancel" onclick="closeEditPlayerModal()" style="flex:1;">ANNULER</button>
             </div>
         </div>
     </div>
@@ -464,7 +485,7 @@
                 <input type="file" id="lib-upload" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)">
             </label>
             <div id="lib-grid" class="lib-grid"></div>
-            <button onclick="document.getElementById('modal-library').style.display='none'" style="margin-top:20px; background:var(--danger);">FERMER</button>
+            <button class="btn-cancel" onclick="document.getElementById('modal-library').style.display='none'" style="margin-top:20px;">FERMER</button>
         </div>
     </div>
 
@@ -474,8 +495,8 @@
             <p id="restore-team-msg" style="margin-bottom:20px;">Que souhaitez-vous faire ?</p>
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <button onclick="confirmRestoreAction('active')" style="background:var(--mj-color);">🟢 RÉACTIVER L'ÉQUIPE</button>
-                <button onclick="confirmRestoreAction('inactive')" style="background:#34495e;">⚪ RESTER INACTIVE (Débannir seulement)</button>
-                <button onclick="closeRestoreModal()" style="background:var(--danger);">🔴 ANNULER</button>
+                <button onclick="confirmRestoreAction('inactive')" style="background:var(--blue);">⚪ RESTER INACTIVE (Débannir seulement)</button>
+                <button class="btn-cancel" onclick="closeRestoreModal()">🔴 ANNULER</button>
             </div>
         </div>
     </div>
@@ -484,7 +505,7 @@
         <h2 style="color:white; margin-bottom:20px; text-transform:uppercase; color: #8e44ad;">Télécommande Animateur</h2>
         <div id="qrcode-remote" style="background:white; padding:20px; border-radius:15px; box-shadow: 0 0 30px rgba(142, 68, 173, 0.5);"></div>
         <p style="color:#ccc; margin-top:15px; font-style:italic;">Scannez pour piloter depuis un mobile</p>
-        <button onclick="document.getElementById('overlay-remote-qr').style.display='none'" style="margin-top:30px; width:auto; background:var(--danger); padding:10px 30px;">FERMER</button>
+        <button class="btn-cancel" onclick="document.getElementById('overlay-remote-qr').style.display='none'" style="margin-top:30px; width:auto; padding:10px 30px;">FERMER</button>
     </div>
 
     <div id="overlay-guide" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:20000; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
@@ -525,6 +546,11 @@
         let editingPlayerOriginalAvatar = "";
         let editingPlayerCurrentAvatar = "";
         
+        // Validation Regex (8 min, 1 maj, 1 min, 1 chiffre, 1 spécial)
+        function isValidPassword(pwd) {
+            return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd);
+        }
+
         // --- ÉCOUTEURS TOUCHE ENTRÉE ---
         window.onload = function() {
             setupDragDrop('drop-zone', handleFiles);
@@ -543,7 +569,9 @@
             document.getElementById('sa-det-prenom').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
             document.getElementById('sa-det-nom').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
             document.getElementById('sa-det-email').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
-            document.getElementById('sa-det-memo').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
+            document.getElementById('sa-det-pass-current').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
+            document.getElementById('sa-det-pass-new').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
+            document.getElementById('sa-det-pass-conf').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
             document.getElementById('sa-det-days-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
             
             document.getElementById('t-name').addEventListener('keypress', (e) => { if(e.key === 'Enter') { checkTeamForm(); if(!document.getElementById('btn-add-team').disabled) addTeam(); }});
@@ -655,7 +683,9 @@
             if(u.isBlocked) { btnBlock.innerText = "🟢 RÉACTIVER L'ACCÈS"; btnBlock.style.background = "var(--success)"; } 
             else { btnBlock.innerText = "🔴 BLOQUER L'ACCÈS"; btnBlock.style.background = "var(--danger)"; }
             
-            document.getElementById('sa-det-memo').value = u.memoPassword || "";
+            document.getElementById('sa-det-pass-current').value = "";
+            document.getElementById('sa-det-pass-new').value = "";
+            document.getElementById('sa-det-pass-conf').value = "";
         }
 
         function adjSaDays(val) {
@@ -666,18 +696,22 @@
             input.value = final;
         }
 
-        // CORRECTION V1.145 : SYNCHRONISATION SA PANEL => FIREBASE AUTH
+        function setUnlimited() {
+            document.getElementById('sa-det-days-input').value = 9999;
+        }
+
         function saveSAMjDetails() {
             if(!targetMjUid || !allUsersData[targetMjUid]) return;
             const u = allUsersData[targetMjUid];
             
             const oldEmail = u.email || "";
-            const oldMemo = u.memoPassword || "";
             
             const newPrenom = document.getElementById('sa-det-prenom').value.trim();
             const newNom = document.getElementById('sa-det-nom').value.trim();
             const newEmail = document.getElementById('sa-det-email').value.trim();
-            const newMemo = document.getElementById('sa-det-memo').value;
+            const currentPass = document.getElementById('sa-det-pass-current').value;
+            const newPass = document.getElementById('sa-det-pass-new').value;
+            const confPass = document.getElementById('sa-det-pass-conf').value;
             const inputDays = parseInt(document.getElementById('sa-det-days-input').value) || 0;
             
             const msToAdd = inputDays * 24 * 60 * 60 * 1000;
@@ -686,28 +720,30 @@
             const updates = { prenom: newPrenom, nom: newNom, expirationDate: newExp };
 
             const emailChanged = (newEmail !== oldEmail && newEmail !== "");
-            const passChanged = (newMemo !== oldMemo && newMemo !== "");
+            const passChanged = (newPass !== "");
 
             if (emailChanged || passChanged) {
-                if(!oldEmail || !oldMemo) {
-                    alert("⚠️ Impossible de modifier les identifiants : Ce compte n'a pas d'ancien mot de passe Mémo enregistré pour que la console puisse s'y connecter en arrière-plan.");
+                if(!currentPass) {
+                    alert("⚠️ Vous DEVEZ saisir le 'Mot de passe ACTUEL' du MJ pour modifier ses identifiants Firebase.");
                     return;
+                }
+                if(passChanged) {
+                    if(newPass !== confPass) return alert("Les nouveaux mots de passe ne correspondent pas.");
+                    if(!isValidPassword(newPass)) return alert("Le nouveau mot de passe ne respecte pas les critères de sécurité.");
                 }
                 
                 const btn = document.getElementById('btn-sa-save');
                 btn.innerText = "⏳ MISE À JOUR AUTHENTIFICATION...";
                 btn.disabled = true;
 
-                // Le Super Admin se connecte en sous-marin au compte MJ pour modifier l'Auth
-                secondaryAuth.signInWithEmailAndPassword(oldEmail, oldMemo)
+                // Le Super Admin se connecte en sous-marin au compte MJ
+                secondaryAuth.signInWithEmailAndPassword(oldEmail, currentPass)
                 .then(async (userCredential) => {
                     try {
                         if(emailChanged) await userCredential.user.updateEmail(newEmail);
-                        if(passChanged) await userCredential.user.updatePassword(newMemo);
+                        if(passChanged) await userCredential.user.updatePassword(newPass);
                         
                         updates.email = newEmail;
-                        updates.memoPassword = newMemo;
-                        
                         await secondaryAuth.signOut();
                         
                         db.ref('users/' + targetMjUid).update(updates).then(() => {
@@ -726,11 +762,9 @@
                 .catch(error => {
                     btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS";
                     btn.disabled = false;
-                    alert("⚠️ Échec de connexion au compte MJ.\nLe mot de passe Mémo actuel ('" + oldMemo + "') est-il correct ?\n(Erreur: " + error.message + ")");
+                    alert("⚠️ Échec de connexion au compte MJ.\nLe mot de passe actuel saisi est incorrect.\n(Erreur: " + error.message + ")");
                 });
             } else {
-                updates.email = oldEmail; 
-                updates.memoPassword = oldMemo; 
                 db.ref('users/' + targetMjUid).update(updates).then(() => {
                     alert("Fiche MJ enregistrée avec succès !");
                     document.getElementById('modal-sa-mj-details').style.display = 'none';
@@ -743,7 +777,10 @@
             const pass = document.getElementById('sa-create-pass').value;
             const prenom = document.getElementById('sa-create-prenom').value.trim();
 
-            if(!email || !pass || pass.length < 6) return alert("Email invalide ou mot de passe trop court (min 6 car.).");
+            if(!email) return alert("Veuillez saisir un email.");
+            if(!isValidPassword(pass)) {
+                return alert("Le mot de passe doit contenir au moins 8 caractères, une minuscule, une majuscule, un chiffre et un caractère spécial.");
+            }
 
             secondaryAuth.createUserWithEmailAndPassword(email, pass)
             .then((userCredential) => {
@@ -751,12 +788,18 @@
                 const newExp = Date.now() + (30 * 24 * 60 * 60 * 1000); 
                 
                 return db.ref('users/' + newUid).set({
-                    email: email, prenom: prenom, memoPassword: pass, expirationDate: newExp, isBlocked: false
+                    email: email, prenom: prenom, expirationDate: newExp, isBlocked: false
                 }).then(() => {
                     secondaryAuth.signOut();
-                    alert("Nouveau compte MJ créé avec succès (30 Jours) !");
+                    
                     document.getElementById('modal-sa-create').style.display = 'none';
                     document.getElementById('sa-create-email').value = ''; document.getElementById('sa-create-pass').value = ''; document.getElementById('sa-create-prenom').value = '';
+                    
+                    // Génération de l'email automatique (Mailto)
+                    const subject = encodeURIComponent("Vos accès à la console MJ Presta'Puce");
+                    const body = encodeURIComponent(`Bonjour ${prenom || ''},\n\nVoici vos accès pour gérer vos parties de Blindtest :\n\nLien : https://prestapuce.github.io/prestapuce-blindtest/mj\nIdentifiant : ${email}\nMot de passe : ${pass}\n\nUn guide d'utilisation complet est disponible directement sur votre console via le bouton "AIDE / GUIDE".\n\nAmusez-vous bien !\nL'équipe Presta'Puce`);
+                    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+                    
                 });
             })
             .catch((error) => { alert("Erreur de création : " + error.message); });
@@ -764,14 +807,13 @@
 
         function deleteMjAccount() {
             if(!targetMjUid || !allUsersData[targetMjUid]) return;
-            const u = allUsersData[targetMjUid];
-            const email = u.email;
-            const memo = u.memoPassword;
+            const email = allUsersData[targetMjUid].email;
 
-            if(confirm(`⚠️ DANGER : Voulez-vous vraiment supprimer DÉFINITIVEMENT le compte ${email} ?\n\nToutes ses données de jeu et son accès seront détruits.`)) {
-                
-                if(email && memo) {
-                    secondaryAuth.signInWithEmailAndPassword(email, memo)
+            const pass = prompt(`⚠️ DANGER : Voulez-vous vraiment supprimer DÉFINITIVEMENT le compte ${email} ?\n\nPour détruire l'identifiant de connexion, veuillez saisir le mot de passe actuel du MJ.\n(Laissez vide et cliquez sur OK pour effacer uniquement ses données de jeu)`);
+            
+            if(pass !== null) {
+                if(pass !== "") {
+                    secondaryAuth.signInWithEmailAndPassword(email, pass)
                     .then((userCredential) => {
                         userCredential.user.delete().then(() => {
                             eraseMjDatabase(targetMjUid);
@@ -781,11 +823,10 @@
                         });
                     })
                     .catch(err => {
-                        alert("Le mot de passe Mémo est incorrect. Les données BDD vont être effacées, mais l'identifiant restera dans la console Firebase Google.\nErreur: " + err.message);
+                        alert("Le mot de passe saisi est incorrect. Les données BDD vont être effacées, mais l'identifiant restera dans la console Firebase Google.\nErreur: " + err.message);
                         eraseMjDatabase(targetMjUid);
                     });
                 } else {
-                    alert("Aucun mot de passe mémorisé. Ses données vont être effacées, mais vous devrez supprimer son identifiant manuellement dans Firebase Auth.");
                     eraseMjDatabase(targetMjUid);
                 }
             }
@@ -1187,8 +1228,9 @@
                 if(!passCurrent) {
                     return alert("⚠️ Vous DEVEZ saisir votre 'Mot de passe actuel' pour modifier votre Email ou votre Mot de passe.");
                 }
-                if(passChanged && pass1 !== pass2) {
-                    return alert("Les nouveaux mots de passe ne correspondent pas.");
+                if(passChanged) {
+                    if(pass1 !== pass2) return alert("Les nouveaux mots de passe ne correspondent pas.");
+                    if(!isValidPassword(pass1)) return alert("Le nouveau mot de passe ne respecte pas les critères de sécurité (8 min, 1 Maj, 1 Min, 1 Chiffre, 1 Spécial).");
                 }
                 
                 try {
@@ -1198,7 +1240,6 @@
                     if (emailChanged) await user.updateEmail(newEmail);
                     if (passChanged) {
                         await user.updatePassword(pass1);
-                        updates.memoPassword = pass1; // CORRECTION V1.145 : Met à jour le mémo du Super Admin automatiquement
                     }
                 } catch(e) {
                     return alert("Erreur de sécurité : Mot de passe actuel incorrect. (" + e.message + ")");
@@ -1370,7 +1411,7 @@
             Object.keys(globalTeams).forEach(tKey => {
                 const team = globalTeams[tKey]; const isActive = team.active !== false; const isBanned = team.banned === true; const bonus = team.bonus || 0;
                 if(isBanned) { hasTeamBanned = true; banList.innerHTML += `<div class="team-item banned"><div style="display:flex; align-items:center;"><div class="crest-mini-bg" style="opacity:0.6;"><img src="${team.icon}" class="crest-mini"></div><b style="margin-left:5px; color:var(--danger);">${tKey}</b></div><div class="team-controls"><span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réhabiliter l'équipe">✅</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span></div></div>`; }
-                else if(!isActive) { hasTeamInactive = true; const frozenScore = team.frozenScore || 0; inactList.innerHTML += `<div class="team-item inactive"><div style="display:flex; align-items:center;"><div class="crest-mini-bg" style="opacity:0.6;"><img src="${team.icon}" class="crest-mini"></div><b style="margin-left:5px; color:#95a5a6;">${tKey}</b> <small style="margin-left:5px;">(Score: ${frozenScore})</small></div><div class="team-controls"><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button><span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réactiver l'équipe">▶️</span><span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">✖</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span></div></div>`; }
+                else if(!isActive) { hasTeamInactive = true; const frozenScore = team.frozenScore || 0; inactList.innerHTML += `<div class="team-item inactive"><div style="display:flex; align-items:center;"><div class="crest-mini-bg" style="opacity:0.6;"><img src="${team.icon}" class="crest-mini"></div><b style="margin-left:5px; color:#bdc3c7;">${tKey}</b> <small style="margin-left:5px;">(Score: ${frozenScore})</small></div><div class="team-controls"><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button><span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réactiver l'équipe">▶️</span><span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">✖</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span></div></div>`; }
                 else { tList.innerHTML += `<div class="team-item"><div style="display:flex; align-items:center;"><div class="crest-mini-bg"><img src="${team.icon}" class="crest-mini"></div><b style="margin-left:5px;">${tKey}</b></div><div class="team-controls"><div class="team-score-ctrl"><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button><span class="team-bonus-val">${bonus}</span><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button></div><span class="btn-icon btn-pause" onclick="archiveTeam('${tKey}')" title="Désactiver (Pause)">✖</span><span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">🚫</span><span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span></div></div>`; }
             });
             inactSection.style.display = hasTeamInactive ? 'block' : 'none'; banSection.style.display = hasTeamBanned ? 'block' : 'none';
@@ -1423,7 +1464,7 @@
 
                         <button class="lobby-btn" style="background:var(--blue); margin:0 2px;" onclick="openEditModal('${uid}')" title="Éditer le profil du joueur">✏️</button>
                         ${sanctionBtn}
-                        <button class="lobby-btn" style="background:gray; margin-left:2px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Rendre ce joueur inactif">🗑️</button>
+                        <button class="lobby-btn" style="background:transparent; border:1px solid var(--danger); margin-left:2px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Rendre ce joueur inactif">🗑️</button>
                     </div>
                 </div>`;
             });
@@ -1439,13 +1480,13 @@
                     <button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${uid}')" title="Éditer le profil">✏️</button>
                     <button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${uid}')" title="Réactiver ce joueur">✅</button>
                     <button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir ce joueur (Carton Rouge)">🟥</button>
-                    <button class="lobby-btn" style="background:gray;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button>
+                    <button class="lobby-btn" style="background:transparent; border:1px solid var(--danger);" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button>
                 </div></div>`;
             });
 
             bannedPlayers.forEach(d => {
                 hasBanned = true; const uid = d.uid; const pseudo = d.name;
-                htmlBanned += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--blue); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="openEditModal('${uid}')" title="Éditer le profil">✏️ Éditer</button><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')" title="Réactiver ce joueur">Réhabiliter</button><button style="background:#c0392b; width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
+                htmlBanned += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--blue); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="openEditModal('${uid}')" title="Éditer le profil">✏️ Éditer</button><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')" title="Réactiver ce joueur">Réhabiliter</button><button style="background:transparent; border:1px solid var(--danger); width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
             });
 
             scoreList.innerHTML = htmlActive; iList.innerHTML = htmlInactive; bList.innerHTML = htmlBanned;
