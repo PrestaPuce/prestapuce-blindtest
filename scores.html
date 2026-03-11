@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Scores - Presta'Puce (v1.155)</title>
+    <title>Scores - Presta'Puce (v1.156)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -61,19 +61,26 @@
         .info { flex: 1; margin-left: 1vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: baseline; gap: 0.5vw; line-height: 1; }
         .info b { font-size: clamp(0.9rem, 2.5vh, 1.8rem); }
         .team-tag { font-size: clamp(0.7rem, 2vh, 1.2rem); color: #bdc3c7; font-style: italic; font-weight: normal; }
+        
         .pts { font-size: clamp(1rem, 3vh, 2rem); font-weight: 800; background: rgba(0,0,0,0.3); padding: 0 1vw; border-radius: 6px; color: var(--accent); min-width: 4vw; text-align: center; line-height: 1.4; transition: background 0.3s, color 0.3s; }
         
+        /* ANIMATION ÉTAPE 3 : FLASH LORS DU GAIN DE POINT */
+        @keyframes scorePulse {
+            0% { transform: scale(1); background: rgba(0,0,0,0.3); color: var(--accent); }
+            20% { transform: scale(1.4); background: white; color: black; box-shadow: 0 0 15px white; }
+            100% { transform: scale(1); background: rgba(0,0,0,0.3); color: var(--accent); }
+        }
+        .flash-score { animation: scorePulse 1.2s cubic-bezier(0.25, 1, 0.5, 1) !important; }
+
         .last-buzzed { border-color: transparent !important; background: rgba(46, 204, 113, 0.4); box-shadow: inset 0 0 0 0.5vw #2ecc71, 0 0 2vh #2ecc71 !important; transform: scale(1.02); z-index: 10; position: relative; }
         .inactive-card { opacity: 0.6; filter: grayscale(0.8); border-left-color: #7f8c8d; }
         .pause-badge { background: #7f8c8d; color: white; font-size: 0.5em; padding: 2px 5px; border-radius: 4px; margin-left: 10px; vertical-align: middle; }
 
-        /* HIGHLIGHT TOP 3 DANS LA GRILLE */
+        /* HIGHLIGHT TOP 3 */
         .rank-1-card { border: 2px solid var(--gold) !important; box-shadow: 0 0 15px rgba(241, 196, 15, 0.5) !important; background: rgba(241, 196, 15, 0.15) !important; border-left: 0.5vw solid var(--gold) !important; }
         .rank-1-card .pts { background: var(--gold) !important; color: black !important; }
-        
         .rank-2-card { border: 1px solid var(--silver) !important; box-shadow: 0 0 10px rgba(189, 195, 199, 0.3) !important; background: rgba(189, 195, 199, 0.1) !important; border-left: 0.5vw solid var(--silver) !important; }
         .rank-2-card .pts { background: var(--silver) !important; color: black !important; }
-        
         .rank-3-card { border: 1px solid var(--bronze) !important; box-shadow: 0 0 10px rgba(205, 127, 50, 0.3) !important; background: rgba(205, 127, 50, 0.1) !important; border-left: 0.5vw solid var(--bronze) !important; }
         .rank-3-card .pts { background: var(--bronze) !important; color: white !important; }
 
@@ -118,7 +125,7 @@
             </a>
             <div class="title-group">
                 <h1>SALLE : <span id="room-title" class="room-highlight">----</span></h1>
-                <div class="version-text">v1.155</div>
+                <div class="version-text">v1.156</div>
             </div>
         </div>
     </header>
@@ -176,9 +183,24 @@
             else { qrBox.classList.add('zoomed'); overlay.classList.add('active'); }
         }
 
+        // VARIABLES DE JEU & TRACKING
         let scoresData = {}, teamsData = {}, currentBuzzer = null, currentBuzzerId = null;
         let buzzHistory = [];
         let isGameFinished = false;
+        
+        // Moteurs Étape 3 (Dynamique & Flash)
+        let previousPts = {}; 
+        let lastPointTime = {}; 
+        let lastFlashTime = {}; 
+
+        // FONCTION DE TRACKING
+        function trackScores(id, newPts) {
+            if (previousPts[id] !== undefined && newPts > previousPts[id]) {
+                lastPointTime[id] = Date.now();
+                lastFlashTime[id] = Date.now();
+            }
+            previousPts[id] = newPts;
+        }
 
         roomRef.child('mjLogo').on('value', snap => { if(snap.exists()) { document.getElementById('display-mj-logo').src = snap.val(); document.getElementById('page-favicon').href = snap.val(); } });
         roomRef.child('mjLink').on('value', snap => {
@@ -209,7 +231,7 @@
         function showPodium() {
             document.getElementById('main-view').style.display = 'none'; document.getElementById('qr-box').style.display = 'none'; document.getElementById('btn-return-podium').style.display = 'none'; document.getElementById('blur-overlay').style.display = 'none';
             const podiumScreen = document.getElementById('podium-screen'); podiumScreen.style.display = 'flex';
-            let ranking = calculateRanking(); const top3 = ranking.slice(0, 3); const container = document.getElementById('podium-display'); container.innerHTML = "";
+            let ranking = getSortedRanking(); const top3 = ranking.slice(0, 3); const container = document.getElementById('podium-display'); container.innerHTML = "";
             const visualOrder = [1, 0, 2]; 
             visualOrder.forEach(idx => {
                 if (top3[idx]) {
@@ -232,7 +254,8 @@
             if (isGameFinished) document.getElementById('btn-return-podium').style.display = 'block'; else document.getElementById('btn-return-podium').style.display = 'none';
         }
 
-        function calculateRanking() {
+        // CALCULS GLOBAUX BRUTS (Sans tri)
+        function calculateGlobalScores() {
             const listEquipes = Object.keys(teamsData);
             const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
             let rankingMap = new Map();
@@ -243,19 +266,37 @@
                 let score = 0; let active = true;
                 if (team.active === false) { score = (team.frozenScore || 0); active = false; } 
                 else { score = (team.bonus || 0); }
-                rankingMap.set("TEAM_" + tName, { name: tName, pts: score, icon: team.icon, isTeam: true, count: 0, isActive: active });
+                rankingMap.set("team-" + tName, { dataId: "team-" + tName, name: tName, pts: score, icon: team.icon, isTeam: true, count: 0, isActive: active });
             });
 
             allPlayers.forEach(p => {
                 const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
-                if (statutEquipe !== "Solo" && rankingMap.has("TEAM_" + statutEquipe)) {
-                    let teamEntry = rankingMap.get("TEAM_" + statutEquipe);
+                if (statutEquipe !== "Solo" && rankingMap.has("team-" + statutEquipe)) {
+                    let teamEntry = rankingMap.get("team-" + statutEquipe);
                     if (teamEntry.isActive) { teamEntry.pts += (p.pts || 0); if (p.active !== false) teamEntry.count++; }
                 } else {
-                    if (p.active !== false && !p.banned) { rankingMap.set("SOLO_" + p.name, { name: p.name, pts: (p.pts || 0), avatar: p.avatar, isTeam: false, isActive: true }); }
+                    if (p.active !== false && !p.banned) { rankingMap.set("solo-" + p.name, { dataId: "solo-" + p.name, name: p.name, pts: (p.pts || 0), avatar: p.avatar, isTeam: false, isActive: true, count: 1 }); }
                 }
             });
-            return Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts);
+            return Array.from(rankingMap.values());
+        }
+
+        // LE MOTEUR DE TRI ANTI-EX-AEQUO (Étape 3)
+        function getSortedRanking() {
+            let unsorted = calculateGlobalScores();
+            return unsorted.sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts; // 1. Score le plus haut
+                
+                let countA = Math.max(1, a.count);
+                let countB = Math.max(1, b.count);
+                if (countA !== countB) return countA - countB; // 2. Le mérite (Le moins de joueurs possibles)
+                
+                let timeA = lastPointTime[a.dataId] || 0;
+                let timeB = lastPointTime[b.dataId] || 0;
+                if (timeB !== timeA) return timeB - timeA; // 3. Dynamique (Le dernier à avoir marqué passe devant)
+                
+                return a.name.localeCompare(b.name);
+            });
         }
 
         function renderAvatar(av, size=28) {
@@ -297,10 +338,17 @@
         }
 
         function updateDisplay() {
-            const listEquipes = Object.keys(teamsData);
             const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
+            
+            // TRACKING : Vérification des nouveaux scores
+            allPlayers.forEach(p => trackScores('player-' + p.uid, p.pts || 0));
+            let globalUnsorted = calculateGlobalScores();
+            globalUnsorted.forEach(item => trackScores(item.dataId, item.pts));
 
+            // GÉNÉRATION LISTE INDIVIDUELLE
             let pListHTML = "";
+            const listEquipes = Object.keys(teamsData);
+            
             allPlayers.sort((a, b) => {
                 if (a.active === false && b.active !== false) return 1;
                 if (a.active !== false && b.active === false) return -1;
@@ -319,18 +367,25 @@
                 const enEquipe = p.teamName && listEquipes.includes(p.teamName);
                 const labelSub = enEquipe ? p.teamName : "Solo";
                 
+                const idP = 'player-' + p.uid;
+                const isFlashingP = (Date.now() - (lastFlashTime[idP] || 0)) < 1500;
+                const flashClassP = isFlashingP ? " flash-score" : "";
+
                 pListHTML += `
-                    <div class="card ${buzzedClass} ${inactiveClass}" data-id="player-${p.uid}">
+                    <div class="card ${buzzedClass} ${inactiveClass}" data-id="${idP}">
                         <div class="avatar">${renderAvatar(p.avatar)}</div>
                         <div class="info">
                             <b>${p.name}</b> <span class="team-tag">(${labelSub})</span>
                         </div>
-                        <div class="pts">${p.pts || 0}</div>
+                        <div class="pts${flashClassP}">${p.pts || 0}</div>
                     </div>`;
             });
 
+            // GÉNÉRATION CLASSEMENT GLOBAL (Avec Tri intelligent)
             let gListHTML = "";
-            calculateRanking().forEach((item, index) => {
+            let globalSorted = getSortedRanking();
+            
+            globalSorted.forEach((item, index) => {
                 const iconHtml = item.isTeam ? `<div class="crest-bg"><img src="${item.icon}" style="width:4vh; height:4vh;"></div>` : `<span>${renderAvatar(item.avatar)}</span>`;
                 const labelJoueur = (item.count === 1) ? "joueur" : "joueurs";
                 
@@ -343,7 +398,6 @@
 
                 let inactiveClass = item.isActive ? "" : " inactive-card";
                 
-                // NOUVEAU : Application des classes du podium
                 let rankClass = "";
                 if (item.pts > 0 && item.isActive) {
                     if (index === 0) rankClass = " rank-1-card";
@@ -351,13 +405,15 @@
                     else if (index === 2) rankClass = " rank-3-card";
                 }
                 
-                let dataId = item.isTeam ? `team-${item.name}` : `solo-${item.name}`;
+                const idG = item.dataId;
+                const isFlashingG = (Date.now() - (lastFlashTime[idG] || 0)) < 1500;
+                const flashClassG = isFlashingG ? " flash-score" : "";
 
                 gListHTML += `
-                    <div class="card${inactiveClass}${rankClass}" data-id="${dataId}">
+                    <div class="card${inactiveClass}${rankClass}" data-id="${idG}">
                         <div class="crest">${iconHtml}</div>
                         <div class="info"><b>${finalName}</b></div>
-                        <div class="pts">${item.pts}</div>
+                        <div class="pts${flashClassG}">${item.pts}</div>
                     </div>`;
             });
 
