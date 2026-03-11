@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.142)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.143)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -122,7 +122,7 @@
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
 
-    <div class="version-tag">v1.142</div>
+    <div class="version-tag">v1.143</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -148,7 +148,7 @@
         <p class="section-title">👤 IDENTITÉ</p>
         <input type="text" id="prof-nom" placeholder="Nom">
         <input type="text" id="prof-prenom" placeholder="Prénom (Affiché aux joueurs)">
-        <input type="email" id="prof-email" placeholder="Email" disabled style="color:#aaa;">
+        <input type="email" id="prof-email" placeholder="Email (Identifiant)" style="border-color:var(--blue);">
         
         <p class="section-title">🖼️ IMAGE DE MARQUE</p>
         <label for="prof-logo-upload" id="profile-drop-zone" class="drop-zone profile-drop">
@@ -168,18 +168,30 @@
         
         <p class="section-title">📁 BIBLIOTHÈQUE</p>
         <button onclick="openLibrary()" style="background:var(--gold); color:black; margin-top:0;">Gérer mes Blasons d'Équipes</button>
-        <span class="input-helper">Gérez ici vos images pour les équipes (Logos personnalisés).</span>
 
         <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:20px 0;">
-        <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">SÉCURITÉ</p>
-        <input type="password" id="prof-pass" placeholder="Nouveau mot de passe">
-        <input type="password" id="prof-pass-conf" placeholder="Confirmer mot de passe">
-        <label class="show-pass-container">
-            <input type="checkbox" onchange="const t = this.checked ? 'text' : 'password'; document.getElementById('prof-pass').type = t; document.getElementById('prof-pass-conf').type = t;"> Afficher
-        </label>
+        <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">SÉCURITÉ (Requis pour modifier l'email ou le mot de passe)</p>
+        <div class="password-wrapper">
+            <input type="password" id="prof-pass-current" placeholder="Votre mot de passe actuel" style="border-color:var(--danger);">
+            <div class="password-icon" onclick="togglePasswordVisibility('prof-pass-current', this)">
+                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </div>
+        </div>
+        <div class="password-wrapper">
+            <input type="password" id="prof-pass" placeholder="Nouveau mot de passe (Optionnel)">
+            <div class="password-icon" onclick="togglePasswordVisibility('prof-pass', this)">
+                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </div>
+        </div>
+        <div class="password-wrapper">
+            <input type="password" id="prof-pass-conf" placeholder="Confirmer le nouveau mot de passe">
+            <div class="password-icon" onclick="togglePasswordVisibility('prof-pass-conf', this)">
+                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </div>
+        </div>
+        
         <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER TOUT</button>
         <button onclick="closeProfile()" style="background:#7f8c8d;">Retour</button>
-
         <button onclick="profileLogout()" style="background:var(--danger); margin-top:20px; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);">🚪 DÉCONNEXION</button>
     </div>
 
@@ -345,18 +357,31 @@
     </div>
 
     <div id="modal-sa-mj-details" class="modal-overlay">
-       <div class="modal-box" style="max-width:600px;">
-           <h2 style="color:var(--blue); margin-top:0; margin-bottom:5px;" id="sa-det-name">Nom du MJ</h2>
-           <p id="sa-det-email" style="color:#ccc; font-style:italic; margin-top:0; margin-bottom:20px;">email@mj.com</p>
+       <div class="modal-box" style="max-width:600px; padding-top:40px;">
+           <button onclick="document.getElementById('modal-sa-mj-details').style.display='none'" style="position:absolute; top:10px; right:10px; background:var(--danger); width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0; border:none; font-weight:bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">✖</button>
+           
+           <h2 style="color:var(--blue); margin-top:0; margin-bottom:15px;">FICHE MAÎTRE DU JEU</h2>
+           
+           <div style="display:flex; gap:10px; margin-bottom:5px;">
+               <input type="text" id="sa-det-prenom" placeholder="Prénom" style="margin-bottom:0;">
+               <input type="text" id="sa-det-nom" placeholder="Nom" style="margin-bottom:0;">
+           </div>
+           <input type="email" id="sa-det-email" placeholder="Email (Identifiant)" style="margin-bottom:5px; border-color:var(--accent);">
+           <span class="input-helper" style="margin-top:0; margin-bottom:15px;">La modification de l'email nécessitera le Moteur Firebase (Prochaine étape).</span>
            
            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);">
-               <h3 style="margin-top:0; color:var(--gold);">Abonnement : <span id="sa-det-days" style="font-size:1.5rem;">0</span> Jours</h3>
-               <div style="display:flex; gap:10px; margin-bottom:15px;">
-                   <button onclick="addMjDays(30)" style="background:var(--success); flex:1; margin:0; padding:10px; font-size:0.8rem;">+ 30 Jours</button>
-                   <button onclick="addMjDays(10)" style="background:var(--blue); flex:1; margin:0; padding:10px; font-size:0.8rem;">+ 10 Jours</button>
-                   <button onclick="addMjDays(-1)" style="background:#e67e22; flex:1; margin:0; padding:10px; font-size:0.8rem;">- 1 Jour</button>
+               <h3 style="margin-top:0; color:var(--gold);">Abonnement (Jours restants)</h3>
+               
+               <div style="display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom:15px;">
+                   <button onclick="adjSaDays(-1)" style="width:45px; height:45px; font-size:1.8rem; font-weight:bold; background:#7f8c8d; margin:0; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.5);">-</button>
+                   <input type="number" id="sa-det-days-input" style="width:100px; text-align:center; font-size:2rem; font-weight:bold; color:var(--accent); margin:0; background:transparent; border:none; outline:none;">
+                   <button onclick="adjSaDays(1)" style="width:45px; height:45px; font-size:1.8rem; font-weight:bold; background:#7f8c8d; margin:0; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.5);">+</button>
                </div>
-               <button id="btn-sa-block" onclick="toggleBlockMj()" style="background:var(--danger); margin:0;">BLOQUER L'ACCÈS</button>
+
+               <div style="display:flex; gap:10px; margin-bottom:10px;">
+                   <button onclick="adjSaDays(30)" style="background:var(--success); flex:1; margin:0; padding:10px; font-size:0.8rem;">+ 30 Jours</button>
+                   <button id="btn-sa-block" onclick="toggleBlockMj()" style="background:var(--danger); flex:1; margin:0; padding:10px; font-size:0.8rem;">BLOQUER L'ACCÈS</button>
+               </div>
            </div>
 
            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
@@ -367,11 +392,10 @@
                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                    </div>
                </div>
-               <button onclick="saveMjMemo()" style="background:var(--mj-color); margin-top:10px; margin-bottom:0; font-size:0.8rem;">💾 ENREGISTRER LE MÉMO</button>
-               <span class="input-helper" style="margin-top:5px; margin-bottom:0;">Firebase bloque la lecture des mots de passe. Utilisez ce champ pour noter celui que vous avez fourni.</span>
            </div>
            
-           <button onclick="document.getElementById('modal-sa-mj-details').style.display='none'" style="background:#7f8c8d; margin-top:20px; margin-bottom:0;">FERMER LA FICHE</button>
+           <button onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);">💾 ENREGISTRER LES MODIFICATIONS</button>
+           <button onclick="deleteMjAccount()" style="background:rgba(0,0,0,0.5); border:1px solid var(--danger); color:var(--danger); width:100%; margin-top:20px; margin-bottom:0;">🗑️ SUPPRIMER CE COMPTE MJ</button>
        </div>
     </div>
 
@@ -497,7 +521,22 @@
         let editingPlayerOriginalAvatar = "";
         let editingPlayerCurrentAvatar = "";
         
-        // --- MOTEUR SUPER ADMIN (Étape 1 & 2) ---
+        // --- ÉCOUTEURS TOUCHE ENTRÉE ---
+        window.onload = function() {
+            setupDragDrop('drop-zone', handleFiles);
+            setupDragDrop('profile-drop-zone', handleProfileFile);
+            setupDragDrop('bg-drop-zone', handleBgUpload);
+            
+            document.getElementById('mj-email').addEventListener('keypress', (e) => { if(e.key === 'Enter') login(); });
+            document.getElementById('mj-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') login(); });
+            document.getElementById('sa-vault-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') verifyVaultPassword(); });
+            document.getElementById('t-name').addEventListener('keypress', (e) => { if(e.key === 'Enter') { checkTeamForm(); if(!document.getElementById('btn-add-team').disabled) addTeam(); }});
+            document.getElementById('edit-player-name').addEventListener('keypress', (e) => { if(e.key === 'Enter') savePlayerEdit(); });
+            document.getElementById('sa-create-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') createMjAction(); });
+            document.getElementById('prof-pass-conf').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveProfile(); });
+        };
+
+        // --- MOTEUR SUPER ADMIN (Étape A) ---
         let isSuperAdmin = false;
         let allUsersData = {};
         let targetMjUid = null;
@@ -531,8 +570,7 @@
             Object.keys(allUsersData).forEach(uid => {
                 const u = allUsersData[uid];
                 
-                // On peut afficher tous les MJs, même toi (pour vérifier ton abonnement)
-                const email = u.email || "Email inconnu";
+                const email = u.email || "Email inconnu (Non connecté)";
                 const name = (u.prenom || "MJ") + " " + (u.nom || "");
                 const isBlocked = u.isBlocked === true;
                 
@@ -540,11 +578,15 @@
                 if(u.expirationDate) {
                     daysLeft = Math.ceil((u.expirationDate - Date.now()) / (1000 * 60 * 60 * 24));
                 }
+                if (daysLeft < 0) daysLeft = 0;
                 
                 let statusColor = "var(--success)";
                 let statusText = daysLeft + " Jours";
                 
-                if (isBlocked) {
+                if(email === "contact@prestapuce.com") {
+                    statusText = "NO LIMIT (SA)";
+                    statusColor = "var(--gold)";
+                } else if (isBlocked) {
                     statusColor = "var(--danger)";
                     statusText = "BLOQUÉ";
                 } else if (daysLeft <= 0) {
@@ -569,9 +611,8 @@
 
         function verifyVaultPassword() {
             const pass = document.getElementById('sa-vault-pass').value;
-            const email = auth.currentUser.email; // Ton email Super Admin
+            const email = auth.currentUser.email; 
             
-            // On tente une reconnexion silencieuse pour vérifier le mot de passe
             auth.signInWithEmailAndPassword(email, pass).then(() => {
                 document.getElementById('modal-sa-vault').style.display = 'none';
                 updateMjDetailsView();
@@ -585,14 +626,16 @@
             if(!targetMjUid || !allUsersData[targetMjUid]) return;
             const u = allUsersData[targetMjUid];
             
-            document.getElementById('sa-det-name').innerText = (u.prenom || "MJ") + " " + (u.nom || "");
-            document.getElementById('sa-det-email').innerText = u.email || "Email inconnu";
+            document.getElementById('sa-det-prenom').value = u.prenom || "";
+            document.getElementById('sa-det-nom').value = u.nom || "";
+            document.getElementById('sa-det-email').value = u.email || "";
             
             let daysLeft = 0;
             if(u.expirationDate) {
                 daysLeft = Math.ceil((u.expirationDate - Date.now()) / (1000 * 60 * 60 * 24));
             }
-            document.getElementById('sa-det-days').innerText = daysLeft;
+            if(daysLeft < 0) daysLeft = 0;
+            document.getElementById('sa-det-days-input').value = daysLeft;
             
             const btnBlock = document.getElementById('btn-sa-block');
             if(u.isBlocked) {
@@ -606,20 +649,48 @@
             document.getElementById('sa-det-memo').value = u.memoPassword || "";
         }
 
-        function addMjDays(days) {
-            if(!targetMjUid) return;
-            const msToAdd = days * 24 * 60 * 60 * 1000;
-            let currentExp = allUsersData[targetMjUid].expirationDate || Date.now();
+        function adjSaDays(val) {
+            const input = document.getElementById('sa-det-days-input');
+            let current = parseInt(input.value) || 0;
+            let final = current + val;
+            if(final < 0) final = 0;
+            input.value = final;
+        }
+
+        function saveSAMjDetails() {
+            if(!targetMjUid || !allUsersData[targetMjUid]) return;
             
-            // S'il était déjà expiré, on repart d'aujourd'hui
-            if (currentExp < Date.now() && days > 0) currentExp = Date.now(); 
+            const newPrenom = document.getElementById('sa-det-prenom').value.trim();
+            const newNom = document.getElementById('sa-det-nom').value.trim();
+            const newEmail = document.getElementById('sa-det-email').value.trim();
+            const newMemo = document.getElementById('sa-det-memo').value;
+            const inputDays = parseInt(document.getElementById('sa-det-days-input').value) || 0;
             
-            const newExp = currentExp + msToAdd;
-            
-            db.ref('users/' + targetMjUid).update({ expirationDate: newExp }).then(() => {
-                // L'interface se mettra à jour toute seule grâce au Listener
-                setTimeout(updateMjDetailsView, 200); 
+            // Calcul de la nouvelle date d'expiration par rapport à AUJOURD'HUI
+            const msToAdd = inputDays * 24 * 60 * 60 * 1000;
+            const newExp = Date.now() + msToAdd;
+
+            const updates = {
+                prenom: newPrenom,
+                nom: newNom,
+                email: newEmail,
+                memoPassword: newMemo,
+                expirationDate: newExp
+            };
+
+            db.ref('users/' + targetMjUid).update(updates).then(() => {
+                alert("Fiche MJ enregistrée avec succès !");
+                document.getElementById('modal-sa-mj-details').style.display = 'none';
             });
+        }
+
+        function deleteMjAccount() {
+            if(!targetMjUid) return;
+            if(confirm("⚠️ DANGER : Voulez-vous vraiment supprimer toutes les données de ce compte MJ ?\n\n(Note : La suppression de l'identifiant côté Firebase Auth arrivera à l'étape B, mais ce compte n'aura plus aucune donnée).")) {
+                db.ref('users/' + targetMjUid).remove().then(() => {
+                    document.getElementById('modal-sa-mj-details').style.display = 'none';
+                });
+            }
         }
 
         function toggleBlockMj() {
@@ -630,26 +701,12 @@
             });
         }
 
-        function saveMjMemo() {
-            if(!targetMjUid) return;
-            const memo = document.getElementById('sa-det-memo').value;
-            db.ref('users/' + targetMjUid).update({ memoPassword: memo }).then(() => {
-                alert("Mémo enregistré avec succès !");
-            });
-        }
-
         function createMjAction() {
-            alert("Bientôt ! Le moteur de création (Double instance Firebase) sera activé à la prochaine étape de développement.");
+            alert("Bientôt ! Le moteur de création (Double instance Firebase Auth) sera activé à la prochaine étape (Étape B).");
             document.getElementById('modal-sa-create').style.display='none';
         }
         // --- FIN MOTEUR SUPER ADMIN ---
 
-        /* DRAG & DROP MULTIPLE */
-        window.onload = function() {
-            setupDragDrop('drop-zone', handleFiles);
-            setupDragDrop('profile-drop-zone', handleProfileFile);
-            setupDragDrop('bg-drop-zone', handleBgUpload);
-        };
         function setupDragDrop(id, handler) {
             const el = document.getElementById(id);
             if(!el) return;
@@ -827,32 +884,45 @@
             return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${pattern}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`;
         }
 
-        document.getElementById('mj-pass').addEventListener('keypress', (e) => { if (e.key === 'Enter') login(); });
         function login() { const email = document.getElementById('mj-email').value.trim(); const pass = document.getElementById('mj-pass').value; if(!email || !pass) return; auth.signInWithEmailAndPassword(email, pass).then(res => { loadMjData(res.user); }).catch(e => { alert("Erreur connexion"); }); }
         function togglePasswordVisibility(inputId, icon) { const input = document.getElementById(inputId); if(input.type === 'password') { input.type = 'text'; icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 3.31 0 6.28-1.38 8.22-3.67l.48.48 2.73 2.73 1.27-1.27L3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>'; } else { input.type = 'password'; icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; } }
         function forgotPassword() { const email = document.getElementById('mj-email').value.trim(); if(!email) return alert("Veuillez saisir votre email."); auth.sendPasswordResetEmail(email).then(() => { alert("Email envoyé !"); }).catch(e => alert("Erreur : " + e.message)); }
 
         function loadMjData(user) {
             
-            // VERIFICATION SUPER ADMIN (Étape 2)
             isSuperAdmin = (user.email === 'contact@prestapuce.com');
             
             if(isSuperAdmin) {
                 document.getElementById('btn-super-admin').style.display = 'inline-block';
                 document.getElementById('sys-version-input').style.display = 'inline-block';
                 document.getElementById('btn-update-version').style.display = 'inline-block';
-                initSuperAdminListener(); // Lance la surveillance de la BDD pour la liste
+                initSuperAdminListener();
             } else {
                 document.getElementById('btn-super-admin').style.display = 'none';
                 document.getElementById('sys-version-input').style.display = 'none';
                 document.getElementById('btn-update-version').style.display = 'none';
             }
 
-            // On s'assure d'enregistrer l'email du MJ dans la BDD s'il n'y est pas
             db.ref('users/' + user.uid).update({ email: user.email });
 
             db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
+                
+                // --- LE PÉAGE (Sauf Super Admin & Guest) ---
+                if(!isSuperAdmin && data.isGuest !== true) {
+                    const isBlocked = data.isBlocked === true;
+                    let isExpired = false;
+                    if(data.expirationDate && data.expirationDate < Date.now()) {
+                        isExpired = true;
+                    }
+                    
+                    if(isBlocked || isExpired) {
+                        alert("⚠️ ACCÈS REFUSÉ.\n\nVotre abonnement est expiré ou votre compte est bloqué.\nVeuillez contacter contact@prestapuce.com");
+                        auth.signOut().then(()=>location.reload());
+                        return; // Stoppe tout
+                    }
+                }
+                
                 mjProfileData = data;
                 
                 if (!data.library && data.customLogos) {
@@ -984,7 +1054,7 @@
                 document.getElementById('prof-logo-url').value = currentLogo; updateLogoPreview(currentLogo);
                 document.getElementById('prof-link').value = mjProfileData.customLink || "";
                 const isGuest = mjProfileData.isGuest === true;
-                const inputs = ['prof-nom','prof-prenom','prof-link','prof-pass','prof-pass-conf'];
+                const inputs = ['prof-nom','prof-prenom','prof-link','prof-email']; // Ajout prof-email
                 inputs.forEach(id => document.getElementById(id).disabled = isGuest);
                 document.getElementById('btn-save-profile').disabled = isGuest;
                 const dz = document.getElementById('profile-drop-zone');
@@ -992,14 +1062,61 @@
             }
         }
         function closeProfile() { document.getElementById('screen-profile').style.display = "none"; document.getElementById(previousScreen).style.display = "block"; }
-        function saveProfile() {
+        
+        async function saveProfile() {
             if(mjProfileData.isGuest === true) { alert("Action impossible en Mode Découverte."); return; }
             const user = auth.currentUser; if(!user) return;
-            const pass1 = document.getElementById('prof-pass').value; const pass2 = document.getElementById('prof-pass-conf').value;
-            if(pass1 || pass2) { if(pass1 !== pass2) return alert("Les mots de passe ne correspondent pas."); user.updatePassword(pass1).then(() => { alert("Mot de passe mis à jour !"); }).catch(e => alert("Erreur de mot de passe : " + e.message)); }
-            const updates = { nom: document.getElementById('prof-nom').value.trim(), prenom: document.getElementById('prof-prenom').value.trim(), customLogo: document.getElementById('prof-logo-url').value.trim(), customLink: document.getElementById('prof-link').value.trim() };
-            db.ref('users/' + user.uid).update(updates).then(() => { alert("Profil mis à jour !"); mjProfileData = { ...mjProfileData, ...updates }; document.getElementById('mj-display-name').innerText = updates.prenom || "MJ"; updateLogos(updates.customLogo); closeProfile(); }).catch(e => alert("Erreur : " + e.message));
+            
+            const newEmail = document.getElementById('prof-email').value.trim();
+            const passCurrent = document.getElementById('prof-pass-current').value;
+            const pass1 = document.getElementById('prof-pass').value; 
+            const pass2 = document.getElementById('prof-pass-conf').value;
+            
+            const emailChanged = newEmail !== user.email;
+            const passChanged = pass1 !== "";
+
+            // Sécurité Re-Auth
+            if (emailChanged || passChanged) {
+                if(!passCurrent) {
+                    return alert("⚠️ Vous DEVEZ saisir votre 'Mot de passe actuel' pour modifier votre Email ou votre Mot de passe.");
+                }
+                if(passChanged && pass1 !== pass2) {
+                    return alert("Les nouveaux mots de passe ne correspondent pas.");
+                }
+                
+                try {
+                    const credential = firebase.auth.EmailAuthProvider.credential(user.email, passCurrent);
+                    await user.reauthenticateWithCredential(credential);
+                    
+                    if (emailChanged) await user.updateEmail(newEmail);
+                    if (passChanged) await user.updatePassword(pass1);
+                } catch(e) {
+                    return alert("Erreur de sécurité : Mot de passe actuel incorrect. (" + e.message + ")");
+                }
+            }
+
+            const updates = { 
+                nom: document.getElementById('prof-nom').value.trim(), 
+                prenom: document.getElementById('prof-prenom').value.trim(), 
+                customLogo: document.getElementById('prof-logo-url').value.trim(), 
+                customLink: document.getElementById('prof-link').value.trim(),
+                email: newEmail 
+            };
+            
+            db.ref('users/' + user.uid).update(updates).then(() => { 
+                alert("Profil mis à jour !"); 
+                mjProfileData = { ...mjProfileData, ...updates }; 
+                document.getElementById('mj-display-name').innerText = updates.prenom || "MJ"; 
+                updateLogos(updates.customLogo); 
+                
+                document.getElementById('prof-pass-current').value = "";
+                document.getElementById('prof-pass').value = "";
+                document.getElementById('prof-pass-conf').value = "";
+                
+                closeProfile(); 
+            }).catch(e => alert("Erreur : " + e.message));
         }
+
         function updateLogos(url) { const finalUrl = url || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png"; document.getElementById('global-mj-logo').src = finalUrl; document.getElementById('login-mj-logo').src = finalUrl; document.getElementById('page-favicon').href = finalUrl; if(roomRef && roomID) { roomRef.child('mjLogo').set(finalUrl); if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); } }
 
         function askMjNameAndCreate() { const defaultName = mjProfileData.prenom || "MJ"; const mjName = prompt("Quel nom d'animateur afficher aux joueurs ?", defaultName); if(mjName !== null) { createNewRoom(mjName); } }
