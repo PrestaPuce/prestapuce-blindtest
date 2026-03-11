@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.136)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.137)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -77,9 +77,9 @@
         .modal-box { background: var(--card-bg); padding: 30px; border-radius: 15px; width: 100%; max-width: 500px; text-align: center; border: 2px solid var(--gold); position: relative; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
         
         .lib-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
-        .lib-item { position: relative; width: 100%; aspect-ratio: 1; background: #ecf0f1; border-radius: 5px; padding: 0; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #95a5a6; }
-        .lib-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
-        .lib-del { position: absolute; top: 0; right: 0; background: var(--danger); color: white; width: 22px; height: 22px; border-bottom-left-radius: 6px; cursor: pointer; font-size: 0.8rem; line-height: 22px; box-shadow: -1px 1px 3px rgba(0,0,0,0.3); font-weight: bold; z-index: 5; }
+        .lib-item { position: relative; width: 100%; aspect-ratio: 1; background: #ecf0f1; border-radius: 5px; padding: 0; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #95a5a6; cursor: pointer; }
+        .lib-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .lib-del { position: absolute; top: 0; right: 0; background: var(--danger); color: white; width: 22px; height: 22px; border-bottom-left-radius: 6px; cursor: pointer; font-size: 0.8rem; line-height: 22px; box-shadow: -1px 1px 3px rgba(0,0,0,0.3); font-weight: bold; z-index: 5; text-align: center; }
 
         .switch-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; font-size: 1rem; color: white; font-weight: bold; }
         .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
@@ -104,11 +104,17 @@
         .edit-gallery-item img { width: 100%; height: 100%; object-fit: cover; }
         .edit-gallery-item:hover { border-color: var(--accent); }
         .original-avatar-item { border-color: var(--gold) !important; box-shadow: 0 0 8px rgba(241, 196, 15, 0.5); }
+        
+        /* STYLE GALERIE FONDS D'ÉCRAN */
+        .bg-gallery-wrapper { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 250px; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .bg-item { position: relative; width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 6px; cursor: pointer; border: 2px solid transparent; overflow: hidden; }
+        .bg-item img { width: 100%; height: 100%; object-fit: cover; }
+        .bg-selected { border-color: var(--blue) !important; box-shadow: 0 0 10px var(--blue); transform: scale(1.05); z-index: 2; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.136</div>
+    <div class="version-tag">v1.137</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -245,18 +251,26 @@
 
         <div style="margin-top:20px; border: 1px solid var(--blue); padding: 20px; border-radius: 12px; background: rgba(52, 152, 219, 0.1);">
             <h3 style="color:var(--blue); margin-top:0;">📺 Personnalisation Écran Géant</h3>
-            <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #ccc;">Image de fond (Lien URL ou Fichier de votre ordinateur) :</p>
-            <div style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
-                <input type="text" id="room-bg-url" placeholder="https://..." style="margin:0; flex:1;">
-                <label for="room-bg-upload" class="btn-folder" title="Uploader une image" style="background:var(--blue); color:white; font-size: 1.2rem; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;">📁
-                    <input type="file" id="room-bg-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files)">
-                </label>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button style="background:var(--success); flex:2; margin:0;" onclick="saveCustomBg()">Appliquer le fond</button>
+            
+            <label for="room-bg-upload" id="bg-drop-zone" class="drop-zone" style="padding:15px; margin-bottom:10px;">
+                <span id="bg-dz-title" style="font-size:1rem; font-weight:bold; display:block; color:var(--blue);">GLISSEZ VOTRE FOND ICI</span>
+                <span id="bg-dz-sub" style="font-size:0.8rem; color:#ccc;">ou Cliquez pour parcourir votre ordinateur</span>
+                <input type="file" id="room-bg-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files)">
+            </label>
+
+            <div id="bg-gallery" class="bg-gallery-wrapper">
+                </div>
+            
+            <input type="hidden" id="room-bg-url">
+
+            <div style="display:flex; gap:10px; margin-bottom: 10px;">
+                <button id="btn-apply-bg" style="background:var(--blue); flex:2; margin:0;" onclick="saveCustomBg()" disabled>APPLIQUER LA SÉLECTION</button>
                 <button style="background:#7f8c8d; flex:1; margin:0;" onclick="resetCustomBg()">Fond par défaut</button>
             </div>
-            <span id="bg-upload-status" style="display:block; margin-top:10px; font-size:0.8rem; color:var(--gold);"></span>
+            
+            <label class="show-pass-container" style="justify-content:center; color:#ccc;">
+                <input type="checkbox" id="check-default-bg"> Définir ce fond par défaut pour mes prochaines salles
+            </label>
         </div>
 
         <div style="margin-top:20px; border: 1px solid #7f8c8d; padding: 20px; border-radius: 12px; background: rgba(127, 140, 141, 0.1);">
@@ -360,10 +374,14 @@
 
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
+        
+        // Bibliothèques
         let mjLibrary = {}; 
+        let mjBgLibrary = {}; 
+        let selectedBgUrl = "";
+
         let showDefaultCrests = true;
         let pendingRestoreTeam = null; 
-
         let currentBuzzerId = null;
         let buzzHistory = [];
 
@@ -372,10 +390,11 @@
         let editingPlayerOriginalAvatar = "";
         let editingPlayerCurrentAvatar = "";
 
-        /* DRAG & DROP */
+        /* DRAG & DROP MULTIPLE */
         window.onload = function() {
             setupDragDrop('drop-zone', handleFiles);
             setupDragDrop('profile-drop-zone', handleProfileFile);
+            setupDragDrop('bg-drop-zone', handleBgUpload);
         };
         function setupDragDrop(id, handler) {
             const el = document.getElementById(id);
@@ -386,6 +405,7 @@
             el.addEventListener('drop', (e) => { const dt = e.dataTransfer; handler(dt.files); }, false);
         }
         function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        
         async function handleFiles(files) {
             if(!files || files.length === 0) return;
             const title = document.getElementById('dz-title'); const sub = document.getElementById('dz-sub'); const originalTitle = title.innerText;
@@ -395,42 +415,98 @@
             title.innerText = "✅ TERMINÉ !"; sub.innerText = `${count} images ajoutées.`; refreshLibraryData(); setTimeout(() => { title.innerText = originalTitle; sub.innerText = "ou Cliquez pour parcourir"; }, 2000);
         }
         function uploadSingleFile(file, uid) { return new Promise((resolve, reject) => { const storageRef = storage.ref(`mj_library/${uid}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}_${file.name}`); storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => { db.ref(`users/${uid}/library`).push(url).then(() => resolve(url)); }).catch(err => reject(err)); }); }
+        
         function handleProfileFile(files) { if(!files || files.length === 0) return; const file = files[0]; const uid = auth.currentUser.uid; const storageRef = storage.ref(`mj_profile_logos/${uid}/logo`); document.getElementById('prof-logo-placeholder').style.opacity = '0.3'; storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => { document.getElementById('prof-logo-placeholder').style.display = 'none'; const img = document.getElementById('prof-logo-preview'); img.src = url; img.style.display = 'block'; document.getElementById('prof-logo-url').value = url; }).catch(err => alert("Erreur upload profil : " + err.message)); }
 
-        // GESTION UPLOAD FOND D'ÉCRAN
+        // --- GESTION DES FONDS D'ÉCRAN (Étape 4) ---
         function handleBgUpload(files) {
             if(!files || files.length === 0) return;
             const file = files[0];
-            const status = document.getElementById('bg-upload-status');
+            const title = document.getElementById('bg-dz-title'); const sub = document.getElementById('bg-dz-sub');
+            const originalTitle = title.innerText; const originalSub = sub.innerText;
             const uid = auth.currentUser.uid;
-            status.innerText = "⏳ Envoi de l'image en cours...";
+            title.innerText = "⏳ Envoi en cours..."; sub.innerText = "Veuillez patienter...";
+            
             const storageRef = storage.ref(`mj_custom_bgs/${uid}/${Date.now()}_${file.name}`);
             storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
-                document.getElementById('room-bg-url').value = url;
-                status.innerText = "✅ Image chargée ! Cliquez sur 'Appliquer le fond'.";
-                setTimeout(() => { status.innerText = ""; }, 4000);
-            }).catch(err => {
-                status.innerText = "❌ Erreur : " + err.message;
+                db.ref(`users/${uid}/bgLibrary`).push(url).then(() => {
+                    title.innerText = "✅ Fond Ajouté !"; sub.innerText = "";
+                    refreshBgLibrary();
+                    setTimeout(() => { title.innerText = originalTitle; sub.innerText = originalSub; }, 3000);
+                });
+            }).catch(err => { alert("Erreur : " + err.message); title.innerText = originalTitle; sub.innerText = originalSub; });
+        }
+
+        function refreshBgLibrary() { 
+            const uid = auth.currentUser.uid; 
+            db.ref(`users/${uid}/bgLibrary`).once('value').then(snap => { 
+                mjBgLibrary = snap.val() || {}; 
+                renderBgGallery(); 
+            }); 
+        }
+
+        function renderBgGallery() {
+            const grid = document.getElementById('bg-gallery');
+            grid.innerHTML = "";
+            const entries = Object.entries(mjBgLibrary).reverse(); // Les plus récents en premier
+            
+            entries.forEach(entry => {
+                const key = entry[0]; const url = entry[1];
+                const item = document.createElement('div');
+                item.className = 'bg-item';
+                if(selectedBgUrl === url) item.classList.add('bg-selected');
+                
+                item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteBgFromLibrary(event, '${key}')">X</div>`;
+                item.onclick = () => {
+                    document.querySelectorAll('.bg-item').forEach(i => i.classList.remove('bg-selected'));
+                    item.classList.add('bg-selected');
+                    selectedBgUrl = url;
+                    document.getElementById('btn-apply-bg').disabled = false;
+                };
+                grid.appendChild(item);
             });
         }
 
+        function deleteBgFromLibrary(event, key) {
+            event.stopPropagation();
+            if(confirm("Supprimer ce fond d'écran de votre galerie ?")) {
+                const uid = auth.currentUser.uid;
+                const urlToDelete = mjBgLibrary[key];
+                if(selectedBgUrl === urlToDelete) { selectedBgUrl = ""; document.getElementById('btn-apply-bg').disabled = true; }
+                if(mjProfileData.defaultBackground === urlToDelete) {
+                    db.ref(`users/${uid}/defaultBackground`).remove();
+                    mjProfileData.defaultBackground = null;
+                }
+                db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(() => { refreshBgLibrary(); });
+            }
+        }
+
         function saveCustomBg() {
-            const url = document.getElementById('room-bg-url').value.trim();
+            if(!selectedBgUrl) return;
+            const setDefault = document.getElementById('check-default-bg').checked;
+            const uid = auth.currentUser.uid;
+            
+            if(setDefault) {
+                db.ref(`users/${uid}/defaultBackground`).set(selectedBgUrl);
+                mjProfileData.defaultBackground = selectedBgUrl;
+            }
+
             if (roomRef) {
-                roomRef.child('customBackground').set(url).then(() => {
-                    alert("Fond d'écran appliqué sur l'écran géant !");
-                });
+                roomRef.child('customBackground').set(selectedBgUrl).then(() => { alert("Fond d'écran appliqué !"); });
             }
         }
 
         function resetCustomBg() {
-            document.getElementById('room-bg-url').value = "";
+            selectedBgUrl = "";
+            document.querySelectorAll('.bg-item').forEach(i => i.classList.remove('bg-selected'));
+            document.getElementById('btn-apply-bg').disabled = true;
+            
             if (roomRef) {
-                roomRef.child('customBackground').remove().then(() => {
-                    alert("Fond d'écran réinitialisé au dégradé par défaut !");
-                });
+                roomRef.child('customBackground').remove().then(() => { alert("Retour au fond animé par défaut."); });
             }
         }
+
+        // --- FIN GESTION FONDS ---
 
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
@@ -451,13 +527,21 @@
             db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
                 mjProfileData = data;
+                
+                // Lib Blasons
                 if (!data.library && data.customLogos) {
-                    let migratedLib = {};
-                    Object.values(data.customLogos).forEach((url, idx) => { migratedLib['migrated_' + idx] = url; });
+                    let migratedLib = {}; Object.values(data.customLogos).forEach((url, idx) => { migratedLib['migrated_' + idx] = url; });
                     db.ref(`users/${user.uid}/library`).set(migratedLib).then(() => { mjLibrary = migratedLib; renderLibraryGrid(); loadCrestGrid(); });
                 } else { mjLibrary = data.library || {}; }
+                
+                // Lib Fonds d'écran
+                mjBgLibrary = data.bgLibrary || {};
+                
+                if(data.defaultBackground) { document.getElementById('check-default-bg').checked = true; }
+
                 showDefaultCrests = (data.showDefaultCrests !== false); 
                 document.getElementById('check-hide-default').checked = showDefaultCrests;
+                
                 if(mjProfileData.isGuest === true) { cleanGuestData(user.uid); }
                 else {
                     document.getElementById('mj-display-name').innerText = data.prenom || "MJ";
@@ -520,10 +604,7 @@
                         });
                     }
                 }
-
-                db.ref(`users/${uid}/library/${key}`).remove().then(() => {
-                    refreshLibraryData();
-                });
+                db.ref(`users/${uid}/library/${key}`).remove().then(() => { refreshLibraryData(); });
             }
         }
 
@@ -550,10 +631,7 @@
                 const myLibValues = Object.values(mjLibrary);
                 let hasNew = false;
                 Object.values(roomLib).forEach(url => {
-                    if(!myLibValues.includes(url)) {
-                        db.ref(`users/${uid}/library`).push(url);
-                        hasNew = true;
-                    }
+                    if(!myLibValues.includes(url)) { db.ref(`users/${uid}/library`).push(url); hasNew = true; }
                 });
                 if(hasNew) refreshLibraryData(); 
             });
@@ -608,17 +686,24 @@
             document.getElementById('display-room').innerText = roomID;
             db.ref('activeRooms/' + roomID).set({ status: 'open' });
             roomRef = db.ref('rooms/' + id);
+            
             if(mjName) roomRef.child('mjName').set(mjName);
             const currentLogo = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
             roomRef.child('mjLogo').set(currentLogo);
             if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink);
             roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true);
             
+            // INJECTION DU FOND PAR DÉFAUT (ÉTAPE 4)
+            if(mjProfileData.defaultBackground) {
+                roomRef.child('customBackground').set(mjProfileData.defaultBackground);
+            }
+            
             syncLibraryToRoom();
             initMJLogic(); 
             initLibrarySync(); 
             initAdminListener();
             loadCrestGrid();
+            renderBgGallery(); // Affiche la galerie de fonds
             openScoreBoard();
         }
 
@@ -706,10 +791,16 @@
             roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
 
-            // Écouteur pour rafraîchir le champ fond personnalisé
+            // Écouteur pour la synchronisation visuelle du fond selectionné
             roomRef.child('customBackground').on('value', snap => {
-                const bgInput = document.getElementById('room-bg-url');
-                if(bgInput) bgInput.value = snap.val() || "";
+                const url = snap.val();
+                if(url) {
+                    selectedBgUrl = url;
+                    document.querySelectorAll('.bg-item').forEach(i => {
+                        if(i.querySelector('img').src === url) i.classList.add('bg-selected');
+                        else i.classList.remove('bg-selected');
+                    });
+                }
             });
         }
 
