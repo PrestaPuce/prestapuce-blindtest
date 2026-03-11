@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.135)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.136)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -100,7 +100,6 @@
         .password-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; fill: #bdc3c7; width: 20px; height: 20px; user-select: none; }
         .password-icon:hover { fill: var(--accent); }
 
-        /* GALERIE D'ÉDITION MJ (v1.135) */
         .edit-gallery-item { aspect-ratio: 1/1; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; padding: 0; box-sizing: border-box; font-size: 1.5rem; transition: 0.2s; }
         .edit-gallery-item img { width: 100%; height: 100%; object-fit: cover; }
         .edit-gallery-item:hover { border-color: var(--accent); }
@@ -109,7 +108,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.135</div>
+    <div class="version-tag">v1.136</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -239,9 +238,25 @@
             <div id="banned-list"></div>
         </div>
 
-        <div style="margin-top:20px; padding: 15px; border: 2px solid var(--gold); border-radius: 12px; background: rgba(243, 156, 18, 0.1); text-align: center;">
+        <div style="margin-top:20px; border: 2px solid var(--gold); border-radius: 12px; background: rgba(243, 156, 18, 0.1); text-align: center; padding: 15px;">
             <h3 style="color:var(--gold); margin-top:0;">PODIUM & RÉSULTATS</h3>
-            <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 1.1rem;" onclick="triggerEndGame()">🏁 Fin de partie</button>
+            <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 1.1rem; margin-bottom: 0;" onclick="triggerEndGame()">🏁 Fin de partie</button>
+        </div>
+
+        <div style="margin-top:20px; border: 1px solid var(--blue); padding: 20px; border-radius: 12px; background: rgba(52, 152, 219, 0.1);">
+            <h3 style="color:var(--blue); margin-top:0;">📺 Personnalisation Écran Géant</h3>
+            <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #ccc;">Image de fond (Lien URL ou Fichier de votre ordinateur) :</p>
+            <div style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
+                <input type="text" id="room-bg-url" placeholder="https://..." style="margin:0; flex:1;">
+                <label for="room-bg-upload" class="btn-folder" title="Uploader une image" style="background:var(--blue); color:white; font-size: 1.2rem; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;">📁
+                    <input type="file" id="room-bg-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files)">
+                </label>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button style="background:var(--success); flex:2; margin:0;" onclick="saveCustomBg()">Appliquer le fond</button>
+                <button style="background:#7f8c8d; flex:1; margin:0;" onclick="resetCustomBg()">Fond par défaut</button>
+            </div>
+            <span id="bg-upload-status" style="display:block; margin-top:10px; font-size:0.8rem; color:var(--gold);"></span>
         </div>
 
         <div style="margin-top:20px; border: 1px solid #7f8c8d; padding: 20px; border-radius: 12px; background: rgba(127, 140, 141, 0.1);">
@@ -352,7 +367,6 @@
         let currentBuzzerId = null;
         let buzzHistory = [];
 
-        // Variables pour l'édition de joueur (v1.135)
         let editingPlayerUid = null;
         let editingPlayerOriginalPseudo = "";
         let editingPlayerOriginalAvatar = "";
@@ -382,6 +396,41 @@
         }
         function uploadSingleFile(file, uid) { return new Promise((resolve, reject) => { const storageRef = storage.ref(`mj_library/${uid}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}_${file.name}`); storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => { db.ref(`users/${uid}/library`).push(url).then(() => resolve(url)); }).catch(err => reject(err)); }); }
         function handleProfileFile(files) { if(!files || files.length === 0) return; const file = files[0]; const uid = auth.currentUser.uid; const storageRef = storage.ref(`mj_profile_logos/${uid}/logo`); document.getElementById('prof-logo-placeholder').style.opacity = '0.3'; storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => { document.getElementById('prof-logo-placeholder').style.display = 'none'; const img = document.getElementById('prof-logo-preview'); img.src = url; img.style.display = 'block'; document.getElementById('prof-logo-url').value = url; }).catch(err => alert("Erreur upload profil : " + err.message)); }
+
+        // GESTION UPLOAD FOND D'ÉCRAN
+        function handleBgUpload(files) {
+            if(!files || files.length === 0) return;
+            const file = files[0];
+            const status = document.getElementById('bg-upload-status');
+            const uid = auth.currentUser.uid;
+            status.innerText = "⏳ Envoi de l'image en cours...";
+            const storageRef = storage.ref(`mj_custom_bgs/${uid}/${Date.now()}_${file.name}`);
+            storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
+                document.getElementById('room-bg-url').value = url;
+                status.innerText = "✅ Image chargée ! Cliquez sur 'Appliquer le fond'.";
+                setTimeout(() => { status.innerText = ""; }, 4000);
+            }).catch(err => {
+                status.innerText = "❌ Erreur : " + err.message;
+            });
+        }
+
+        function saveCustomBg() {
+            const url = document.getElementById('room-bg-url').value.trim();
+            if (roomRef) {
+                roomRef.child('customBackground').set(url).then(() => {
+                    alert("Fond d'écran appliqué sur l'écran géant !");
+                });
+            }
+        }
+
+        function resetCustomBg() {
+            document.getElementById('room-bg-url').value = "";
+            if (roomRef) {
+                roomRef.child('customBackground').remove().then(() => {
+                    alert("Fond d'écran réinitialisé au dégradé par défaut !");
+                });
+            }
+        }
 
         function createBlason(i) {
             const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
@@ -510,7 +559,6 @@
             });
         }
 
-        /* GESTION PROFIL */
         let previousScreen = "screen-choice";
         function toggleProfile() { const profScreen = document.getElementById('screen-profile'); if(profScreen.style.display === "block") closeProfile(); else showProfile(); }
         function updateLogoPreview(url) { const preview = document.getElementById('prof-logo-preview'); const placeholder = document.getElementById('prof-logo-placeholder'); if(url) { preview.src = url; preview.style.display = 'block'; placeholder.style.display = 'none'; } else { preview.style.display = 'none'; placeholder.style.display = 'block'; } }
@@ -657,6 +705,12 @@
             roomRef.child('gameState').on('value', snap => { const st = snap.val() ? snap.val().status : 'waiting'; const btn = document.getElementById('btn-open-buzz'); if(st === 'ready' || st === 'taken') { btn.innerText = "✅ Buzzers Ouverts"; btn.style.background = "#27ae60"; btn.disabled = true; } else { btn.innerText = "Ouvrir Buzzers"; btn.style.background = "#3498db"; btn.disabled = false; } });
             roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
+
+            // Écouteur pour rafraîchir le champ fond personnalisé
+            roomRef.child('customBackground').on('value', snap => {
+                const bgInput = document.getElementById('room-bg-url');
+                if(bgInput) bgInput.value = snap.val() || "";
+            });
         }
 
         function renderLobby() {
@@ -756,9 +810,6 @@
             bSection.style.display = hasBanned ? "block" : "none"; iSection.style.display = hasInactive ? "block" : "none"; 
         }
 
-        /* ---------------------------------------------------- */
-        /* MODERATION AVANCÉE (v1.135) - ÉDITION DU PROFIL      */
-        /* ---------------------------------------------------- */
         function openEditModal(uid) {
             const pData = allPlayersData[uid];
             if(!pData) return;
@@ -859,7 +910,6 @@
                 closeEditPlayerModal();
             });
         }
-        /* ---------------------------------------------------- */
 
         function setPlayerScore(uid, val) { let num = parseInt(val, 10); if (isNaN(num)) num = 0; roomRef.child('players/' + uid).update({ pts: num }); }
         
