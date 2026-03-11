@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.137)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.138)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -68,7 +68,7 @@
         .btn-folder { background: var(--gold); color: black; font-size: 1.4rem; width: 45px; height: 45px; padding: 0; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; margin-left: 5px; box-shadow: 0 4px rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer !important; flex-shrink: 0; }
         .btn-folder:hover { transform: scale(1.05); }
 
-        .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed #7f8c8d; padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.2); transition: 0.3s; position: relative; margin-bottom: 20px; cursor: pointer; }
+        .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed #7f8c8d; padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.2); transition: 0.3s; position: relative; margin-bottom: 10px; cursor: pointer; }
         .drop-zone.drag-active { border-color: #27ae60; background: rgba(39, 174, 96, 0.2); transform: scale(1.02); }
         .profile-drop { width: 150px; height: 150px; margin: 0 auto 5px auto; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #ecf0f1; border: 3px dashed #7f8c8d; }
         .profile-drop img { width: 100%; height: 100%; object-fit: contain; }
@@ -114,7 +114,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.137</div>
+    <div class="version-tag">v1.138</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -252,16 +252,19 @@
         <div style="margin-top:20px; border: 1px solid var(--blue); padding: 20px; border-radius: 12px; background: rgba(52, 152, 219, 0.1);">
             <h3 style="color:var(--blue); margin-top:0;">📺 Personnalisation Écran Géant</h3>
             
-            <label for="room-bg-upload" id="bg-drop-zone" class="drop-zone" style="padding:15px; margin-bottom:10px;">
+            <label for="room-bg-upload" id="bg-drop-zone" class="drop-zone" style="padding:15px;">
                 <span id="bg-dz-title" style="font-size:1rem; font-weight:bold; display:block; color:var(--blue);">GLISSEZ VOTRE FOND ICI</span>
                 <span id="bg-dz-sub" style="font-size:0.8rem; color:#ccc;">ou Cliquez pour parcourir votre ordinateur</span>
                 <input type="file" id="room-bg-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files)">
             </label>
 
+            <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
+                <input type="text" id="room-bg-url-input" placeholder="Ou collez un lien d'image (https://...)" style="margin:0; flex:1; font-size:0.9rem; padding:10px;">
+                <button style="background:var(--blue); width:auto; margin:0; padding:10px 15px; font-size:0.9rem;" onclick="addBgUrlToLibrary()">Ajouter</button>
+            </div>
+
             <div id="bg-gallery" class="bg-gallery-wrapper">
                 </div>
-            
-            <input type="hidden" id="room-bg-url">
 
             <div style="display:flex; gap:10px; margin-bottom: 10px;">
                 <button id="btn-apply-bg" style="background:var(--blue); flex:2; margin:0;" onclick="saveCustomBg()" disabled>APPLIQUER LA SÉLECTION</button>
@@ -435,6 +438,23 @@
                     setTimeout(() => { title.innerText = originalTitle; sub.innerText = originalSub; }, 3000);
                 });
             }).catch(err => { alert("Erreur : " + err.message); title.innerText = originalTitle; sub.innerText = originalSub; });
+        }
+
+        // Fonction d'ajout par lien URL
+        function addBgUrlToLibrary() {
+            const urlInput = document.getElementById('room-bg-url-input');
+            const url = urlInput.value.trim();
+            if(!url) return;
+            if(!url.startsWith('http')) {
+                alert("Veuillez entrer une URL valide (commençant par http ou https).");
+                return;
+            }
+            
+            const uid = auth.currentUser.uid;
+            db.ref(`users/${uid}/bgLibrary`).push(url).then(() => {
+                urlInput.value = "";
+                refreshBgLibrary();
+            }).catch(err => alert("Erreur : " + err.message));
         }
 
         function refreshBgLibrary() { 
