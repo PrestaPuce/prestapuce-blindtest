@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Scores - Presta'Puce (v1.156)</title>
+    <title>Scores - Presta'Puce (v1.157)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -11,14 +11,11 @@
     <style>
         :root { --bg-color: #1a1a1a; --accent: #f1c40f; --card-bg: rgba(44, 62, 80, 0.7); --gold: #f1c40f; --silver: #bdc3c7; --bronze: #cd7f32; }
         
-        /* STRUCTURE GLOBALE RESPONSIVE */
         body { margin: 0; padding: 1vh; font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at center, #2c3e50 0%, #1a1a1a 100%); color: white; height: 100vh; overflow: hidden; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        /* OVERLAY FLOU */
         #blur-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 4000; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
         #blur-overlay.active { opacity: 1; pointer-events: auto; }
 
-        /* HEADER */
         header { display: flex; align-items: center; justify-content: center; height: 12vh; position: relative; margin-bottom: -2vh; flex-shrink: 0; z-index: 10; }
         .header-center { display: flex; align-items: center; gap: 2vw; background: rgba(0,0,0,0.3); padding: 1vh 3vw; border-radius: 50px; border: 1px solid rgba(241, 196, 15, 0.3); backdrop-filter: blur(5px); }
         .title-group { display: flex; flex-direction: column; align-items: center; line-height: 1; }
@@ -27,14 +24,12 @@
         .version-text { font-size: clamp(0.6rem, 1.5vh, 1rem); color: rgba(255,255,255,0.4); font-family: monospace; margin-top: 0.5vh; }
         #display-mj-logo { height: 8vh; width: auto; object-fit: contain; border-radius: 6px; }
         
-        /* QR CODE AGRANDI */
         #qr-box { position: fixed; top: 1vh; left: 1vw; background: white; padding: 0.5vh; border-radius: 8px; text-align: center; color: black; z-index: 5000; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transform-origin: top left; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: zoom-in; width: 10.5vh; }
         #qr-box img { width: 100% !important; height: auto !important; display: block; }
         #qr-box.zoomed { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50vmin; padding: 2vmin; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); cursor: zoom-out; }
         #qr-label { font-size: 0.8vh; font-weight: bold; margin-top: 0.2vh; transition: font-size 0.3s; }
         #qr-box.zoomed #qr-label { font-size: 3vmin; margin-top: 1vmin; }
 
-        /* BOUTONS FLOTTANTS */
         #btn-fullscreen { position: fixed; top: 1vh; right: 1vw; z-index: 2000; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0; border-radius: 50%; cursor: pointer; width: 4vh; height: 4vh; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; opacity: 0.4; }
         #btn-fullscreen:hover { opacity: 1; background: var(--accent); color: black; transform: scale(1.1); }
         #btn-fullscreen svg { width: 60%; height: 60%; fill: currentColor; }
@@ -43,7 +38,6 @@
         #btn-hof { position: fixed; top: 6vh; right: 1vw; background: rgba(0,0,0,0.5); border: 1px solid var(--accent); color: var(--accent); padding: 0.5vh 1.5vw; border-radius: 15px; cursor: pointer; font-size: clamp(0.6rem, 1.5vh, 1rem); font-weight: bold; transition: 0.2s; z-index: 1500; }
         #btn-hof:hover { background: var(--accent); color: black; }
 
-        /* GRILLE PRINCIPALE */
         .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; flex-grow: 1; padding: 0 1vw; overflow: hidden; margin-top: 0; }
         .column-wrapper { display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
         .column-title { text-align: center; font-size: clamp(1rem, 3vh, 2rem); color: var(--accent); text-transform: uppercase; border-bottom: 1px solid rgba(241, 196, 15, 0.5); flex-shrink: 0; letter-spacing: 1px; padding-bottom: 2px; margin-bottom: 5px; line-height: 1.1; }
@@ -53,7 +47,6 @@
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
-        /* CARTES RESPONSIVES */
         .card { background: var(--card-bg); display: flex; align-items: center; padding: 0 1vw; border-radius: 8px; margin-bottom: 0.8vh; border-left: 0.5vw solid var(--accent); height: 7vh; transition: border 0.3s, background 0.3s, box-shadow 0.3s; }
         .avatar, .crest { width: 5vh; display: flex; justify-content: center; align-items: center; font-size: 2.5vh; }
         .crest-bg { background: white; padding: 2px; border-radius: 4px; display: flex; }
@@ -64,19 +57,28 @@
         
         .pts { font-size: clamp(1rem, 3vh, 2rem); font-weight: 800; background: rgba(0,0,0,0.3); padding: 0 1vw; border-radius: 6px; color: var(--accent); min-width: 4vw; text-align: center; line-height: 1.4; transition: background 0.3s, color 0.3s; }
         
-        /* ANIMATION ÉTAPE 3 : FLASH LORS DU GAIN DE POINT */
+        /* ANIMATIONS DES SCORES (Flash + Super Popup) */
         @keyframes scorePulse {
             0% { transform: scale(1); background: rgba(0,0,0,0.3); color: var(--accent); }
             20% { transform: scale(1.4); background: white; color: black; box-shadow: 0 0 15px white; }
             100% { transform: scale(1); background: rgba(0,0,0,0.3); color: var(--accent); }
         }
-        .flash-score { animation: scorePulse 1.2s cubic-bezier(0.25, 1, 0.5, 1) !important; }
+        .flash-score { animation: scorePulse 0.8s cubic-bezier(0.25, 1, 0.5, 1) !important; }
+
+        #big-anim-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 6000; pointer-events: none; }
+        .big-score-text { font-size: 35vh; font-weight: 900; color: white; text-shadow: 0 10px 50px rgba(241, 196, 15, 0.8), 0 0 20px rgba(241, 196, 15, 1); transform: scale(0); opacity: 0; animation: superPopup 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes superPopup {
+            0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+            20% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+            40% { transform: scale(1) rotate(0deg); opacity: 1; text-shadow: 0 10px 50px rgba(241, 196, 15, 0.8); }
+            80% { transform: scale(1) rotate(0deg); opacity: 1; filter: blur(0px); }
+            100% { transform: scale(2) rotate(10deg); opacity: 0; filter: blur(20px); }
+        }
 
         .last-buzzed { border-color: transparent !important; background: rgba(46, 204, 113, 0.4); box-shadow: inset 0 0 0 0.5vw #2ecc71, 0 0 2vh #2ecc71 !important; transform: scale(1.02); z-index: 10; position: relative; }
         .inactive-card { opacity: 0.6; filter: grayscale(0.8); border-left-color: #7f8c8d; }
         .pause-badge { background: #7f8c8d; color: white; font-size: 0.5em; padding: 2px 5px; border-radius: 4px; margin-left: 10px; vertical-align: middle; }
 
-        /* HIGHLIGHT TOP 3 */
         .rank-1-card { border: 2px solid var(--gold) !important; box-shadow: 0 0 15px rgba(241, 196, 15, 0.5) !important; background: rgba(241, 196, 15, 0.15) !important; border-left: 0.5vw solid var(--gold) !important; }
         .rank-1-card .pts { background: var(--gold) !important; color: black !important; }
         .rank-2-card { border: 1px solid var(--silver) !important; box-shadow: 0 0 10px rgba(189, 195, 199, 0.3) !important; background: rgba(189, 195, 199, 0.1) !important; border-left: 0.5vw solid var(--silver) !important; }
@@ -84,7 +86,6 @@
         .rank-3-card { border: 1px solid var(--bronze) !important; box-shadow: 0 0 10px rgba(205, 127, 50, 0.3) !important; background: rgba(205, 127, 50, 0.1) !important; border-left: 0.5vw solid var(--bronze) !important; }
         .rank-3-card .pts { background: var(--bronze) !important; color: white !important; }
 
-        /* PODIUM FINAL */
         #podium-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 20, 0.98); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; }
         .podium-container { display: flex; align-items: flex-end; justify-content: center; gap: 3vw; margin-top: 5vh; }
         .step { text-align: center; display: flex; flex-direction: column; align-items: center; width: 20vw; }
@@ -107,6 +108,8 @@
     </style>
 </head>
 <body>
+    
+    <div id="big-anim-overlay"></div>
 
     <div id="blur-overlay" onclick="toggleQRZoom()"></div>
     <div id="btn-fullscreen" onclick="toggleFullScreen()" title="Plein Écran (Touche F)">
@@ -125,7 +128,7 @@
             </a>
             <div class="title-group">
                 <h1>SALLE : <span id="room-title" class="room-highlight">----</span></h1>
-                <div class="version-text">v1.156</div>
+                <div class="version-text">v1.157</div>
             </div>
         </div>
     </header>
@@ -183,78 +186,57 @@
             else { qrBox.classList.add('zoomed'); overlay.classList.add('active'); }
         }
 
-        // VARIABLES DE JEU & TRACKING
+        // --- MOTEUR DE TRACKING DES SCORES ET ANIMATIONS ---
         let scoresData = {}, teamsData = {}, currentBuzzer = null, currentBuzzerId = null;
         let buzzHistory = [];
         let isGameFinished = false;
         
-        // Moteurs Étape 3 (Dynamique & Flash)
         let previousPts = {}; 
         let lastPointTime = {}; 
-        let lastFlashTime = {}; 
+        let pendingAnimations = {}; 
+        let activeIntervals = {};
+        let isBigAnimPlaying = false;
 
-        // FONCTION DE TRACKING
+        function showBigPlus3() {
+            if (isBigAnimPlaying) return;
+            isBigAnimPlaying = true;
+            const overlay = document.getElementById('big-anim-overlay');
+            overlay.innerHTML = `<div class="big-score-text">+3</div>`;
+            setTimeout(() => {
+                overlay.innerHTML = '';
+                isBigAnimPlaying = false;
+            }, 2000);
+        }
+
         function trackScores(id, newPts) {
-            if (previousPts[id] !== undefined && newPts > previousPts[id]) {
+            let oldPts = previousPts[id];
+            if (oldPts !== undefined && newPts > oldPts) {
+                let delta = newPts - oldPts;
+                if (delta === 3) {
+                    pendingAnimations[id] = { start: oldPts, end: newPts, type: 'plus3' };
+                    showBigPlus3();
+                } else if (delta === 1) {
+                    pendingAnimations[id] = { start: newPts, end: newPts, type: 'flash' };
+                }
                 lastPointTime[id] = Date.now();
-                lastFlashTime[id] = Date.now();
             }
             previousPts[id] = newPts;
         }
 
+        // --- LECTEURS DE BASE DE DONNÉES ---
         roomRef.child('mjLogo').on('value', snap => { if(snap.exists()) { document.getElementById('display-mj-logo').src = snap.val(); document.getElementById('page-favicon').href = snap.val(); } });
         roomRef.child('mjLink').on('value', snap => {
             const linkElement = document.getElementById('mj-logo-link');
             if(snap.exists() && snap.val() !== "") { linkElement.href = snap.val(); linkElement.style.pointerEvents = "auto"; document.getElementById('display-mj-logo').style.cursor = "pointer"; } 
             else { linkElement.href = "#"; linkElement.style.pointerEvents = "none"; document.getElementById('display-mj-logo').style.cursor = "default"; }
         });
-
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => { console.log(err); }); } 
-            else { if (document.exitFullscreen) document.exitFullscreen(); }
-        }
-        document.addEventListener('keydown', (e) => { if(e.key.toLowerCase() === 'f') toggleFullScreen(); });
-
-        let uiTimer;
-        document.onmousemove = () => {
-            document.getElementById('btn-fullscreen').classList.remove('hide-ui');
-            clearTimeout(uiTimer);
-            uiTimer = setTimeout(() => { if(document.fullscreenElement) document.getElementById('btn-fullscreen').classList.add('hide-ui'); }, 3000);
-        };
-
         roomRef.child('gameState').on('value', snap => {
             const state = snap.val();
             if (state && state.status === 'endGame') { isGameFinished = true; showPodium(); } 
             else { isGameFinished = false; showLeaderboard(); }
         });
 
-        function showPodium() {
-            document.getElementById('main-view').style.display = 'none'; document.getElementById('qr-box').style.display = 'none'; document.getElementById('btn-return-podium').style.display = 'none'; document.getElementById('blur-overlay').style.display = 'none';
-            const podiumScreen = document.getElementById('podium-screen'); podiumScreen.style.display = 'flex';
-            let ranking = getSortedRanking(); const top3 = ranking.slice(0, 3); const container = document.getElementById('podium-display'); container.innerHTML = "";
-            const visualOrder = [1, 0, 2]; 
-            visualOrder.forEach(idx => {
-                if (top3[idx]) {
-                    const item = top3[idx]; const rank = idx + 1;
-                    let imgHtml = "";
-                    if(rank === 1) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img">`;
-                    if(rank === 2) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img">`;
-                    if(rank === 3) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img">`;
-                    let avatarDisplay = item.isTeam ? `<div class="crest-bg" style="width:10vh; height:10vh; margin:0 auto;"><img src="${item.icon}" style="width:100%; height:100%; object-fit:contain;"></div>` : renderAvatar(item.avatar, 50);
-                    const div = document.createElement('div'); div.className = `step rank-${rank}`;
-                    div.innerHTML = `${imgHtml}<div class="winner-name">${item.name}</div>${avatarDisplay}<div class="winner-score">${item.pts} pts</div><div class="step-block">${rank}</div>`;
-                    container.appendChild(div);
-                }
-            });
-            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
-        }
-
-        function showLeaderboard() {
-            document.getElementById('podium-screen').style.display = 'none'; document.getElementById('main-view').style.display = 'grid'; document.getElementById('qr-box').style.display = 'block'; document.getElementById('blur-overlay').style.display = 'block';
-            if (isGameFinished) document.getElementById('btn-return-podium').style.display = 'block'; else document.getElementById('btn-return-podium').style.display = 'none';
-        }
-
-        // CALCULS GLOBAUX BRUTS (Sans tri)
+        // --- LOGIQUE ANTI-EX-AEQUO ---
         function calculateGlobalScores() {
             const listEquipes = Object.keys(teamsData);
             const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
@@ -263,10 +245,8 @@
             listEquipes.forEach(tName => {
                 const team = teamsData[tName];
                 if (team.banned === true) return;
-                let score = 0; let active = true;
-                if (team.active === false) { score = (team.frozenScore || 0); active = false; } 
-                else { score = (team.bonus || 0); }
-                rankingMap.set("team-" + tName, { dataId: "team-" + tName, name: tName, pts: score, icon: team.icon, isTeam: true, count: 0, isActive: active });
+                let score = team.active === false ? (team.frozenScore || 0) : (team.bonus || 0);
+                rankingMap.set("team-" + tName, { dataId: "team-" + tName, name: tName, pts: score, icon: team.icon, isTeam: true, count: 0, isActive: team.active !== false });
             });
 
             allPlayers.forEach(p => {
@@ -281,25 +261,19 @@
             return Array.from(rankingMap.values());
         }
 
-        // LE MOTEUR DE TRI ANTI-EX-AEQUO (Étape 3)
         function getSortedRanking() {
             let unsorted = calculateGlobalScores();
             return unsorted.sort((a, b) => {
-                if (b.pts !== a.pts) return b.pts - a.pts; // 1. Score le plus haut
-                
-                let countA = Math.max(1, a.count);
-                let countB = Math.max(1, b.count);
-                if (countA !== countB) return countA - countB; // 2. Le mérite (Le moins de joueurs possibles)
-                
-                let timeA = lastPointTime[a.dataId] || 0;
-                let timeB = lastPointTime[b.dataId] || 0;
-                if (timeB !== timeA) return timeB - timeA; // 3. Dynamique (Le dernier à avoir marqué passe devant)
-                
+                if (b.pts !== a.pts) return b.pts - a.pts; // 1. Score
+                let countA = Math.max(1, a.count); let countB = Math.max(1, b.count);
+                if (countA !== countB) return countA - countB; // 2. Mérite (moins de joueurs)
+                let timeA = lastPointTime[a.dataId] || 0; let timeB = lastPointTime[b.dataId] || 0;
+                if (timeB !== timeA) return timeB - timeA; // 3. Dynamique
                 return a.name.localeCompare(b.name);
             });
         }
 
-        function renderAvatar(av, size=28) {
+        function renderAvatar(av) {
             if(av && av.length > 20) return `<img src="${av}" style="width:80%; height:80%; border-radius:50%; object-fit:cover;">`;
             return `<span style="font-size:200%;">${av || '👤'}</span>`;
         }
@@ -314,15 +288,14 @@
             });
 
             container.innerHTML = newHTML;
-            
             const newCards = Array.from(container.children);
+            
             newCards.forEach(card => {
                 const id = card.getAttribute('data-id');
                 if(id && oldRects.has(id)) {
                     const oldRect = oldRects.get(id);
                     const newRect = card.getBoundingClientRect();
                     const deltaY = oldRect.top - newRect.top;
-                    
                     if (deltaY !== 0) {
                         card.style.transform = `translateY(${deltaY}px)`;
                         card.style.transition = 'none';
@@ -337,17 +310,38 @@
             });
         }
 
+        // L'EXÉCUTEUR DU SUSPENS (+3)
+        function executeStepAnimation(dataId, start, end) {
+            if (activeIntervals[dataId]) clearInterval(activeIntervals[dataId]);
+            let current = start;
+            
+            activeIntervals[dataId] = setInterval(() => {
+                let els = document.querySelectorAll(`[data-id="${dataId}"] .pts`);
+                if (els.length > 0) {
+                    current++;
+                    els.forEach(el => {
+                        el.innerText = current;
+                        el.classList.remove('flash-score');
+                        void el.offsetWidth; // Reflow magique
+                        el.classList.add('flash-score');
+                    });
+                }
+                if (current >= end) {
+                    clearInterval(activeIntervals[dataId]);
+                    delete activeIntervals[dataId];
+                }
+            }, 800); // 1 point toutes les 0.8s
+        }
+
         function updateDisplay() {
             const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
             
-            // TRACKING : Vérification des nouveaux scores
+            // On track les nouveaux scores pour déclencher les animations
             allPlayers.forEach(p => trackScores('player-' + p.uid, p.pts || 0));
-            let globalUnsorted = calculateGlobalScores();
-            globalUnsorted.forEach(item => trackScores(item.dataId, item.pts));
+            calculateGlobalScores().forEach(item => trackScores(item.dataId, item.pts));
 
-            // GÉNÉRATION LISTE INDIVIDUELLE
-            let pListHTML = "";
             const listEquipes = Object.keys(teamsData);
+            let pListHTML = "";
             
             allPlayers.sort((a, b) => {
                 if (a.active === false && b.active !== false) return 1;
@@ -361,41 +355,31 @@
                 if (indexB !== -1) return 1;
                 return 0;
             }).forEach(p => {
-                const isInactive = p.active === false;
-                const buzzedClass = (p.uid === currentBuzzerId) ? "last-buzzed" : "";
-                const inactiveClass = isInactive ? "inactive-card" : "";
-                const enEquipe = p.teamName && listEquipes.includes(p.teamName);
-                const labelSub = enEquipe ? p.teamName : "Solo";
-                
                 const idP = 'player-' + p.uid;
-                const isFlashingP = (Date.now() - (lastFlashTime[idP] || 0)) < 1500;
-                const flashClassP = isFlashingP ? " flash-score" : "";
-
+                const enEquipe = p.teamName && listEquipes.includes(p.teamName);
+                const inactiveClass = p.active === false ? "inactive-card" : "";
+                const buzzedClass = (p.uid === currentBuzzerId) ? "last-buzzed" : "";
+                
+                // Si une animation +3 est prévue, on affiche temporairement l'ancien score
+                let displayPtsP = p.pts || 0;
+                if (pendingAnimations[idP] && pendingAnimations[idP].type === 'plus3') {
+                    displayPtsP = pendingAnimations[idP].start;
+                }
+                
                 pListHTML += `
                     <div class="card ${buzzedClass} ${inactiveClass}" data-id="${idP}">
                         <div class="avatar">${renderAvatar(p.avatar)}</div>
-                        <div class="info">
-                            <b>${p.name}</b> <span class="team-tag">(${labelSub})</span>
-                        </div>
-                        <div class="pts${flashClassP}">${p.pts || 0}</div>
+                        <div class="info"><b>${p.name}</b> <span class="team-tag">(${enEquipe ? p.teamName : "Solo"})</span></div>
+                        <div class="pts">${displayPtsP}</div>
                     </div>`;
             });
 
-            // GÉNÉRATION CLASSEMENT GLOBAL (Avec Tri intelligent)
             let gListHTML = "";
-            let globalSorted = getSortedRanking();
-            
-            globalSorted.forEach((item, index) => {
+            getSortedRanking().forEach((item, index) => {
+                const idG = item.dataId;
                 const iconHtml = item.isTeam ? `<div class="crest-bg"><img src="${item.icon}" style="width:4vh; height:4vh;"></div>` : `<span>${renderAvatar(item.avatar)}</span>`;
-                const labelJoueur = (item.count === 1) ? "joueur" : "joueurs";
                 
-                let finalName = item.name;
-                if (item.isTeam) {
-                    finalName += item.isActive ? ` <span class="team-tag">(${item.count} ${labelJoueur})</span>` : ` <span class="pause-badge">EN PAUSE</span>`;
-                } else {
-                    finalName += ' <span class="team-tag">(Solo)</span>';
-                }
-
+                let finalName = item.name + (item.isTeam ? (item.isActive ? ` <span class="team-tag">(${item.count} j)</span>` : ` <span class="pause-badge">EN PAUSE</span>`) : ' <span class="team-tag">(Solo)</span>');
                 let inactiveClass = item.isActive ? "" : " inactive-card";
                 
                 let rankClass = "";
@@ -404,28 +388,43 @@
                     else if (index === 1) rankClass = " rank-2-card";
                     else if (index === 2) rankClass = " rank-3-card";
                 }
-                
-                const idG = item.dataId;
-                const isFlashingG = (Date.now() - (lastFlashTime[idG] || 0)) < 1500;
-                const flashClassG = isFlashingG ? " flash-score" : "";
+
+                // Affichage temporaire de l'ancien score pour le +3
+                let displayPtsG = item.pts;
+                if (pendingAnimations[idG] && pendingAnimations[idG].type === 'plus3') {
+                    displayPtsG = pendingAnimations[idG].start;
+                }
 
                 gListHTML += `
                     <div class="card${inactiveClass}${rankClass}" data-id="${idG}">
                         <div class="crest">${iconHtml}</div>
                         <div class="info"><b>${finalName}</b></div>
-                        <div class="pts${flashClassG}">${item.pts}</div>
+                        <div class="pts">${displayPtsG}</div>
                     </div>`;
             });
 
+            // On glisse les cartes
             animateList('player-list', pListHTML);
             animateList('global-list', gListHTML);
+
+            // On lance les animations à l'intérieur des cartes (Flash ou Compteur)
+            for (let id in pendingAnimations) {
+                let anim = pendingAnimations[id];
+                if (anim.type === 'plus3') {
+                    executeStepAnimation(id, anim.start, anim.end);
+                } else if (anim.type === 'flash') {
+                    document.querySelectorAll(`[data-id="${id}"] .pts`).forEach(el => {
+                        el.classList.remove('flash-score');
+                        void el.offsetWidth;
+                        el.classList.add('flash-score');
+                    });
+                }
+                delete pendingAnimations[id];
+            }
         }
         
         roomRef.child('buzzers').on('value', snap => {
-            const val = snap.val();
-            currentBuzzer = val ? val.pseudo : null;
-            currentBuzzerId = val ? val.id : null;
-            
+            const val = snap.val(); currentBuzzer = val ? val.pseudo : null; currentBuzzerId = val ? val.id : null;
             if (currentBuzzer) {
                 if (!buzzHistory.includes(currentBuzzer)) { buzzHistory.push(currentBuzzer); } 
                 else { buzzHistory = buzzHistory.filter(name => name !== currentBuzzer); buzzHistory.push(currentBuzzer); }
@@ -436,11 +435,12 @@
         roomRef.child('players').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
         roomRef.child('teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
 
-        function toggleHOF() {
-            const overlay = document.getElementById('hof-overlay');
-            if(overlay.style.display === "flex") { overlay.style.display = "none"; } 
-            else { overlay.style.display = "flex"; document.getElementById('hof-list').innerHTML = "<p style='text-align:center;'>Historique global en construction...</p>"; }
-        }
+        function showPodium() { document.getElementById('main-view').style.display = 'none'; document.getElementById('qr-box').style.display = 'none'; document.getElementById('btn-return-podium').style.display = 'none'; document.getElementById('blur-overlay').style.display = 'none'; const podiumScreen = document.getElementById('podium-screen'); podiumScreen.style.display = 'flex'; let ranking = getSortedRanking(); const top3 = ranking.slice(0, 3); const container = document.getElementById('podium-display'); container.innerHTML = ""; const visualOrder = [1, 0, 2]; visualOrder.forEach(idx => { if (top3[idx]) { const item = top3[idx]; const rank = idx + 1; let imgHtml = ""; if(rank === 1) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img">`; if(rank === 2) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img">`; if(rank === 3) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img">`; let avatarDisplay = item.isTeam ? `<div class="crest-bg" style="width:10vh; height:10vh; margin:0 auto;"><img src="${item.icon}" style="width:100%; height:100%; object-fit:contain;"></div>` : renderAvatar(item.avatar, 50); const div = document.createElement('div'); div.className = `step rank-${rank}`; div.innerHTML = `${imgHtml}<div class="winner-name">${item.name}</div>${avatarDisplay}<div class="winner-score">${item.pts} pts</div><div class="step-block">${rank}</div>`; container.appendChild(div); } }); confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } }); }
+        function showLeaderboard() { document.getElementById('podium-screen').style.display = 'none'; document.getElementById('main-view').style.display = 'grid'; document.getElementById('qr-box').style.display = 'block'; document.getElementById('blur-overlay').style.display = 'block'; if (isGameFinished) document.getElementById('btn-return-podium').style.display = 'block'; else document.getElementById('btn-return-podium').style.display = 'none'; }
+        function toggleFullScreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => { console.log(err); }); } else { if (document.exitFullscreen) document.exitFullscreen(); } }
+        document.addEventListener('keydown', (e) => { if(e.key.toLowerCase() === 'f') toggleFullScreen(); });
+        let uiTimer; document.onmousemove = () => { document.getElementById('btn-fullscreen').classList.remove('hide-ui'); clearTimeout(uiTimer); uiTimer = setTimeout(() => { if(document.fullscreenElement) document.getElementById('btn-fullscreen').classList.add('hide-ui'); }, 3000); };
+        function toggleHOF() { const overlay = document.getElementById('hof-overlay'); if(overlay.style.display === "flex") { overlay.style.display = "none"; } else { overlay.style.display = "flex"; document.getElementById('hof-list').innerHTML = "<p style='text-align:center;'>Historique global en construction...</p>"; } }
     </script>
 </body>
 </html>
