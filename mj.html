@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.141)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.142)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -122,7 +122,7 @@
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
 
-    <div class="version-tag">v1.141</div>
+    <div class="version-tag">v1.142</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -178,22 +178,39 @@
             <input type="checkbox" onchange="const t = this.checked ? 'text' : 'password'; document.getElementById('prof-pass').type = t; document.getElementById('prof-pass-conf').type = t;"> Afficher
         </label>
         <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER TOUT</button>
-        <button onclick="closeProfile()" style="background:var(--danger);">Retour</button>
+        <button onclick="closeProfile()" style="background:#7f8c8d;">Retour</button>
+
+        <button onclick="profileLogout()" style="background:var(--danger); margin-top:20px; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);">🚪 DÉCONNEXION</button>
     </div>
 
     <div id="screen-choice" class="box" style="display:none;">
         <h2>Bonjour <span id="mj-display-name" style="color:var(--accent);">MJ</span> !</h2>
+        
+        <button id="btn-super-admin" onclick="openSuperAdmin()" style="display:none; margin-bottom:15px; background: #c0392b; box-shadow: 0 0 15px rgba(192, 57, 43, 0.5); border:1px solid rgba(255,255,255,0.2);">👑 GESTION SUPER ADMIN</button>
+        
         <button onclick="askMjNameAndCreate()" style="margin-top:15px;">🆕 Créer une nouvelle salle</button>
         <button id="btn-resume" onclick="resumeRoom()" style="display:none; background:var(--blue)">🔄 Reprendre la salle <span id="last-room-id"></span></button>
-        <button onclick="auth.signOut().then(()=>location.reload())" style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.3); font-size:0.8rem; margin-top:15px; width:auto; padding:8px 15px;">Déconnexion</button>
+        <button onclick="profileLogout()" style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.3); font-size:0.8rem; margin-top:15px; width:auto; padding:8px 15px;">Déconnexion</button>
+    </div>
+
+    <div id="screen-super-admin" class="dashboard" style="display:none; max-width: 900px;">
+        <div class="room-info" style="background: #c0392b; color: white;">👑 GESTION SUPER ADMIN - ABONNEMENTS</div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+            <button style="background:var(--blue); width:auto;" onclick="document.getElementById('modal-sa-create').style.display='flex'">➕ Créer un nouveau compte MJ</button>
+            <button style="background:#7f8c8d; width:auto;" onclick="closeSuperAdmin()">Retour Accueil</button>
+        </div>
+        
+        <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
+            <h3 style="margin-top:0; color: var(--accent);">Liste des Maîtres du Jeu</h3>
+            <div id="sa-mj-list">
+                </div>
+        </div>
     </div>
 
     <div id="screen-dashboard" class="dashboard">
         <div class="room-info" style="backdrop-filter: blur(10px);">SALLE : <span id="display-room">----</span></div>
         
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom: 15px; flex-wrap: wrap;">
-            <button id="btn-super-admin" onclick="openSuperAdmin()" style="display:none; width: auto; background: #e74c3c; padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">👑 SUPER ADMIN</button>
-            
             <button onclick="openScoreBoard()" style="width: auto; background: rgba(211, 84, 0, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">📺 Tableau des Scores</button>
             <button onclick="showRemoteQR()" style="width: auto; background: rgba(142, 68, 173, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">📱 Remote</button>
             <button onclick="toggleGuide()" style="width: auto; background: rgba(52, 73, 94, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">GUIDE</button>
@@ -308,6 +325,77 @@
         </div>
     </div>
 
+    <div id="modal-sa-vault" class="modal-overlay">
+       <div class="modal-box">
+           <h2 style="color:var(--danger); margin-top:0;">🔒 COFFRE-FORT</h2>
+           <p style="color:#bdc3c7; font-size:0.9rem; margin-bottom:20px;">Saisissez votre mot de passe Super Admin pour accéder à la fiche complète de ce MJ.</p>
+           
+           <div class="password-wrapper">
+               <input type="password" id="sa-vault-pass" placeholder="Mot de passe Super Admin" style="margin-bottom:0;">
+               <div class="password-icon" onclick="togglePasswordVisibility('sa-vault-pass', this)">
+                   <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+               </div>
+           </div>
+           
+           <div style="display:flex; gap:10px; margin-top:15px;">
+               <button onclick="verifyVaultPassword()" style="background:var(--danger); flex:2;">DÉVERROUILLER</button>
+               <button onclick="document.getElementById('modal-sa-vault').style.display='none'" style="background:#7f8c8d; flex:1;">ANNULER</button>
+           </div>
+       </div>
+    </div>
+
+    <div id="modal-sa-mj-details" class="modal-overlay">
+       <div class="modal-box" style="max-width:600px;">
+           <h2 style="color:var(--blue); margin-top:0; margin-bottom:5px;" id="sa-det-name">Nom du MJ</h2>
+           <p id="sa-det-email" style="color:#ccc; font-style:italic; margin-top:0; margin-bottom:20px;">email@mj.com</p>
+           
+           <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);">
+               <h3 style="margin-top:0; color:var(--gold);">Abonnement : <span id="sa-det-days" style="font-size:1.5rem;">0</span> Jours</h3>
+               <div style="display:flex; gap:10px; margin-bottom:15px;">
+                   <button onclick="addMjDays(30)" style="background:var(--success); flex:1; margin:0; padding:10px; font-size:0.8rem;">+ 30 Jours</button>
+                   <button onclick="addMjDays(10)" style="background:var(--blue); flex:1; margin:0; padding:10px; font-size:0.8rem;">+ 10 Jours</button>
+                   <button onclick="addMjDays(-1)" style="background:#e67e22; flex:1; margin:0; padding:10px; font-size:0.8rem;">- 1 Jour</button>
+               </div>
+               <button id="btn-sa-block" onclick="toggleBlockMj()" style="background:var(--danger); margin:0;">BLOQUER L'ACCÈS</button>
+           </div>
+
+           <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
+               <h4 style="margin-top:0; color:#bdc3c7; text-align:left;">Mémo Mot de passe (Attribué au MJ)</h4>
+               <div class="password-wrapper" style="margin-bottom:0;">
+                   <input type="password" id="sa-det-memo" placeholder="Saisissez et enregistrez le mot de passe ici..." style="margin-bottom:0;">
+                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-memo', this)">
+                       <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                   </div>
+               </div>
+               <button onclick="saveMjMemo()" style="background:var(--mj-color); margin-top:10px; margin-bottom:0; font-size:0.8rem;">💾 ENREGISTRER LE MÉMO</button>
+               <span class="input-helper" style="margin-top:5px; margin-bottom:0;">Firebase bloque la lecture des mots de passe. Utilisez ce champ pour noter celui que vous avez fourni.</span>
+           </div>
+           
+           <button onclick="document.getElementById('modal-sa-mj-details').style.display='none'" style="background:#7f8c8d; margin-top:20px; margin-bottom:0;">FERMER LA FICHE</button>
+       </div>
+    </div>
+
+    <div id="modal-sa-create" class="modal-overlay">
+       <div class="modal-box">
+           <h2 style="color:var(--mj-color); margin-top:0;">➕ NOUVEAU COMPTE MJ</h2>
+           <input type="email" id="sa-create-email" placeholder="Email du MJ (Sert d'identifiant)">
+           
+           <div class="password-wrapper">
+               <input type="password" id="sa-create-pass" placeholder="Mot de passe temporaire">
+               <div class="password-icon" onclick="togglePasswordVisibility('sa-create-pass', this)">
+                   <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+               </div>
+           </div>
+
+           <input type="text" id="sa-create-prenom" placeholder="Prénom (Affiché aux joueurs)">
+           
+           <div style="display:flex; gap:10px; margin-top:15px;">
+               <button onclick="createMjAction()" style="background:var(--mj-color); flex:2;">CRÉER (30 Jours Offerts)</button>
+               <button onclick="document.getElementById('modal-sa-create').style.display='none'" style="background:#7f8c8d; flex:1;">ANNULER</button>
+           </div>
+       </div>
+    </div>
+
     <div id="modal-edit-player" class="modal-overlay">
         <div class="modal-box" style="max-width: 600px;">
             <h2 style="color:var(--blue); margin-top:0; text-align:center;">ÉDITER LE JOUEUR</h2>
@@ -409,13 +497,152 @@
         let editingPlayerOriginalAvatar = "";
         let editingPlayerCurrentAvatar = "";
         
-        // MOTEUR SUPER ADMIN (Étape 2)
+        // --- MOTEUR SUPER ADMIN (Étape 1 & 2) ---
         let isSuperAdmin = false;
+        let allUsersData = {};
+        let targetMjUid = null;
+
+        function profileLogout() {
+            auth.signOut().then(()=>location.reload());
+        }
 
         function openSuperAdmin() {
             if(!isSuperAdmin) return;
-            alert("Lobby Super Admin en cours de construction... (Étape 3) \nBientôt vous gérerez les MJs ici !");
+            document.getElementById('screen-choice').style.display = 'none';
+            document.getElementById('screen-super-admin').style.display = 'block';
         }
+
+        function closeSuperAdmin() {
+            document.getElementById('screen-super-admin').style.display = 'none';
+            document.getElementById('screen-choice').style.display = 'block';
+        }
+
+        function initSuperAdminListener() {
+            if(!isSuperAdmin) return;
+            db.ref('users').on('value', snap => {
+                allUsersData = snap.val() || {};
+                renderSAMjList();
+            });
+        }
+
+        function renderSAMjList() {
+            const container = document.getElementById('sa-mj-list');
+            container.innerHTML = "";
+            Object.keys(allUsersData).forEach(uid => {
+                const u = allUsersData[uid];
+                
+                // On peut afficher tous les MJs, même toi (pour vérifier ton abonnement)
+                const email = u.email || "Email inconnu";
+                const name = (u.prenom || "MJ") + " " + (u.nom || "");
+                const isBlocked = u.isBlocked === true;
+                
+                let daysLeft = 0;
+                if(u.expirationDate) {
+                    daysLeft = Math.ceil((u.expirationDate - Date.now()) / (1000 * 60 * 60 * 24));
+                }
+                
+                let statusColor = "var(--success)";
+                let statusText = daysLeft + " Jours";
+                
+                if (isBlocked) {
+                    statusColor = "var(--danger)";
+                    statusText = "BLOQUÉ";
+                } else if (daysLeft <= 0) {
+                    statusColor = "#e67e22";
+                    statusText = "EXPIRÉ";
+                }
+
+                container.innerHTML += `
+                    <div class="score-row" style="cursor:pointer;" onclick="openVault('${uid}')" title="Cliquez pour gérer ce compte">
+                        <div style="flex:1;"><b>${email}</b><br><small style="color:#bdc3c7;">${name}</small></div>
+                        <div><span style="color:${statusColor}; font-weight:bold; background:rgba(0,0,0,0.5); padding:5px 10px; border-radius:5px; border:1px solid ${statusColor};">${statusText}</span></div>
+                    </div>
+                `;
+            });
+        }
+
+        function openVault(uid) {
+            targetMjUid = uid;
+            document.getElementById('sa-vault-pass').value = '';
+            document.getElementById('modal-sa-vault').style.display = 'flex';
+        }
+
+        function verifyVaultPassword() {
+            const pass = document.getElementById('sa-vault-pass').value;
+            const email = auth.currentUser.email; // Ton email Super Admin
+            
+            // On tente une reconnexion silencieuse pour vérifier le mot de passe
+            auth.signInWithEmailAndPassword(email, pass).then(() => {
+                document.getElementById('modal-sa-vault').style.display = 'none';
+                updateMjDetailsView();
+                document.getElementById('modal-sa-mj-details').style.display = 'flex';
+            }).catch(err => {
+                alert("Mot de passe incorrect !");
+            });
+        }
+
+        function updateMjDetailsView() {
+            if(!targetMjUid || !allUsersData[targetMjUid]) return;
+            const u = allUsersData[targetMjUid];
+            
+            document.getElementById('sa-det-name').innerText = (u.prenom || "MJ") + " " + (u.nom || "");
+            document.getElementById('sa-det-email').innerText = u.email || "Email inconnu";
+            
+            let daysLeft = 0;
+            if(u.expirationDate) {
+                daysLeft = Math.ceil((u.expirationDate - Date.now()) / (1000 * 60 * 60 * 24));
+            }
+            document.getElementById('sa-det-days').innerText = daysLeft;
+            
+            const btnBlock = document.getElementById('btn-sa-block');
+            if(u.isBlocked) {
+                btnBlock.innerText = "🟢 RÉACTIVER L'ACCÈS";
+                btnBlock.style.background = "var(--success)";
+            } else {
+                btnBlock.innerText = "🔴 BLOQUER L'ACCÈS";
+                btnBlock.style.background = "var(--danger)";
+            }
+            
+            document.getElementById('sa-det-memo').value = u.memoPassword || "";
+        }
+
+        function addMjDays(days) {
+            if(!targetMjUid) return;
+            const msToAdd = days * 24 * 60 * 60 * 1000;
+            let currentExp = allUsersData[targetMjUid].expirationDate || Date.now();
+            
+            // S'il était déjà expiré, on repart d'aujourd'hui
+            if (currentExp < Date.now() && days > 0) currentExp = Date.now(); 
+            
+            const newExp = currentExp + msToAdd;
+            
+            db.ref('users/' + targetMjUid).update({ expirationDate: newExp }).then(() => {
+                // L'interface se mettra à jour toute seule grâce au Listener
+                setTimeout(updateMjDetailsView, 200); 
+            });
+        }
+
+        function toggleBlockMj() {
+            if(!targetMjUid) return;
+            const isBlocked = allUsersData[targetMjUid].isBlocked === true;
+            db.ref('users/' + targetMjUid).update({ isBlocked: !isBlocked }).then(() => {
+                setTimeout(updateMjDetailsView, 200);
+            });
+        }
+
+        function saveMjMemo() {
+            if(!targetMjUid) return;
+            const memo = document.getElementById('sa-det-memo').value;
+            db.ref('users/' + targetMjUid).update({ memoPassword: memo }).then(() => {
+                alert("Mémo enregistré avec succès !");
+            });
+        }
+
+        function createMjAction() {
+            alert("Bientôt ! Le moteur de création (Double instance Firebase) sera activé à la prochaine étape de développement.");
+            document.getElementById('modal-sa-create').style.display='none';
+        }
+        // --- FIN MOTEUR SUPER ADMIN ---
 
         /* DRAG & DROP MULTIPLE */
         window.onload = function() {
@@ -446,7 +673,6 @@
         function handleProfileFile(files) { if(!files || files.length === 0) return; const file = files[0]; const uid = auth.currentUser.uid; const storageRef = storage.ref(`mj_profile_logos/${uid}/logo`); document.getElementById('prof-logo-placeholder').style.opacity = '0.3'; storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => { document.getElementById('prof-logo-placeholder').style.display = 'none'; const img = document.getElementById('prof-logo-preview'); img.src = url; img.style.display = 'block'; document.getElementById('prof-logo-url').value = url; }).catch(err => alert("Erreur upload profil : " + err.message)); }
 
         // --- GESTION DES FONDS D'ÉCRAN ---
-        
         function applyMjConsoleBg(url) {
             const bgDiv = document.getElementById('dynamic-bg');
             if (url && url !== "") {
@@ -589,7 +815,6 @@
                 roomRef.child('customBackground').remove().then(() => { alert("Retour au fond animé par défaut."); });
             }
         }
-
         // --- FIN GESTION FONDS ---
 
         function createBlason(i) {
@@ -608,18 +833,23 @@
         function forgotPassword() { const email = document.getElementById('mj-email').value.trim(); if(!email) return alert("Veuillez saisir votre email."); auth.sendPasswordResetEmail(email).then(() => { alert("Email envoyé !"); }).catch(e => alert("Erreur : " + e.message)); }
 
         function loadMjData(user) {
+            
+            // VERIFICATION SUPER ADMIN (Étape 2)
             isSuperAdmin = (user.email === 'contact@prestapuce.com');
             
-            // GESTION DE L'INTERFACE SELON LES DROITS (Étape 2)
             if(isSuperAdmin) {
                 document.getElementById('btn-super-admin').style.display = 'inline-block';
                 document.getElementById('sys-version-input').style.display = 'inline-block';
                 document.getElementById('btn-update-version').style.display = 'inline-block';
+                initSuperAdminListener(); // Lance la surveillance de la BDD pour la liste
             } else {
                 document.getElementById('btn-super-admin').style.display = 'none';
                 document.getElementById('sys-version-input').style.display = 'none';
                 document.getElementById('btn-update-version').style.display = 'none';
             }
+
+            // On s'assure d'enregistrer l'email du MJ dans la BDD s'il n'y est pas
+            db.ref('users/' + user.uid).update({ email: user.email });
 
             db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
