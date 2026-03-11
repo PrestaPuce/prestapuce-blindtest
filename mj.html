@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.144)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.145)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -26,7 +26,6 @@
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s; text-transform: uppercase; margin-bottom: 10px; position: relative; top: 0; box-shadow: 0 4px rgba(0,0,0,0.3); }
         button:hover:not(:disabled) { opacity: 0.9; }
         button:active:not(:disabled) { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
-        /* Règle UI : Gris uniquement pour les boutons désactivés */
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; }
         
         .countdown-btn { background: #e67e22 !important; cursor: wait !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(230, 126, 34, 0.6) !important; }
@@ -123,7 +122,7 @@
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
 
-    <div class="version-tag">v1.144</div>
+    <div class="version-tag">v1.145</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -367,7 +366,8 @@
                <input type="text" id="sa-det-prenom" placeholder="Prénom" style="margin-bottom:0;">
                <input type="text" id="sa-det-nom" placeholder="Nom" style="margin-bottom:0;">
            </div>
-           <input type="email" id="sa-det-email" placeholder="Email (Identifiant)" style="margin-bottom:15px; border-color:var(--accent);">
+           <input type="email" id="sa-det-email" placeholder="Email (Identifiant)" style="margin-bottom:5px; border-color:var(--accent);">
+           <span class="input-helper" style="margin-top:0; margin-bottom:15px;">Modifier l'email ou le mot de passe nécessitera l'ancien mot de passe Mémo.</span>
            
            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);">
                <h3 style="margin-top:0; color:var(--gold);">Abonnement (Jours restants)</h3>
@@ -385,16 +385,16 @@
            </div>
 
            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
-               <h4 style="margin-top:0; color:#bdc3c7; text-align:left;">Mémo Mot de passe (Attribué au MJ)</h4>
+               <h4 style="margin-top:0; color:#bdc3c7; text-align:left;">Mot de passe attribué (Identifiant Firebase)</h4>
                <div class="password-wrapper" style="margin-bottom:0;">
-                   <input type="password" id="sa-det-memo" placeholder="Saisissez et enregistrez le mot de passe ici..." style="margin-bottom:0;">
+                   <input type="password" id="sa-det-memo" placeholder="Modifier le mot de passe ici..." style="margin-bottom:0;">
                    <div class="password-icon" onclick="togglePasswordVisibility('sa-det-memo', this)">
                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                    </div>
                </div>
            </div>
            
-           <button onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);">💾 ENREGISTRER LES MODIFICATIONS</button>
+           <button id="btn-sa-save" onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);">💾 ENREGISTRER LES MODIFICATIONS</button>
            <button onclick="deleteMjAccount()" style="background:rgba(0,0,0,0.5); border:1px solid var(--danger); color:var(--danger); width:100%; margin-top:20px; margin-bottom:0;">🗑️ SUPPRIMER CE COMPTE MJ</button>
        </div>
     </div>
@@ -501,7 +501,7 @@
         const auth = firebase.auth();
         const storage = firebase.storage();
         
-        // SECONDE INSTANCE POUR LA CRÉATION/SUPPRESSION SANS DÉCONNEXION (Étape B)
+        // SECONDE INSTANCE POUR LA GESTION AUTH SANS DÉCONNEXION
         const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
         const secondaryAuth = secondaryApp.auth();
 
@@ -666,8 +666,13 @@
             input.value = final;
         }
 
+        // CORRECTION V1.145 : SYNCHRONISATION SA PANEL => FIREBASE AUTH
         function saveSAMjDetails() {
             if(!targetMjUid || !allUsersData[targetMjUid]) return;
+            const u = allUsersData[targetMjUid];
+            
+            const oldEmail = u.email || "";
+            const oldMemo = u.memoPassword || "";
             
             const newPrenom = document.getElementById('sa-det-prenom').value.trim();
             const newNom = document.getElementById('sa-det-nom').value.trim();
@@ -678,12 +683,59 @@
             const msToAdd = inputDays * 24 * 60 * 60 * 1000;
             const newExp = Date.now() + msToAdd;
 
-            const updates = { prenom: newPrenom, nom: newNom, email: newEmail, memoPassword: newMemo, expirationDate: newExp };
+            const updates = { prenom: newPrenom, nom: newNom, expirationDate: newExp };
 
-            db.ref('users/' + targetMjUid).update(updates).then(() => {
-                alert("Fiche MJ enregistrée avec succès !");
-                document.getElementById('modal-sa-mj-details').style.display = 'none';
-            });
+            const emailChanged = (newEmail !== oldEmail && newEmail !== "");
+            const passChanged = (newMemo !== oldMemo && newMemo !== "");
+
+            if (emailChanged || passChanged) {
+                if(!oldEmail || !oldMemo) {
+                    alert("⚠️ Impossible de modifier les identifiants : Ce compte n'a pas d'ancien mot de passe Mémo enregistré pour que la console puisse s'y connecter en arrière-plan.");
+                    return;
+                }
+                
+                const btn = document.getElementById('btn-sa-save');
+                btn.innerText = "⏳ MISE À JOUR AUTHENTIFICATION...";
+                btn.disabled = true;
+
+                // Le Super Admin se connecte en sous-marin au compte MJ pour modifier l'Auth
+                secondaryAuth.signInWithEmailAndPassword(oldEmail, oldMemo)
+                .then(async (userCredential) => {
+                    try {
+                        if(emailChanged) await userCredential.user.updateEmail(newEmail);
+                        if(passChanged) await userCredential.user.updatePassword(newMemo);
+                        
+                        updates.email = newEmail;
+                        updates.memoPassword = newMemo;
+                        
+                        await secondaryAuth.signOut();
+                        
+                        db.ref('users/' + targetMjUid).update(updates).then(() => {
+                            btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS";
+                            btn.disabled = false;
+                            alert("Fiche MJ et Identifiants de connexion mis à jour avec succès !");
+                            document.getElementById('modal-sa-mj-details').style.display = 'none';
+                        });
+                    } catch(error) {
+                        await secondaryAuth.signOut();
+                        btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS";
+                        btn.disabled = false;
+                        alert("Erreur de sécurité Google Auth : " + error.message);
+                    }
+                })
+                .catch(error => {
+                    btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS";
+                    btn.disabled = false;
+                    alert("⚠️ Échec de connexion au compte MJ.\nLe mot de passe Mémo actuel ('" + oldMemo + "') est-il correct ?\n(Erreur: " + error.message + ")");
+                });
+            } else {
+                updates.email = oldEmail; 
+                updates.memoPassword = oldMemo; 
+                db.ref('users/' + targetMjUid).update(updates).then(() => {
+                    alert("Fiche MJ enregistrée avec succès !");
+                    document.getElementById('modal-sa-mj-details').style.display = 'none';
+                });
+            }
         }
 
         function createMjAction() {
@@ -693,16 +745,15 @@
 
             if(!email || !pass || pass.length < 6) return alert("Email invalide ou mot de passe trop court (min 6 car.).");
 
-            // Création via la seconde instance pour ne pas déconnecter le Super Admin
             secondaryAuth.createUserWithEmailAndPassword(email, pass)
             .then((userCredential) => {
                 const newUid = userCredential.user.uid;
-                const newExp = Date.now() + (30 * 24 * 60 * 60 * 1000); // + 30 Jours
+                const newExp = Date.now() + (30 * 24 * 60 * 60 * 1000); 
                 
                 return db.ref('users/' + newUid).set({
                     email: email, prenom: prenom, memoPassword: pass, expirationDate: newExp, isBlocked: false
                 }).then(() => {
-                    secondaryAuth.signOut(); // On déconnecte la seconde instance
+                    secondaryAuth.signOut();
                     alert("Nouveau compte MJ créé avec succès (30 Jours) !");
                     document.getElementById('modal-sa-create').style.display = 'none';
                     document.getElementById('sa-create-email').value = ''; document.getElementById('sa-create-pass').value = ''; document.getElementById('sa-create-prenom').value = '';
@@ -719,7 +770,6 @@
 
             if(confirm(`⚠️ DANGER : Voulez-vous vraiment supprimer DÉFINITIVEMENT le compte ${email} ?\n\nToutes ses données de jeu et son accès seront détruits.`)) {
                 
-                // On tente de supprimer l'authentification si on a le mot de passe dans le mémo
                 if(email && memo) {
                     secondaryAuth.signInWithEmailAndPassword(email, memo)
                     .then((userCredential) => {
@@ -1125,6 +1175,14 @@
             const emailChanged = newEmail !== user.email;
             const passChanged = pass1 !== "";
 
+            const updates = { 
+                nom: document.getElementById('prof-nom').value.trim(), 
+                prenom: document.getElementById('prof-prenom').value.trim(), 
+                customLogo: document.getElementById('prof-logo-url').value.trim(), 
+                customLink: document.getElementById('prof-link').value.trim(),
+                email: newEmail 
+            };
+
             if (emailChanged || passChanged) {
                 if(!passCurrent) {
                     return alert("⚠️ Vous DEVEZ saisir votre 'Mot de passe actuel' pour modifier votre Email ou votre Mot de passe.");
@@ -1138,19 +1196,14 @@
                     await user.reauthenticateWithCredential(credential);
                     
                     if (emailChanged) await user.updateEmail(newEmail);
-                    if (passChanged) await user.updatePassword(pass1);
+                    if (passChanged) {
+                        await user.updatePassword(pass1);
+                        updates.memoPassword = pass1; // CORRECTION V1.145 : Met à jour le mémo du Super Admin automatiquement
+                    }
                 } catch(e) {
                     return alert("Erreur de sécurité : Mot de passe actuel incorrect. (" + e.message + ")");
                 }
             }
-
-            const updates = { 
-                nom: document.getElementById('prof-nom').value.trim(), 
-                prenom: document.getElementById('prof-prenom').value.trim(), 
-                customLogo: document.getElementById('prof-logo-url').value.trim(), 
-                customLink: document.getElementById('prof-link').value.trim(),
-                email: newEmail 
-            };
             
             db.ref('users/' + user.uid).update(updates).then(() => { 
                 alert("Profil mis à jour !"); 
