@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Scores - Presta'Puce (v1.154)</title>
+    <title>Scores - Presta'Puce (v1.155)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -19,21 +19,8 @@
         #blur-overlay.active { opacity: 1; pointer-events: auto; }
 
         /* HEADER */
-        header { 
-            display: flex; align-items: center; justify-content: center; 
-            height: 12vh; position: relative; 
-            margin-bottom: -2vh; 
-            flex-shrink: 0;
-            z-index: 10;
-        }
-
-        .header-center {
-            display: flex; align-items: center; gap: 2vw;
-            background: rgba(0,0,0,0.3); padding: 1vh 3vw;
-            border-radius: 50px; border: 1px solid rgba(241, 196, 15, 0.3);
-            backdrop-filter: blur(5px);
-        }
-
+        header { display: flex; align-items: center; justify-content: center; height: 12vh; position: relative; margin-bottom: -2vh; flex-shrink: 0; z-index: 10; }
+        .header-center { display: flex; align-items: center; gap: 2vw; background: rgba(0,0,0,0.3); padding: 1vh 3vw; border-radius: 50px; border: 1px solid rgba(241, 196, 15, 0.3); backdrop-filter: blur(5px); }
         .title-group { display: flex; flex-direction: column; align-items: center; line-height: 1; }
         h1 { font-size: clamp(1.5rem, 4vh, 3rem); margin: 0; color: white; } 
         .room-highlight { color: var(--accent); }
@@ -41,21 +28,9 @@
         #display-mj-logo { height: 8vh; width: auto; object-fit: contain; border-radius: 6px; }
         
         /* QR CODE AGRANDI */
-        #qr-box { 
-            position: fixed; top: 1vh; left: 1vw; 
-            background: white; padding: 0.5vh; border-radius: 8px; 
-            text-align: center; color: black; z-index: 5000; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
-            transform-origin: top left; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            cursor: zoom-in; 
-            width: 10.5vh; 
-        }
+        #qr-box { position: fixed; top: 1vh; left: 1vw; background: white; padding: 0.5vh; border-radius: 8px; text-align: center; color: black; z-index: 5000; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transform-origin: top left; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: zoom-in; width: 10.5vh; }
         #qr-box img { width: 100% !important; height: auto !important; display: block; }
-        #qr-box.zoomed {
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 50vmin; padding: 2vmin; border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8); cursor: zoom-out;
-        }
+        #qr-box.zoomed { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50vmin; padding: 2vmin; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); cursor: zoom-out; }
         #qr-label { font-size: 0.8vh; font-weight: bold; margin-top: 0.2vh; transition: font-size 0.3s; }
         #qr-box.zoomed #qr-label { font-size: 3vmin; margin-top: 1vmin; }
 
@@ -65,78 +40,44 @@
         #btn-fullscreen svg { width: 60%; height: 60%; fill: currentColor; }
         .hide-ui { opacity: 0 !important; pointer-events: none; }
 
-        /* BOUTON HOF */
-        #btn-hof { 
-            position: fixed; 
-            top: 6vh; 
-            right: 1vw; 
-            background: rgba(0,0,0,0.5); 
-            border: 1px solid var(--accent); 
-            color: var(--accent); 
-            padding: 0.5vh 1.5vw; 
-            border-radius: 15px; 
-            cursor: pointer; 
-            font-size: clamp(0.6rem, 1.5vh, 1rem); 
-            font-weight: bold; 
-            transition: 0.2s; 
-            z-index: 1500; 
-        }
+        #btn-hof { position: fixed; top: 6vh; right: 1vw; background: rgba(0,0,0,0.5); border: 1px solid var(--accent); color: var(--accent); padding: 0.5vh 1.5vw; border-radius: 15px; cursor: pointer; font-size: clamp(0.6rem, 1.5vh, 1rem); font-weight: bold; transition: 0.2s; z-index: 1500; }
         #btn-hof:hover { background: var(--accent); color: black; }
 
         /* GRILLE PRINCIPALE */
-        .main-container { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; 
-            flex-grow: 1; padding: 0 1vw; overflow: hidden; 
-            margin-top: 0; 
-        }
+        .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; flex-grow: 1; padding: 0 1vw; overflow: hidden; margin-top: 0; }
         .column-wrapper { display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
-        
-        .column-title { 
-            text-align: center; font-size: clamp(1rem, 3vh, 2rem); color: var(--accent); text-transform: uppercase; 
-            border-bottom: 1px solid rgba(241, 196, 15, 0.5); flex-shrink: 0; letter-spacing: 1px;
-            padding-bottom: 2px; 
-            margin-bottom: 5px; 
-            line-height: 1.1;
-        }
-        
+        .column-title { text-align: center; font-size: clamp(1rem, 3vh, 2rem); color: var(--accent); text-transform: uppercase; border-bottom: 1px solid rgba(241, 196, 15, 0.5); flex-shrink: 0; letter-spacing: 1px; padding-bottom: 2px; margin-bottom: 5px; line-height: 1.1; }
         #player-list, #global-list { overflow-y: auto; overflow-x: hidden; flex-grow: 1; padding-right: 5px; padding-bottom: 10px; position: relative; }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
-        /* CARTES RESPONSIVES (Modifiées pour le FLIP animation) */
-        .card { 
-            background: var(--card-bg); display: flex; align-items: center; padding: 0 1vw; 
-            border-radius: 8px; margin-bottom: 0.8vh; border-left: 0.5vw solid var(--accent); 
-            height: 7vh; 
-            /* On supprime la transition "all" pour que l'animation JS ne soit pas contrariée */
-        }
-        
+        /* CARTES RESPONSIVES */
+        .card { background: var(--card-bg); display: flex; align-items: center; padding: 0 1vw; border-radius: 8px; margin-bottom: 0.8vh; border-left: 0.5vw solid var(--accent); height: 7vh; transition: border 0.3s, background 0.3s, box-shadow 0.3s; }
         .avatar, .crest { width: 5vh; display: flex; justify-content: center; align-items: center; font-size: 2.5vh; }
         .crest-bg { background: white; padding: 2px; border-radius: 4px; display: flex; }
         .crest img, .avatar img { width: 4vh; height: 4vh; object-fit: contain; } 
-        
         .info { flex: 1; margin-left: 1vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: baseline; gap: 0.5vw; line-height: 1; }
         .info b { font-size: clamp(0.9rem, 2.5vh, 1.8rem); }
         .team-tag { font-size: clamp(0.7rem, 2vh, 1.2rem); color: #bdc3c7; font-style: italic; font-weight: normal; }
+        .pts { font-size: clamp(1rem, 3vh, 2rem); font-weight: 800; background: rgba(0,0,0,0.3); padding: 0 1vw; border-radius: 6px; color: var(--accent); min-width: 4vw; text-align: center; line-height: 1.4; transition: background 0.3s, color 0.3s; }
         
-        .pts { font-size: clamp(1rem, 3vh, 2rem); font-weight: 800; background: rgba(0,0,0,0.3); padding: 0 1vw; border-radius: 6px; color: var(--accent); min-width: 4vw; text-align: center; line-height: 1.4; }
-        
-        .last-buzzed { 
-            border-color: transparent !important; 
-            background: rgba(46, 204, 113, 0.4); 
-            box-shadow: inset 0 0 0 0.5vw #2ecc71, 0 0 2vh #2ecc71 !important;
-            transform: scale(1.02); 
-            z-index: 10; 
-            position: relative;
-        }
-        
-        /* Style Inactif / Pause */
+        .last-buzzed { border-color: transparent !important; background: rgba(46, 204, 113, 0.4); box-shadow: inset 0 0 0 0.5vw #2ecc71, 0 0 2vh #2ecc71 !important; transform: scale(1.02); z-index: 10; position: relative; }
         .inactive-card { opacity: 0.6; filter: grayscale(0.8); border-left-color: #7f8c8d; }
         .pause-badge { background: #7f8c8d; color: white; font-size: 0.5em; padding: 2px 5px; border-radius: 4px; margin-left: 10px; vertical-align: middle; }
 
-        /* PODIUM */
+        /* HIGHLIGHT TOP 3 DANS LA GRILLE */
+        .rank-1-card { border: 2px solid var(--gold) !important; box-shadow: 0 0 15px rgba(241, 196, 15, 0.5) !important; background: rgba(241, 196, 15, 0.15) !important; border-left: 0.5vw solid var(--gold) !important; }
+        .rank-1-card .pts { background: var(--gold) !important; color: black !important; }
+        
+        .rank-2-card { border: 1px solid var(--silver) !important; box-shadow: 0 0 10px rgba(189, 195, 199, 0.3) !important; background: rgba(189, 195, 199, 0.1) !important; border-left: 0.5vw solid var(--silver) !important; }
+        .rank-2-card .pts { background: var(--silver) !important; color: black !important; }
+        
+        .rank-3-card { border: 1px solid var(--bronze) !important; box-shadow: 0 0 10px rgba(205, 127, 50, 0.3) !important; background: rgba(205, 127, 50, 0.1) !important; border-left: 0.5vw solid var(--bronze) !important; }
+        .rank-3-card .pts { background: var(--bronze) !important; color: white !important; }
+
+        /* PODIUM FINAL */
         #podium-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 20, 0.98); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; }
         .podium-container { display: flex; align-items: flex-end; justify-content: center; gap: 3vw; margin-top: 5vh; }
         .step { text-align: center; display: flex; flex-direction: column; align-items: center; width: 20vw; }
@@ -154,8 +95,6 @@
         .nav-btn { padding:1.5vh 3vw; font-size:2vh; background:var(--bg-color); color:white; border:1px solid white; border-radius:1vh; cursor:pointer; margin: 0 1vw; transition: 0.2s; }
         .nav-btn:hover { background: white; color: black; }
         #btn-return-podium { display: none; position: fixed; bottom: 2vh; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; border: none; padding: 1vh 2vw; border-radius: 20px; font-weight: bold; cursor: pointer; z-index: 100; box-shadow: 0 0 10px rgba(241, 196, 15, 0.5); font-size: 2vh; }
-
-        /* HOF OVERLAY */
         #hof-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 4000; flex-direction: column; align-items: center; justify-content: center; }
         .hof-content { width: 60vw; background: #2c3e50; padding: 4vh; border-radius: 20px; border: 3px solid var(--accent); }
     </style>
@@ -163,16 +102,13 @@
 <body>
 
     <div id="blur-overlay" onclick="toggleQRZoom()"></div>
-
     <div id="btn-fullscreen" onclick="toggleFullScreen()" title="Plein Écran (Touche F)">
         <svg id="icon-fs" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
     </div>
-
     <div id="qr-box" onclick="toggleQRZoom()">
         <div id="qrcode"></div>
         <div id="qr-label">REJOINDRE</div>
     </div>
-
     <button id="btn-hof" onclick="toggleHOF()">🏆 Hall of Fame</button>
 
     <header>
@@ -182,7 +118,7 @@
             </a>
             <div class="title-group">
                 <h1>SALLE : <span id="room-title" class="room-highlight">----</span></h1>
-                <div class="version-text">v1.154</div>
+                <div class="version-text">v1.155</div>
             </div>
         </div>
     </header>
@@ -296,7 +232,6 @@
             if (isGameFinished) document.getElementById('btn-return-podium').style.display = 'block'; else document.getElementById('btn-return-podium').style.display = 'none';
         }
 
-        /* --- CALCUL INTELLIGENT SCORES --- */
         function calculateRanking() {
             const listEquipes = Object.keys(teamsData);
             const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
@@ -323,17 +258,13 @@
             return Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts);
         }
 
-        /* CORRECTION V1.154 : RÈGLE AVATAR 20 CARACTÈRES */
         function renderAvatar(av, size=28) {
             if(av && av.length > 20) return `<img src="${av}" style="width:80%; height:80%; border-radius:50%; object-fit:cover;">`;
             return `<span style="font-size:200%;">${av || '👤'}</span>`;
         }
 
-        /* FONCTION FLIP ANIMATION POUR LE GLISSEMENT */
         function animateList(containerId, newHTML) {
             const container = document.getElementById(containerId);
-            
-            // 1. Lire les anciennes positions
             const oldCards = Array.from(container.children);
             const oldRects = new Map();
             oldCards.forEach(card => {
@@ -341,10 +272,8 @@
                 if(id) oldRects.set(id, card.getBoundingClientRect());
             });
 
-            // 2. Injecter le nouveau DOM
             container.innerHTML = newHTML;
             
-            // 3. Lire les nouvelles positions et inverser
             const newCards = Array.from(container.children);
             newCards.forEach(card => {
                 const id = card.getAttribute('data-id');
@@ -354,11 +283,8 @@
                     const deltaY = oldRect.top - newRect.top;
                     
                     if (deltaY !== 0) {
-                        // Invert
                         card.style.transform = `translateY(${deltaY}px)`;
                         card.style.transition = 'none';
-                        
-                        // Play (après un très court délai pour que le navigateur comprenne)
                         requestAnimationFrame(() => {
                             requestAnimationFrame(() => {
                                 card.style.transform = '';
@@ -393,7 +319,6 @@
                 const enEquipe = p.teamName && listEquipes.includes(p.teamName);
                 const labelSub = enEquipe ? p.teamName : "Solo";
                 
-                // Ajout du data-id pour l'animation
                 pListHTML += `
                     <div class="card ${buzzedClass} ${inactiveClass}" data-id="player-${p.uid}">
                         <div class="avatar">${renderAvatar(p.avatar)}</div>
@@ -405,7 +330,7 @@
             });
 
             let gListHTML = "";
-            calculateRanking().forEach(item => {
+            calculateRanking().forEach((item, index) => {
                 const iconHtml = item.isTeam ? `<div class="crest-bg"><img src="${item.icon}" style="width:4vh; height:4vh;"></div>` : `<span>${renderAvatar(item.avatar)}</span>`;
                 const labelJoueur = (item.count === 1) ? "joueur" : "joueurs";
                 
@@ -418,18 +343,24 @@
 
                 let inactiveClass = item.isActive ? "" : " inactive-card";
                 
-                // Ajout du data-id pour l'animation (On utilise le nom comme identifiant)
+                // NOUVEAU : Application des classes du podium
+                let rankClass = "";
+                if (item.pts > 0 && item.isActive) {
+                    if (index === 0) rankClass = " rank-1-card";
+                    else if (index === 1) rankClass = " rank-2-card";
+                    else if (index === 2) rankClass = " rank-3-card";
+                }
+                
                 let dataId = item.isTeam ? `team-${item.name}` : `solo-${item.name}`;
 
                 gListHTML += `
-                    <div class="card${inactiveClass}" data-id="${dataId}">
+                    <div class="card${inactiveClass}${rankClass}" data-id="${dataId}">
                         <div class="crest">${iconHtml}</div>
                         <div class="info"><b>${finalName}</b></div>
                         <div class="pts">${item.pts}</div>
                     </div>`;
             });
 
-            // On utilise la nouvelle fonction d'animation au lieu du .innerHTML direct
             animateList('player-list', pListHTML);
             animateList('global-list', gListHTML);
         }
