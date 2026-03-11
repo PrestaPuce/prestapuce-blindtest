@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.140)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.141)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -14,7 +14,6 @@
         
         body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         
-        /* FOND DYNAMIQUE PRESTA'PUCE SUR LA CONSOLE */
         #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: linear-gradient(45deg, #0f0c29, #302b63, #24243e); background-size: 300% 300%; animation: gradientBG 15s ease infinite; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         #bg-protection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(0, 0, 0, 0.5); pointer-events: none; }
@@ -123,7 +122,7 @@
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
 
-    <div class="version-tag">v1.140</div>
+    <div class="version-tag">v1.141</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -193,6 +192,8 @@
         <div class="room-info" style="backdrop-filter: blur(10px);">SALLE : <span id="display-room">----</span></div>
         
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <button id="btn-super-admin" onclick="openSuperAdmin()" style="display:none; width: auto; background: #e74c3c; padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">👑 SUPER ADMIN</button>
+            
             <button onclick="openScoreBoard()" style="width: auto; background: rgba(211, 84, 0, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">📺 Tableau des Scores</button>
             <button onclick="showRemoteQR()" style="width: auto; background: rgba(142, 68, 173, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">📱 Remote</button>
             <button onclick="toggleGuide()" style="width: auto; background: rgba(52, 73, 94, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">GUIDE</button>
@@ -294,8 +295,8 @@
         <div style="margin-top:20px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);">
             <h3 style="color:#bdc3c7; margin-top:0;">Administration Version (Cache)</h3>
             <div style="display:flex; gap:10px; align-items:center;">
-                <input type="text" id="sys-version-input" placeholder="1.xxx" style="margin:0; width:100px;">
-                <button style="background:#7f8c8d; width:auto; margin:0;" onclick="updateAppVersion()">Mettre à jour</button>
+                <input type="text" id="sys-version-input" placeholder="1.xxx" style="margin:0; width:100px; display:none;">
+                <button id="btn-update-version" style="background:#7f8c8d; width:auto; margin:0; display:none;" onclick="updateAppVersion()">Mettre à jour</button>
                 <span style="font-size:0.8rem; color:#aaa;">Actuelle : <b id="current-version-display">...</b></span>
             </div>
         </div>
@@ -407,6 +408,14 @@
         let editingPlayerOriginalPseudo = "";
         let editingPlayerOriginalAvatar = "";
         let editingPlayerCurrentAvatar = "";
+        
+        // MOTEUR SUPER ADMIN (Étape 2)
+        let isSuperAdmin = false;
+
+        function openSuperAdmin() {
+            if(!isSuperAdmin) return;
+            alert("Lobby Super Admin en cours de construction... (Étape 3) \nBientôt vous gérerez les MJs ici !");
+        }
 
         /* DRAG & DROP MULTIPLE */
         window.onload = function() {
@@ -537,7 +546,6 @@
                     applyMjConsoleBg(null);
                 }
 
-                // SUPPRESSION INTELLIGENTE : Si l'image est celle en cours, on reset la salle
                 if(currentRoomBgUrl === urlToDelete && roomRef) {
                     roomRef.child('customBackground').remove();
                 }
@@ -600,6 +608,19 @@
         function forgotPassword() { const email = document.getElementById('mj-email').value.trim(); if(!email) return alert("Veuillez saisir votre email."); auth.sendPasswordResetEmail(email).then(() => { alert("Email envoyé !"); }).catch(e => alert("Erreur : " + e.message)); }
 
         function loadMjData(user) {
+            isSuperAdmin = (user.email === 'contact@prestapuce.com');
+            
+            // GESTION DE L'INTERFACE SELON LES DROITS (Étape 2)
+            if(isSuperAdmin) {
+                document.getElementById('btn-super-admin').style.display = 'inline-block';
+                document.getElementById('sys-version-input').style.display = 'inline-block';
+                document.getElementById('btn-update-version').style.display = 'inline-block';
+            } else {
+                document.getElementById('btn-super-admin').style.display = 'none';
+                document.getElementById('sys-version-input').style.display = 'none';
+                document.getElementById('btn-update-version').style.display = 'none';
+            }
+
             db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
                 mjProfileData = data;
@@ -870,7 +891,6 @@
             roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
 
-            // Écouteur pour la synchronisation visuelle (et mémorisation) du fond sélectionné
             roomRef.child('customBackground').on('value', snap => {
                 const url = snap.val() || "";
                 currentRoomBgUrl = url;
