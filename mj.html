@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.149)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.150)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -27,12 +27,12 @@
         button:hover:not(:disabled) { opacity: 0.9; }
         button:active:not(:disabled) { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
         
-        /* Boutons désactivés (Seule utilisation du gris) */
-        button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; }
+        /* Règle stricte : Gris UNIQUEMENT pour l'état désactivé */
+        button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; color: #dcdde1 !important; border:none !important;}
         
-        /* Boutons d'annulation/retour (Non gris) */
+        /* Boutons d'annulation/retour sans gris */
         .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: white !important; box-shadow: none !important; }
-        .btn-cancel:hover { background: rgba(231, 76, 60, 0.2) !important; }
+        .btn-cancel:hover:not(:disabled) { background: rgba(231, 76, 60, 0.2) !important; }
 
         .countdown-btn { background: #e67e22 !important; cursor: wait !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(230, 126, 34, 0.6) !important; }
 
@@ -128,7 +128,7 @@
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
 
-    <div class="version-tag">v1.149</div>
+    <div class="version-tag">v1.150</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -217,7 +217,7 @@
         <div class="room-info" style="background: #c0392b; color: white;">👑 GESTION SUPER ADMIN - ABONNEMENTS</div>
         <div style="display:flex; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
             <button style="background:var(--blue); width:auto;" onclick="document.getElementById('modal-sa-create').style.display='flex'">➕ Créer un nouveau compte MJ</button>
-            <button style="background:var(--blue); width:auto;" onclick="closeSuperAdmin()">Retour Accueil</button>
+            <button class="btn-cancel" style="width:auto;" onclick="closeSuperAdmin()">Retour Accueil</button>
         </div>
         
         <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
@@ -366,7 +366,7 @@
 
     <div id="modal-sa-mj-details" class="modal-overlay">
        <div class="modal-box" style="max-width:600px; padding-top:40px;">
-           <button onclick="document.getElementById('modal-sa-mj-details').style.display='none'" style="position:absolute; top:10px; right:10px; background:var(--danger); width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0; border:none; font-weight:bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">✖</button>
+           <button class="btn-cancel" onclick="document.getElementById('modal-sa-mj-details').style.display='none'" style="position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0; font-weight:bold;">✖</button>
            
            <h2 style="color:var(--blue); margin-top:0; margin-bottom:15px;">FICHE MAÎTRE DU JEU</h2>
            
@@ -375,9 +375,8 @@
                <input type="text" id="sa-det-nom" placeholder="Nom" style="margin-bottom:0;">
            </div>
            <input type="email" id="sa-det-email" placeholder="Email (Identifiant)" style="margin-bottom:5px; border-color:var(--accent);">
-           <span class="input-helper" style="margin-top:0; margin-bottom:15px;">Modifier l'email ou le mot de passe nécessitera l'ancien mot de passe du MJ.</span>
            
-           <div style="display:flex; gap:10px; margin-bottom: 20px;">
+           <div style="display:flex; gap:10px; margin-bottom: 20px; margin-top: 15px;">
                <button style="background:var(--gold); color:black; flex:1; margin:0; padding:10px; font-size:0.9rem;" onclick="openLibraryProxy('proxy')">🎨 Gérer ses Blasons</button>
                <button style="background:var(--purple); color:white; flex:1; margin:0; padding:10px; font-size:0.9rem;" onclick="openBgLibraryProxy('proxy')">📺 Gérer ses Fonds</button>
            </div>
@@ -419,7 +418,6 @@
                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                    </div>
                </div>
-               <span class="input-helper" style="margin-top:5px; margin-bottom:0;">Firebase exige l'ancien mot de passe pour le changer. Si perdu, le MJ doit utiliser "Mot de passe oublié" à la connexion.</span>
            </div>
            
            <button id="btn-sa-save" onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);">💾 ENREGISTRER LES MODIFICATIONS</button>
@@ -476,6 +474,29 @@
         </div>
     </div>
 
+    <div id="modal-library" class="modal-overlay">
+        <div class="modal-box">
+            <h2 style="color:var(--gold); margin-top:0;">MA BIBLIOTHÈQUE DE BLASONS</h2>
+            
+            <div class="switch-container" id="switch-container-lib">
+                <label for="check-hide-default" style="cursor:pointer;">Afficher les blasons par défaut :</label>
+                <label class="switch">
+                    <input type="checkbox" id="check-hide-default" onchange="toggleDefaultCrests(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <label for="lib-upload" id="drop-zone" class="drop-zone">
+                <span id="dz-title" style="font-size:1.2rem; font-weight:bold; display:block; color:var(--gold);">GLISSEZ VOS IMAGES ICI</span>
+                <span id="dz-sub" style="font-size:0.9rem; color:#ccc;">ou Cliquez pour parcourir</span>
+                <span style="font-size:0.8rem; color:#bdc3c7; display:block; margin-top:5px;">Sélection multiple autorisée (JPG, PNG, GIF)</span>
+                <input type="file" id="lib-upload" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)">
+            </label>
+            <div id="lib-grid" class="lib-grid"></div>
+            <button class="btn-cancel" onclick="closeLibrary()" style="margin-top:20px;">FERMER LA BIBLIOTHÈQUE</button>
+        </div>
+    </div>
+
     <div id="modal-edit-player" class="modal-overlay">
         <div class="modal-box" style="max-width: 600px;">
             <h2 style="color:var(--blue); margin-top:0; text-align:center;">ÉDITER LE JOUEUR</h2>
@@ -503,27 +524,6 @@
         </div>
     </div>
 
-    <div id="modal-library" class="modal-overlay">
-        <div class="modal-box">
-            <h2 style="color:var(--gold); margin-top:0;">MA BIBLIOTHÈQUE DE BLASONS</h2>
-            <div class="switch-container">
-                <label for="check-hide-default" style="cursor:pointer;">Afficher les blasons par défaut :</label>
-                <label class="switch">
-                    <input type="checkbox" id="check-hide-default" onchange="toggleDefaultCrests(this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <label for="lib-upload" id="drop-zone" class="drop-zone">
-                <span id="dz-title" style="font-size:1.2rem; font-weight:bold; display:block; color:var(--gold);">GLISSEZ VOS IMAGES ICI</span>
-                <span id="dz-sub" style="font-size:0.9rem; color:#ccc;">ou Cliquez pour parcourir</span>
-                <span style="font-size:0.8rem; color:#bdc3c7; display:block; margin-top:5px;">Sélection multiple autorisée (JPG, PNG, GIF)</span>
-                <input type="file" id="lib-upload" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)">
-            </label>
-            <div id="lib-grid" class="lib-grid"></div>
-            <button class="btn-cancel" onclick="closeLibrary()" style="margin-top:20px;">FERMER LA BIBLIOTHÈQUE</button>
-        </div>
-    </div>
-
     <div id="modal-restore-team" class="modal-overlay">
         <div class="modal-box" style="max-width: 400px;">
             <h2 style="color:var(--blue); margin-top:0;">RESTAURATION</h2>
@@ -546,7 +546,7 @@
     <div id="overlay-guide" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:20000; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
         <div style="background:var(--card-bg); max-width:800px; width:100%; height:90%; border-radius:15px; border:1px solid rgba(255,255,255,0.2); position:relative; overflow:hidden; backdrop-filter: blur(15px);">
             <iframe id="guide-iframe" src="" style="width:100%; height:100%; border:none;"></iframe>
-            <button onclick="toggleGuide()" style="position:absolute; top:10px; left:10px; width:40px; height:40px; border-radius:50%; background:var(--danger); color:white; font-weight:bold; font-size:1.2rem; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 10;">✖</button>
+            <button class="btn-cancel" onclick="toggleGuide()" style="position:absolute; top:10px; left:10px; width:40px; height:40px; border-radius:50%; font-weight:bold; font-size:1.2rem; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 10;">✖</button>
         </div>
     </div>
 
@@ -899,12 +899,14 @@
             if (mode === 'proxy') {
                 isProxyMode = true;
                 activeLibraryUid = targetMjUid;
+                document.getElementById('switch-container-lib').style.display = 'none';
             } else {
                 isProxyMode = false;
                 activeLibraryUid = auth.currentUser.uid;
+                document.getElementById('switch-container-lib').style.display = 'flex';
             }
             document.getElementById('modal-library').style.display = 'flex';
-            refreshLibraryData();
+            loadModalLibrary();
         }
 
         function closeLibrary() {
@@ -915,24 +917,24 @@
             }
         }
 
-        function refreshLibraryData() {
+        function loadModalLibrary() {
             const uid = activeLibraryUid || auth.currentUser.uid;
             db.ref(`users/${uid}/library`).once('value').then(snap => {
-                const lib = snap.val() || {};
+                const libData = snap.val() || {};
                 if (!isProxyMode) {
-                    mjLibrary = lib; // On met à jour la variable globale SEULEMENT si ce n'est pas le proxy
+                    mjLibrary = libData;
                     loadCrestGrid();
                     syncLibraryToRoom();
                 }
-                renderLibraryGrid(lib); // On envoie les données brutes pour affichage isolé
+                renderModalLibraryGrid(libData); 
             });
         }
 
-        function renderLibraryGrid(lib) {
+        function renderModalLibraryGrid(libData) {
             const grid = document.getElementById('lib-grid');
             if(!grid) return;
             grid.innerHTML = "";
-            const entries = Object.entries(lib || {});
+            const entries = Object.entries(libData || {});
             const recent = entries.filter(e => e[0].startsWith('-'));
             const old = entries.filter(e => !e[0].startsWith('-'));
             recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
@@ -942,16 +944,24 @@
                 const key = entry[0]; const url = entry[1];
                 const item = document.createElement('div');
                 item.className = 'lib-item';
-                item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteFromLibrary('${key}', '${url}')">X</div>`;
+                item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteFromModalLibrary('${key}', '${url}')">X</div>`;
                 grid.appendChild(item);
             });
+
+            if (showDefaultCrests) {
+                for(let i=0; i<30; i++) {
+                    const url = createBlason(i);
+                    const item = document.createElement('div');
+                    item.className = 'lib-item';
+                    item.innerHTML = `<img src="${url}">`;
+                    grid.appendChild(item);
+                }
+            }
         }
 
-        function deleteFromLibrary(key, urlToDelete) {
+        function deleteFromModalLibrary(key, urlToDelete) {
             if(confirm("Supprimer cette image ?\nSi elle est utilisée par une équipe, elle sera remplacée par le logo par défaut.")) {
-                const uid = activeLibraryUid;
-
-                // Mise à jour de la salle active UNIQUEMENT si on gère sa propre bibliothèque
+                const uid = activeLibraryUid || auth.currentUser.uid;
                 if(!isProxyMode && globalTeams) {
                     Object.keys(globalTeams).forEach(tKey => {
                         if(globalTeams[tKey].icon === urlToDelete) {
@@ -960,7 +970,7 @@
                         }
                     });
                 }
-                db.ref(`users/${uid}/library/${key}`).remove().then(() => { refreshLibraryData(); });
+                db.ref(`users/${uid}/library/${key}`).remove().then(() => { loadModalLibrary(); });
             }
         }
 
@@ -977,7 +987,7 @@
                 } catch (err) { console.error("Erreur fichier", err); }
             }
             title.innerText = "✅ TERMINÉ !"; sub.innerText = `${count} images ajoutées.`;
-            refreshLibraryData();
+            loadModalLibrary();
             setTimeout(() => { title.innerText = originalTitle; sub.innerText = "ou Cliquez pour parcourir"; }, 2000);
         }
 
@@ -1003,6 +1013,16 @@
             if (showDefaultCrests) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); } }
         }
 
+        function toggleDefaultCrests(checked) {
+            showDefaultCrests = checked;
+            if (!isProxyMode) {
+                db.ref(`users/${auth.currentUser.uid}/showDefaultCrests`).set(checked);
+                mjProfileData.showDefaultCrests = checked;
+                loadCrestGrid(); 
+            }
+            loadModalLibrary(); 
+        }
+
         // --- FONDS D'ÉCRAN (BACKGROUNDS) ---
         function openBgLibraryProxy(mode) {
             if (mode === 'proxy') {
@@ -1016,7 +1036,7 @@
             document.getElementById('btn-modal-bg-default').disabled = true;
             document.getElementById('btn-modal-bg-console').disabled = true;
             document.getElementById('modal-bg-library').style.display = 'flex';
-            refreshBgLibrary();
+            loadBgLibrary('modal');
         }
 
         function closeBgLibrary() {
@@ -1027,21 +1047,18 @@
             }
         }
 
-        function refreshBgLibrary() {
-            // Affichage Modal (Proxy Safe)
-            const uid = activeBgLibraryUid || auth.currentUser.uid;
+        function loadBgLibrary(mode) {
+            const uid = (mode === 'modal') ? activeBgLibraryUid : auth.currentUser.uid;
             db.ref(`users/${uid}/bgLibrary`).once('value').then(snap => {
-                const lib = snap.val() || {};
-                renderBgGalleryModal(lib);
-            });
-
-            // Maintien synchro du Dashboard si on n'est pas en proxy
-            if (!isProxyBgMode && auth.currentUser) {
-                db.ref(`users/${auth.currentUser.uid}/bgLibrary`).once('value').then(snap => {
-                    mjBgLibrary = snap.val() || {};
+                const libData = snap.val() || {};
+                if (mode === 'dashboard' || !isProxyBgMode) {
+                    mjBgLibrary = libData;
                     renderBgGalleryDashboard();
-                });
-            }
+                }
+                if (mode === 'modal') {
+                    renderBgGalleryModal(libData);
+                }
+            });
         }
 
         function renderBgGalleryDashboard() {
@@ -1065,11 +1082,11 @@
             });
         }
 
-        function renderBgGalleryModal(lib) {
+        function renderBgGalleryModal(libData) {
             const grid = document.getElementById('bg-modal-gallery');
             if(!grid) return;
             grid.innerHTML = "";
-            const entries = Object.entries(lib || {}).reverse();
+            const entries = Object.entries(libData || {}).reverse();
             entries.forEach(entry => {
                 const key = entry[0]; const url = entry[1];
                 const item = document.createElement('div');
@@ -1097,7 +1114,7 @@
                 if(mjProfileData.defaultBackground === urlToDelete) { db.ref(`users/${uid}/defaultBackground`).remove(); mjProfileData.defaultBackground = null; }
                 if(mjProfileData.consoleBackground === urlToDelete) { db.ref(`users/${uid}/consoleBackground`).remove(); mjProfileData.consoleBackground = null; applyMjConsoleBg(null); }
                 if(currentRoomBgUrl === urlToDelete && roomRef) { roomRef.child('customBackground').remove(); }
-                db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(() => { refreshBgLibrary(); });
+                db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(() => { loadBgLibrary('dashboard'); });
             }
         }
 
@@ -1111,10 +1128,15 @@
                     document.getElementById('btn-modal-bg-console').disabled = true;
                 }
                 db.ref(`users/${uid}/defaultBackground`).once('value', s => { if(s.val() === urlToDelete) db.ref(`users/${uid}/defaultBackground`).remove(); });
-                db.ref(`users/${uid}/consoleBackground`).once('value', s => { if(s.val() === urlToDelete) { db.ref(`users/${uid}/consoleBackground`).remove(); if(!isProxyBgMode) applyMjConsoleBg(null); } });
+                db.ref(`users/${uid}/consoleBackground`).once('value', s => { 
+                    if(s.val() === urlToDelete) { 
+                        db.ref(`users/${uid}/consoleBackground`).remove(); 
+                        if(!isProxyBgMode) applyMjConsoleBg(null); 
+                    } 
+                });
                 if (!isProxyBgMode && currentRoomBgUrl === urlToDelete && roomRef) roomRef.child('customBackground').remove();
 
-                db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(() => { refreshBgLibrary(); });
+                db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(() => { loadBgLibrary('modal'); });
             }
         }
 
@@ -1133,7 +1155,7 @@
             storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
                 db.ref(`users/${uid}/bgLibrary`).push(url).then(() => {
                     title.innerText = "✅ Fond Ajouté !"; sub.innerText = "";
-                    refreshBgLibrary();
+                    loadBgLibrary(mode);
                     setTimeout(() => { title.innerText = originalTitle; sub.innerText = originalSub; }, 3000);
                 });
             }).catch(err => { alert("Erreur : " + err.message); title.innerText = originalTitle; sub.innerText = originalSub; });
@@ -1150,7 +1172,7 @@
             const uid = (mode === 'modal') ? activeBgLibraryUid : auth.currentUser.uid;
             db.ref(`users/${uid}/bgLibrary`).push(url).then(() => {
                 urlInput.value = "";
-                refreshBgLibrary();
+                loadBgLibrary(mode);
             }).catch(err => alert("Erreur : " + err.message));
         }
 
@@ -1290,23 +1312,6 @@
             });
         }
 
-        function toggleDefaultCrests(checked) { showDefaultCrests = checked; const uid = auth.currentUser.uid; db.ref(`users/${uid}/showDefaultCrests`).set(checked); mjProfileData.showDefaultCrests = checked; loadCrestGrid(); }
-        function syncLibraryToRoom() { if(roomID && roomRef) { roomRef.child('library').update(mjLibrary); } }
-
-        function initLibrarySync() {
-            roomRef.child('library').on('value', snap => {
-                const roomLib = snap.val() || {};
-                const uid = auth.currentUser.uid;
-                if(!uid) return;
-                const myLibValues = Object.values(mjLibrary);
-                let hasNew = false;
-                Object.values(roomLib).forEach(url => {
-                    if(!myLibValues.includes(url)) { db.ref(`users/${uid}/library`).push(url); hasNew = true; }
-                });
-                if(hasNew) refreshLibraryData(); 
-            });
-        }
-
         let previousScreen = "screen-choice";
         function toggleProfile() { const profScreen = document.getElementById('screen-profile'); if(profScreen.style.display === "block") closeProfile(); else showProfile(); }
         function updateLogoPreview(url) { const preview = document.getElementById('prof-logo-preview'); const placeholder = document.getElementById('prof-logo-placeholder'); if(url) { preview.src = url; preview.style.display = 'block'; placeholder.style.display = 'none'; } else { preview.style.display = 'none'; placeholder.style.display = 'block'; } }
@@ -1424,7 +1429,7 @@
             initLibrarySync(); 
             initAdminListener();
             loadCrestGrid();
-            refreshBgLibrary();
+            loadBgLibrary('dashboard');
             openScoreBoard();
         }
 
@@ -1517,12 +1522,12 @@
                 currentRoomBgUrl = url;
                 if(url) {
                     selectedBgUrl = url;
-                    document.querySelectorAll('.bg-item').forEach(i => {
+                    document.querySelectorAll('#bg-gallery .bg-item').forEach(i => {
                         if(i.querySelector('img').src === url) i.classList.add('bg-selected');
                         else i.classList.remove('bg-selected');
                     });
                 } else {
-                    document.querySelectorAll('.bg-item').forEach(i => i.classList.remove('bg-selected'));
+                    document.querySelectorAll('#bg-gallery .bg-item').forEach(i => i.classList.remove('bg-selected'));
                 }
             });
         }
