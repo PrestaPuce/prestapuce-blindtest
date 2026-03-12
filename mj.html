@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.153)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.154)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -19,7 +19,6 @@
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: rgba(0,0,0,0.5); color: white; font-size: 1rem; outline: none; margin-bottom: 5px; }
         .input-helper { display: block; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 15px; font-style: italic; text-align: left; padding-left: 5px; }
         .section-title { margin: 20px 0 10px 0; font-size: 0.9rem; color: var(--accent); text-align: left; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
-        
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s; text-transform: uppercase; margin-bottom: 10px; position: relative; top: 0; box-shadow: 0 4px rgba(0,0,0,0.3); }
         button:hover:not(:disabled) { opacity: 0.9; }
         button:active:not(:disabled) { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
@@ -27,7 +26,6 @@
         .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: white !important; box-shadow: none !important; }
         .btn-cancel:hover:not(:disabled) { background: rgba(231, 76, 60, 0.2) !important; }
         .countdown-btn { background: #e67e22 !important; cursor: wait !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(230, 126, 34, 0.6) !important; }
-
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 1.2rem; }
         .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 200px; overflow-y: auto; justify-content: flex-start; }
@@ -62,13 +60,19 @@
         .drop-zone.drag-active { border-color: #27ae60; background: rgba(39, 174, 96, 0.3); transform: scale(1.02); }
         .profile-drop { width: 150px; height: 150px; margin: 0 auto 5px auto; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border: 3px dashed #bdc3c7; }
         .profile-drop img { width: 100%; height: 100%; object-fit: contain; }
+        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .modal-box { background: var(--card-bg); padding: 30px; border-radius: 15px; width: 100%; max-width: 500px; text-align: center; border: 2px solid var(--gold); position: relative; max-height: 90vh; overflow-y: auto; box-sizing: border-box; backdrop-filter: blur(15px); }
-        .lib-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+        .modal-box { display:flex; flex-direction:column; background: var(--card-bg); padding: 30px; border-radius: 15px; width: 100%; max-width: 500px; text-align: center; border: 2px solid var(--gold); position: relative; max-height: 90vh; box-sizing: border-box; backdrop-filter: blur(15px); }
+        .modal-header { flex-shrink:0; }
+        .modal-body { flex:1; overflow-y:auto; margin:15px 0; padding-right:5px; }
+        .modal-footer { flex-shrink:0; }
+        .modal-close-x { position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; background:var(--danger); color:white; font-weight:bold; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; box-shadow:0 2px 5px rgba(0,0,0,0.5); }
+
+        .lib-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
         .lib-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 0; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
         .lib-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .lib-del { position: absolute; top: 0; right: 0; background: var(--danger); color: white; width: 22px; height: 22px; border-bottom-left-radius: 6px; cursor: pointer; font-size: 0.8rem; line-height: 22px; box-shadow: -1px 1px 3px rgba(0,0,0,0.3); font-weight: bold; z-index: 5; text-align: center; }
-        .switch-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; font-size: 1rem; color: white; font-weight: bold; }
+        .switch-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; font-size: 1rem; color: white; font-weight: bold; }
         .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #c0392b; -webkit-transition: .4s; transition: .4s; border-radius: 34px; }
@@ -88,7 +92,7 @@
         .edit-gallery-item img { width: 100%; height: 100%; object-fit: cover; }
         .edit-gallery-item:hover { border-color: var(--accent); }
         .original-avatar-item { border-color: var(--gold) !important; box-shadow: 0 0 8px rgba(241, 196, 15, 0.5); }
-        .bg-gallery-wrapper { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; max-height: 250px; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .bg-gallery-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .bg-item { position: relative; width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 6px; cursor: pointer; border: 2px solid transparent; overflow: hidden; }
         .bg-item img { width: 100%; height: 100%; object-fit: cover; }
         .bg-selected { border-color: var(--blue) !important; box-shadow: 0 0 10px var(--blue); transform: scale(1.05); z-index: 2; }
@@ -98,22 +102,22 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag">v1.153</div>
+    <div class="version-tag">v1.154</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
     </div>
 
-    <div id="univ-lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:30000; align-items:center; justify-content:center;" onclick="if(event.target.id==='univ-lightbox') closeLightbox()">
-        <div style="position:absolute; left:20px; color:white; font-size:3rem; cursor:pointer; padding:20px; user-select:none; z-index:30001;" onclick="lbPrev(event)">◀</div>
+    <div id="univ-lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:30000; align-items:center; justify-content:space-between; padding:0 20px; box-sizing:border-box;" onclick="if(event.target.id==='univ-lightbox') closeLightbox()">
+        <div style="color:white; font-size:3rem; cursor:pointer; padding:20px; user-select:none; z-index:30001;" onclick="lbPrev(event)">◀</div>
         <div style="position:relative; max-width:80%; max-height:80%; display:flex; justify-content:center; align-items:center; z-index:30001;">
             <img id="lb-img" src="" style="max-width:100%; max-height:80vh; object-fit:contain; border-radius:10px; cursor:pointer; box-shadow:0 10px 30px rgba(0,0,0,0.8);" onclick="closeLightbox(event)">
             <div id="lb-del" style="position:absolute; top:-20px; right:-20px; background:var(--danger); color:white; width:45px; height:45px; border-radius:50%; font-weight:bold; font-size:1.5rem; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.5);" onclick="lbDelete(event)" title="Supprimer définitivement">✖</div>
         </div>
-        <div style="position:absolute; right:20px; color:white; font-size:3rem; cursor:pointer; padding:20px; user-select:none; z-index:30001;" onclick="lbNext(event)">▶</div>
+        <div style="color:white; font-size:3rem; cursor:pointer; padding:20px; user-select:none; z-index:30001;" onclick="lbNext(event)">▶</div>
     </div>
 
-    <div id="screen-login" class="box">
+    <div id="screen-login" class="box" style="display:block;">
         <button class="btn-ghost" onclick="toggleGuide()">AIDE / GUIDE</button>
         <img id="login-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px; border-radius: 10px;">
         <h2>Accès MJ Sécurisé</h2>
@@ -126,37 +130,34 @@
         <p onclick="forgotPassword()" style="color:var(--accent); cursor:pointer; font-size:0.8rem; text-decoration: underline; margin-top: 10px;">Mot de passe oublié ?</p>
     </div>
 
-    <div id="screen-profile" class="box" style="display:none;">
+    <div id="screen-profile" class="box" style="display:none; max-height:90vh; overflow-y:auto;">
         <h2 style="margin-bottom:20px; color:white;">MA CARTE DE VISITE</h2>
         <p class="section-title">👤 IDENTITÉ</p>
         <input type="text" id="prof-nom" placeholder="Nom">
         <input type="text" id="prof-prenom" placeholder="Prénom (Affiché aux joueurs)">
         <input type="email" id="prof-email" placeholder="Email (Identifiant)" style="border-color:var(--blue);">
-        
         <p class="section-title">🖼️ IMAGE DE MARQUE</p>
         <label for="prof-logo-upload" id="profile-drop-zone" class="drop-zone profile-drop">
             <img id="prof-logo-preview" src="" style="display:none;">
-            <div id="prof-logo-placeholder" style="padding:10px; color:#bdc3c7;"><span style="font-size:2rem; display:block; margin-bottom:5px;">🖼️</span><span style="font-size:0.8rem; font-weight:bold; text-transform:uppercase;">VOTRE LOGO<br>OU AVATAR</span></div>
+            <div id="prof-logo-placeholder" style="padding:10px; color:#bdc3c7;"><span style="font-size:2rem; display:block; margin-bottom:5px;">🖼️</span><span style="font-size:0.8rem; font-weight:bold; text-transform:uppercase;">VOTRE LOGO</span></div>
             <input type="file" id="prof-logo-upload" accept="image/*" style="display:none;" onchange="handleProfileFile(this.files)">
         </label>
-        <span class="input-helper">Ce visuel sera affiché sur les téléphones des joueurs et sur l'écran géant.</span>
+        <span class="input-helper">Affiché sur les téléphones et sur l'écran géant.</span>
         <input type="hidden" id="prof-logo-url"> 
         <p class="section-title">🌐 PUBLICITÉ / RÉSEAUX</p>
         <input type="text" id="prof-link" placeholder="Ex: https://monsite.com ou @moninsta">
-        
         <p class="section-title">📁 BIBLIOTHÈQUE / MÉDIAS</p>
         <button onclick="openLibraryProxy('self')" style="background:var(--gold); color:black; margin-top:0;">🎨 Gérer mes Blasons</button>
         <button onclick="openBgLibraryProxy('self')" style="background:var(--purple); color:white; margin-top:10px;">📺 Gérer mes Fonds</button>
-
         <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:20px 0;">
-        <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">SÉCURITÉ (Requis pour modifier l'email ou le mot de passe)</p>
-        <div class="password-wrapper"><input type="password" id="prof-pass-current" placeholder="Votre mot de passe actuel" style="border-color:var(--danger);"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+        <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">SÉCURITÉ</p>
+        <div class="password-wrapper"><input type="password" id="prof-pass-current" placeholder="Mot de passe actuel" style="border-color:var(--danger);"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
         <div class="password-wrapper"><input type="password" id="prof-pass" placeholder="Nouveau mot de passe"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
-        <div class="password-wrapper"><input type="password" id="prof-pass-conf" placeholder="Confirmer le nouveau mot de passe" style="margin-bottom:0;"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+        <div class="password-wrapper"><input type="password" id="prof-pass-conf" placeholder="Confirmer le mot de passe" style="margin-bottom:0;"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
         <span class="input-helper" style="margin-top:5px; margin-bottom:15px;">8 caractères, 1 Maj, 1 Min, 1 Chiffre, 1 Spécial.</span>
-        <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER TOUT</button>
+        <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER</button>
         <button class="btn-cancel" onclick="closeProfile()">Retour</button>
-        <button onclick="profileLogout()" style="background:var(--danger); margin-top:20px; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);">🚪 DÉCONNEXION</button>
+        <button onclick="profileLogout()" style="background:var(--danger); margin-top:20px;">🚪 DÉCONNEXION</button>
     </div>
 
     <div id="screen-choice" class="box" style="display:none;">
@@ -168,9 +169,9 @@
     </div>
 
     <div id="screen-super-admin" class="dashboard" style="display:none; max-width: 900px;">
-        <div class="room-info" style="background: #c0392b; color: white;">👑 GESTION SUPER ADMIN - ABONNEMENTS</div>
+        <div class="room-info" style="background: #c0392b; color: white;">👑 GESTION SUPER ADMIN</div>
         <div style="display:flex; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
-            <button style="background:var(--blue); width:auto;" onclick="document.getElementById('modal-sa-create').style.display='flex'">➕ Créer un nouveau compte MJ</button>
+            <button style="background:var(--blue); width:auto;" onclick="document.getElementById('modal-sa-create').style.display='flex'">➕ Créer un compte MJ</button>
             <button class="btn-cancel" style="width:auto;" onclick="closeSuperAdmin()">Retour Accueil</button>
         </div>
         <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
@@ -239,7 +240,7 @@
                 <input type="text" id="room-bg-url-input" placeholder="Lien d'image (http...)" style="margin:0; flex:1; font-size:0.9rem; padding:10px;">
                 <button style="background:var(--blue); width:auto; margin:0; padding:10px 15px; font-size:0.9rem;" onclick="addBgUrlToLibrary('dashboard')">Ajouter</button>
             </div>
-            <div id="bg-gallery" class="bg-gallery-wrapper"></div>
+            <div id="bg-gallery" class="bg-gallery-wrapper" style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; max-height: 250px; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; border: 1px solid rgba(255,255,255,0.1); margin-bottom:10px;"></div>
             <div style="display:flex; gap:10px; margin-bottom: 10px;">
                 <button id="btn-apply-bg" style="background:var(--blue); flex:2; margin:0;" onclick="saveCustomBg()" disabled>APPLIQUER LA SÉLECTION</button>
                 <button class="btn-cancel" style="flex:1; margin:0;" onclick="resetCustomBg()">Fond par défaut</button>
@@ -251,7 +252,7 @@
         </div>
 
         <div style="margin-top:20px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);">
-            <h3 style="color:#bdc3c7; margin-top:0;">Administration Version (Cache)</h3>
+            <h3 style="color:#bdc3c7; margin-top:0;">Administration Version</h3>
             <div style="display:flex; gap:10px; align-items:center;">
                 <input type="text" id="sys-version-input" placeholder="1.xxx" style="margin:0; width:100px; display:none;">
                 <button id="btn-update-version" style="background:var(--blue); width:auto; margin:0; display:none;" onclick="updateAppVersion()">Mettre à jour</button>
@@ -267,9 +268,9 @@
     </div>
 
     <div id="modal-sa-vault" class="modal-overlay">
-       <div class="modal-box">
+       <div class="modal-box" style="display:block;">
            <h2 style="color:var(--danger); margin-top:0;">🔒 COFFRE-FORT</h2>
-           <p style="color:#bdc3c7; font-size:0.9rem; margin-bottom:20px;">Saisissez votre mot de passe Super Admin pour accéder à la fiche de ce MJ.</p>
+           <p style="color:#bdc3c7; font-size:0.9rem; margin-bottom:20px;">Saisissez votre mot de passe Super Admin pour accéder à la fiche.</p>
            <div class="password-wrapper">
                <input type="password" id="sa-vault-pass" placeholder="Mot de passe Super Admin" style="margin-bottom:0;">
                <div class="password-icon" onclick="togglePasswordVisibility('sa-vault-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
@@ -282,8 +283,8 @@
     </div>
 
     <div id="modal-sa-mj-details" class="modal-overlay">
-       <div class="modal-box" style="max-width:600px; padding-top:40px;">
-           <button class="btn-cancel" onclick="document.getElementById('modal-sa-mj-details').style.display='none'" style="position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0; font-weight:bold;">✖</button>
+       <div class="modal-box" style="display:block; max-width:600px; padding-top:40px;">
+           <button class="modal-close-x" onclick="document.getElementById('modal-sa-mj-details').style.display='none'">✖</button>
            <h2 style="color:var(--blue); margin-top:0; margin-bottom:15px;">FICHE MAÎTRE DU JEU</h2>
            <div style="display:flex; gap:10px; margin-bottom:5px;">
                <input type="text" id="sa-det-prenom" placeholder="Prénom" style="margin-bottom:0;">
@@ -312,32 +313,20 @@
 
            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
                <h4 style="margin-top:0; color:#bdc3c7; text-align:left;">Modifier les identifiants</h4>
-               <div class="password-wrapper">
-                   <input type="password" id="sa-det-pass-current" placeholder="Mot de passe ACTUEL du MJ (Obligatoire)" style="border-color:var(--danger);">
-                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
-               </div>
-               <div class="password-wrapper">
-                   <input type="password" id="sa-det-pass-new" placeholder="Nouveau mot de passe">
-                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-new', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
-               </div>
-               <div class="password-wrapper" style="margin-bottom:0;">
-                   <input type="password" id="sa-det-pass-conf" placeholder="Confirmer le nouveau mot de passe" style="margin-bottom:0;">
-                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
-               </div>
+               <div class="password-wrapper"><input type="password" id="sa-det-pass-current" placeholder="Mot de passe ACTUEL du MJ" style="border-color:var(--danger);"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+               <div class="password-wrapper"><input type="password" id="sa-det-pass-new" placeholder="Nouveau mot de passe"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-new', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+               <div class="password-wrapper" style="margin-bottom:0;"><input type="password" id="sa-det-pass-conf" placeholder="Confirmer le nouveau mot de passe" style="margin-bottom:0;"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
            </div>
-           <button id="btn-sa-save" onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem;">💾 ENREGISTRER LES MODIFICATIONS</button>
+           <button id="btn-sa-save" onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem;">💾 ENREGISTRER</button>
            <button class="btn-cancel" onclick="deleteMjAccount()" style="width:100%; margin-top:20px; margin-bottom:0;">🗑️ SUPPRIMER CE COMPTE MJ</button>
        </div>
     </div>
 
     <div id="modal-sa-create" class="modal-overlay">
-       <div class="modal-box">
+       <div class="modal-box" style="display:block;">
            <h2 style="color:var(--mj-color); margin-top:0;">➕ NOUVEAU COMPTE MJ</h2>
            <input type="email" id="sa-create-email" placeholder="Email du MJ">
-           <div class="password-wrapper">
-               <input type="password" id="sa-create-pass" placeholder="Mot de passe">
-               <div class="password-icon" onclick="togglePasswordVisibility('sa-create-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
-           </div>
+           <div class="password-wrapper"><input type="password" id="sa-create-pass" placeholder="Mot de passe"><div class="password-icon" onclick="togglePasswordVisibility('sa-create-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
            <span class="input-helper" style="margin-top:0; margin-bottom:10px;">8 car. min, 1 Maj, 1 Min, 1 Chiffre, 1 Spécial.</span>
            <input type="text" id="sa-create-prenom" placeholder="Prénom (Affiché aux joueurs)">
            <div style="display:flex; gap:10px; margin-top:15px;">
@@ -348,45 +337,57 @@
     </div>
 
     <div id="modal-bg-library" class="modal-overlay">
-        <div class="modal-box" style="max-width: 700px;">
-            <h2 style="color:#85c1e9; margin-top:0;">📺 GESTION DES FONDS D'ÉCRAN</h2>
-            <label for="bg-modal-upload" id="bg-modal-drop-zone" class="drop-zone" style="padding:15px;">
-                <span id="bg-modal-dz-title" style="font-size:1rem; font-weight:bold; display:block; color:#85c1e9;">GLISSEZ VOTRE FOND ICI</span>
-                <span id="bg-modal-dz-sub" style="font-size:0.8rem; color:#ecf0f1;">ou Cliquez pour parcourir</span>
-                <input type="file" id="bg-modal-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files, 'modal')">
-            </label>
-            <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
-                <input type="text" id="bg-modal-url-input" placeholder="Lien d'image (https://...)" style="margin:0; flex:1;">
-                <button style="background:var(--blue); width:auto; margin:0;" onclick="addBgUrlToLibrary('modal')">Ajouter</button>
+        <div class="modal-box" style="max-width: 700px; padding:20px;">
+            <button class="modal-close-x" onclick="closeBgLibrary()">✖</button>
+            <div class="modal-header">
+                <h2 style="color:#85c1e9; margin-top:0;">📺 GESTION DES FONDS D'ÉCRAN</h2>
+                <label for="bg-modal-upload" id="bg-modal-drop-zone" class="drop-zone" style="padding:10px;">
+                    <span id="bg-modal-dz-title" style="font-size:1rem; font-weight:bold; display:block; color:#85c1e9;">GLISSEZ VOTRE FOND ICI</span><span id="bg-modal-dz-sub" style="font-size:0.8rem; color:#ecf0f1;">ou Cliquez</span>
+                    <input type="file" id="bg-modal-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files, 'modal')">
+                </label>
+                <div style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
+                    <input type="text" id="bg-modal-url-input" placeholder="Lien d'image (https://...)" style="margin:0; flex:1;">
+                    <button style="background:var(--blue); width:auto; margin:0;" onclick="addBgUrlToLibrary('modal')">Ajouter</button>
+                </div>
             </div>
-            <div id="bg-modal-gallery" class="bg-gallery-wrapper"></div>
-            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 15px; background:rgba(0,0,0,0.3); padding:15px; border-radius:8px;">
-                <button id="btn-modal-bg-default" style="background:var(--success); margin:0;" onclick="setModalBgAction('default')" disabled>Définir par défaut (Salles)</button>
-                <button id="btn-modal-bg-console" style="background:var(--blue); margin:0;" onclick="setModalBgAction('console')" disabled>Définir pour la console MJ</button>
+            
+            <div class="modal-body" id="bg-modal-gallery" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
+            
+            <div class="modal-footer">
+                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 10px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">
+                    <button id="btn-modal-bg-default" style="background:var(--success); margin:0;" onclick="setModalBgAction('default')" disabled>Définir par défaut (Salles)</button>
+                    <button id="btn-modal-bg-console" style="background:var(--blue); margin:0;" onclick="setModalBgAction('console')" disabled>Définir pour la console MJ</button>
+                </div>
+                <button class="btn-cancel" onclick="closeBgLibrary()" style="margin-bottom:0;">FERMER LA GALERIE</button>
             </div>
-            <button class="btn-cancel" onclick="closeBgLibrary()">FERMER LA GALERIE</button>
         </div>
     </div>
 
     <div id="modal-library" class="modal-overlay">
-        <div class="modal-box">
-            <h2 style="color:var(--gold); margin-top:0;">MA BIBLIOTHÈQUE DE BLASONS</h2>
-            <div class="switch-container" id="switch-container-lib">
-                <label for="check-hide-default" style="cursor:pointer;">Afficher les blasons par défaut :</label>
-                <label class="switch"><input type="checkbox" id="check-hide-default" onchange="toggleDefaultCrests(this.checked)"><span class="slider"></span></label>
+        <div class="modal-box" style="padding:20px;">
+            <button class="modal-close-x" onclick="closeLibrary()">✖</button>
+            <div class="modal-header">
+                <h2 style="color:var(--gold); margin-top:0;">MA BIBLIOTHÈQUE DE BLASONS</h2>
+                <div class="switch-container" id="switch-container-lib">
+                    <label for="check-hide-default" style="cursor:pointer;">Afficher les blasons par défaut :</label>
+                    <label class="switch"><input type="checkbox" id="check-hide-default" onchange="toggleDefaultCrests(this.checked)"><span class="slider"></span></label>
+                </div>
+                <label for="lib-upload" id="drop-zone" class="drop-zone" style="padding:10px; margin-bottom:0;">
+                    <span id="dz-title" style="font-size:1.2rem; font-weight:bold; display:block; color:var(--gold);">GLISSEZ VOS IMAGES ICI</span><span id="dz-sub" style="font-size:0.9rem; color:#ccc;">ou Cliquez</span>
+                    <input type="file" id="lib-upload" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)">
+                </label>
             </div>
-            <label for="lib-upload" id="drop-zone" class="drop-zone">
-                <span id="dz-title" style="font-size:1.2rem; font-weight:bold; display:block; color:var(--gold);">GLISSEZ VOS IMAGES ICI</span>
-                <span id="dz-sub" style="font-size:0.9rem; color:#ccc;">ou Cliquez pour parcourir</span>
-                <input type="file" id="lib-upload" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)">
-            </label>
-            <div id="lib-grid" class="lib-grid"></div>
-            <button class="btn-cancel" onclick="closeLibrary()" style="margin-top:20px;">FERMER LA BIBLIOTHÈQUE</button>
+            
+            <div class="modal-body" id="lib-grid" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px; align-content:start;"></div>
+            
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeLibrary()" style="margin-top:10px; margin-bottom:0;">FERMER LA BIBLIOTHÈQUE</button>
+            </div>
         </div>
     </div>
 
     <div id="modal-edit-player" class="modal-overlay">
-        <div class="modal-box" style="max-width: 600px;">
+        <div class="modal-box" style="display:block; max-width: 600px;">
             <h2 style="color:var(--blue); margin-top:0; text-align:center;">ÉDITER LE JOUEUR</h2>
             <div style="display:flex; flex-wrap:wrap; gap: 20px; align-items: stretch; margin-bottom: 10px;">
                 <div style="flex: 1; min-width:200px; display:flex; flex-direction:column; align-items:center;">
@@ -407,7 +408,7 @@
     </div>
 
     <div id="modal-restore-team" class="modal-overlay">
-        <div class="modal-box" style="max-width: 400px;">
+        <div class="modal-box" style="display:block; max-width: 400px;">
             <h2 style="color:var(--blue); margin-top:0;">RESTAURATION</h2>
             <p id="restore-team-msg" style="margin-bottom:20px;">Que souhaitez-vous faire ?</p>
             <div style="display:flex; flex-direction:column; gap:10px;">
@@ -447,8 +448,7 @@
         let editingPlayerUid = null, editingPlayerOriginalPseudo = "", editingPlayerOriginalAvatar = "", editingPlayerCurrentAvatar = "";
         let isSuperAdmin = false, allUsersData = {}, targetMjUid = null;
 
-        // LIGHTBOX VARIABLES
-        let curLbArr = [], curLbIdx = 0;
+        let curLbType = '', curLbIdx = 0, lbCrests = [], lbBgsDash = [], lbBgsModal = [];
 
         function isValidPassword(pwd) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd); }
 
@@ -537,12 +537,12 @@
         function toggleBlockMj() { if(targetMjUid) db.ref('users/' + targetMjUid).update({ isBlocked: !allUsersData[targetMjUid].isBlocked }).then(() => setTimeout(updateMjDetailsView, 200)); }
 
         // --- GESTION MEDIAS (PROXY SAFE + LIGHTBOX) ---
-        let lbCrests = [], lbBgsDash = [], lbBgsModal = [];
-        function openLightbox(idx, arr) { curLbArr = arr; curLbIdx = idx; document.getElementById('univ-lightbox').style.display = 'flex'; updateLightbox(); }
+        function getCurArr() { if(curLbType === 'crest') return lbCrests; if(curLbType === 'bgDash') return lbBgsDash; if(curLbType === 'bgModal') return lbBgsModal; return []; }
+        function openLightbox(idx, type) { curLbType = type; curLbIdx = idx; document.getElementById('univ-lightbox').style.display = 'flex'; updateLightbox(); }
         function updateLightbox() {
-            if(curLbArr.length === 0) return closeLightbox();
-            if(curLbIdx >= curLbArr.length) curLbIdx = 0; if(curLbIdx < 0) curLbIdx = curLbArr.length - 1;
-            const item = curLbArr[curLbIdx];
+            let arr = getCurArr(); if(arr.length === 0) return closeLightbox();
+            if(curLbIdx >= arr.length) curLbIdx = 0; if(curLbIdx < 0) curLbIdx = arr.length - 1;
+            const item = arr[curLbIdx];
             document.getElementById('lb-img').src = item.url;
             document.getElementById('lb-del').style.display = item.isNative ? 'none' : 'flex';
         }
@@ -550,16 +550,17 @@
         function lbPrev(e) { e.stopPropagation(); curLbIdx--; updateLightbox(); }
         function lbNext(e) { e.stopPropagation(); curLbIdx++; updateLightbox(); }
         
+        function physicalDelete(url) { if(url && url.includes('firebasestorage')) { try{ storage.refFromURL(url).delete().catch(e => console.log("Cloud err:", e.message)); }catch(err){} } }
         function lbDelete(e) {
-            e.stopPropagation(); const item = curLbArr[curLbIdx]; if(item.isNative) return;
+            e.stopPropagation(); let arr = getCurArr(); const item = arr[curLbIdx]; if(item.isNative) return;
             if(confirm("Voulez-vous vraiment supprimer définitivement cette image ?")) {
                 if(item.type === 'crest') executeCrestDelete(item.key, item.url);
                 else if(item.type === 'bg' && item.mode === 'dashboard') executeBgDeleteDash(item.key, item.url);
                 else if(item.type === 'bg' && item.mode === 'modal') executeBgDeleteModal(item.key, item.url);
-                physicalDelete(item.url); curLbArr.splice(curLbIdx, 1); updateLightbox();
+                physicalDelete(item.url);
+                setTimeout(updateLightbox, 500); 
             }
         }
-        function physicalDelete(url) { if(url && url.includes('firebasestorage')) { storage.refFromURL(url).delete().catch(e => console.log("Cloud err:", e.message)); } }
 
         function setupDragDrop(id, handler) { const el = document.getElementById(id); if(el) { ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(n => { el.addEventListener(n, e=>{e.preventDefault();e.stopPropagation();}, false); document.body.addEventListener(n, e=>{e.preventDefault();e.stopPropagation();}, false); }); ['dragenter', 'dragover'].forEach(n => el.addEventListener(n, ()=>el.classList.add('drag-active'), false)); ['dragleave', 'drop'].forEach(n => el.addEventListener(n, ()=>el.classList.remove('drag-active'), false)); el.addEventListener('drop', e => handler(e.dataTransfer.files), false); } }
         function openLibraryProxy(mode) { isProxyMode = (mode === 'proxy'); activeLibraryUid = isProxyMode ? targetMjUid : auth.currentUser.uid; document.getElementById('switch-container-lib').style.display = isProxyMode ? 'none' : 'flex'; document.getElementById('modal-library').style.display = 'flex'; loadModalLibrary(); }
@@ -579,7 +580,7 @@
             const entries = Object.entries(libData || {}); const recent = entries.filter(e => e[0].startsWith('-')); const old = entries.filter(e => !e[0].startsWith('-')); recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
             [...recent, ...old].forEach(e => lbCrests.push({ key: e[0], url: e[1], isNative: false, type: 'crest' }));
             if (showDefaultCrests) { for(let i=0; i<30; i++) lbCrests.push({ key: null, url: createBlason(i), isNative: true, type: 'crest' }); }
-            lbCrests.forEach((item, i) => { const div = document.createElement('div'); div.className = 'lib-item'; div.onclick = () => openLightbox(i, lbCrests); div.innerHTML = `<img src="${item.url}">${!item.isNative ? `<div class="lib-del" onclick="deleteFromModalLibrary(event, '${item.key}', '${item.url}')">X</div>` : ''}`; grid.appendChild(div); });
+            lbCrests.forEach((item, i) => { const div = document.createElement('div'); div.className = 'lib-item'; div.onclick = () => openLightbox(i, 'crest'); div.innerHTML = `<img src="${item.url}">`; grid.appendChild(div); });
         }
 
         function executeCrestDelete(key, urlToDelete) {
@@ -587,12 +588,11 @@
             if(!isProxyMode && globalTeams) { Object.keys(globalTeams).forEach(tKey => { if(globalTeams[tKey].icon === urlToDelete) roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" }); }); }
             db.ref(`users/${uid}/library/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => loadModalLibrary());
         }
-        function deleteFromModalLibrary(e, key, url) { e.stopPropagation(); if(confirm("Voulez-vous vraiment supprimer définitivement cette image ?")) { executeCrestDelete(key, url); physicalDelete(url); } }
 
         async function handleFiles(files) {
             if(!files || files.length === 0) return; const title = document.getElementById('dz-title'); const sub = document.getElementById('dz-sub'); const orig = title.innerText; const uid = activeLibraryUid || auth.currentUser.uid; let count = 0; title.innerText = `⏳ Envoi : 0 / ${files.length}...`;
             for (let i = 0; i < files.length; i++) { try { await new Promise((resolve, reject) => { storage.ref(`mj_library/${uid}/${Date.now()}_${files[i].name}`).put(files[i]).then(s => s.ref.getDownloadURL()).then(u => db.ref(`users/${uid}/library`).push(u).then(()=>resolve(u))).catch(reject); }); count++; title.innerText = `⏳ Envoi : ${count} / ${files.length}...`; } catch(e){} }
-            title.innerText = "✅ TERMINÉ !"; loadModalLibrary(); setTimeout(() => { title.innerText = orig; sub.innerText = "ou Cliquez pour parcourir"; }, 2000);
+            title.innerText = "✅ TERMINÉ !"; loadModalLibrary(); setTimeout(() => { title.innerText = orig; sub.innerText = "ou Cliquez"; }, 2000);
         }
 
         function loadCrestGrid() {
@@ -613,12 +613,12 @@
         function renderBgGalleryDashboard() {
             const grid = document.getElementById('bg-gallery'); if(!grid) return; grid.innerHTML = ""; lbBgsDash = [];
             Object.entries(mjBgLibrary || {}).reverse().forEach(e => lbBgsDash.push({key: e[0], url: e[1], isNative: false, type: 'bg', mode: 'dashboard'}));
-            lbBgsDash.forEach((item, i) => { const div = document.createElement('div'); div.className = 'bg-item'; if(selectedBgUrl === item.url) div.classList.add('bg-selected'); div.onclick = () => { document.querySelectorAll('#bg-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); selectedBgUrl = item.url; document.getElementById('btn-apply-bg').disabled = false; openLightbox(i, lbBgsDash); }; div.innerHTML = `<img src="${item.url}"><div class="lib-del" onclick="deleteBgFromLibraryDashboard(event, '${item.key}', '${item.url}')">X</div>`; grid.appendChild(div); });
+            lbBgsDash.forEach((item, i) => { const div = document.createElement('div'); div.className = 'bg-item'; if(selectedBgUrl === item.url) div.classList.add('bg-selected'); div.onclick = () => { document.querySelectorAll('#bg-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); selectedBgUrl = item.url; document.getElementById('btn-apply-bg').disabled = false; openLightbox(i, 'bgDash'); }; div.innerHTML = `<img src="${item.url}">`; grid.appendChild(div); });
         }
         function renderBgGalleryModal(libData) {
             const grid = document.getElementById('bg-modal-gallery'); if(!grid) return; grid.innerHTML = ""; lbBgsModal = [];
             Object.entries(libData || {}).reverse().forEach(e => lbBgsModal.push({key: e[0], url: e[1], isNative: false, type: 'bg', mode: 'modal'}));
-            lbBgsModal.forEach((item, i) => { const div = document.createElement('div'); div.className = 'bg-item'; if(modalSelectedBgUrl === item.url) div.classList.add('bg-selected'); div.onclick = () => { document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); modalSelectedBgUrl = item.url; document.getElementById('btn-modal-bg-default').disabled = false; document.getElementById('btn-modal-bg-console').disabled = false; openLightbox(i, lbBgsModal); }; div.innerHTML = `<img src="${item.url}"><div class="lib-del" onclick="deleteBgFromLibraryModal(event, '${item.key}', '${item.url}')">X</div>`; grid.appendChild(div); });
+            lbBgsModal.forEach((item, i) => { const div = document.createElement('div'); div.className = 'bg-item'; if(modalSelectedBgUrl === item.url) div.classList.add('bg-selected'); div.onclick = () => { document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); modalSelectedBgUrl = item.url; document.getElementById('btn-modal-bg-default').disabled = false; document.getElementById('btn-modal-bg-console').disabled = false; openLightbox(i, 'bgModal'); }; div.innerHTML = `<img src="${item.url}">`; grid.appendChild(div); });
         }
         function executeBgDeleteDash(key, urlToDelete) {
             const uid = auth.currentUser.uid;
@@ -628,8 +628,6 @@
             if(currentRoomBgUrl === urlToDelete && roomRef) roomRef.child('customBackground').remove();
             db.ref(`users/${uid}/bgLibrary/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => loadBgLibrary('dashboard'));
         }
-        function deleteBgFromLibraryDashboard(e, key, url) { e.stopPropagation(); if(confirm("Voulez-vous vraiment supprimer définitivement cette image ?")) { executeBgDeleteDash(key, url); physicalDelete(url); } }
-        
         function executeBgDeleteModal(key, urlToDelete) {
             const uid = activeBgLibraryUid;
             if(modalSelectedBgUrl === urlToDelete) { modalSelectedBgUrl = ""; document.getElementById('btn-modal-bg-default').disabled = true; document.getElementById('btn-modal-bg-console').disabled = true; }
@@ -638,9 +636,8 @@
             if (!isProxyBgMode && currentRoomBgUrl === urlToDelete && roomRef) roomRef.child('customBackground').remove();
             db.ref(`users/${uid}/bgLibrary/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => loadBgLibrary('modal'));
         }
-        function deleteBgFromLibraryModal(e, key, url) { e.stopPropagation(); if(confirm("Voulez-vous vraiment supprimer définitivement cette image ?")) { executeBgDeleteModal(key, url); physicalDelete(url); } }
 
-        function handleBgUpload(files, mode) { if(!files||files.length===0)return; const file=files[0], prefix=mode==='modal'?'bg-modal':'bg', title=document.getElementById(prefix+'-dz-title'), sub=document.getElementById(prefix+'-dz-sub'), orig=title.innerText, uid=mode==='modal'?activeBgLibraryUid:auth.currentUser.uid; title.innerText="⏳ Envoi..."; storage.ref(`mj_custom_bgs/${uid}/${Date.now()}_${file.name}`).put(file).then(s=>s.ref.getDownloadURL()).then(u=>{ db.ref(`users/${uid}/bgLibrary`).push(u).then(()=>{ title.innerText="✅ Ajouté !"; loadBgLibrary(mode); setTimeout(()=>{title.innerText=orig;sub.innerText=sub.innerText;},3000); }); }).catch(e=>alert("Erreur: "+e.message)); }
+        function handleBgUpload(files, mode) { if(!files||files.length===0)return; const file=files[0], prefix=mode==='modal'?'bg-modal':'bg', title=document.getElementById(prefix+'-dz-title'), sub=document.getElementById(prefix+'-dz-sub'), orig=title.innerText, uid=mode==='modal'?activeBgLibraryUid:auth.currentUser.uid; title.innerText="⏳ Envoi..."; storage.ref(`mj_custom_bgs/${uid}/${Date.now()}_${file.name}`).put(file).then(s=>s.ref.getDownloadURL()).then(u=>{ db.ref(`users/${uid}/bgLibrary`).push(u).then(()=>{ title.innerText="✅ Ajouté !"; loadBgLibrary(mode); setTimeout(()=>{title.innerText=orig;sub.innerText="ou Cliquez";},3000); }); }).catch(e=>alert("Erreur: "+e.message)); }
         function addBgUrlToLibrary(mode) { const p=mode==='modal'?'bg-modal':'room-bg', i=document.getElementById(p+'-url-input'), u=i.value.trim(); if(!u||(!u.startsWith('http')&&!u.startsWith('data:image/')))return alert("URL invalide."); db.ref(`users/${mode==='modal'?activeBgLibraryUid:auth.currentUser.uid}/bgLibrary`).push(u).then(()=>{ i.value=""; loadBgLibrary(mode); }).catch(e=>alert("Erreur: "+e.message)); }
         function setModalBgAction(type) { if(!modalSelectedBgUrl)return; const uid=activeBgLibraryUid; if(type==='default'){ db.ref(`users/${uid}/defaultBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond par défaut enregistré !");if(!isProxyBgMode)mjProfileData.defaultBackground=modalSelectedBgUrl;}); } else { db.ref(`users/${uid}/consoleBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond console enregistré !");if(!isProxyBgMode){mjProfileData.consoleBackground=modalSelectedBgUrl;applyMjConsoleBg(modalSelectedBgUrl);}}); } }
         function saveCustomBg() { if(!selectedBgUrl)return; const d=document.getElementById('check-default-bg').checked, c=document.getElementById('check-console-bg').checked, uid=auth.currentUser.uid; if(d){db.ref(`users/${uid}/defaultBackground`).set(selectedBgUrl);mjProfileData.defaultBackground=selectedBgUrl;} if(c){db.ref(`users/${uid}/consoleBackground`).set(selectedBgUrl);mjProfileData.consoleBackground=selectedBgUrl;applyMjConsoleBg(selectedBgUrl);}else{db.ref(`users/${uid}/consoleBackground`).remove();mjProfileData.consoleBackground=null;applyMjConsoleBg(null);} if(roomRef)roomRef.child('customBackground').set(selectedBgUrl).then(()=>alert("Appliqué !")); }
@@ -716,7 +713,7 @@
         }
 
         function updateLogos(url) { const f = url || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png"; document.getElementById('global-mj-logo').src=f; document.getElementById('login-mj-logo').src=f; document.getElementById('page-favicon').href=f; if(roomRef&&roomID){ roomRef.child('mjLogo').set(f); if(mjProfileData.customLink)roomRef.child('mjLink').set(mjProfileData.customLink); } }
-        function createBlason(i) { const c=['#e74c3c','#3498db','#f1c40f','#2c3e50','#27ae60','#ecf0f1'], c1=c[i%c.length], c2=c[(i+1)%c.length], m=i%10; let p=(m===0)?`<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`:(m===1)?`<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`:`<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`; return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${p}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`; }
+        function createBlason(i) { const c=['#e74c3c','#3498db','#f1c40f','#2c3e50','#27ae60','#ecf0f1'], c1=c[i%c.length], c2=c[(i+1)%c.length], m=i%10; let p=(m===0)?`<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`:(m===1)?`<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`:`<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`; return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="800" height="800"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${p}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`; }
 
         function askMjNameAndCreate() { const n = prompt("Nom d'animateur ?", mjProfileData.prenom||"MJ"); if(n!==null) { roomID = Math.floor(1000 + Math.random() * 9000).toString(); db.ref('users/'+auth.currentUser.uid+'/lastRoom').set(roomID).then(()=>launchDashboard(roomID, n)); } }
         function resumeRoom() { launchDashboard(lastSavedRoom); }
