@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.150)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.152)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -11,13 +11,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --mj-color: #2ecc71; --bg-color: transparent; --card-bg: rgba(44, 62, 80, 0.75); --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; --success: #27ae60; --purple: #8e44ad; }
-        
         body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        
         #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: linear-gradient(45deg, #0f0c29, #302b63, #24243e); background-size: 300% 300%; animation: gradientBG 15s ease infinite; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         #bg-protection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(0, 0, 0, 0.5); pointer-events: none; }
-
         .box { max-width: 400px; margin: 80px auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: rgba(0,0,0,0.5); color: white; font-size: 1rem; outline: none; margin-bottom: 5px; }
         .input-helper { display: block; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 15px; font-style: italic; text-align: left; padding-left: 5px; }
@@ -26,73 +23,51 @@
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s; text-transform: uppercase; margin-bottom: 10px; position: relative; top: 0; box-shadow: 0 4px rgba(0,0,0,0.3); }
         button:hover:not(:disabled) { opacity: 0.9; }
         button:active:not(:disabled) { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
-        
-        /* Règle stricte : Gris UNIQUEMENT pour l'état désactivé */
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; color: #dcdde1 !important; border:none !important;}
-        
-        /* Boutons d'annulation/retour sans gris */
         .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: white !important; box-shadow: none !important; }
         .btn-cancel:hover:not(:disabled) { background: rgba(231, 76, 60, 0.2) !important; }
-
         .countdown-btn { background: #e67e22 !important; cursor: wait !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(230, 126, 34, 0.6) !important; }
 
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
         .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 1.2rem; }
-        
         .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 200px; overflow-y: auto; justify-content: flex-start; }
         .crest-wrapper { width: 50px; height: 50px; background: #ecf0f1; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; flex-shrink: 0; }
         .crest-selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: scale(1.1); z-index: 2; }
         .crest-opt { width: 100%; height: 100%; object-fit: contain; }
-        
         .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 20px 0; text-align: center; display: none; backdrop-filter: blur(10px); }
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        
         .team-item { display: flex; align-items: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin-bottom: 8px; justify-content: space-between; flex-wrap: wrap; gap: 10px; border: 1px solid rgba(255,255,255,0.05); }
         .team-item.banned { border: 2px solid var(--danger); background: rgba(231, 76, 60, 0.2); opacity: 0.8; }
         .team-item.inactive { border: 1px dashed rgba(255,255,255,0.3); background: rgba(0,0,0,0.2); opacity: 0.8; }
-        
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin-bottom: 5px; transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.05); }
         .score-row.airlock-row { background: rgba(243, 156, 18, 0.2); border: 2px solid var(--gold); }
         .score-row.buzzer-active-row { background: rgba(46, 204, 113, 0.3) !important; border: 2px solid var(--success) !important; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); transform: scale(1.02); z-index: 10; position: relative; }
-        
         .crest-mini-bg { background: white; padding: 0; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; width: 30px; height: 30px; align-items: center; justify-content: center; overflow: hidden; }
         .crest-mini { width: 100%; height: 100%; object-fit: contain; }
-        
         .btn-icon { cursor: pointer; font-weight: bold; font-size: 1.2rem; margin-left: 8px; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 4px; }
         .btn-icon:hover { background: rgba(255,255,255,0.1); }
-        .btn-edit { color: var(--blue); }
-        .btn-del { color: var(--danger); }
-        .btn-restore { color: var(--success); }
-        .btn-pause { color: #bdc3c7; }
-        
+        .btn-edit { color: var(--blue); } .btn-del { color: var(--danger); } .btn-restore { color: var(--success); } .btn-pause { color: #bdc3c7; }
         .team-controls { display: flex; align-items: center; gap: 2px; }
         .team-score-ctrl { display: flex; align-items: center; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 2px; margin-right: 5px; }
         .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue); box-shadow: none; border-radius: 4px; cursor: pointer; color: white; border: none; }
         .team-bonus-val { font-size: 0.9rem; font-weight: bold; margin: 0 8px; color: var(--accent); min-width: 20px; text-align: center; }
-
         .player-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
         .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; cursor:pointer; }
-        
         input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
-
         .btn-folder { background: var(--gold); color: black; font-size: 1.4rem; width: 45px; height: 45px; padding: 0; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; margin-left: 5px; box-shadow: 0 4px rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer !important; flex-shrink: 0; }
         .btn-folder:hover { transform: scale(1.05); }
-
         .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed rgba(255,255,255,0.3); padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.3); transition: 0.3s; position: relative; margin-bottom: 10px; cursor: pointer; }
         .drop-zone.drag-active { border-color: #27ae60; background: rgba(39, 174, 96, 0.3); transform: scale(1.02); }
         .profile-drop { width: 150px; height: 150px; margin: 0 auto 5px auto; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border: 3px dashed #bdc3c7; }
         .profile-drop img { width: 100%; height: 100%; object-fit: contain; }
-        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .modal-box { background: var(--card-bg); padding: 30px; border-radius: 15px; width: 100%; max-width: 500px; text-align: center; border: 2px solid var(--gold); position: relative; max-height: 90vh; overflow-y: auto; box-sizing: border-box; backdrop-filter: blur(15px); }
-        
         .lib-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
         .lib-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 0; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
         .lib-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .lib-del { position: absolute; top: 0; right: 0; background: var(--danger); color: white; width: 22px; height: 22px; border-bottom-left-radius: 6px; cursor: pointer; font-size: 0.8rem; line-height: 22px; box-shadow: -1px 1px 3px rgba(0,0,0,0.3); font-weight: bold; z-index: 5; text-align: center; }
-
         .switch-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; font-size: 1rem; color: white; font-weight: bold; }
         .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -100,10 +75,8 @@
         .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; -webkit-transition: .4s; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: #27ae60; }
         input:checked + .slider:before { -webkit-transform: translateX(26px); -ms-transform: translateX(26px); transform: translateX(26px); }
-
         .show-pass-container { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 0.9rem; cursor: pointer; text-align: left; width: 100%; padding-left: 5px; }
         .show-pass-container input { width: 18px; height: 18px; margin: 0; cursor: pointer; flex-shrink: 0; }
-        
         .version-tag { position: fixed; bottom: 10px; right: 15px; color: rgba(255, 255, 255, 0.5); font-size: 0.8rem; font-family: monospace; z-index: 9999; pointer-events: none; }
         .btn-ghost { position: absolute; top: 15px !important; right: 15px !important; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: all 0.3s ease; box-shadow: none !important; width: auto !important; margin: 0 !important; backdrop-filter: blur(5px); }
         .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,255,255,0.1); }
@@ -111,12 +84,10 @@
         .password-wrapper input { margin-bottom: 0; padding-right: 45px; }
         .password-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; fill: #bdc3c7; width: 20px; height: 20px; user-select: none; }
         .password-icon:hover { fill: var(--accent); }
-
         .edit-gallery-item { aspect-ratio: 1/1; background: rgba(0,0,0,0.5); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; padding: 0; box-sizing: border-box; font-size: 1.5rem; transition: 0.2s; }
         .edit-gallery-item img { width: 100%; height: 100%; object-fit: cover; }
         .edit-gallery-item:hover { border-color: var(--accent); }
         .original-avatar-item { border-color: var(--gold) !important; box-shadow: 0 0 8px rgba(241, 196, 15, 0.5); }
-        
         .bg-gallery-wrapper { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; max-height: 250px; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
         .bg-item { position: relative; width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 6px; cursor: pointer; border: 2px solid transparent; overflow: hidden; }
         .bg-item img { width: 100%; height: 100%; object-fit: cover; }
@@ -127,8 +98,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-
-    <div class="version-tag">v1.150</div>
+    <div class="version-tag">v1.152</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -205,9 +175,7 @@
 
     <div id="screen-choice" class="box" style="display:none;">
         <h2>Bonjour <span id="mj-display-name" style="color:var(--accent);">MJ</span> !</h2>
-        
         <button id="btn-super-admin" onclick="openSuperAdmin()" style="display:none; margin-bottom:15px; background: #c0392b; box-shadow: 0 0 15px rgba(192, 57, 43, 0.5); border:1px solid rgba(255,255,255,0.2);">👑 GESTION SUPER ADMIN</button>
-        
         <button onclick="askMjNameAndCreate()" style="margin-top:15px;">🆕 Créer une nouvelle salle</button>
         <button id="btn-resume" onclick="resumeRoom()" style="display:none; background:var(--blue)">🔄 Reprendre la salle <span id="last-room-id"></span></button>
         <button class="btn-cancel" onclick="profileLogout()" style="font-size:0.8rem; margin-top:15px; width:auto; padding:8px 15px;">Déconnexion</button>
@@ -219,23 +187,19 @@
             <button style="background:var(--blue); width:auto;" onclick="document.getElementById('modal-sa-create').style.display='flex'">➕ Créer un nouveau compte MJ</button>
             <button class="btn-cancel" style="width:auto;" onclick="closeSuperAdmin()">Retour Accueil</button>
         </div>
-        
         <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
             <h3 style="margin-top:0; color: var(--accent);">Liste des Maîtres du Jeu</h3>
-            <div id="sa-mj-list">
-                </div>
+            <div id="sa-mj-list"></div>
         </div>
     </div>
 
     <div id="screen-dashboard" class="dashboard">
         <div class="room-info" style="backdrop-filter: blur(10px);">SALLE : <span id="display-room">----</span></div>
-        
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom: 15px; flex-wrap: wrap;">
             <button onclick="openScoreBoard()" style="width: auto; background: rgba(211, 84, 0, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">📺 Tableau des Scores</button>
             <button onclick="showRemoteQR()" style="width: auto; background: rgba(142, 68, 173, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">📱 Remote</button>
             <button onclick="toggleGuide()" style="width: auto; background: rgba(52, 73, 94, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">GUIDE</button>
         </div>
-
         <div style="display:flex; gap:10px; margin-bottom:20px;">
             <button id="btn-open-buzz" style="background:var(--blue); flex:1;" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
             <button style="background:var(--danger); flex:1;" onclick="fullReset()">RESET TITRE</button>
@@ -259,20 +223,17 @@
                 <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()" style="margin-bottom: 0;">
                 <div class="btn-folder" onclick="openLibraryProxy('self')" title="Bibliothèque de Blasons">📁</div>
             </div>
-            
             <div class="crest-picker" id="crest-grid" style="margin-top: 15px;"></div>
             <div style="display:flex; gap:10px;">
                 <button id="btn-add-team" disabled onclick="addTeam()" style="flex:2;">CRÉER L'ÉQUIPE</button>
                 <button id="btn-cancel-edit" class="btn-cancel" onclick="cancelEdit()" style="flex:1; display:none;">ANNULER</button>
             </div>
-            
             <div id="mj-team-list-display"></div>
             
             <div id="mj-team-inactive-section" style="margin-top:20px; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px; display:none; border:1px dashed rgba(255,255,255,0.3);">
                 <h4 style="margin:0 0 10px 0; color:#bdc3c7; font-size:0.9rem;">ÉQUIPES INACTIVES / EN PAUSE (Scores Figés)</h4>
                 <div id="mj-team-inactive-display"></div>
             </div>
-
             <div id="mj-team-banned-section" style="margin-top:20px; padding:10px; background:rgba(231, 76, 60, 0.1); border-radius:8px; display:none; border:1px solid var(--danger);">
                 <h4 style="margin:0 0 10px 0; color:var(--danger); font-size:0.9rem;">ÉQUIPES BANNIES</h4>
                 <div id="mj-team-banned-display"></div>
@@ -281,12 +242,10 @@
         
         <h3 style="text-shadow: 0 1px 2px black;">Lobby Joueurs</h3>
         <div id="score-list"></div>
-        
         <div id="inactive-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255,255,255,0.3); border-radius: 12px; backdrop-filter: blur(10px);">
             <h3 style="color:#bdc3c7; margin-top:0; font-size:1rem;">Joueurs Inactifs / Partis</h3>
             <div id="inactive-list"></div>
         </div>
-
         <div id="banned-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); border-radius: 12px; backdrop-filter: blur(10px);">
             <h3 style="color:var(--danger); margin-top:0;">Joueurs Expulsés</h3>
             <div id="banned-list"></div>
@@ -299,33 +258,23 @@
 
         <div style="margin-top:20px; border: 1px solid var(--blue); padding: 20px; border-radius: 12px; background: rgba(52, 152, 219, 0.15); backdrop-filter: blur(10px);">
             <h3 style="color:#85c1e9; margin-top:0; text-shadow: 0 1px 2px black;">📺 Personnalisation Écran Géant</h3>
-            
             <label for="room-bg-upload" id="bg-drop-zone" class="drop-zone" style="padding:15px;">
                 <span id="bg-dz-title" style="font-size:1rem; font-weight:bold; display:block; color:#85c1e9;">GLISSEZ VOTRE FOND ICI</span>
-                <span id="bg-dz-sub" style="font-size:0.8rem; color:#ecf0f1;">ou Cliquez pour parcourir votre ordinateur</span>
+                <span id="bg-dz-sub" style="font-size:0.8rem; color:#ecf0f1;">ou Cliquez pour parcourir</span>
                 <input type="file" id="room-bg-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files, 'dashboard')">
             </label>
-
             <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
-                <input type="text" id="room-bg-url-input" placeholder="Ou collez un lien d'image (https://... ou data:image/...)" style="margin:0; flex:1; font-size:0.9rem; padding:10px;">
+                <input type="text" id="room-bg-url-input" placeholder="Lien d'image (http...)" style="margin:0; flex:1; font-size:0.9rem; padding:10px;">
                 <button style="background:var(--blue); width:auto; margin:0; padding:10px 15px; font-size:0.9rem;" onclick="addBgUrlToLibrary('dashboard')">Ajouter</button>
             </div>
-
-            <div id="bg-gallery" class="bg-gallery-wrapper">
-                </div>
-
+            <div id="bg-gallery" class="bg-gallery-wrapper"></div>
             <div style="display:flex; gap:10px; margin-bottom: 10px;">
                 <button id="btn-apply-bg" style="background:var(--blue); flex:2; margin:0;" onclick="saveCustomBg()" disabled>APPLIQUER LA SÉLECTION</button>
                 <button class="btn-cancel" style="flex:1; margin:0;" onclick="resetCustomBg()">Fond par défaut</button>
             </div>
-            
             <div style="display:flex; flex-direction:column; gap:8px; margin-top:15px; background:rgba(0,0,0,0.3); padding:15px; border-radius:8px;">
-                <label class="show-pass-container" style="margin-bottom:0; color:#ecf0f1; font-size:0.85rem;">
-                    <input type="checkbox" id="check-default-bg"> Définir par défaut pour toutes mes prochaines salles
-                </label>
-                <label class="show-pass-container" style="margin-bottom:0; color:#ecf0f1; font-size:0.85rem;">
-                    <input type="checkbox" id="check-console-bg"> Appliquer ce fond sur ma Console MJ
-                </label>
+                <label class="show-pass-container" style="margin-bottom:0; color:#ecf0f1; font-size:0.85rem;"><input type="checkbox" id="check-default-bg"> Définir par défaut pour toutes mes prochaines salles</label>
+                <label class="show-pass-container" style="margin-bottom:0; color:#ecf0f1; font-size:0.85rem;"><input type="checkbox" id="check-console-bg"> Appliquer ce fond sur ma Console MJ</label>
             </div>
         </div>
 
@@ -348,15 +297,11 @@
     <div id="modal-sa-vault" class="modal-overlay">
        <div class="modal-box">
            <h2 style="color:var(--danger); margin-top:0;">🔒 COFFRE-FORT</h2>
-           <p style="color:#bdc3c7; font-size:0.9rem; margin-bottom:20px;">Saisissez votre mot de passe Super Admin pour accéder à la fiche complète de ce MJ.</p>
-           
+           <p style="color:#bdc3c7; font-size:0.9rem; margin-bottom:20px;">Saisissez votre mot de passe Super Admin pour accéder à la fiche de ce MJ.</p>
            <div class="password-wrapper">
                <input type="password" id="sa-vault-pass" placeholder="Mot de passe Super Admin" style="margin-bottom:0;">
-               <div class="password-icon" onclick="togglePasswordVisibility('sa-vault-pass', this)">
-                   <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-               </div>
+               <div class="password-icon" onclick="togglePasswordVisibility('sa-vault-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
            </div>
-           
            <div style="display:flex; gap:10px; margin-top:15px;">
                <button onclick="verifyVaultPassword()" style="background:var(--danger); flex:2;">DÉVERROUILLER</button>
                <button class="btn-cancel" onclick="document.getElementById('modal-sa-vault').style.display='none'" style="flex:1;">ANNULER</button>
@@ -367,9 +312,7 @@
     <div id="modal-sa-mj-details" class="modal-overlay">
        <div class="modal-box" style="max-width:600px; padding-top:40px;">
            <button class="btn-cancel" onclick="document.getElementById('modal-sa-mj-details').style.display='none'" style="position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0; font-weight:bold;">✖</button>
-           
            <h2 style="color:var(--blue); margin-top:0; margin-bottom:15px;">FICHE MAÎTRE DU JEU</h2>
-           
            <div style="display:flex; gap:10px; margin-bottom:5px;">
                <input type="text" id="sa-det-prenom" placeholder="Prénom" style="margin-bottom:0;">
                <input type="text" id="sa-det-nom" placeholder="Nom" style="margin-bottom:0;">
@@ -383,13 +326,11 @@
 
            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);">
                <h3 style="margin-top:0; color:var(--gold);">Abonnement (Jours restants)</h3>
-               
                <div style="display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom:15px;">
                    <button onclick="adjSaDays(-1)" style="width:45px; height:45px; font-size:1.8rem; font-weight:bold; background:var(--blue); margin:0; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.5);">-</button>
                    <input type="number" id="sa-det-days-input" style="width:100px; text-align:center; font-size:2rem; font-weight:bold; color:var(--accent); margin:0; background:transparent; border:none; outline:none;">
                    <button onclick="adjSaDays(1)" style="width:45px; height:45px; font-size:1.8rem; font-weight:bold; background:var(--blue); margin:0; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.5);">+</button>
                </div>
-
                <div style="display:flex; gap:10px; margin-bottom:10px;">
                    <button onclick="adjSaDays(30)" style="background:var(--success); flex:2; margin:0; padding:10px; font-size:0.8rem;">+ 30 Jours</button>
                    <button onclick="setUnlimited()" style="background:var(--gold); color:black; flex:1; margin:0; padding:10px; font-size:0.8rem;">∞ Illimité</button>
@@ -398,29 +339,21 @@
            </div>
 
            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
-               <h4 style="margin-top:0; color:#bdc3c7; text-align:left;">Modifier les identifiants (Email ou MDP)</h4>
-               
+               <h4 style="margin-top:0; color:#bdc3c7; text-align:left;">Modifier les identifiants</h4>
                <div class="password-wrapper">
-                   <input type="password" id="sa-det-pass-current" placeholder="Mot de passe ACTUEL du MJ (Obligatoire pour modifier)" style="border-color:var(--danger);">
-                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-current', this)">
-                       <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                   </div>
+                   <input type="password" id="sa-det-pass-current" placeholder="Mot de passe ACTUEL du MJ (Obligatoire)" style="border-color:var(--danger);">
+                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
                </div>
                <div class="password-wrapper">
                    <input type="password" id="sa-det-pass-new" placeholder="Nouveau mot de passe">
-                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-new', this)">
-                       <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                   </div>
+                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-new', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
                </div>
                <div class="password-wrapper" style="margin-bottom:0;">
                    <input type="password" id="sa-det-pass-conf" placeholder="Confirmer le nouveau mot de passe" style="margin-bottom:0;">
-                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-conf', this)">
-                       <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                   </div>
+                   <div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
                </div>
            </div>
-           
-           <button id="btn-sa-save" onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);">💾 ENREGISTRER LES MODIFICATIONS</button>
+           <button id="btn-sa-save" onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem;">💾 ENREGISTRER LES MODIFICATIONS</button>
            <button class="btn-cancel" onclick="deleteMjAccount()" style="width:100%; margin-top:20px; margin-bottom:0;">🗑️ SUPPRIMER CE COMPTE MJ</button>
        </div>
     </div>
@@ -428,20 +361,15 @@
     <div id="modal-sa-create" class="modal-overlay">
        <div class="modal-box">
            <h2 style="color:var(--mj-color); margin-top:0;">➕ NOUVEAU COMPTE MJ</h2>
-           <input type="email" id="sa-create-email" placeholder="Email du MJ (Sert d'identifiant)">
-           
+           <input type="email" id="sa-create-email" placeholder="Email du MJ">
            <div class="password-wrapper">
                <input type="password" id="sa-create-pass" placeholder="Mot de passe">
-               <div class="password-icon" onclick="togglePasswordVisibility('sa-create-pass', this)">
-                   <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-               </div>
+               <div class="password-icon" onclick="togglePasswordVisibility('sa-create-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
            </div>
-           <span class="input-helper" style="margin-top:0; margin-bottom:10px;">8 caractères min, 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial.</span>
-
+           <span class="input-helper" style="margin-top:0; margin-bottom:10px;">8 car. min, 1 Maj, 1 Min, 1 Chiffre, 1 Spécial.</span>
            <input type="text" id="sa-create-prenom" placeholder="Prénom (Affiché aux joueurs)">
-           
            <div style="display:flex; gap:10px; margin-top:15px;">
-               <button onclick="createMjAction()" style="background:var(--mj-color); flex:2;">CRÉER (30 Jours Offerts)</button>
+               <button onclick="createMjAction()" style="background:var(--mj-color); flex:2;">CRÉER (30 Jours)</button>
                <button class="btn-cancel" onclick="document.getElementById('modal-sa-create').style.display='none'" style="flex:1;">ANNULER</button>
            </div>
        </div>
@@ -450,26 +378,20 @@
     <div id="modal-bg-library" class="modal-overlay">
         <div class="modal-box" style="max-width: 700px;">
             <h2 style="color:#85c1e9; margin-top:0;">📺 GESTION DES FONDS D'ÉCRAN</h2>
-            
             <label for="bg-modal-upload" id="bg-modal-drop-zone" class="drop-zone" style="padding:15px;">
                 <span id="bg-modal-dz-title" style="font-size:1rem; font-weight:bold; display:block; color:#85c1e9;">GLISSEZ VOTRE FOND ICI</span>
                 <span id="bg-modal-dz-sub" style="font-size:0.8rem; color:#ecf0f1;">ou Cliquez pour parcourir</span>
                 <input type="file" id="bg-modal-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files, 'modal')">
             </label>
-
             <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
-                <input type="text" id="bg-modal-url-input" placeholder="Lien d'image (https://... ou data:image/...)" style="margin:0; flex:1;">
+                <input type="text" id="bg-modal-url-input" placeholder="Lien d'image (https://...)" style="margin:0; flex:1;">
                 <button style="background:var(--blue); width:auto; margin:0;" onclick="addBgUrlToLibrary('modal')">Ajouter</button>
             </div>
-
-            <div id="bg-modal-gallery" class="bg-gallery-wrapper">
-                </div>
-
+            <div id="bg-modal-gallery" class="bg-gallery-wrapper"></div>
             <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 15px; background:rgba(0,0,0,0.3); padding:15px; border-radius:8px;">
                 <button id="btn-modal-bg-default" style="background:var(--success); margin:0;" onclick="setModalBgAction('default')" disabled>Définir par défaut (Salles)</button>
                 <button id="btn-modal-bg-console" style="background:var(--blue); margin:0;" onclick="setModalBgAction('console')" disabled>Définir pour la console MJ</button>
             </div>
-            
             <button class="btn-cancel" onclick="closeBgLibrary()">FERMER LA GALERIE</button>
         </div>
     </div>
@@ -477,19 +399,13 @@
     <div id="modal-library" class="modal-overlay">
         <div class="modal-box">
             <h2 style="color:var(--gold); margin-top:0;">MA BIBLIOTHÈQUE DE BLASONS</h2>
-            
             <div class="switch-container" id="switch-container-lib">
                 <label for="check-hide-default" style="cursor:pointer;">Afficher les blasons par défaut :</label>
-                <label class="switch">
-                    <input type="checkbox" id="check-hide-default" onchange="toggleDefaultCrests(this.checked)">
-                    <span class="slider"></span>
-                </label>
+                <label class="switch"><input type="checkbox" id="check-hide-default" onchange="toggleDefaultCrests(this.checked)"><span class="slider"></span></label>
             </div>
-
             <label for="lib-upload" id="drop-zone" class="drop-zone">
                 <span id="dz-title" style="font-size:1.2rem; font-weight:bold; display:block; color:var(--gold);">GLISSEZ VOS IMAGES ICI</span>
                 <span id="dz-sub" style="font-size:0.9rem; color:#ccc;">ou Cliquez pour parcourir</span>
-                <span style="font-size:0.8rem; color:#bdc3c7; display:block; margin-top:5px;">Sélection multiple autorisée (JPG, PNG, GIF)</span>
                 <input type="file" id="lib-upload" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)">
             </label>
             <div id="lib-grid" class="lib-grid"></div>
@@ -500,23 +416,17 @@
     <div id="modal-edit-player" class="modal-overlay">
         <div class="modal-box" style="max-width: 600px;">
             <h2 style="color:var(--blue); margin-top:0; text-align:center;">ÉDITER LE JOUEUR</h2>
-            
             <div style="display:flex; flex-wrap:wrap; gap: 20px; align-items: stretch; margin-bottom: 10px;">
                 <div style="flex: 1; min-width:200px; display:flex; flex-direction:column; align-items:center;">
                     <div id="edit-player-avatar-preview" style="font-size:4rem; margin:10px 0; height:80px; width:80px; display:flex; justify-content:center; align-items:center; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
-                    <button id="btn-censor-avatar" onclick="censorPlayerAvatar()" style="background:var(--danger); width:auto; padding:8px 15px; font-size:0.8rem; margin-bottom:20px; display:none;">🚫 Censurer (Logo MJ)</button>
-                    
-                    <p style="margin:0 0 5px 0; text-align:left; color:#bdc3c7; font-size: 0.9rem; width:100%;">Pseudo :</p>
+                    <button id="btn-censor-avatar" onclick="censorPlayerAvatar()" style="background:var(--danger); width:auto; padding:8px 15px; font-size:0.8rem; margin-bottom:20px; display:none;">🚫 Censurer</button>
                     <input type="text" id="edit-player-name" placeholder="Pseudo du joueur" maxlength="15" style="margin-bottom: 0; width:100%;">
                 </div>
-                
                 <div style="flex: 1; min-width:200px; border-left: 1px solid rgba(255,255,255,0.2); padding-left:20px; max-height: 220px; overflow-y: auto; text-align:left;">
                     <p style="margin:0 0 10px 0; font-size:0.9rem; color:#ccc;">Changer l'avatar :</p>
-                    <div id="edit-avatar-gallery" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-                        </div>
+                    <div id="edit-avatar-gallery" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
                 </div>
             </div>
-
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button onclick="savePlayerEdit()" style="background:var(--mj-color); flex:2;">💾 ENREGISTRER</button>
                 <button class="btn-cancel" onclick="closeEditPlayerModal()" style="flex:1;">ANNULER</button>
@@ -530,1332 +440,393 @@
             <p id="restore-team-msg" style="margin-bottom:20px;">Que souhaitez-vous faire ?</p>
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <button onclick="confirmRestoreAction('active')" style="background:var(--mj-color);">🟢 RÉACTIVER L'ÉQUIPE</button>
-                <button onclick="confirmRestoreAction('inactive')" style="background:var(--blue);">⚪ RESTER INACTIVE (Débannir seulement)</button>
+                <button onclick="confirmRestoreAction('inactive')" style="background:var(--blue);">⚪ RESTER INACTIVE</button>
                 <button class="btn-cancel" onclick="closeRestoreModal()">🔴 ANNULER</button>
             </div>
         </div>
     </div>
 
     <div id="overlay-remote-qr" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:20000; flex-direction:column; align-items:center; justify-content:center;">
-        <h2 style="color:white; margin-bottom:20px; text-transform:uppercase; color: #8e44ad;">Télécommande Animateur</h2>
+        <h2 style="color:white; margin-bottom:20px; text-transform:uppercase; color: #8e44ad;">Télécommande</h2>
         <div id="qrcode-remote" style="background:white; padding:20px; border-radius:15px; box-shadow: 0 0 30px rgba(142, 68, 173, 0.5);"></div>
-        <p style="color:#ccc; margin-top:15px; font-style:italic;">Scannez pour piloter depuis un mobile</p>
         <button class="btn-cancel" onclick="document.getElementById('overlay-remote-qr').style.display='none'" style="margin-top:30px; width:auto; padding:10px 30px;">FERMER</button>
     </div>
 
     <div id="overlay-guide" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:20000; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
         <div style="background:var(--card-bg); max-width:800px; width:100%; height:90%; border-radius:15px; border:1px solid rgba(255,255,255,0.2); position:relative; overflow:hidden; backdrop-filter: blur(15px);">
             <iframe id="guide-iframe" src="" style="width:100%; height:100%; border:none;"></iframe>
-            <button class="btn-cancel" onclick="toggleGuide()" style="position:absolute; top:10px; left:10px; width:40px; height:40px; border-radius:50%; font-weight:bold; font-size:1.2rem; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 10;">✖</button>
+            <button class="btn-cancel" onclick="toggleGuide()" style="position:absolute; top:10px; left:10px; width:40px; height:40px; border-radius:50%; font-weight:bold; font-size:1.2rem; display:flex; align-items:center; justify-content:center; z-index: 10;">✖</button>
         </div>
     </div>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const auth = firebase.auth();
-        const storage = firebase.storage();
-        
-        // SECONDE INSTANCE POUR LA GESTION AUTH SANS DÉCONNEXION
-        const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
-        const secondaryAuth = secondaryApp.auth();
+        const db = firebase.database(); const auth = firebase.auth(); const storage = firebase.storage();
+        const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary"); const secondaryAuth = secondaryApp.auth();
 
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
-
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
         
-        // VARIABLES GLOBALES DES GALERIES & PROXY
-        let activeLibraryUid = null; 
-        let isProxyMode = false;
+        let activeLibraryUid = null, isProxyMode = false, activeBgLibraryUid = null, isProxyBgMode = false, modalSelectedBgUrl = "";
+        let mjLibrary = {}, mjBgLibrary = {}, selectedBgUrl = "", currentRoomBgUrl = ""; 
+        let showDefaultCrests = true, pendingRestoreTeam = null, currentBuzzerId = null, buzzHistory = [];
+        let editingPlayerUid = null, editingPlayerOriginalPseudo = "", editingPlayerOriginalAvatar = "", editingPlayerCurrentAvatar = "";
+        let isSuperAdmin = false, allUsersData = {}, targetMjUid = null;
 
-        let activeBgLibraryUid = null;
-        let isProxyBgMode = false;
-        let modalSelectedBgUrl = "";
+        function isValidPassword(pwd) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd); }
 
-        let mjLibrary = {}; 
-        let mjBgLibrary = {}; 
-        let selectedBgUrl = "";
-        let currentRoomBgUrl = ""; 
-
-        let showDefaultCrests = true;
-        let pendingRestoreTeam = null; 
-        let currentBuzzerId = null;
-        let buzzHistory = [];
-
-        let editingPlayerUid = null;
-        let editingPlayerOriginalPseudo = "";
-        let editingPlayerOriginalAvatar = "";
-        let editingPlayerCurrentAvatar = "";
-        
-        // Validation Regex (8 min, 1 maj, 1 min, 1 chiffre, 1 spécial)
-        function isValidPassword(pwd) {
-            return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd);
-        }
-
-        // --- ÉCOUTEURS TOUCHE ENTRÉE ---
         window.onload = function() {
-            setupDragDrop('drop-zone', f => handleFiles(f));
-            setupDragDrop('profile-drop-zone', f => handleProfileFile(f));
-            setupDragDrop('bg-drop-zone', f => handleBgUpload(f, 'dashboard'));
-            setupDragDrop('bg-modal-drop-zone', f => handleBgUpload(f, 'modal'));
+            setupDragDrop('drop-zone', f => handleFiles(f)); setupDragDrop('profile-drop-zone', f => handleProfileFile(f));
+            setupDragDrop('bg-drop-zone', f => handleBgUpload(f, 'dashboard')); setupDragDrop('bg-modal-drop-zone', f => handleBgUpload(f, 'modal'));
             
-            document.getElementById('mj-email').addEventListener('keypress', (e) => { if(e.key === 'Enter') login(); });
-            document.getElementById('mj-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') login(); });
-            
-            document.getElementById('sa-vault-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') verifyVaultPassword(); });
-            
-            document.getElementById('sa-create-email').addEventListener('keypress', (e) => { if(e.key === 'Enter') createMjAction(); });
-            document.getElementById('sa-create-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') createMjAction(); });
-            document.getElementById('sa-create-prenom').addEventListener('keypress', (e) => { if(e.key === 'Enter') createMjAction(); });
-            
-            document.getElementById('sa-det-prenom').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
-            document.getElementById('sa-det-nom').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
-            document.getElementById('sa-det-email').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
-            document.getElementById('sa-det-pass-current').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
-            document.getElementById('sa-det-pass-new').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
-            document.getElementById('sa-det-pass-conf').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
-            document.getElementById('sa-det-days-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveSAMjDetails(); });
-            
-            document.getElementById('t-name').addEventListener('keypress', (e) => { if(e.key === 'Enter') { checkTeamForm(); if(!document.getElementById('btn-add-team').disabled) addTeam(); }});
-            document.getElementById('edit-player-name').addEventListener('keypress', (e) => { if(e.key === 'Enter') savePlayerEdit(); });
-            
-            document.getElementById('prof-nom').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveProfile(); });
-            document.getElementById('prof-prenom').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveProfile(); });
-            document.getElementById('prof-email').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveProfile(); });
-            document.getElementById('prof-link').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveProfile(); });
-            document.getElementById('prof-pass-current').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveProfile(); });
-            document.getElementById('prof-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveProfile(); });
-            document.getElementById('prof-pass-conf').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveProfile(); });
-            
-            document.getElementById('bg-modal-url-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') addBgUrlToLibrary('modal'); });
-            document.getElementById('room-bg-url-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') addBgUrlToLibrary('dashboard'); });
+            const bindEnter = (id, fn) => { const el = document.getElementById(id); if(el) el.addEventListener('keypress', e => { if(e.key === 'Enter') fn(); }); };
+            bindEnter('mj-email', login); bindEnter('mj-pass', login); bindEnter('sa-vault-pass', verifyVaultPassword);
+            bindEnter('sa-create-email', createMjAction); bindEnter('sa-create-pass', createMjAction); bindEnter('sa-create-prenom', createMjAction);
+            bindEnter('sa-det-prenom', saveSAMjDetails); bindEnter('sa-det-nom', saveSAMjDetails); bindEnter('sa-det-email', saveSAMjDetails);
+            bindEnter('sa-det-pass-current', saveSAMjDetails); bindEnter('sa-det-pass-new', saveSAMjDetails); bindEnter('sa-det-pass-conf', saveSAMjDetails); bindEnter('sa-det-days-input', saveSAMjDetails);
+            bindEnter('t-name', () => { checkTeamForm(); if(!document.getElementById('btn-add-team').disabled) addTeam(); });
+            bindEnter('edit-player-name', savePlayerEdit); bindEnter('prof-nom', saveProfile); bindEnter('prof-prenom', saveProfile); bindEnter('prof-email', saveProfile); bindEnter('prof-link', saveProfile);
+            bindEnter('prof-pass-current', saveProfile); bindEnter('prof-pass', saveProfile); bindEnter('prof-pass-conf', saveProfile);
+            bindEnter('bg-modal-url-input', () => addBgUrlToLibrary('modal')); bindEnter('room-bg-url-input', () => addBgUrlToLibrary('dashboard'));
         };
 
-        // --- MOTEUR SUPER ADMIN ---
-        let isSuperAdmin = false;
-        let allUsersData = {};
-        let targetMjUid = null;
-
-        function profileLogout() {
-            auth.signOut().then(()=>location.reload());
-        }
-
-        function openSuperAdmin() {
-            if(!isSuperAdmin) return;
-            document.getElementById('screen-choice').style.display = 'none';
-            document.getElementById('screen-super-admin').style.display = 'block';
-        }
-
-        function closeSuperAdmin() {
-            document.getElementById('screen-super-admin').style.display = 'none';
-            document.getElementById('screen-choice').style.display = 'block';
-        }
-
-        function initSuperAdminListener() {
-            if(!isSuperAdmin) return;
-            db.ref('users').on('value', snap => {
-                allUsersData = snap.val() || {};
-                renderSAMjList();
-            });
-        }
-
+        function profileLogout() { auth.signOut().then(()=>location.reload()); }
+        function openSuperAdmin() { if(!isSuperAdmin) return; document.getElementById('screen-choice').style.display = 'none'; document.getElementById('screen-super-admin').style.display = 'block'; }
+        function closeSuperAdmin() { document.getElementById('screen-super-admin').style.display = 'none'; document.getElementById('screen-choice').style.display = 'block'; }
+        function initSuperAdminListener() { if(isSuperAdmin) db.ref('users').on('value', snap => { allUsersData = snap.val() || {}; renderSAMjList(); }); }
         function renderSAMjList() {
-            const container = document.getElementById('sa-mj-list');
-            container.innerHTML = "";
+            const container = document.getElementById('sa-mj-list'); container.innerHTML = "";
             Object.keys(allUsersData).forEach(uid => {
-                const u = allUsersData[uid];
-                const email = u.email || "Email inconnu (Non connecté)";
-                const name = (u.prenom || "MJ") + " " + (u.nom || "");
-                const isBlocked = u.isBlocked === true;
-                
-                let daysLeft = 0;
-                if(u.expirationDate) daysLeft = Math.ceil((u.expirationDate - Date.now()) / (1000 * 60 * 60 * 24));
-                if (daysLeft < 0) daysLeft = 0;
-                
-                let statusColor = "var(--success)";
-                let statusText = daysLeft + " Jours";
-                
-                if(email === "contact@prestapuce.com" || daysLeft > 9000) {
-                    statusText = "NO LIMIT (SA)"; statusColor = "var(--gold)";
-                } else if (isBlocked) {
-                    statusColor = "var(--danger)"; statusText = "BLOQUÉ";
-                } else if (daysLeft <= 0) {
-                    statusColor = "#e67e22"; statusText = "EXPIRÉ";
-                }
-
-                container.innerHTML += `
-                    <div class="score-row" style="cursor:pointer;" onclick="openVault('${uid}')" title="Cliquez pour gérer ce compte">
-                        <div style="flex:1;"><b>${email}</b><br><small style="color:#bdc3c7;">${name}</small></div>
-                        <div><span style="color:${statusColor}; font-weight:bold; background:rgba(0,0,0,0.5); padding:5px 10px; border-radius:5px; border:1px solid ${statusColor};">${statusText}</span></div>
-                    </div>
-                `;
+                const u = allUsersData[uid]; const email = u.email || "Inconnu"; const name = (u.prenom || "MJ") + " " + (u.nom || "");
+                let daysLeft = u.expirationDate ? Math.ceil((u.expirationDate - Date.now()) / 86400000) : 0; if (daysLeft < 0) daysLeft = 0;
+                let statusColor = "var(--success)"; let statusText = daysLeft + " Jours";
+                if(email === "contact@prestapuce.com" || daysLeft > 9000) { statusText = "NO LIMIT (SA)"; statusColor = "var(--gold)"; } 
+                else if (u.isBlocked) { statusColor = "var(--danger)"; statusText = "BLOQUÉ"; } 
+                else if (daysLeft <= 0) { statusColor = "#e67e22"; statusText = "EXPIRÉ"; }
+                container.innerHTML += `<div class="score-row" style="cursor:pointer;" onclick="openVault('${uid}')"><div style="flex:1;"><b>${email}</b><br><small style="color:#bdc3c7;">${name}</small></div><div><span style="color:${statusColor}; font-weight:bold; background:rgba(0,0,0,0.5); padding:5px 10px; border-radius:5px; border:1px solid ${statusColor};">${statusText}</span></div></div>`;
             });
         }
-
-        function openVault(uid) {
-            targetMjUid = uid;
-            document.getElementById('sa-vault-pass').value = '';
-            document.getElementById('modal-sa-vault').style.display = 'flex';
-        }
-
-        function verifyVaultPassword() {
-            const pass = document.getElementById('sa-vault-pass').value;
-            const email = auth.currentUser.email; 
-            
-            auth.signInWithEmailAndPassword(email, pass).then(() => {
-                document.getElementById('modal-sa-vault').style.display = 'none';
-                updateMjDetailsView();
-                document.getElementById('modal-sa-mj-details').style.display = 'flex';
-            }).catch(err => {
-                alert("Mot de passe incorrect !");
-            });
-        }
-
+        function openVault(uid) { targetMjUid = uid; document.getElementById('sa-vault-pass').value = ''; document.getElementById('modal-sa-vault').style.display = 'flex'; }
+        function verifyVaultPassword() { auth.signInWithEmailAndPassword(auth.currentUser.email, document.getElementById('sa-vault-pass').value).then(() => { document.getElementById('modal-sa-vault').style.display = 'none'; updateMjDetailsView(); document.getElementById('modal-sa-mj-details').style.display = 'flex'; }).catch(() => alert("Mot de passe incorrect !")); }
         function updateMjDetailsView() {
-            if(!targetMjUid || !allUsersData[targetMjUid]) return;
-            const u = allUsersData[targetMjUid];
-            
-            document.getElementById('sa-det-prenom').value = u.prenom || "";
-            document.getElementById('sa-det-nom').value = u.nom || "";
-            document.getElementById('sa-det-email').value = u.email || "";
-            
-            let daysLeft = 0;
-            if(u.expirationDate) daysLeft = Math.ceil((u.expirationDate - Date.now()) / (1000 * 60 * 60 * 24));
-            if(daysLeft < 0) daysLeft = 0;
+            if(!targetMjUid || !allUsersData[targetMjUid]) return; const u = allUsersData[targetMjUid];
+            document.getElementById('sa-det-prenom').value = u.prenom || ""; document.getElementById('sa-det-nom').value = u.nom || ""; document.getElementById('sa-det-email').value = u.email || "";
+            let daysLeft = u.expirationDate ? Math.ceil((u.expirationDate - Date.now()) / 86400000) : 0; if(daysLeft < 0) daysLeft = 0;
             document.getElementById('sa-det-days-input').value = daysLeft;
-            
             const btnBlock = document.getElementById('btn-sa-block');
-            if(u.isBlocked) { btnBlock.innerText = "🟢 RÉACTIVER L'ACCÈS"; btnBlock.style.background = "var(--success)"; } 
-            else { btnBlock.innerText = "🔴 BLOQUER L'ACCÈS"; btnBlock.style.background = "var(--danger)"; }
-            
-            document.getElementById('sa-det-pass-current').value = "";
-            document.getElementById('sa-det-pass-new').value = "";
-            document.getElementById('sa-det-pass-conf').value = "";
+            if(u.isBlocked) { btnBlock.innerText = "🟢 RÉACTIVER L'ACCÈS"; btnBlock.style.background = "var(--success)"; } else { btnBlock.innerText = "🔴 BLOQUER L'ACCÈS"; btnBlock.style.background = "var(--danger)"; }
+            document.getElementById('sa-det-pass-current').value = ""; document.getElementById('sa-det-pass-new').value = ""; document.getElementById('sa-det-pass-conf').value = "";
         }
-
-        function adjSaDays(val) {
-            const input = document.getElementById('sa-det-days-input');
-            let current = parseInt(input.value) || 0;
-            let final = current + val;
-            if(final < 0) final = 0;
-            input.value = final;
-        }
-
-        function setUnlimited() {
-            document.getElementById('sa-det-days-input').value = 9999;
-        }
-
+        function adjSaDays(val) { const i = document.getElementById('sa-det-days-input'); let f = (parseInt(i.value) || 0) + val; if(f < 0) f = 0; i.value = f; }
+        function setUnlimited() { document.getElementById('sa-det-days-input').value = 9999; }
         function saveSAMjDetails() {
-            if(!targetMjUid || !allUsersData[targetMjUid]) return;
-            const u = allUsersData[targetMjUid];
-            const oldEmail = u.email || "";
-            
-            const newPrenom = document.getElementById('sa-det-prenom').value.trim();
-            const newNom = document.getElementById('sa-det-nom').value.trim();
-            const newEmail = document.getElementById('sa-det-email').value.trim();
-            const currentPass = document.getElementById('sa-det-pass-current').value;
-            const newPass = document.getElementById('sa-det-pass-new').value;
-            const confPass = document.getElementById('sa-det-pass-conf').value;
-            const inputDays = parseInt(document.getElementById('sa-det-days-input').value) || 0;
-            
-            const msToAdd = inputDays * 24 * 60 * 60 * 1000;
-            const newExp = Date.now() + msToAdd;
-
-            const updates = { prenom: newPrenom, nom: newNom, expirationDate: newExp };
-
-            const emailChanged = (newEmail !== oldEmail && newEmail !== "");
-            const passChanged = (newPass !== "");
-
+            if(!targetMjUid || !allUsersData[targetMjUid]) return; const u = allUsersData[targetMjUid]; const oldEmail = u.email || "";
+            const updates = { prenom: document.getElementById('sa-det-prenom').value.trim(), nom: document.getElementById('sa-det-nom').value.trim(), expirationDate: Date.now() + ((parseInt(document.getElementById('sa-det-days-input').value) || 0) * 86400000) };
+            const newEmail = document.getElementById('sa-det-email').value.trim(), currentPass = document.getElementById('sa-det-pass-current').value, newPass = document.getElementById('sa-det-pass-new').value, confPass = document.getElementById('sa-det-pass-conf').value;
+            const emailChanged = (newEmail !== oldEmail && newEmail !== ""); const passChanged = (newPass !== "");
             if (emailChanged || passChanged) {
-                if(!currentPass) {
-                    return alert("⚠️ Vous DEVEZ saisir le 'Mot de passe ACTUEL' du MJ pour modifier ses identifiants Firebase.");
-                }
-                if(passChanged) {
-                    if(newPass === currentPass) return alert("Le nouveau mot de passe doit être différent de l'ancien.");
-                    if(newPass !== confPass) return alert("Les nouveaux mots de passe ne correspondent pas.");
-                    if(!isValidPassword(newPass)) return alert("Le nouveau mot de passe ne respecte pas les critères de sécurité.");
-                }
-                
-                const btn = document.getElementById('btn-sa-save');
-                btn.innerText = "⏳ MISE À JOUR...";
-                btn.disabled = true;
-
-                secondaryAuth.signInWithEmailAndPassword(oldEmail, currentPass)
-                .then(async (userCredential) => {
+                if(!currentPass) return alert("Mot de passe ACTUEL requis.");
+                if(passChanged) { if(newPass === currentPass) return alert("Le nouveau mdp doit être différent."); if(newPass !== confPass) return alert("Les mdps ne correspondent pas."); if(!isValidPassword(newPass)) return alert("Critères de sécurité non respectés."); }
+                const btn = document.getElementById('btn-sa-save'); btn.innerText = "⏳ MISE À JOUR..."; btn.disabled = true;
+                secondaryAuth.signInWithEmailAndPassword(oldEmail, currentPass).then(async (uc) => {
                     try {
-                        if(emailChanged) await userCredential.user.updateEmail(newEmail);
-                        if(passChanged) await userCredential.user.updatePassword(newPass);
-                        
-                        updates.email = newEmail;
-                        await secondaryAuth.signOut();
-                        
-                        db.ref('users/' + targetMjUid).update(updates).then(() => {
-                            btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS";
-                            btn.disabled = false;
-                            alert("Fiche MJ et Identifiants mis à jour !");
-                            document.getElementById('modal-sa-mj-details').style.display = 'none';
-                        });
-                    } catch(error) {
-                        await secondaryAuth.signOut();
-                        btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS"; btn.disabled = false;
-                        alert("Erreur Google Auth : " + error.message);
-                    }
-                }).catch(error => {
-                    btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS"; btn.disabled = false;
-                    alert("⚠️ Échec de connexion au compte MJ.\nLe mot de passe actuel saisi est incorrect.\n(Erreur: " + error.message + ")");
-                });
-            } else {
-                db.ref('users/' + targetMjUid).update(updates).then(() => {
-                    alert("Fiche MJ enregistrée avec succès !");
-                    document.getElementById('modal-sa-mj-details').style.display = 'none';
-                });
-            }
+                        if(emailChanged) await uc.user.updateEmail(newEmail); if(passChanged) await uc.user.updatePassword(newPass);
+                        updates.email = newEmail; await secondaryAuth.signOut();
+                        db.ref('users/' + targetMjUid).update(updates).then(() => { btn.innerText = "💾 ENREGISTRER"; btn.disabled = false; alert("Mis à jour !"); document.getElementById('modal-sa-mj-details').style.display = 'none'; });
+                    } catch(e) { await secondaryAuth.signOut(); btn.innerText = "💾 ENREGISTRER"; btn.disabled = false; alert("Erreur Auth : " + e.message); }
+                }).catch(e => { btn.innerText = "💾 ENREGISTRER"; btn.disabled = false; alert("Erreur : " + e.message); });
+            } else { db.ref('users/' + targetMjUid).update(updates).then(() => { alert("Enregistré !"); document.getElementById('modal-sa-mj-details').style.display = 'none'; }); }
         }
-
         function createMjAction() {
-            const email = document.getElementById('sa-create-email').value.trim();
-            const pass = document.getElementById('sa-create-pass').value;
-            const prenom = document.getElementById('sa-create-prenom').value.trim();
-
-            if(!email) return alert("Veuillez saisir un email.");
-            if(!isValidPassword(pass)) {
-                return alert("Le mot de passe doit contenir au moins 8 caractères, une minuscule, une majuscule, un chiffre et un caractère spécial.");
-            }
-
-            secondaryAuth.createUserWithEmailAndPassword(email, pass)
-            .then((userCredential) => {
-                const newUid = userCredential.user.uid;
-                const newExp = Date.now() + (30 * 24 * 60 * 60 * 1000); 
-                
-                return db.ref('users/' + newUid).set({
-                    email: email, prenom: prenom, expirationDate: newExp, isBlocked: false
-                }).then(() => {
-                    secondaryAuth.signOut();
-                    document.getElementById('modal-sa-create').style.display = 'none';
+            const email = document.getElementById('sa-create-email').value.trim(), pass = document.getElementById('sa-create-pass').value, prenom = document.getElementById('sa-create-prenom').value.trim();
+            if(!email || !isValidPassword(pass)) return alert("Email invalide ou mdp non sécurisé.");
+            secondaryAuth.createUserWithEmailAndPassword(email, pass).then((uc) => {
+                db.ref('users/' + uc.user.uid).set({ email: email, prenom: prenom, expirationDate: Date.now() + (30 * 86400000), isBlocked: false }).then(() => {
+                    secondaryAuth.signOut(); document.getElementById('modal-sa-create').style.display = 'none';
                     document.getElementById('sa-create-email').value = ''; document.getElementById('sa-create-pass').value = ''; document.getElementById('sa-create-prenom').value = '';
-                    
-                    const subject = encodeURIComponent("Vos accès à la console MJ Presta'Puce");
-                    const body = encodeURIComponent(`Bonjour ${prenom || ''},\n\nVoici vos accès pour gérer vos parties de Blindtest :\n\nLien : https://prestapuce.github.io/prestapuce-blindtest/mj\nIdentifiant : ${email}\nMot de passe : ${pass}\n\nUn guide d'utilisation complet est disponible directement sur votre console via le bouton "AIDE / GUIDE".\n\nAmusez-vous bien !\nL'équipe Presta'Puce`);
-                    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+                    window.location.href = `mailto:${email}?subject=Accès MJ Presta'Puce&body=Lien: https://prestapuce.github.io/prestapuce-blindtest/mj%0AEmail: ${email}%0AMdp: ${pass}`;
                 });
-            })
-            .catch((error) => { alert("Erreur de création : " + error.message); });
+            }).catch(e => alert("Erreur : " + e.message));
         }
-
         function deleteMjAccount() {
-            if(!targetMjUid || !allUsersData[targetMjUid]) return;
-            const u = allUsersData[targetMjUid];
-            const email = u.email;
-            const pass = prompt(`⚠️ DANGER : Voulez-vous vraiment supprimer DÉFINITIVEMENT le compte ${email} ?\n\nPour détruire l'identifiant de connexion, veuillez saisir le mot de passe actuel du MJ.\n(Laissez vide et cliquez sur OK pour effacer uniquement ses données de jeu)`);
-            
+            if(!targetMjUid || !allUsersData[targetMjUid]) return; const email = allUsersData[targetMjUid].email;
+            const pass = prompt(`⚠️ DANGER: Supprimer ${email} ?\nSaisir le mdp actuel pour supprimer l'Auth (ou vide pour juste BDD)`);
             if(pass !== null) {
-                if(pass !== "") {
-                    secondaryAuth.signInWithEmailAndPassword(email, pass)
-                    .then((userCredential) => {
-                        userCredential.user.delete().then(() => {
-                            eraseMjDatabase(targetMjUid);
-                        }).catch(err => {
-                            alert("Erreur suppression Auth : " + err.message + "\n\nLes données vont quand même être effacées.");
-                            eraseMjDatabase(targetMjUid);
-                        });
-                    }).catch(err => {
-                        alert("Mot de passe incorrect. Les données BDD vont être effacées, mais l'identifiant restera dans la console Firebase Google.\nErreur: " + err.message);
-                        eraseMjDatabase(targetMjUid);
-                    });
-                } else { eraseMjDatabase(targetMjUid); }
+                if(pass !== "") secondaryAuth.signInWithEmailAndPassword(email, pass).then((uc) => uc.user.delete().then(() => eraseMjDatabase(targetMjUid)).catch(e => { alert("Erreur Auth : " + e.message); eraseMjDatabase(targetMjUid); })).catch(e => { alert("Mdp incorrect."); eraseMjDatabase(targetMjUid); });
+                else eraseMjDatabase(targetMjUid);
             }
         }
+        function eraseMjDatabase(uid) { db.ref('users/' + uid).remove().then(() => { alert("Supprimé."); document.getElementById('modal-sa-mj-details').style.display = 'none'; }); }
+        function toggleBlockMj() { if(targetMjUid) db.ref('users/' + targetMjUid).update({ isBlocked: !allUsersData[targetMjUid].isBlocked }).then(() => setTimeout(updateMjDetailsView, 200)); }
 
-        function eraseMjDatabase(uid) {
-            db.ref('users/' + uid).remove().then(() => {
-                alert("Les données du compte ont été supprimées.");
-                document.getElementById('modal-sa-mj-details').style.display = 'none';
-            });
-        }
-
-        function toggleBlockMj() {
-            if(!targetMjUid) return;
-            const isBlocked = allUsersData[targetMjUid].isBlocked === true;
-            db.ref('users/' + targetMjUid).update({ isBlocked: !isBlocked }).then(() => {
-                setTimeout(updateMjDetailsView, 200);
-            });
-        }
-
-        // --- GESTION DES MEDIAS (PROXY SAFE) ---
-        function setupDragDrop(id, handler) {
-            const el = document.getElementById(id);
-            if(!el) return;
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(n => { el.addEventListener(n, preventDefaults, false); document.body.addEventListener(n, preventDefaults, false); });
-            ['dragenter', 'dragover'].forEach(n => el.addEventListener(n, ()=>el.classList.add('drag-active'), false));
-            ['dragleave', 'drop'].forEach(n => el.addEventListener(n, ()=>el.classList.remove('drag-active'), false));
-            el.addEventListener('drop', (e) => { const dt = e.dataTransfer; handler(dt.files); }, false);
-        }
-        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        // --- GESTION MEDIAS (PROXY SAFE) ---
+        function setupDragDrop(id, handler) { const el = document.getElementById(id); if(el) { ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(n => { el.addEventListener(n, e=>{e.preventDefault();e.stopPropagation();}, false); document.body.addEventListener(n, e=>{e.preventDefault();e.stopPropagation();}, false); }); ['dragenter', 'dragover'].forEach(n => el.addEventListener(n, ()=>el.classList.add('drag-active'), false)); ['dragleave', 'drop'].forEach(n => el.addEventListener(n, ()=>el.classList.remove('drag-active'), false)); el.addEventListener('drop', e => handler(e.dataTransfer.files), false); } }
+        function openLibraryProxy(mode) { isProxyMode = (mode === 'proxy'); activeLibraryUid = isProxyMode ? targetMjUid : auth.currentUser.uid; document.getElementById('switch-container-lib').style.display = isProxyMode ? 'none' : 'flex'; document.getElementById('modal-library').style.display = 'flex'; loadModalLibrary(); }
+        function closeLibrary() { document.getElementById('modal-library').style.display = 'none'; if(isProxyMode) { isProxyMode = false; activeLibraryUid = auth.currentUser.uid; } }
         
-        // --- BLASONS (CRESTS) ---
-        function openLibraryProxy(mode) {
-            if (mode === 'proxy') {
-                isProxyMode = true;
-                activeLibraryUid = targetMjUid;
-                document.getElementById('switch-container-lib').style.display = 'none';
-            } else {
-                isProxyMode = false;
-                activeLibraryUid = auth.currentUser.uid;
-                document.getElementById('switch-container-lib').style.display = 'flex';
-            }
-            document.getElementById('modal-library').style.display = 'flex';
-            loadModalLibrary();
-        }
-
-        function closeLibrary() {
-            document.getElementById('modal-library').style.display = 'none';
-            if (isProxyMode) {
-                isProxyMode = false;
-                activeLibraryUid = auth.currentUser.uid;
-            }
-        }
-
         function loadModalLibrary() {
             const uid = activeLibraryUid || auth.currentUser.uid;
             db.ref(`users/${uid}/library`).once('value').then(snap => {
                 const libData = snap.val() || {};
-                if (!isProxyMode) {
-                    mjLibrary = libData;
-                    loadCrestGrid();
-                    syncLibraryToRoom();
-                }
+                if (!isProxyMode) { mjLibrary = libData; loadCrestGrid(); syncLibraryToRoom(); }
                 renderModalLibraryGrid(libData); 
-            });
+            }).catch(e => console.error("Erreur Library:", e));
         }
 
         function renderModalLibraryGrid(libData) {
-            const grid = document.getElementById('lib-grid');
-            if(!grid) return;
-            grid.innerHTML = "";
+            const grid = document.getElementById('lib-grid'); if(!grid) return; grid.innerHTML = "";
             const entries = Object.entries(libData || {});
-            const recent = entries.filter(e => e[0].startsWith('-'));
-            const old = entries.filter(e => !e[0].startsWith('-'));
+            const recent = entries.filter(e => e[0].startsWith('-')); const old = entries.filter(e => !e[0].startsWith('-'));
             recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
-            const finalOrder = [...recent, ...old];
-            
-            finalOrder.forEach(entry => {
-                const key = entry[0]; const url = entry[1];
-                const item = document.createElement('div');
-                item.className = 'lib-item';
-                item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteFromModalLibrary('${key}', '${url}')">X</div>`;
-                grid.appendChild(item);
-            });
-
-            if (showDefaultCrests) {
-                for(let i=0; i<30; i++) {
-                    const url = createBlason(i);
-                    const item = document.createElement('div');
-                    item.className = 'lib-item';
-                    item.innerHTML = `<img src="${url}">`;
-                    grid.appendChild(item);
-                }
-            }
+            [...recent, ...old].forEach(entry => { const item = document.createElement('div'); item.className = 'lib-item'; item.innerHTML = `<img src="${entry[1]}"><div class="lib-del" onclick="deleteFromModalLibrary('${entry[0]}', '${entry[1]}')">X</div>`; grid.appendChild(item); });
+            if (showDefaultCrests) { for(let i=0; i<30; i++) { const item = document.createElement('div'); item.className = 'lib-item'; item.innerHTML = `<img src="${createBlason(i)}">`; grid.appendChild(item); } }
         }
 
         function deleteFromModalLibrary(key, urlToDelete) {
-            if(confirm("Supprimer cette image ?\nSi elle est utilisée par une équipe, elle sera remplacée par le logo par défaut.")) {
-                const uid = activeLibraryUid || auth.currentUser.uid;
-                if(!isProxyMode && globalTeams) {
-                    Object.keys(globalTeams).forEach(tKey => {
-                        if(globalTeams[tKey].icon === urlToDelete) {
-                            const fallbackUrl = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
-                            roomRef.child('teams/' + tKey).update({ icon: fallbackUrl });
-                        }
-                    });
-                }
-                db.ref(`users/${uid}/library/${key}`).remove().then(() => { loadModalLibrary(); });
+            if(confirm("Supprimer cette image ?")) {
+                if(!isProxyMode && globalTeams) { Object.keys(globalTeams).forEach(tKey => { if(globalTeams[tKey].icon === urlToDelete) roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" }); }); }
+                db.ref(`users/${activeLibraryUid || auth.currentUser.uid}/library/${key}`).remove().then(() => loadModalLibrary());
             }
         }
 
         async function handleFiles(files) {
-            if(!files || files.length === 0) return;
-            const title = document.getElementById('dz-title'); const sub = document.getElementById('dz-sub'); const originalTitle = title.innerText;
-            const uid = activeLibraryUid || auth.currentUser.uid;
-            let count = 0; const total = files.length;
-            title.innerText = `⏳ Envoi : 0 / ${total}...`; sub.innerText = "Veuillez patienter...";
-            for (let i = 0; i < total; i++) {
-                try {
-                    await uploadSingleFile(files[i], uid);
-                    count++; title.innerText = `⏳ Envoi : ${count} / ${total}...`;
-                } catch (err) { console.error("Erreur fichier", err); }
-            }
-            title.innerText = "✅ TERMINÉ !"; sub.innerText = `${count} images ajoutées.`;
-            loadModalLibrary();
-            setTimeout(() => { title.innerText = originalTitle; sub.innerText = "ou Cliquez pour parcourir"; }, 2000);
-        }
-
-        function uploadSingleFile(file, uid) {
-            return new Promise((resolve, reject) => {
-                const storageRef = storage.ref(`mj_library/${uid}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}_${file.name}`);
-                storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
-                    db.ref(`users/${uid}/library`).push(url).then(() => resolve(url));
-                }).catch(err => reject(err));
-            });
+            if(!files || files.length === 0) return; const title = document.getElementById('dz-title'); const sub = document.getElementById('dz-sub'); const orig = title.innerText; const uid = activeLibraryUid || auth.currentUser.uid; let count = 0; title.innerText = `⏳ Envoi : 0 / ${files.length}...`;
+            for (let i = 0; i < files.length; i++) { try { await new Promise((resolve, reject) => { storage.ref(`mj_library/${uid}/${Date.now()}_${files[i].name}`).put(files[i]).then(s => s.ref.getDownloadURL()).then(u => db.ref(`users/${uid}/library`).push(u).then(()=>resolve(u))).catch(reject); }); count++; title.innerText = `⏳ Envoi : ${count} / ${files.length}...`; } catch(e){} }
+            title.innerText = "✅ TERMINÉ !"; loadModalLibrary(); setTimeout(() => { title.innerText = orig; sub.innerText = "ou Cliquez pour parcourir"; }, 2000);
         }
 
         function loadCrestGrid() {
-            const grid = document.getElementById('crest-grid');
-            if(!grid) return;
-            grid.innerHTML = "";
-            const entries = Object.entries(mjLibrary || {});
-            const recent = entries.filter(e => e[0].startsWith('-'));
-            const old = entries.filter(e => !e[0].startsWith('-'));
-            recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
-            const finalOrder = [...recent, ...old];
-            finalOrder.forEach(entry => { createCrestItem(entry[1], grid); });
-            if (showDefaultCrests) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); } }
+            const grid = document.getElementById('crest-grid'); if(!grid) return; grid.innerHTML = "";
+            const entries = Object.entries(mjLibrary || {}); const recent = entries.filter(e => e[0].startsWith('-')); const old = entries.filter(e => !e[0].startsWith('-')); recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
+            [...recent, ...old].forEach(entry => createCrestItem(entry[1], grid));
+            if (showDefaultCrests) { for(let i=0; i<30; i++) createCrestItem(createBlason(i), grid); }
         }
+        function toggleDefaultCrests(checked) { showDefaultCrests = checked; if (!isProxyMode) { db.ref(`users/${auth.currentUser.uid}/showDefaultCrests`).set(checked); mjProfileData.showDefaultCrests = checked; loadCrestGrid(); } loadModalLibrary(); }
 
-        function toggleDefaultCrests(checked) {
-            showDefaultCrests = checked;
-            if (!isProxyMode) {
-                db.ref(`users/${auth.currentUser.uid}/showDefaultCrests`).set(checked);
-                mjProfileData.showDefaultCrests = checked;
-                loadCrestGrid(); 
-            }
-            loadModalLibrary(); 
-        }
-
-        // --- FONDS D'ÉCRAN (BACKGROUNDS) ---
-        function openBgLibraryProxy(mode) {
-            if (mode === 'proxy') {
-                isProxyBgMode = true;
-                activeBgLibraryUid = targetMjUid;
-            } else {
-                isProxyBgMode = false;
-                activeBgLibraryUid = auth.currentUser.uid;
-            }
-            modalSelectedBgUrl = "";
-            document.getElementById('btn-modal-bg-default').disabled = true;
-            document.getElementById('btn-modal-bg-console').disabled = true;
-            document.getElementById('modal-bg-library').style.display = 'flex';
-            loadBgLibrary('modal');
-        }
-
-        function closeBgLibrary() {
-            document.getElementById('modal-bg-library').style.display = 'none';
-            if (isProxyBgMode) {
-                isProxyBgMode = false;
-                activeBgLibraryUid = auth.currentUser.uid;
-            }
-        }
-
+        // --- FONDS D'ÉCRAN ---
+        function openBgLibraryProxy(mode) { isProxyBgMode = (mode === 'proxy'); activeBgLibraryUid = isProxyBgMode ? targetMjUid : auth.currentUser.uid; modalSelectedBgUrl = ""; document.getElementById('btn-modal-bg-default').disabled = true; document.getElementById('btn-modal-bg-console').disabled = true; document.getElementById('modal-bg-library').style.display = 'flex'; loadBgLibrary('modal'); }
+        function closeBgLibrary() { document.getElementById('modal-bg-library').style.display = 'none'; if(isProxyBgMode) { isProxyBgMode = false; activeBgLibraryUid = auth.currentUser.uid; } }
         function loadBgLibrary(mode) {
             const uid = (mode === 'modal') ? activeBgLibraryUid : auth.currentUser.uid;
-            db.ref(`users/${uid}/bgLibrary`).once('value').then(snap => {
-                const libData = snap.val() || {};
-                if (mode === 'dashboard' || !isProxyBgMode) {
-                    mjBgLibrary = libData;
-                    renderBgGalleryDashboard();
-                }
-                if (mode === 'modal') {
-                    renderBgGalleryModal(libData);
-                }
-            });
+            db.ref(`users/${uid}/bgLibrary`).once('value').then(snap => { const libData = snap.val() || {}; if (mode === 'dashboard' || !isProxyBgMode) { mjBgLibrary = libData; renderBgGalleryDashboard(); } if (mode === 'modal') { renderBgGalleryModal(libData); } }).catch(e=>console.error(e));
         }
-
-        function renderBgGalleryDashboard() {
-            const grid = document.getElementById('bg-gallery');
-            if(!grid) return;
-            grid.innerHTML = "";
-            const entries = Object.entries(mjBgLibrary || {}).reverse();
-            entries.forEach(entry => {
-                const key = entry[0]; const url = entry[1];
-                const item = document.createElement('div');
-                item.className = 'bg-item';
-                if(selectedBgUrl === url) item.classList.add('bg-selected');
-                item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteBgFromLibraryDashboard(event, '${key}', '${url}')">X</div>`;
-                item.onclick = () => {
-                    document.querySelectorAll('#bg-gallery .bg-item').forEach(i => i.classList.remove('bg-selected'));
-                    item.classList.add('bg-selected');
-                    selectedBgUrl = url;
-                    document.getElementById('btn-apply-bg').disabled = false;
-                };
-                grid.appendChild(item);
-            });
-        }
-
-        function renderBgGalleryModal(libData) {
-            const grid = document.getElementById('bg-modal-gallery');
-            if(!grid) return;
-            grid.innerHTML = "";
-            const entries = Object.entries(libData || {}).reverse();
-            entries.forEach(entry => {
-                const key = entry[0]; const url = entry[1];
-                const item = document.createElement('div');
-                item.className = 'bg-item';
-                if(modalSelectedBgUrl === url) item.classList.add('bg-selected');
-                item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteBgFromLibraryModal(event, '${key}', '${url}')">X</div>`;
-                item.onclick = () => {
-                    document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(i => i.classList.remove('bg-selected'));
-                    item.classList.add('bg-selected');
-                    modalSelectedBgUrl = url;
-                    document.getElementById('btn-modal-bg-default').disabled = false;
-                    document.getElementById('btn-modal-bg-console').disabled = false;
-                };
-                grid.appendChild(item);
-            });
-        }
-
-        function deleteBgFromLibraryDashboard(event, key, urlToDelete) {
-            event.stopPropagation();
-            if(confirm("Supprimer ce fond d'écran de votre galerie ?")) {
-                const uid = auth.currentUser.uid;
-                if(selectedBgUrl === urlToDelete) {
-                    selectedBgUrl = ""; document.getElementById('btn-apply-bg').disabled = true;
-                }
-                if(mjProfileData.defaultBackground === urlToDelete) { db.ref(`users/${uid}/defaultBackground`).remove(); mjProfileData.defaultBackground = null; }
-                if(mjProfileData.consoleBackground === urlToDelete) { db.ref(`users/${uid}/consoleBackground`).remove(); mjProfileData.consoleBackground = null; applyMjConsoleBg(null); }
-                if(currentRoomBgUrl === urlToDelete && roomRef) { roomRef.child('customBackground').remove(); }
-                db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(() => { loadBgLibrary('dashboard'); });
-            }
-        }
-
-        function deleteBgFromLibraryModal(event, key, urlToDelete) {
-            event.stopPropagation();
-            if(confirm("Supprimer ce fond d'écran ?")) {
-                const uid = activeBgLibraryUid;
-                if(modalSelectedBgUrl === urlToDelete) {
-                    modalSelectedBgUrl = "";
-                    document.getElementById('btn-modal-bg-default').disabled = true;
-                    document.getElementById('btn-modal-bg-console').disabled = true;
-                }
-                db.ref(`users/${uid}/defaultBackground`).once('value', s => { if(s.val() === urlToDelete) db.ref(`users/${uid}/defaultBackground`).remove(); });
-                db.ref(`users/${uid}/consoleBackground`).once('value', s => { 
-                    if(s.val() === urlToDelete) { 
-                        db.ref(`users/${uid}/consoleBackground`).remove(); 
-                        if(!isProxyBgMode) applyMjConsoleBg(null); 
-                    } 
-                });
-                if (!isProxyBgMode && currentRoomBgUrl === urlToDelete && roomRef) roomRef.child('customBackground').remove();
-
-                db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(() => { loadBgLibrary('modal'); });
-            }
-        }
-
-        function handleBgUpload(files, mode) {
-            if(!files || files.length === 0) return;
-            const file = files[0];
-            const prefix = mode === 'modal' ? 'bg-modal' : 'bg';
-            const title = document.getElementById(prefix + '-dz-title');
-            const sub = document.getElementById(prefix + '-dz-sub');
-            const originalTitle = title.innerText; const originalSub = sub.innerText;
-            const uid = (mode === 'modal') ? activeBgLibraryUid : auth.currentUser.uid;
-
-            title.innerText = "⏳ Envoi en cours..."; sub.innerText = "Veuillez patienter...";
-
-            const storageRef = storage.ref(`mj_custom_bgs/${uid}/${Date.now()}_${file.name}`);
-            storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
-                db.ref(`users/${uid}/bgLibrary`).push(url).then(() => {
-                    title.innerText = "✅ Fond Ajouté !"; sub.innerText = "";
-                    loadBgLibrary(mode);
-                    setTimeout(() => { title.innerText = originalTitle; sub.innerText = originalSub; }, 3000);
-                });
-            }).catch(err => { alert("Erreur : " + err.message); title.innerText = originalTitle; sub.innerText = originalSub; });
-        }
-
-        function addBgUrlToLibrary(mode) {
-            const prefix = mode === 'modal' ? 'bg-modal' : 'room-bg';
-            const urlInput = document.getElementById(prefix + '-url-input');
-            const url = urlInput.value.trim();
-            if(!url) return;
-
-            if(!url.startsWith('http') && !url.startsWith('data:image/')) { return alert("Veuillez entrer une URL valide (http ou data:image)."); }
-
-            const uid = (mode === 'modal') ? activeBgLibraryUid : auth.currentUser.uid;
-            db.ref(`users/${uid}/bgLibrary`).push(url).then(() => {
-                urlInput.value = "";
-                loadBgLibrary(mode);
-            }).catch(err => alert("Erreur : " + err.message));
-        }
-
-        function setModalBgAction(type) {
-            if(!modalSelectedBgUrl) return;
-            const uid = activeBgLibraryUid;
-            if(type === 'default') {
-                db.ref(`users/${uid}/defaultBackground`).set(modalSelectedBgUrl).then(() => {
-                    alert("Fond par défaut enregistré !");
-                    if(!isProxyBgMode) mjProfileData.defaultBackground = modalSelectedBgUrl;
-                });
-            } else if (type === 'console') {
-                db.ref(`users/${uid}/consoleBackground`).set(modalSelectedBgUrl).then(() => {
-                    alert("Fond de console enregistré !");
-                    if(!isProxyBgMode) {
-                        mjProfileData.consoleBackground = modalSelectedBgUrl;
-                        applyMjConsoleBg(modalSelectedBgUrl);
-                    }
-                });
-            }
-        }
+        function renderBgGalleryDashboard() { const grid = document.getElementById('bg-gallery'); if(!grid) return; grid.innerHTML = ""; Object.entries(mjBgLibrary || {}).reverse().forEach(e => { const item = document.createElement('div'); item.className = 'bg-item'; if(selectedBgUrl === e[1]) item.classList.add('bg-selected'); item.innerHTML = `<img src="${e[1]}"><div class="lib-del" onclick="deleteBgFromLibraryDashboard(event, '${e[0]}', '${e[1]}')">X</div>`; item.onclick = () => { document.querySelectorAll('#bg-gallery .bg-item').forEach(i => i.classList.remove('bg-selected')); item.classList.add('bg-selected'); selectedBgUrl = e[1]; document.getElementById('btn-apply-bg').disabled = false; }; grid.appendChild(item); }); }
+        function renderBgGalleryModal(libData) { const grid = document.getElementById('bg-modal-gallery'); if(!grid) return; grid.innerHTML = ""; Object.entries(libData || {}).reverse().forEach(e => { const item = document.createElement('div'); item.className = 'bg-item'; if(modalSelectedBgUrl === e[1]) item.classList.add('bg-selected'); item.innerHTML = `<img src="${e[1]}"><div class="lib-del" onclick="deleteBgFromLibraryModal(event, '${e[0]}', '${e[1]}')">X</div>`; item.onclick = () => { document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(i => i.classList.remove('bg-selected')); item.classList.add('bg-selected'); modalSelectedBgUrl = e[1]; document.getElementById('btn-modal-bg-default').disabled = false; document.getElementById('btn-modal-bg-console').disabled = false; }; grid.appendChild(item); }); }
+        function deleteBgFromLibraryDashboard(e, key, url) { e.stopPropagation(); if(confirm("Supprimer ?")) { if(selectedBgUrl===url){selectedBgUrl="";document.getElementById('btn-apply-bg').disabled=true;} const uid=auth.currentUser.uid; if(mjProfileData.defaultBackground===url){db.ref(`users/${uid}/defaultBackground`).remove();mjProfileData.defaultBackground=null;} if(mjProfileData.consoleBackground===url){db.ref(`users/${uid}/consoleBackground`).remove();mjProfileData.consoleBackground=null;applyMjConsoleBg(null);} if(currentRoomBgUrl===url&&roomRef)roomRef.child('customBackground').remove(); db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(()=>loadBgLibrary('dashboard')); } }
+        function deleteBgFromLibraryModal(e, key, url) { e.stopPropagation(); if(confirm("Supprimer ?")) { if(modalSelectedBgUrl===url){modalSelectedBgUrl="";document.getElementById('btn-modal-bg-default').disabled=true;document.getElementById('btn-modal-bg-console').disabled=true;} const uid=activeBgLibraryUid; db.ref(`users/${uid}/defaultBackground`).once('value', s => {if(s.val()===url)db.ref(`users/${uid}/defaultBackground`).remove();}); db.ref(`users/${uid}/consoleBackground`).once('value', s => {if(s.val()===url){db.ref(`users/${uid}/consoleBackground`).remove();if(!isProxyBgMode)applyMjConsoleBg(null);}}); if(!isProxyBgMode&&currentRoomBgUrl===url&&roomRef)roomRef.child('customBackground').remove(); db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(()=>loadBgLibrary('modal')); } }
+        function handleBgUpload(files, mode) { if(!files||files.length===0)return; const file=files[0], prefix=mode==='modal'?'bg-modal':'bg', title=document.getElementById(prefix+'-dz-title'), sub=document.getElementById(prefix+'-dz-sub'), orig=title.innerText, uid=mode==='modal'?activeBgLibraryUid:auth.currentUser.uid; title.innerText="⏳ Envoi..."; storage.ref(`mj_custom_bgs/${uid}/${Date.now()}_${file.name}`).put(file).then(s=>s.ref.getDownloadURL()).then(u=>{ db.ref(`users/${uid}/bgLibrary`).push(u).then(()=>{ title.innerText="✅ Ajouté !"; loadBgLibrary(mode); setTimeout(()=>{title.innerText=orig;sub.innerText=sub.innerText;},3000); }); }).catch(e=>alert("Erreur: "+e.message)); }
+        function addBgUrlToLibrary(mode) { const p=mode==='modal'?'bg-modal':'room-bg', i=document.getElementById(p+'-url-input'), u=i.value.trim(); if(!u||(!u.startsWith('http')&&!u.startsWith('data:image/')))return alert("URL invalide."); db.ref(`users/${mode==='modal'?activeBgLibraryUid:auth.currentUser.uid}/bgLibrary`).push(u).then(()=>{ i.value=""; loadBgLibrary(mode); }); }
+        function setModalBgAction(type) { if(!modalSelectedBgUrl)return; const uid=activeBgLibraryUid; if(type==='default'){ db.ref(`users/${uid}/defaultBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond par défaut enregistré !");if(!isProxyBgMode)mjProfileData.defaultBackground=modalSelectedBgUrl;}); } else { db.ref(`users/${uid}/consoleBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond console enregistré !");if(!isProxyBgMode){mjProfileData.consoleBackground=modalSelectedBgUrl;applyMjConsoleBg(modalSelectedBgUrl);}}); } }
+        function saveCustomBg() { if(!selectedBgUrl)return; const d=document.getElementById('check-default-bg').checked, c=document.getElementById('check-console-bg').checked, uid=auth.currentUser.uid; if(d){db.ref(`users/${uid}/defaultBackground`).set(selectedBgUrl);mjProfileData.defaultBackground=selectedBgUrl;} if(c){db.ref(`users/${uid}/consoleBackground`).set(selectedBgUrl);mjProfileData.consoleBackground=selectedBgUrl;applyMjConsoleBg(selectedBgUrl);}else{db.ref(`users/${uid}/consoleBackground`).remove();mjProfileData.consoleBackground=null;applyMjConsoleBg(null);} if(roomRef)roomRef.child('customBackground').set(selectedBgUrl).then(()=>alert("Appliqué !")); }
+        function resetCustomBg() { selectedBgUrl=""; document.querySelectorAll('#bg-gallery .bg-item').forEach(i=>i.classList.remove('bg-selected')); document.getElementById('btn-apply-bg').disabled=true; if(roomRef)roomRef.child('customBackground').remove().then(()=>alert("Fond par défaut de la salle réinitialisé.")); }
+        function handleProfileFile(files) { if(!files||files.length===0)return; const storageRef=storage.ref(`mj_profile_logos/${auth.currentUser.uid}/logo`); document.getElementById('prof-logo-placeholder').style.opacity='0.3'; storageRef.put(files[0]).then(s=>s.ref.getDownloadURL()).then(u=>{ document.getElementById('prof-logo-placeholder').style.display='none'; const img=document.getElementById('prof-logo-preview'); img.src=u; img.style.display='block'; document.getElementById('prof-logo-url').value=u; }).catch(e=>alert("Erreur upload: "+e.message)); }
+        function applyMjConsoleBg(url) { const bg=document.getElementById('dynamic-bg'); if(url&&url!==""){ bg.style.background=`url('${url}') center/cover no-repeat`; bg.style.animation='none'; }else{ bg.style.background='linear-gradient(45deg, #0f0c29, #302b63, #24243e)'; bg.style.backgroundSize='300% 300%'; bg.style.animation='gradientBG 15s ease infinite'; } }
+        function login() { const e=document.getElementById('mj-email').value.trim(), p=document.getElementById('mj-pass').value; if(e&&p)auth.signInWithEmailAndPassword(e,p).then(r=>loadMjData(r.user)).catch(()=>alert("Oups ! Identifiants incorrects.")); }
+        function togglePasswordVisibility(id, icon) { const i=document.getElementById(id); if(i.type==='password'){ i.type='text'; icon.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 3.31 0 6.28-1.38 8.22-3.67l.48.48 2.73 2.73 1.27-1.27L3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>'; } else { i.type='password'; icon.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; } }
+        function forgotPassword() { const e=document.getElementById('mj-email').value.trim(); if(e)auth.sendPasswordResetEmail(e).then(()=>alert("Email envoyé !")).catch(err=>alert("Erreur: "+err.message)); }
         
-        function saveCustomBg() {
-            if(!selectedBgUrl) return;
-            const setDefault = document.getElementById('check-default-bg').checked;
-            const setConsole = document.getElementById('check-console-bg').checked;
-            const uid = auth.currentUser.uid;
-            
-            if(setDefault) { db.ref(`users/${uid}/defaultBackground`).set(selectedBgUrl); mjProfileData.defaultBackground = selectedBgUrl; }
-            if(setConsole) { db.ref(`users/${uid}/consoleBackground`).set(selectedBgUrl); mjProfileData.consoleBackground = selectedBgUrl; applyMjConsoleBg(selectedBgUrl); } 
-            else { db.ref(`users/${uid}/consoleBackground`).remove(); mjProfileData.consoleBackground = null; applyMjConsoleBg(null); }
-
-            if (roomRef) { roomRef.child('customBackground').set(selectedBgUrl).then(() => { alert("Fond d'écran appliqué !"); }); }
-        }
-
-        function resetCustomBg() {
-            selectedBgUrl = ""; document.querySelectorAll('#bg-gallery .bg-item').forEach(i => i.classList.remove('bg-selected'));
-            document.getElementById('btn-apply-bg').disabled = true;
-            if (roomRef) { roomRef.child('customBackground').remove().then(() => { alert("Retour au fond animé par défaut."); }); }
-        }
-        // --- FIN GESTION FONDS & MEDIAS ---
-
-        function handleProfileFile(files) { if(!files || files.length === 0) return; const file = files[0]; const uid = auth.currentUser.uid; const storageRef = storage.ref(`mj_profile_logos/${uid}/logo`); document.getElementById('prof-logo-placeholder').style.opacity = '0.3'; storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => { document.getElementById('prof-logo-placeholder').style.display = 'none'; const img = document.getElementById('prof-logo-preview'); img.src = url; img.style.display = 'block'; document.getElementById('prof-logo-url').value = url; }).catch(err => alert("Erreur upload profil : " + err.message)); }
-
-        function applyMjConsoleBg(url) {
-            const bgDiv = document.getElementById('dynamic-bg');
-            if (url && url !== "") {
-                bgDiv.style.background = `url('${url}') center/cover no-repeat`;
-                bgDiv.style.animation = 'none';
-            } else {
-                bgDiv.style.background = 'linear-gradient(45deg, #0f0c29, #302b63, #24243e)';
-                bgDiv.style.backgroundSize = '300% 300%';
-                bgDiv.style.animation = 'gradientBG 15s ease infinite';
-            }
-        }
-
-        function login() { const email = document.getElementById('mj-email').value.trim(); const pass = document.getElementById('mj-pass').value; if(!email || !pass) return; auth.signInWithEmailAndPassword(email, pass).then(res => { loadMjData(res.user); }).catch(e => { alert("Oups ! L'email ou le mot de passe saisi est incorrect. Veuillez vérifier vos identifiants."); }); }
-        function togglePasswordVisibility(inputId, icon) { const input = document.getElementById(inputId); if(input.type === 'password') { input.type = 'text'; icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 3.31 0 6.28-1.38 8.22-3.67l.48.48 2.73 2.73 1.27-1.27L3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>'; } else { input.type = 'password'; icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; } }
-        function forgotPassword() { const email = document.getElementById('mj-email').value.trim(); if(!email) return alert("Veuillez saisir votre email."); auth.sendPasswordResetEmail(email).then(() => { alert("Email envoyé !"); }).catch(e => alert("Erreur : " + e.message)); }
-
         function loadMjData(user) {
-            
-            isSuperAdmin = (user.email === 'contact@prestapuce.com');
-            activeLibraryUid = user.uid;
-            activeBgLibraryUid = user.uid;
-            
-            if(isSuperAdmin) {
-                document.getElementById('btn-super-admin').style.display = 'inline-block';
-                document.getElementById('sys-version-input').style.display = 'inline-block';
-                document.getElementById('btn-update-version').style.display = 'inline-block';
-                initSuperAdminListener();
-            } else {
-                document.getElementById('btn-super-admin').style.display = 'none';
-                document.getElementById('sys-version-input').style.display = 'none';
-                document.getElementById('btn-update-version').style.display = 'none';
-            }
-
+            isSuperAdmin = (user.email === 'contact@prestapuce.com'); activeLibraryUid = user.uid; activeBgLibraryUid = user.uid;
+            if(isSuperAdmin) { document.getElementById('btn-super-admin').style.display='inline-block'; document.getElementById('sys-version-input').style.display='inline-block'; document.getElementById('btn-update-version').style.display='inline-block'; initSuperAdminListener(); } 
+            else { document.getElementById('btn-super-admin').style.display='none'; document.getElementById('sys-version-input').style.display='none'; document.getElementById('btn-update-version').style.display='none'; }
             db.ref('users/' + user.uid).update({ email: user.email });
-
             db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
-                
-                // --- LE PÉAGE ---
-                if(!isSuperAdmin && data.isGuest !== true) {
-                    const isBlocked = data.isBlocked === true;
-                    let isExpired = false;
-                    if(data.expirationDate && data.expirationDate < Date.now()) { isExpired = true; }
-                    
-                    if(isBlocked || isExpired) {
-                        alert("⚠️ ACCÈS REFUSÉ.\n\nVotre abonnement est expiré ou votre compte est bloqué.\nVeuillez contacter contact@prestapuce.com");
-                        auth.signOut().then(()=>location.reload());
-                        return;
-                    }
-                }
-                
+                if(!isSuperAdmin && data.isGuest !== true) { if(data.isBlocked || (data.expirationDate && data.expirationDate < Date.now())) { alert("⚠️ ACCÈS REFUSÉ. Abonnement expiré ou bloqué."); return auth.signOut().then(()=>location.reload()); } }
                 mjProfileData = data;
-                
-                if (!data.library && data.customLogos) {
-                    let migratedLib = {}; Object.values(data.customLogos).forEach((url, idx) => { migratedLib['migrated_' + idx] = url; });
-                    db.ref(`users/${user.uid}/library`).set(migratedLib).then(() => { mjLibrary = migratedLib; loadCrestGrid(); });
-                } else { mjLibrary = data.library || {}; }
-                
+                if (!data.library && data.customLogos) { let m={}; Object.values(data.customLogos).forEach((u,i)=>m['m_'+i]=u); db.ref(`users/${user.uid}/library`).set(m).then(()=>{ mjLibrary=m; loadCrestGrid(); }); } else { mjLibrary = data.library || {}; }
                 mjBgLibrary = data.bgLibrary || {};
-                
-                if(data.defaultBackground) { document.getElementById('check-default-bg').checked = true; }
-                if(data.consoleBackground) { 
-                    document.getElementById('check-console-bg').checked = true; 
-                    applyMjConsoleBg(data.consoleBackground);
-                } else { applyMjConsoleBg(null); }
-
-                showDefaultCrests = (data.showDefaultCrests !== false); 
-                document.getElementById('check-hide-default').checked = showDefaultCrests;
-                
-                if(mjProfileData.isGuest === true) { cleanGuestData(user.uid); }
-                else {
-                    document.getElementById('mj-display-name').innerText = data.prenom || "MJ";
-                    updateLogos(data.customLogo);
-                    checkUserRoom(user.uid);
-                }
-            });
-        }
-
-        function cleanGuestData(uid) {
-            const updates = {}; updates[`users/${uid}/lastRoom`] = null; updates[`users/${uid}/library`] = null;
-            db.ref().update(updates).then(() => {
-                mjProfileData.lastRoom = ""; mjLibrary = {};
-                document.getElementById('mj-display-name').innerText = mjProfileData.prenom || "MJ";
-                updateLogos(mjProfileData.customLogo); checkUserRoom(uid);
-            });
+                if(data.defaultBackground) document.getElementById('check-default-bg').checked=true;
+                if(data.consoleBackground) { document.getElementById('check-console-bg').checked=true; applyMjConsoleBg(data.consoleBackground); } else applyMjConsoleBg(null);
+                showDefaultCrests = (data.showDefaultCrests !== false); document.getElementById('check-hide-default').checked = showDefaultCrests;
+                if(mjProfileData.isGuest === true) { db.ref().update({[`users/${user.uid}/lastRoom`]:null, [`users/${user.uid}/library`]:null}).then(()=>{ mjProfileData.lastRoom=""; mjLibrary={}; document.getElementById('mj-display-name').innerText=mjProfileData.prenom||"MJ"; updateLogos(mjProfileData.customLogo); checkUserRoom(user.uid); }); }
+                else { document.getElementById('mj-display-name').innerText=data.prenom||"MJ"; updateLogos(data.customLogo); checkUserRoom(user.uid); }
+            }).catch(e=>console.error(e));
         }
 
         function checkUserRoom(uid) {
-            db.ref('users/' + uid + '/lastRoom').once('value', snap => {
-                document.getElementById('screen-login').style.display = "none"; document.getElementById('screen-profile').style.display = "none"; document.getElementById('screen-dashboard').style.display = "none"; document.getElementById('screen-choice').style.display = "block"; document.getElementById('global-mj-logo-container').style.display = "block";
-                if(snap.exists() && snap.val() !== "") { lastSavedRoom = snap.val(); document.getElementById('btn-resume').style.display = "block"; document.getElementById('last-room-id').innerText = lastSavedRoom; } 
-                else { document.getElementById('btn-resume').style.display = "none"; }
-            });
+            db.ref('users/' + uid + '/lastRoom').once('value').then(snap => {
+                document.getElementById('screen-login').style.display="none"; document.getElementById('screen-profile').style.display="none"; document.getElementById('screen-dashboard').style.display="none"; document.getElementById('screen-choice').style.display="block"; document.getElementById('global-mj-logo-container').style.display="block";
+                if(snap.exists() && snap.val() !== "") { lastSavedRoom = snap.val(); document.getElementById('btn-resume').style.display="block"; document.getElementById('last-room-id').innerText=lastSavedRoom; } 
+                else { document.getElementById('btn-resume').style.display="none"; }
+            }).catch(e=>console.error(e));
         }
+
+        // Brique de sécurité Tâche 1
+        function syncLibraryToRoom() { 
+            try { if(roomID && roomRef) roomRef.child('library').set(mjLibrary || {}); } catch(e){ console.error("Erreur sync library", e); }
+        }
+
+        function initLibrarySync() { roomRef.child('library').on('value', snap => { const r = snap.val()||{}; const u = auth.currentUser.uid; if(!u)return; let h=false; Object.values(r).forEach(url => { if(!Object.values(mjLibrary).includes(url)){ db.ref(`users/${u}/library`).push(url); h=true; } }); if(h) loadModalLibrary(); }); }
 
         let previousScreen = "screen-choice";
-        function toggleProfile() { const profScreen = document.getElementById('screen-profile'); if(profScreen.style.display === "block") closeProfile(); else showProfile(); }
-        function updateLogoPreview(url) { const preview = document.getElementById('prof-logo-preview'); const placeholder = document.getElementById('prof-logo-placeholder'); if(url) { preview.src = url; preview.style.display = 'block'; placeholder.style.display = 'none'; } else { preview.style.display = 'none'; placeholder.style.display = 'block'; } }
+        function toggleProfile() { const p = document.getElementById('screen-profile'); if(p.style.display==="block") closeProfile(); else showProfile(); }
+        function updateLogoPreview(u) { const p=document.getElementById('prof-logo-preview'), h=document.getElementById('prof-logo-placeholder'); if(u){p.src=u;p.style.display='block';h.style.display='none';}else{p.style.display='none';h.style.display='block';} }
         function showProfile() {
-            if(document.getElementById('screen-choice').style.display === "block") previousScreen = "screen-choice";
-            if(document.getElementById('screen-dashboard').style.display === "block") previousScreen = "screen-dashboard";
-            document.getElementById('screen-choice').style.display = "none"; document.getElementById('screen-dashboard').style.display = "none"; document.getElementById('screen-profile').style.display = "block";
-            const user = auth.currentUser;
-            if(user) {
-                document.getElementById('prof-email').value = user.email;
-                document.getElementById('prof-nom').value = mjProfileData.nom || "";
-                document.getElementById('prof-prenom').value = mjProfileData.prenom || "";
-                const currentLogo = mjProfileData.customLogo || "";
-                document.getElementById('prof-logo-url').value = currentLogo; updateLogoPreview(currentLogo);
-                document.getElementById('prof-link').value = mjProfileData.customLink || "";
-                const isGuest = mjProfileData.isGuest === true;
-                const inputs = ['prof-nom','prof-prenom','prof-link','prof-email'];
-                inputs.forEach(id => document.getElementById(id).disabled = isGuest);
-                document.getElementById('btn-save-profile').disabled = isGuest;
-                const dz = document.getElementById('profile-drop-zone');
-                if(isGuest) { dz.style.opacity = '0.5'; dz.style.pointerEvents = 'none'; } else { dz.style.opacity = '1'; dz.style.pointerEvents = 'auto'; }
+            if(document.getElementById('screen-choice').style.display==="block") previousScreen="screen-choice"; if(document.getElementById('screen-dashboard').style.display==="block") previousScreen="screen-dashboard";
+            document.getElementById('screen-choice').style.display="none"; document.getElementById('screen-dashboard').style.display="none"; document.getElementById('screen-profile').style.display="block";
+            if(auth.currentUser) {
+                document.getElementById('prof-email').value=auth.currentUser.email; document.getElementById('prof-nom').value=mjProfileData.nom||""; document.getElementById('prof-prenom').value=mjProfileData.prenom||"";
+                const cl = mjProfileData.customLogo||""; document.getElementById('prof-logo-url').value=cl; updateLogoPreview(cl); document.getElementById('prof-link').value=mjProfileData.customLink||"";
+                const isG = mjProfileData.isGuest===true; ['prof-nom','prof-prenom','prof-link','prof-email'].forEach(id=>document.getElementById(id).disabled=isG); document.getElementById('btn-save-profile').disabled=isG;
+                const dz=document.getElementById('profile-drop-zone'); if(isG){dz.style.opacity='0.5';dz.style.pointerEvents='none';}else{dz.style.opacity='1';dz.style.pointerEvents='auto';}
             }
         }
-        function closeProfile() { document.getElementById('screen-profile').style.display = "none"; document.getElementById(previousScreen).style.display = "block"; }
+        function closeProfile() { document.getElementById('screen-profile').style.display="none"; document.getElementById(previousScreen).style.display="block"; }
         
         async function saveProfile() {
-            if(mjProfileData.isGuest === true) { alert("Action impossible en Mode Découverte."); return; }
+            if(mjProfileData.isGuest===true) return alert("Action impossible en Découverte.");
             const user = auth.currentUser; if(!user) return;
-            
-            const newEmail = document.getElementById('prof-email').value.trim();
-            const passCurrent = document.getElementById('prof-pass-current').value;
-            const pass1 = document.getElementById('prof-pass').value; 
-            const pass2 = document.getElementById('prof-pass-conf').value;
-            
-            const emailChanged = newEmail !== user.email;
-            const passChanged = pass1 !== "";
-
-            const updates = { 
-                nom: document.getElementById('prof-nom').value.trim(), 
-                prenom: document.getElementById('prof-prenom').value.trim(), 
-                customLogo: document.getElementById('prof-logo-url').value.trim(), 
-                customLink: document.getElementById('prof-link').value.trim()
-            };
-
-            if (emailChanged || passChanged) {
-                if(!passCurrent) {
-                    return alert("⚠️ Vous DEVEZ saisir votre 'Mot de passe actuel' pour modifier votre Email ou votre Mot de passe.");
-                }
-                if(passChanged) {
-                    if(pass1 === passCurrent) return alert("Le nouveau mot de passe doit être différent de l'ancien.");
-                    if(pass1 !== pass2) return alert("Les nouveaux mots de passe ne correspondent pas.");
-                    if(!isValidPassword(pass1)) return alert("Le nouveau mot de passe ne respecte pas les critères de sécurité (8 min, 1 Maj, 1 Min, 1 Chiffre, 1 Spécial).");
-                }
-                
+            const newE = document.getElementById('prof-email').value.trim(), passC = document.getElementById('prof-pass-current').value, pass1 = document.getElementById('prof-pass').value, pass2 = document.getElementById('prof-pass-conf').value;
+            const eCh = newE!==user.email, pCh = pass1!=="";
+            const upd = { nom: document.getElementById('prof-nom').value.trim(), prenom: document.getElementById('prof-prenom').value.trim(), customLogo: document.getElementById('prof-logo-url').value.trim(), customLink: document.getElementById('prof-link').value.trim() };
+            if (eCh || pCh) {
+                if(!passC) return alert("Mot de passe ACTUEL requis.");
+                if(pCh) { if(pass1===passC) return alert("Le nouveau mdp doit être différent."); if(pass1!==pass2) return alert("Mots de passe différents."); if(!isValidPassword(pass1)) return alert("Critères de sécurité non respectés."); }
                 try {
-                    const credential = firebase.auth.EmailAuthProvider.credential(user.email, passCurrent);
-                    await user.reauthenticateWithCredential(credential);
-                    
-                    if (emailChanged) {
-                        await user.updateEmail(newEmail);
-                        updates.email = newEmail;
-                    }
-                    if (passChanged) {
-                        await user.updatePassword(pass1);
-                    }
-                } catch(e) {
-                    return alert("Erreur de sécurité : Mot de passe actuel incorrect. (" + e.message + ")");
-                }
+                    await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, passC));
+                    if (eCh) { await user.updateEmail(newE); upd.email = newE; }
+                    if (pCh) await user.updatePassword(pass1);
+                } catch(e) { return alert("Mot de passe actuel incorrect."); }
             }
-            
-            db.ref('users/' + user.uid).update(updates).then(() => { 
-                alert("Profil mis à jour !"); 
-                mjProfileData = { ...mjProfileData, ...updates }; 
-                document.getElementById('mj-display-name').innerText = updates.prenom || "MJ"; 
-                updateLogos(updates.customLogo); 
-                
-                document.getElementById('prof-pass-current').value = "";
-                document.getElementById('prof-pass').value = "";
-                document.getElementById('prof-pass-conf').value = "";
-                
-                closeProfile(); 
-            }).catch(e => alert("Erreur : " + e.message));
+            db.ref('users/'+user.uid).update(upd).then(()=>{ alert("Profil mis à jour !"); mjProfileData={...mjProfileData, ...upd}; document.getElementById('mj-display-name').innerText=upd.prenom||"MJ"; updateLogos(upd.customLogo); document.getElementById('prof-pass-current').value=""; document.getElementById('prof-pass').value=""; document.getElementById('prof-pass-conf').value=""; closeProfile(); }).catch(e=>alert("Erreur: "+e.message));
         }
 
-        function updateLogos(url) { const finalUrl = url || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png"; document.getElementById('global-mj-logo').src = finalUrl; document.getElementById('login-mj-logo').src = finalUrl; document.getElementById('page-favicon').href = finalUrl; if(roomRef && roomID) { roomRef.child('mjLogo').set(finalUrl); if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); } }
+        function updateLogos(url) { const f = url || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png"; document.getElementById('global-mj-logo').src=f; document.getElementById('login-mj-logo').src=f; document.getElementById('page-favicon').href=f; if(roomRef&&roomID){ roomRef.child('mjLogo').set(f); if(mjProfileData.customLink)roomRef.child('mjLink').set(mjProfileData.customLink); } }
+        function createBlason(i) { const c=['#e74c3c','#3498db','#f1c40f','#2c3e50','#27ae60','#ecf0f1'], c1=c[i%c.length], c2=c[(i+1)%c.length], m=i%10; let p=(m===0)?`<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`:(m===1)?`<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`:`<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`; return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${p}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`; }
 
-        function askMjNameAndCreate() { const defaultName = mjProfileData.prenom || "MJ"; const mjName = prompt("Quel nom d'animateur afficher aux joueurs ?", defaultName); if(mjName !== null) { createNewRoom(mjName); } }
-        function createNewRoom(mjName = "MJ") { roomID = Math.floor(1000 + Math.random() * 9000).toString(); db.ref('users/' + auth.currentUser.uid + '/lastRoom').set(roomID); launchDashboard(roomID, mjName); }
+        function askMjNameAndCreate() { const n = prompt("Nom d'animateur ?", mjProfileData.prenom||"MJ"); if(n!==null) { roomID = Math.floor(1000 + Math.random() * 9000).toString(); db.ref('users/'+auth.currentUser.uid+'/lastRoom').set(roomID).then(()=>launchDashboard(roomID, n)); } }
         function resumeRoom() { launchDashboard(lastSavedRoom); }
 
         function launchDashboard(id, mjName = null) {
-            roomID = id;
-            buzzHistory = []; currentBuzzerId = null; currentPlayer = null;
-            const btnDel = document.getElementById('btn-delete-room');
-            if(btnDel) { btnDel.classList.remove('countdown-btn'); btnDel.disabled = false; btnDel.innerText = "⚠️ SUPPRIMER LA SALLE (Effacer tout)"; }
-
-            document.getElementById('screen-choice').style.display = "none"; 
-            document.getElementById('screen-dashboard').style.display = "block";
-            document.getElementById('display-room').innerText = roomID;
+            roomID = id; buzzHistory = []; currentBuzzerId = null; currentPlayer = null;
+            const btnDel = document.getElementById('btn-delete-room'); if(btnDel) { btnDel.classList.remove('countdown-btn'); btnDel.disabled = false; btnDel.innerText = "⚠️ SUPPRIMER LA SALLE (Effacer tout)"; }
+            document.getElementById('screen-choice').style.display = "none"; document.getElementById('screen-dashboard').style.display = "block"; document.getElementById('display-room').innerText = roomID;
+            
             db.ref('activeRooms/' + roomID).set({ status: 'open' });
             roomRef = db.ref('rooms/' + id);
             
-            if(mjName) roomRef.child('mjName').set(mjName);
-            const currentLogo = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
-            roomRef.child('mjLogo').set(currentLogo);
-            if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink);
-            roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true);
+            try { if(mjName) roomRef.child('mjName').set(mjName); } catch(e){}
+            try { roomRef.child('mjLogo').set(mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png"); } catch(e){}
+            try { if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); } catch(e){}
+            try { roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true); } catch(e){}
+            try { if(mjProfileData.defaultBackground) roomRef.child('customBackground').set(mjProfileData.defaultBackground); } catch(e){}
             
-            if(mjProfileData.defaultBackground) {
-                roomRef.child('customBackground').set(mjProfileData.defaultBackground);
-            }
-            
-            syncLibraryToRoom();
-            initMJLogic(); 
-            initLibrarySync(); 
-            initAdminListener();
-            loadCrestGrid();
-            loadBgLibrary('dashboard');
-            openScoreBoard();
+            // Boucliers de lancement
+            try { syncLibraryToRoom(); } catch(e){ console.error(e); }
+            try { initMJLogic(); } catch(e){ console.error(e); }
+            try { initLibrarySync(); } catch(e){ console.error(e); }
+            try { initAdminListener(); } catch(e){ console.error(e); }
+            try { loadCrestGrid(); } catch(e){ console.error(e); }
+            try { loadBgLibrary('dashboard'); } catch(e){ console.error(e); }
+            try { openScoreBoard(); } catch(e){ console.error(e); }
         }
 
-        function initAdminListener() { db.ref('config/minVersion').on('value', snap => { const v = snap.val() || "1.000"; document.getElementById('current-version-display').innerText = v; if(document.getElementById('sys-version-input').value === "") { document.getElementById('sys-version-input').value = v; } }); }
-        function updateAppVersion() { const newV = document.getElementById('sys-version-input').value.trim(); if(newV && confirm("⚠️ ATTENTION : Cela va forcer le rechargement de TOUS les joueurs.")) { db.ref('config/minVersion').set(newV); } }
-        function openScoreBoard() { if(!roomID) return; const currentUrl = window.location.href.split('?')[0]; let basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/')); const scoreUrl = basePath + "/scores.html?room=" + roomID; window.open(scoreUrl, '_blank'); }
-        function toggleGuide() { const overlay = document.getElementById('overlay-guide'); const iframe = document.getElementById('guide-iframe'); if(overlay.style.display === 'flex') { overlay.style.display = 'none'; } else { overlay.style.display = 'flex'; iframe.src = "guide.html?t=" + new Date().getTime(); } }
-        function showRemoteQR() { const overlay = document.getElementById('overlay-remote-qr'); const qrContainer = document.getElementById('qrcode-remote'); const currentUrl = window.location.href.split('?')[0]; let basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/')); let remoteUrl = basePath + "/remote.html?room=" + roomID; qrContainer.innerHTML = ""; new QRCode(qrContainer, { text: remoteUrl, width: 250, height: 250 }); overlay.style.display = 'flex'; }
+        function initAdminListener() { db.ref('config/minVersion').on('value', snap => { const v = snap.val() || "1.000"; const d = document.getElementById('current-version-display'); if(d) d.innerText = v; const i = document.getElementById('sys-version-input'); if(i && i.value === "") i.value = v; }); }
+        function updateAppVersion() { const n = document.getElementById('sys-version-input').value.trim(); if(n && confirm("Forcer le rechargement de TOUS les joueurs ?")) db.ref('config/minVersion').set(n); }
+        function openScoreBoard() { if(!roomID) return; window.open(window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/scores.html?room=" + roomID, '_blank'); }
+        function toggleGuide() { const o = document.getElementById('overlay-guide'); if(o.style.display === 'flex') o.style.display = 'none'; else { o.style.display = 'flex'; document.getElementById('guide-iframe').src = "guide.html?t=" + Date.now(); } }
+        function showRemoteQR() { const o = document.getElementById('overlay-remote-qr'); const q = document.getElementById('qrcode-remote'); q.innerHTML = ""; new QRCode(q, { text: window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/remote.html?room=" + roomID, width: 250, height: 250 }); o.style.display = 'flex'; }
 
-        function createCrestItem(url, container) {
-            const wrap = document.createElement('div'); wrap.className = 'crest-wrapper';
-            if (selCrest === url) wrap.classList.add('crest-selected');
-            const img = document.createElement('img'); img.src = url; img.className = 'crest-opt';
-            wrap.onclick = () => { document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); wrap.classList.add('crest-selected'); selCrest = url; checkTeamForm(); };
-            wrap.appendChild(img); container.appendChild(wrap);
-        }
-
-        function checkTeamForm() { const name = document.getElementById('t-name').value.trim(); document.getElementById('btn-add-team').disabled = !(name.length > 0 && selCrest !== ""); }
-
-        function editTeam(n) {
-            const team = globalTeams[n];
-            editingTeamKey = n;
-            document.getElementById('t-name').value = n;
-            selCrest = team.icon;
-            document.getElementById('btn-add-team').innerText = "ENREGISTRER MODIFICATION";
-            document.getElementById('btn-add-team').style.background = "var(--blue)";
-            document.getElementById('btn-cancel-edit').style.display = "block";
-            loadCrestGrid(); checkTeamForm();
-        }
-
-        function cancelEdit() {
-            editingTeamKey = null;
-            document.getElementById('t-name').value = "";
-            selCrest = "";
-            document.getElementById('btn-add-team').innerText = "CRÉER L'ÉQUIPE";
-            document.getElementById('btn-add-team').style.background = "var(--mj-color)";
-            document.getElementById('btn-cancel-edit').style.display = "none";
-            loadCrestGrid(); checkTeamForm();
-        }
-
-        function addTeam() { 
-            const n = document.getElementById('t-name').value.trim();
-            if(n && selCrest) { 
-                if(mjProfileData.isGuest === true && !editingTeamKey && Object.keys(globalTeams).length >= 2) { alert("🔒 Limité à 2 équipes en Découverte."); return; }
-                if(editingTeamKey && editingTeamKey !== n) { roomRef.child('teams/' + editingTeamKey).remove(); }
-                roomRef.child('teams/' + n).update({ icon: selCrest, active: true, bonus: 0 }); 
-                cancelEdit();
-            } 
-        }
+        function createCrestItem(url, container) { const w = document.createElement('div'); w.className = 'crest-wrapper'; if (selCrest === url) w.classList.add('crest-selected'); w.innerHTML = `<img src="${url}" class="crest-opt">`; w.onclick = () => { document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); w.classList.add('crest-selected'); selCrest = url; checkTeamForm(); }; container.appendChild(w); }
+        function checkTeamForm() { document.getElementById('btn-add-team').disabled = !(document.getElementById('t-name').value.trim().length > 0 && selCrest !== ""); }
+        function editTeam(n) { const t = globalTeams[n]; editingTeamKey = n; document.getElementById('t-name').value = n; selCrest = t.icon; document.getElementById('btn-add-team').innerText = "ENREGISTRER MODIF"; document.getElementById('btn-add-team').style.background = "var(--blue)"; document.getElementById('btn-cancel-edit').style.display = "block"; loadCrestGrid(); checkTeamForm(); }
+        function cancelEdit() { editingTeamKey = null; document.getElementById('t-name').value = ""; selCrest = ""; document.getElementById('btn-add-team').innerText = "CRÉER L'ÉQUIPE"; document.getElementById('btn-add-team').style.background = "var(--mj-color)"; document.getElementById('btn-cancel-edit').style.display = "none"; loadCrestGrid(); checkTeamForm(); }
+        function addTeam() { const n = document.getElementById('t-name').value.trim(); if(n && selCrest) { if(mjProfileData.isGuest === true && !editingTeamKey && Object.keys(globalTeams).length >= 2) return alert("Limité à 2 équipes en Découverte."); if(editingTeamKey && editingTeamKey !== n) roomRef.child('teams/' + editingTeamKey).remove(); roomRef.child('teams/' + n).update({ icon: selCrest, active: true, bonus: 0 }); cancelEdit(); } }
         
         function initMJLogic() {
             roomRef.child('players').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
-            
             roomRef.child('buzzers').on('value', snap => {
-                const buzzerData = snap.val(); 
-                const box = document.getElementById('player-box');
-                
-                if(buzzerData) { 
-                    currentBuzzerId = buzzerData.id;
-                    const pseudo = buzzerData.pseudo;
-                    
-                    if (pseudo) {
-                        if (!buzzHistory.includes(pseudo)) { buzzHistory.push(pseudo); }
-                        else { buzzHistory = buzzHistory.filter(name => name !== pseudo); buzzHistory.push(pseudo); }
-                    }
-
-                    let id = buzzerData.id; let realData = null;
-                    if(id && allPlayersData[id]) { realData = allPlayersData[id]; currentPlayer = { id: id, ...realData }; }
-                    else if(pseudo) { for(const [uid, pData] of Object.entries(allPlayersData)) { if(pData.name === pseudo) { realData = pData; currentPlayer = { id: uid, ...realData }; break; } } }
-                    
-                    if(realData) {
-                        const avatarContainer = document.getElementById('p-avatar');
-                        if(realData.avatar && realData.avatar.length > 20) avatarContainer.innerHTML = `<img src="${realData.avatar}" style="width:70px; height:70px; border-radius:50%; object-fit:cover;">`; else avatarContainer.innerHTML = realData.avatar || '👤'; 
-                        document.getElementById('p-name').innerText = realData.name; box.style.display = "block";
-                        if(realData.teamName && realData.teamName !== "Solo") { const iconUrl = globalTeams[realData.teamName] ? globalTeams[realData.teamName].icon : realData.teamIcon; document.getElementById('p-team').innerHTML = `<div class="crest-mini-bg"><img src="${iconUrl}" class="crest-mini"></div><span>${realData.teamName}</span>`; } else document.getElementById('p-team').innerHTML = "Solo"; 
-                    }
-                } else {
-                    currentBuzzerId = null;
-                    box.style.display = "none"; 
-                }
+                const b = snap.val(); const box = document.getElementById('player-box');
+                if(b) { 
+                    currentBuzzerId = b.id; const ps = b.pseudo;
+                    if (ps) { if (!buzzHistory.includes(ps)) buzzHistory.push(ps); else { buzzHistory = buzzHistory.filter(n => n !== ps); buzzHistory.push(ps); } }
+                    let rd = null; if(b.id && allPlayersData[b.id]) { rd = allPlayersData[b.id]; currentPlayer = { id: b.id, ...rd }; } else if(ps) { for(const [uid, p] of Object.entries(allPlayersData)) { if(p.name === ps) { rd = p; currentPlayer = { id: uid, ...rd }; break; } } }
+                    if(rd) { const a = document.getElementById('p-avatar'); if(rd.avatar && rd.avatar.length > 20) a.innerHTML = `<img src="${rd.avatar}" style="width:70px; height:70px; border-radius:50%; object-fit:cover;">`; else a.innerHTML = rd.avatar || '👤'; document.getElementById('p-name').innerText = rd.name; box.style.display = "block"; if(rd.teamName && rd.teamName !== "Solo") { document.getElementById('p-team').innerHTML = `<div class="crest-mini-bg"><img src="${globalTeams[rd.teamName] ? globalTeams[rd.teamName].icon : rd.teamIcon}" class="crest-mini"></div><span>${rd.teamName}</span>`; } else document.getElementById('p-team').innerHTML = "Solo"; }
+                } else { currentBuzzerId = null; box.style.display = "none"; }
                 renderLobby(); 
             });
-            
             roomRef.child('gameState').on('value', snap => { const st = snap.val() ? snap.val().status : 'waiting'; const btn = document.getElementById('btn-open-buzz'); if(st === 'ready' || st === 'taken') { btn.innerText = "✅ Buzzers Ouverts"; btn.style.background = "#27ae60"; btn.disabled = true; } else { btn.innerText = "Ouvrir Buzzers"; btn.style.background = "#3498db"; btn.disabled = false; } });
             roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
-
-            roomRef.child('customBackground').on('value', snap => {
-                const url = snap.val() || "";
-                currentRoomBgUrl = url;
-                if(url) {
-                    selectedBgUrl = url;
-                    document.querySelectorAll('#bg-gallery .bg-item').forEach(i => {
-                        if(i.querySelector('img').src === url) i.classList.add('bg-selected');
-                        else i.classList.remove('bg-selected');
-                    });
-                } else {
-                    document.querySelectorAll('#bg-gallery .bg-item').forEach(i => i.classList.remove('bg-selected'));
-                }
-            });
+            roomRef.child('customBackground').on('value', snap => { const url = snap.val() || ""; currentRoomBgUrl = url; if(url) { selectedBgUrl = url; document.querySelectorAll('#bg-gallery .bg-item').forEach(i => { if(i.querySelector('img').src === url) i.classList.add('bg-selected'); else i.classList.remove('bg-selected'); }); } else { document.querySelectorAll('#bg-gallery .bg-item').forEach(i => i.classList.remove('bg-selected')); } });
         }
 
         function renderLobby() {
-            let htmlActive = ""; let htmlInactive = ""; let htmlBanned = "";
-            const scoreList = document.getElementById('score-list'); const iList = document.getElementById('inactive-list'); const bList = document.getElementById('banned-list');
-            const iSection = document.getElementById('inactive-section'); const bSection = document.getElementById('banned-section');
-            let hasBanned = false; let hasInactive = false;
-            const tList = document.getElementById('mj-team-list-display'); tList.innerHTML = "";
-            const inactList = document.getElementById('mj-team-inactive-display'); inactList.innerHTML = "";
-            const inactSection = document.getElementById('mj-team-inactive-section');
-            const banList = document.getElementById('mj-team-banned-display'); banList.innerHTML = "";
-            const banSection = document.getElementById('mj-team-banned-section');
-            let hasTeamInactive = false; let hasTeamBanned = false;
-
-            Object.keys(globalTeams).forEach(tKey => {
-                const team = globalTeams[tKey]; const isActive = team.active !== false; const isBanned = team.banned === true; const bonus = team.bonus || 0;
-                if(isBanned) { hasTeamBanned = true; banList.innerHTML += `<div class="team-item banned"><div style="display:flex; align-items:center;"><div class="crest-mini-bg" style="opacity:0.6;"><img src="${team.icon}" class="crest-mini"></div><b style="margin-left:5px; color:var(--danger);">${tKey}</b></div><div class="team-controls"><span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réhabiliter l'équipe">✅</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span></div></div>`; }
-                else if(!isActive) { hasTeamInactive = true; const frozenScore = team.frozenScore || 0; inactList.innerHTML += `<div class="team-item inactive"><div style="display:flex; align-items:center;"><div class="crest-mini-bg" style="opacity:0.6;"><img src="${team.icon}" class="crest-mini"></div><b style="margin-left:5px; color:#bdc3c7;">${tKey}</b> <small style="margin-left:5px;">(Score: ${frozenScore})</small></div><div class="team-controls"><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button><span class="btn-icon btn-restore" onclick="openRestoreModal('${tKey}')" title="Réactiver l'équipe">▶️</span><span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">✖</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${tKey}')" title="Supprimer définitivement">🗑️</span></div></div>`; }
-                else { tList.innerHTML += `<div class="team-item"><div style="display:flex; align-items:center;"><div class="crest-mini-bg"><img src="${team.icon}" class="crest-mini"></div><b style="margin-left:5px;">${tKey}</b></div><div class="team-controls"><div class="team-score-ctrl"><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', -1)">-</button><span class="team-bonus-val">${bonus}</span><button class="btn-tiny" onclick="updateTeamBonus('${tKey}', 1)">+</button></div><span class="btn-icon btn-pause" onclick="archiveTeam('${tKey}')" title="Désactiver (Pause)">✖</span><span class="btn-icon btn-del" onclick="banTeam('${tKey}')" title="Bannir">🚫</span><span class="btn-icon btn-edit" onclick="editTeam('${tKey}')">✎</span></div></div>`; }
+            let hA = "", hI = "", hB = ""; let hsB = false, hsI = false, htI = false, htB = false;
+            const sl = document.getElementById('score-list'), il = document.getElementById('inactive-list'), bl = document.getElementById('banned-list');
+            const is = document.getElementById('inactive-section'), bs = document.getElementById('banned-section');
+            const tl = document.getElementById('mj-team-list-display'), inl = document.getElementById('mj-team-inactive-display'), bal = document.getElementById('mj-team-banned-display');
+            tl.innerHTML = ""; inl.innerHTML = ""; bal.innerHTML = "";
+            Object.keys(globalTeams).forEach(k => {
+                const t = globalTeams[k], isA = t.active !== false, isBan = t.banned === true, bo = t.bonus || 0;
+                if(isBan) { htB = true; bal.innerHTML += `<div class="team-item banned"><div style="display:flex; align-items:center;"><div class="crest-mini-bg" style="opacity:0.6;"><img src="${t.icon}" class="crest-mini"></div><b style="margin-left:5px; color:var(--danger);">${k}</b></div><div class="team-controls"><span class="btn-icon btn-restore" onclick="openRestoreModal('${k}')">✅</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${k}')">🗑️</span></div></div>`; }
+                else if(!isA) { htI = true; inl.innerHTML += `<div class="team-item inactive"><div style="display:flex; align-items:center;"><div class="crest-mini-bg" style="opacity:0.6;"><img src="${t.icon}" class="crest-mini"></div><b style="margin-left:5px; color:#bdc3c7;">${k}</b> <small style="margin-left:5px;">(Score: ${t.frozenScore||0})</small></div><div class="team-controls"><button class="btn-tiny" onclick="updateTeamBonus('${k}', -1)">-</button><button class="btn-tiny" onclick="updateTeamBonus('${k}', 1)">+</button><span class="btn-icon btn-restore" onclick="openRestoreModal('${k}')">▶️</span><span class="btn-icon btn-del" onclick="banTeam('${k}')">✖</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${k}')">🗑️</span></div></div>`; }
+                else { tl.innerHTML += `<div class="team-item"><div style="display:flex; align-items:center;"><div class="crest-mini-bg"><img src="${t.icon}" class="crest-mini"></div><b style="margin-left:5px;">${k}</b></div><div class="team-controls"><div class="team-score-ctrl"><button class="btn-tiny" onclick="updateTeamBonus('${k}', -1)">-</button><span class="team-bonus-val">${bo}</span><button class="btn-tiny" onclick="updateTeamBonus('${k}', 1)">+</button></div><span class="btn-icon btn-pause" onclick="archiveTeam('${k}')">✖</span><span class="btn-icon btn-del" onclick="banTeam('${k}')">🚫</span><span class="btn-icon btn-edit" onclick="editTeam('${k}')">✎</span></div></div>`; }
             });
-            inactSection.style.display = hasTeamInactive ? 'block' : 'none'; banSection.style.display = hasTeamBanned ? 'block' : 'none';
-
-            const activePlayers = []; const inactivePlayers = []; const recoveryPlayers = []; const bannedPlayers = [];
-            Object.keys(allPlayersData).forEach(uid => { const d = allPlayersData[uid]; if (!d) return; d.uid = uid; 
-                if (d.banned === true) { bannedPlayers.push(d); } 
-                else if (d.active === false) { if (d.recoveryRequest === true) recoveryPlayers.push(d); else inactivePlayers.push(d); } 
-                else { activePlayers.push(d); }
+            document.getElementById('mj-team-inactive-section').style.display = htI ? 'block' : 'none'; document.getElementById('mj-team-banned-section').style.display = htB ? 'block' : 'none';
+            const aP = [], iP = [], rP = [], bP = [];
+            Object.keys(allPlayersData).forEach(uid => { const d = allPlayersData[uid]; if(!d)return; d.uid = uid; if(d.banned===true)bP.push(d); else if(d.active===false){if(d.recoveryRequest===true)rP.push(d);else iP.push(d);} else aP.push(d); });
+            aP.sort((a,b) => { if(a.uid===currentBuzzerId)return -1; if(b.uid===currentBuzzerId)return 1; let iA=buzzHistory.indexOf(a.name), iB=buzzHistory.indexOf(b.name); if(iA!==-1&&iB!==-1)return iB-iA; if(iA!==-1)return -1; if(iB!==-1)return 1; let rA=a.reconnectedAt||0, rB=b.reconnectedAt||0; if(rA===0&&rB>0)return -1; if(rA>0&&rB===0)return 1; if(rA>0&&rB>0)return rA-rB; return a.name.localeCompare(b.name); });
+            aP.forEach(d => {
+                let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
+                const iB = currentBlocked[d.name]; const bS = iB ? "background:var(--danger);color:white;border:none;" : "background:transparent;border:1px solid var(--danger);opacity:0.6;";
+                let aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;">` : `<span style="font-size:1.2rem;margin-right:8px;">${d.avatar||'👤'}</span>`;
+                const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
+                const sB = d.hasBeenWarned===true ? `<button class="lobby-btn" style="background:#c0392b;margin:0 2px;" onclick="kickPlayer('${d.uid}', '${d.name}')">🟥</button>` : `<button class="lobby-btn" style="background:#f1c40f;color:black;margin:0 2px;" onclick="warnPlayer('${d.uid}', '${d.name}')">🟨</button>`;
+                hA += `<div class="${rC}"><div style="display:flex;align-items:center;flex:1;overflow:hidden;">${aH}<b style="margin-right:10px;">${d.name}</b><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div><div class="player-controls"><button class="lobby-btn" style="background:var(--accent);color:black;margin:0 2px;" onclick="forceBuzzer('${d.uid}')">⚡</button><button class="lobby-btn" style="${bS}margin:0 2px;" onclick="toggleBlockPlayer('${d.name}')">🛑</button><div style="display:flex;align-items:center;background:rgba(0,0,0,0.5);border-radius:4px;padding:2px;margin:0 5px;"><button class="btn-tiny" onclick="adj('${d.uid}',-1)">-</button><input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;"><button class="btn-tiny" onclick="adj('${d.uid}',1)">+</button></div><button class="lobby-btn" style="background:var(--blue);margin:0 2px;" onclick="openEditModal('${d.uid}')">✏️</button>${sB}<button class="lobby-btn btn-cancel" style="margin-left:2px; padding:0; width:30px; height:30px; border:1px solid var(--danger)!important;" onclick="deletePlayer('${d.uid}', '${d.name}', true)">🗑️</button></div></div>`;
             });
-
-            activePlayers.sort((a, b) => {
-                if (a.uid === currentBuzzerId) return -1; if (b.uid === currentBuzzerId) return 1;
-                let indexA = buzzHistory.indexOf(a.name); let indexB = buzzHistory.indexOf(b.name);
-                if (indexA !== -1 && indexB !== -1) return indexB - indexA; if (indexA !== -1) return -1; if (indexB !== -1) return 1;
-                let recA = a.reconnectedAt || 0; let recB = b.reconnectedAt || 0;
-                if (recA === 0 && recB > 0) return -1; if (recA > 0 && recB === 0) return 1; if (recA > 0 && recB > 0) return recA - recB; 
-                return a.name.localeCompare(b.name);
-            });
-
-            activePlayers.forEach(d => {
-                const uid = d.uid; const pseudo = d.name;
-                let teamOptions = `<option value="Solo" ${d.teamName === "Solo" ? "selected" : ""}>Solo</option>`;
-                Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active !== false && globalTeams[t].banned !== true) { teamOptions += `<option value="${t}" ${d.teamName === t ? "selected" : ""}>${t}</option>`; } });
-                const isBlocked = currentBlocked[pseudo];
-                const blockBtnStyle = isBlocked ? "background:var(--danger); color:white; border:none;" : "background:transparent; border:1px solid var(--danger); opacity:0.6;";
-                let avHtml = (d.avatar && d.avatar.length > 20) ? `<img src="${d.avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px;">` : `<span style="font-size:1.2rem; margin-right:8px;">${d.avatar || '👤'}</span>`;
-                const rowClass = (uid === currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
-                
-                const isWarned = d.hasBeenWarned === true;
-                const sanctionBtn = isWarned 
-                    ? `<button class="lobby-btn" style="background:#c0392b; margin:0 2px;" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir ce joueur (Carton Rouge)">🟥</button>`
-                    : `<button class="lobby-btn" style="background:#f1c40f; color:black; margin:0 2px;" onclick="warnPlayer('${uid}', '${pseudo}')" title="Avertir ce joueur (Carton Jaune)">🟨</button>`;
-
-                htmlActive += `
-                <div class="${rowClass}">
-                    <div style="display:flex; align-items:center; flex:1; overflow:hidden;">
-                        ${avHtml}<b style="margin-right:10px;">${pseudo}</b>
-                        <select class="mini-select" onchange="togglePlayerTeam('${uid}', this.value)">${teamOptions}</select>
-                    </div>
-                    <div class="player-controls">
-                        <button class="lobby-btn" style="background:var(--accent); color:black; margin:0 2px;" onclick="forceBuzzer('${uid}')" title="Forcer le buzzer">⚡</button>
-                        <button class="lobby-btn" style="${blockBtnStyle} margin:0 2px;" onclick="toggleBlockPlayer('${pseudo}')" title="Bloquer/Débloquer le buzzer">🛑</button>
-
-                        <div style="display:flex; align-items:center; background:rgba(0,0,0,0.5); border-radius:4px; padding:2px; margin:0 5px;">
-                            <button class="btn-tiny" onclick="adj('${uid}',-1)" title="Score -1">-</button>
-                            <input type="number" title="Score du joueur (cliquer pour modifier)" value="${d.pts || 0}" onchange="setPlayerScore('${uid}', this.value)" style="width:40px; text-align:center; background:transparent; border:none; color:var(--accent); font-weight:bold; font-size:1rem; padding:0; margin:0 2px;">
-                            <button class="btn-tiny" onclick="adj('${uid}',1)" title="Score +1">+</button>
-                        </div>
-
-                        <button class="lobby-btn" style="background:var(--blue); margin:0 2px;" onclick="openEditModal('${uid}')" title="Éditer le profil du joueur">✏️</button>
-                        ${sanctionBtn}
-                        <button class="lobby-btn" style="background:transparent; border:1px solid var(--danger); margin-left:2px;" onclick="deletePlayer('${uid}', '${pseudo}', true)" title="Rendre ce joueur inactif">🗑️</button>
-                    </div>
-                </div>`;
-            });
-
-            recoveryPlayers.forEach(d => {
-                hasInactive = true; const uid = d.uid; const pseudo = d.name;
-                htmlInactive += `<div class="score-row airlock-row"><div style="flex:1;"><b>${pseudo}</b> <small style="color:var(--gold); display:block; font-style:italic;">Tentative de reconnexion...</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue); width:auto; padding:0 10px; margin-right:5px;" onclick="openEditModal('${uid}')" title="Éditer le profil">✏️</button><button class="lobby-btn" style="background:var(--success); width:auto; padding:0 10px;" onclick="acceptRecovery('${uid}')" title="Accepter la connexion">✅ Accepter</button><button class="lobby-btn" style="background:var(--danger); width:auto; padding:0 10px; margin-left:5px;" onclick="rejectRecovery('${uid}')" title="Refuser la connexion">❌ Refuser</button></div></div>`;
-            });
-
-            inactivePlayers.forEach(d => {
-                hasInactive = true; const uid = d.uid; const pseudo = d.name;
-                htmlInactive += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${pseudo}</b> <small>(${d.pts || 0} pts)</small></div><div class="player-controls">
-                    <button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${uid}')" title="Éditer le profil">✏️</button>
-                    <button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${uid}')" title="Réactiver ce joueur">✅</button>
-                    <button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${uid}', '${pseudo}')" title="Bannir ce joueur (Carton Rouge)">🟥</button>
-                    <button class="lobby-btn" style="background:transparent; border:1px solid var(--danger);" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button>
-                </div></div>`;
-            });
-
-            bannedPlayers.forEach(d => {
-                hasBanned = true; const uid = d.uid; const pseudo = d.name;
-                htmlBanned += `<div class="team-item" style="border: 1px solid var(--danger); justify-content: space-between;"><span style="color:var(--danger)"><b>${pseudo}</b></span><div><button style="background:var(--blue); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="openEditModal('${uid}')" title="Éditer le profil">✏️ Éditer</button><button style="background:var(--mj-color); width:auto; padding:5px 15px; margin:0; font-size:0.8rem; margin-right:5px;" onclick="unkickPlayer('${uid}')" title="Réactiver ce joueur">Réhabiliter</button><button style="background:transparent; border:1px solid var(--danger); width:auto; padding:5px 10px; margin:0; font-size:0.8rem;" onclick="deletePlayer('${uid}', '${pseudo}', false)" title="Supprimer définitivement">🗑️</button></div></div>`;
-            });
-
-            scoreList.innerHTML = htmlActive; iList.innerHTML = htmlInactive; bList.innerHTML = htmlBanned;
-            bSection.style.display = hasBanned ? "block" : "none"; iSection.style.display = hasInactive ? "block" : "none"; 
+            rP.forEach(d => { hsI=true; hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);width:auto;padding:0 10px;margin-right:5px;" onclick="openEditModal('${d.uid}')">✏️</button><button class="lobby-btn" style="background:var(--success);width:auto;padding:0 10px;" onclick="acceptRecovery('${d.uid}')">✅</button><button class="lobby-btn" style="background:var(--danger);width:auto;padding:0 10px;margin-left:5px;" onclick="rejectRecovery('${d.uid}')">❌</button></div></div>`; });
+            iP.forEach(d => { hsI=true; hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')">✏️</button><button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${d.uid}')">✅</button><button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${d.uid}', '${d.name}')">🟥</button><button class="lobby-btn btn-cancel" style="padding:0; width:30px; height:30px; border:1px solid var(--danger)!important;" onclick="deletePlayer('${d.uid}', '${d.name}', false)">🗑️</button></div></div>`; });
+            bP.forEach(d => { hsB=true; hB += `<div class="team-item" style="border:1px solid var(--danger);justify-content:space-between;"><span style="color:var(--danger)"><b>${d.name}</b></span><div><button style="background:var(--blue);width:auto;padding:5px 15px;margin:0;font-size:0.8rem;margin-right:5px;" onclick="openEditModal('${d.uid}')">✏️</button><button style="background:var(--mj-color);width:auto;padding:5px 15px;margin:0;font-size:0.8rem;margin-right:5px;" onclick="unkickPlayer('${d.uid}')">Réhabiliter</button><button class="btn-cancel" style="width:auto;padding:5px 10px;margin:0;font-size:0.8rem;" onclick="deletePlayer('${d.uid}', '${d.name}', false)">🗑️</button></div></div>`; });
+            sl.innerHTML = hA; il.innerHTML = hI; bl.innerHTML = hB; bs.style.display = hsB ? "block" : "none"; is.style.display = hsI ? "block" : "none"; 
         }
 
-        function openEditModal(uid) {
-            const pData = allPlayersData[uid];
-            if(!pData) return;
-            editingPlayerUid = uid;
-            editingPlayerOriginalPseudo = pData.name;
-            editingPlayerOriginalAvatar = pData.avatar || "👤";
-            editingPlayerCurrentAvatar = editingPlayerOriginalAvatar;
-
-            document.getElementById('edit-player-name').value = pData.name;
-            
-            const btnCensor = document.getElementById('btn-censor-avatar');
-            if (editingPlayerOriginalAvatar.length > 20) {
-                btnCensor.style.display = 'block';
-            } else {
-                btnCensor.style.display = 'none';
-            }
-
-            updateEditAvatarPreview();
-            populateEditGallery();
-
-            document.getElementById('modal-edit-player').style.display = 'flex';
-        }
-
-        function populateEditGallery() {
-            const gallery = document.getElementById('edit-avatar-gallery');
-            gallery.innerHTML = "";
-
-            const origDiv = document.createElement('div');
-            origDiv.className = 'edit-gallery-item original-avatar-item';
-            origDiv.title = "Restaurer l'original";
-            if (editingPlayerOriginalAvatar.length > 20) {
-                origDiv.innerHTML = `<img src="${editingPlayerOriginalAvatar}">`;
-            } else {
-                origDiv.innerText = editingPlayerOriginalAvatar;
-            }
-            origDiv.onclick = () => {
-                editingPlayerCurrentAvatar = editingPlayerOriginalAvatar;
-                updateEditAvatarPreview();
-            };
-            gallery.appendChild(origDiv);
-
-            avatars.forEach(a => {
-                const div = document.createElement('div');
-                div.className = 'edit-gallery-item';
-                div.innerText = a;
-                div.onclick = () => {
-                    editingPlayerCurrentAvatar = a;
-                    updateEditAvatarPreview();
-                };
-                gallery.appendChild(div);
-            });
-        }
-
-        function updateEditAvatarPreview() {
-            const container = document.getElementById('edit-player-avatar-preview');
-            if(editingPlayerCurrentAvatar.length > 20) {
-                container.innerHTML = `<img src="${editingPlayerCurrentAvatar}" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">`;
-            } else {
-                container.innerText = editingPlayerCurrentAvatar;
-            }
-        }
-
-        function censorPlayerAvatar() {
-            const defaultLogo = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
-            editingPlayerCurrentAvatar = defaultLogo;
-            updateEditAvatarPreview();
-        }
-
-        function closeEditPlayerModal() {
-            document.getElementById('modal-edit-player').style.display = 'none';
-            editingPlayerUid = null;
-        }
-
-        function savePlayerEdit() {
-            if(!editingPlayerUid) return;
-            const val = document.getElementById('edit-player-name').value.trim();
-            const regex = /^[a-zA-Z0-9À-ÿ\s\-_]+$/;
-            if (!regex.test(val)) return alert("Caractères autorisés : Lettres, Chiffres, Espaces, Tirets (-), Underscore (_).");
-            if(val.length < 2) return alert("Pseudo trop court !");
-
-            let isTaken = false;
-            Object.keys(allPlayersData).forEach(uid => {
-                if(uid !== editingPlayerUid && allPlayersData[uid].name && allPlayersData[uid].name.toLowerCase() === val.toLowerCase()) {
-                    isTaken = true;
-                }
-            });
-            if(isTaken) return alert("Ce pseudo est déjà utilisé par un autre joueur.");
-
-            const updates = { name: val, avatar: editingPlayerCurrentAvatar };
-            roomRef.child('players/' + editingPlayerUid).update(updates).then(() => {
-                if(val !== editingPlayerOriginalPseudo && currentBlocked[editingPlayerOriginalPseudo]) {
-                    roomRef.child('blockedPlayers/' + editingPlayerOriginalPseudo).remove();
-                    roomRef.child('blockedPlayers/' + val).set(true);
-                }
-                if(currentBuzzerId === editingPlayerUid) {
-                    roomRef.child('buzzers').update({ pseudo: val, avatar: editingPlayerCurrentAvatar });
-                }
-                closeEditPlayerModal();
-            });
-        }
-
-        function setPlayerScore(uid, val) { let num = parseInt(val, 10); if (isNaN(num)) num = 0; roomRef.child('players/' + uid).update({ pts: num }); }
-        
-        function warnPlayer(uid, name) {
-            if(confirm(`Envoyer un avertissement (Carton Jaune) à ${name} ?\nSon écran sera temporairement bloqué par un message d'alerte.`)) {
-                roomRef.child('players/' + uid).update({ hasBeenWarned: true, pendingWarning: true });
-            }
-        }
-
-        function acceptRecovery(uid) { roomRef.child('players/' + uid).update({ active: true, recoveryRequest: null, reconnectedAt: Date.now() }); }
-        function rejectRecovery(uid) { if(confirm("Refuser la reconnexion de ce joueur ?\n(Il restera Inactif)")) { roomRef.child('players/' + uid).update({ recoveryRequest: null }); } }
-
-        function archiveTeam(teamName) {
-            if(confirm("Mettre l'équipe " + teamName + " en pause ?\n- Score figé.\n- Joueurs déplacés en Solo.")) {
-                let currentScore = 0; let sumPlayers = 0;
-                Object.values(allPlayersData).forEach(p => { if(p.teamName === teamName) sumPlayers += (p.pts || 0); });
-                currentScore = sumPlayers + (globalTeams[teamName].bonus || 0);
-                let members = []; Object.entries(allPlayersData).forEach(([uid, p]) => { if(p.teamName === teamName) members.push(uid); });
-                roomRef.child('teams/' + teamName).update({ active: false, frozenScore: currentScore, previousMembers: members, lastState: 'active' });
-                members.forEach(uid => { roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "" }); });
-            }
-        }
-
-        function banTeam(teamName) {
-            if(confirm("BANNIR l'équipe " + teamName + " ?\n- Invisible pour les joueurs.\n- Joueurs déplacés en Solo.")) {
-                let members = []; Object.entries(allPlayersData).forEach(([uid, p]) => { if(p.teamName === teamName) members.push(uid); });
-                const wasActive = (globalTeams[teamName].active !== false); const prevState = wasActive ? 'active' : 'inactive';
-                roomRef.child('teams/' + teamName).update({ active: false, banned: true, previousMembers: members, lastState: prevState });
-                members.forEach(uid => { roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", active: true, banned: false }); });
-            }
-        }
-
-        function openRestoreModal(teamName) {
-            const team = globalTeams[teamName];
-            if (team.lastState === 'active' || (!team.banned && !team.active)) {
-                if(confirm("Confirmer la réactivation de l'équipe " + teamName + " ?")) { performRestore(teamName, 'active'); }
-            } else {
-                pendingRestoreTeam = teamName;
-                document.getElementById('restore-team-msg').innerText = `L'équipe ${teamName} était EN PAUSE avant d'être bannie.`;
-                document.getElementById('modal-restore-team').style.display = 'flex';
-            }
-        }
-
-        function confirmRestoreAction(mode) { if(pendingRestoreTeam) { performRestore(pendingRestoreTeam, mode); closeRestoreModal(); } }
-        function closeRestoreModal() { document.getElementById('modal-restore-team').style.display = 'none'; pendingRestoreTeam = null; }
-
-        function performRestore(teamName, targetState) {
-            const team = globalTeams[teamName];
-            if (targetState === 'active') { roomRef.child('teams/' + teamName).update({ active: true, banned: false, frozenScore: null, previousMembers: null }); } 
-            else if (targetState === 'inactive') { roomRef.child('teams/' + teamName).update({ active: false, banned: false }); }
-        }
-
-        function deleteTeamDefinitive(teamName) { if(confirm("⚠️ Supprimer DÉFINITIVEMENT l'équipe " + teamName + " ?")) { roomRef.child('teams/' + teamName).remove(); } }
-        
-        function updateTeamBonus(teamName, delta) { 
-            const team = globalTeams[teamName];
-            if(team.active !== false) { roomRef.child('teams/' + teamName + '/bonus').transaction(val => (val || 0) + delta); } 
-            else { roomRef.child('teams/' + teamName).update({ frozenScore: (team.frozenScore || 0) + delta, bonus: (team.bonus || 0) + delta }); }
-        }
-
-        function deletePlayer(uid, name, isActive) { if(isActive) { if(confirm("Voulez-vous rendre " + name + " inactif ?")) roomRef.child('players/' + uid).update({ active: false }); } else { if(confirm("⚠️ ATTENTION : Supprimer définitivement " + name + " ?")) roomRef.child('players/' + uid).remove(); } }
-        function forceBuzzer(uid) { const pData = allPlayersData[uid]; if(!pData) return; roomRef.child('gameState').update({ status: 'taken' }); roomRef.child('buzzers').set({ id: uid, pseudo: pData.name, avatar: pData.avatar || "", teamName: pData.teamName || "Solo", teamIcon: pData.teamIcon || "" }); }
-        function toggleBlockPlayer(pseudo) { if(currentBlocked[pseudo]) roomRef.child('blockedPlayers/' + pseudo).remove(); else roomRef.child('blockedPlayers/' + pseudo).set(true); }
-        function triggerEndGame() { if(confirm("Fin de partie ? Les scores vont être figés.")) { roomRef.child('gameState').set({ status: 'endGame', timestamp: Date.now() }); roomRef.child('buzzers').remove(); } }
-        function statusUpdate(st) { if(roomRef) { roomRef.child('gameState').set({ status: st }); if(st === 'ready') roomRef.child('buzzers').remove(); } }
+        function openEditModal(uid) { const d = allPlayersData[uid]; if(!d)return; editingPlayerUid=uid; editingPlayerOriginalPseudo=d.name; editingPlayerOriginalAvatar=d.avatar||"👤"; editingPlayerCurrentAvatar=editingPlayerOriginalAvatar; document.getElementById('edit-player-name').value=d.name; document.getElementById('btn-censor-avatar').style.display=(editingPlayerOriginalAvatar.length>20)?'block':'none'; updateEditAvatarPreview(); populateEditGallery(); document.getElementById('modal-edit-player').style.display='flex'; }
+        function populateEditGallery() { const g=document.getElementById('edit-avatar-gallery'); g.innerHTML=""; const o=document.createElement('div'); o.className='edit-gallery-item original-avatar-item'; if(editingPlayerOriginalAvatar.length>20)o.innerHTML=`<img src="${editingPlayerOriginalAvatar}">`; else o.innerText=editingPlayerOriginalAvatar; o.onclick=()=>{editingPlayerCurrentAvatar=editingPlayerOriginalAvatar;updateEditAvatarPreview();}; g.appendChild(o); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='edit-gallery-item'; d.innerText=a; d.onclick=()=>{editingPlayerCurrentAvatar=a;updateEditAvatarPreview();}; g.appendChild(d); }); }
+        function updateEditAvatarPreview() { const c=document.getElementById('edit-player-avatar-preview'); if(editingPlayerCurrentAvatar.length>20)c.innerHTML=`<img src="${editingPlayerCurrentAvatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`; else c.innerText=editingPlayerCurrentAvatar; }
+        function censorPlayerAvatar() { editingPlayerCurrentAvatar = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png"; updateEditAvatarPreview(); }
+        function closeEditPlayerModal() { document.getElementById('modal-edit-player').style.display='none'; editingPlayerUid=null; }
+        function savePlayerEdit() { if(!editingPlayerUid)return; const v=document.getElementById('edit-player-name').value.trim(); if(!/^[a-zA-Z0-9À-ÿ\s\-_]+$/.test(v)||v.length<2)return alert("Pseudo invalide (Lettres, chiffres, 2 car. min)."); let tk=false; Object.keys(allPlayersData).forEach(u=>{if(u!==editingPlayerUid&&allPlayersData[u].name&&allPlayersData[u].name.toLowerCase()===v.toLowerCase())tk=true;}); if(tk)return alert("Déjà utilisé."); roomRef.child('players/'+editingPlayerUid).update({name:v, avatar:editingPlayerCurrentAvatar}).then(()=>{ if(v!==editingPlayerOriginalPseudo&&currentBlocked[editingPlayerOriginalPseudo]){roomRef.child('blockedPlayers/'+editingPlayerOriginalPseudo).remove();roomRef.child('blockedPlayers/'+v).set(true);} if(currentBuzzerId===editingPlayerUid)roomRef.child('buzzers').update({pseudo:v, avatar:editingPlayerCurrentAvatar}); closeEditPlayerModal(); }); }
+        function setPlayerScore(u, v) { roomRef.child('players/'+u).update({pts: parseInt(v)||0}); }
+        function warnPlayer(u, n) { if(confirm(`Avertissement (Jaune) à ${n} ?`)) roomRef.child('players/'+u).update({hasBeenWarned:true, pendingWarning:true}); }
+        function acceptRecovery(u) { roomRef.child('players/'+u).update({active:true, recoveryRequest:null, reconnectedAt:Date.now()}); }
+        function rejectRecovery(u) { if(confirm("Refuser ?")) roomRef.child('players/'+u).update({recoveryRequest:null}); }
+        function archiveTeam(n) { if(confirm("Pause équipe "+n+" ?")) { let c=0; Object.values(allPlayersData).forEach(p=>{if(p.teamName===n)c+=(p.pts||0);}); c+=(globalTeams[n].bonus||0); let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, frozenScore:c, previousMembers:m, lastState:'active'}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:""})); } }
+        function banTeam(n) { if(confirm("Bannir équipe "+n+" ?")) { let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, banned:true, previousMembers:m, lastState:(globalTeams[n].active!==false?'active':'inactive')}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:"", active:true, banned:false})); } }
+        function openRestoreModal(n) { const t=globalTeams[n]; if(t.lastState==='active'||(!t.banned&&!t.active)){if(confirm("Réactiver "+n+" ?"))performRestore(n,'active');}else{pendingRestoreTeam=n; document.getElementById('restore-team-msg').innerText=`${n} était EN PAUSE avant d'être bannie.`; document.getElementById('modal-restore-team').style.display='flex';} }
+        function confirmRestoreAction(m) { if(pendingRestoreTeam){performRestore(pendingRestoreTeam,m); closeRestoreModal();} }
+        function closeRestoreModal() { document.getElementById('modal-restore-team').style.display='none'; pendingRestoreTeam=null; }
+        function performRestore(n, s) { if(s==='active') roomRef.child('teams/'+n).update({active:true, banned:false, frozenScore:null, previousMembers:null}); else if(s==='inactive') roomRef.child('teams/'+n).update({active:false, banned:false}); }
+        function deleteTeamDefinitive(n) { if(confirm("⚠️ Supprimer DÉFINITIVEMENT "+n+" ?")) roomRef.child('teams/'+n).remove(); }
+        function updateTeamBonus(n, d) { const t=globalTeams[n]; if(t.active!==false)roomRef.child('teams/'+n+'/bonus').transaction(v=>(v||0)+d); else roomRef.child('teams/'+n).update({frozenScore:(t.frozenScore||0)+d, bonus:(t.bonus||0)+d}); }
+        function deletePlayer(u, n, a) { if(a) { if(confirm("Rendre inactif "+n+" ?")) roomRef.child('players/'+u).update({active:false}); } else { if(confirm("⚠️ Supprimer "+n+" définitivement ?")) roomRef.child('players/'+u).remove(); } }
+        function forceBuzzer(u) { const p=allPlayersData[u]; if(p) { roomRef.child('gameState').update({status:'taken'}); roomRef.child('buzzers').set({id:u, pseudo:p.name, avatar:p.avatar||"", teamName:p.teamName||"Solo", teamIcon:p.teamIcon||""}); } }
+        function toggleBlockPlayer(ps) { if(currentBlocked[ps]) roomRef.child('blockedPlayers/'+ps).remove(); else roomRef.child('blockedPlayers/'+ps).set(true); }
+        function triggerEndGame() { if(confirm("Fin de partie ?")) { roomRef.child('gameState').set({status:'endGame', timestamp:Date.now()}); roomRef.child('buzzers').remove(); } }
+        function statusUpdate(st) { if(roomRef) { roomRef.child('gameState').set({status:st}); if(st==='ready') roomRef.child('buzzers').remove(); } }
         function fullReset() { roomRef.child('blockedPlayers').remove(); roomRef.child('buzzers').remove(); statusUpdate('waiting'); }
-        function adj(uid, v) { roomRef.child('players/'+uid+'/pts').transaction(x => (x||0)+v); }
-        
-        function kickPlayer(uid, name) { 
-            if(confirm("Bannir " + name + " (Carton Rouge) ?\n\nNote : Vous pourrez toujours le réhabiliter plus tard depuis la liste des joueurs expulsés.")) { 
-                roomRef.child('players/' + uid).update({ banned: true, active: false }); 
-            } 
+        function adj(u, v) { roomRef.child('players/'+u+'/pts').transaction(x=>(x||0)+v); }
+        function kickPlayer(u, n) { if(confirm("Bannir "+n+" (Rouge) ?")) roomRef.child('players/'+u).update({banned:true, active:false}); }
+        function unkickPlayer(u) { roomRef.child('players/'+u).update({banned:false, active:true, reconnectedAt:Date.now()}); }
+        function restoreInactivePlayer(u) { roomRef.child('players/'+u).update({active:true, reconnectedAt:Date.now()}); }
+        function togglePlayerTeam(u, c) { const i=(c==="Solo")?"":(globalTeams[c]?globalTeams[c].icon:""); roomRef.child('players/'+u).update({teamName:c, teamIcon:i, active:true}); }
+        function handleError() { if(currentPlayer&&currentPlayer.name) { roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready'); } }
+        function handleReward(pts, m) { if(!currentPlayer||!currentPlayer.id)return; const cp=allPlayersData[currentPlayer.id]?(allPlayersData[currentPlayer.id].pts||0):0; roomRef.child('players/'+currentPlayer.id).update({pts:cp+pts, active:true}); if(m==='partial'){roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready');}else fullReset(); }
+        function quitRoom() { if(mjProfileData.isGuest===true) resetFullGame(); else { if(roomRef) roomRef.child('buzzers').off(); checkUserRoom(auth.currentUser.uid); } }
+        function resetFullGame() {
+            if(confirm("⚠️ Fermer la salle ?\nLes joueurs auront 10s pour sauvegarder.")) {
+                roomRef.child('gameState').set({status:'closing', timestamp:Date.now()});
+                const b=document.getElementById('btn-delete-room');
+                if(b) {
+                    b.disabled=true; b.classList.add('countdown-btn'); let t=10; b.innerText=`⏳ SUPPRESSION DANS ${t}s...`;
+                    const i=setInterval(()=>{ t--; b.innerText=`⏳ SUPPRESSION DANS ${t}s...`; if(t<=0){ clearInterval(i); executeRoomDeletion(); } }, 1000);
+                } else setTimeout(executeRoomDeletion, 10000);
+            }
         }
-        
-        function unkickPlayer(uid) { 
-            roomRef.child('players/' + uid).update({ banned: false, active: true, reconnectedAt: Date.now() }); 
-        }
-
-        function restoreInactivePlayer(uid) {
-            roomRef.child('players/' + uid).update({ active: true, reconnectedAt: Date.now() });
-        }
-
-        function togglePlayerTeam(uid, choice) { const icon = (choice === "Solo") ? "" : (globalTeams[choice] ? globalTeams[choice].icon : ""); roomRef.child('players/' + uid).update({ teamName: choice, teamIcon: icon, active: true }); }
-        function handleError() { if(currentPlayer && currentPlayer.name) { roomRef.child('blockedPlayers/' + currentPlayer.name).set(true); statusUpdate('ready'); } }
-        
-        function handleReward(pts, mode) { 
-            if(!currentPlayer || !currentPlayer.id) return; 
-            const currentPts = allPlayersData[currentPlayer.id] ? (allPlayersData[currentPlayer.id].pts || 0) : 0;
-            roomRef.child('players/' + currentPlayer.id).update({ pts: currentPts + pts, active: true }); 
-            if(mode === 'partial') { roomRef.child('blockedPlayers/' + currentPlayer.name).set(true); statusUpdate('ready'); } 
-            else { fullReset(); } 
-        }
-
-        function quitRoom() { if(mjProfileData.isGuest === true) resetFullGame(); else { if(roomRef) roomRef.child('buzzers').off(); checkUserRoom(auth.currentUser.uid); } }
-        
-        function resetFullGame() { 
-            if(confirm("⚠️ Fermer la salle ?\n\nLes joueurs auront 10 secondes pour sauvegarder leur profil avant la suppression définitive.")) { 
-                roomRef.child('gameState').set({ status: 'closing', timestamp: Date.now() });
-                const btn = document.getElementById('btn-delete-room');
-                if(btn) {
-                    btn.disabled = true;
-                    btn.classList.add('countdown-btn');
-                    let timeLeft = 10;
-                    btn.innerText = `⏳ SUPPRESSION DANS ${timeLeft}s...`;
-                    
-                    const interval = setInterval(() => {
-                        timeLeft--;
-                        btn.innerText = `⏳ SUPPRESSION DANS ${timeLeft}s...`;
-                        if(timeLeft <= 0) {
-                            clearInterval(interval);
-                            executeRoomDeletion();
-                        }
-                    }, 1000);
-                } else {
-                    setTimeout(executeRoomDeletion, 10000);
-                }
-            } 
-        }
-
-        function executeRoomDeletion() {
-            roomRef.remove(); 
-            db.ref('activeRooms/' + roomID).remove(); 
-            db.ref('users/' + auth.currentUser.uid + '/lastRoom').remove().then(() => { 
-                lastSavedRoom = ""; 
-                checkUserRoom(auth.currentUser.uid); 
-            });
-        }
+        function executeRoomDeletion() { roomRef.remove(); db.ref('activeRooms/'+roomID).remove(); db.ref('users/'+auth.currentUser.uid+'/lastRoom').remove().then(()=>{ lastSavedRoom=""; checkUserRoom(auth.currentUser.uid); }); }
     </script>
 </body>
 </html>
