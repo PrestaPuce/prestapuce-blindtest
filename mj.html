@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.152)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.153)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -98,10 +98,19 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag">v1.152</div>
+    <div class="version-tag">v1.153</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
+    </div>
+
+    <div id="univ-lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:30000; align-items:center; justify-content:center;" onclick="if(event.target.id==='univ-lightbox') closeLightbox()">
+        <div style="position:absolute; left:20px; color:white; font-size:3rem; cursor:pointer; padding:20px; user-select:none; z-index:30001;" onclick="lbPrev(event)">◀</div>
+        <div style="position:relative; max-width:80%; max-height:80%; display:flex; justify-content:center; align-items:center; z-index:30001;">
+            <img id="lb-img" src="" style="max-width:100%; max-height:80vh; object-fit:contain; border-radius:10px; cursor:pointer; box-shadow:0 10px 30px rgba(0,0,0,0.8);" onclick="closeLightbox(event)">
+            <div id="lb-del" style="position:absolute; top:-20px; right:-20px; background:var(--danger); color:white; width:45px; height:45px; border-radius:50%; font-weight:bold; font-size:1.5rem; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.5);" onclick="lbDelete(event)" title="Supprimer définitivement">✖</div>
+        </div>
+        <div style="position:absolute; right:20px; color:white; font-size:3rem; cursor:pointer; padding:20px; user-select:none; z-index:30001;" onclick="lbNext(event)">▶</div>
     </div>
 
     <div id="screen-login" class="box">
@@ -111,9 +120,7 @@
         <input type="email" id="mj-email" placeholder="Email MJ">
         <div class="password-wrapper">
             <input type="password" id="mj-pass" placeholder="Mot de passe">
-            <div class="password-icon" onclick="togglePasswordVisibility('mj-pass', this)">
-                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-            </div>
+            <div class="password-icon" onclick="togglePasswordVisibility('mj-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
         </div>
         <button id="btn-login-submit" onclick="login()">Se Connecter</button>
         <p onclick="forgotPassword()" style="color:var(--accent); cursor:pointer; font-size:0.8rem; text-decoration: underline; margin-top: 10px;">Mot de passe oublié ?</p>
@@ -129,45 +136,24 @@
         <p class="section-title">🖼️ IMAGE DE MARQUE</p>
         <label for="prof-logo-upload" id="profile-drop-zone" class="drop-zone profile-drop">
             <img id="prof-logo-preview" src="" style="display:none;">
-            <div id="prof-logo-placeholder" style="padding:10px; color:#bdc3c7;">
-                <span style="font-size:2rem; display:block; margin-bottom:5px;">🖼️</span>
-                <span style="font-size:0.8rem; font-weight:bold; text-transform:uppercase;">VOTRE LOGO<br>OU AVATAR</span>
-            </div>
+            <div id="prof-logo-placeholder" style="padding:10px; color:#bdc3c7;"><span style="font-size:2rem; display:block; margin-bottom:5px;">🖼️</span><span style="font-size:0.8rem; font-weight:bold; text-transform:uppercase;">VOTRE LOGO<br>OU AVATAR</span></div>
             <input type="file" id="prof-logo-upload" accept="image/*" style="display:none;" onchange="handleProfileFile(this.files)">
         </label>
         <span class="input-helper">Ce visuel sera affiché sur les téléphones des joueurs et sur l'écran géant.</span>
         <input type="hidden" id="prof-logo-url"> 
-
         <p class="section-title">🌐 PUBLICITÉ / RÉSEAUX</p>
         <input type="text" id="prof-link" placeholder="Ex: https://monsite.com ou @moninsta">
-        <span class="input-helper">Lien d'ouverture si un joueur clique sur votre logo (Optionnel).</span>
         
         <p class="section-title">📁 BIBLIOTHÈQUE / MÉDIAS</p>
-        <button onclick="openLibraryProxy('self')" style="background:var(--gold); color:black; margin-top:0;">🎨 Gérer mes Blasons d'Équipes</button>
-        <button onclick="openBgLibraryProxy('self')" style="background:var(--purple); color:white; margin-top:10px;">📺 Gérer mes Fonds d'écran</button>
+        <button onclick="openLibraryProxy('self')" style="background:var(--gold); color:black; margin-top:0;">🎨 Gérer mes Blasons</button>
+        <button onclick="openBgLibraryProxy('self')" style="background:var(--purple); color:white; margin-top:10px;">📺 Gérer mes Fonds</button>
 
         <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:20px 0;">
         <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">SÉCURITÉ (Requis pour modifier l'email ou le mot de passe)</p>
-        <div class="password-wrapper">
-            <input type="password" id="prof-pass-current" placeholder="Votre mot de passe actuel" style="border-color:var(--danger);">
-            <div class="password-icon" onclick="togglePasswordVisibility('prof-pass-current', this)">
-                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-            </div>
-        </div>
-        <div class="password-wrapper">
-            <input type="password" id="prof-pass" placeholder="Nouveau mot de passe">
-            <div class="password-icon" onclick="togglePasswordVisibility('prof-pass', this)">
-                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-            </div>
-        </div>
-        <div class="password-wrapper">
-            <input type="password" id="prof-pass-conf" placeholder="Confirmer le nouveau mot de passe">
-            <div class="password-icon" onclick="togglePasswordVisibility('prof-pass-conf', this)">
-                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-            </div>
-        </div>
-        <span class="input-helper" style="margin-top:0; margin-bottom:15px;">Le mot de passe doit contenir 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.</span>
-        
+        <div class="password-wrapper"><input type="password" id="prof-pass-current" placeholder="Votre mot de passe actuel" style="border-color:var(--danger);"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+        <div class="password-wrapper"><input type="password" id="prof-pass" placeholder="Nouveau mot de passe"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+        <div class="password-wrapper"><input type="password" id="prof-pass-conf" placeholder="Confirmer le nouveau mot de passe" style="margin-bottom:0;"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+        <span class="input-helper" style="margin-top:5px; margin-bottom:15px;">8 caractères, 1 Maj, 1 Min, 1 Chiffre, 1 Spécial.</span>
         <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER TOUT</button>
         <button class="btn-cancel" onclick="closeProfile()">Retour</button>
         <button onclick="profileLogout()" style="background:var(--danger); margin-top:20px; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);">🚪 DÉCONNEXION</button>
@@ -229,27 +215,14 @@
                 <button id="btn-cancel-edit" class="btn-cancel" onclick="cancelEdit()" style="flex:1; display:none;">ANNULER</button>
             </div>
             <div id="mj-team-list-display"></div>
-            
-            <div id="mj-team-inactive-section" style="margin-top:20px; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px; display:none; border:1px dashed rgba(255,255,255,0.3);">
-                <h4 style="margin:0 0 10px 0; color:#bdc3c7; font-size:0.9rem;">ÉQUIPES INACTIVES / EN PAUSE (Scores Figés)</h4>
-                <div id="mj-team-inactive-display"></div>
-            </div>
-            <div id="mj-team-banned-section" style="margin-top:20px; padding:10px; background:rgba(231, 76, 60, 0.1); border-radius:8px; display:none; border:1px solid var(--danger);">
-                <h4 style="margin:0 0 10px 0; color:var(--danger); font-size:0.9rem;">ÉQUIPES BANNIES</h4>
-                <div id="mj-team-banned-display"></div>
-            </div>
+            <div id="mj-team-inactive-section" style="margin-top:20px; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px; display:none; border:1px dashed rgba(255,255,255,0.3);"><h4 style="margin:0 0 10px 0; color:#bdc3c7; font-size:0.9rem;">ÉQUIPES INACTIVES / EN PAUSE</h4><div id="mj-team-inactive-display"></div></div>
+            <div id="mj-team-banned-section" style="margin-top:20px; padding:10px; background:rgba(231, 76, 60, 0.1); border-radius:8px; display:none; border:1px solid var(--danger);"><h4 style="margin:0 0 10px 0; color:var(--danger); font-size:0.9rem;">ÉQUIPES BANNIES</h4><div id="mj-team-banned-display"></div></div>
         </div>
         
         <h3 style="text-shadow: 0 1px 2px black;">Lobby Joueurs</h3>
         <div id="score-list"></div>
-        <div id="inactive-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255,255,255,0.3); border-radius: 12px; backdrop-filter: blur(10px);">
-            <h3 style="color:#bdc3c7; margin-top:0; font-size:1rem;">Joueurs Inactifs / Partis</h3>
-            <div id="inactive-list"></div>
-        </div>
-        <div id="banned-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); border-radius: 12px; backdrop-filter: blur(10px);">
-            <h3 style="color:var(--danger); margin-top:0;">Joueurs Expulsés</h3>
-            <div id="banned-list"></div>
-        </div>
+        <div id="inactive-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255,255,255,0.3); border-radius: 12px; backdrop-filter: blur(10px);"><h3 style="color:#bdc3c7; margin-top:0; font-size:1rem;">Joueurs Inactifs / Partis</h3><div id="inactive-list"></div></div>
+        <div id="banned-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); border-radius: 12px; backdrop-filter: blur(10px);"><h3 style="color:var(--danger); margin-top:0;">Joueurs Expulsés</h3><div id="banned-list"></div></div>
 
         <div style="margin-top:20px; border: 2px solid var(--gold); border-radius: 12px; background: rgba(243, 156, 18, 0.15); text-align: center; padding: 15px; backdrop-filter: blur(10px);">
             <h3 style="color:var(--gold); margin-top:0; text-shadow: 0 1px 2px black;">PODIUM & RÉSULTATS</h3>
@@ -259,8 +232,7 @@
         <div style="margin-top:20px; border: 1px solid var(--blue); padding: 20px; border-radius: 12px; background: rgba(52, 152, 219, 0.15); backdrop-filter: blur(10px);">
             <h3 style="color:#85c1e9; margin-top:0; text-shadow: 0 1px 2px black;">📺 Personnalisation Écran Géant</h3>
             <label for="room-bg-upload" id="bg-drop-zone" class="drop-zone" style="padding:15px;">
-                <span id="bg-dz-title" style="font-size:1rem; font-weight:bold; display:block; color:#85c1e9;">GLISSEZ VOTRE FOND ICI</span>
-                <span id="bg-dz-sub" style="font-size:0.8rem; color:#ecf0f1;">ou Cliquez pour parcourir</span>
+                <span id="bg-dz-title" style="font-size:1rem; font-weight:bold; display:block; color:#85c1e9;">GLISSEZ VOTRE FOND ICI</span><span id="bg-dz-sub" style="font-size:0.8rem; color:#ecf0f1;">ou Cliquez pour parcourir</span>
                 <input type="file" id="room-bg-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files, 'dashboard')">
             </label>
             <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
@@ -475,6 +447,9 @@
         let editingPlayerUid = null, editingPlayerOriginalPseudo = "", editingPlayerOriginalAvatar = "", editingPlayerCurrentAvatar = "";
         let isSuperAdmin = false, allUsersData = {}, targetMjUid = null;
 
+        // LIGHTBOX VARIABLES
+        let curLbArr = [], curLbIdx = 0;
+
         function isValidPassword(pwd) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd); }
 
         window.onload = function() {
@@ -561,7 +536,31 @@
         function eraseMjDatabase(uid) { db.ref('users/' + uid).remove().then(() => { alert("Supprimé."); document.getElementById('modal-sa-mj-details').style.display = 'none'; }); }
         function toggleBlockMj() { if(targetMjUid) db.ref('users/' + targetMjUid).update({ isBlocked: !allUsersData[targetMjUid].isBlocked }).then(() => setTimeout(updateMjDetailsView, 200)); }
 
-        // --- GESTION MEDIAS (PROXY SAFE) ---
+        // --- GESTION MEDIAS (PROXY SAFE + LIGHTBOX) ---
+        let lbCrests = [], lbBgsDash = [], lbBgsModal = [];
+        function openLightbox(idx, arr) { curLbArr = arr; curLbIdx = idx; document.getElementById('univ-lightbox').style.display = 'flex'; updateLightbox(); }
+        function updateLightbox() {
+            if(curLbArr.length === 0) return closeLightbox();
+            if(curLbIdx >= curLbArr.length) curLbIdx = 0; if(curLbIdx < 0) curLbIdx = curLbArr.length - 1;
+            const item = curLbArr[curLbIdx];
+            document.getElementById('lb-img').src = item.url;
+            document.getElementById('lb-del').style.display = item.isNative ? 'none' : 'flex';
+        }
+        function closeLightbox(e) { if(e) e.stopPropagation(); document.getElementById('univ-lightbox').style.display = 'none'; }
+        function lbPrev(e) { e.stopPropagation(); curLbIdx--; updateLightbox(); }
+        function lbNext(e) { e.stopPropagation(); curLbIdx++; updateLightbox(); }
+        
+        function lbDelete(e) {
+            e.stopPropagation(); const item = curLbArr[curLbIdx]; if(item.isNative) return;
+            if(confirm("Voulez-vous vraiment supprimer définitivement cette image ?")) {
+                if(item.type === 'crest') executeCrestDelete(item.key, item.url);
+                else if(item.type === 'bg' && item.mode === 'dashboard') executeBgDeleteDash(item.key, item.url);
+                else if(item.type === 'bg' && item.mode === 'modal') executeBgDeleteModal(item.key, item.url);
+                physicalDelete(item.url); curLbArr.splice(curLbIdx, 1); updateLightbox();
+            }
+        }
+        function physicalDelete(url) { if(url && url.includes('firebasestorage')) { storage.refFromURL(url).delete().catch(e => console.log("Cloud err:", e.message)); } }
+
         function setupDragDrop(id, handler) { const el = document.getElementById(id); if(el) { ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(n => { el.addEventListener(n, e=>{e.preventDefault();e.stopPropagation();}, false); document.body.addEventListener(n, e=>{e.preventDefault();e.stopPropagation();}, false); }); ['dragenter', 'dragover'].forEach(n => el.addEventListener(n, ()=>el.classList.add('drag-active'), false)); ['dragleave', 'drop'].forEach(n => el.addEventListener(n, ()=>el.classList.remove('drag-active'), false)); el.addEventListener('drop', e => handler(e.dataTransfer.files), false); } }
         function openLibraryProxy(mode) { isProxyMode = (mode === 'proxy'); activeLibraryUid = isProxyMode ? targetMjUid : auth.currentUser.uid; document.getElementById('switch-container-lib').style.display = isProxyMode ? 'none' : 'flex'; document.getElementById('modal-library').style.display = 'flex'; loadModalLibrary(); }
         function closeLibrary() { document.getElementById('modal-library').style.display = 'none'; if(isProxyMode) { isProxyMode = false; activeLibraryUid = auth.currentUser.uid; } }
@@ -576,20 +575,19 @@
         }
 
         function renderModalLibraryGrid(libData) {
-            const grid = document.getElementById('lib-grid'); if(!grid) return; grid.innerHTML = "";
-            const entries = Object.entries(libData || {});
-            const recent = entries.filter(e => e[0].startsWith('-')); const old = entries.filter(e => !e[0].startsWith('-'));
-            recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
-            [...recent, ...old].forEach(entry => { const item = document.createElement('div'); item.className = 'lib-item'; item.innerHTML = `<img src="${entry[1]}"><div class="lib-del" onclick="deleteFromModalLibrary('${entry[0]}', '${entry[1]}')">X</div>`; grid.appendChild(item); });
-            if (showDefaultCrests) { for(let i=0; i<30; i++) { const item = document.createElement('div'); item.className = 'lib-item'; item.innerHTML = `<img src="${createBlason(i)}">`; grid.appendChild(item); } }
+            const grid = document.getElementById('lib-grid'); if(!grid) return; grid.innerHTML = ""; lbCrests = [];
+            const entries = Object.entries(libData || {}); const recent = entries.filter(e => e[0].startsWith('-')); const old = entries.filter(e => !e[0].startsWith('-')); recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
+            [...recent, ...old].forEach(e => lbCrests.push({ key: e[0], url: e[1], isNative: false, type: 'crest' }));
+            if (showDefaultCrests) { for(let i=0; i<30; i++) lbCrests.push({ key: null, url: createBlason(i), isNative: true, type: 'crest' }); }
+            lbCrests.forEach((item, i) => { const div = document.createElement('div'); div.className = 'lib-item'; div.onclick = () => openLightbox(i, lbCrests); div.innerHTML = `<img src="${item.url}">${!item.isNative ? `<div class="lib-del" onclick="deleteFromModalLibrary(event, '${item.key}', '${item.url}')">X</div>` : ''}`; grid.appendChild(div); });
         }
 
-        function deleteFromModalLibrary(key, urlToDelete) {
-            if(confirm("Supprimer cette image ?")) {
-                if(!isProxyMode && globalTeams) { Object.keys(globalTeams).forEach(tKey => { if(globalTeams[tKey].icon === urlToDelete) roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" }); }); }
-                db.ref(`users/${activeLibraryUid || auth.currentUser.uid}/library/${key}`).remove().then(() => loadModalLibrary());
-            }
+        function executeCrestDelete(key, urlToDelete) {
+            const uid = activeLibraryUid || auth.currentUser.uid;
+            if(!isProxyMode && globalTeams) { Object.keys(globalTeams).forEach(tKey => { if(globalTeams[tKey].icon === urlToDelete) roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" }); }); }
+            db.ref(`users/${uid}/library/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => loadModalLibrary());
         }
+        function deleteFromModalLibrary(e, key, url) { e.stopPropagation(); if(confirm("Voulez-vous vraiment supprimer définitivement cette image ?")) { executeCrestDelete(key, url); physicalDelete(url); } }
 
         async function handleFiles(files) {
             if(!files || files.length === 0) return; const title = document.getElementById('dz-title'); const sub = document.getElementById('dz-sub'); const orig = title.innerText; const uid = activeLibraryUid || auth.currentUser.uid; let count = 0; title.innerText = `⏳ Envoi : 0 / ${files.length}...`;
@@ -612,15 +610,42 @@
             const uid = (mode === 'modal') ? activeBgLibraryUid : auth.currentUser.uid;
             db.ref(`users/${uid}/bgLibrary`).once('value').then(snap => { const libData = snap.val() || {}; if (mode === 'dashboard' || !isProxyBgMode) { mjBgLibrary = libData; renderBgGalleryDashboard(); } if (mode === 'modal') { renderBgGalleryModal(libData); } }).catch(e=>console.error(e));
         }
-        function renderBgGalleryDashboard() { const grid = document.getElementById('bg-gallery'); if(!grid) return; grid.innerHTML = ""; Object.entries(mjBgLibrary || {}).reverse().forEach(e => { const item = document.createElement('div'); item.className = 'bg-item'; if(selectedBgUrl === e[1]) item.classList.add('bg-selected'); item.innerHTML = `<img src="${e[1]}"><div class="lib-del" onclick="deleteBgFromLibraryDashboard(event, '${e[0]}', '${e[1]}')">X</div>`; item.onclick = () => { document.querySelectorAll('#bg-gallery .bg-item').forEach(i => i.classList.remove('bg-selected')); item.classList.add('bg-selected'); selectedBgUrl = e[1]; document.getElementById('btn-apply-bg').disabled = false; }; grid.appendChild(item); }); }
-        function renderBgGalleryModal(libData) { const grid = document.getElementById('bg-modal-gallery'); if(!grid) return; grid.innerHTML = ""; Object.entries(libData || {}).reverse().forEach(e => { const item = document.createElement('div'); item.className = 'bg-item'; if(modalSelectedBgUrl === e[1]) item.classList.add('bg-selected'); item.innerHTML = `<img src="${e[1]}"><div class="lib-del" onclick="deleteBgFromLibraryModal(event, '${e[0]}', '${e[1]}')">X</div>`; item.onclick = () => { document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(i => i.classList.remove('bg-selected')); item.classList.add('bg-selected'); modalSelectedBgUrl = e[1]; document.getElementById('btn-modal-bg-default').disabled = false; document.getElementById('btn-modal-bg-console').disabled = false; }; grid.appendChild(item); }); }
-        function deleteBgFromLibraryDashboard(e, key, url) { e.stopPropagation(); if(confirm("Supprimer ?")) { if(selectedBgUrl===url){selectedBgUrl="";document.getElementById('btn-apply-bg').disabled=true;} const uid=auth.currentUser.uid; if(mjProfileData.defaultBackground===url){db.ref(`users/${uid}/defaultBackground`).remove();mjProfileData.defaultBackground=null;} if(mjProfileData.consoleBackground===url){db.ref(`users/${uid}/consoleBackground`).remove();mjProfileData.consoleBackground=null;applyMjConsoleBg(null);} if(currentRoomBgUrl===url&&roomRef)roomRef.child('customBackground').remove(); db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(()=>loadBgLibrary('dashboard')); } }
-        function deleteBgFromLibraryModal(e, key, url) { e.stopPropagation(); if(confirm("Supprimer ?")) { if(modalSelectedBgUrl===url){modalSelectedBgUrl="";document.getElementById('btn-modal-bg-default').disabled=true;document.getElementById('btn-modal-bg-console').disabled=true;} const uid=activeBgLibraryUid; db.ref(`users/${uid}/defaultBackground`).once('value', s => {if(s.val()===url)db.ref(`users/${uid}/defaultBackground`).remove();}); db.ref(`users/${uid}/consoleBackground`).once('value', s => {if(s.val()===url){db.ref(`users/${uid}/consoleBackground`).remove();if(!isProxyBgMode)applyMjConsoleBg(null);}}); if(!isProxyBgMode&&currentRoomBgUrl===url&&roomRef)roomRef.child('customBackground').remove(); db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(()=>loadBgLibrary('modal')); } }
+        function renderBgGalleryDashboard() {
+            const grid = document.getElementById('bg-gallery'); if(!grid) return; grid.innerHTML = ""; lbBgsDash = [];
+            Object.entries(mjBgLibrary || {}).reverse().forEach(e => lbBgsDash.push({key: e[0], url: e[1], isNative: false, type: 'bg', mode: 'dashboard'}));
+            lbBgsDash.forEach((item, i) => { const div = document.createElement('div'); div.className = 'bg-item'; if(selectedBgUrl === item.url) div.classList.add('bg-selected'); div.onclick = () => { document.querySelectorAll('#bg-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); selectedBgUrl = item.url; document.getElementById('btn-apply-bg').disabled = false; openLightbox(i, lbBgsDash); }; div.innerHTML = `<img src="${item.url}"><div class="lib-del" onclick="deleteBgFromLibraryDashboard(event, '${item.key}', '${item.url}')">X</div>`; grid.appendChild(div); });
+        }
+        function renderBgGalleryModal(libData) {
+            const grid = document.getElementById('bg-modal-gallery'); if(!grid) return; grid.innerHTML = ""; lbBgsModal = [];
+            Object.entries(libData || {}).reverse().forEach(e => lbBgsModal.push({key: e[0], url: e[1], isNative: false, type: 'bg', mode: 'modal'}));
+            lbBgsModal.forEach((item, i) => { const div = document.createElement('div'); div.className = 'bg-item'; if(modalSelectedBgUrl === item.url) div.classList.add('bg-selected'); div.onclick = () => { document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); modalSelectedBgUrl = item.url; document.getElementById('btn-modal-bg-default').disabled = false; document.getElementById('btn-modal-bg-console').disabled = false; openLightbox(i, lbBgsModal); }; div.innerHTML = `<img src="${item.url}"><div class="lib-del" onclick="deleteBgFromLibraryModal(event, '${item.key}', '${item.url}')">X</div>`; grid.appendChild(div); });
+        }
+        function executeBgDeleteDash(key, urlToDelete) {
+            const uid = auth.currentUser.uid;
+            if(selectedBgUrl === urlToDelete) { selectedBgUrl = ""; document.getElementById('btn-apply-bg').disabled = true; }
+            if(mjProfileData.defaultBackground === urlToDelete) { db.ref(`users/${uid}/defaultBackground`).remove(); mjProfileData.defaultBackground = null; }
+            if(mjProfileData.consoleBackground === urlToDelete) { db.ref(`users/${uid}/consoleBackground`).remove(); mjProfileData.consoleBackground = null; applyMjConsoleBg(null); }
+            if(currentRoomBgUrl === urlToDelete && roomRef) roomRef.child('customBackground').remove();
+            db.ref(`users/${uid}/bgLibrary/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => loadBgLibrary('dashboard'));
+        }
+        function deleteBgFromLibraryDashboard(e, key, url) { e.stopPropagation(); if(confirm("Voulez-vous vraiment supprimer définitivement cette image ?")) { executeBgDeleteDash(key, url); physicalDelete(url); } }
+        
+        function executeBgDeleteModal(key, urlToDelete) {
+            const uid = activeBgLibraryUid;
+            if(modalSelectedBgUrl === urlToDelete) { modalSelectedBgUrl = ""; document.getElementById('btn-modal-bg-default').disabled = true; document.getElementById('btn-modal-bg-console').disabled = true; }
+            db.ref(`users/${uid}/defaultBackground`).once('value', s => { if(s.val() === urlToDelete) db.ref(`users/${uid}/defaultBackground`).remove(); });
+            db.ref(`users/${uid}/consoleBackground`).once('value', s => { if(s.val() === urlToDelete) { db.ref(`users/${uid}/consoleBackground`).remove(); if(!isProxyBgMode) applyMjConsoleBg(null); } });
+            if (!isProxyBgMode && currentRoomBgUrl === urlToDelete && roomRef) roomRef.child('customBackground').remove();
+            db.ref(`users/${uid}/bgLibrary/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => loadBgLibrary('modal'));
+        }
+        function deleteBgFromLibraryModal(e, key, url) { e.stopPropagation(); if(confirm("Voulez-vous vraiment supprimer définitivement cette image ?")) { executeBgDeleteModal(key, url); physicalDelete(url); } }
+
         function handleBgUpload(files, mode) { if(!files||files.length===0)return; const file=files[0], prefix=mode==='modal'?'bg-modal':'bg', title=document.getElementById(prefix+'-dz-title'), sub=document.getElementById(prefix+'-dz-sub'), orig=title.innerText, uid=mode==='modal'?activeBgLibraryUid:auth.currentUser.uid; title.innerText="⏳ Envoi..."; storage.ref(`mj_custom_bgs/${uid}/${Date.now()}_${file.name}`).put(file).then(s=>s.ref.getDownloadURL()).then(u=>{ db.ref(`users/${uid}/bgLibrary`).push(u).then(()=>{ title.innerText="✅ Ajouté !"; loadBgLibrary(mode); setTimeout(()=>{title.innerText=orig;sub.innerText=sub.innerText;},3000); }); }).catch(e=>alert("Erreur: "+e.message)); }
-        function addBgUrlToLibrary(mode) { const p=mode==='modal'?'bg-modal':'room-bg', i=document.getElementById(p+'-url-input'), u=i.value.trim(); if(!u||(!u.startsWith('http')&&!u.startsWith('data:image/')))return alert("URL invalide."); db.ref(`users/${mode==='modal'?activeBgLibraryUid:auth.currentUser.uid}/bgLibrary`).push(u).then(()=>{ i.value=""; loadBgLibrary(mode); }); }
+        function addBgUrlToLibrary(mode) { const p=mode==='modal'?'bg-modal':'room-bg', i=document.getElementById(p+'-url-input'), u=i.value.trim(); if(!u||(!u.startsWith('http')&&!u.startsWith('data:image/')))return alert("URL invalide."); db.ref(`users/${mode==='modal'?activeBgLibraryUid:auth.currentUser.uid}/bgLibrary`).push(u).then(()=>{ i.value=""; loadBgLibrary(mode); }).catch(e=>alert("Erreur: "+e.message)); }
         function setModalBgAction(type) { if(!modalSelectedBgUrl)return; const uid=activeBgLibraryUid; if(type==='default'){ db.ref(`users/${uid}/defaultBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond par défaut enregistré !");if(!isProxyBgMode)mjProfileData.defaultBackground=modalSelectedBgUrl;}); } else { db.ref(`users/${uid}/consoleBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond console enregistré !");if(!isProxyBgMode){mjProfileData.consoleBackground=modalSelectedBgUrl;applyMjConsoleBg(modalSelectedBgUrl);}}); } }
         function saveCustomBg() { if(!selectedBgUrl)return; const d=document.getElementById('check-default-bg').checked, c=document.getElementById('check-console-bg').checked, uid=auth.currentUser.uid; if(d){db.ref(`users/${uid}/defaultBackground`).set(selectedBgUrl);mjProfileData.defaultBackground=selectedBgUrl;} if(c){db.ref(`users/${uid}/consoleBackground`).set(selectedBgUrl);mjProfileData.consoleBackground=selectedBgUrl;applyMjConsoleBg(selectedBgUrl);}else{db.ref(`users/${uid}/consoleBackground`).remove();mjProfileData.consoleBackground=null;applyMjConsoleBg(null);} if(roomRef)roomRef.child('customBackground').set(selectedBgUrl).then(()=>alert("Appliqué !")); }
         function resetCustomBg() { selectedBgUrl=""; document.querySelectorAll('#bg-gallery .bg-item').forEach(i=>i.classList.remove('bg-selected')); document.getElementById('btn-apply-bg').disabled=true; if(roomRef)roomRef.child('customBackground').remove().then(()=>alert("Fond par défaut de la salle réinitialisé.")); }
+        
         function handleProfileFile(files) { if(!files||files.length===0)return; const storageRef=storage.ref(`mj_profile_logos/${auth.currentUser.uid}/logo`); document.getElementById('prof-logo-placeholder').style.opacity='0.3'; storageRef.put(files[0]).then(s=>s.ref.getDownloadURL()).then(u=>{ document.getElementById('prof-logo-placeholder').style.display='none'; const img=document.getElementById('prof-logo-preview'); img.src=u; img.style.display='block'; document.getElementById('prof-logo-url').value=u; }).catch(e=>alert("Erreur upload: "+e.message)); }
         function applyMjConsoleBg(url) { const bg=document.getElementById('dynamic-bg'); if(url&&url!==""){ bg.style.background=`url('${url}') center/cover no-repeat`; bg.style.animation='none'; }else{ bg.style.background='linear-gradient(45deg, #0f0c29, #302b63, #24243e)'; bg.style.backgroundSize='300% 300%'; bg.style.animation='gradientBG 15s ease infinite'; } }
         function login() { const e=document.getElementById('mj-email').value.trim(), p=document.getElementById('mj-pass').value; if(e&&p)auth.signInWithEmailAndPassword(e,p).then(r=>loadMjData(r.user)).catch(()=>alert("Oups ! Identifiants incorrects.")); }
@@ -654,11 +679,7 @@
             }).catch(e=>console.error(e));
         }
 
-        // Brique de sécurité Tâche 1
-        function syncLibraryToRoom() { 
-            try { if(roomID && roomRef) roomRef.child('library').set(mjLibrary || {}); } catch(e){ console.error("Erreur sync library", e); }
-        }
-
+        function syncLibraryToRoom() { try { if(roomID && roomRef) roomRef.child('library').set(mjLibrary || {}); } catch(e){ console.error("Erreur sync library", e); } }
         function initLibrarySync() { roomRef.child('library').on('value', snap => { const r = snap.val()||{}; const u = auth.currentUser.uid; if(!u)return; let h=false; Object.values(r).forEach(url => { if(!Object.values(mjLibrary).includes(url)){ db.ref(`users/${u}/library`).push(url); h=true; } }); if(h) loadModalLibrary(); }); }
 
         let previousScreen = "screen-choice";
@@ -714,7 +735,6 @@
             try { roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true); } catch(e){}
             try { if(mjProfileData.defaultBackground) roomRef.child('customBackground').set(mjProfileData.defaultBackground); } catch(e){}
             
-            // Boucliers de lancement
             try { syncLibraryToRoom(); } catch(e){ console.error(e); }
             try { initMJLogic(); } catch(e){ console.error(e); }
             try { initLibrarySync(); } catch(e){ console.error(e); }
