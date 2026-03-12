@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.148)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.149)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -26,7 +26,8 @@
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s; text-transform: uppercase; margin-bottom: 10px; position: relative; top: 0; box-shadow: 0 4px rgba(0,0,0,0.3); }
         button:hover:not(:disabled) { opacity: 0.9; }
         button:active:not(:disabled) { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
-        /* Règle UI stricte : Gris uniquement pour les désactivés */
+        
+        /* Boutons désactivés (Seule utilisation du gris) */
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; }
         
         /* Boutons d'annulation/retour (Non gris) */
@@ -127,7 +128,7 @@
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
 
-    <div class="version-tag">v1.148</div>
+    <div class="version-tag">v1.149</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -172,7 +173,7 @@
         <span class="input-helper">Lien d'ouverture si un joueur clique sur votre logo (Optionnel).</span>
         
         <p class="section-title">📁 BIBLIOTHÈQUE / MÉDIAS</p>
-        <button onclick="openLibraryProxy('self')" style="background:var(--gold); color:black; margin-top:0;">Gérer mes Blasons d'Équipes</button>
+        <button onclick="openLibraryProxy('self')" style="background:var(--gold); color:black; margin-top:0;">🎨 Gérer mes Blasons d'Équipes</button>
         <button onclick="openBgLibraryProxy('self')" style="background:var(--purple); color:white; margin-top:10px;">📺 Gérer mes Fonds d'écran</button>
 
         <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:20px 0;">
@@ -374,7 +375,7 @@
                <input type="text" id="sa-det-nom" placeholder="Nom" style="margin-bottom:0;">
            </div>
            <input type="email" id="sa-det-email" placeholder="Email (Identifiant)" style="margin-bottom:5px; border-color:var(--accent);">
-           <span class="input-helper" style="margin-top:0; margin-bottom:15px;">Modifier l'email ou le mot de passe nécessitera l'ancien mot de passe Mémo.</span>
+           <span class="input-helper" style="margin-top:0; margin-bottom:15px;">Modifier l'email ou le mot de passe nécessitera l'ancien mot de passe du MJ.</span>
            
            <div style="display:flex; gap:10px; margin-bottom: 20px;">
                <button style="background:var(--gold); color:black; flex:1; margin:0; padding:10px; font-size:0.9rem;" onclick="openLibraryProxy('proxy')">🎨 Gérer ses Blasons</button>
@@ -418,7 +419,7 @@
                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                    </div>
                </div>
-               <span class="input-helper" style="margin-top:5px; margin-bottom:0;">Le nouveau mot de passe doit contenir 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial. Firebase exige l'ancien mot de passe pour le changer. Si perdu, le MJ doit utiliser "Mot de passe oublié" à la connexion.</span>
+               <span class="input-helper" style="margin-top:5px; margin-bottom:0;">Firebase exige l'ancien mot de passe pour le changer. Si perdu, le MJ doit utiliser "Mot de passe oublié" à la connexion.</span>
            </div>
            
            <button id="btn-sa-save" onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);">💾 ENREGISTRER LES MODIFICATIONS</button>
@@ -565,8 +566,14 @@
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
         
-        // VARIABLES GLOBALES DES GALERIES
-        let activeLibraryUid = null; // Définit sur quel compte le système de fichiers interagit (Proxy SA)
+        // VARIABLES GLOBALES DES GALERIES & PROXY
+        let activeLibraryUid = null; 
+        let isProxyMode = false;
+
+        let activeBgLibraryUid = null;
+        let isProxyBgMode = false;
+        let modalSelectedBgUrl = "";
+
         let mjLibrary = {}; 
         let mjBgLibrary = {}; 
         let selectedBgUrl = "";
@@ -743,7 +750,6 @@
         function saveSAMjDetails() {
             if(!targetMjUid || !allUsersData[targetMjUid]) return;
             const u = allUsersData[targetMjUid];
-            
             const oldEmail = u.email || "";
             
             const newPrenom = document.getElementById('sa-det-prenom').value.trim();
@@ -764,8 +770,7 @@
 
             if (emailChanged || passChanged) {
                 if(!currentPass) {
-                    alert("⚠️ Vous DEVEZ saisir le 'Mot de passe ACTUEL' du MJ pour modifier ses identifiants Firebase.");
-                    return;
+                    return alert("⚠️ Vous DEVEZ saisir le 'Mot de passe ACTUEL' du MJ pour modifier ses identifiants Firebase.");
                 }
                 if(passChanged) {
                     if(newPass === currentPass) return alert("Le nouveau mot de passe doit être différent de l'ancien.");
@@ -774,7 +779,7 @@
                 }
                 
                 const btn = document.getElementById('btn-sa-save');
-                btn.innerText = "⏳ MISE À JOUR AUTHENTIFICATION...";
+                btn.innerText = "⏳ MISE À JOUR...";
                 btn.disabled = true;
 
                 secondaryAuth.signInWithEmailAndPassword(oldEmail, currentPass)
@@ -789,19 +794,16 @@
                         db.ref('users/' + targetMjUid).update(updates).then(() => {
                             btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS";
                             btn.disabled = false;
-                            alert("Fiche MJ et Identifiants de connexion mis à jour avec succès !");
+                            alert("Fiche MJ et Identifiants mis à jour !");
                             document.getElementById('modal-sa-mj-details').style.display = 'none';
                         });
                     } catch(error) {
                         await secondaryAuth.signOut();
-                        btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS";
-                        btn.disabled = false;
-                        alert("Erreur de sécurité Google Auth : " + error.message);
+                        btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS"; btn.disabled = false;
+                        alert("Erreur Google Auth : " + error.message);
                     }
-                })
-                .catch(error => {
-                    btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS";
-                    btn.disabled = false;
+                }).catch(error => {
+                    btn.innerText = "💾 ENREGISTRER LES MODIFICATIONS"; btn.disabled = false;
                     alert("⚠️ Échec de connexion au compte MJ.\nLe mot de passe actuel saisi est incorrect.\n(Erreur: " + error.message + ")");
                 });
             } else {
@@ -831,14 +833,12 @@
                     email: email, prenom: prenom, expirationDate: newExp, isBlocked: false
                 }).then(() => {
                     secondaryAuth.signOut();
-                    
                     document.getElementById('modal-sa-create').style.display = 'none';
                     document.getElementById('sa-create-email').value = ''; document.getElementById('sa-create-pass').value = ''; document.getElementById('sa-create-prenom').value = '';
                     
                     const subject = encodeURIComponent("Vos accès à la console MJ Presta'Puce");
                     const body = encodeURIComponent(`Bonjour ${prenom || ''},\n\nVoici vos accès pour gérer vos parties de Blindtest :\n\nLien : https://prestapuce.github.io/prestapuce-blindtest/mj\nIdentifiant : ${email}\nMot de passe : ${pass}\n\nUn guide d'utilisation complet est disponible directement sur votre console via le bouton "AIDE / GUIDE".\n\nAmusez-vous bien !\nL'équipe Presta'Puce`);
                     window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-                    
                 });
             })
             .catch((error) => { alert("Erreur de création : " + error.message); });
@@ -848,7 +848,6 @@
             if(!targetMjUid || !allUsersData[targetMjUid]) return;
             const u = allUsersData[targetMjUid];
             const email = u.email;
-
             const pass = prompt(`⚠️ DANGER : Voulez-vous vraiment supprimer DÉFINITIVEMENT le compte ${email} ?\n\nPour détruire l'identifiant de connexion, veuillez saisir le mot de passe actuel du MJ.\n(Laissez vide et cliquez sur OK pour effacer uniquement ses données de jeu)`);
             
             if(pass !== null) {
@@ -861,14 +860,11 @@
                             alert("Erreur suppression Auth : " + err.message + "\n\nLes données vont quand même être effacées.");
                             eraseMjDatabase(targetMjUid);
                         });
-                    })
-                    .catch(err => {
-                        alert("Le mot de passe saisi est incorrect. Les données BDD vont être effacées, mais l'identifiant restera dans la console Firebase Google.\nErreur: " + err.message);
+                    }).catch(err => {
+                        alert("Mot de passe incorrect. Les données BDD vont être effacées, mais l'identifiant restera dans la console Firebase Google.\nErreur: " + err.message);
                         eraseMjDatabase(targetMjUid);
                     });
-                } else {
-                    eraseMjDatabase(targetMjUid);
-                }
+                } else { eraseMjDatabase(targetMjUid); }
             }
         }
 
@@ -886,8 +882,8 @@
                 setTimeout(updateMjDetailsView, 200);
             });
         }
-        // --- FIN MOTEUR SUPER ADMIN ---
 
+        // --- GESTION DES MEDIAS (PROXY SAFE) ---
         function setupDragDrop(id, handler) {
             const el = document.getElementById(id);
             if(!el) return;
@@ -898,37 +894,227 @@
         }
         function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
         
+        // --- BLASONS (CRESTS) ---
+        function openLibraryProxy(mode) {
+            if (mode === 'proxy') {
+                isProxyMode = true;
+                activeLibraryUid = targetMjUid;
+            } else {
+                isProxyMode = false;
+                activeLibraryUid = auth.currentUser.uid;
+            }
+            document.getElementById('modal-library').style.display = 'flex';
+            refreshLibraryData();
+        }
+
+        function closeLibrary() {
+            document.getElementById('modal-library').style.display = 'none';
+            if (isProxyMode) {
+                isProxyMode = false;
+                activeLibraryUid = auth.currentUser.uid;
+            }
+        }
+
+        function refreshLibraryData() {
+            const uid = activeLibraryUid || auth.currentUser.uid;
+            db.ref(`users/${uid}/library`).once('value').then(snap => {
+                const lib = snap.val() || {};
+                if (!isProxyMode) {
+                    mjLibrary = lib; // On met à jour la variable globale SEULEMENT si ce n'est pas le proxy
+                    loadCrestGrid();
+                    syncLibraryToRoom();
+                }
+                renderLibraryGrid(lib); // On envoie les données brutes pour affichage isolé
+            });
+        }
+
+        function renderLibraryGrid(lib) {
+            const grid = document.getElementById('lib-grid');
+            if(!grid) return;
+            grid.innerHTML = "";
+            const entries = Object.entries(lib || {});
+            const recent = entries.filter(e => e[0].startsWith('-'));
+            const old = entries.filter(e => !e[0].startsWith('-'));
+            recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
+            const finalOrder = [...recent, ...old];
+            
+            finalOrder.forEach(entry => {
+                const key = entry[0]; const url = entry[1];
+                const item = document.createElement('div');
+                item.className = 'lib-item';
+                item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteFromLibrary('${key}', '${url}')">X</div>`;
+                grid.appendChild(item);
+            });
+        }
+
+        function deleteFromLibrary(key, urlToDelete) {
+            if(confirm("Supprimer cette image ?\nSi elle est utilisée par une équipe, elle sera remplacée par le logo par défaut.")) {
+                const uid = activeLibraryUid;
+
+                // Mise à jour de la salle active UNIQUEMENT si on gère sa propre bibliothèque
+                if(!isProxyMode && globalTeams) {
+                    Object.keys(globalTeams).forEach(tKey => {
+                        if(globalTeams[tKey].icon === urlToDelete) {
+                            const fallbackUrl = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
+                            roomRef.child('teams/' + tKey).update({ icon: fallbackUrl });
+                        }
+                    });
+                }
+                db.ref(`users/${uid}/library/${key}`).remove().then(() => { refreshLibraryData(); });
+            }
+        }
+
         async function handleFiles(files) {
             if(!files || files.length === 0) return;
             const title = document.getElementById('dz-title'); const sub = document.getElementById('dz-sub'); const originalTitle = title.innerText;
-            const uid = activeLibraryUid; // Géré par le mode Proxy
+            const uid = activeLibraryUid || auth.currentUser.uid;
             let count = 0; const total = files.length;
             title.innerText = `⏳ Envoi : 0 / ${total}...`; sub.innerText = "Veuillez patienter...";
-            for (let i = 0; i < total; i++) { try { await uploadSingleFile(files[i], uid); count++; title.innerText = `⏳ Envoi : ${count} / ${total}...`; } catch (err) { console.error("Erreur fichier " + i, err); } }
-            title.innerText = "✅ TERMINÉ !"; sub.innerText = `${count} images ajoutées.`; refreshLibraryData(); setTimeout(() => { title.innerText = originalTitle; sub.innerText = "ou Cliquez pour parcourir"; }, 2000);
+            for (let i = 0; i < total; i++) {
+                try {
+                    await uploadSingleFile(files[i], uid);
+                    count++; title.innerText = `⏳ Envoi : ${count} / ${total}...`;
+                } catch (err) { console.error("Erreur fichier", err); }
+            }
+            title.innerText = "✅ TERMINÉ !"; sub.innerText = `${count} images ajoutées.`;
+            refreshLibraryData();
+            setTimeout(() => { title.innerText = originalTitle; sub.innerText = "ou Cliquez pour parcourir"; }, 2000);
         }
-        
-        function uploadSingleFile(file, uid) { 
-            return new Promise((resolve, reject) => { 
-                const storageRef = storage.ref(`mj_library/${uid}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}_${file.name}`); 
-                storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => { 
-                    db.ref(`users/${uid}/library`).push(url).then(() => resolve(url)); 
-                }).catch(err => reject(err)); 
-            }); 
-        }
-        
-        function handleProfileFile(files) { if(!files || files.length === 0) return; const file = files[0]; const uid = auth.currentUser.uid; const storageRef = storage.ref(`mj_profile_logos/${uid}/logo`); document.getElementById('prof-logo-placeholder').style.opacity = '0.3'; storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => { document.getElementById('prof-logo-placeholder').style.display = 'none'; const img = document.getElementById('prof-logo-preview'); img.src = url; img.style.display = 'block'; document.getElementById('prof-logo-url').value = url; }).catch(err => alert("Erreur upload profil : " + err.message)); }
 
-        // --- GESTION DES FONDS D'ÉCRAN ---
-        function applyMjConsoleBg(url) {
-            const bgDiv = document.getElementById('dynamic-bg');
-            if (url && url !== "") {
-                bgDiv.style.background = `url('${url}') center/cover no-repeat`;
-                bgDiv.style.animation = 'none';
+        function uploadSingleFile(file, uid) {
+            return new Promise((resolve, reject) => {
+                const storageRef = storage.ref(`mj_library/${uid}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}_${file.name}`);
+                storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
+                    db.ref(`users/${uid}/library`).push(url).then(() => resolve(url));
+                }).catch(err => reject(err));
+            });
+        }
+
+        function loadCrestGrid() {
+            const grid = document.getElementById('crest-grid');
+            if(!grid) return;
+            grid.innerHTML = "";
+            const entries = Object.entries(mjLibrary || {});
+            const recent = entries.filter(e => e[0].startsWith('-'));
+            const old = entries.filter(e => !e[0].startsWith('-'));
+            recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
+            const finalOrder = [...recent, ...old];
+            finalOrder.forEach(entry => { createCrestItem(entry[1], grid); });
+            if (showDefaultCrests) { for(let i=0; i<30; i++) { createCrestItem(createBlason(i), grid); } }
+        }
+
+        // --- FONDS D'ÉCRAN (BACKGROUNDS) ---
+        function openBgLibraryProxy(mode) {
+            if (mode === 'proxy') {
+                isProxyBgMode = true;
+                activeBgLibraryUid = targetMjUid;
             } else {
-                bgDiv.style.background = 'linear-gradient(45deg, #0f0c29, #302b63, #24243e)';
-                bgDiv.style.backgroundSize = '300% 300%';
-                bgDiv.style.animation = 'gradientBG 15s ease infinite';
+                isProxyBgMode = false;
+                activeBgLibraryUid = auth.currentUser.uid;
+            }
+            modalSelectedBgUrl = "";
+            document.getElementById('btn-modal-bg-default').disabled = true;
+            document.getElementById('btn-modal-bg-console').disabled = true;
+            document.getElementById('modal-bg-library').style.display = 'flex';
+            refreshBgLibrary();
+        }
+
+        function closeBgLibrary() {
+            document.getElementById('modal-bg-library').style.display = 'none';
+            if (isProxyBgMode) {
+                isProxyBgMode = false;
+                activeBgLibraryUid = auth.currentUser.uid;
+            }
+        }
+
+        function refreshBgLibrary() {
+            // Affichage Modal (Proxy Safe)
+            const uid = activeBgLibraryUid || auth.currentUser.uid;
+            db.ref(`users/${uid}/bgLibrary`).once('value').then(snap => {
+                const lib = snap.val() || {};
+                renderBgGalleryModal(lib);
+            });
+
+            // Maintien synchro du Dashboard si on n'est pas en proxy
+            if (!isProxyBgMode && auth.currentUser) {
+                db.ref(`users/${auth.currentUser.uid}/bgLibrary`).once('value').then(snap => {
+                    mjBgLibrary = snap.val() || {};
+                    renderBgGalleryDashboard();
+                });
+            }
+        }
+
+        function renderBgGalleryDashboard() {
+            const grid = document.getElementById('bg-gallery');
+            if(!grid) return;
+            grid.innerHTML = "";
+            const entries = Object.entries(mjBgLibrary || {}).reverse();
+            entries.forEach(entry => {
+                const key = entry[0]; const url = entry[1];
+                const item = document.createElement('div');
+                item.className = 'bg-item';
+                if(selectedBgUrl === url) item.classList.add('bg-selected');
+                item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteBgFromLibraryDashboard(event, '${key}', '${url}')">X</div>`;
+                item.onclick = () => {
+                    document.querySelectorAll('#bg-gallery .bg-item').forEach(i => i.classList.remove('bg-selected'));
+                    item.classList.add('bg-selected');
+                    selectedBgUrl = url;
+                    document.getElementById('btn-apply-bg').disabled = false;
+                };
+                grid.appendChild(item);
+            });
+        }
+
+        function renderBgGalleryModal(lib) {
+            const grid = document.getElementById('bg-modal-gallery');
+            if(!grid) return;
+            grid.innerHTML = "";
+            const entries = Object.entries(lib || {}).reverse();
+            entries.forEach(entry => {
+                const key = entry[0]; const url = entry[1];
+                const item = document.createElement('div');
+                item.className = 'bg-item';
+                if(modalSelectedBgUrl === url) item.classList.add('bg-selected');
+                item.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteBgFromLibraryModal(event, '${key}', '${url}')">X</div>`;
+                item.onclick = () => {
+                    document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(i => i.classList.remove('bg-selected'));
+                    item.classList.add('bg-selected');
+                    modalSelectedBgUrl = url;
+                    document.getElementById('btn-modal-bg-default').disabled = false;
+                    document.getElementById('btn-modal-bg-console').disabled = false;
+                };
+                grid.appendChild(item);
+            });
+        }
+
+        function deleteBgFromLibraryDashboard(event, key, urlToDelete) {
+            event.stopPropagation();
+            if(confirm("Supprimer ce fond d'écran de votre galerie ?")) {
+                const uid = auth.currentUser.uid;
+                if(selectedBgUrl === urlToDelete) {
+                    selectedBgUrl = ""; document.getElementById('btn-apply-bg').disabled = true;
+                }
+                if(mjProfileData.defaultBackground === urlToDelete) { db.ref(`users/${uid}/defaultBackground`).remove(); mjProfileData.defaultBackground = null; }
+                if(mjProfileData.consoleBackground === urlToDelete) { db.ref(`users/${uid}/consoleBackground`).remove(); mjProfileData.consoleBackground = null; applyMjConsoleBg(null); }
+                if(currentRoomBgUrl === urlToDelete && roomRef) { roomRef.child('customBackground').remove(); }
+                db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(() => { refreshBgLibrary(); });
+            }
+        }
+
+        function deleteBgFromLibraryModal(event, key, urlToDelete) {
+            event.stopPropagation();
+            if(confirm("Supprimer ce fond d'écran ?")) {
+                const uid = activeBgLibraryUid;
+                if(modalSelectedBgUrl === urlToDelete) {
+                    modalSelectedBgUrl = "";
+                    document.getElementById('btn-modal-bg-default').disabled = true;
+                    document.getElementById('btn-modal-bg-console').disabled = true;
+                }
+                db.ref(`users/${uid}/defaultBackground`).once('value', s => { if(s.val() === urlToDelete) db.ref(`users/${uid}/defaultBackground`).remove(); });
+                db.ref(`users/${uid}/consoleBackground`).once('value', s => { if(s.val() === urlToDelete) { db.ref(`users/${uid}/consoleBackground`).remove(); if(!isProxyBgMode) applyMjConsoleBg(null); } });
+                if (!isProxyBgMode && currentRoomBgUrl === urlToDelete && roomRef) roomRef.child('customBackground').remove();
+
+                db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(() => { refreshBgLibrary(); });
             }
         }
 
@@ -936,13 +1122,13 @@
             if(!files || files.length === 0) return;
             const file = files[0];
             const prefix = mode === 'modal' ? 'bg-modal' : 'bg';
-            const title = document.getElementById(prefix + '-dz-title'); 
+            const title = document.getElementById(prefix + '-dz-title');
             const sub = document.getElementById(prefix + '-dz-sub');
             const originalTitle = title.innerText; const originalSub = sub.innerText;
-            const uid = activeLibraryUid; // Géré par le mode Proxy
-            
+            const uid = (mode === 'modal') ? activeBgLibraryUid : auth.currentUser.uid;
+
             title.innerText = "⏳ Envoi en cours..."; sub.innerText = "Veuillez patienter...";
-            
+
             const storageRef = storage.ref(`mj_custom_bgs/${uid}/${Date.now()}_${file.name}`);
             storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
                 db.ref(`users/${uid}/bgLibrary`).push(url).then(() => {
@@ -958,186 +1144,68 @@
             const urlInput = document.getElementById(prefix + '-url-input');
             const url = urlInput.value.trim();
             if(!url) return;
-            
-            if(!url.startsWith('http') && !url.startsWith('data:image/')) {
-                alert("Veuillez entrer une URL valide (commençant par http ou data:image).");
-                return;
-            }
-            
-            const uid = activeLibraryUid;
+
+            if(!url.startsWith('http') && !url.startsWith('data:image/')) { return alert("Veuillez entrer une URL valide (http ou data:image)."); }
+
+            const uid = (mode === 'modal') ? activeBgLibraryUid : auth.currentUser.uid;
             db.ref(`users/${uid}/bgLibrary`).push(url).then(() => {
                 urlInput.value = "";
                 refreshBgLibrary();
             }).catch(err => alert("Erreur : " + err.message));
         }
 
-        function refreshBgLibrary() { 
-            const uid = activeLibraryUid; 
-            db.ref(`users/${uid}/bgLibrary`).once('value').then(snap => { 
-                mjBgLibrary = snap.val() || {}; 
-                renderBgGallery(); 
-            }); 
-        }
-
-        function renderBgGallery() {
-            const gridDashboard = document.getElementById('bg-gallery');
-            const gridModal = document.getElementById('bg-modal-gallery');
-            
-            if(gridDashboard) gridDashboard.innerHTML = "";
-            if(gridModal) gridModal.innerHTML = "";
-            
-            const entries = Object.entries(mjBgLibrary).reverse();
-            
-            entries.forEach(entry => {
-                const key = entry[0]; const url = entry[1];
-                
-                // Rendu dans le Dashboard (Seulement si c'est notre propre galerie)
-                if(gridDashboard && activeLibraryUid === auth.currentUser.uid) {
-                    const item1 = document.createElement('div');
-                    item1.className = 'bg-item';
-                    if(selectedBgUrl === url) item1.classList.add('bg-selected');
-                    item1.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteBgFromLibrary(event, '${key}')">X</div>`;
-                    item1.onclick = () => {
-                        document.querySelectorAll('#bg-gallery .bg-item').forEach(i => i.classList.remove('bg-selected'));
-                        item1.classList.add('bg-selected');
-                        selectedBgUrl = url;
-                        document.getElementById('btn-apply-bg').disabled = false;
-                    };
-                    gridDashboard.appendChild(item1);
-                }
-
-                // Rendu dans le Modal (Autonome ou Proxy SA)
-                if(gridModal) {
-                    const item2 = document.createElement('div');
-                    item2.className = 'bg-item';
-                    if(selectedBgUrl === url) item2.classList.add('bg-selected');
-                    item2.innerHTML = `<img src="${url}"><div class="lib-del" onclick="deleteBgFromLibrary(event, '${key}')">X</div>`;
-                    item2.onclick = () => {
-                        document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(i => i.classList.remove('bg-selected'));
-                        item2.classList.add('bg-selected');
-                        selectedBgUrl = url;
-                        document.getElementById('btn-modal-bg-default').disabled = false;
-                        document.getElementById('btn-modal-bg-console').disabled = false;
-                    };
-                    gridModal.appendChild(item2);
-                }
-            });
-        }
-
-        function deleteBgFromLibrary(event, key) {
-            event.stopPropagation();
-            if(confirm("Supprimer ce fond d'écran de la galerie ?")) {
-                const uid = activeLibraryUid;
-                const urlToDelete = mjBgLibrary[key];
-                
-                if(selectedBgUrl === urlToDelete) { 
-                    selectedBgUrl = ""; 
-                    document.getElementById('btn-apply-bg').disabled = true; 
-                    document.getElementById('btn-modal-bg-default').disabled = true;
-                    document.getElementById('btn-modal-bg-console').disabled = true;
-                }
-                
-                if(uid === auth.currentUser.uid) {
-                    // C'est NOTRE galerie
-                    if(mjProfileData.defaultBackground === urlToDelete) db.ref(`users/${uid}/defaultBackground`).remove();
-                    if(mjProfileData.consoleBackground === urlToDelete) { db.ref(`users/${uid}/consoleBackground`).remove(); applyMjConsoleBg(null); }
-                    if(currentRoomBgUrl === urlToDelete && roomRef) roomRef.child('customBackground').remove();
-                } else {
-                    // C'est la galerie d'un MJ cible (Mode Proxy Super Admin)
-                    db.ref(`users/${uid}/defaultBackground`).once('value', s => { if(s.val() === urlToDelete) db.ref(`users/${uid}/defaultBackground`).remove(); });
-                    db.ref(`users/${uid}/consoleBackground`).once('value', s => { if(s.val() === urlToDelete) db.ref(`users/${uid}/consoleBackground`).remove(); });
-                }
-
-                db.ref(`users/${uid}/bgLibrary/${key}`).remove().then(() => { refreshBgLibrary(); });
-            }
-        }
-
-        // Action depuis le modal Autonome / Proxy
         function setModalBgAction(type) {
-            if(!selectedBgUrl) return;
-            const uid = activeLibraryUid;
-            
+            if(!modalSelectedBgUrl) return;
+            const uid = activeBgLibraryUid;
             if(type === 'default') {
-                db.ref(`users/${uid}/defaultBackground`).set(selectedBgUrl).then(() => {
-                    alert("Fond par défaut (pour les prochaines salles) enregistré !");
-                    if(uid === auth.currentUser.uid) mjProfileData.defaultBackground = selectedBgUrl;
+                db.ref(`users/${uid}/defaultBackground`).set(modalSelectedBgUrl).then(() => {
+                    alert("Fond par défaut enregistré !");
+                    if(!isProxyBgMode) mjProfileData.defaultBackground = modalSelectedBgUrl;
                 });
             } else if (type === 'console') {
-                db.ref(`users/${uid}/consoleBackground`).set(selectedBgUrl).then(() => {
-                    alert("Fond de console MJ enregistré !");
-                    if(uid === auth.currentUser.uid) {
-                        mjProfileData.consoleBackground = selectedBgUrl;
-                        applyMjConsoleBg(selectedBgUrl);
+                db.ref(`users/${uid}/consoleBackground`).set(modalSelectedBgUrl).then(() => {
+                    alert("Fond de console enregistré !");
+                    if(!isProxyBgMode) {
+                        mjProfileData.consoleBackground = modalSelectedBgUrl;
+                        applyMjConsoleBg(modalSelectedBgUrl);
                     }
                 });
             }
         }
-
-        // Action depuis le tableau de bord actif
+        
         function saveCustomBg() {
             if(!selectedBgUrl) return;
             const setDefault = document.getElementById('check-default-bg').checked;
             const setConsole = document.getElementById('check-console-bg').checked;
             const uid = auth.currentUser.uid;
             
-            if(setDefault) {
-                db.ref(`users/${uid}/defaultBackground`).set(selectedBgUrl);
-                mjProfileData.defaultBackground = selectedBgUrl;
-            }
+            if(setDefault) { db.ref(`users/${uid}/defaultBackground`).set(selectedBgUrl); mjProfileData.defaultBackground = selectedBgUrl; }
+            if(setConsole) { db.ref(`users/${uid}/consoleBackground`).set(selectedBgUrl); mjProfileData.consoleBackground = selectedBgUrl; applyMjConsoleBg(selectedBgUrl); } 
+            else { db.ref(`users/${uid}/consoleBackground`).remove(); mjProfileData.consoleBackground = null; applyMjConsoleBg(null); }
 
-            if(setConsole) {
-                db.ref(`users/${uid}/consoleBackground`).set(selectedBgUrl);
-                mjProfileData.consoleBackground = selectedBgUrl;
-                applyMjConsoleBg(selectedBgUrl);
-            } else {
-                db.ref(`users/${uid}/consoleBackground`).remove();
-                mjProfileData.consoleBackground = null;
-                applyMjConsoleBg(null);
-            }
-
-            if (roomRef) {
-                roomRef.child('customBackground').set(selectedBgUrl).then(() => { alert("Fond d'écran appliqué à la salle !"); });
-            }
+            if (roomRef) { roomRef.child('customBackground').set(selectedBgUrl).then(() => { alert("Fond d'écran appliqué !"); }); }
         }
 
         function resetCustomBg() {
-            selectedBgUrl = "";
-            document.querySelectorAll('.bg-item').forEach(i => i.classList.remove('bg-selected'));
+            selectedBgUrl = ""; document.querySelectorAll('#bg-gallery .bg-item').forEach(i => i.classList.remove('bg-selected'));
             document.getElementById('btn-apply-bg').disabled = true;
-            
-            if (roomRef) {
-                roomRef.child('customBackground').remove().then(() => { alert("Retour au fond animé par défaut de la salle."); });
+            if (roomRef) { roomRef.child('customBackground').remove().then(() => { alert("Retour au fond animé par défaut."); }); }
+        }
+        // --- FIN GESTION FONDS & MEDIAS ---
+
+        function handleProfileFile(files) { if(!files || files.length === 0) return; const file = files[0]; const uid = auth.currentUser.uid; const storageRef = storage.ref(`mj_profile_logos/${uid}/logo`); document.getElementById('prof-logo-placeholder').style.opacity = '0.3'; storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => { document.getElementById('prof-logo-placeholder').style.display = 'none'; const img = document.getElementById('prof-logo-preview'); img.src = url; img.style.display = 'block'; document.getElementById('prof-logo-url').value = url; }).catch(err => alert("Erreur upload profil : " + err.message)); }
+
+        function applyMjConsoleBg(url) {
+            const bgDiv = document.getElementById('dynamic-bg');
+            if (url && url !== "") {
+                bgDiv.style.background = `url('${url}') center/cover no-repeat`;
+                bgDiv.style.animation = 'none';
+            } else {
+                bgDiv.style.background = 'linear-gradient(45deg, #0f0c29, #302b63, #24243e)';
+                bgDiv.style.backgroundSize = '300% 300%';
+                bgDiv.style.animation = 'gradientBG 15s ease infinite';
             }
         }
-        
-        // --- SYSTÈME PROXY & MODALS ---
-        function openLibraryProxy(mode) {
-            activeLibraryUid = (mode === 'proxy') ? targetMjUid : auth.currentUser.uid;
-            document.getElementById('modal-library').style.display = 'flex';
-            refreshLibraryData();
-        }
-        
-        function closeLibrary() {
-            document.getElementById('modal-library').style.display = 'none';
-            activeLibraryUid = auth.currentUser.uid; // Retour à la normale
-            refreshLibraryData();
-        }
-
-        function openBgLibraryProxy(mode) {
-            activeLibraryUid = (mode === 'proxy') ? targetMjUid : auth.currentUser.uid;
-            selectedBgUrl = ""; // Reset sélection visuelle
-            document.getElementById('btn-modal-bg-default').disabled = true;
-            document.getElementById('btn-modal-bg-console').disabled = true;
-            document.getElementById('modal-bg-library').style.display = 'flex';
-            refreshBgLibrary();
-        }
-
-        function closeBgLibrary() {
-            document.getElementById('modal-bg-library').style.display = 'none';
-            activeLibraryUid = auth.currentUser.uid; // Retour à la normale
-            refreshBgLibrary();
-        }
-        // --- FIN GESTION FONDS ---
 
         function login() { const email = document.getElementById('mj-email').value.trim(); const pass = document.getElementById('mj-pass').value; if(!email || !pass) return; auth.signInWithEmailAndPassword(email, pass).then(res => { loadMjData(res.user); }).catch(e => { alert("Oups ! L'email ou le mot de passe saisi est incorrect. Veuillez vérifier vos identifiants."); }); }
         function togglePasswordVisibility(inputId, icon) { const input = document.getElementById(inputId); if(input.type === 'password') { input.type = 'text'; icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 3.31 0 6.28-1.38 8.22-3.67l.48.48 2.73 2.73 1.27-1.27L3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>'; } else { input.type = 'password'; icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; } }
@@ -1146,7 +1214,8 @@
         function loadMjData(user) {
             
             isSuperAdmin = (user.email === 'contact@prestapuce.com');
-            activeLibraryUid = user.uid; // Init standard
+            activeLibraryUid = user.uid;
+            activeBgLibraryUid = user.uid;
             
             if(isSuperAdmin) {
                 document.getElementById('btn-super-admin').style.display = 'inline-block';
@@ -1168,9 +1237,7 @@
                 if(!isSuperAdmin && data.isGuest !== true) {
                     const isBlocked = data.isBlocked === true;
                     let isExpired = false;
-                    if(data.expirationDate && data.expirationDate < Date.now()) {
-                        isExpired = true;
-                    }
+                    if(data.expirationDate && data.expirationDate < Date.now()) { isExpired = true; }
                     
                     if(isBlocked || isExpired) {
                         alert("⚠️ ACCÈS REFUSÉ.\n\nVotre abonnement est expiré ou votre compte est bloqué.\nVeuillez contacter contact@prestapuce.com");
@@ -1183,7 +1250,7 @@
                 
                 if (!data.library && data.customLogos) {
                     let migratedLib = {}; Object.values(data.customLogos).forEach((url, idx) => { migratedLib['migrated_' + idx] = url; });
-                    db.ref(`users/${user.uid}/library`).set(migratedLib).then(() => { mjLibrary = migratedLib; renderLibraryGrid(); loadCrestGrid(); });
+                    db.ref(`users/${user.uid}/library`).set(migratedLib).then(() => { mjLibrary = migratedLib; loadCrestGrid(); });
                 } else { mjLibrary = data.library || {}; }
                 
                 mjBgLibrary = data.bgLibrary || {};
@@ -1192,9 +1259,7 @@
                 if(data.consoleBackground) { 
                     document.getElementById('check-console-bg').checked = true; 
                     applyMjConsoleBg(data.consoleBackground);
-                } else {
-                    applyMjConsoleBg(null);
-                }
+                } else { applyMjConsoleBg(null); }
 
                 showDefaultCrests = (data.showDefaultCrests !== false); 
                 document.getElementById('check-hide-default').checked = showDefaultCrests;
@@ -1222,6 +1287,23 @@
                 document.getElementById('screen-login').style.display = "none"; document.getElementById('screen-profile').style.display = "none"; document.getElementById('screen-dashboard').style.display = "none"; document.getElementById('screen-choice').style.display = "block"; document.getElementById('global-mj-logo-container').style.display = "block";
                 if(snap.exists() && snap.val() !== "") { lastSavedRoom = snap.val(); document.getElementById('btn-resume').style.display = "block"; document.getElementById('last-room-id').innerText = lastSavedRoom; } 
                 else { document.getElementById('btn-resume').style.display = "none"; }
+            });
+        }
+
+        function toggleDefaultCrests(checked) { showDefaultCrests = checked; const uid = auth.currentUser.uid; db.ref(`users/${uid}/showDefaultCrests`).set(checked); mjProfileData.showDefaultCrests = checked; loadCrestGrid(); }
+        function syncLibraryToRoom() { if(roomID && roomRef) { roomRef.child('library').update(mjLibrary); } }
+
+        function initLibrarySync() {
+            roomRef.child('library').on('value', snap => {
+                const roomLib = snap.val() || {};
+                const uid = auth.currentUser.uid;
+                if(!uid) return;
+                const myLibValues = Object.values(mjLibrary);
+                let hasNew = false;
+                Object.values(roomLib).forEach(url => {
+                    if(!myLibValues.includes(url)) { db.ref(`users/${uid}/library`).push(url); hasNew = true; }
+                });
+                if(hasNew) refreshLibraryData(); 
             });
         }
 
@@ -1266,8 +1348,7 @@
                 nom: document.getElementById('prof-nom').value.trim(), 
                 prenom: document.getElementById('prof-prenom').value.trim(), 
                 customLogo: document.getElementById('prof-logo-url').value.trim(), 
-                customLink: document.getElementById('prof-link').value.trim(),
-                email: newEmail 
+                customLink: document.getElementById('prof-link').value.trim()
             };
 
             if (emailChanged || passChanged) {
@@ -1284,7 +1365,10 @@
                     const credential = firebase.auth.EmailAuthProvider.credential(user.email, passCurrent);
                     await user.reauthenticateWithCredential(credential);
                     
-                    if (emailChanged) await user.updateEmail(newEmail);
+                    if (emailChanged) {
+                        await user.updateEmail(newEmail);
+                        updates.email = newEmail;
+                    }
                     if (passChanged) {
                         await user.updatePassword(pass1);
                     }
@@ -1340,7 +1424,7 @@
             initLibrarySync(); 
             initAdminListener();
             loadCrestGrid();
-            refreshBgLibrary(); // Pour dashboard interne
+            refreshBgLibrary();
             openScoreBoard();
         }
 
