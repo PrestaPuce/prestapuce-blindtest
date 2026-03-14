@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Scores - Presta'Puce (v1.158)</title>
+    <title>Scores - Presta'Puce (v1.159)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -57,7 +57,11 @@
         /* EFFET VERRE DÉPOLI SUR LES CARTES */
         .card { background: var(--card-bg); display: flex; align-items: center; padding: 0 1vw; border-radius: 8px; margin-bottom: 0.8vh; border-left: 0.5vw solid var(--accent); height: 7vh; transition: border 0.3s, background 0.3s, box-shadow 0.3s; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-left: 0.5vw solid var(--accent); }
         .avatar, .crest { width: 5vh; display: flex; justify-content: center; align-items: center; font-size: 2.5vh; }
-        .crest-bg { background: white; padding: 2px; border-radius: 4px; display: flex; }
+        
+        /* CORRECTION VISUELLE : SUPPRESSION DU FOND BLANC PAR DÉFAUT */
+        .crest-bg { padding: 0; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .crest-bg.native-svg { background: white; padding: 2px; } /* On garde le fond blanc uniquement pour les SVG par défaut */
+
         .crest img, .avatar img { width: 4vh; height: 4vh; object-fit: contain; } 
         .info { flex: 1; margin-left: 1vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: baseline; gap: 0.5vw; line-height: 1; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
         .info b { font-size: clamp(0.9rem, 2.5vh, 1.8rem); }
@@ -127,7 +131,7 @@
             </a>
             <div class="title-group">
                 <h1>SALLE : <span id="room-title" class="room-highlight">----</span></h1>
-                <div class="version-text">v1.158</div>
+                <div class="version-text">v1.159</div>
             </div>
         </div>
     </header>
@@ -178,7 +182,6 @@
         
         new QRCode(document.getElementById("qrcode"), { text: playURL, width: 250, height: 250, correctLevel : QRCode.CorrectLevel.H });
 
-        // GESTION DU FOND PERSONNALISÉ (ÉTAPE 4)
         roomRef.child('customBackground').on('value', snap => {
             const bgDiv = document.getElementById('dynamic-bg');
             if (snap.exists() && snap.val() !== "") {
@@ -267,32 +270,32 @@
             return Array.from(rankingMap.values());
         }
 
-        // LOGIQUE ANTI-EX-AEQUO (V2 avec priorité SOLO)
         function getSortedRanking() {
             let unsorted = calculateGlobalScores();
             return unsorted.sort((a, b) => {
-                if (b.pts !== a.pts) return b.pts - a.pts; // 1. Score
-                
+                if (b.pts !== a.pts) return b.pts - a.pts; 
                 let countA = Math.max(1, a.count); 
                 let countB = Math.max(1, b.count);
-                if (countA !== countB) return countA - countB; // 2. Moins de joueurs
-                
-                // 3. Joueur Solo prime sur Équipe réduite à 1 joueur
+                if (countA !== countB) return countA - countB; 
                 if (!a.isTeam && b.isTeam) return -1;
                 if (a.isTeam && !b.isTeam) return 1;
-
                 let timeA = lastPointTime[a.dataId] || 0; 
                 let timeB = lastPointTime[b.dataId] || 0;
-                if (timeB !== timeA) return timeB - timeA; // 4. Dynamique
-                
-                return a.name.localeCompare(b.name); // 5. Alphabétique
+                if (timeB !== timeA) return timeB - timeA; 
+                return a.name.localeCompare(b.name); 
             });
         }
 
+        // --- DÉBUT CORRECTION: RENDU TRANSPARENT DES AVATARS ---
         function renderAvatar(av) {
-            if(av && av.length > 20) return `<img src="${av}" style="width:80%; height:80%; border-radius:50%; object-fit:cover;">`;
-            return `<span style="font-size:200%;">${av || '👤'}</span>`;
+            if(av && av.length > 20) {
+                // Si c'est une image (url base64 ou http), on s'assure qu'elle n'a pas de fond par défaut
+                return `<div style="width:100%; height:100%; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:transparent;"><img src="${av}" style="width:100%; height:100%; object-fit:cover;"></div>`;
+            }
+            // Si c'est un émoji
+            return `<span style="font-size:200%; display:flex; align-items:center; justify-content:center; width:100%; height:100%;">${av || '👤'}</span>`;
         }
+        // --- FIN CORRECTION ---
 
         function animateList(containerId, newHTML) {
             const container = document.getElementById(containerId);
@@ -384,7 +387,21 @@
             let gListHTML = "";
             getSortedRanking().forEach((item, index) => {
                 const idG = item.dataId;
-                const iconHtml = item.isTeam ? `<div class="crest-bg"><img src="${item.icon}" style="width:4vh; height:4vh;"></div>` : `<span>${renderAvatar(item.avatar)}</span>`;
+                
+                // --- DÉBUT CORRECTION: RENDU SÉCURISÉ DES BLASONS D'ÉQUIPES ---
+                let iconHtml = "";
+                if (item.isTeam) {
+                    if (item.icon && item.icon.startsWith('data:image/svg')) {
+                        // C'est un SVG généré par défaut : on lui met un fond blanc pour le contraste
+                        iconHtml = `<div class="crest-bg native-svg"><img src="${item.icon}" style="width:4vh; height:4vh;"></div>`;
+                    } else {
+                        // C'est un blason uploadé (PNG, JPG...) : On garde un fond transparent
+                        iconHtml = `<div class="crest-bg" style="background:transparent;"><img src="${item.icon}" style="width:4vh; height:4vh; border-radius:4px; object-fit:contain;"></div>`;
+                    }
+                } else {
+                    iconHtml = `<span>${renderAvatar(item.avatar)}</span>`;
+                }
+                // --- FIN CORRECTION ---
                 
                 let finalName = item.name + (item.isTeam ? (item.isActive ? ` <span class="team-tag">(${item.count} j)</span>` : ` <span class="pause-badge">EN PAUSE</span>`) : ' <span class="team-tag">(Solo)</span>');
                 let inactiveClass = item.isActive ? "" : " inactive-card";
