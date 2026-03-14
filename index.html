@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.150)</title>
+    <title>Presta'Puce - Blind Test (v1.151)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -122,7 +122,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.150</div>
+    <div class="version-tag">v1.151</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -428,7 +428,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.150";
+        const CLIENT_VERSION = "1.151";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -796,11 +796,28 @@
             for(let i=0; i<30; i++) { const svg = createBlason(i); if(!seen.has(svg)) { seen.add(svg); createCrestItem(svg, c); } }
         }
 
+        // --- DÉBUT DE LA CORRECTION : NETTOYAGE UNIVERSEL DES VIGNETTES ---
         function createCrestItem(url, container) {
-            const d = document.createElement('div'); d.className='crest-item'; const img = document.createElement('img'); img.src=url;
-            d.onclick = () => { document.querySelectorAll('.crest-item').forEach(e=>e.classList.remove('selected')); d.classList.add('selected'); selectedTeamCrest=url; showTeamPreview(); };
-            d.appendChild(img); container.appendChild(d);
+            const d = document.createElement('div'); 
+            d.className='crest-item'; 
+            
+            if (url.startsWith('data:image/svg')) {
+                 d.innerHTML = `<img src="${url}">`;
+            } else {
+                 d.style.background = 'transparent';
+                 d.innerHTML = `<img src="${url}" style="border-radius: 8px;">`;
+            }
+
+            d.onclick = () => { 
+                document.querySelectorAll('.crest-item').forEach(e=>e.classList.remove('selected')); 
+                d.classList.add('selected'); 
+                selectedTeamCrest=url; 
+                showTeamPreview(); 
+            };
+            container.appendChild(d);
         }
+        // --- FIN DE LA CORRECTION ---
+
         function showTeamPreview() { document.getElementById('team-crest-choices').style.display='none'; document.getElementById('team-crest-gallery').style.display='none'; document.getElementById('team-preview-img').src=selectedTeamCrest; document.getElementById('team-preview').style.display='flex'; }
         
         function createNewTeam() { 
