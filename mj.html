@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.154)</title>
+    <title>Console MJ Pro - Presta'Puce (v1.156)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -20,8 +20,7 @@
         .input-helper { display: block; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 15px; font-style: italic; text-align: left; padding-left: 5px; }
         .section-title { margin: 20px 0 10px 0; font-size: 0.9rem; color: var(--accent); text-align: left; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s; text-transform: uppercase; margin-bottom: 10px; position: relative; top: 0; box-shadow: 0 4px rgba(0,0,0,0.3); }
-        button:hover:not(:disabled) { opacity: 0.9; }
-        button:active:not(:disabled) { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
+        button:hover:not(:disabled) { opacity: 0.9; } button:active:not(:disabled) { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.3); }
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; color: #dcdde1 !important; border:none !important;}
         .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: white !important; box-shadow: none !important; }
         .btn-cancel:hover:not(:disabled) { background: rgba(231, 76, 60, 0.2) !important; }
@@ -52,8 +51,7 @@
         .player-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
         .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; cursor:pointer; }
-        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type="number"] { -moz-appearance: textfield; }
+        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; } input[type="number"] { -moz-appearance: textfield; }
         .btn-folder { background: var(--gold); color: black; font-size: 1.4rem; width: 45px; height: 45px; padding: 0; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; margin-left: 5px; box-shadow: 0 4px rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer !important; flex-shrink: 0; }
         .btn-folder:hover { transform: scale(1.05); }
         .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed rgba(255,255,255,0.3); padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.3); transition: 0.3s; position: relative; margin-bottom: 10px; cursor: pointer; }
@@ -68,17 +66,17 @@
         .modal-footer { flex-shrink:0; }
         .modal-close-x { position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; background:var(--danger); color:white; font-weight:bold; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; box-shadow:0 2px 5px rgba(0,0,0,0.5); }
 
-        .lib-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .lib-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-content:start; }
         .lib-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 0; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
         .lib-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .lib-del { position: absolute; top: 0; right: 0; background: var(--danger); color: white; width: 22px; height: 22px; border-bottom-left-radius: 6px; cursor: pointer; font-size: 0.8rem; line-height: 22px; box-shadow: -1px 1px 3px rgba(0,0,0,0.3); font-weight: bold; z-index: 5; text-align: center; }
+        
         .switch-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; font-size: 1rem; color: white; font-weight: bold; }
         .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #c0392b; -webkit-transition: .4s; transition: .4s; border-radius: 34px; }
         .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; -webkit-transition: .4s; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #27ae60; }
-        input:checked + .slider:before { -webkit-transform: translateX(26px); -ms-transform: translateX(26px); transform: translateX(26px); }
+        input:checked + .slider { background-color: #27ae60; } input:checked + .slider:before { transform: translateX(26px); }
         .show-pass-container { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 0.9rem; cursor: pointer; text-align: left; width: 100%; padding-left: 5px; }
         .show-pass-container input { width: 18px; height: 18px; margin: 0; cursor: pointer; flex-shrink: 0; }
         .version-tag { position: fixed; bottom: 10px; right: 15px; color: rgba(255, 255, 255, 0.5); font-size: 0.8rem; font-family: monospace; z-index: 9999; pointer-events: none; }
@@ -92,7 +90,7 @@
         .edit-gallery-item img { width: 100%; height: 100%; object-fit: cover; }
         .edit-gallery-item:hover { border-color: var(--accent); }
         .original-avatar-item { border-color: var(--gold) !important; box-shadow: 0 0 8px rgba(241, 196, 15, 0.5); }
-        .bg-gallery-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .bg-gallery-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-content:start; }
         .bg-item { position: relative; width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 6px; cursor: pointer; border: 2px solid transparent; overflow: hidden; }
         .bg-item img { width: 100%; height: 100%; object-fit: cover; }
         .bg-selected { border-color: var(--blue) !important; box-shadow: 0 0 10px var(--blue); transform: scale(1.05); z-index: 2; }
@@ -102,7 +100,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag">v1.154</div>
+    <div class="version-tag">v1.156</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -240,7 +238,11 @@
                 <input type="text" id="room-bg-url-input" placeholder="Lien d'image (http...)" style="margin:0; flex:1; font-size:0.9rem; padding:10px;">
                 <button style="background:var(--blue); width:auto; margin:0; padding:10px 15px; font-size:0.9rem;" onclick="addBgUrlToLibrary('dashboard')">Ajouter</button>
             </div>
-            <div id="bg-gallery" class="bg-gallery-wrapper" style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; max-height: 250px; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; border: 1px solid rgba(255,255,255,0.1); margin-bottom:10px;"></div>
+            
+            <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; max-height: 250px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); margin-bottom:10px;">
+                <div id="bg-gallery" class="bg-gallery-wrapper"></div>
+            </div>
+
             <div style="display:flex; gap:10px; margin-bottom: 10px;">
                 <button id="btn-apply-bg" style="background:var(--blue); flex:2; margin:0;" onclick="saveCustomBg()" disabled>APPLIQUER LA SÉLECTION</button>
                 <button class="btn-cancel" style="flex:1; margin:0;" onclick="resetCustomBg()">Fond par défaut</button>
@@ -268,7 +270,7 @@
     </div>
 
     <div id="modal-sa-vault" class="modal-overlay">
-       <div class="modal-box" style="display:block;">
+       <div class="modal-box">
            <h2 style="color:var(--danger); margin-top:0;">🔒 COFFRE-FORT</h2>
            <p style="color:#bdc3c7; font-size:0.9rem; margin-bottom:20px;">Saisissez votre mot de passe Super Admin pour accéder à la fiche.</p>
            <div class="password-wrapper">
@@ -283,7 +285,7 @@
     </div>
 
     <div id="modal-sa-mj-details" class="modal-overlay">
-       <div class="modal-box" style="display:block; max-width:600px; padding-top:40px;">
+       <div class="modal-box" style="max-width:600px; padding-top:40px;">
            <button class="modal-close-x" onclick="document.getElementById('modal-sa-mj-details').style.display='none'">✖</button>
            <h2 style="color:var(--blue); margin-top:0; margin-bottom:15px;">FICHE MAÎTRE DU JEU</h2>
            <div style="display:flex; gap:10px; margin-bottom:5px;">
@@ -323,7 +325,7 @@
     </div>
 
     <div id="modal-sa-create" class="modal-overlay">
-       <div class="modal-box" style="display:block;">
+       <div class="modal-box">
            <h2 style="color:var(--mj-color); margin-top:0;">➕ NOUVEAU COMPTE MJ</h2>
            <input type="email" id="sa-create-email" placeholder="Email du MJ">
            <div class="password-wrapper"><input type="password" id="sa-create-pass" placeholder="Mot de passe"><div class="password-icon" onclick="togglePasswordVisibility('sa-create-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
@@ -351,7 +353,9 @@
                 </div>
             </div>
             
-            <div class="modal-body" id="bg-modal-gallery" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
+            <div class="modal-body">
+                <div id="bg-modal-gallery" class="bg-gallery-wrapper"></div>
+            </div>
             
             <div class="modal-footer">
                 <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 10px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">
@@ -378,7 +382,9 @@
                 </label>
             </div>
             
-            <div class="modal-body" id="lib-grid" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px; align-content:start;"></div>
+            <div class="modal-body">
+                <div id="lib-grid" class="lib-grid"></div>
+            </div>
             
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeLibrary()" style="margin-top:10px; margin-bottom:0;">FERMER LA BIBLIOTHÈQUE</button>
@@ -387,7 +393,7 @@
     </div>
 
     <div id="modal-edit-player" class="modal-overlay">
-        <div class="modal-box" style="display:block; max-width: 600px;">
+        <div class="modal-box" style="max-width: 600px;">
             <h2 style="color:var(--blue); margin-top:0; text-align:center;">ÉDITER LE JOUEUR</h2>
             <div style="display:flex; flex-wrap:wrap; gap: 20px; align-items: stretch; margin-bottom: 10px;">
                 <div style="flex: 1; min-width:200px; display:flex; flex-direction:column; align-items:center;">
@@ -408,7 +414,7 @@
     </div>
 
     <div id="modal-restore-team" class="modal-overlay">
-        <div class="modal-box" style="display:block; max-width: 400px;">
+        <div class="modal-box" style="max-width: 400px;">
             <h2 style="color:var(--blue); margin-top:0;">RESTAURATION</h2>
             <p id="restore-team-msg" style="margin-bottom:20px;">Que souhaitez-vous faire ?</p>
             <div style="display:flex; flex-direction:column; gap:10px;">
@@ -465,6 +471,8 @@
             bindEnter('edit-player-name', savePlayerEdit); bindEnter('prof-nom', saveProfile); bindEnter('prof-prenom', saveProfile); bindEnter('prof-email', saveProfile); bindEnter('prof-link', saveProfile);
             bindEnter('prof-pass-current', saveProfile); bindEnter('prof-pass', saveProfile); bindEnter('prof-pass-conf', saveProfile);
             bindEnter('bg-modal-url-input', () => addBgUrlToLibrary('modal')); bindEnter('room-bg-url-input', () => addBgUrlToLibrary('dashboard'));
+            
+            document.addEventListener('keydown', e => { if(document.getElementById('univ-lightbox').style.display === 'flex') { if(e.key==='ArrowLeft') lbPrev(e); else if(e.key==='ArrowRight') lbNext(e); else if(e.key==='Escape') closeLightbox(e); } });
         };
 
         function profileLogout() { auth.signOut().then(()=>location.reload()); }
@@ -547,12 +555,12 @@
             document.getElementById('lb-del').style.display = item.isNative ? 'none' : 'flex';
         }
         function closeLightbox(e) { if(e) e.stopPropagation(); document.getElementById('univ-lightbox').style.display = 'none'; }
-        function lbPrev(e) { e.stopPropagation(); curLbIdx--; updateLightbox(); }
-        function lbNext(e) { e.stopPropagation(); curLbIdx++; updateLightbox(); }
+        function lbPrev(e) { if(e) e.stopPropagation(); curLbIdx--; updateLightbox(); }
+        function lbNext(e) { if(e) e.stopPropagation(); curLbIdx++; updateLightbox(); }
         
         function physicalDelete(url) { if(url && url.includes('firebasestorage')) { try{ storage.refFromURL(url).delete().catch(e => console.log("Cloud err:", e.message)); }catch(err){} } }
         function lbDelete(e) {
-            e.stopPropagation(); let arr = getCurArr(); const item = arr[curLbIdx]; if(item.isNative) return;
+            if(e) e.stopPropagation(); let arr = getCurArr(); const item = arr[curLbIdx]; if(item.isNative) return;
             if(confirm("Voulez-vous vraiment supprimer définitivement cette image ?")) {
                 if(item.type === 'crest') executeCrestDelete(item.key, item.url);
                 else if(item.type === 'bg' && item.mode === 'dashboard') executeBgDeleteDash(item.key, item.url);
@@ -580,7 +588,19 @@
             const entries = Object.entries(libData || {}); const recent = entries.filter(e => e[0].startsWith('-')); const old = entries.filter(e => !e[0].startsWith('-')); recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
             [...recent, ...old].forEach(e => lbCrests.push({ key: e[0], url: e[1], isNative: false, type: 'crest' }));
             if (showDefaultCrests) { for(let i=0; i<30; i++) lbCrests.push({ key: null, url: createBlason(i), isNative: true, type: 'crest' }); }
-            lbCrests.forEach((item, i) => { const div = document.createElement('div'); div.className = 'lib-item'; div.onclick = () => openLightbox(i, 'crest'); div.innerHTML = `<img src="${item.url}">`; grid.appendChild(div); });
+            lbCrests.forEach((item, i) => { 
+                const div = document.createElement('div'); 
+                div.className = 'lib-item'; 
+                div.onclick = () => openLightbox(i, 'crest'); 
+                if (item.url.startsWith('data:image/svg')) {
+                     div.innerHTML = `<img src="${item.url}">`;
+                } else {
+                     div.style.background = 'transparent';
+                     div.style.border = 'none';
+                     div.innerHTML = `<img src="${item.url}" style="border-radius: 4px;">`;
+                }
+                grid.appendChild(div); 
+            });
         }
 
         function executeCrestDelete(key, urlToDelete) {
@@ -613,12 +633,28 @@
         function renderBgGalleryDashboard() {
             const grid = document.getElementById('bg-gallery'); if(!grid) return; grid.innerHTML = ""; lbBgsDash = [];
             Object.entries(mjBgLibrary || {}).reverse().forEach(e => lbBgsDash.push({key: e[0], url: e[1], isNative: false, type: 'bg', mode: 'dashboard'}));
-            lbBgsDash.forEach((item, i) => { const div = document.createElement('div'); div.className = 'bg-item'; if(selectedBgUrl === item.url) div.classList.add('bg-selected'); div.onclick = () => { document.querySelectorAll('#bg-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); selectedBgUrl = item.url; document.getElementById('btn-apply-bg').disabled = false; openLightbox(i, 'bgDash'); }; div.innerHTML = `<img src="${item.url}">`; grid.appendChild(div); });
+            lbBgsDash.forEach((item, i) => { 
+                const div = document.createElement('div'); 
+                div.className = 'bg-item'; 
+                if(selectedBgUrl === item.url) div.classList.add('bg-selected'); 
+                div.onclick = () => { document.querySelectorAll('#bg-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); selectedBgUrl = item.url; document.getElementById('btn-apply-bg').disabled = false; openLightbox(i, 'bgDash'); }; 
+                div.style.background = 'transparent';
+                div.innerHTML = `<img src="${item.url}">`; 
+                grid.appendChild(div); 
+            });
         }
         function renderBgGalleryModal(libData) {
             const grid = document.getElementById('bg-modal-gallery'); if(!grid) return; grid.innerHTML = ""; lbBgsModal = [];
             Object.entries(libData || {}).reverse().forEach(e => lbBgsModal.push({key: e[0], url: e[1], isNative: false, type: 'bg', mode: 'modal'}));
-            lbBgsModal.forEach((item, i) => { const div = document.createElement('div'); div.className = 'bg-item'; if(modalSelectedBgUrl === item.url) div.classList.add('bg-selected'); div.onclick = () => { document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); modalSelectedBgUrl = item.url; document.getElementById('btn-modal-bg-default').disabled = false; document.getElementById('btn-modal-bg-console').disabled = false; openLightbox(i, 'bgModal'); }; div.innerHTML = `<img src="${item.url}">`; grid.appendChild(div); });
+            lbBgsModal.forEach((item, i) => { 
+                const div = document.createElement('div'); 
+                div.className = 'bg-item'; 
+                if(modalSelectedBgUrl === item.url) div.classList.add('bg-selected'); 
+                div.onclick = () => { document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); modalSelectedBgUrl = item.url; document.getElementById('btn-modal-bg-default').disabled = false; document.getElementById('btn-modal-bg-console').disabled = false; openLightbox(i, 'bgModal'); }; 
+                div.style.background = 'transparent';
+                div.innerHTML = `<img src="${item.url}">`; 
+                grid.appendChild(div); 
+            });
         }
         function executeBgDeleteDash(key, urlToDelete) {
             const uid = auth.currentUser.uid;
@@ -747,7 +783,19 @@
         function toggleGuide() { const o = document.getElementById('overlay-guide'); if(o.style.display === 'flex') o.style.display = 'none'; else { o.style.display = 'flex'; document.getElementById('guide-iframe').src = "guide.html?t=" + Date.now(); } }
         function showRemoteQR() { const o = document.getElementById('overlay-remote-qr'); const q = document.getElementById('qrcode-remote'); q.innerHTML = ""; new QRCode(q, { text: window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/remote.html?room=" + roomID, width: 250, height: 250 }); o.style.display = 'flex'; }
 
-        function createCrestItem(url, container) { const w = document.createElement('div'); w.className = 'crest-wrapper'; if (selCrest === url) w.classList.add('crest-selected'); w.innerHTML = `<img src="${url}" class="crest-opt">`; w.onclick = () => { document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); w.classList.add('crest-selected'); selCrest = url; checkTeamForm(); }; container.appendChild(w); }
+        function createCrestItem(url, container) { 
+            const w = document.createElement('div'); 
+            w.className = 'crest-wrapper'; 
+            if (selCrest === url) w.classList.add('crest-selected'); 
+            if (url.startsWith('data:image/svg')) {
+                w.innerHTML = `<img src="${url}" class="crest-opt">`;
+            } else {
+                w.style.background = 'transparent'; 
+                w.innerHTML = `<img src="${url}" class="crest-opt" style="border-radius: 4px;">`;
+            }
+            w.onclick = () => { document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); w.classList.add('crest-selected'); selCrest = url; checkTeamForm(); }; 
+            container.appendChild(w); 
+        }
         function checkTeamForm() { document.getElementById('btn-add-team').disabled = !(document.getElementById('t-name').value.trim().length > 0 && selCrest !== ""); }
         function editTeam(n) { const t = globalTeams[n]; editingTeamKey = n; document.getElementById('t-name').value = n; selCrest = t.icon; document.getElementById('btn-add-team').innerText = "ENREGISTRER MODIF"; document.getElementById('btn-add-team').style.background = "var(--blue)"; document.getElementById('btn-cancel-edit').style.display = "block"; loadCrestGrid(); checkTeamForm(); }
         function cancelEdit() { editingTeamKey = null; document.getElementById('t-name').value = ""; selCrest = ""; document.getElementById('btn-add-team').innerText = "CRÉER L'ÉQUIPE"; document.getElementById('btn-add-team').style.background = "var(--mj-color)"; document.getElementById('btn-cancel-edit').style.display = "none"; loadCrestGrid(); checkTeamForm(); }
