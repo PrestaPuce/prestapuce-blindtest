@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Remote MJ - Presta'Puce</title>
+    <title>Remote MJ - Presta'Puce (v1.153)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -110,7 +110,7 @@
         </div>
 
         <div class="controls-zone">
-            <button id="btn-open-buzz" class="big-btn btn-open" onclick="statusUpdate('ready')">🔊 OUVRIR BUZZERS</button>
+            <button id="btn-open-buzz" class="big-btn btn-open" onclick="openBuzzers()">🔊 OUVRIR BUZZERS</button>
             <button class="big-btn btn-gold" onclick="handleReward(3, 'finish')">+3 (Terminé)</button>
             <button class="big-btn btn-green" onclick="handleReward(1, 'finish')">+1 (Terminé)</button>
             <button class="big-btn btn-cyan" onclick="handleReward(1, 'partial')">+1 (On continue)</button>
@@ -174,15 +174,20 @@
             roomRef.child('gameState').on('value', snap => {
                 const st = snap.val() ? snap.val().status : 'waiting';
                 const btn = document.getElementById('btn-open-buzz');
-                if(st === 'ready' || st === 'taken') {
-                    btn.innerText = "✅ BUZZERS OUVERTS";
+                
+                // --- MODIFICATION ANTI-LAG (AFFICHAGE) ---
+                if(st === 'ready' || st === 'taken' || st === 'processing') {
+                    btn.innerText = st === 'processing' ? "⏳ ANALYSE..." : "✅ BUZZERS OUVERTS";
                     btn.classList.add('active');
+                    if (st === 'processing') btn.style.background = "#e67e22"; else btn.style.background = "var(--mj-color)";
                     btn.disabled = true;
                 } else {
                     btn.innerText = "🔊 OUVRIR BUZZERS";
                     btn.classList.remove('active');
+                    btn.style.background = "var(--blue)";
                     btn.disabled = false;
                 }
+                // --- FIN MODIFICATION ---
             });
         }
 
@@ -219,6 +224,18 @@
             `;
         }
 
+        // --- DÉBUT MODIFICATION ANTI-LAG (OUVERTURE DES BUZZERS) ---
+        function openBuzzers() {
+            if (roomRef) {
+                // 1. On supprime les anciens tickets
+                roomRef.child('buzzAttempts').remove().then(() => {
+                    // 2. On ouvre la manche
+                    statusUpdate('ready');
+                });
+            }
+        }
+        // --- FIN MODIFICATION ---
+
         function statusUpdate(st) { 
             roomRef.child('gameState').set({ status: st }); 
             if(st === 'ready') roomRef.child('buzzers').remove(); 
@@ -235,14 +252,16 @@
             roomRef.child('players/' + currentPlayer.id + '/pts').transaction(x => (x||0)+pts);
             if(mode === 'partial') {
                 roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
-                statusUpdate('ready');
+                // On rouvre les buzzers proprement avec la nouvelle fonction
+                openBuzzers();
             } else fullReset();
         }
 
         function handleError() {
             if(!currentPlayer || !currentPlayer.pseudo) return;
             roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
-            statusUpdate('ready');
+            // On rouvre les buzzers proprement avec la nouvelle fonction
+            openBuzzers();
         }
 
         function adj(uid, v) { 
