@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Console MJ Pro - Presta'Puce (v1.157)</title>
+    <title>Console MJ Pro - Presta'Puce</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -100,7 +100,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag">v1.157</div>
+    <div class="version-tag" id="app-version-display"></div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
         <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
@@ -439,6 +439,8 @@
     </div>
 
     <script>
+        const APP_VERSION = "1.161";
+        
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database(); const auth = firebase.auth(); const storage = firebase.storage();
@@ -454,14 +456,15 @@
         let editingPlayerUid = null, editingPlayerOriginalPseudo = "", editingPlayerOriginalAvatar = "", editingPlayerCurrentAvatar = "";
         let isSuperAdmin = false, allUsersData = {}, targetMjUid = null;
 
-        // --- NOUVEAU: GESTION ANTI-LAG ---
         let buzzProcessing = false;
-
         let curLbType = '', curLbIdx = 0, lbCrests = [], lbBgsDash = [], lbBgsModal = [];
 
         function isValidPassword(pwd) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd); }
 
         window.onload = function() {
+            document.title = `Console MJ Pro - Presta'Puce (v${APP_VERSION})`;
+            document.getElementById('app-version-display').innerText = `v${APP_VERSION}`;
+            
             setupDragDrop('drop-zone', f => handleFiles(f)); setupDragDrop('profile-drop-zone', f => handleProfileFile(f));
             setupDragDrop('bg-drop-zone', f => handleBgUpload(f, 'dashboard')); setupDragDrop('bg-modal-drop-zone', f => handleBgUpload(f, 'modal'));
             
@@ -806,6 +809,8 @@
         
         function initMJLogic() {
             roomRef.child('players').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
+            
+            // Écoute de l'ancien système pour l'affichage du gagnant
             roomRef.child('buzzers').on('value', snap => {
                 const b = snap.val(); const box = document.getElementById('player-box');
                 if(b) { 
@@ -816,6 +821,7 @@
                 } else { currentBuzzerId = null; box.style.display = "none"; }
                 renderLobby(); 
             });
+
             roomRef.child('gameState').on('value', snap => { 
                 const st = snap.val() ? snap.val().status : 'waiting'; 
                 const btn = document.getElementById('btn-open-buzz'); 
@@ -828,18 +834,20 @@
                 } 
             });
 
-            // --- NOUVEAU: ÉCOUTE DES TICKETS ANTI-LAG ---
+            // --- NOUVEAU: LE CERVEAU ANTI-LAG ---
             roomRef.child('buzzAttempts').on('value', snap => {
                 const attempts = snap.val();
-                if (!attempts) return;
+                if (!attempts) return; // Si la boîte est vide, on ne fait rien
                 
                 if (!buzzProcessing) {
                     buzzProcessing = true;
-                    // Met tout le monde en attente instantanément
+                    // 1. On bloque les téléphones instantanément
                     roomRef.child('gameState').set({status: 'processing'}); 
                     
+                    // 2. On laisse 300ms aux joueurs en 4G pour que leur ticket arrive
                     setTimeout(() => {
-                        roomRef.child('buzzAttempts').once('value', finalSnap => {
+                        // CORRECTION ICI : utilisation de .then() pour blinder la réponse Firebase
+                        roomRef.child('buzzAttempts').once('value').then(finalSnap => {
                             const finalAttempts = finalSnap.val();
                             if (!finalAttempts) { 
                                 buzzProcessing = false; 
@@ -850,8 +858,9 @@
                             let winner = null;
                             let minTime = Infinity;
                             
+                            // 3. On dépouille les tickets et on compare les chronos absolus
                             Object.values(finalAttempts).forEach(att => {
-                                if (!currentBlocked[att.pseudo]) { // Sécurité : le joueur n'est pas bloqué
+                                if (!currentBlocked[att.pseudo]) { 
                                     if (att.timestamp < minTime) {
                                         minTime = att.timestamp;
                                         winner = att;
@@ -860,7 +869,7 @@
                             });
                             
                             if (winner) {
-                                // On écrit le gagnant définitif
+                                // 4. On écrit le vainqueur !
                                 roomRef.child('buzzers').set({ 
                                     id: winner.id, 
                                     pseudo: winner.pseudo, 
@@ -870,20 +879,19 @@
                                 });
                                 roomRef.child('gameState').set({status: 'taken'});
                             } else {
-                                // Tout le monde était bloqué, on rouvre
+                                // Tous les tickets venaient de joueurs bloqués
                                 roomRef.child('gameState').set({status: 'ready'});
                                 roomRef.child('buzzAttempts').remove();
                             }
                             buzzProcessing = false;
                         });
-                    }, 250); // Fenêtre de tolérance réseau
+                    }, 300); // 300 millisecondes d'équité
                 }
             });
             // --- FIN NOUVEAU ---
 
             roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
-            roomRef.child('customBackground').on('value', snap => { const url = snap.val() || ""; currentRoomBgUrl = url; if(url) { selectedBgUrl = url; document.querySelectorAll('#bg-gallery .bg-item').forEach(i => { if(i.querySelector('img').src === url) i.classList.add('bg-selected'); else i.classList.remove('bg-selected'); }); } else { document.querySelectorAll('#bg-gallery .bg-item').forEach(i => i.classList.remove('bg-selected')); } });
         }
 
         function renderLobby() {
@@ -935,21 +943,10 @@
         function deleteTeamDefinitive(n) { if(confirm("⚠️ Supprimer DÉFINITIVEMENT "+n+" ?")) roomRef.child('teams/'+n).remove(); }
         function updateTeamBonus(n, d) { const t=globalTeams[n]; if(t.active!==false)roomRef.child('teams/'+n+'/bonus').transaction(v=>(v||0)+d); else roomRef.child('teams/'+n).update({frozenScore:(t.frozenScore||0)+d, bonus:(t.bonus||0)+d}); }
         function deletePlayer(u, n, a) { if(a) { if(confirm("Rendre inactif "+n+" ?")) roomRef.child('players/'+u).update({active:false}); } else { if(confirm("⚠️ Supprimer "+n+" définitivement ?")) roomRef.child('players/'+u).remove(); } }
-        
-        // --- MODIFICATION ANTI-LAG: FORCER LE BUZZER ---
-        function forceBuzzer(u) { 
-            const p=allPlayersData[u]; 
-            if(p) { 
-                roomRef.child('gameState').update({status:'taken'}); 
-                // On écrit directement dans 'buzzers' car c'est le MJ qui force
-                roomRef.child('buzzers').set({id:u, pseudo:p.name, avatar:p.avatar||"", teamName:p.teamName||"Solo", teamIcon:p.teamIcon||""}); 
-            } 
-        }
-        
+        function forceBuzzer(u) { const p=allPlayersData[u]; if(p) { roomRef.child('gameState').update({status:'taken'}); roomRef.child('buzzers').set({id:u, pseudo:p.name, avatar:p.avatar||"", teamName:p.teamName||"Solo", teamIcon:p.teamIcon||""}); } }
         function toggleBlockPlayer(ps) { if(currentBlocked[ps]) roomRef.child('blockedPlayers/'+ps).remove(); else roomRef.child('blockedPlayers/'+ps).set(true); }
         function triggerEndGame() { if(confirm("Fin de partie ?")) { roomRef.child('gameState').set({status:'endGame', timestamp:Date.now()}); roomRef.child('buzzers').remove(); roomRef.child('buzzAttempts').remove(); } }
         
-        // --- MODIFICATION ANTI-LAG: STATUS ET RESET ---
         function statusUpdate(st) { 
             if(roomRef) { 
                 roomRef.child('gameState').set({status:st}); 
@@ -960,36 +957,21 @@
                 } 
             } 
         }
+
         function fullReset() { 
             roomRef.child('blockedPlayers').remove(); 
             roomRef.child('buzzers').remove(); 
             roomRef.child('buzzAttempts').remove(); 
             statusUpdate('waiting'); 
         }
-
+        
         function adj(u, v) { roomRef.child('players/'+u+'/pts').transaction(x=>(x||0)+v); }
         function kickPlayer(u, n) { if(confirm("Bannir "+n+" (Rouge) ?")) roomRef.child('players/'+u).update({banned:true, active:false}); }
         function unkickPlayer(u) { roomRef.child('players/'+u).update({banned:false, active:true, reconnectedAt:Date.now()}); }
         function restoreInactivePlayer(u) { roomRef.child('players/'+u).update({active:true, reconnectedAt:Date.now()}); }
         function togglePlayerTeam(u, c) { const i=(c==="Solo")?"":(globalTeams[c]?globalTeams[c].icon:""); roomRef.child('players/'+u).update({teamName:c, teamIcon:i, active:true}); }
-        
-        // --- MODIFICATION ANTI-LAG: ERREURS ET RECOMPENSES ---
-        function handleError() { 
-            if(currentPlayer&&currentPlayer.name) { 
-                roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); 
-                statusUpdate('ready'); 
-            } 
-        }
-        function handleReward(pts, m) { 
-            if(!currentPlayer||!currentPlayer.id)return; 
-            const cp=allPlayersData[currentPlayer.id]?(allPlayersData[currentPlayer.id].pts||0):0; 
-            roomRef.child('players/'+currentPlayer.id).update({pts:cp+pts, active:true}); 
-            if(m==='partial'){
-                roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); 
-                statusUpdate('ready');
-            } else fullReset(); 
-        }
-
+        function handleError() { if(currentPlayer&&currentPlayer.name) { roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready'); } }
+        function handleReward(pts, m) { if(!currentPlayer||!currentPlayer.id)return; const cp=allPlayersData[currentPlayer.id]?(allPlayersData[currentPlayer.id].pts||0):0; roomRef.child('players/'+currentPlayer.id).update({pts:cp+pts, active:true}); if(m==='partial'){roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready');}else fullReset(); }
         function quitRoom() { if(mjProfileData.isGuest===true) resetFullGame(); else { if(roomRef) roomRef.child('buzzers').off(); checkUserRoom(auth.currentUser.uid); } }
         function resetFullGame() {
             if(confirm("⚠️ Fermer la salle ?\nLes joueurs auront 10s pour sauvegarder.")) {
