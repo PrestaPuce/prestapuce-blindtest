@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Scores - Presta'Puce (v1.159)</title>
+    <title>Scores - Presta'Puce</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -58,9 +58,8 @@
         .card { background: var(--card-bg); display: flex; align-items: center; padding: 0 1vw; border-radius: 8px; margin-bottom: 0.8vh; border-left: 0.5vw solid var(--accent); height: 7vh; transition: border 0.3s, background 0.3s, box-shadow 0.3s; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-left: 0.5vw solid var(--accent); }
         .avatar, .crest { width: 5vh; display: flex; justify-content: center; align-items: center; font-size: 2.5vh; }
         
-        /* CORRECTION VISUELLE : SUPPRESSION DU FOND BLANC PAR DÉFAUT */
         .crest-bg { padding: 0; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .crest-bg.native-svg { background: white; padding: 2px; } /* On garde le fond blanc uniquement pour les SVG par défaut */
+        .crest-bg.native-svg { background: white; padding: 2px; }
 
         .crest img, .avatar img { width: 4vh; height: 4vh; object-fit: contain; } 
         .info { flex: 1; margin-left: 1vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: baseline; gap: 0.5vw; line-height: 1; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
@@ -131,7 +130,7 @@
             </a>
             <div class="title-group">
                 <h1>SALLE : <span id="room-title" class="room-highlight">----</span></h1>
-                <div class="version-text">v1.159</div>
+                <div id="version-display" class="version-text"></div>
             </div>
         </div>
     </header>
@@ -154,7 +153,7 @@
         <div id="podium-display" class="podium-container"></div>
         <div style="margin-top:5vh; display:flex; gap:3vw;">
             <button onclick="showLeaderboard()" class="nav-btn">Voir le classement complet</button>
-            <button onclick="location.reload()" class="nav-btn" style="background:var(--accent); color:black; border:none;">Relancer l'affichage</button>
+            <button onclick="relaunchPodiumAnimation()" class="nav-btn" style="background:var(--accent); color:black; border:none;">Relancer l'affichage</button>
         </div>
     </div>
 
@@ -167,6 +166,14 @@
     </div>
 
     <script>
+        const CLIENT_VERSION = "1.161";
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
+            const versionDisp = document.getElementById('version-display');
+            if(versionDisp) versionDisp.innerText = "v" + CLIENT_VERSION;
+        });
+
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90", measurementId: "G-J04SC2DFFF" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -251,20 +258,46 @@
             const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
             let rankingMap = new Map();
 
+            // 1. Initialiser les équipes
             listEquipes.forEach(tName => {
                 const team = teamsData[tName];
                 if (team.banned === true) return;
                 let score = team.active === false ? (team.frozenScore || 0) : (team.bonus || 0);
-                rankingMap.set("team-" + tName, { dataId: "team-" + tName, name: tName, pts: score, icon: team.icon, isTeam: true, count: 0, isActive: team.active !== false });
+                rankingMap.set("team-" + tName, { 
+                    dataId: "team-" + tName, 
+                    name: tName, 
+                    pts: score, 
+                    icon: team.icon, 
+                    isTeam: true, 
+                    count: 0,             // Joueurs actuellement actifs
+                    historicalCount: 0,   // Joueurs ayant appartenu à l'équipe (avantage historique)
+                    isActive: team.active !== false 
+                });
             });
 
+            // 2. Assigner les scores et compter l'historique
             allPlayers.forEach(p => {
                 const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
                 if (statutEquipe !== "Solo" && rankingMap.has("team-" + statutEquipe)) {
                     let teamEntry = rankingMap.get("team-" + statutEquipe);
-                    if (teamEntry.isActive) { teamEntry.pts += (p.pts || 0); if (p.active !== false) teamEntry.count++; }
+                    if (teamEntry.isActive) { 
+                        teamEntry.pts += (p.pts || 0); 
+                        teamEntry.historicalCount++; // Comptabilise chaque joueur inscrit sous ce blason
+                        if (p.active !== false) teamEntry.count++; // Joueur actuellement sur le buzzer
+                    }
                 } else {
-                    if (p.active !== false && !p.banned) { rankingMap.set("solo-" + p.name, { dataId: "solo-" + p.name, name: p.name, pts: (p.pts || 0), avatar: p.avatar, isTeam: false, isActive: true, count: 1 }); }
+                    if (p.active !== false && !p.banned) { 
+                        rankingMap.set("solo-" + p.name, { 
+                            dataId: "solo-" + p.name, 
+                            name: p.name, 
+                            pts: (p.pts || 0), 
+                            avatar: p.avatar, 
+                            isTeam: false, 
+                            isActive: true, 
+                            count: 1,
+                            historicalCount: 1
+                        }); 
+                    }
                 }
             });
             return Array.from(rankingMap.values());
@@ -273,29 +306,39 @@
         function getSortedRanking() {
             let unsorted = calculateGlobalScores();
             return unsorted.sort((a, b) => {
+                // Critère 1 : Le nombre de points (du plus grand au plus petit)
                 if (b.pts !== a.pts) return b.pts - a.pts; 
+                
+                // Critère 2 : Joueur Solo prioritaire sur Équipe
+                if (!a.isTeam && b.isTeam) return -1;
+                if (a.isTeam && !b.isTeam) return 1;
+
+                // Critère 3 : L'équipe avec le moins de joueurs actifs gagne
                 let countA = Math.max(1, a.count); 
                 let countB = Math.max(1, b.count);
                 if (countA !== countB) return countA - countB; 
-                if (!a.isTeam && b.isTeam) return -1;
-                if (a.isTeam && !b.isTeam) return 1;
+                
+                // NOUVEAU Critère 3.5 : L'équipe avec le moins de joueurs HISTORIQUES gagne
+                let histA = Math.max(1, a.historicalCount || a.count);
+                let histB = Math.max(1, b.historicalCount || b.count);
+                if (histA !== histB) return histA - histB;
+
+                // Critère 4 : Le premier arrivé (celui qui a fait le point le plus ancien)
                 let timeA = lastPointTime[a.dataId] || 0; 
                 let timeB = lastPointTime[b.dataId] || 0;
-                if (timeB !== timeA) return timeB - timeA; 
+                if (timeB !== timeA) return timeA - timeB; // Si timeB est plus grand (plus récent), il passe après
+                
+                // Critère 5 : Ordre alphabétique
                 return a.name.localeCompare(b.name); 
             });
         }
 
-        // --- DÉBUT CORRECTION: RENDU TRANSPARENT DES AVATARS ---
         function renderAvatar(av) {
             if(av && av.length > 20) {
-                // Si c'est une image (url base64 ou http), on s'assure qu'elle n'a pas de fond par défaut
                 return `<div style="width:100%; height:100%; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:transparent;"><img src="${av}" style="width:100%; height:100%; object-fit:cover;"></div>`;
             }
-            // Si c'est un émoji
             return `<span style="font-size:200%; display:flex; align-items:center; justify-content:center; width:100%; height:100%;">${av || '👤'}</span>`;
         }
-        // --- FIN CORRECTION ---
 
         function animateList(containerId, newHTML) {
             const container = document.getElementById(containerId);
@@ -388,20 +431,16 @@
             getSortedRanking().forEach((item, index) => {
                 const idG = item.dataId;
                 
-                // --- DÉBUT CORRECTION: RENDU SÉCURISÉ DES BLASONS D'ÉQUIPES ---
                 let iconHtml = "";
                 if (item.isTeam) {
                     if (item.icon && item.icon.startsWith('data:image/svg')) {
-                        // C'est un SVG généré par défaut : on lui met un fond blanc pour le contraste
                         iconHtml = `<div class="crest-bg native-svg"><img src="${item.icon}" style="width:4vh; height:4vh;"></div>`;
                     } else {
-                        // C'est un blason uploadé (PNG, JPG...) : On garde un fond transparent
                         iconHtml = `<div class="crest-bg" style="background:transparent;"><img src="${item.icon}" style="width:4vh; height:4vh; border-radius:4px; object-fit:contain;"></div>`;
                     }
                 } else {
                     iconHtml = `<span>${renderAvatar(item.avatar)}</span>`;
                 }
-                // --- FIN CORRECTION ---
                 
                 let finalName = item.name + (item.isTeam ? (item.isActive ? ` <span class="team-tag">(${item.count} j)</span>` : ` <span class="pause-badge">EN PAUSE</span>`) : ' <span class="team-tag">(Solo)</span>');
                 let inactiveClass = item.isActive ? "" : " inactive-card";
@@ -449,8 +488,59 @@
         roomRef.child('players').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
         roomRef.child('teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
 
-        function showPodium() { document.getElementById('main-view').style.display = 'none'; document.getElementById('qr-box').style.display = 'none'; document.getElementById('btn-return-podium').style.display = 'none'; document.getElementById('blur-overlay').style.display = 'none'; const podiumScreen = document.getElementById('podium-screen'); podiumScreen.style.display = 'flex'; let ranking = getSortedRanking(); const top3 = ranking.slice(0, 3); const container = document.getElementById('podium-display'); container.innerHTML = ""; const visualOrder = [1, 0, 2]; visualOrder.forEach(idx => { if (top3[idx]) { const item = top3[idx]; const rank = idx + 1; let imgHtml = ""; if(rank === 1) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img">`; if(rank === 2) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img">`; if(rank === 3) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img">`; let avatarDisplay = item.isTeam ? `<div class="crest-bg" style="width:10vh; height:10vh; margin:0 auto;"><img src="${item.icon}" style="width:100%; height:100%; object-fit:contain;"></div>` : renderAvatar(item.avatar, 50); const div = document.createElement('div'); div.className = `step rank-${rank}`; div.innerHTML = `${imgHtml}<div class="winner-name">${item.name}</div>${avatarDisplay}<div class="winner-score">${item.pts} pts</div><div class="step-block">${rank}</div>`; container.appendChild(div); } }); confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } }); }
-        function showLeaderboard() { document.getElementById('podium-screen').style.display = 'none'; document.getElementById('main-view').style.display = 'grid'; document.getElementById('qr-box').style.display = 'block'; document.getElementById('blur-overlay').style.display = 'block'; if (isGameFinished) document.getElementById('btn-return-podium').style.display = 'block'; else document.getElementById('btn-return-podium').style.display = 'none'; }
+        function showPodium() { 
+            document.getElementById('main-view').style.display = 'none'; 
+            document.getElementById('qr-box').style.display = 'none'; 
+            document.getElementById('btn-return-podium').style.display = 'none'; 
+            document.getElementById('blur-overlay').style.display = 'none'; 
+            
+            const podiumScreen = document.getElementById('podium-screen'); 
+            podiumScreen.style.display = 'flex'; 
+            
+            let ranking = getSortedRanking(); 
+            const top3 = ranking.slice(0, 3); 
+            const container = document.getElementById('podium-display'); 
+            container.innerHTML = ""; 
+            
+            const visualOrder = [1, 0, 2]; 
+            visualOrder.forEach(idx => { 
+                if (top3[idx]) { 
+                    const item = top3[idx]; 
+                    const rank = idx + 1; 
+                    let imgHtml = ""; 
+                    if(rank === 1) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img">`; 
+                    if(rank === 2) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img">`; 
+                    if(rank === 3) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img">`; 
+                    
+                    let avatarDisplay = item.isTeam ? `<div class="crest-bg" style="width:10vh; height:10vh; margin:0 auto;"><img src="${item.icon}" style="width:100%; height:100%; object-fit:contain;"></div>` : renderAvatar(item.avatar, 50); 
+                    
+                    const div = document.createElement('div'); 
+                    div.className = `step rank-${rank}`; 
+                    div.innerHTML = `${imgHtml}<div class="winner-name">${item.name}</div>${avatarDisplay}<div class="winner-score">${item.pts} pts</div><div class="step-block">${rank}</div>`; 
+                    container.appendChild(div); 
+                } 
+            }); 
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } }); 
+        }
+
+        function relaunchPodiumAnimation() {
+            const container = document.getElementById('podium-display');
+            container.style.opacity = '0';
+            setTimeout(() => {
+                container.style.opacity = '1';
+                showPodium();
+            }, 300);
+        }
+
+        function showLeaderboard() { 
+            document.getElementById('podium-screen').style.display = 'none'; 
+            document.getElementById('main-view').style.display = 'grid'; 
+            document.getElementById('qr-box').style.display = 'block'; 
+            document.getElementById('blur-overlay').style.display = 'block'; 
+            if (isGameFinished) document.getElementById('btn-return-podium').style.display = 'block'; 
+            else document.getElementById('btn-return-podium').style.display = 'none'; 
+        }
+        
         function toggleFullScreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => { console.log(err); }); } else { if (document.exitFullscreen) document.exitFullscreen(); } }
         document.addEventListener('keydown', (e) => { if(e.key.toLowerCase() === 'f') toggleFullScreen(); });
         let uiTimer; document.onmousemove = () => { document.getElementById('btn-fullscreen').classList.remove('hide-ui'); clearTimeout(uiTimer); uiTimer = setTimeout(() => { if(document.fullscreenElement) document.getElementById('btn-fullscreen').classList.add('hide-ui'); }, 3000); };
