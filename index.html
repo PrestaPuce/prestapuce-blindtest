@@ -128,6 +128,10 @@
         @keyframes popTrophy { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         #podium-content h1 { font-size: clamp(2rem, 8vw, 2.5rem); margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; line-height: 1.1; }
         #podium-content p { font-size: 1.3rem; color: white; margin: 0; font-weight: bold; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; }
+        
+        /* ANIMATION DU CHAMPION */
+        @keyframes bounceTrophy { 0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 transparent); } 50% { transform: scale(1.1) translateY(-10px); filter: drop-shadow(0 10px 15px rgba(241,196,15,0.6)); } }
+        .champion-trophy { animation: popTrophy 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, bounceTrophy 2s ease-in-out 0.6s infinite !important; }
     </style>
 </head>
 <body>
@@ -421,7 +425,7 @@
         </div>
     </div>
 
-    <div id="overlay-closing" class="overlay-full" style="z-index: 4000;">
+    <div id="overlay-closing" class="overlay-full" style="z-index: 6000;">
         <div class="settings-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--gold); margin-top:0;">PARTIE TERMINÉE 🏁</h2>
             <p style="color:#ccc; font-size:1rem; margin-bottom: 25px; line-height: 1.4;">L'animateur clôture la salle.<br><br>Veux-tu sauvegarder ton profil et ton score pour tes futures parties ?</p>
@@ -451,7 +455,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.158";
+        const CLIENT_VERSION = "1.159";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1039,7 +1043,12 @@
             }
         }
 
-        function showClosingScreen() { isRoomClosing = true; document.getElementById('overlay-closing').style.display = 'flex'; }
+        function showClosingScreen() { 
+            isRoomClosing = true; 
+            document.getElementById('podium-zone').style.display = 'none'; // Force la fermeture du podium
+            document.getElementById('overlay-closing').style.display = 'flex'; 
+        }
+        
         function handleFinalSave() { alert("La création de compte arrive très bientôt !\nTon profil reste néanmoins mémorisé sur ce téléphone pour ta prochaine partie."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; }
         function handleFinalLeave() { localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; }
 
@@ -1123,15 +1132,18 @@
 
         function renderPodiumUI(rank, name, pts) {
             let html = ""; 
-            if(rank === 1) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img"><h1 style="color:var(--gold);">CHAMPION ! 🏆</h1><p>${name} - ${pts} pts</p>`; 
+            if(rank === 1) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img champion-trophy"><h1 style="color:var(--gold);">CHAMPION ! 🏆</h1><p>${name} - ${pts} pts</p>`; 
             else if(rank === 2) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img"><h1 style="color:#bdc3c7;">VICE-CHAMPION 🥈</h1><p>${name} - ${pts} pts</p>`; 
             else if(rank === 3) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img"><h1 style="color:#cd7f32;">3ème PLACE 🥉</h1><p>${name} - ${pts} pts</p>`; 
             else html = `<h1>${rank}ème PLACE</h1><p>${name} - ${pts} pts</p>`; 
             
             document.getElementById('podium-content').innerHTML = html; 
             document.getElementById('podium-zone').style.display = 'flex'; 
-            document.getElementById('sound-applause').play().catch(()=>{}); 
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 3000 });
+            
+            if (rank === 1) {
+                document.getElementById('sound-applause').play().catch(()=>{}); 
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 6000 });
+            }
         }
     </script>
 </body>
