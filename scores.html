@@ -90,15 +90,19 @@
         .podium-container { display: flex; align-items: flex-end; justify-content: center; gap: 3vw; margin-top: 5vh; }
         .step { text-align: center; display: flex; flex-direction: column; align-items: center; width: 20vw; }
         .step-block { width: 100%; border-radius: 15px 15px 0 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 2vh; font-size: 4vh; font-weight: bold; color: rgba(0,0,0,0.5); box-shadow: 0 1vh 3vh rgba(0,0,0,0.5); }
-        .rank-1 .trophy-img { width: 25vh; height: 25vh; margin-bottom: 2vh; animation: trophyZoom 1.5s infinite alternate; }
+        
+        .rank-1 .trophy-img { width: 25vh; height: 25vh; margin-bottom: 2vh; }
         .rank-1 .step-block { height: 30vh; background: linear-gradient(to bottom, #f1c40f, #f39c12); }
-        .rank-2 .trophy-img { width: 18vh; height: 18vh; margin-bottom: 2vh; }
+        .rank-2 .trophy-img { width: 18vh; height: 18vh; margin-bottom: 2vh; animation: trophyZoom 1.5s infinite alternate; }
         .rank-2 .step-block { height: 20vh; background: linear-gradient(to bottom, #bdc3c7, #7f8c8d); }
-        .rank-3 .trophy-img { width: 15vh; height: 15vh; margin-bottom: 2vh; }
+        .rank-3 .trophy-img { width: 15vh; height: 15vh; margin-bottom: 2vh; animation: trophyZoom 1.5s infinite alternate; }
         .rank-3 .step-block { height: 15vh; background: linear-gradient(to bottom, #e67e22, #d35400); }
         .winner-name { font-size: clamp(1.2rem, 3vh, 2.5rem); font-weight: bold; margin-bottom: 1vh; text-shadow: 0 2px 4px black; }
         .winner-score { font-size: clamp(1.5rem, 4vh, 3rem); color: var(--accent); font-weight: 900; }
-        @keyframes trophyZoom { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+        
+        @keyframes trophyZoom { 0% { transform: scale(1); filter: drop-shadow(0 0 0 transparent); } 100% { transform: scale(1.1); filter: drop-shadow(0 1vh 1vh rgba(255,255,255,0.2)); } }
+        @keyframes bounceTrophyScore { 0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 transparent); } 50% { transform: scale(1.15) translateY(-2vh); filter: drop-shadow(0 2vh 2vh rgba(241,196,15,0.6)); } }
+        .champion-trophy { animation: bounceTrophyScore 2s ease-in-out infinite !important; }
 
         .nav-btn { padding:1.5vh 3vw; font-size:2vh; background:var(--bg-color); color:white; border:1px solid white; border-radius:1vh; cursor:pointer; margin: 0 1vw; transition: 0.2s; }
         .nav-btn:hover { background: white; color: black; }
@@ -166,7 +170,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.161";
+        const CLIENT_VERSION = "1.162";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -258,7 +262,6 @@
             const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
             let rankingMap = new Map();
 
-            // 1. Initialiser les équipes
             listEquipes.forEach(tName => {
                 const team = teamsData[tName];
                 if (team.banned === true) return;
@@ -269,21 +272,20 @@
                     pts: score, 
                     icon: team.icon, 
                     isTeam: true, 
-                    count: 0,             // Joueurs actuellement actifs
-                    historicalCount: 0,   // Joueurs ayant appartenu à l'équipe (avantage historique)
+                    count: 0,
+                    historicalCount: 0,
                     isActive: team.active !== false 
                 });
             });
 
-            // 2. Assigner les scores et compter l'historique
             allPlayers.forEach(p => {
                 const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
                 if (statutEquipe !== "Solo" && rankingMap.has("team-" + statutEquipe)) {
                     let teamEntry = rankingMap.get("team-" + statutEquipe);
                     if (teamEntry.isActive) { 
                         teamEntry.pts += (p.pts || 0); 
-                        teamEntry.historicalCount++; // Comptabilise chaque joueur inscrit sous ce blason
-                        if (p.active !== false) teamEntry.count++; // Joueur actuellement sur le buzzer
+                        teamEntry.historicalCount++;
+                        if (p.active !== false) teamEntry.count++; 
                     }
                 } else {
                     if (p.active !== false && !p.banned) { 
@@ -306,29 +308,22 @@
         function getSortedRanking() {
             let unsorted = calculateGlobalScores();
             return unsorted.sort((a, b) => {
-                // Critère 1 : Le nombre de points (du plus grand au plus petit)
                 if (b.pts !== a.pts) return b.pts - a.pts; 
-                
-                // Critère 2 : Joueur Solo prioritaire sur Équipe
                 if (!a.isTeam && b.isTeam) return -1;
                 if (a.isTeam && !b.isTeam) return 1;
 
-                // Critère 3 : L'équipe avec le moins de joueurs actifs gagne
                 let countA = Math.max(1, a.count); 
                 let countB = Math.max(1, b.count);
                 if (countA !== countB) return countA - countB; 
                 
-                // NOUVEAU Critère 3.5 : L'équipe avec le moins de joueurs HISTORIQUES gagne
                 let histA = Math.max(1, a.historicalCount || a.count);
                 let histB = Math.max(1, b.historicalCount || b.count);
                 if (histA !== histB) return histA - histB;
 
-                // Critère 4 : Le premier arrivé (celui qui a fait le point le plus ancien)
                 let timeA = lastPointTime[a.dataId] || 0; 
                 let timeB = lastPointTime[b.dataId] || 0;
-                if (timeB !== timeA) return timeA - timeB; // Si timeB est plus grand (plus récent), il passe après
+                if (timeB !== timeA) return timeA - timeB; 
                 
-                // Critère 5 : Ordre alphabétique
                 return a.name.localeCompare(b.name); 
             });
         }
@@ -508,7 +503,7 @@
                     const item = top3[idx]; 
                     const rank = idx + 1; 
                     let imgHtml = ""; 
-                    if(rank === 1) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img">`; 
+                    if(rank === 1) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img champion-trophy">`; 
                     if(rank === 2) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img">`; 
                     if(rank === 3) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img">`; 
                     
@@ -520,7 +515,9 @@
                     container.appendChild(div); 
                 } 
             }); 
-            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } }); 
+            
+            // Tir de confettis en surcouche maximale
+            confetti({ particleCount: 300, spread: 100, origin: { y: 0.6 }, zIndex: 9999 }); 
         }
 
         function relaunchPodiumAnimation() {
