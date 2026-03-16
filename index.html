@@ -121,6 +121,13 @@
         #reuse-avatar-preview, #reconnect-avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 15px auto; border: 3px solid var(--accent); }
         .qr-card h3 { color: white !important; }
         .qr-card p { color: white !important; font-size: 1.1rem; }
+
+        /* PODIUM CSS */
+        #podium-content { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; }
+        .trophy-img { width: 130px; height: 130px; object-fit: contain; margin-bottom: 5px; animation: popTrophy 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+        @keyframes popTrophy { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        #podium-content h1 { font-size: clamp(2rem, 8vw, 2.5rem); margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; line-height: 1.1; }
+        #podium-content p { font-size: 1.3rem; color: white; margin: 0; font-weight: bold; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; }
     </style>
 </head>
 <body>
@@ -434,14 +441,17 @@
         </div>
     </div>
 
-    <div id="podium-zone" class="overlay-full"><div id="podium-content"></div><button class="btn-main" onclick="leaveGame(true)" style="margin-top:30px;">Quitter</button></div>
+    <div id="podium-zone" class="overlay-full" style="z-index: 5000;">
+        <div id="podium-content"></div>
+        <button class="btn-main" onclick="showClosingScreen()" style="margin-top:30px;">Terminer</button>
+    </div>
 
     <audio id="sound-click" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/BUZZER.WAV?alt=media&token=43ced984-3c6a-4167-b0dc-4cd97d7760dd" preload="auto"></audio>
     <audio id="sound-win" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Buzzer%20champion.mp3?alt=media&token=8425ad5e-69a3-4a57-966e-58df8ff39701" preload="auto"></audio>
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.157";
+        const CLIENT_VERSION = "1.158";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1083,7 +1093,46 @@
 
         function showQR() { const url = window.location.href.split('?')[0] + "?room=" + roomID; document.getElementById('qrcode-display').innerHTML = ""; new QRCode(document.getElementById("qrcode-display"), { text: url, width: 200, height: 200 }); document.getElementById('qr-room-code').innerText = roomID; document.getElementById('overlay-qr').style.display = 'flex'; }
         function showShare() { const url = window.location.href.split('?')[0] + "?room=" + roomID; if (navigator.share) { navigator.share({ title: 'Blind Test - Presta\'Puce', text: `Rejoins ma partie de Blind Test ! Code Salle: ${roomID}`, url: url }).catch(console.error); } else { prompt("Copie ce lien pour le partager :", url); } }
-        function showEndGame() { roomRef.child('players').once('value', snap => { const all = snap.val() || {}; const sorted = Object.values(all).sort((a,b) => b.pts - a.pts); const rank = sorted.findIndex(p => p.name === player.pseudo) + 1; let html = ""; if(rank === 1) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img"><h1>CHAMPION ! 🏆</h1>`; else if(rank === 2) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img"><h1>VICE-CHAMPION 🥈</h1>`; else if(rank === 3) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img"><h1>3ème PLACE 🥉</h1>`; else html = `<h1>${rank}ème PLACE</h1><p>Bien joué !</p>`; document.getElementById('podium-content').innerHTML = html; document.getElementById('podium-zone').style.display = 'flex'; document.getElementById('sound-applause').play().catch(()=>{}); confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 3000 }); }); }
+        
+        function showEndGame() {
+            if (player.team !== "Solo") {
+                roomRef.child('players').once('value', snap => {
+                    const all = snap.val() || {};
+                    let teamScores = {};
+                    Object.values(all).forEach(p => {
+                        if (p.teamName && p.teamName !== "Solo") {
+                            if (!teamScores[p.teamName]) teamScores[p.teamName] = 0;
+                            teamScores[p.teamName] += (p.pts || 0);
+                        }
+                    });
+                    const sortedTeams = Object.keys(teamScores).map(t => ({name: t, pts: teamScores[t]})).sort((a,b) => b.pts - a.pts);
+                    const rank = sortedTeams.findIndex(t => t.name === player.team) + 1;
+                    const pts = teamScores[player.team] || 0;
+                    renderPodiumUI(rank, `Équipe ${player.team}`, pts);
+                });
+            } else {
+                roomRef.child('players').once('value', snap => {
+                    const all = snap.val() || {};
+                    const sorted = Object.values(all).sort((a,b) => b.pts - a.pts);
+                    const rank = sorted.findIndex(p => p.name === player.pseudo) + 1;
+                    const pts = sorted.find(p => p.name === player.pseudo)?.pts || 0;
+                    renderPodiumUI(rank, player.pseudo, pts);
+                });
+            }
+        }
+
+        function renderPodiumUI(rank, name, pts) {
+            let html = ""; 
+            if(rank === 1) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="trophy-img"><h1 style="color:var(--gold);">CHAMPION ! 🏆</h1><p>${name} - ${pts} pts</p>`; 
+            else if(rank === 2) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img"><h1 style="color:#bdc3c7;">VICE-CHAMPION 🥈</h1><p>${name} - ${pts} pts</p>`; 
+            else if(rank === 3) html = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img"><h1 style="color:#cd7f32;">3ème PLACE 🥉</h1><p>${name} - ${pts} pts</p>`; 
+            else html = `<h1>${rank}ème PLACE</h1><p>${name} - ${pts} pts</p>`; 
+            
+            document.getElementById('podium-content').innerHTML = html; 
+            document.getElementById('podium-zone').style.display = 'flex'; 
+            document.getElementById('sound-applause').play().catch(()=>{}); 
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 3000 });
+        }
     </script>
 </body>
 </html>
