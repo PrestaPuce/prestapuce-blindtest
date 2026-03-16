@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test (v1.154)</title>
+    <title>Presta'Puce - Blind Test (v1.155)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -79,9 +79,12 @@
 
         .game-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; display: flex; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; background: rgba(0,0,0,0.3); }
         .mini-profile { display: flex; align-items: center; position: relative; flex: 1; height: 100%; }
-        .avatar-wrapper { position: relative; width: 44px; height: 44px; flex-shrink: 0; }
+        .avatar-wrapper { position: relative; width: 44px; height: 44px; flex-shrink: 0; transition: transform 0.2s; }
+        .avatar-wrapper:active { transform: scale(0.9); }
         .mini-avatar { width: 100%; height: 100%; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
+        .edit-badge { position: absolute; bottom: -5px; left: -10px; background: var(--card); border: 2px solid var(--accent); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; z-index: 6; box-shadow: 0 2px 4px rgba(0,0,0,0.5); pointer-events: none; }
         #team-badge { position: absolute; bottom: -5px; right: -20px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #2c3e50; background: white; object-fit: cover; display: none; z-index: 5; }
+        
         .text-info-col { display: flex; flex-direction: column; justify-content: space-between; height: 40px; margin-left: 28px; }
         #game-pseudo { font-weight: bold; font-size: 1rem; line-height: 1.1; white-space: nowrap; }
         #game-team { font-size: 0.8rem; color: var(--accent); white-space: nowrap; line-height: 1; }
@@ -122,7 +125,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.154</div>
+    <div class="version-tag">v1.155</div>
 
     <div class="wizard-container">
         <div id="btn-back-global" onclick="goBack()" style="position: absolute; top: 15px; left: 15px; z-index: 500; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
@@ -294,6 +297,11 @@
                         <div style="width: 18px; height: 18px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; margin-top: 3px; background: #7f8c8d;"></div>
                         <div><b style="color:#95a5a6; display:block; margin-bottom:3px; font-size:1rem;">BLOQUÉ / OCCUPÉ</b><span style="font-size: 0.85rem; color: #ccc;">Quelqu'un a déjà buzzé ou vous avez fait une erreur.</span></div>
                     </div>
+                    
+                    <div style="display: flex; align-items: flex-start; background: rgba(52, 152, 219, 0.1); padding: 12px; border-radius: 12px; border: 1px dashed rgba(52, 152, 219, 0.4); margin-top: 10px;">
+                        <div style="width: 24px; height: 24px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">✏️</div>
+                        <div><b style="color:var(--primary); display:block; margin-bottom:3px; font-size:1rem;">TON PROFIL</b><span style="font-size: 0.85rem; color: #ccc;">Modifie ton pseudo, ton avatar ou ton équipe à tout moment en tapant sur ta photo !</span></div>
+                    </div>
                 </div>
             </div>
             <div class="screen-footer">
@@ -304,9 +312,10 @@
         <div id="step-game" class="step-screen" style="padding:0;">
             <div class="game-header">
                 <div class="mini-profile">
-                    <div class="avatar-wrapper">
+                    <div class="avatar-wrapper" onclick="openSettings()" style="cursor: pointer;">
                         <div class="mini-avatar" id="game-avatar"></div>
                         <img id="team-badge" src="" alt="Team">
+                        <div class="edit-badge">✏️</div>
                     </div>
                     <div class="text-info-col">
                         <span id="game-pseudo">Joueur</span>
@@ -314,7 +323,6 @@
                     </div>
                 </div>
                 <div class="header-actions">
-                    <div class="icon-btn" onclick="openSettings()">⚙️</div>
                     <div class="icon-btn" onclick="showQR()">🔗</div>
                     <div class="icon-btn" onclick="confirmQuit()" style="background:var(--danger);">✕</div>
                 </div>
@@ -428,7 +436,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.154";
+        const CLIENT_VERSION = "1.155";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -442,6 +450,8 @@
         
         let recoveryRef = null;
         let pendingRecoveryUid = null;
+        let teamListRef = null;
+        let teamListCallback = null;
 
         let wakeLock = null;
 
@@ -545,6 +555,7 @@
         function goBack() {
             if(isEditing) { finishEdit(true); return; }
             if(stepHistory.length === 0) return;
+            if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
             const previous = stepHistory.pop(); navigateTo(previous, false); 
         }
 
@@ -758,11 +769,18 @@
         function selectMode(mode) { player.team = mode; player.teamIcon = ""; if(isEditing) { roomRef.child('players/' + myUserID).update({teamName: "Solo", teamIcon: ""}); finishEdit(true); } else { if(mode === 'Solo') showRecap(); else goToTeamAction(); } }
         
         function goToTeamAction() { navigateTo('step-team-action'); }
-        function goToTeamCreate() { toggleCreateUI(true); navigateTo('step-team-create'); renderTeamCrestPicker(); } 
+        
+        function goToTeamCreate() { 
+            if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
+            toggleCreateUI(true); navigateTo('step-team-create'); renderTeamCrestPicker(); 
+        } 
+        
         function goToTeamJoin() { navigateTo('step-team-join'); loadTeamsList(); }
 
         function loadTeamsList() {
-            roomRef.child('teams').once('value', snap => {
+            if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
+            teamListRef = roomRef.child('teams');
+            teamListCallback = teamListRef.on('value', snap => {
                 const list = document.getElementById('team-list'); list.innerHTML = ""; const teams = snap.val() || {}; let validTeamsCount = 0;
                 for(let tName in teams) {
                     const t = teams[tName]; if (t.banned === true || t.active === false) continue;
@@ -776,6 +794,7 @@
         }
 
         function joinTeam(name, icon) { 
+            if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
             player.team = name; player.teamIcon = icon; 
             if(isEditing) { 
                 roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon}); finishEdit(true); 
@@ -1044,7 +1063,6 @@
             } else if (isBlocked) { 
                 box.classList.add('blocked'); l.innerText = "BLOQUÉ"; msg.innerText = "Attends la prochaine manche."; 
             } else if (gameState === 'ready' || gameState === 'processing') { 
-                // CORRECTION VISUELLE : On force l'affichage de l'analyse même si le réseau hésite
                 if (hasBuzzedLocally || gameState === 'processing') {
                     box.classList.add('blocked'); l.innerText = "⏳..."; msg.innerText = "Analyse du chrono...";
                 } else {
