@@ -11,13 +11,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --mj-color: #2ecc71; --bg-color: transparent; --card-bg: rgba(44, 62, 80, 0.75); --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; --success: #27ae60; --purple: #8e44ad; }
-        body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+        body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; user-select: none; -webkit-user-select: none; }
         #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: linear-gradient(45deg, #0f0c29, #302b63, #24243e); background-size: 300% 300%; animation: gradientBG 15s ease infinite; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         #bg-protection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(0, 0, 0, 0.5); pointer-events: none; }
         
         .box { max-width: 400px; margin: 80px auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: rgba(0,0,0,0.5); color: white; font-size: 1rem; outline: none; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: rgba(0,0,0,0.5); color: white; font-size: 1rem; outline: none; margin-bottom: 5px; user-select: auto; -webkit-user-select: auto; }
         .input-helper { display: block; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 15px; font-style: italic; text-align: left; padding-left: 5px; }
         .section-title { margin: 20px 0 10px 0; font-size: 0.9rem; color: var(--accent); text-align: left; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
         button { background: var(--mj-color); color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s; text-transform: uppercase; margin-bottom: 10px; position: relative; top: 0; box-shadow: 0 4px rgba(0,0,0,0.3); }
@@ -25,11 +25,10 @@
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; color: #dcdde1 !important; border:none !important;}
         .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: white !important; box-shadow: none !important; }
         .btn-cancel:hover:not(:disabled) { background: rgba(231, 76, 60, 0.2) !important; }
-        .countdown-btn { background: #e67e22 !important; cursor: wait !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(230, 126, 34, 0.6) !important; }
         
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
         
-        /* NOUVEAU HUB MJ V2 */
+        /* HUB MJ V2 */
         .hub-search-bar { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--accent); background: rgba(0,0,0,0.6); color: white; font-size: 1.1rem; outline: none; margin-bottom: 20px; transition: 0.3s; }
         .hub-search-bar:focus { box-shadow: 0 0 15px rgba(241, 196, 15, 0.5); }
         .hub-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -329,7 +328,7 @@
         <div style="margin-top:40px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);">
             <h3 style="color:var(--danger); margin-top:0;">Fermer la Console</h3>
             <button style="background:var(--blue);" onclick="quitRoom()">🚪 Quitter le tableau de bord (Conserver données)</button>
-            <button id="btn-delete-room" style="background:var(--danger);" onclick="resetFullGame()">⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE</button>
+            <button id="btn-delete-room" style="background:var(--danger); transition: all 0.2s;" onmousedown="startDeleteHold(event)" onmouseup="cancelDeleteHold(event)" onmouseleave="cancelDeleteHold(event)" ontouchstart="startDeleteHold(event)" ontouchend="cancelDeleteHold(event)">⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE</button>
         </div>
     </div>
 
@@ -503,7 +502,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.167";
+        const APP_VERSION = "1.168";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -525,6 +524,11 @@
         
         let mjRooms = [];
         let currentHubTab = 'active';
+
+        // Variables pour le maintien (Hold to delete)
+        let holdTimer = null;
+        let holdInterval = null;
+        let holdTimeLeft = 5;
 
         function isValidPassword(pwd) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd); }
 
@@ -780,7 +784,7 @@
             }).catch(e=>console.error(e));
         }
 
-        // --- NOUVEAU HUB MJ V2 (ACCORDÉON & SMART FILTER) ---
+        // --- HUB MJ V2 ---
         function checkUserRoom(uid) {
             db.ref('rooms').orderByChild('mj').equalTo(uid).once('value', snap => {
                 document.getElementById('screen-login').style.display="none"; 
@@ -849,11 +853,45 @@
         function deleteRoomFromHub(rID, e) {
             e.stopPropagation();
             if(confirm("⚠️ Êtes-vous sûr de vouloir supprimer définitivement la salle n°" + rID + " ? Cette action est irréversible.")) {
-                db.ref('rooms/' + rID).remove();
-                db.ref('activeRooms/' + rID).remove();
-                mjRooms = mjRooms.filter(r => r.id !== rID);
-                renderHubRooms();
+                backupAndDestroyRoom(rID).then(() => {
+                    mjRooms = mjRooms.filter(r => r.id !== rID);
+                    renderHubRooms();
+                });
             }
+        }
+
+        function backupAndDestroyRoom(targetRoomID) {
+            return new Promise((resolve) => {
+                const rRef = db.ref('rooms/' + targetRoomID);
+                rRef.child('players').once('value').then(snap => {
+                    const players = snap.val() || {};
+                    const backupPromises = [];
+                    
+                    // PREPARATION DE L'ÉTAPE 2 : SAUVEGARDE DES COMPTES
+                    Object.keys(players).forEach(uid => {
+                        // Si le joueur a un vrai compte Firebase Auth (uid long, et pas "u_...")
+                        if (uid.length > 20 && !uid.startsWith("u_")) { 
+                            backupPromises.push(db.ref('users/' + uid + '/history/' + targetRoomID).set({
+                                date: firebase.database.ServerValue.TIMESTAMP,
+                                pts: players[uid].pts || 0,
+                                teamName: players[uid].teamName || "Solo",
+                                eventName: document.getElementById('display-event-name').innerText || "Partie"
+                            }));
+                        }
+                    });
+                    
+                    // Une fois les comptes sauvegardés (ou s'il n'y en a pas), on désintègre la salle
+                    Promise.all(backupPromises).then(() => {
+                        rRef.remove();
+                        db.ref('activeRooms/' + targetRoomID).remove();
+                        resolve();
+                    }).catch(() => { 
+                        rRef.remove(); 
+                        db.ref('activeRooms/' + targetRoomID).remove(); 
+                        resolve(); 
+                    });
+                });
+            });
         }
 
         function renderHubRooms() {
@@ -995,6 +1033,16 @@
 
         function launchDashboard(id, mjName = null, eventName = null, isArchived = false) {
             roomID = id; buzzHistory = []; currentBuzzerId = null; currentPlayer = null;
+            
+            // CORRECTIF BUG DU BOUTON SUPPRESSION
+            const btnDel = document.getElementById('btn-delete-room');
+            if (btnDel) {
+                btnDel.disabled = false;
+                btnDel.innerText = "⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE";
+                btnDel.style.background = "var(--danger)";
+                clearTimeout(holdTimer);
+                clearInterval(holdInterval);
+            }
             
             document.getElementById('screen-choice').style.display = "none"; 
             const dashboard = document.getElementById('screen-dashboard');
@@ -1237,34 +1285,65 @@
         
         function quitRoom() { 
             if(mjProfileData.isGuest===true) {
-                resetFullGame(); 
+                // Pour l'invité on conserve le vieux système rapide
+                if(confirm("⚠️ SUPPRESSION DÉFINITIVE DE CETTE SALLE ?\nToutes les données (scores, équipes) seront perdues.")) {
+                    roomRef.child('gameState').set({status:'closing', timestamp:Date.now()});
+                    setTimeout(() => {
+                        roomRef.remove(); 
+                        db.ref('activeRooms/'+roomID).remove(); 
+                        checkUserRoom(auth.currentUser.uid);
+                    }, 5000);
+                }
             } else { 
                 if(roomRef) roomRef.child('buzzers').off(); 
-                
                 if(!document.getElementById('screen-dashboard').classList.contains('readonly-mode') && roomID) {
                     const publicRef = db.ref('activeRooms/' + roomID);
                     publicRef.remove();
                     publicRef.onDisconnect().cancel();
                 }
-                
                 checkUserRoom(auth.currentUser.uid); 
             } 
         }
         
-        function resetFullGame() {
-            if(confirm("⚠️ SUPPRESSION DÉFINITIVE DE CETTE SALLE ?\nToutes les données (scores, équipes) seront perdues.")) {
+        // --- NOUVEAU SYSTÈME HOLD-TO-DELETE + SAUVEGARDE COMPTES ---
+        function startDeleteHold(e) {
+            if(e) e.preventDefault();
+            const btn = document.getElementById('btn-delete-room');
+            if(btn.disabled) return;
+            
+            holdTimeLeft = 5;
+            btn.innerText = `⏳ MAINTENEZ POUR SUPPRIMER (${holdTimeLeft}s)...`;
+            btn.style.background = "#e67e22";
+            
+            holdInterval = setInterval(() => {
+                holdTimeLeft--;
+                if(holdTimeLeft > 0) btn.innerText = `⏳ MAINTENEZ POUR SUPPRIMER (${holdTimeLeft}s)...`;
+            }, 1000);
+
+            holdTimer = setTimeout(() => {
+                clearInterval(holdInterval);
+                btn.innerText = "💥 SUPPRESSION EN COURS...";
+                btn.disabled = true;
+                
+                // On met la salle en mode 'closing' pour expulser les joueurs
                 roomRef.child('gameState').set({status:'closing', timestamp:Date.now()});
-                const b=document.getElementById('btn-delete-room');
-                if(b) {
-                    b.disabled=true; b.classList.add('countdown-btn'); let t=5; b.innerText=`⏳ SUPPRESSION DANS ${t}s...`;
-                    const i=setInterval(()=>{ t--; b.innerText=`⏳ SUPPRESSION DANS ${t}s...`; if(t<=0){ clearInterval(i); executeRoomDeletion(); } }, 1000);
-                } else setTimeout(executeRoomDeletion, 5000);
-            }
+                
+                // Exécution de la destruction avec sauvegarde préalable
+                backupAndDestroyRoom(roomID).then(() => {
+                    checkUserRoom(auth.currentUser.uid);
+                });
+            }, 5000);
         }
-        function executeRoomDeletion() { 
-            roomRef.remove(); 
-            db.ref('activeRooms/'+roomID).remove(); 
-            checkUserRoom(auth.currentUser.uid); 
+
+        function cancelDeleteHold(e) {
+            if(e) e.preventDefault();
+            clearTimeout(holdTimer);
+            clearInterval(holdInterval);
+            const btn = document.getElementById('btn-delete-room');
+            if(btn && !btn.disabled) {
+                btn.innerText = "⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE";
+                btn.style.background = "var(--danger)";
+            }
         }
     </script>
 </body>
