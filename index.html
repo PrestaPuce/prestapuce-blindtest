@@ -153,12 +153,12 @@
                     Scanner un QR Code
                 </button>
                 
-                <div style="width: 100%; max-width: 350px; position: relative;">
-                    <input type="text" id="input-room-search" placeholder="🔍 Chercher (Ex: Mariage...)" oninput="filterRooms(); document.getElementById('clear-room-search').style.display = this.value.length > 0 ? 'block' : 'none';" style="padding-right: 40px;">
+                <div style="width: 100%; max-width: 350px; position: relative; margin-bottom: 10px;">
+                    <input type="text" id="input-room-search" placeholder="🔍 Chercher (Ex: Mariage...)" oninput="filterRooms(); document.getElementById('clear-room-search').style.display = this.value.length > 0 ? 'block' : 'none';" style="margin-bottom: 0; padding-right: 40px;">
                     <span id="clear-room-search" onclick="document.getElementById('input-room-search').value=''; filterRooms(); this.style.display='none';" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; cursor: pointer; color: white; display: none;">✕</span>
                 </div>
                 
-                <div id="room-search-results" style="width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; margin-top: 10px; padding-bottom: 20px;">
+                <div id="room-search-results" style="width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; padding-bottom: 20px;">
                     <div style="text-align:center; color:#7f8c8d; font-style:italic; padding: 20px;">Chargement des salles...</div>
                 </div>
             </div>
@@ -407,8 +407,8 @@
             <h3 style="color:white; font-size:1.1rem; margin-top:0;">Membres de l'équipe</h3>
             
             <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:10px; width:100%;">
-                <div style="position: relative; width: 100%;">
-                    <input type="text" id="team-live-search" placeholder="🔍 Chercher un joueur..." style="width:100%; box-sizing:border-box; padding:10px; padding-right:40px; font-size:1rem; border-radius:8px;" oninput="renderTeamMembers(); document.getElementById('clear-team-search').style.display = this.value.length > 0 ? 'block' : 'none';">
+                <div style="position: relative; width: 100%; margin-bottom: 10px;">
+                    <input type="text" id="team-live-search" placeholder="🔍 Chercher un joueur..." style="margin-bottom: 0; width:100%; box-sizing:border-box; padding:10px; padding-right:40px; font-size:1rem; border-radius:8px;" oninput="renderTeamMembers(); document.getElementById('clear-team-search').style.display = this.value.length > 0 ? 'block' : 'none';">
                     <span id="clear-team-search" onclick="document.getElementById('team-live-search').value=''; renderTeamMembers(); this.style.display='none';" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; cursor: pointer; color: white; display: none;">✕</span>
                 </div>
                 <div style="display:flex; gap:10px; width:100%;">
@@ -514,7 +514,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.173";
+        const CLIENT_VERSION = "1.174";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -941,6 +941,7 @@
         function joinTeam(name, icon) { 
             if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
             
+            // Vérification Liste Noire avant de rejoindre
             roomRef.child('teams/' + name + '/blacklist/' + myUserID).once('value', snap => {
                 if (snap.exists()) {
                     alert("🚫 Vous avez été expulsé de cette équipe.\nSeul le Capitaine ou l'Animateur peut vous réintégrer.");
