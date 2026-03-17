@@ -254,7 +254,7 @@
         <div id="step-team-create" class="step-screen">
             <div class="screen-header"><h2>Créer ton Clan</h2></div>
             <div class="screen-content content-top">
-                <input type="text" id="new-team-name" placeholder="Nom de l'équipe">
+                <input type="text" id="new-team-name" placeholder="Nom de l'équipe" onkeypress="if(event.key==='Enter') createNewTeam()">
                 <div id="team-crest-choices" class="selection-mode-container" style="margin-top:20px; width:100%;">
                     <div class="choice-card" onclick="document.getElementById('team-file-input').click()">
                         <div class="choice-icon">📸</div>
@@ -393,7 +393,7 @@
         </div>
     </div>
     
-    <div id="overlay-manage-team" class="overlay-full" style="z-index: 2500;" onclick="this.style.display='none'">
+    <div id="overlay-manage-team" class="overlay-full" style="z-index: 2500;" onclick="closeTeamManagement()">
         <div class="settings-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--gold); margin-top:0;">GÉRER L'ÉQUIPE</h2>
             
@@ -404,10 +404,19 @@
             
             <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
             <h3 style="color:white; font-size:1.1rem; margin-top:0;">Membres de l'équipe</h3>
-            <div id="manage-team-members" style="max-height:150px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:15px; text-align: left;">
+            
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:10px; width:100%;">
+                <input type="text" id="team-live-search" placeholder="🔍 Chercher un joueur..." style="width:100%; box-sizing:border-box; padding:10px; font-size:1rem; border-radius:8px;" oninput="renderTeamMembers()">
+                <div style="display:flex; gap:10px; width:100%;">
+                    <button id="pill-actifs" class="btn-secondary" style="flex:1; border-color:var(--success); color:var(--success); margin-top:0;" onclick="setTeamFilter('actifs')">🟢 Actifs</button>
+                    <button id="pill-bloques" class="btn-secondary" style="flex:1; border-color:var(--grey); color:var(--grey); margin-top:0;" onclick="setTeamFilter('bloques')">🔴 Bloqués</button>
+                </div>
+            </div>
+
+            <div id="manage-team-members" style="max-height:150px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:15px; text-align: left; width:100%;">
             </div>
             
-            <button class="btn-main" onclick="document.getElementById('overlay-manage-team').style.display='none'">Fermer</button>
+            <button class="btn-main" onclick="closeTeamManagement()">Fermer</button>
         </div>
     </div>
 
@@ -500,7 +509,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.170";
+        const CLIENT_VERSION = "1.171";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -926,29 +935,39 @@
 
         function joinTeam(name, icon) { 
             if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
-            player.team = name; player.teamIcon = icon; 
             
-            const trueTime = Date.now() + serverTimeOffset;
-            roomRef.child('players').once('value', snap => {
-                let hasCaptain = false;
-                let activeMembers = 0;
-                snap.forEach(child => {
-                    const p = child.val();
-                    if (p.teamName === name && p.active !== false && p.banned !== true && child.key !== myUserID) {
-                        activeMembers++;
-                        if (p.isCaptain) hasCaptain = true;
+            // Vérification Liste Noire avant de rejoindre
+            roomRef.child('teams/' + name + '/blacklist/' + myUserID).once('value', snap => {
+                if (snap.exists()) {
+                    alert("🚫 Vous avez été expulsé de cette équipe.\nSeul le Capitaine ou l'Animateur peut vous réintégrer.");
+                    navigateTo('step-team-action');
+                    return;
+                }
+                
+                player.team = name; player.teamIcon = icon; 
+                
+                const trueTime = Date.now() + serverTimeOffset;
+                roomRef.child('players').once('value', snapPlayers => {
+                    let hasCaptain = false;
+                    let activeMembers = 0;
+                    snapPlayers.forEach(child => {
+                        const p = child.val();
+                        if (p.teamName === name && p.active !== false && p.banned !== true && child.key !== myUserID) {
+                            activeMembers++;
+                            if (p.isCaptain) hasCaptain = true;
+                        }
+                    });
+                    const becomeCaptain = (!hasCaptain || activeMembers === 0);
+                    
+                    if(isEditing) { 
+                        roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { finishEdit(true); }); 
+                    } else if (isRecovering) {
+                        roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { isRecovering = false; finishEdit(false); }); 
+                    } else { 
+                        isCaptain = becomeCaptain;
+                        showRecap(); 
                     }
                 });
-                const becomeCaptain = (!hasCaptain || activeMembers === 0);
-                
-                if(isEditing) { 
-                    roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { finishEdit(true); }); 
-                } else if (isRecovering) {
-                    roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { isRecovering = false; finishEdit(false); }); 
-                } else { 
-                    isCaptain = becomeCaptain;
-                    showRecap(); 
-                }
             });
         }
         
@@ -1043,36 +1062,104 @@
             if(btnManage) btnManage.style.display = (isCaptain && player.team !== "Solo") ? "block" : "none";
         }
 
-        // --- GESTION ÉQUIPE (CAPITAINE) ---
+        // --- GESTION ÉQUIPE (CAPITAINE) TEMPS RÉEL + RECHERCHE UNIFIÉE ---
+        let manageTeamRef = null;
+        let manageTeamCallback = null;
+        let blacklistRef = null;
+        let blacklistCallback = null;
+        let teamMembersData = [];
+        let teamBlacklistData = [];
+        let currentTeamFilter = 'actifs';
+
         function openTeamManagement() {
             document.getElementById('overlay-settings').style.display = 'none';
             document.getElementById('manage-team-name').value = player.team;
-            const list = document.getElementById('manage-team-members');
-            list.innerHTML = "<div style='color:#ccc;'>Chargement...</div>";
+            document.getElementById('team-live-search').value = '';
+            setTeamFilter('actifs');
+            document.getElementById('overlay-manage-team').style.display = 'flex';
             
-            roomRef.child('players').orderByChild('teamName').equalTo(player.team).once('value', snap => {
-                list.innerHTML = "";
-                let members = [];
-                snap.forEach(child => { if(child.val().active !== false) members.push({id: child.key, ...child.val()}); });
+            if(manageTeamRef) manageTeamRef.off('value', manageTeamCallback);
+            if(blacklistRef) blacklistRef.off('value', blacklistCallback);
+            
+            manageTeamRef = roomRef.child('players').orderByChild('teamName').equalTo(player.team);
+            manageTeamCallback = manageTeamRef.on('value', snap => {
+                teamMembersData = [];
+                snap.forEach(child => { if(child.val().active !== false) teamMembersData.push({id: child.key, ...child.val()}); });
+                renderTeamMembers();
+            });
+            
+            blacklistRef = roomRef.child('teams/' + player.team + '/blacklist');
+            blacklistCallback = blacklistRef.on('value', snap => {
+                teamBlacklistData = [];
+                snap.forEach(child => { teamBlacklistData.push({ id: child.key, ...child.val() }); });
+                renderTeamMembers();
+            });
+        }
+
+        function closeTeamManagement() {
+            if(manageTeamRef) manageTeamRef.off('value', manageTeamCallback);
+            if(blacklistRef) blacklistRef.off('value', blacklistCallback);
+            manageTeamRef = null; blacklistRef = null;
+            document.getElementById('overlay-manage-team').style.display = 'none';
+        }
+
+        function setTeamFilter(filter) {
+            currentTeamFilter = filter;
+            document.getElementById('pill-actifs').style.borderColor = (filter === 'actifs') ? 'var(--success)' : 'var(--grey)';
+            document.getElementById('pill-actifs').style.color = (filter === 'actifs') ? 'var(--success)' : 'var(--grey)';
+            document.getElementById('pill-bloques').style.borderColor = (filter === 'bloques') ? 'var(--danger)' : 'var(--grey)';
+            document.getElementById('pill-bloques').style.color = (filter === 'bloques') ? 'var(--danger)' : 'var(--grey)';
+            renderTeamMembers();
+        }
+
+        function renderTeamMembers() {
+            const list = document.getElementById('manage-team-members');
+            list.innerHTML = "";
+            const query = document.getElementById('team-live-search').value.toLowerCase().trim();
+            
+            let displayList = [];
+            
+            if (query.length > 0) {
+                // Recherche Globale : On ignore la pilule et on cherche partout
+                displayList = [
+                    ...teamMembersData.map(m => ({...m, isBlocked: false})), 
+                    ...teamBlacklistData.map(m => ({...m, isBlocked: true}))
+                ];
+                displayList = displayList.filter(m => m.name && m.name.toLowerCase().includes(query));
+            } else {
+                // On respecte la pilule sélectionnée si aucune recherche
+                if (currentTeamFilter === 'actifs') {
+                    displayList = teamMembersData.map(m => ({...m, isBlocked: false}));
+                } else {
+                    displayList = teamBlacklistData.map(m => ({...m, isBlocked: true}));
+                }
+            }
+            
+            if(displayList.length === 0) { 
+                list.innerHTML = "<div style='color:#7f8c8d; font-style:italic; padding:10px;'>Aucun joueur trouvé.</div>"; 
+                return; 
+            }
+            
+            displayList.sort((a,b) => (a.joinTimestamp || 0) - (b.joinTimestamp || 0));
+            
+            displayList.forEach(m => {
+                const div = document.createElement('div');
+                div.style.cssText = "display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;";
+                let av = (m.avatar && m.avatar.length > 20) ? `<img src="${m.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.5rem;">${m.avatar}</span>`;
                 
-                members.sort((a,b) => (a.joinTimestamp || 0) - (b.joinTimestamp || 0));
+                let btnAction = "";
+                let statusDot = m.isBlocked ? "🔴" : "🟢";
                 
-                members.forEach(m => {
-                    const div = document.createElement('div');
-                    div.style.cssText = "display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;";
-                    let av = m.avatar.length > 20 ? `<img src="${m.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.5rem;">${m.avatar}</span>`;
-                    
-                    let btnAction = "";
-                    if(m.id === myUserID) {
-                        btnAction = `<span style="color:#7f8c8d; font-size:0.8rem; margin-left:auto;">(Toi)</span>`;
-                    } else {
-                        btnAction = `<button onclick="expelMember('${m.id}', '${m.name.replace(/'/g, "\\'")}')" style="margin-left:auto; background:var(--danger); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer;">❌</button>`;
-                    }
-                    
-                    div.innerHTML = `${av} <b style="margin-left:10px; color:white; font-size:1rem;">${m.name}</b> ${btnAction}`;
-                    list.appendChild(div);
-                });
-                document.getElementById('overlay-manage-team').style.display = 'flex';
+                if (m.id === myUserID) {
+                    btnAction = `<span style="color:#7f8c8d; font-size:0.8rem; margin-left:auto;">(Toi)</span>`;
+                } else if (m.isBlocked) {
+                    btnAction = `<button onclick="pardonMember('${m.id}')" style="margin-left:auto; background:var(--success); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer;">🔄 Gracier</button>`;
+                } else {
+                    btnAction = `<button onclick="expelMember('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${m.avatar}')" style="margin-left:auto; background:var(--danger); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer;">❌ Expulser</button>`;
+                }
+                
+                div.innerHTML = `${statusDot} ${av} <b style="margin-left:10px; color:${m.isBlocked ? '#7f8c8d' : 'white'}; font-size:1rem;">${m.name}</b> ${btnAction}`;
+                list.appendChild(div);
             });
         }
 
@@ -1140,11 +1227,17 @@
             });
         }
 
-        function expelMember(uid, name) {
-            if(confirm(`Expulser ${name} de l'équipe ?`)) {
+        function expelMember(uid, name, avatar) {
+            if(confirm(`Expulser ${name} de l'équipe ?\n\nIl sera ajouté à la liste noire et repassera en Solo.`)) {
+                // Inscrire le joueur sur la liste noire avec ses infos d'affichage
+                roomRef.child('teams/' + player.team + '/blacklist/' + uid).set({ name: name, avatar: avatar });
+                // Passer le joueur en Solo
                 roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", isCaptain: false });
-                openTeamManagement(); // Rafraîchir la liste
             }
+        }
+
+        function pardonMember(uid) {
+            roomRef.child('teams/' + player.team + '/blacklist/' + uid).remove();
         }
         // --- FIN GESTION ÉQUIPE ---
 
