@@ -45,7 +45,7 @@
         .pulse { animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity:1; transform: scale(1); } 50% { opacity:0.4; transform: scale(0.9); } 100% { opacity:1; transform: scale(1); } }
 
-        input[type="text"], input[type="number"] { width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px; flex-shrink: 0; }
+        input[type="text"], input[type="number"] { width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px; flex-shrink: 0; transition: border-color 0.3s; }
         input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
         
         .btn-main { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: clamp(1rem, 4vw, 1.3rem); font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 350px; }
@@ -129,7 +129,6 @@
         #podium-content h1 { font-size: clamp(2rem, 8vw, 2.5rem); margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; line-height: 1.1; }
         #podium-content p { font-size: 1.3rem; color: white; margin: 0; font-weight: bold; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; }
         
-        /* ANIMATION DU CHAMPION */
         @keyframes bounceTrophy { 0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 transparent); } 50% { transform: scale(1.1) translateY(-10px); filter: drop-shadow(0 10px 15px rgba(241,196,15,0.6)); } }
         .champion-trophy { animation: popTrophy 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, bounceTrophy 2s ease-in-out 0.6s infinite !important; }
     </style>
@@ -144,16 +143,23 @@
         </div>
 
         <div id="step-room" class="step-screen active">
-            <div class="screen-content">
-                <h1>CODE SALLE</h1>
-                <p class="desc">Entre le code ou scanne le QR de l'écran.</p>
+            <div class="screen-content content-top" style="padding-top: 5vh;">
+                <h1>REJOINDRE</h1>
+                <p class="desc">Cherche ta salle ou scanne un QR Code.</p>
+                
                 <div id="reader"></div>
                 <button class="btn-scan" onclick="startQRScan()">
                     <svg style="width:24px;height:24px;fill:white" viewBox="0 0 24 24"><path d="M3 5v4h2V5h4V3H5c-1.1 0-2 .9-2 2zm2 10H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm14 4h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zm0-16h-4v2h4v4h2V5c0-1.1-.9-2-2-2z"/></svg>
                     Scanner un QR Code
                 </button>
-                <input type="number" id="input-room" placeholder="EX: 1234">
-                <button class="btn-main" onclick="validateRoomStep()">Rejoindre</button>
+                
+                <div style="width: 100%; max-width: 350px; position: relative;">
+                    <input type="text" id="input-room-search" placeholder="🔍 Chercher (Ex: Mariage...)" oninput="filterRooms()">
+                </div>
+                
+                <div id="room-search-results" style="width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; margin-top: 10px; padding-bottom: 20px;">
+                    <div style="text-align:center; color:#7f8c8d; font-style:italic; padding: 20px;">Chargement des salles...</div>
+                </div>
             </div>
         </div>
 
@@ -455,7 +461,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.159";
+        const CLIENT_VERSION = "1.160";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -473,6 +479,7 @@
         let teamListCallback = null;
 
         let wakeLock = null;
+        let availableRooms = []; // Moteur de recherche
 
         async function requestWakeLock() {
             if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
@@ -553,14 +560,82 @@
             if (!storedId) { storedId = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5); localStorage.setItem('buzz_userId', storedId); }
             myUserID = storedId;
             typeWriterSequence();
+            
+            // Lancement de l'écoute du Live Filter
+            fetchActiveRooms();
+
             const urlParams = new URLSearchParams(window.location.search);
             const r = urlParams.get('room');
             if(r) { roomID = r; checkRoomAndStart(true); } else { navigateTo('step-room'); }
+            
             renderAvatarGrid();
-            document.getElementById('input-room').addEventListener('keypress', (e)=>{if(e.key==='Enter') validateRoomStep()});
+            
+            // Gestion de la touche Entrée pour la recherche
+            const searchInput = document.getElementById('input-room-search');
+            if(searchInput) {
+                searchInput.addEventListener('keypress', (e)=>{
+                    if(e.key === 'Enter') {
+                        const firstCard = document.querySelector('#room-search-results .choice-card');
+                        if (firstCard) firstCard.click();
+                    }
+                });
+            }
+            
             document.getElementById('input-pseudo').addEventListener('keypress', (e)=>{if(e.key==='Enter') validatePseudo()});
             window.addEventListener('popstate', (event) => { if(stepHistory.length > 0) goBack(); });
         };
+
+        // --- MOTEUR DE RECHERCHE LIVE FILTER ---
+        function fetchActiveRooms() {
+            db.ref('activeRooms').on('value', snap => {
+                availableRooms = [];
+                const rooms = snap.val();
+                if(rooms) {
+                    Object.values(rooms).forEach(r => { availableRooms.push(r); });
+                }
+                availableRooms.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+                filterRooms(); 
+            });
+        }
+
+        function filterRooms() {
+            const query = document.getElementById('input-room-search').value.toLowerCase().trim();
+            const container = document.getElementById('room-search-results');
+            container.innerHTML = "";
+            
+            if(availableRooms.length === 0) {
+                container.innerHTML = "<div style='text-align:center; color:#7f8c8d; font-style:italic; padding: 20px;'>Aucune partie en cours pour le moment.</div>";
+                return;
+            }
+
+            let matches = availableRooms.filter(r => {
+                const event = (r.eventName || "").toLowerCase();
+                const mj = (r.mjName || "").toLowerCase();
+                const id = (r.id || "").toLowerCase();
+                return event.includes(query) || mj.includes(query) || id.includes(query);
+            });
+
+            if(matches.length === 0) {
+                container.innerHTML = "<div style='text-align:center; color:#7f8c8d; font-style:italic; padding: 20px;'>Aucune salle ne correspond à ta recherche.</div>";
+                return;
+            }
+
+            matches.forEach(r => {
+                const div = document.createElement('div');
+                div.className = "choice-card";
+                div.style.padding = "15px";
+                div.innerHTML = `
+                    <div class="choice-icon" style="font-size:1.8rem; margin-right:15px;">🎟️</div>
+                    <div class="choice-content" style="flex:1; overflow:hidden;">
+                        <b style="color:var(--accent); font-size:1.1rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;">${r.eventName || "PARTIE EN COURS"}</b>
+                        <span style="color:#ecf0f1; font-size:0.85rem; display:block;">Animé par ${r.mjName || "Animateur"}</span>
+                    </div>
+                `;
+                div.onclick = () => { roomID = r.id; checkRoomAndStart(false); };
+                container.appendChild(div);
+            });
+        }
+        // --- FIN MOTEUR DE RECHERCHE ---
 
         function navigateTo(targetId, pushToHistory = true) {
             if(html5QrCode) { try { html5QrCode.stop(); document.getElementById('reader').style.display='none'; } catch(e){} }
@@ -594,16 +669,11 @@
                     html5QrCode.stop().then(() => {
                         document.getElementById('reader').style.display = 'none';
                         let match = decodedText.match(/[?&]room=([^&]+)/);
-                        if (match) { document.getElementById('input-room').value = match[1]; validateRoomStep(); } 
+                        if (match) { roomID = match[1]; checkRoomAndStart(false); } 
                         else { alert("Code QR invalide pour ce jeu."); }
                     });
                 }, (errorMessage) => { })
             .catch(err => alert("Erreur caméra : " + err));
-        }
-
-        function validateRoomStep() {
-            const val = document.getElementById('input-room').value.trim();
-            if(!val) return; roomID = val; checkRoomAndStart(false);
         }
 
         function checkRoomAndStart(autoLogin) {
