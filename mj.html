@@ -45,6 +45,8 @@
         .hub-badge { font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-left: auto; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
         .badge-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
         .badge-archive { background: rgba(189, 195, 199, 0.2); color: #bdc3c7; border: 1px solid #bdc3c7; }
+        .badge-banned { background: rgba(231, 76, 60, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+        .badge-inactive { background: rgba(243, 156, 18, 0.2); color: var(--gold); border: 1px solid var(--gold); }
         .hub-btn { padding: 8px 15px; font-size: 0.8rem; width: auto; margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
         /* MODE LECTURE SEULE */
@@ -71,7 +73,7 @@
         .score-row.buzzer-active-row { background: rgba(46, 204, 113, 0.3) !important; border: 2px solid var(--success) !important; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); transform: scale(1.02); z-index: 10; position: relative; }
         .crest-mini-bg { background: white; padding: 0; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; width: 30px; height: 30px; align-items: center; justify-content: center; overflow: hidden; }
         .crest-mini { width: 100%; height: 100%; object-fit: contain; }
-        .btn-icon { cursor: pointer; font-weight: bold; font-size: 1.2rem; margin-left: 8px; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 4px; }
+        .btn-icon { cursor: pointer; font-weight: bold; font-size: 1.2rem; margin-left: 8px; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 4px; border:none; background:transparent;}
         .btn-icon:hover { background: rgba(255,255,255,0.1); }
         .btn-edit { color: var(--blue); } .btn-del { color: var(--danger); } .btn-restore { color: var(--success); } .btn-pause { color: #bdc3c7; }
         .team-controls { display: flex; align-items: center; gap: 2px; }
@@ -154,9 +156,9 @@
         <button class="btn-ghost" onclick="toggleGuide()">AIDE / GUIDE</button>
         <img id="login-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px; border-radius: 10px;">
         <h2>Accès MJ Sécurisé</h2>
-        <input type="email" id="mj-email" placeholder="Email MJ">
+        <input type="email" id="mj-email" placeholder="Email MJ" onkeypress="if(event.key==='Enter') login()">
         <div class="password-wrapper">
-            <input type="password" id="mj-pass" placeholder="Mot de passe">
+            <input type="password" id="mj-pass" placeholder="Mot de passe" onkeypress="if(event.key==='Enter') login()">
             <div class="password-icon" onclick="togglePasswordVisibility('mj-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
         </div>
         <button id="btn-login-submit" onclick="login()">Se Connecter</button>
@@ -166,9 +168,9 @@
     <div id="screen-profile" class="box" style="display:none; max-height:90vh; overflow-y:auto;">
         <h2 style="margin-bottom:20px; color:white;">MA CARTE DE VISITE</h2>
         <p class="section-title">👤 IDENTITÉ</p>
-        <input type="text" id="prof-nom" placeholder="Nom">
-        <input type="text" id="prof-prenom" placeholder="Prénom (Affiché aux joueurs)">
-        <input type="email" id="prof-email" placeholder="Email (Identifiant)" style="border-color:var(--blue);">
+        <input type="text" id="prof-nom" placeholder="Nom" onkeypress="if(event.key==='Enter') saveProfile()">
+        <input type="text" id="prof-prenom" placeholder="Prénom (Affiché aux joueurs)" onkeypress="if(event.key==='Enter') saveProfile()">
+        <input type="email" id="prof-email" placeholder="Email (Identifiant)" style="border-color:var(--blue);" onkeypress="if(event.key==='Enter') saveProfile()">
         <p class="section-title">🖼️ IMAGE DE MARQUE</p>
         <label for="prof-logo-upload" id="profile-drop-zone" class="drop-zone profile-drop">
             <img id="prof-logo-preview" src="" style="display:none;">
@@ -178,15 +180,15 @@
         <span class="input-helper">Affiché sur les téléphones et sur l'écran géant.</span>
         <input type="hidden" id="prof-logo-url"> 
         <p class="section-title">🌐 PUBLICITÉ / RÉSEAUX</p>
-        <input type="text" id="prof-link" placeholder="Ex: https://monsite.com ou @moninsta">
+        <input type="text" id="prof-link" placeholder="Ex: https://monsite.com ou @moninsta" onkeypress="if(event.key==='Enter') saveProfile()">
         <p class="section-title">📁 BIBLIOTHÈQUE / MÉDIAS</p>
         <button onclick="openLibraryProxy('self')" style="background:var(--gold); color:black; margin-top:0;">🎨 Gérer mes Blasons</button>
         <button onclick="openBgLibraryProxy('self')" style="background:var(--purple); color:white; margin-top:10px;">📺 Gérer mes Fonds</button>
         <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:20px 0;">
         <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">SÉCURITÉ</p>
-        <div class="password-wrapper"><input type="password" id="prof-pass-current" placeholder="Mot de passe actuel" style="border-color:var(--danger);"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
-        <div class="password-wrapper"><input type="password" id="prof-pass" placeholder="Nouveau mot de passe"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
-        <div class="password-wrapper"><input type="password" id="prof-pass-conf" placeholder="Confirmer le mot de passe" style="margin-bottom:0;"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+        <div class="password-wrapper"><input type="password" id="prof-pass-current" placeholder="Mot de passe actuel" style="border-color:var(--danger);" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+        <div class="password-wrapper"><input type="password" id="prof-pass" placeholder="Nouveau mot de passe" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+        <div class="password-wrapper"><input type="password" id="prof-pass-conf" placeholder="Confirmer le mot de passe" style="margin-bottom:0;" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
         <span class="input-helper" style="margin-top:5px; margin-bottom:15px;">8 caractères, 1 Maj, 1 Min, 1 Chiffre, 1 Spécial.</span>
         <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER</button>
         <button class="btn-cancel" onclick="closeProfile()">Retour</button>
@@ -199,7 +201,10 @@
         
         <button onclick="askMjNameAndCreate()" style="margin-top:10px; font-size:1.1rem; margin-bottom: 25px;">🆕 Créer une nouvelle salle</button>
 
-        <input type="text" id="hub-search" class="hub-search-bar" placeholder="🔍 Rechercher une salle, une date, un numéro..." oninput="renderHubRooms()">
+        <div style="position:relative; margin-bottom:20px;">
+            <input type="text" id="hub-search" class="hub-search-bar" style="margin-bottom:0; padding-right:40px;" placeholder="🔍 Rechercher une salle, une date, un numéro..." oninput="renderHubRooms(); document.getElementById('clear-hub-search').style.display = this.value.length > 0 ? 'block' : 'none';">
+            <span id="clear-hub-search" onclick="document.getElementById('hub-search').value=''; renderHubRooms(); this.style.display='none';" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); font-size:1.2rem; cursor:pointer; color:white; display:none;">✕</span>
+        </div>
 
         <div id="hub-tabs" class="hub-tabs">
             <button id="tab-active" class="hub-tab active" onclick="setHubTab('active')">🟢 EN COURS</button>
@@ -229,9 +234,9 @@
             <h2 style="color:var(--accent); margin-top:0;">NOUVELLE SALLE</h2>
             <p style="font-size:0.9rem; color:#bdc3c7; margin-bottom:20px;">Personnalisez l'affichage pour vos joueurs.</p>
             <div style="text-align: left; font-size: 0.85rem; color: var(--accent); margin-bottom: 5px; font-weight: bold;">NOM DE L'ANIMATEUR / DJ</div>
-            <input type="text" id="new-room-mj" placeholder="Ex: DJ Fred">
+            <input type="text" id="new-room-mj" placeholder="Ex: DJ Fred" onkeypress="if(event.key==='Enter') document.getElementById('new-room-name').focus()">
             <div style="text-align: left; font-size: 0.85rem; color: var(--accent); margin-bottom: 5px; font-weight: bold; margin-top: 10px;">NOM DE L'ÉVÉNEMENT</div>
-            <input type="text" id="new-room-name" placeholder="Ex: Soirée Disco ou Mariage Sophie">
+            <input type="text" id="new-room-name" placeholder="Ex: Soirée Disco ou Mariage Sophie" onkeypress="if(event.key==='Enter') confirmCreateRoom()">
             <button onclick="confirmCreateRoom()" style="margin-top:20px; font-size:1.1rem; background:var(--mj-color);">LANCER LA PARTIE</button>
         </div>
     </div>
@@ -272,19 +277,24 @@
         </div>
 
         <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-top: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
-            <h3 style="margin-top:0; text-shadow: 0 1px 2px black;">Gestion Équipes</h3>
+            <h3 style="margin-top:0; text-shadow: 0 1px 2px black; margin-bottom:15px;">Lobby des Équipes</h3>
+            
             <div class="team-controls" style="display:flex; align-items: center; gap: 10px; margin-bottom:15px; width:100%;">
-                <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()" style="margin-bottom: 0;">
+                <input type="text" id="t-name" placeholder="Nom de l'équipe..." onkeypress="if(event.key==='Enter') { checkTeamForm(); if(!document.getElementById('btn-add-team').disabled) addTeam(); }" style="margin-bottom: 0;">
                 <div class="btn-folder" onclick="openLibraryProxy('self')" title="Bibliothèque de Blasons">📁</div>
             </div>
             <div class="team-controls crest-picker" id="crest-grid" style="margin-top: 5px;"></div>
-            <div class="team-controls" style="display:flex; gap:10px;">
+            <div class="team-controls" style="display:flex; gap:10px; margin-bottom:20px;">
                 <button id="btn-add-team" disabled onclick="addTeam()" style="flex:2;">CRÉER L'ÉQUIPE</button>
                 <button id="btn-cancel-edit" class="btn-cancel" onclick="cancelEdit()" style="flex:1; display:none;">ANNULER</button>
             </div>
-            <div id="mj-team-list-display"></div>
-            <div id="mj-team-inactive-section" style="margin-top:20px; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px; display:none; border:1px dashed rgba(255,255,255,0.3);"><h4 style="margin:0 0 10px 0; color:#bdc3c7; font-size:0.9rem;">ÉQUIPES INACTIVES / EN PAUSE</h4><div id="mj-team-inactive-display"></div></div>
-            <div id="mj-team-banned-section" style="margin-top:20px; padding:10px; background:rgba(231, 76, 60, 0.1); border-radius:8px; display:none; border:1px solid var(--danger);"><h4 style="margin:0 0 10px 0; color:var(--danger); font-size:0.9rem;">ÉQUIPES BANNIES</h4><div id="mj-team-banned-display"></div></div>
+            
+            <div style="position:relative; margin-bottom:15px;">
+                <input type="text" id="mj-team-search" class="hub-search-bar" style="margin-bottom:0; padding-right:40px;" placeholder="🔍 Chercher une équipe..." oninput="renderTeamLobby()">
+                <span id="clear-mj-team-search" onclick="document.getElementById('mj-team-search').value=''; renderTeamLobby();" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none; font-size:1.2rem;">✕</span>
+            </div>
+            
+            <div id="mj-team-lobby-list" style="display:flex; flex-direction:column;"></div>
         </div>
         
         <h3 style="text-shadow: 0 1px 2px black;">Lobby Joueurs</h3>
@@ -304,7 +314,7 @@
                 <input type="file" id="room-bg-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files, 'dashboard')">
             </label>
             <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
-                <input type="text" id="room-bg-url-input" placeholder="Lien d'image (http...)" style="margin:0; flex:1; font-size:0.9rem; padding:10px;">
+                <input type="text" id="room-bg-url-input" placeholder="Lien d'image (http...)" style="margin:0; flex:1; font-size:0.9rem; padding:10px;" onkeypress="if(event.key==='Enter') addBgUrlToLibrary('dashboard')">
                 <button style="background:var(--blue); width:auto; margin:0; padding:10px 15px; font-size:0.9rem;" onclick="addBgUrlToLibrary('dashboard')">Ajouter</button>
             </div>
             
@@ -343,7 +353,7 @@
            <h2 style="color:var(--danger); margin-top:0;">🔒 COFFRE-FORT</h2>
            <p style="color:#bdc3c7; font-size:0.9rem; margin-bottom:20px;">Saisissez votre mot de passe Super Admin pour accéder à la fiche.</p>
            <div class="password-wrapper">
-               <input type="password" id="sa-vault-pass" placeholder="Mot de passe Super Admin" style="margin-bottom:0;">
+               <input type="password" id="sa-vault-pass" placeholder="Mot de passe Super Admin" style="margin-bottom:0;" onkeypress="if(event.key==='Enter') verifyVaultPassword()">
                <div class="password-icon" onclick="togglePasswordVisibility('sa-vault-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
            </div>
            <div style="display:flex; gap:10px; margin-top:15px;">
@@ -358,10 +368,10 @@
            <button class="modal-close-x" onclick="document.getElementById('modal-sa-mj-details').style.display='none'">✖</button>
            <h2 style="color:var(--blue); margin-top:0; margin-bottom:15px;">FICHE MAÎTRE DU JEU</h2>
            <div style="display:flex; gap:10px; margin-bottom:5px;">
-               <input type="text" id="sa-det-prenom" placeholder="Prénom" style="margin-bottom:0;">
-               <input type="text" id="sa-det-nom" placeholder="Nom" style="margin-bottom:0;">
+               <input type="text" id="sa-det-prenom" placeholder="Prénom" style="margin-bottom:0;" onkeypress="if(event.key==='Enter') saveSAMjDetails()">
+               <input type="text" id="sa-det-nom" placeholder="Nom" style="margin-bottom:0;" onkeypress="if(event.key==='Enter') saveSAMjDetails()">
            </div>
-           <input type="email" id="sa-det-email" placeholder="Email (Identifiant)" style="margin-bottom:5px; border-color:var(--accent);">
+           <input type="email" id="sa-det-email" placeholder="Email (Identifiant)" style="margin-bottom:5px; border-color:var(--accent);" onkeypress="if(event.key==='Enter') saveSAMjDetails()">
            
            <div style="display:flex; gap:10px; margin-bottom: 20px; margin-top: 15px;">
                <button style="background:var(--gold); color:black; flex:1; margin:0; padding:10px; font-size:0.9rem;" onclick="openLibraryProxy('proxy')">🎨 Gérer ses Blasons</button>
@@ -372,7 +382,7 @@
                <h3 style="margin-top:0; color:var(--gold);">Abonnement (Jours restants)</h3>
                <div style="display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom:15px;">
                    <button onclick="adjSaDays(-1)" style="width:45px; height:45px; font-size:1.8rem; font-weight:bold; background:var(--blue); margin:0; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.5);">-</button>
-                   <input type="number" id="sa-det-days-input" style="width:100px; text-align:center; font-size:2rem; font-weight:bold; color:var(--accent); margin:0; background:transparent; border:none; outline:none;">
+                   <input type="number" id="sa-det-days-input" style="width:100px; text-align:center; font-size:2rem; font-weight:bold; color:var(--accent); margin:0; background:transparent; border:none; outline:none;" onkeypress="if(event.key==='Enter') saveSAMjDetails()">
                    <button onclick="adjSaDays(1)" style="width:45px; height:45px; font-size:1.8rem; font-weight:bold; background:var(--blue); margin:0; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.5);">+</button>
                </div>
                <div style="display:flex; gap:10px; margin-bottom:10px;">
@@ -384,9 +394,9 @@
 
            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
                <h4 style="margin-top:0; color:#bdc3c7; text-align:left;">Modifier les identifiants</h4>
-               <div class="password-wrapper"><input type="password" id="sa-det-pass-current" placeholder="Mot de passe ACTUEL du MJ" style="border-color:var(--danger);"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
-               <div class="password-wrapper"><input type="password" id="sa-det-pass-new" placeholder="Nouveau mot de passe"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-new', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
-               <div class="password-wrapper" style="margin-bottom:0;"><input type="password" id="sa-det-pass-conf" placeholder="Confirmer le nouveau mot de passe" style="margin-bottom:0;"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+               <div class="password-wrapper"><input type="password" id="sa-det-pass-current" placeholder="Mot de passe ACTUEL du MJ" style="border-color:var(--danger);" onkeypress="if(event.key==='Enter') saveSAMjDetails()"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+               <div class="password-wrapper"><input type="password" id="sa-det-pass-new" placeholder="Nouveau mot de passe" onkeypress="if(event.key==='Enter') saveSAMjDetails()"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-new', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+               <div class="password-wrapper" style="margin-bottom:0;"><input type="password" id="sa-det-pass-conf" placeholder="Confirmer le nouveau mot de passe" style="margin-bottom:0;" onkeypress="if(event.key==='Enter') saveSAMjDetails()"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
            </div>
            <button id="btn-sa-save" onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem;">💾 ENREGISTRER</button>
            <button class="btn-cancel" onclick="deleteMjAccount()" style="width:100%; margin-top:20px; margin-bottom:0;">🗑️ SUPPRIMER CE COMPTE MJ</button>
@@ -396,10 +406,10 @@
     <div id="modal-sa-create" class="modal-overlay">
        <div class="modal-box">
            <h2 style="color:var(--mj-color); margin-top:0;">➕ NOUVEAU COMPTE MJ</h2>
-           <input type="email" id="sa-create-email" placeholder="Email du MJ">
-           <div class="password-wrapper"><input type="password" id="sa-create-pass" placeholder="Mot de passe"><div class="password-icon" onclick="togglePasswordVisibility('sa-create-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+           <input type="email" id="sa-create-email" placeholder="Email du MJ" onkeypress="if(event.key==='Enter') createMjAction()">
+           <div class="password-wrapper"><input type="password" id="sa-create-pass" placeholder="Mot de passe" onkeypress="if(event.key==='Enter') createMjAction()"><div class="password-icon" onclick="togglePasswordVisibility('sa-create-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
            <span class="input-helper" style="margin-top:0; margin-bottom:10px;">8 car. min, 1 Maj, 1 Min, 1 Chiffre, 1 Spécial.</span>
-           <input type="text" id="sa-create-prenom" placeholder="Prénom (Affiché aux joueurs)">
+           <input type="text" id="sa-create-prenom" placeholder="Prénom (Affiché aux joueurs)" onkeypress="if(event.key==='Enter') createMjAction()">
            <div style="display:flex; gap:10px; margin-top:15px;">
                <button onclick="createMjAction()" style="background:var(--mj-color); flex:2;">CRÉER (30 Jours)</button>
                <button class="btn-cancel" onclick="document.getElementById('modal-sa-create').style.display='none'" style="flex:1;">ANNULER</button>
@@ -417,7 +427,7 @@
                     <input type="file" id="bg-modal-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files, 'modal')">
                 </label>
                 <div style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
-                    <input type="text" id="bg-modal-url-input" placeholder="Lien d'image (https://...)" style="margin:0; flex:1;">
+                    <input type="text" id="bg-modal-url-input" placeholder="Lien d'image (https://...)" style="margin:0; flex:1;" onkeypress="if(event.key==='Enter') addBgUrlToLibrary('modal')">
                     <button style="background:var(--blue); width:auto; margin:0;" onclick="addBgUrlToLibrary('modal')">Ajouter</button>
                 </div>
             </div>
@@ -468,7 +478,7 @@
                 <div style="flex: 1; min-width:200px; display:flex; flex-direction:column; align-items:center;">
                     <div id="edit-player-avatar-preview" style="font-size:4rem; margin:10px 0; height:80px; width:80px; display:flex; justify-content:center; align-items:center; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
                     <button id="btn-censor-avatar" onclick="censorPlayerAvatar()" style="background:var(--danger); width:auto; padding:8px 15px; font-size:0.8rem; margin-bottom:20px; display:none;">🚫 Censurer</button>
-                    <input type="text" id="edit-player-name" placeholder="Pseudo du joueur" maxlength="15" style="margin-bottom: 0; width:100%;">
+                    <input type="text" id="edit-player-name" placeholder="Pseudo du joueur" maxlength="15" style="margin-bottom: 0; width:100%;" onkeypress="if(event.key==='Enter') savePlayerEdit()">
                 </div>
                 <div style="flex: 1; min-width:200px; border-left: 1px solid rgba(255,255,255,0.2); padding-left:20px; max-height: 220px; overflow-y: auto; text-align:left;">
                     <p style="margin:0 0 10px 0; font-size:0.9rem; color:#ccc;">Changer l'avatar :</p>
@@ -508,7 +518,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.169";
+        const APP_VERSION = "1.175";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -532,6 +542,10 @@
         let currentHubTab = 'active';
 
         let holdTimer = null;
+        let isRenderingTeamLobby = false;
+        let currentOpenTeam = null;
+        let activeTeamBlacklist = [];
+        let activeTeamBlacklistListener = null;
 
         function isValidPassword(pwd) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd); }
 
@@ -542,19 +556,6 @@
             setupDragDrop('drop-zone', f => handleFiles(f)); setupDragDrop('profile-drop-zone', f => handleProfileFile(f));
             setupDragDrop('bg-drop-zone', f => handleBgUpload(f, 'dashboard')); setupDragDrop('bg-modal-drop-zone', f => handleBgUpload(f, 'modal'));
             
-            const bindEnter = (id, fn) => { const el = document.getElementById(id); if(el) el.addEventListener('keypress', e => { if(e.key === 'Enter') fn(); }); };
-            bindEnter('mj-email', login); bindEnter('mj-pass', login); bindEnter('sa-vault-pass', verifyVaultPassword);
-            bindEnter('sa-create-email', createMjAction); bindEnter('sa-create-pass', createMjAction); bindEnter('sa-create-prenom', createMjAction);
-            bindEnter('sa-det-prenom', saveSAMjDetails); bindEnter('sa-det-nom', saveSAMjDetails); bindEnter('sa-det-email', saveSAMjDetails);
-            bindEnter('sa-det-pass-current', saveSAMjDetails); bindEnter('sa-det-pass-new', saveSAMjDetails); bindEnter('sa-det-pass-conf', saveSAMjDetails); bindEnter('sa-det-days-input', saveSAMjDetails);
-            bindEnter('t-name', () => { checkTeamForm(); if(!document.getElementById('btn-add-team').disabled) addTeam(); });
-            bindEnter('edit-player-name', savePlayerEdit); bindEnter('prof-nom', saveProfile); bindEnter('prof-prenom', saveProfile); bindEnter('prof-email', saveProfile); bindEnter('prof-link', saveProfile);
-            bindEnter('prof-pass-current', saveProfile); bindEnter('prof-pass', saveProfile); bindEnter('prof-pass-conf', saveProfile);
-            bindEnter('bg-modal-url-input', () => addBgUrlToLibrary('modal')); bindEnter('room-bg-url-input', () => addBgUrlToLibrary('dashboard'));
-            
-            bindEnter('new-room-mj', () => document.getElementById('new-room-name').focus());
-            bindEnter('new-room-name', confirmCreateRoom);
-
             document.addEventListener('keydown', e => { if(document.getElementById('univ-lightbox').style.display === 'flex') { if(e.key==='ArrowLeft') lbPrev(e); else if(e.key==='ArrowRight') lbNext(e); else if(e.key==='Escape') closeLightbox(e); } });
         };
 
@@ -787,7 +788,6 @@
             }).catch(e=>console.error(e));
         }
 
-        // --- HUB MJ V2 ---
         function checkUserRoom(uid) {
             db.ref('rooms').orderByChild('mj').equalTo(uid).once('value', snap => {
                 document.getElementById('screen-login').style.display="none"; 
@@ -959,7 +959,6 @@
                 `;
             });
         }
-        // --- FIN DU HUB V2 ---
 
         function syncLibraryToRoom() { try { if(roomID && roomRef) roomRef.child('library').set(mjLibrary || {}); } catch(e){ console.error("Erreur sync library", e); } }
         function initLibrarySync() { roomRef.child('library').on('value', snap => { const r = snap.val()||{}; const u = auth.currentUser.uid; if(!u)return; let h=false; Object.values(r).forEach(url => { if(!Object.values(mjLibrary).includes(url)){ db.ref(`users/${u}/library`).push(url); h=true; } }); if(h) loadModalLibrary(); }); }
@@ -1034,7 +1033,6 @@
         function launchDashboard(id, mjName = null, eventName = null, isArchived = false) {
             roomID = id; buzzHistory = []; currentBuzzerId = null; currentPlayer = null;
             
-            // CORRECTIF BUG DU BOUTON SUPPRESSION + RESET CSS HOLD
             const btnDel = document.getElementById('btn-delete-room');
             if (btnDel) {
                 btnDel.disabled = false;
@@ -1111,7 +1109,11 @@
             roomRef.child('eventName').on('value', snap => { if(snap.exists()) document.getElementById('display-event-name').innerText = snap.val(); else document.getElementById('display-event-name').innerText = "PARTIE EN COURS"; });
             roomRef.child('mjName').on('value', snap => { if(snap.exists()) document.getElementById('display-mj-name').innerText = "Animé par " + snap.val(); else document.getElementById('display-mj-name').innerText = "Animé par MJ"; });
             
-            roomRef.child('players').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
+            roomRef.child('players').on('value', snap => { 
+                allPlayersData = snap.val() || {}; 
+                renderLobby(); 
+                renderTeamLobby();
+            });
             
             roomRef.child('buzzers').on('value', snap => {
                 const b = snap.val(); const box = document.getElementById('player-box');
@@ -1184,23 +1186,24 @@
                 }
             });
 
-            roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
-            roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
+            roomRef.child('teams').on('value', snap => { 
+                globalTeams = snap.val() || {}; 
+                renderLobby(); 
+                renderTeamLobby();
+            });
+            
+            roomRef.child('blockedPlayers').on('value', snap => { 
+                currentBlocked = snap.val() || {}; 
+                renderLobby(); 
+            });
         }
 
+        // --- LOBBY DES JOUEURS (SOLO & ETATS) ---
         function renderLobby() {
-            let hA = "", hI = "", hB = ""; let hsB = false, hsI = false, htI = false, htB = false;
+            let hA = "", hI = "", hB = ""; let hsB = false, hsI = false;
             const sl = document.getElementById('score-list'), il = document.getElementById('inactive-list'), bl = document.getElementById('banned-list');
             const is = document.getElementById('inactive-section'), bs = document.getElementById('banned-section');
-            const tl = document.getElementById('mj-team-list-display'), inl = document.getElementById('mj-team-inactive-display'), bal = document.getElementById('mj-team-banned-display');
-            tl.innerHTML = ""; inl.innerHTML = ""; bal.innerHTML = "";
-            Object.keys(globalTeams).forEach(k => {
-                const t = globalTeams[k], isA = t.active !== false, isBan = t.banned === true, bo = t.bonus || 0;
-                if(isBan) { htB = true; bal.innerHTML += `<div class="team-item banned"><div style="display:flex; align-items:center;"><div class="crest-mini-bg" style="opacity:0.6;"><img src="${t.icon}" class="crest-mini"></div><b style="margin-left:5px; color:var(--danger);">${k}</b></div><div class="team-controls"><span class="btn-icon btn-restore" onclick="openRestoreModal('${k}')">✅</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${k}')">🗑️</span></div></div>`; }
-                else if(!isA) { htI = true; inl.innerHTML += `<div class="team-item inactive"><div style="display:flex; align-items:center;"><div class="crest-mini-bg" style="opacity:0.6;"><img src="${t.icon}" class="crest-mini"></div><b style="margin-left:5px; color:#bdc3c7;">${k}</b> <small style="margin-left:5px;">(Score: ${t.frozenScore||0})</small></div><div class="team-controls"><button class="btn-tiny" onclick="updateTeamBonus('${k}', -1)">-</button><button class="btn-tiny" onclick="updateTeamBonus('${k}', 1)">+</button><span class="btn-icon btn-restore" onclick="openRestoreModal('${k}')">▶️</span><span class="btn-icon btn-del" onclick="banTeam('${k}')">✖</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${k}')">🗑️</span></div></div>`; }
-                else { tl.innerHTML += `<div class="team-item"><div style="display:flex; align-items:center;"><div class="crest-mini-bg"><img src="${t.icon}" class="crest-mini"></div><b style="margin-left:5px;">${k}</b></div><div class="team-controls"><div class="team-score-ctrl"><button class="btn-tiny" onclick="updateTeamBonus('${k}', -1)">-</button><span class="team-bonus-val">${bo}</span><button class="btn-tiny" onclick="updateTeamBonus('${k}', 1)">+</button></div><span class="btn-icon btn-pause" onclick="archiveTeam('${k}')">✖</span><span class="btn-icon btn-del" onclick="banTeam('${k}')">🚫</span><span class="btn-icon btn-edit" onclick="editTeam('${k}')">✎</span></div></div>`; }
-            });
-            document.getElementById('mj-team-inactive-section').style.display = htI ? 'block' : 'none'; document.getElementById('mj-team-banned-section').style.display = htB ? 'block' : 'none';
+            
             const aP = [], iP = [], rP = [], bP = [];
             Object.keys(allPlayersData).forEach(uid => { const d = allPlayersData[uid]; if(!d)return; d.uid = uid; if(d.banned===true)bP.push(d); else if(d.active===false){if(d.recoveryRequest===true)rP.push(d);else iP.push(d);} else aP.push(d); });
             aP.sort((a,b) => { if(a.uid===currentBuzzerId)return -1; if(b.uid===currentBuzzerId)return 1; let iA=buzzHistory.indexOf(a.name), iB=buzzHistory.indexOf(b.name); if(iA!==-1&&iB!==-1)return iB-iA; if(iA!==-1)return -1; if(iB!==-1)return 1; let rA=a.reconnectedAt||0, rB=b.reconnectedAt||0; if(rA===0&&rB>0)return -1; if(rA>0&&rB===0)return 1; if(rA>0&&rB>0)return rA-rB; return a.name.localeCompare(b.name); });
@@ -1209,14 +1212,230 @@
                 const iB = currentBlocked[d.name]; const bS = iB ? "background:var(--danger);color:white;border:none;" : "background:transparent;border:1px solid var(--danger);opacity:0.6;";
                 let aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;">` : `<span style="font-size:1.2rem;margin-right:8px;">${d.avatar||'👤'}</span>`;
                 const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
-                const sB = d.hasBeenWarned===true ? `<button class="lobby-btn" style="background:#c0392b;margin:0 2px;" onclick="kickPlayer('${d.uid}', '${d.name}')">🟥</button>` : `<button class="lobby-btn" style="background:#f1c40f;color:black;margin:0 2px;" onclick="warnPlayer('${d.uid}', '${d.name}')">🟨</button>`;
-                hA += `<div class="${rC}"><div style="display:flex;align-items:center;flex:1;overflow:hidden;">${aH}<b style="margin-right:10px;">${d.name}</b><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div><div class="player-controls"><button class="lobby-btn" style="background:var(--accent);color:black;margin:0 2px;" onclick="forceBuzzer('${d.uid}')">⚡</button><button class="lobby-btn" style="${bS}margin:0 2px;" onclick="toggleBlockPlayer('${d.name}')">🛑</button><div style="display:flex;align-items:center;background:rgba(0,0,0,0.5);border-radius:4px;padding:2px;margin:0 5px;"><button class="btn-tiny" onclick="adj('${d.uid}',-1)">-</button><input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;"><button class="btn-tiny" onclick="adj('${d.uid}',1)">+</button></div><button class="lobby-btn" style="background:var(--blue);margin:0 2px;" onclick="openEditModal('${d.uid}')">✏️</button>${sB}<button class="lobby-btn btn-cancel" style="margin-left:2px; padding:0; width:30px; height:30px; border:1px solid var(--danger)!important;" onclick="deletePlayer('${d.uid}', '${d.name}', true)">🗑️</button></div></div>`;
+                const sB = d.hasBeenWarned===true ? `<button class="lobby-btn" style="background:#c0392b;margin:0 2px;" onclick="kickPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')">🟥</button>` : `<button class="lobby-btn" style="background:#f1c40f;color:black;margin:0 2px;" onclick="warnPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')">🟨</button>`;
+                hA += `<div class="${rC}"><div style="display:flex;align-items:center;flex:1;overflow:hidden;">${aH}<b style="margin-right:10px;">${d.name}</b><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div><div class="player-controls"><button class="lobby-btn" style="background:var(--accent);color:black;margin:0 2px;" onclick="forceBuzzer('${d.uid}')">⚡</button><button class="lobby-btn" style="${bS}margin:0 2px;" onclick="toggleBlockPlayer('${d.name.replace(/'/g, "\\'")}')">🛑</button><div style="display:flex;align-items:center;background:rgba(0,0,0,0.5);border-radius:4px;padding:2px;margin:0 5px;"><button class="btn-tiny" onclick="adj('${d.uid}',-1)">-</button><input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;"><button class="btn-tiny" onclick="adj('${d.uid}',1)">+</button></div><button class="lobby-btn" style="background:var(--blue);margin:0 2px;" onclick="openEditModal('${d.uid}')">✏️</button>${sB}<button class="lobby-btn btn-cancel" style="margin-left:2px; padding:0; width:30px; height:30px; border:1px solid var(--danger)!important;" onclick="deletePlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}', true)">🗑️</button></div></div>`;
             });
             rP.forEach(d => { hsI=true; hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);width:auto;padding:0 10px;margin-right:5px;" onclick="openEditModal('${d.uid}')">✏️</button><button class="lobby-btn" style="background:var(--success);width:auto;padding:0 10px;" onclick="acceptRecovery('${d.uid}')">✅</button><button class="lobby-btn" style="background:var(--danger);width:auto;padding:0 10px;margin-left:5px;" onclick="rejectRecovery('${d.uid}')">❌</button></div></div>`; });
-            iP.forEach(d => { hsI=true; hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')">✏️</button><button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${d.uid}')">✅</button><button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${d.uid}', '${d.name}')">🟥</button><button class="lobby-btn btn-cancel" style="padding:0; width:30px; height:30px; border:1px solid var(--danger)!important;" onclick="deletePlayer('${d.uid}', '${d.name}', false)">🗑️</button></div></div>`; });
-            bP.forEach(d => { hsB=true; hB += `<div class="team-item" style="border:1px solid var(--danger);justify-content:space-between;"><span style="color:var(--danger)"><b>${d.name}</b></span><div><button style="background:var(--blue);width:auto;padding:5px 15px;margin:0;font-size:0.8rem;margin-right:5px;" onclick="openEditModal('${d.uid}')">✏️</button><button style="background:var(--mj-color);width:auto;padding:5px 15px;margin:0;font-size:0.8rem;margin-right:5px;" onclick="unkickPlayer('${d.uid}')">Réhabiliter</button><button class="btn-cancel" style="width:auto;padding:5px 10px;margin:0;font-size:0.8rem;" onclick="deletePlayer('${d.uid}', '${d.name}', false)">🗑️</button></div></div>`; });
+            iP.forEach(d => { hsI=true; hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')">✏️</button><button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${d.uid}')">✅</button><button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')">🟥</button><button class="lobby-btn btn-cancel" style="padding:0; width:30px; height:30px; border:1px solid var(--danger)!important;" onclick="deletePlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}', false)">🗑️</button></div></div>`; });
+            bP.forEach(d => { hsB=true; hB += `<div class="team-item" style="border:1px solid var(--danger);justify-content:space-between;"><span style="color:var(--danger)"><b>${d.name}</b></span><div><button style="background:var(--blue);width:auto;padding:5px 15px;margin:0;font-size:0.8rem;margin-right:5px;" onclick="openEditModal('${d.uid}')">✏️</button><button style="background:var(--mj-color);width:auto;padding:5px 15px;margin:0;font-size:0.8rem;margin-right:5px;" onclick="unkickPlayer('${d.uid}')">Réhabiliter</button><button class="btn-cancel" style="width:auto;padding:5px 10px;margin:0;font-size:0.8rem;" onclick="deletePlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}', false)">🗑️</button></div></div>`; });
             sl.innerHTML = hA; il.innerHTML = hI; bl.innerHTML = hB; bs.style.display = hsB ? "block" : "none"; is.style.display = hsI ? "block" : "none"; 
         }
+
+        // --- LOBBY DES ÉQUIPES ---
+        function saveFocus() {
+            const active = document.activeElement;
+            if (active && active.tagName === 'INPUT' && active.type === 'text') {
+                return { id: active.id, start: active.selectionStart, end: active.selectionEnd, val: active.value };
+            }
+            return null;
+        }
+
+        function restoreFocus(focusData) {
+            if (focusData && focusData.id) {
+                setTimeout(() => {
+                    const el = document.getElementById(focusData.id);
+                    if (el) {
+                        el.focus();
+                        el.value = focusData.val;
+                        el.setSelectionRange(focusData.start, focusData.end);
+                    }
+                }, 0);
+            }
+        }
+
+        function renderTeamLobby() {
+            if (isRenderingTeamLobby) return;
+            isRenderingTeamLobby = true;
+            
+            const container = document.getElementById('mj-team-lobby-list');
+            const searchInput = document.getElementById('mj-team-search');
+            const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : "";
+            
+            const focusData = saveFocus();
+            let html = "";
+            
+            Object.keys(globalTeams).forEach(k => {
+                const t = globalTeams[k];
+                if (searchVal && !k.toLowerCase().includes(searchVal)) return;
+                
+                const isA = t.active !== false;
+                const isBan = t.banned === true;
+                const bo = t.bonus || 0;
+                
+                let badgeClass = isBan ? "badge-banned" : (!isA ? "badge-inactive" : "badge-active");
+                let badgeText = isBan ? "🔴 BANNIE" : (!isA ? "🟠 EN PAUSE" : "🟢 ACTIVE");
+                
+                let totalScore = 0;
+                Object.values(allPlayersData).forEach(p => { if(p.teamName === k) totalScore += (p.pts || 0); });
+                totalScore += bo;
+                if(!isA && !isBan) totalScore = t.frozenScore || 0;
+                
+                let actionsHtml = "";
+                if(isBan) {
+                    actionsHtml = `<span class="btn-icon btn-restore" onclick="openRestoreModal('${k.replace(/'/g, "\\'")}')" title="Restaurer">🔄</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${k.replace(/'/g, "\\'")}')" title="Supprimer">🗑️</span>`;
+                } else if(!isA) {
+                    actionsHtml = `<span class="btn-icon btn-restore" onclick="openRestoreModal('${k.replace(/'/g, "\\'")}')" title="Réactiver">▶️</span><span class="btn-icon btn-del" onclick="banTeam('${k.replace(/'/g, "\\'")}')" title="Bannir">🚫</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${k.replace(/'/g, "\\'")}')" title="Supprimer">🗑️</span>`;
+                } else {
+                    actionsHtml = `<span class="btn-icon btn-pause" onclick="archiveTeam('${k.replace(/'/g, "\\'")}')" title="Mettre en pause">⏸️</span><span class="btn-icon btn-del" onclick="banTeam('${k.replace(/'/g, "\\'")}')" title="Bannir">🚫</span><span class="btn-icon btn-edit" onclick="editTeam('${k.replace(/'/g, "\\'")}')" title="Modifier">✎</span>`;
+                }
+                
+                let btnDisabled = isBan ? "disabled style='background:grey;'" : "";
+                
+                html += `
+                <div class="hub-line" style="margin-bottom:0; border-radius:8px; border-bottom-left-radius:0; border-bottom-right-radius:0;" onclick="toggleTeamAccordion('${k.replace(/'/g, "\\'")}')">
+                    <span id="team-arrow-${k}" class="hub-arrow">▶</span>
+                    <div class="crest-mini-bg"><img src="${t.icon}" class="crest-mini"></div>
+                    <div class="hub-line-text" style="margin-left:10px;">
+                        <b style="color:var(--accent); margin-right:8px;">${k}</b> 
+                        <span style="color:#bdc3c7; font-size:0.85rem;">| Score : <span id="score-team-${k}">${totalScore}</span></span>
+                    </div>
+                    <span class="hub-badge ${badgeClass}">${badgeText}</span>
+                    <div class="team-controls" style="margin-left:10px;" onclick="event.stopPropagation();">
+                        <div class="team-score-ctrl">
+                            <button class="btn-tiny" onclick="updateTeamBonus('${k.replace(/'/g, "\\'")}', -1)" ${btnDisabled}>-</button>
+                            <span class="team-bonus-val">${bo}</span>
+                            <button class="btn-tiny" onclick="updateTeamBonus('${k.replace(/'/g, "\\'")}', 1)" ${btnDisabled}>+</button>
+                        </div>
+                        ${actionsHtml}
+                    </div>
+                </div>
+                <div id="team-details-${k}" class="hub-details" style="display:none; margin-top:0; border-top:none; border-top-left-radius:0; border-top-right-radius:0; margin-bottom:10px;" onclick="event.stopPropagation();">
+                    <div style="position:relative; margin-bottom:10px;">
+                        <input type="text" id="search-member-${k}" class="hub-search-bar" style="margin-bottom:0; padding:10px; font-size:0.9rem; padding-right:35px;" placeholder="🔍 Chercher un joueur (Actifs & Bloqués)..." oninput="renderTeamMembers('${k.replace(/'/g, "\\'")}')">
+                        <span id="clear-search-member-${k}" onclick="document.getElementById('search-member-${k}').value=''; renderTeamMembers('${k.replace(/'/g, "\\'")}');" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none;">✕</span>
+                    </div>
+                    <div id="list-member-${k}" style="display:flex; flex-direction:column; gap:5px;"></div>
+                </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            if (currentOpenTeam && document.getElementById('team-details-' + currentOpenTeam)) {
+                document.getElementById('team-details-' + currentOpenTeam).style.display = 'block';
+                document.getElementById('team-arrow-' + currentOpenTeam).classList.add('open');
+                renderTeamMembers(currentOpenTeam);
+            }
+            
+            restoreFocus(focusData);
+            isRenderingTeamLobby = false;
+        }
+
+        function toggleTeamAccordion(teamName) {
+            if (currentOpenTeam === teamName) {
+                document.getElementById('team-details-' + teamName).style.display = 'none';
+                document.getElementById('team-arrow-' + teamName).classList.remove('open');
+                if (activeTeamBlacklistListener) roomRef.child('teams/'+teamName+'/blacklist').off('value', activeTeamBlacklistListener);
+                currentOpenTeam = null;
+                return;
+            }
+            if (currentOpenTeam) {
+                const oldDet = document.getElementById('team-details-' + currentOpenTeam);
+                if (oldDet) oldDet.style.display = 'none';
+                const oldArr = document.getElementById('team-arrow-' + currentOpenTeam);
+                if (oldArr) oldArr.classList.remove('open');
+                if (activeTeamBlacklistListener) roomRef.child('teams/'+currentOpenTeam+'/blacklist').off('value', activeTeamBlacklistListener);
+            }
+            
+            currentOpenTeam = teamName;
+            const newDet = document.getElementById('team-details-' + teamName);
+            if (newDet) newDet.style.display = 'block';
+            const newArr = document.getElementById('team-arrow-' + teamName);
+            if (newArr) newArr.classList.add('open');
+
+            activeTeamBlacklistListener = roomRef.child('teams/'+teamName+'/blacklist').on('value', snap => {
+                activeTeamBlacklist = [];
+                snap.forEach(child => {
+                    activeTeamBlacklist.push({ id: child.key, ...child.val() });
+                });
+                renderTeamMembers(teamName);
+            });
+        }
+
+        function renderTeamMembers(teamName) {
+            const list = document.getElementById('list-member-' + teamName);
+            if (!list) return;
+            const searchInput = document.getElementById('search-member-' + teamName);
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+            
+            const clearBtn = document.getElementById('clear-search-member-' + teamName);
+            if (clearBtn) clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+
+            let displayList = [];
+            Object.keys(allPlayersData).forEach(uid => {
+                const p = allPlayersData[uid];
+                if (p.teamName === teamName && p.active !== false && p.banned !== true) {
+                    displayList.push({ id: uid, isBlocked: false, ...p });
+                }
+            });
+            activeTeamBlacklist.forEach(m => {
+                displayList.push({ id: m.id, isBlocked: true, name: m.name, avatar: m.avatar, joinTimestamp: 0 });
+            });
+
+            if (query) {
+                displayList = displayList.filter(m => m.name && m.name.toLowerCase().includes(query));
+            }
+
+            displayList.sort((a,b) => (a.joinTimestamp || 0) - (b.joinTimestamp || 0));
+
+            if (displayList.length === 0) {
+                list.innerHTML = "<div style='color:#7f8c8d; font-style:italic; padding:10px;'>Aucun joueur trouvé.</div>";
+                return;
+            }
+
+            let html = "";
+            displayList.forEach(m => {
+                let av = (m.avatar && m.avatar.length > 20) ? `<img src="${m.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.5rem;">${m.avatar||'👤'}</span>`;
+                let statusDot = m.isBlocked ? "🔴" : "🟢";
+                let isCap = m.isCaptain ? "👑" : "";
+                
+                let buttonsHtml = "";
+                if (m.isBlocked) {
+                    buttonsHtml = `<button onclick="pardonTeamMember('${m.id}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--success); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;">🔄 Gracier</button>`;
+                } else {
+                    let btnCap = m.isCaptain ? "" : `<button onclick="makeCaptain('${m.id}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--gold); border:none; color:black; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;">👑 Nommer Capitaine</button>`;
+                    buttonsHtml = `${btnCap} <button onclick="expelTeamMember('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${m.avatar}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--danger); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;">✕ Expulser</button>`;
+                }
+
+                html += `
+                <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;">
+                    <span style="margin-right:8px; font-size:0.8rem;">${statusDot}</span>
+                    ${av}
+                    <b style="margin-left:10px; color:${m.isBlocked ? '#7f8c8d' : 'white'}; font-size:1rem;">${m.name} <span style="font-size:1.1rem;">${isCap}</span></b>
+                    ${!m.isBlocked ? `<span style="color:var(--accent); margin-left:10px; font-size:0.85rem;">${m.pts || 0} pts</span>` : ''}
+                    <div style="margin-left:auto; display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
+                        ${buttonsHtml}
+                    </div>
+                </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        function makeCaptain(uid, teamName) {
+            if(confirm("Transférer de force le rôle de Capitaine à ce joueur ?")) {
+                let updates = {};
+                Object.keys(allPlayersData).forEach(k => {
+                    if (allPlayersData[k].teamName === teamName && allPlayersData[k].isCaptain) {
+                        updates[k + '/isCaptain'] = false;
+                    }
+                });
+                updates[uid + '/isCaptain'] = true;
+                roomRef.child('players').update(updates);
+            }
+        }
+
+        function expelTeamMember(uid, name, avatar, teamName) {
+            if(confirm(`Expulser ${name} de l'équipe ?\n\nIl repassera en Solo et sera mis sur la liste noire de l'équipe.`)) {
+                roomRef.child('teams/' + teamName + '/blacklist/' + uid).set({ name: name, avatar: avatar });
+                roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", isCaptain: false });
+            }
+        }
+
+        function pardonTeamMember(uid, teamName) {
+            roomRef.child('teams/' + teamName + '/blacklist/' + uid).remove();
+        }
+        // --- FIN LOBBY DES ÉQUIPES ---
 
         function openEditModal(uid) { const d = allPlayersData[uid]; if(!d)return; editingPlayerUid=uid; editingPlayerOriginalPseudo=d.name; editingPlayerOriginalAvatar=d.avatar||"👤"; editingPlayerCurrentAvatar=editingPlayerOriginalAvatar; document.getElementById('edit-player-name').value=d.name; document.getElementById('btn-censor-avatar').style.display=(editingPlayerOriginalAvatar.length>20)?'block':'none'; updateEditAvatarPreview(); populateEditGallery(); document.getElementById('modal-edit-player').style.display='flex'; }
         function populateEditGallery() { const g=document.getElementById('edit-avatar-gallery'); g.innerHTML=""; const o=document.createElement('div'); o.className='edit-gallery-item original-avatar-item'; if(editingPlayerOriginalAvatar.length>20)o.innerHTML=`<img src="${editingPlayerOriginalAvatar}">`; else o.innerText=editingPlayerOriginalAvatar; o.onclick=()=>{editingPlayerCurrentAvatar=editingPlayerOriginalAvatar;updateEditAvatarPreview();}; g.appendChild(o); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='edit-gallery-item'; d.innerText=a; d.onclick=()=>{editingPlayerCurrentAvatar=a;updateEditAvatarPreview();}; g.appendChild(d); }); }
