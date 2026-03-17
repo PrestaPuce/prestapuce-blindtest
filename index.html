@@ -514,7 +514,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.174";
+        const CLIENT_VERSION = "1.175";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -941,7 +941,6 @@
         function joinTeam(name, icon) { 
             if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
             
-            // Vérification Liste Noire avant de rejoindre
             roomRef.child('teams/' + name + '/blacklist/' + myUserID).once('value', snap => {
                 if (snap.exists()) {
                     alert("🚫 Vous avez été expulsé de cette équipe.\nSeul le Capitaine ou l'Animateur peut vous réintégrer.");
@@ -1276,7 +1275,10 @@
 
         function handleKickedChoice(choice) {
             document.getElementById('overlay-team-kicked').style.display = 'none';
-            if (choice === 'solo') { player.team = "Solo"; player.teamIcon = ""; isCaptain = false; updateGameHeader(); } 
+            if (choice === 'solo') { 
+                player.team = "Solo"; player.teamIcon = ""; isCaptain = false; updateGameHeader(); 
+                if(roomRef && myUserID) { roomRef.child('players/' + myUserID).update({ teamName: "Solo", teamIcon: "", isCaptain: false }); }
+            } 
             else if (choice === 'change') { isRecovering = true; isCaptain = false; navigateTo('step-team-action'); }
         }
 
@@ -1298,6 +1300,7 @@
 
         function handleReinstatedChoice(choice) {
             document.getElementById('overlay-team-reinstated').style.display = 'none';
+            if (choice === 'yes') { document.getElementById('overlay-team-kicked').style.display = 'none'; }
             if (choice === 'yes' && kickedFromTeam) {
                 roomRef.child('teams/' + kickedFromTeam).once('value', snap => {
                     const t = snap.val();
