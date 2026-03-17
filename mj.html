@@ -15,6 +15,7 @@
         #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: linear-gradient(45deg, #0f0c29, #302b63, #24243e); background-size: 300% 300%; animation: gradientBG 15s ease infinite; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         #bg-protection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(0, 0, 0, 0.5); pointer-events: none; }
+        
         .box { max-width: 400px; margin: 80px auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: rgba(0,0,0,0.5); color: white; font-size: 1rem; outline: none; margin-bottom: 5px; }
         .input-helper { display: block; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 15px; font-style: italic; text-align: left; padding-left: 5px; }
@@ -25,8 +26,26 @@
         .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: white !important; box-shadow: none !important; }
         .btn-cancel:hover:not(:disabled) { background: rgba(231, 76, 60, 0.2) !important; }
         .countdown-btn { background: #e67e22 !important; cursor: wait !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(230, 126, 34, 0.6) !important; }
+        
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
-        .room-info { background: var(--accent); color: black; padding: 10px; border-radius: 10px; font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 1.2rem; }
+        
+        /* CLASSES DU HUB (Moteur de recherche salles) */
+        .hub-room-card { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 10px; text-align: left; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .hub-room-card:hover { background: rgba(255,255,255,0.1); }
+        .hub-room-info h4 { margin: 0 0 5px 0; color: var(--accent); font-size: 1.1rem; }
+        .hub-room-info p { margin: 0; font-size: 0.8rem; color: #bdc3c7; }
+        .hub-btn { padding: 8px 15px; font-size: 0.9rem; width: auto; margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+
+        /* MODE LECTURE SEULE */
+        .readonly-mode .player-controls { display: none !important; }
+        .readonly-mode .team-controls { display: none !important; }
+        .readonly-mode #mj-actions-bar { display: none !important; }
+        .readonly-mode .current-player .action-grid { display: none !important; }
+        .readonly-mode .team-item.banned, .readonly-mode .team-item.inactive { display: none !important; }
+        .readonly-mode #inactive-section, .readonly-mode #banned-section { display: none !important; }
+        .readonly-mode #mj-team-inactive-section, .readonly-mode #mj-team-banned-section { display: none !important; }
+
+        .room-info-card { background: var(--accent); color: black; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3); }
         .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 200px; overflow-y: auto; justify-content: flex-start; }
         .crest-wrapper { width: 50px; height: 50px; background: #ecf0f1; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; flex-shrink: 0; }
         .crest-selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: scale(1.1); z-index: 2; }
@@ -158,12 +177,23 @@
         <button onclick="profileLogout()" style="background:var(--danger); margin-top:20px;">🚪 DÉCONNEXION</button>
     </div>
 
-    <div id="screen-choice" class="box" style="display:none;">
+    <div id="screen-choice" class="box" style="display:none; max-width: 600px;">
         <h2>Bonjour <span id="mj-display-name" style="color:var(--accent);">MJ</span> !</h2>
         <button id="btn-super-admin" onclick="openSuperAdmin()" style="display:none; margin-bottom:15px; background: #c0392b; box-shadow: 0 0 15px rgba(192, 57, 43, 0.5); border:1px solid rgba(255,255,255,0.2);">👑 GESTION SUPER ADMIN</button>
-        <button onclick="askMjNameAndCreate()" style="margin-top:15px;">🆕 Créer une nouvelle salle</button>
-        <button id="btn-resume" onclick="resumeRoom()" style="display:none; background:var(--blue)">🔄 Reprendre la salle <span id="last-room-id"></span></button>
-        <button class="btn-cancel" onclick="profileLogout()" style="font-size:0.8rem; margin-top:15px; width:auto; padding:8px 15px;">Déconnexion</button>
+        
+        <button onclick="askMjNameAndCreate()" style="margin-top:15px; font-size:1.1rem; margin-bottom: 25px;">🆕 Créer une nouvelle salle</button>
+
+        <div id="active-rooms-section" style="display:none; margin-bottom:20px;">
+            <h3 style="color:var(--success); text-align:left; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">▶️ Salles en cours</h3>
+            <div id="active-rooms-list" style="margin-top:10px;"></div>
+        </div>
+
+        <div id="archived-rooms-section" style="display:none;">
+            <h3 style="color:#bdc3c7; text-align:left; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">🗄️ Archives (Lecture Seule)</h3>
+            <div id="archived-rooms-list" style="margin-top:10px;"></div>
+        </div>
+
+        <button class="btn-cancel" onclick="profileLogout()" style="font-size:0.8rem; margin-top:25px; width:auto; padding:8px 15px;">Déconnexion</button>
     </div>
 
     <div id="screen-super-admin" class="dashboard" style="display:none; max-width: 900px;">
@@ -183,19 +213,21 @@
             <button class="modal-close-x" onclick="document.getElementById('modal-create-room').style.display='none'">✖</button>
             <h2 style="color:var(--accent); margin-top:0;">NOUVELLE SALLE</h2>
             <p style="font-size:0.9rem; color:#bdc3c7; margin-bottom:20px;">Personnalisez l'affichage pour vos joueurs.</p>
-            
             <div style="text-align: left; font-size: 0.85rem; color: var(--accent); margin-bottom: 5px; font-weight: bold;">NOM DE L'ANIMATEUR / DJ</div>
             <input type="text" id="new-room-mj" placeholder="Ex: DJ Fred">
-            
             <div style="text-align: left; font-size: 0.85rem; color: var(--accent); margin-bottom: 5px; font-weight: bold; margin-top: 10px;">NOM DE L'ÉVÉNEMENT</div>
             <input type="text" id="new-room-name" placeholder="Ex: Soirée Disco ou Mariage Sophie">
-            
             <button onclick="confirmCreateRoom()" style="margin-top:20px; font-size:1.1rem; background:var(--mj-color);">LANCER LA PARTIE</button>
         </div>
     </div>
 
     <div id="screen-dashboard" class="dashboard">
-        <div class="room-info-card" style="background: var(--accent); color: black; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3);">
+        
+        <div id="readonly-banner" style="display:none; background:var(--danger); color:white; font-weight:bold; font-size:1.2rem; padding:15px; border-radius:10px; margin-bottom:20px; text-align:center; box-shadow:0 4px 10px rgba(231,76,60,0.4); text-transform:uppercase; border:2px solid #c0392b;">
+            🏁 Partie Terminée - Mode Lecture Seule
+        </div>
+
+        <div class="room-info-card">
             <div id="display-event-name" style="font-size: 1.8rem; font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1.1;">PARTIE EN COURS</div>
             <div id="display-mj-name" style="font-size: 1.1rem; font-weight: 600; margin-top: 5px; opacity: 0.9;">Animé par MJ</div>
             <div style="font-size: 0.85rem; font-family: monospace; opacity: 0.7; margin-top: 5px; font-weight: bold;">SALLE N° <span id="display-room">----</span></div>
@@ -206,7 +238,8 @@
             <button onclick="showRemoteQR()" style="width: auto; background: rgba(142, 68, 173, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">📱 Remote</button>
             <button onclick="toggleGuide()" style="width: auto; background: rgba(52, 73, 94, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">GUIDE</button>
         </div>
-        <div style="display:flex; gap:10px; margin-bottom:20px;">
+        
+        <div id="mj-actions-bar" style="display:flex; gap:10px; margin-bottom:20px;">
             <button id="btn-open-buzz" style="background:var(--blue); flex:1;" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
             <button style="background:var(--danger); flex:1;" onclick="fullReset()">RESET TITRE</button>
         </div>
@@ -225,12 +258,12 @@
 
         <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-top: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
             <h3 style="margin-top:0; text-shadow: 0 1px 2px black;">Gestion Équipes</h3>
-            <div style="display:flex; align-items: center; gap: 10px;">
+            <div class="team-controls" style="display:flex; align-items: center; gap: 10px; margin-bottom:15px; width:100%;">
                 <input type="text" id="t-name" placeholder="Nom de l'équipe..." oninput="checkTeamForm()" style="margin-bottom: 0;">
                 <div class="btn-folder" onclick="openLibraryProxy('self')" title="Bibliothèque de Blasons">📁</div>
             </div>
-            <div class="crest-picker" id="crest-grid" style="margin-top: 15px;"></div>
-            <div style="display:flex; gap:10px;">
+            <div class="team-controls crest-picker" id="crest-grid" style="margin-top: 5px;"></div>
+            <div class="team-controls" style="display:flex; gap:10px;">
                 <button id="btn-add-team" disabled onclick="addTeam()" style="flex:2;">CRÉER L'ÉQUIPE</button>
                 <button id="btn-cancel-edit" class="btn-cancel" onclick="cancelEdit()" style="flex:1; display:none;">ANNULER</button>
             </div>
@@ -244,9 +277,9 @@
         <div id="inactive-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255,255,255,0.3); border-radius: 12px; backdrop-filter: blur(10px);"><h3 style="color:#bdc3c7; margin-top:0; font-size:1rem;">Joueurs Inactifs / Partis</h3><div id="inactive-list"></div></div>
         <div id="banned-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); border-radius: 12px; backdrop-filter: blur(10px);"><h3 style="color:var(--danger); margin-top:0;">Joueurs Expulsés</h3><div id="banned-list"></div></div>
 
-        <div style="margin-top:20px; border: 2px solid var(--gold); border-radius: 12px; background: rgba(243, 156, 18, 0.15); text-align: center; padding: 15px; backdrop-filter: blur(10px);">
+        <div class="team-controls" style="margin-top:20px; border: 2px solid var(--gold); border-radius: 12px; background: rgba(243, 156, 18, 0.15); text-align: center; padding: 15px; backdrop-filter: blur(10px);">
             <h3 style="color:var(--gold); margin-top:0; text-shadow: 0 1px 2px black;">PODIUM & RÉSULTATS</h3>
-            <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 1.1rem; margin-bottom: 0;" onclick="triggerEndGame()">🏁 Fin de partie</button>
+            <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 1.1rem; margin-bottom: 0;" onclick="triggerEndGame()">🏁 Fin de partie & Archiver</button>
         </div>
 
         <div style="margin-top:20px; border: 1px solid var(--blue); padding: 20px; border-radius: 12px; background: rgba(52, 152, 219, 0.15); backdrop-filter: blur(10px);">
@@ -284,9 +317,9 @@
         </div>
 
         <div style="margin-top:40px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);">
-            <h3 style="color:var(--danger); margin-top:0;">Clôturer la partie</h3>
-            <button style="background:var(--blue);" onclick="quitRoom()">🚪 Quitter la salle (Conserver données)</button>
-            <button id="btn-delete-room" style="background:var(--danger);" onclick="resetFullGame()">⚠️ SUPPRIMER LA SALLE (Effacer tout)</button>
+            <h3 style="color:var(--danger); margin-top:0;">Fermer la Console</h3>
+            <button style="background:var(--blue);" onclick="quitRoom()">🚪 Quitter le tableau de bord (Conserver données)</button>
+            <button id="btn-delete-room" style="background:var(--danger);" onclick="resetFullGame()">⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE</button>
         </div>
     </div>
 
@@ -460,7 +493,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.165";
+        const APP_VERSION = "1.166";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -468,7 +501,7 @@
         const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary"); const secondaryAuth = secondaryApp.auth();
 
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
-        let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {}, lastSavedRoom = "";
+        let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {};
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
         
         let activeLibraryUid = null, isProxyMode = false, activeBgLibraryUid = null, isProxyBgMode = false, modalSelectedBgUrl = "";
@@ -734,12 +767,50 @@
             }).catch(e=>console.error(e));
         }
 
+        // LE NOUVEAU HUB MJ AVEC ARCHIVES
         function checkUserRoom(uid) {
-            db.ref('users/' + uid + '/lastRoom').once('value').then(snap => {
-                document.getElementById('screen-login').style.display="none"; document.getElementById('screen-profile').style.display="none"; document.getElementById('screen-dashboard').style.display="none"; document.getElementById('screen-choice').style.display="block"; document.getElementById('global-mj-logo-container').style.display="block";
-                if(snap.exists() && snap.val() !== "") { lastSavedRoom = snap.val(); document.getElementById('btn-resume').style.display="block"; document.getElementById('last-room-id').innerText=lastSavedRoom; } 
-                else { document.getElementById('btn-resume').style.display="none"; }
-            }).catch(e=>console.error(e));
+            db.ref('rooms').orderByChild('mj').equalTo(uid).once('value', snap => {
+                document.getElementById('screen-login').style.display="none"; 
+                document.getElementById('screen-profile').style.display="none"; 
+                document.getElementById('screen-dashboard').style.display="none"; 
+                document.getElementById('screen-choice').style.display="block"; 
+                document.getElementById('global-mj-logo-container').style.display="block";
+
+                const rooms = snap.val() || {};
+                const activeContainer = document.getElementById('active-rooms-list');
+                const archivedContainer = document.getElementById('archived-rooms-list');
+                activeContainer.innerHTML = "";
+                archivedContainer.innerHTML = "";
+
+                let hasActive = false;
+                let hasArchive = false;
+
+                Object.keys(rooms).sort((a,b) => (rooms[b].createdAt || 0) - (rooms[a].createdAt || 0)).forEach(rID => {
+                    const r = rooms[rID];
+                    const eventName = r.eventName || "Partie Sans Nom";
+                    const d = new Date(r.createdAt || Date.now());
+                    const dateStr = d.toLocaleDateString('fr-FR') + " à " + d.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                    
+                    if(r.isArchived) {
+                        hasArchive = true;
+                        archivedContainer.innerHTML += `
+                            <div class="hub-room-card">
+                                <div class="hub-room-info"><h4>${eventName}</h4><p>${dateStr} - Salle n°${rID}</p></div>
+                                <button class="hub-btn" style="background:var(--blue);" onclick="launchDashboard('${rID}', '${r.mjName}', '${r.eventName}', true)">👁️ Consulter</button>
+                            </div>`;
+                    } else {
+                        hasActive = true;
+                        activeContainer.innerHTML += `
+                            <div class="hub-room-card" style="border-color:var(--success);">
+                                <div class="hub-room-info"><h4>${eventName}</h4><p>${dateStr} - Salle n°${rID}</p></div>
+                                <button class="hub-btn" style="background:var(--success);" onclick="launchDashboard('${rID}', '${r.mjName}', '${r.eventName}', false)">▶️ Reprendre</button>
+                            </div>`;
+                    }
+                });
+
+                document.getElementById('active-rooms-section').style.display = hasActive ? "block" : "none";
+                document.getElementById('archived-rooms-section').style.display = hasArchive ? "block" : "none";
+            });
         }
 
         function syncLibraryToRoom() { try { if(roomID && roomRef) roomRef.child('library').set(mjLibrary || {}); } catch(e){ console.error("Erreur sync library", e); } }
@@ -795,29 +866,60 @@
             const dateStr = d.getFullYear().toString() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); 
             const rndStr = String(Math.floor(Math.random() * 1000)).padStart(3, '0'); 
             const newRoomID = `${dateStr}${rndStr}`; 
+            
             document.getElementById('modal-create-room').style.display = 'none'; 
-            db.ref('users/'+auth.currentUser.uid+'/lastRoom').set(newRoomID).then(()=>launchDashboard(newRoomID, mjName, eventName)); 
+            
+            // On écrit les données de base de la salle
+            const initialData = {
+                mj: auth.currentUser.uid,
+                mjName: mjName,
+                eventName: eventName,
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                gameState: { status: 'waiting' },
+                isArchived: false
+            };
+
+            db.ref('rooms/' + newRoomID).set(initialData).then(() => {
+                launchDashboard(newRoomID, mjName, eventName, false);
+            });
         }
 
-        function resumeRoom() { launchDashboard(lastSavedRoom); }
-
-        function launchDashboard(id, mjName = null, eventName = null) {
+        // Lancement avec Gestion des Archives et Live Filter
+        function launchDashboard(id, mjName = null, eventName = null, isArchived = false) {
             roomID = id; buzzHistory = []; currentBuzzerId = null; currentPlayer = null;
-            const btnDel = document.getElementById('btn-delete-room'); if(btnDel) { btnDel.classList.remove('countdown-btn'); btnDel.disabled = false; btnDel.innerText = "⚠️ SUPPRIMER LA SALLE (Effacer tout)"; }
-            document.getElementById('screen-choice').style.display = "none"; document.getElementById('screen-dashboard').style.display = "block"; document.getElementById('display-room').innerText = roomID;
+            const btnDel = document.getElementById('btn-delete-room'); 
+            
+            if(btnDel) { btnDel.classList.remove('countdown-btn'); btnDel.disabled = false; btnDel.innerText = "⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE"; }
+            
+            document.getElementById('screen-choice').style.display = "none"; 
+            const dashboard = document.getElementById('screen-dashboard');
+            dashboard.style.display = "block"; 
+            document.getElementById('display-room').innerText = roomID;
             
             if (eventName) document.getElementById('display-event-name').innerText = eventName;
             if (mjName) document.getElementById('display-mj-name').innerText = "Animé par " + mjName;
 
-            let activeRoomData = { status: 'open', timestamp: firebase.database.ServerValue.TIMESTAMP };
-            if (mjName) activeRoomData.mjName = mjName;
-            if (eventName) activeRoomData.eventName = eventName;
-            db.ref('activeRooms/' + roomID).set(activeRoomData);
-            
             roomRef = db.ref('rooms/' + id);
-            
-            try { if(mjName) roomRef.child('mjName').set(mjName); } catch(e){}
-            try { if(eventName) roomRef.child('eventName').set(eventName); } catch(e){}
+
+            // GESTION DU MODE LECTURE SEULE
+            if(isArchived) {
+                dashboard.classList.add('readonly-mode');
+                document.getElementById('readonly-banner').style.display = 'block';
+            } else {
+                dashboard.classList.remove('readonly-mode');
+                document.getElementById('readonly-banner').style.display = 'none';
+                
+                // On publie dans le Live Filter pour les joueurs
+                let activeRoomData = { id: roomID, status: 'open', timestamp: firebase.database.ServerValue.TIMESTAMP };
+                if (mjName) activeRoomData.mjName = mjName;
+                if (eventName) activeRoomData.eventName = eventName;
+                
+                const publicRef = db.ref('activeRooms/' + roomID);
+                publicRef.set(activeRoomData);
+                // La magie Anti-Zombie : si le MJ perd la co, on supprime de la recherche
+                publicRef.onDisconnect().remove();
+            }
+
             try { roomRef.child('mjLogo').set(mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png"); } catch(e){}
             try { if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); } catch(e){}
             try { roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true); } catch(e){}
@@ -862,7 +964,6 @@
             
             roomRef.child('players').on('value', snap => { allPlayersData = snap.val() || {}; renderLobby(); });
             
-            // Écoute de l'ancien système pour l'affichage du gagnant
             roomRef.child('buzzers').on('value', snap => {
                 const b = snap.val(); const box = document.getElementById('player-box');
                 if(b) { 
@@ -886,17 +987,14 @@
                 } 
             });
 
-            // --- NOUVEAU: LE CERVEAU ANTI-LAG ---
             roomRef.child('buzzAttempts').on('value', snap => {
                 const attempts = snap.val();
-                if (!attempts) return; // Si la boîte est vide, on ne fait rien
+                if (!attempts) return; 
                 
                 if (!buzzProcessing) {
                     buzzProcessing = true;
-                    // 1. On bloque les téléphones instantanément
                     roomRef.child('gameState').set({status: 'processing'}); 
                     
-                    // 2. On laisse 300ms aux joueurs en 4G pour que leur ticket arrive
                     setTimeout(() => {
                         roomRef.child('buzzAttempts').once('value').then(finalSnap => {
                             const finalAttempts = finalSnap.val();
@@ -909,7 +1007,6 @@
                             let winner = null;
                             let minTime = Infinity;
                             
-                            // 3. On dépouille les tickets et on compare les chronos absolus
                             Object.values(finalAttempts).forEach(att => {
                                 if (!currentBlocked[att.pseudo]) { 
                                     if (att.timestamp < minTime) {
@@ -920,7 +1017,6 @@
                             });
                             
                             if (winner) {
-                                // 4. On écrit le vainqueur !
                                 roomRef.child('buzzers').set({ 
                                     id: winner.id, 
                                     pseudo: winner.pseudo, 
@@ -930,16 +1026,14 @@
                                 });
                                 roomRef.child('gameState').set({status: 'taken'});
                             } else {
-                                // Tous les tickets venaient de joueurs bloqués
                                 roomRef.child('gameState').set({status: 'ready'});
                                 roomRef.child('buzzAttempts').remove();
                             }
                             buzzProcessing = false;
                         });
-                    }, 300); // 300 millisecondes d'équité
+                    }, 300); 
                 }
             });
-            // --- FIN NOUVEAU ---
 
             roomRef.child('teams').on('value', snap => { globalTeams = snap.val() || {}; renderLobby(); });
             roomRef.child('blockedPlayers').on('value', snap => { currentBlocked = snap.val() || {}; renderLobby(); });
@@ -996,7 +1090,25 @@
         function deletePlayer(u, n, a) { if(a) { if(confirm("Rendre inactif "+n+" ?")) roomRef.child('players/'+u).update({active:false}); } else { if(confirm("⚠️ Supprimer "+n+" définitivement ?")) roomRef.child('players/'+u).remove(); } }
         function forceBuzzer(u) { const p=allPlayersData[u]; if(p) { roomRef.child('gameState').update({status:'taken'}); roomRef.child('buzzers').set({id:u, pseudo:p.name, avatar:p.avatar||"", teamName:p.teamName||"Solo", teamIcon:p.teamIcon||""}); } }
         function toggleBlockPlayer(ps) { if(currentBlocked[ps]) roomRef.child('blockedPlayers/'+ps).remove(); else roomRef.child('blockedPlayers/'+ps).set(true); }
-        function triggerEndGame() { if(confirm("Fin de partie ?")) { roomRef.child('gameState').set({status:'endGame', timestamp:Date.now()}); roomRef.child('buzzers').remove(); roomRef.child('buzzAttempts').remove(); } }
+        
+        // NOUVEAU : ARCHIVAGE ET FIN DE PARTIE
+        function triggerEndGame() { 
+            if(confirm("🏁 Fin de partie ?\n\nCela affichera le podium et placera cette salle dans vos Archives en Lecture Seule.")) { 
+                roomRef.child('gameState').set({status:'endGame', timestamp:Date.now()}); 
+                roomRef.update({ isArchived: true });
+                roomRef.child('buzzers').remove(); 
+                roomRef.child('buzzAttempts').remove(); 
+                
+                // Retrait immédiat du Live Filter Joueurs
+                const publicRef = db.ref('activeRooms/' + roomID);
+                publicRef.remove();
+                publicRef.onDisconnect().cancel();
+
+                // Bascule de l'interface en Lecture Seule
+                document.getElementById('screen-dashboard').classList.add('readonly-mode');
+                document.getElementById('readonly-banner').style.display = 'block';
+            } 
+        }
         
         function statusUpdate(st) { 
             if(roomRef) { 
@@ -1023,18 +1135,40 @@
         function togglePlayerTeam(u, c) { const i=(c==="Solo")?"":(globalTeams[c]?globalTeams[c].icon:""); roomRef.child('players/'+u).update({teamName:c, teamIcon:i, active:true}); }
         function handleError() { if(currentPlayer&&currentPlayer.name) { roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready'); } }
         function handleReward(pts, m) { if(!currentPlayer||!currentPlayer.id)return; const cp=allPlayersData[currentPlayer.id]?(allPlayersData[currentPlayer.id].pts||0):0; roomRef.child('players/'+currentPlayer.id).update({pts:cp+pts, active:true}); if(m==='partial'){roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready');}else fullReset(); }
-        function quitRoom() { if(mjProfileData.isGuest===true) resetFullGame(); else { if(roomRef) roomRef.child('buzzers').off(); checkUserRoom(auth.currentUser.uid); } }
+        
+        // NOUVEAU : QUITTER EN NETTOYANT LE ZOMBIE
+        function quitRoom() { 
+            if(mjProfileData.isGuest===true) {
+                resetFullGame(); 
+            } else { 
+                if(roomRef) roomRef.child('buzzers').off(); 
+                
+                // Si la salle n'était pas archivée, on la retire du public en quittant
+                if(!document.getElementById('screen-dashboard').classList.contains('readonly-mode') && roomID) {
+                    const publicRef = db.ref('activeRooms/' + roomID);
+                    publicRef.remove();
+                    publicRef.onDisconnect().cancel();
+                }
+                
+                checkUserRoom(auth.currentUser.uid); 
+            } 
+        }
+        
         function resetFullGame() {
-            if(confirm("⚠️ Fermer la salle ?\nLes joueurs auront 10s pour sauvegarder.")) {
+            if(confirm("⚠️ SUPPRESSION DÉFINITIVE DE CETTE SALLE ?\nToutes les données (scores, équipes) seront perdues.")) {
                 roomRef.child('gameState').set({status:'closing', timestamp:Date.now()});
                 const b=document.getElementById('btn-delete-room');
                 if(b) {
-                    b.disabled=true; b.classList.add('countdown-btn'); let t=10; b.innerText=`⏳ SUPPRESSION DANS ${t}s...`;
+                    b.disabled=true; b.classList.add('countdown-btn'); let t=5; b.innerText=`⏳ SUPPRESSION DANS ${t}s...`;
                     const i=setInterval(()=>{ t--; b.innerText=`⏳ SUPPRESSION DANS ${t}s...`; if(t<=0){ clearInterval(i); executeRoomDeletion(); } }, 1000);
-                } else setTimeout(executeRoomDeletion, 10000);
+                } else setTimeout(executeRoomDeletion, 5000);
             }
         }
-        function executeRoomDeletion() { roomRef.remove(); db.ref('activeRooms/'+roomID).remove(); db.ref('users/'+auth.currentUser.uid+'/lastRoom').remove().then(()=>{ lastSavedRoom=""; checkUserRoom(auth.currentUser.uid); }); }
+        function executeRoomDeletion() { 
+            roomRef.remove(); 
+            db.ref('activeRooms/'+roomID).remove(); 
+            checkUserRoom(auth.currentUser.uid); 
+        }
     </script>
 </body>
 </html>
