@@ -430,10 +430,11 @@
             <div id="edit-crest-choices" class="selection-mode-container" style="width:100%;">
                 <div class="choice-card" onclick="document.getElementById('edit-team-file-input').click()">
                     <div class="choice-icon">📸</div>
-                    <div class="choice-content"><b style="font-size: 0.95rem; letter-spacing: -1px;">PHOTO / IMAGE PERSO</b></div>
+                    <div class="choice-content"><b style="font-size: 0.95rem; letter-spacing: -1px;">PHOTO D'ÉQUIPE / IMAGE PERSO</b><span>Selfie, Logo...</span></div>
                 </div>
-                <div class="choice-card" onclick="showEditTeamGallery()"><div class="choice-icon">🛡️</div><div class="choice-content"><b>Galerie Blasons</b></div></div>
-                <input type="file" id="edit-team-file-input" accept="image/*" style="display:none" onchange="handleEditTeamFileUpload(this)">
+                <div class="moderation-warning">⚠️ Images modérées par l'animateur. Tout contenu vulgaire entraînera un bannissement.</div>
+                <div class="choice-card" onclick="showEditTeamGallery()"><div class="choice-icon">🛡️</div><div class="choice-content"><b>Galerie Blasons</b><span>Choisis un écusson.</span></div></div>
+                <input type="file" id="edit-team-file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleEditTeamFileUpload(this)">
             </div>
             <div id="edit-crest-gallery" class="gallery-container" style="width:100%;">
                 <div class="crest-grid" id="edit-team-icon-grid"></div>
@@ -513,7 +514,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.172";
+        const CLIENT_VERSION = "1.173";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -940,7 +941,6 @@
         function joinTeam(name, icon) { 
             if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
             
-            // Vérification Liste Noire avant de rejoindre
             roomRef.child('teams/' + name + '/blacklist/' + myUserID).once('value', snap => {
                 if (snap.exists()) {
                     alert("🚫 Vous avez été expulsé de cette équipe.\nSeul le Capitaine ou l'Animateur peut vous réintégrer.");
@@ -1079,7 +1079,6 @@
             document.getElementById('overlay-settings').style.display = 'none';
             document.getElementById('manage-team-name').value = player.team;
             
-            // Réinitialiser la barre de recherche
             const searchInput = document.getElementById('team-live-search');
             searchInput.value = '';
             document.getElementById('clear-team-search').style.display = 'none';
@@ -1129,14 +1128,12 @@
             let displayList = [];
             
             if (query.length > 0) {
-                // Recherche Globale : On ignore la pilule et on cherche partout
                 displayList = [
                     ...teamMembersData.map(m => ({...m, isBlocked: false})), 
                     ...teamBlacklistData.map(m => ({...m, isBlocked: true}))
                 ];
                 displayList = displayList.filter(m => m.name && m.name.toLowerCase().includes(query));
             } else {
-                // On respecte la pilule sélectionnée si aucune recherche
                 if (currentTeamFilter === 'actifs') {
                     displayList = teamMembersData.map(m => ({...m, isBlocked: false}));
                 } else {
@@ -1238,9 +1235,7 @@
 
         function expelMember(uid, name, avatar) {
             if(confirm(`Expulser ${name} de l'équipe ?\n\nIl sera ajouté à la liste noire et repassera en Solo.`)) {
-                // Inscrire le joueur sur la liste noire avec ses infos d'affichage
                 roomRef.child('teams/' + player.team + '/blacklist/' + uid).set({ name: name, avatar: avatar });
-                // Passer le joueur en Solo
                 roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", isCaptain: false });
             }
         }
