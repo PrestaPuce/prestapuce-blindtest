@@ -170,7 +170,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.162";
+        const CLIENT_VERSION = "1.163";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -219,6 +219,7 @@
         let previousPts = {}; 
         let lastPointTime = {}; 
         let pendingAnimations = {}; 
+        let animatingScores = {}; 
         let activeIntervals = {};
         let isBigAnimPlaying = false;
 
@@ -232,10 +233,20 @@
 
         function trackScores(id, newPts) {
             let oldPts = previousPts[id];
+            
+            if (animatingScores[id] !== undefined) {
+                if (newPts > animatingScores[id].targetPts) {
+                    animatingScores[id].targetPts = newPts;
+                }
+                previousPts[id] = newPts;
+                return;
+            }
+
             if (oldPts !== undefined && newPts > oldPts) {
                 let delta = newPts - oldPts;
                 if (delta === 3) {
                     pendingAnimations[id] = { start: oldPts, end: newPts, type: 'plus3' };
+                    animatingScores[id] = { currentPts: oldPts, targetPts: newPts }; 
                     showBigPlus3();
                 } else if (delta === 1) {
                     pendingAnimations[id] = { start: newPts, end: newPts, type: 'flash' };
@@ -308,7 +319,10 @@
         function getSortedRanking() {
             let unsorted = calculateGlobalScores();
             return unsorted.sort((a, b) => {
-                if (b.pts !== a.pts) return b.pts - a.pts; 
+                let displayPtsA = animatingScores[a.dataId] !== undefined ? animatingScores[a.dataId].currentPts : a.pts;
+                let displayPtsB = animatingScores[b.dataId] !== undefined ? animatingScores[b.dataId].currentPts : b.pts;
+
+                if (displayPtsB !== displayPtsA) return displayPtsB - displayPtsA; 
                 if (!a.isTeam && b.isTeam) return -1;
                 if (a.isTeam && !b.isTeam) return 1;
 
@@ -369,19 +383,30 @@
 
         function executeStepAnimation(dataId, start, end) {
             if (activeIntervals[dataId]) clearInterval(activeIntervals[dataId]);
-            let current = start;
+            
             activeIntervals[dataId] = setInterval(() => {
-                let els = document.querySelectorAll(`[data-id="${dataId}"] .pts`);
-                if (els.length > 0) {
-                    current++;
-                    els.forEach(el => {
-                        el.innerText = current;
-                        el.classList.remove('flash-score');
-                        void el.offsetWidth;
-                        el.classList.add('flash-score');
-                    });
+                if (animatingScores[dataId]) {
+                    animatingScores[dataId].currentPts++;
+                    
+                    let els = document.querySelectorAll(`[data-id="${dataId}"] .pts`);
+                    if (els.length > 0) {
+                        els.forEach(el => {
+                            el.innerText = animatingScores[dataId].currentPts;
+                            el.classList.remove('flash-score');
+                            void el.offsetWidth;
+                            el.classList.add('flash-score');
+                        });
+                    }
+                    
+                    if (animatingScores[dataId].currentPts >= animatingScores[dataId].targetPts) { 
+                        clearInterval(activeIntervals[dataId]); 
+                        delete activeIntervals[dataId];
+                        delete animatingScores[dataId]; 
+                    }
+                } else {
+                    clearInterval(activeIntervals[dataId]); 
+                    delete activeIntervals[dataId];
                 }
-                if (current >= end) { clearInterval(activeIntervals[dataId]); delete activeIntervals[dataId]; }
             }, 800); 
         }
 
@@ -412,7 +437,9 @@
                 const buzzedClass = (p.uid === currentBuzzerId) ? "last-buzzed" : "";
                 
                 let displayPtsP = p.pts || 0;
-                if (pendingAnimations[idP] && pendingAnimations[idP].type === 'plus3') { displayPtsP = pendingAnimations[idP].start; }
+                if (animatingScores[idP] !== undefined) {
+                    displayPtsP = animatingScores[idP].currentPts;
+                }
                 
                 pListHTML += `
                     <div class="card ${buzzedClass} ${inactiveClass}" data-id="${idP}">
@@ -448,7 +475,9 @@
                 }
 
                 let displayPtsG = item.pts;
-                if (pendingAnimations[idG] && pendingAnimations[idG].type === 'plus3') { displayPtsG = pendingAnimations[idG].start; }
+                if (animatingScores[idG] !== undefined) {
+                    displayPtsG = animatingScores[idG].currentPts;
+                }
 
                 gListHTML += `
                     <div class="card${inactiveClass}${rankClass}" data-id="${idG}">
