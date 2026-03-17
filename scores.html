@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Scores - Presta'Puce</title>
-    <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
+    <link rel="icon" id="page-favicon" type="image/png" href="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad">
+    
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --bg-color: #1a1a1a; --accent: #f1c40f; --card-bg: rgba(44, 62, 80, 0.4); --gold: #f1c40f; --silver: #bdc3c7; --bronze: #cd7f32; }
+        :root { --bg-color: #1a1a1a; --accent: #f1c40f; --card-bg: rgba(44, 62, 80, 0.4); --gold: #f1c40f; --silver: #bdc3c7; --bronze: #cd7f32; --blue: #3498db; --danger: #e74c3c; --success: #2ecc71; }
         
         body { margin: 0; padding: 1vh; font-family: 'Segoe UI', sans-serif; color: white; height: 100vh; overflow: hidden; box-sizing: border-box; display: flex; flex-direction: column; background: transparent; }
         
         /* FOND DYNAMIQUE PRESTA'PUCE */
-        #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: linear-gradient(45deg, #0f0c29, #302b63, #24243e); background-size: 300% 300%; animation: gradientBG 15s ease infinite; }
+        #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: linear-gradient(45deg, #0f0c29, #302b63, #24243e); background-size: 300% 300%; animation: gradientBG 15s ease infinite; transition: background 0.5s ease; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         
         /* FILTRE D'ASSOMBRISSEMENT */
@@ -23,29 +26,46 @@
         #blur-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 4000; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
         #blur-overlay.active { opacity: 1; pointer-events: auto; }
 
-        header { display: flex; align-items: center; justify-content: center; height: 12vh; position: relative; margin-bottom: -2vh; flex-shrink: 0; z-index: 10; }
-        .header-center { display: flex; align-items: center; gap: 2vw; background: rgba(0,0,0,0.5); padding: 1vh 3vw; border-radius: 50px; border: 1px solid rgba(241, 196, 15, 0.3); backdrop-filter: blur(5px); }
+        header { display: flex; align-items: center; justify-content: center; height: 12vh; position: relative; margin-bottom: -2vh; flex-shrink: 0; z-index: 10; display: none; }
+        .header-center { display: flex; align-items: center; gap: 1vw; background: rgba(0,0,0,0.5); padding: 1vh 3vw 1vh 1vw; border-radius: 50px; border: 1px solid rgba(241, 196, 15, 0.3); backdrop-filter: blur(5px); }
         .title-group { display: flex; flex-direction: column; align-items: center; line-height: 1; }
-        h1 { font-size: clamp(1.5rem, 4vh, 3rem); margin: 0; color: white; } 
-        .room-highlight { color: var(--accent); }
-        .version-text { font-size: clamp(0.6rem, 1.5vh, 1rem); color: rgba(255,255,255,0.4); font-family: monospace; margin-top: 0.5vh; }
-        #display-mj-logo { height: 8vh; width: auto; object-fit: contain; border-radius: 6px; }
         
-        #qr-box { position: fixed; top: 1vh; left: 1vw; background: white; padding: 0.5vh; border-radius: 8px; text-align: center; color: black; z-index: 5000; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transform-origin: top left; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: zoom-in; width: 10.5vh; }
+        #event-name-display { font-size: clamp(1.5rem, 3.5vh, 2.8rem); margin: 0; color: white; text-transform: uppercase; font-weight: 900; text-shadow: 0 2px 5px rgba(0,0,0,0.8); } 
+        #mj-name-display { font-size: clamp(1rem, 2.2vh, 1.5rem); font-weight: bold; color: var(--accent); margin-top: 0.5vh; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+        .room-code-display { font-size: clamp(0.7rem, 1.8vh, 1.1rem); color: rgba(255,255,255,0.7); font-family: monospace; margin-top: 0.8vh; font-weight: bold; background: rgba(0,0,0,0.4); padding: 0.2vh 1vw; border-radius: 10px; border: 1px dashed rgba(255,255,255,0.2); }
+        .room-highlight { color: white; }
+        
+        /* ANIMATION FLIP 3D DU LOGO */
+        .flip-container { width: 8vh; height: 8vh; perspective: 1000px; margin-right: 1vw; }
+        .flip-inner { position: relative; width: 100%; height: 100%; text-align: center; transform-style: preserve-3d; }
+        .flip-inner.animate { animation: flipAnim 10s infinite; }
+        .flip-front, .flip-back { position: absolute; top: 0; left: 0; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 6px; }
+        .flip-back { transform: rotateY(180deg); }
+        .flip-front img, .flip-back img { width: 100%; height: 100%; object-fit: contain; }
+        
+        @keyframes flipAnim {
+            0%, 40% { transform: rotateY(0deg); }
+            50%, 90% { transform: rotateY(180deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        .version-text { display: none; }
+        
+        #qr-box { display: none; position: fixed; top: 1vh; left: 1vw; background: white; padding: 0.5vh; border-radius: 8px; text-align: center; color: black; z-index: 5000; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transform-origin: top left; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: zoom-in; width: 10.5vh; }
         #qr-box img { width: 100% !important; height: auto !important; display: block; }
         #qr-box.zoomed { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50vmin; padding: 2vmin; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); cursor: zoom-out; }
         #qr-label { font-size: 0.8vh; font-weight: bold; margin-top: 0.2vh; transition: font-size 0.3s; }
         #qr-box.zoomed #qr-label { font-size: 3vmin; margin-top: 1vmin; }
 
-        #btn-fullscreen { position: fixed; top: 1vh; right: 1vw; z-index: 2000; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0; border-radius: 50%; cursor: pointer; width: 4vh; height: 4vh; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; opacity: 0.4; }
+        #btn-fullscreen { display: none; position: fixed; top: 1vh; right: 1vw; z-index: 2000; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0; border-radius: 50%; cursor: pointer; width: 4vh; height: 4vh; align-items: center; justify-content: center; transition: all 0.3s ease; opacity: 0.4; }
         #btn-fullscreen:hover { opacity: 1; background: var(--accent); color: black; transform: scale(1.1); }
         #btn-fullscreen svg { width: 60%; height: 60%; fill: currentColor; }
         .hide-ui { opacity: 0 !important; pointer-events: none; }
 
-        #btn-hof { position: fixed; top: 6vh; right: 1vw; background: rgba(0,0,0,0.5); border: 1px solid var(--accent); color: var(--accent); padding: 0.5vh 1.5vw; border-radius: 15px; cursor: pointer; font-size: clamp(0.6rem, 1.5vh, 1rem); font-weight: bold; transition: 0.2s; z-index: 1500; }
+        #btn-hof { display: none; position: fixed; top: 6vh; right: 1vw; background: rgba(0,0,0,0.5); border: 1px solid var(--accent); color: var(--accent); padding: 0.5vh 1.5vw; border-radius: 15px; cursor: pointer; font-size: clamp(0.6rem, 1.5vh, 1rem); font-weight: bold; transition: 0.2s; z-index: 1500; }
         #btn-hof:hover { background: var(--accent); color: black; }
 
-        .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; flex-grow: 1; padding: 0 1vw; overflow: hidden; margin-top: 0; }
+        .main-container { display: none; grid-template-columns: 1fr 1fr; gap: 2vw; flex-grow: 1; padding: 0 1vw; overflow: hidden; margin-top: 0; }
         .column-wrapper { display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
         .column-title { text-align: center; font-size: clamp(1rem, 3vh, 2rem); color: var(--accent); text-transform: uppercase; border-bottom: 1px solid rgba(241, 196, 15, 0.5); flex-shrink: 0; letter-spacing: 1px; padding-bottom: 2px; margin-bottom: 5px; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
         #player-list, #global-list { overflow-y: auto; overflow-x: hidden; flex-grow: 1; padding-right: 5px; padding-bottom: 10px; position: relative; }
@@ -54,18 +74,14 @@
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
-        /* EFFET VERRE DÉPOLI SUR LES CARTES */
         .card { background: var(--card-bg); display: flex; align-items: center; padding: 0 1vw; border-radius: 8px; margin-bottom: 0.8vh; border-left: 0.5vw solid var(--accent); height: 7vh; transition: border 0.3s, background 0.3s, box-shadow 0.3s; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-left: 0.5vw solid var(--accent); }
         .avatar, .crest { width: 5vh; display: flex; justify-content: center; align-items: center; font-size: 2.5vh; }
-        
         .crest-bg { padding: 0; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .crest-bg.native-svg { background: white; padding: 2px; }
-
         .crest img, .avatar img { width: 4vh; height: 4vh; object-fit: contain; } 
         .info { flex: 1; margin-left: 1vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: baseline; gap: 0.5vw; line-height: 1; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
         .info b { font-size: clamp(0.9rem, 2.5vh, 1.8rem); }
         .team-tag { font-size: clamp(0.7rem, 2vh, 1.2rem); color: #bdc3c7; font-style: italic; font-weight: normal; }
-        
         .pts { font-size: clamp(1rem, 3vh, 2rem); font-weight: 800; background: rgba(0,0,0,0.5); padding: 0 1vw; border-radius: 6px; color: var(--accent); min-width: 4vw; text-align: center; line-height: 1.4; transition: background 0.3s, color 0.3s; border: 1px solid rgba(255,255,255,0.1); }
         
         @keyframes scorePulse { 0% { transform: scale(1); background: rgba(0,0,0,0.5); color: var(--accent); } 20% { transform: scale(1.4); background: white; color: black; box-shadow: 0 0 15px white; } 100% { transform: scale(1); background: rgba(0,0,0,0.5); color: var(--accent); } }
@@ -109,6 +125,23 @@
         #btn-return-podium { display: none; position: fixed; bottom: 2vh; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; border: none; padding: 1vh 2vw; border-radius: 20px; font-weight: bold; cursor: pointer; z-index: 100; box-shadow: 0 0 10px rgba(241, 196, 15, 0.5); font-size: 2vh; }
         #hof-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 4000; flex-direction: column; align-items: center; justify-content: center; }
         .hof-content { width: 60vw; background: #2c3e50; padding: 4vh; border-radius: 20px; border: 3px solid var(--accent); }
+
+        /* LOBBY ECRAN GEANT */
+        #lobby-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: transparent; z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 2vh 5vw; box-sizing: border-box; }
+        .lobby-box { background: rgba(44, 62, 80, 0.85); padding: 4vh 3vw; border-radius: 15px; text-align: center; border: 2px solid var(--accent); backdrop-filter: blur(15px); max-width: 800px; width: 100%; height: 85vh; display: flex; flex-direction: column; box-shadow: 0 15px 35px rgba(0,0,0,0.8); }
+        .lobby-search { width: 100%; padding: 2vh; margin-bottom: 2vh; border-radius: 10px; border: 2px solid var(--accent); background: rgba(0,0,0,0.6); color: white; font-size: 1.2rem; outline: none; box-sizing: border-box; }
+        .lobby-search:focus { box-shadow: 0 0 15px rgba(241,196,15,0.5); }
+        .lobby-list-container { flex: 1; overflow-y: auto; padding-right: 10px; display: flex; flex-direction: column; gap: 1vh; }
+        .lobby-room-line { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.5); padding: 2vh; border-radius: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; text-align: left; }
+        .lobby-room-line:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); transform: translateX(5px); }
+        
+        /* MODALE LOGIN MJ */
+        #lobby-login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 11000; align-items: center; justify-content: center; }
+        .login-box { background: rgba(44, 62, 80, 0.95); padding: 4vh 3vw; border-radius: 15px; text-align: center; border: 2px solid var(--accent); max-width: 450px; width: 90%; box-shadow: 0 15px 35px rgba(0,0,0,0.8); }
+        .login-box input { width: 100%; padding: 1.5vh; margin-bottom: 2vh; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; box-sizing: border-box; font-size: 1.2rem; outline: none; }
+        .login-box input:focus { border-color: var(--accent); }
+        .login-box button { width: 100%; padding: 1.5vh; background: var(--accent); color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.2rem; transition: 0.2s; text-transform: uppercase; margin-bottom: 1vh; }
+        .login-box button:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -116,6 +149,34 @@
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
     <div id="big-anim-overlay"></div>
+
+    <div id="lobby-screen" style="display:none;">
+        <div class="lobby-box">
+            <img src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad" style="width:120px; margin: 0 auto 2vh auto;">
+            <h1 style="color:white; margin:0 0 2vh 0; font-size: 2rem; text-shadow: 0 2px 5px black;">ÉCRANS GÉANTS</h1>
+            
+            <div style="position:relative;">
+                <input type="text" id="lobby-search" class="lobby-search" placeholder="🔍 Rechercher un événement, un animateur, une date..." oninput="renderLobbyRooms(); document.getElementById('clear-lobby-search').style.display = this.value.length > 0 ? 'block' : 'none';">
+                <span id="clear-lobby-search" onclick="document.getElementById('lobby-search').value=''; renderLobbyRooms(); this.style.display='none';" style="position:absolute; right:15px; top:40%; transform:translateY(-50%); font-size:1.5rem; cursor:pointer; color:white; display:none;">✕</span>
+            </div>
+            
+            <div id="lobby-room-list" class="lobby-list-container">
+                <div style="text-align:center; color:#7f8c8d; font-style:italic; padding: 20px;">Chargement du réseau mondial...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lobby-login-modal">
+        <div class="login-box">
+            <h2 style="color:var(--accent); margin-top:0;">SÉCURITÉ ANIMATEUR</h2>
+            <p style="color:#bdc3c7; font-size:1rem; margin-bottom:3vh;">Saisissez vos identifiants pour afficher cette salle.</p>
+            <input type="hidden" id="login-target-room">
+            <input type="email" id="mj-email" placeholder="Email Animateur" autocomplete="email" onkeypress="if(event.key==='Enter') executeLobbyLogin()">
+            <input type="password" id="mj-pass" placeholder="Mot de passe" autocomplete="current-password" onkeypress="if(event.key==='Enter') executeLobbyLogin()">
+            <button onclick="executeLobbyLogin()">DÉVERROUILLER L'ÉCRAN</button>
+            <button onclick="document.getElementById('lobby-login-modal').style.display='none'" style="background:transparent; border:1px solid var(--danger); color:var(--danger);">Annuler</button>
+        </div>
+    </div>
 
     <div id="blur-overlay" onclick="toggleQRZoom()"></div>
     <div id="btn-fullscreen" onclick="toggleFullScreen()" title="Plein Écran (Touche F)">
@@ -127,13 +188,24 @@
     </div>
     <button id="btn-hof" onclick="toggleHOF()">🏆 Hall of Fame</button>
 
-    <header>
+    <header id="main-header">
         <div class="header-center">
-            <a id="mj-logo-link" href="#" target="_blank" style="pointer-events: none;">
-                <img id="display-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
+            <a id="mj-logo-link" href="#" target="_blank" style="pointer-events: none; text-decoration: none;">
+                <div class="flip-container">
+                    <div class="flip-inner" id="logo-flip-inner">
+                        <div class="flip-front">
+                            <img src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad">
+                        </div>
+                        <div class="flip-back">
+                            <img id="display-mj-logo" src="">
+                        </div>
+                    </div>
+                </div>
             </a>
             <div class="title-group">
-                <h1>SALLE : <span id="room-title" class="room-highlight">----</span></h1>
+                <h1 id="event-name-display">PARTIE EN COURS</h1>
+                <div id="mj-name-display">Animé par MJ</div>
+                <div class="room-code-display">CODE SALLE : <span id="room-title" class="room-highlight">----</span></div>
                 <div id="version-display" class="version-text"></div>
             </div>
         </div>
@@ -170,48 +242,143 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.163";
+        const CLIENT_VERSION = "1.168";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
             const versionDisp = document.getElementById('version-display');
             if(versionDisp) versionDisp.innerText = "v" + CLIENT_VERSION;
+            
+            checkLobbyOrRoom();
         });
 
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90", measurementId: "G-J04SC2DFFF" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const auth = firebase.auth();
         
-        const urlParams = new URLSearchParams(window.location.search);
-        let roomID = urlParams.get('room');
-        if (!roomID) { roomID = prompt("Entrez le nom de la salle :"); if (roomID) window.location.search = "?room=" + roomID; }
-        
-        document.getElementById('room-title').innerText = roomID;
-        const roomRef = db.ref('rooms/' + roomID);
-        const currentPath = window.location.href.split('?')[0].replace('scores', 'index');
-        const playURL = currentPath + "?room=" + roomID;
-        
-        new QRCode(document.getElementById("qrcode"), { text: playURL, width: 250, height: 250, correctLevel : QRCode.CorrectLevel.H });
+        let allGlobalRooms = [];
+        let roomID = "";
+        let roomRef = null;
 
-        roomRef.child('customBackground').on('value', snap => {
-            const bgDiv = document.getElementById('dynamic-bg');
-            if (snap.exists() && snap.val() !== "") {
-                bgDiv.style.background = `url('${snap.val()}') center/cover no-repeat`;
-                bgDiv.style.animation = 'none';
+        // --- GESTION DU LOBBY ET BYPASS ---
+        function checkLobbyOrRoom() {
+            const urlParams = new URLSearchParams(window.location.search);
+            roomID = urlParams.get('room');
+            
+            if (roomID) {
+                document.getElementById('lobby-screen').style.display = 'none';
+                document.getElementById('main-header').style.display = 'flex';
+                document.getElementById('btn-fullscreen').style.display = 'flex';
+                initScoreboard();
             } else {
-                bgDiv.style.background = 'linear-gradient(45deg, #0f0c29, #302b63, #24243e)';
-                bgDiv.style.backgroundSize = '300% 300%';
-                bgDiv.style.animation = 'gradientBG 15s ease infinite';
+                document.getElementById('lobby-screen').style.display = 'flex';
+                fetchLobbyRooms();
             }
-        });
-
-        function toggleQRZoom() {
-            const qrBox = document.getElementById('qr-box');
-            const overlay = document.getElementById('blur-overlay');
-            if (qrBox.classList.contains('zoomed')) { qrBox.classList.remove('zoomed'); overlay.classList.remove('active'); } 
-            else { qrBox.classList.add('zoomed'); overlay.classList.add('active'); }
         }
 
+        function fetchLobbyRooms() {
+            db.ref('rooms').orderByChild('createdAt').limitToLast(100).on('value', snap => {
+                allGlobalRooms = [];
+                const rooms = snap.val();
+                if(rooms) {
+                    Object.keys(rooms).forEach(k => {
+                        allGlobalRooms.push({ id: k, ...rooms[k] });
+                    });
+                }
+                allGlobalRooms.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+                renderLobbyRooms();
+            });
+        }
+
+        function renderLobbyRooms() {
+            const query = document.getElementById('lobby-search').value.toLowerCase().trim();
+            const container = document.getElementById('lobby-room-list');
+            container.innerHTML = "";
+            
+            if(allGlobalRooms.length === 0) {
+                container.innerHTML = "<div style='text-align:center; color:#7f8c8d; font-style:italic; padding: 20px;'>Aucune partie trouvée.</div>";
+                return;
+            }
+
+            let matches = allGlobalRooms;
+            if (query) {
+                matches = allGlobalRooms.filter(r => {
+                    const ev = (r.eventName || "").toLowerCase();
+                    const mj = (r.mjName || "").toLowerCase();
+                    const d = new Date(r.createdAt || Date.now()).toLocaleDateString('fr-FR');
+                    return ev.includes(query) || mj.includes(query) || r.id.includes(query) || d.includes(query);
+                });
+            }
+
+            if(matches.length === 0) {
+                container.innerHTML = "<div style='text-align:center; color:#7f8c8d; font-style:italic; padding: 20px;'>Aucune salle ne correspond à la recherche.</div>";
+                return;
+            }
+
+            matches.forEach(r => {
+                const d = new Date(r.createdAt || Date.now()).toLocaleDateString('fr-FR');
+                const badgeState = r.isArchived ? "🗄️ ARCHIVÉE" : "🟢 EN COURS";
+                const badgeColor = r.isArchived ? "#7f8c8d" : "var(--success)";
+                const badgeBg = r.isArchived ? "rgba(127,140,141,0.2)" : "rgba(46,204,113,0.2)";
+                
+                const div = document.createElement('div');
+                div.className = "lobby-room-line";
+                div.innerHTML = `
+                    <div style="flex:1;">
+                        <b style="color:var(--accent); font-size:1.3rem;">${r.eventName || "PARTIE EN COURS"}</b><br>
+                        <span style="color:#ecf0f1; font-size:1rem;">Animé par ${r.mjName || "MJ"} | ${d}</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <span style="color:${badgeColor}; border:1px solid ${badgeColor}; background:${badgeBg}; font-weight:bold; font-size:0.8rem; padding:4px 8px; border-radius:4px;">${badgeState}</span><br>
+                        <span style="color:rgba(255,255,255,0.4); font-size:0.8rem; font-family:monospace; display:block; margin-top:5px;">#${r.id}</span>
+                    </div>
+                `;
+                div.onclick = () => showMJLogin(r.id);
+                container.appendChild(div);
+            });
+        }
+
+        function showMJLogin(targetRoomId) {
+            document.getElementById('lobby-login-modal').style.display = 'flex';
+            document.getElementById('login-target-room').value = targetRoomId;
+            setTimeout(() => document.getElementById('mj-email').focus(), 100);
+        }
+
+        function executeLobbyLogin() {
+            const email = document.getElementById('mj-email').value.trim();
+            const pass = document.getElementById('mj-pass').value;
+            const targetRoom = document.getElementById('login-target-room').value;
+            
+            if(!email || !pass) return alert("Veuillez remplir tous les champs.");
+            
+            auth.signInWithEmailAndPassword(email, pass).then((userCredential) => {
+                const user = userCredential.user;
+                if (user.email === 'contact@prestapuce.com') {
+                    window.location.href = "?room=" + targetRoom;
+                    return;
+                }
+                
+                db.ref('rooms/' + targetRoom + '/mj').once('value').then(snap => {
+                    const roomMjUid = snap.val();
+                    if (roomMjUid === user.uid) {
+                        window.location.href = "?room=" + targetRoom;
+                    } else {
+                        auth.signOut();
+                        alert("Accès refusé : Vous n'êtes pas l'animateur de cette salle.");
+                    }
+                }).catch(err => {
+                    auth.signOut();
+                    alert("Erreur lors de la vérification des droits.");
+                });
+                
+            }).catch(err => {
+                alert("Identifiants invalides ou erreur de connexion.");
+            });
+        }
+
+        // --- GESTION DU TABLEAU DES SCORES ---
+        
         let scoresData = {}, teamsData = {}, currentBuzzer = null, currentBuzzerId = null;
         let buzzHistory = [];
         let isGameFinished = false;
@@ -222,6 +389,88 @@
         let animatingScores = {}; 
         let activeIntervals = {};
         let isBigAnimPlaying = false;
+
+        function initScoreboard() {
+            document.getElementById('room-title').innerText = roomID;
+            roomRef = db.ref('rooms/' + roomID);
+            const currentPath = window.location.href.split('?')[0].replace('scores', 'index');
+            const playURL = currentPath + "?room=" + roomID;
+            
+            new QRCode(document.getElementById("qrcode"), { text: playURL, width: 250, height: 250, correctLevel : QRCode.CorrectLevel.H });
+
+            roomRef.child('customBackground').on('value', snap => {
+                const bgDiv = document.getElementById('dynamic-bg');
+                if (snap.exists() && snap.val() !== "") {
+                    bgDiv.style.background = `url('${snap.val()}') center/cover no-repeat`;
+                    bgDiv.style.animation = 'none';
+                } else {
+                    bgDiv.style.background = 'linear-gradient(45deg, #0f0c29, #302b63, #24243e)';
+                    bgDiv.style.backgroundSize = '300% 300%';
+                    bgDiv.style.animation = 'gradientBG 15s ease infinite';
+                }
+            });
+
+            roomRef.child('eventName').on('value', snap => {
+                if(snap.exists()) document.getElementById('event-name-display').innerText = snap.val();
+                else document.getElementById('event-name-display').innerText = "PARTIE EN COURS";
+            });
+            
+            roomRef.child('mjName').on('value', snap => {
+                if(snap.exists()) document.getElementById('mj-name-display').innerText = "Animé par " + snap.val();
+                else document.getElementById('mj-name-display').innerText = "Animé par MJ";
+            });
+
+            roomRef.child('mjLogo').on('value', snap => { 
+                const logoVal = snap.val();
+                const defaultLogo = "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad";
+                const oldWixLogo = "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
+                
+                const flipInner = document.getElementById('logo-flip-inner');
+                const mjLogoImg = document.getElementById('display-mj-logo');
+                
+                document.getElementById('page-favicon').href = (logoVal && logoVal !== "") ? logoVal : defaultLogo;
+
+                if(logoVal && logoVal !== "" && logoVal !== oldWixLogo && logoVal !== defaultLogo) { 
+                    mjLogoImg.src = logoVal;
+                    flipInner.classList.add('animate');
+                } else {
+                    mjLogoImg.src = "";
+                    flipInner.classList.remove('animate');
+                    flipInner.style.transform = "rotateY(0deg)";
+                }
+            });
+            
+            roomRef.child('mjLink').on('value', snap => {
+                const linkElement = document.getElementById('mj-logo-link');
+                if(snap.exists() && snap.val() !== "") { linkElement.href = snap.val(); linkElement.style.pointerEvents = "auto"; } 
+                else { linkElement.href = "#"; linkElement.style.pointerEvents = "none"; }
+            });
+            
+            roomRef.child('gameState').on('value', snap => {
+                const state = snap.val();
+                if (state && state.status === 'endGame') { isGameFinished = true; showPodium(); } 
+                else { isGameFinished = false; showLeaderboard(); }
+            });
+
+            roomRef.child('buzzers').on('value', snap => {
+                const val = snap.val(); currentBuzzer = val ? val.pseudo : null; currentBuzzerId = val ? val.id : null;
+                if (currentBuzzer) {
+                    if (!buzzHistory.includes(currentBuzzer)) { buzzHistory.push(currentBuzzer); } 
+                    else { buzzHistory = buzzHistory.filter(name => name !== currentBuzzer); buzzHistory.push(currentBuzzer); }
+                }
+                updateDisplay();
+            });
+
+            roomRef.child('players').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
+            roomRef.child('teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
+        }
+
+        function toggleQRZoom() {
+            const qrBox = document.getElementById('qr-box');
+            const overlay = document.getElementById('blur-overlay');
+            if (qrBox.classList.contains('zoomed')) { qrBox.classList.remove('zoomed'); overlay.classList.remove('active'); } 
+            else { qrBox.classList.add('zoomed'); overlay.classList.add('active'); }
+        }
 
         function showBigPlus3() {
             if (isBigAnimPlaying) return;
@@ -255,18 +504,6 @@
             }
             previousPts[id] = newPts;
         }
-
-        roomRef.child('mjLogo').on('value', snap => { if(snap.exists()) { document.getElementById('display-mj-logo').src = snap.val(); document.getElementById('page-favicon').href = snap.val(); } });
-        roomRef.child('mjLink').on('value', snap => {
-            const linkElement = document.getElementById('mj-logo-link');
-            if(snap.exists() && snap.val() !== "") { linkElement.href = snap.val(); linkElement.style.pointerEvents = "auto"; document.getElementById('display-mj-logo').style.cursor = "pointer"; } 
-            else { linkElement.href = "#"; linkElement.style.pointerEvents = "none"; document.getElementById('display-mj-logo').style.cursor = "default"; }
-        });
-        roomRef.child('gameState').on('value', snap => {
-            const state = snap.val();
-            if (state && state.status === 'endGame') { isGameFinished = true; showPodium(); } 
-            else { isGameFinished = false; showLeaderboard(); }
-        });
 
         function calculateGlobalScores() {
             const listEquipes = Object.keys(teamsData);
@@ -499,18 +736,6 @@
                 delete pendingAnimations[id];
             }
         }
-        
-        roomRef.child('buzzers').on('value', snap => {
-            const val = snap.val(); currentBuzzer = val ? val.pseudo : null; currentBuzzerId = val ? val.id : null;
-            if (currentBuzzer) {
-                if (!buzzHistory.includes(currentBuzzer)) { buzzHistory.push(currentBuzzer); } 
-                else { buzzHistory = buzzHistory.filter(name => name !== currentBuzzer); buzzHistory.push(currentBuzzer); }
-            }
-            updateDisplay();
-        });
-
-        roomRef.child('players').on('value', snap => { scoresData = snap.val() || {}; updateDisplay(); });
-        roomRef.child('teams').on('value', snap => { teamsData = snap.val() || {}; updateDisplay(); });
 
         function showPodium() { 
             document.getElementById('main-view').style.display = 'none'; 
@@ -545,7 +770,6 @@
                 } 
             }); 
             
-            // Tir de confettis en surcouche maximale
             confetti({ particleCount: 300, spread: 100, origin: { y: 0.6 }, zIndex: 9999 }); 
         }
 
