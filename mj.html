@@ -25,6 +25,7 @@
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; color: #dcdde1 !important; border:none !important;}
         .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: white !important; box-shadow: none !important; }
         .btn-cancel:hover:not(:disabled) { background: rgba(231, 76, 60, 0.2) !important; }
+        .countdown-btn { background: #e67e22 !important; cursor: wait !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(230, 126, 34, 0.6) !important; }
         
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
         
@@ -123,6 +124,11 @@
         .bg-item { position: relative; width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 6px; cursor: pointer; border: 2px solid transparent; overflow: hidden; }
         .bg-item img { width: 100%; height: 100%; object-fit: cover; }
         .bg-selected { border-color: var(--blue) !important; box-shadow: 0 0 10px var(--blue); transform: scale(1.05); z-index: 2; }
+        
+        /* BOUTON SUPPRESSION CSS (Hold to Delete) */
+        #btn-delete-room { position: relative; overflow: hidden; z-index: 1; background: var(--danger); transition: background 0.3s; }
+        #btn-delete-room::before { content: ""; position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: rgba(0, 0, 0, 0.4); z-index: -1; transition: width 0.2s ease-out; }
+        #btn-delete-room.holding::before { width: 100%; transition: width 5s linear; }
     </style>
 </head>
 <body>
@@ -328,7 +334,7 @@
         <div style="margin-top:40px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);">
             <h3 style="color:var(--danger); margin-top:0;">Fermer la Console</h3>
             <button style="background:var(--blue);" onclick="quitRoom()">🚪 Quitter le tableau de bord (Conserver données)</button>
-            <button id="btn-delete-room" style="background:var(--danger); transition: all 0.2s;" onmousedown="startDeleteHold(event)" onmouseup="cancelDeleteHold(event)" onmouseleave="cancelDeleteHold(event)" ontouchstart="startDeleteHold(event)" ontouchend="cancelDeleteHold(event)">⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE</button>
+            <button id="btn-delete-room" onmousedown="startDeleteHold(event)" onmouseup="cancelDeleteHold(event)" onmouseleave="cancelDeleteHold(event)" ontouchstart="startDeleteHold(event)" ontouchend="cancelDeleteHold(event)">⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE</button>
         </div>
     </div>
 
@@ -502,7 +508,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.168";
+        const APP_VERSION = "1.169";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -525,10 +531,7 @@
         let mjRooms = [];
         let currentHubTab = 'active';
 
-        // Variables pour le maintien (Hold to delete)
         let holdTimer = null;
-        let holdInterval = null;
-        let holdTimeLeft = 5;
 
         function isValidPassword(pwd) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd); }
 
@@ -867,9 +870,7 @@
                     const players = snap.val() || {};
                     const backupPromises = [];
                     
-                    // PREPARATION DE L'ÉTAPE 2 : SAUVEGARDE DES COMPTES
                     Object.keys(players).forEach(uid => {
-                        // Si le joueur a un vrai compte Firebase Auth (uid long, et pas "u_...")
                         if (uid.length > 20 && !uid.startsWith("u_")) { 
                             backupPromises.push(db.ref('users/' + uid + '/history/' + targetRoomID).set({
                                 date: firebase.database.ServerValue.TIMESTAMP,
@@ -880,7 +881,6 @@
                         }
                     });
                     
-                    // Une fois les comptes sauvegardés (ou s'il n'y en a pas), on désintègre la salle
                     Promise.all(backupPromises).then(() => {
                         rRef.remove();
                         db.ref('activeRooms/' + targetRoomID).remove();
@@ -1034,14 +1034,13 @@
         function launchDashboard(id, mjName = null, eventName = null, isArchived = false) {
             roomID = id; buzzHistory = []; currentBuzzerId = null; currentPlayer = null;
             
-            // CORRECTIF BUG DU BOUTON SUPPRESSION
+            // CORRECTIF BUG DU BOUTON SUPPRESSION + RESET CSS HOLD
             const btnDel = document.getElementById('btn-delete-room');
             if (btnDel) {
                 btnDel.disabled = false;
+                btnDel.classList.remove('holding');
                 btnDel.innerText = "⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE";
-                btnDel.style.background = "var(--danger)";
                 clearTimeout(holdTimer);
-                clearInterval(holdInterval);
             }
             
             document.getElementById('screen-choice').style.display = "none"; 
@@ -1285,7 +1284,6 @@
         
         function quitRoom() { 
             if(mjProfileData.isGuest===true) {
-                // Pour l'invité on conserve le vieux système rapide
                 if(confirm("⚠️ SUPPRESSION DÉFINITIVE DE CETTE SALLE ?\nToutes les données (scores, équipes) seront perdues.")) {
                     roomRef.child('gameState').set({status:'closing', timestamp:Date.now()});
                     setTimeout(() => {
@@ -1305,30 +1303,22 @@
             } 
         }
         
-        // --- NOUVEAU SYSTÈME HOLD-TO-DELETE + SAUVEGARDE COMPTES ---
+        // --- NOUVEAU SYSTÈME HOLD-TO-DELETE CSS + SAUVEGARDE COMPTES ---
         function startDeleteHold(e) {
             if(e) e.preventDefault();
             const btn = document.getElementById('btn-delete-room');
             if(btn.disabled) return;
             
-            holdTimeLeft = 5;
-            btn.innerText = `⏳ MAINTENEZ POUR SUPPRIMER (${holdTimeLeft}s)...`;
-            btn.style.background = "#e67e22";
+            btn.classList.add('holding');
+            btn.innerText = "⏳ MAINTENEZ POUR SUPPRIMER...";
             
-            holdInterval = setInterval(() => {
-                holdTimeLeft--;
-                if(holdTimeLeft > 0) btn.innerText = `⏳ MAINTENEZ POUR SUPPRIMER (${holdTimeLeft}s)...`;
-            }, 1000);
-
             holdTimer = setTimeout(() => {
-                clearInterval(holdInterval);
+                btn.classList.remove('holding');
                 btn.innerText = "💥 SUPPRESSION EN COURS...";
                 btn.disabled = true;
                 
-                // On met la salle en mode 'closing' pour expulser les joueurs
                 roomRef.child('gameState').set({status:'closing', timestamp:Date.now()});
                 
-                // Exécution de la destruction avec sauvegarde préalable
                 backupAndDestroyRoom(roomID).then(() => {
                     checkUserRoom(auth.currentUser.uid);
                 });
@@ -1338,11 +1328,10 @@
         function cancelDeleteHold(e) {
             if(e) e.preventDefault();
             clearTimeout(holdTimer);
-            clearInterval(holdInterval);
             const btn = document.getElementById('btn-delete-room');
             if(btn && !btn.disabled) {
+                btn.classList.remove('holding');
                 btn.innerText = "⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE";
-                btn.style.background = "var(--danger)";
             }
         }
     </script>
