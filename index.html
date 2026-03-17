@@ -384,9 +384,48 @@
             <h2 style="color:var(--accent);">MODIFIER PROFIL</h2>
             <button class="settings-btn btn-return-game" onclick="finishEdit(false)">⬅️ RETOUR AU BUZZER</button>
             <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+            
+            <button id="btn-manage-team" class="settings-btn" onclick="openTeamManagement()" style="display:none; border: 1px solid var(--gold); color: var(--gold);">👑 Gérer mon Équipe</button>
+            
             <button class="settings-btn" onclick="editStep('step-pseudo')">✏️ Modifier mon Pseudo</button>
             <button class="settings-btn" onclick="editStep('step-avatar')">📷 Changer d'Avatar</button>
             <button class="settings-btn" onclick="editStep('step-mode')">🛡️ Changer Mode (Solo/Team)</button>
+        </div>
+    </div>
+    
+    <div id="overlay-manage-team" class="overlay-full" style="z-index: 2500;" onclick="this.style.display='none'">
+        <div class="settings-content" onclick="event.stopPropagation()">
+            <h2 style="color:var(--gold); margin-top:0;">GÉRER L'ÉQUIPE</h2>
+            
+            <p style="color:#bdc3c7; font-size:0.9rem; margin-bottom:5px; text-align:left;">Nom de l'équipe :</p>
+            <input type="text" id="manage-team-name" style="width:100%; box-sizing:border-box; padding:12px; font-size:1.1rem;" onkeypress="if(event.key==='Enter') renameTeamFromManage()">
+            
+            <button class="settings-btn" onclick="openCrestEdit()" style="margin-top:10px; border: 1px solid var(--accent); color: var(--accent); text-align: center;">📸 Modifier le Blason</button>
+            
+            <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+            <h3 style="color:white; font-size:1.1rem; margin-top:0;">Membres de l'équipe</h3>
+            <div id="manage-team-members" style="max-height:150px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:15px; text-align: left;">
+            </div>
+            
+            <button class="btn-main" onclick="document.getElementById('overlay-manage-team').style.display='none'">Fermer</button>
+        </div>
+    </div>
+
+    <div id="overlay-crest-edit" class="overlay-full" style="z-index: 2600;" onclick="this.style.display='none'">
+        <div class="settings-content" onclick="event.stopPropagation()">
+            <h2 style="color:var(--accent);">NOUVEAU BLASON</h2>
+            <div id="edit-crest-choices" class="selection-mode-container" style="width:100%;">
+                <div class="choice-card" onclick="document.getElementById('edit-team-file-input').click()">
+                    <div class="choice-icon">📸</div>
+                    <div class="choice-content"><b style="font-size: 0.95rem; letter-spacing: -1px;">PHOTO / IMAGE PERSO</b></div>
+                </div>
+                <div class="choice-card" onclick="showEditTeamGallery()"><div class="choice-icon">🛡️</div><div class="choice-content"><b>Galerie Blasons</b></div></div>
+                <input type="file" id="edit-team-file-input" accept="image/*" style="display:none" onchange="handleEditTeamFileUpload(this)">
+            </div>
+            <div id="edit-crest-gallery" class="gallery-container" style="width:100%;">
+                <div class="crest-grid" id="edit-team-icon-grid"></div>
+            </div>
+            <button class="btn-secondary" style="margin-top:15px;" onclick="document.getElementById('overlay-crest-edit').style.display='none'">Annuler</button>
         </div>
     </div>
 
@@ -416,9 +455,9 @@
     <div id="overlay-team-kicked" class="overlay-full" style="z-index: 3500;">
         <div class="settings-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--accent);">ÉQUIPE INDISPONIBLE</h2>
-            <p style="color:#ccc; font-size:1rem; margin-bottom: 25px; line-height: 1.4;" id="kicked-msg">L'animateur a désactivé ton équipe.</p>
-            <button class="btn-main" onclick="handleKickedChoice('solo')" style="margin-bottom: 12px; width: 100%;">Jouer en Solo</button>
-            <button class="settings-btn" onclick="handleKickedChoice('change')" style="border: 1px solid white; text-align: center;">Changer d'Équipe</button>
+            <p style="color:#ccc; font-size:1rem; margin-bottom: 25px; line-height: 1.4;" id="kicked-msg">Tu as été retiré de l'équipe.</p>
+            <button class="btn-main" onclick="handleKickedChoice('solo')" style="margin-bottom: 12px; width: 100%;">Continuer en Solo</button>
+            <button class="settings-btn" onclick="handleKickedChoice('change')" style="border: 1px solid white; text-align: center;">Rejoindre / Créer</button>
         </div>
     </div>
 
@@ -461,10 +500,11 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.160";
+        const CLIENT_VERSION = "1.170";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
+        let isCaptain = false;
 
         let kickedFromTeam = "";
         let reinstatedTeamRef = null;
@@ -479,7 +519,7 @@
         let teamListCallback = null;
 
         let wakeLock = null;
-        let availableRooms = []; // Moteur de recherche
+        let availableRooms = []; 
 
         async function requestWakeLock() {
             if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
@@ -561,7 +601,6 @@
             myUserID = storedId;
             typeWriterSequence();
             
-            // Lancement de l'écoute du Live Filter
             fetchActiveRooms();
 
             const urlParams = new URLSearchParams(window.location.search);
@@ -570,7 +609,6 @@
             
             renderAvatarGrid();
             
-            // Gestion de la touche Entrée pour la recherche
             const searchInput = document.getElementById('input-room-search');
             if(searchInput) {
                 searchInput.addEventListener('keypress', (e)=>{
@@ -585,7 +623,6 @@
             window.addEventListener('popstate', (event) => { if(stepHistory.length > 0) goBack(); });
         };
 
-        // --- MOTEUR DE RECHERCHE LIVE FILTER ---
         function fetchActiveRooms() {
             db.ref('activeRooms').on('value', snap => {
                 availableRooms = [];
@@ -635,7 +672,6 @@
                 container.appendChild(div);
             });
         }
-        // --- FIN MOTEUR DE RECHERCHE ---
 
         function navigateTo(targetId, pushToHistory = true) {
             if(html5QrCode) { try { html5QrCode.stop(); document.getElementById('reader').style.display='none'; } catch(e){} }
@@ -722,8 +758,11 @@
 
         function resumeGame() {
             roomRef.child('players/' + myUserID).once('value', snap => {
-                if(snap.exists()) { snap.ref.update({ active: true }); } 
-                else { roomRef.child('players/' + myUserID).set({ name: player.pseudo, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon, pts: 0, active: true, banned: false }); }
+                if(snap.exists()) { 
+                    snap.ref.update({ active: true }); 
+                } else { 
+                    roomRef.child('players/' + myUserID).set({ name: player.pseudo, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon, pts: 0, active: true, banned: false }); 
+                }
                 launchGame(true);
             });
         }
@@ -858,7 +897,7 @@
         function renderAvatarGrid() { const g=document.getElementById('avatar-grid'); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='grid-item grid-item-emoji'; d.innerText=a; d.onclick=()=>selectAvatar(a); g.appendChild(d); }); }
         
         function selectAvatar(av) { player.avatar = av; if(isEditing) { roomRef.child('players/' + myUserID).update({avatar: av}); finishEdit(true); } else navigateTo('step-mode'); }
-        function selectMode(mode) { player.team = mode; player.teamIcon = ""; if(isEditing) { roomRef.child('players/' + myUserID).update({teamName: "Solo", teamIcon: ""}); finishEdit(true); } else { if(mode === 'Solo') showRecap(); else goToTeamAction(); } }
+        function selectMode(mode) { player.team = mode; player.teamIcon = ""; if(isEditing) { roomRef.child('players/' + myUserID).update({teamName: "Solo", teamIcon: "", isCaptain: false}); finishEdit(true); } else { if(mode === 'Solo') showRecap(); else goToTeamAction(); } }
         
         function goToTeamAction() { navigateTo('step-team-action'); }
         
@@ -888,12 +927,29 @@
         function joinTeam(name, icon) { 
             if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
             player.team = name; player.teamIcon = icon; 
-            if(isEditing) { 
-                roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon}); finishEdit(true); 
-            } else if (isRecovering) {
-                roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon}); 
-                isRecovering = false; finishEdit(false); 
-            } else { showRecap(); } 
+            
+            const trueTime = Date.now() + serverTimeOffset;
+            roomRef.child('players').once('value', snap => {
+                let hasCaptain = false;
+                let activeMembers = 0;
+                snap.forEach(child => {
+                    const p = child.val();
+                    if (p.teamName === name && p.active !== false && p.banned !== true && child.key !== myUserID) {
+                        activeMembers++;
+                        if (p.isCaptain) hasCaptain = true;
+                    }
+                });
+                const becomeCaptain = (!hasCaptain || activeMembers === 0);
+                
+                if(isEditing) { 
+                    roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { finishEdit(true); }); 
+                } else if (isRecovering) {
+                    roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { isRecovering = false; finishEdit(false); }); 
+                } else { 
+                    isCaptain = becomeCaptain;
+                    showRecap(); 
+                }
+            });
         }
         
         function toggleCreateUI(show) { if(show) { document.getElementById('team-crest-choices').style.display = 'flex'; document.getElementById('team-crest-gallery').style.display = 'none'; document.getElementById('team-preview').style.display = 'none'; selectedTeamCrest = ""; } }
@@ -952,7 +1008,18 @@
 
         function launchGame(isReconnect = false) {
             if(!isReconnect) {
-                roomRef.child('players/' + myUserID).set({ name: player.pseudo, pts: 0, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon, active: true, banned: false });
+                const trueTime = Date.now() + serverTimeOffset;
+                let becomeCaptain = isCaptain;
+                roomRef.child('players/' + myUserID).set({ 
+                    name: player.pseudo, pts: 0, avatar: player.avatar, 
+                    teamName: player.team, teamIcon: player.teamIcon, 
+                    active: true, banned: false, 
+                    joinTimestamp: trueTime, isCaptain: becomeCaptain 
+                }).then(() => {
+                    if (becomeCaptain && player.team !== "Solo") {
+                        alert("👑 Félicitations Capitaine ! Vous gérez l'équipe " + player.team + ".");
+                    }
+                });
                 localStorage.setItem('presta_player_session', JSON.stringify(player)); localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar}));
             }
             updateGameHeader(); navigateTo('step-game'); requestWakeLock(); startBuzzer();
@@ -961,7 +1028,9 @@
         function updateGameHeader() {
             const miniAv = document.getElementById('game-avatar');
             if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`; else miniAv.innerText = player.avatar;
-            document.getElementById('game-pseudo').innerText = player.pseudo;
+            
+            document.getElementById('game-pseudo').innerHTML = player.pseudo + (isCaptain && player.team !== "Solo" ? " <span style='font-size:1.1rem;'>👑</span>" : "");
+            
             const teamEl = document.getElementById('game-team'); const badgeEl = document.getElementById('team-badge'); const buzzerBg = document.getElementById('buzzer-bg');
             let bgImg = player.avatar;
             if (player.team !== "Solo") { 
@@ -969,7 +1038,115 @@
                 if (player.teamIcon) { badgeEl.src = player.teamIcon; badgeEl.style.display = "block"; if(player.teamIcon.length > 20) bgImg = player.teamIcon; } 
             } else { teamEl.innerText = "Solo"; teamEl.style.display = "block"; badgeEl.style.display = "none"; }
             if(bgImg.length > 20) { buzzerBg.src = bgImg; buzzerBg.style.display = "block"; } else { buzzerBg.style.display = "none"; }
+            
+            const btnManage = document.getElementById('btn-manage-team');
+            if(btnManage) btnManage.style.display = (isCaptain && player.team !== "Solo") ? "block" : "none";
         }
+
+        // --- GESTION ÉQUIPE (CAPITAINE) ---
+        function openTeamManagement() {
+            document.getElementById('overlay-settings').style.display = 'none';
+            document.getElementById('manage-team-name').value = player.team;
+            const list = document.getElementById('manage-team-members');
+            list.innerHTML = "<div style='color:#ccc;'>Chargement...</div>";
+            
+            roomRef.child('players').orderByChild('teamName').equalTo(player.team).once('value', snap => {
+                list.innerHTML = "";
+                let members = [];
+                snap.forEach(child => { if(child.val().active !== false) members.push({id: child.key, ...child.val()}); });
+                
+                members.sort((a,b) => (a.joinTimestamp || 0) - (b.joinTimestamp || 0));
+                
+                members.forEach(m => {
+                    const div = document.createElement('div');
+                    div.style.cssText = "display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;";
+                    let av = m.avatar.length > 20 ? `<img src="${m.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.5rem;">${m.avatar}</span>`;
+                    
+                    let btnAction = "";
+                    if(m.id === myUserID) {
+                        btnAction = `<span style="color:#7f8c8d; font-size:0.8rem; margin-left:auto;">(Toi)</span>`;
+                    } else {
+                        btnAction = `<button onclick="expelMember('${m.id}', '${m.name.replace(/'/g, "\\'")}')" style="margin-left:auto; background:var(--danger); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer;">❌</button>`;
+                    }
+                    
+                    div.innerHTML = `${av} <b style="margin-left:10px; color:white; font-size:1rem;">${m.name}</b> ${btnAction}`;
+                    list.appendChild(div);
+                });
+                document.getElementById('overlay-manage-team').style.display = 'flex';
+            });
+        }
+
+        function renameTeamFromManage() {
+            const newName = document.getElementById('manage-team-name').value.trim();
+            if(newName.length < 2) return alert("Nom trop court.");
+            if(newName === player.team) return alert("C'est déjà le nom de l'équipe.");
+            
+            roomRef.child('teams/'+newName).once('value', snap => {
+                if(snap.exists()) return alert("Ce nom d'équipe est déjà pris.");
+                
+                roomRef.child('teams/'+newName).set({icon: player.teamIcon}).then(() => {
+                    roomRef.child('players').orderByChild('teamName').equalTo(player.team).once('value', snapPlayers => {
+                        let updates = {};
+                        snapPlayers.forEach(child => { updates[child.key + '/teamName'] = newName; });
+                        roomRef.child('players').update(updates).then(() => {
+                            roomRef.child('teams/'+player.team).remove();
+                            player.team = newName;
+                            updateGameHeader();
+                            alert("Équipe renommée !");
+                        });
+                    });
+                });
+            });
+        }
+
+        function openCrestEdit() {
+            document.getElementById('edit-crest-choices').style.display = 'flex';
+            document.getElementById('edit-crest-gallery').style.display = 'none';
+            document.getElementById('overlay-crest-edit').style.display = 'flex';
+        }
+
+        function showEditTeamGallery() {
+            document.getElementById('edit-crest-choices').style.display = 'none';
+            document.getElementById('edit-crest-gallery').style.display = 'flex';
+            const c = document.getElementById('edit-team-icon-grid');
+            c.innerHTML = "";
+            const seen = new Set(); 
+            if(roomLibrary) {
+                const entries = Object.entries(roomLibrary);
+                const recent = entries.filter(e => e[0].startsWith('-')); const old = entries.filter(e => !e[0].startsWith('-'));
+                recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
+                [...recent, ...old].forEach(entry => { if(!seen.has(entry[1])) { seen.add(entry[1]); createEditCrestItem(entry[1], c); } });
+            }
+            for(let i=0; i<30; i++) { const svg = createBlason(i); if(!seen.has(svg)) { seen.add(svg); createEditCrestItem(svg, c); } }
+        }
+
+        function createEditCrestItem(url, container) {
+            const d = document.createElement('div'); d.className='crest-item'; 
+            if (url.startsWith('data:image/svg')) { d.innerHTML = `<img src="${url}">`; } else { d.style.background = 'transparent'; d.innerHTML = `<img src="${url}" style="border-radius: 8px;">`; }
+            d.onclick = () => { saveNewCrest(url); };
+            container.appendChild(d);
+        }
+
+        function handleEditTeamFileUpload(input) {
+            if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { 
+                roomRef.child('library').push(base64).then(() => { saveNewCrest(base64); }); 
+            }); }
+        }
+
+        function saveNewCrest(iconUrl) {
+            roomRef.child('teams/'+player.team).update({icon: iconUrl}).then(() => {
+                document.getElementById('overlay-crest-edit').style.display='none';
+                alert("Blason mis à jour !");
+            });
+        }
+
+        function expelMember(uid, name) {
+            if(confirm(`Expulser ${name} de l'équipe ?`)) {
+                roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", isCaptain: false });
+                openTeamManagement(); // Rafraîchir la liste
+            }
+        }
+        // --- FIN GESTION ÉQUIPE ---
 
         function monitorTeamChanges(teamName) {
             if (currentWatchedTeam === teamName) return; 
@@ -994,15 +1171,15 @@
                 const t = snap.val(); const msgEl = document.getElementById('kicked-msg');
                 if (!t || t.banned) { msgEl.innerHTML = `L'animateur a banni l'équipe <b>${teamName}</b>.<br><br>S'il décide de la réhabiliter, tu auras la possibilité de la rejoindre à nouveau. Que veux-tu faire en attendant ?`; } 
                 else if (t.active === false) { msgEl.innerHTML = `L'animateur a mis l'équipe <b>${teamName}</b> en pause.<br><br>Tu pourras la retrouver si elle est réactivée. Que veux-tu faire en attendant ?`; } 
-                else { msgEl.innerHTML = `Tu as été retiré de l'équipe <b>${teamName}</b>.<br><br>Que veux-tu faire ?`; }
+                else { msgEl.innerHTML = `Le Capitaine (ou l'animateur) t'a retiré de l'équipe <b>${teamName}</b>.<br><br>Que veux-tu faire ?`; }
                 document.getElementById('overlay-team-kicked').style.display = 'flex';
             });
         }
 
         function handleKickedChoice(choice) {
             document.getElementById('overlay-team-kicked').style.display = 'none';
-            if (choice === 'solo') { player.team = "Solo"; player.teamIcon = ""; updateGameHeader(); } 
-            else if (choice === 'change') { isRecovering = true; navigateTo('step-team-action'); }
+            if (choice === 'solo') { player.team = "Solo"; player.teamIcon = ""; isCaptain = false; updateGameHeader(); } 
+            else if (choice === 'change') { isRecovering = true; isCaptain = false; navigateTo('step-team-action'); }
         }
 
         function monitorReinstatedTeam(teamName) {
@@ -1060,8 +1237,19 @@
                 if (d.avatar && d.avatar !== player.avatar) { player.avatar = d.avatar; profileChanged = true; }
                 if (profileChanged) { localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar})); localStorage.setItem('presta_player_session', JSON.stringify(player)); }
 
+                const wasCaptain = isCaptain;
+                isCaptain = d.isCaptain === true;
+
                 const newTeamName = d.teamName || "Solo";
-                if (player.team !== "Solo" && newTeamName === "Solo") { checkWhyKickedAndShowModal(player.team); }
+                const oldTeamName = player.team;
+                
+                if (oldTeamName !== "Solo" && newTeamName === "Solo") {
+                    checkWhyKickedAndShowModal(oldTeamName);
+                }
+                
+                if (!wasCaptain && isCaptain && newTeamName !== "Solo" && !isExiting && !isRoomClosing) {
+                    alert(`👑 Bonne nouvelle ! Vous avez été promu Capitaine de l'équipe ${newTeamName} !`);
+                }
 
                 player.team = newTeamName; player.teamIcon = d.teamIcon || ""; 
                 
@@ -1102,6 +1290,36 @@
         function setInactiveAndAction(callback) { if(roomRef && myUserID) { roomRef.child('players/' + myUserID).update({ active: false }).then(() => { callback(); }).catch(() => { callback(); }); } else { callback(); } }
 
         function handleExitAction(action) {
+            if (isCaptain && player.team !== "Solo" && action !== 'save') {
+                roomRef.child('players').orderByChild('teamName').equalTo(player.team).once('value', snap => {
+                    let members = [];
+                    snap.forEach(child => {
+                        const p = child.val();
+                        if(child.key !== myUserID && p.active !== false && p.banned !== true) {
+                            members.push({id: child.key, ...p});
+                        }
+                    });
+                    
+                    if(members.length > 0) {
+                        members.sort((a,b) => (a.joinTimestamp || 0) - (b.joinTimestamp || 0));
+                        const successor = members[0];
+                        if(confirm(`⚠️ ATTENTION CAPITAINE !\n\nSi vous quittez, vous perdrez votre statut.\nC'est ${successor.name} qui prendra votre place en tant que nouveau chef.\n\nVoulez-vous vraiment quitter ?`)) {
+                            roomRef.child('players/' + successor.id).update({isCaptain: true}).then(() => {
+                                roomRef.child('players/' + myUserID).update({isCaptain: false}).then(() => {
+                                    executeExitAction(action);
+                                });
+                            });
+                        }
+                    } else {
+                        executeExitAction(action);
+                    }
+                });
+                return;
+            }
+            executeExitAction(action);
+        }
+
+        function executeExitAction(action) {
             releaseWakeLock(); 
             if(action === 'save') {
                 alert("La création de compte arrive très bientôt !");
@@ -1115,7 +1333,7 @@
 
         function showClosingScreen() { 
             isRoomClosing = true; 
-            document.getElementById('podium-zone').style.display = 'none'; // Force la fermeture du podium
+            document.getElementById('podium-zone').style.display = 'none'; 
             document.getElementById('overlay-closing').style.display = 'flex'; 
         }
         
