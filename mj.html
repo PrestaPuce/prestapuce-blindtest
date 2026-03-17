@@ -290,8 +290,8 @@
             </div>
             
             <div style="position:relative; margin-bottom:15px;">
-                <input type="text" id="mj-team-search" class="hub-search-bar" style="margin-bottom:0; padding-right:40px;" placeholder="🔍 Chercher une équipe..." oninput="renderTeamLobby()">
-                <span id="clear-mj-team-search" onclick="document.getElementById('mj-team-search').value=''; renderTeamLobby();" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none; font-size:1.2rem;">✕</span>
+                <input type="text" id="mj-team-search" class="hub-search-bar" style="margin-bottom:0; padding-right:40px;" placeholder="🔍 Chercher une équipe..." oninput="renderTeamLobby(); document.getElementById('clear-mj-team-search').style.display = this.value.length > 0 ? 'block' : 'none';">
+                <span id="clear-mj-team-search" onclick="document.getElementById('mj-team-search').value=''; renderTeamLobby(); this.style.display='none';" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none; font-size:1.2rem;">✕</span>
             </div>
             
             <div id="mj-team-lobby-list" style="display:flex; flex-direction:column;"></div>
@@ -518,7 +518,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.175";
+        const APP_VERSION = "1.176";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -1266,9 +1266,22 @@
                 let badgeText = isBan ? "🔴 BANNIE" : (!isA ? "🟠 EN PAUSE" : "🟢 ACTIVE");
                 
                 let totalScore = 0;
-                Object.values(allPlayersData).forEach(p => { if(p.teamName === k) totalScore += (p.pts || 0); });
+                let activeCount = 0;
+                Object.values(allPlayersData).forEach(p => { 
+                    if(p.teamName === k) {
+                        totalScore += (p.pts || 0);
+                        if(p.active !== false && p.banned !== true) activeCount++;
+                    }
+                });
                 totalScore += bo;
                 if(!isA && !isBan) totalScore = t.frozenScore || 0;
+                
+                let blockedCount = t.blacklist ? Object.keys(t.blacklist).length : 0;
+                let statsHtml = `(<span style="color:var(--success);">${activeCount} Actif${activeCount > 1 ? 's' : ''}</span>`;
+                if (blockedCount > 0) {
+                    statsHtml += ` - <span style="color:var(--danger);">${blockedCount} Banni${blockedCount > 1 ? 's' : ''}</span>`;
+                }
+                statsHtml += `)`;
                 
                 let actionsHtml = "";
                 if(isBan) {
@@ -1287,7 +1300,7 @@
                     <div class="crest-mini-bg"><img src="${t.icon}" class="crest-mini"></div>
                     <div class="hub-line-text" style="margin-left:10px;">
                         <b style="color:var(--accent); margin-right:8px;">${k}</b> 
-                        <span style="color:#bdc3c7; font-size:0.85rem;">| Score : <span id="score-team-${k}">${totalScore}</span></span>
+                        <span style="color:#bdc3c7; font-size:0.85rem;">| Score : <span id="score-team-${k}">${totalScore}</span> | <span style="font-weight:bold;">${statsHtml}</span></span>
                     </div>
                     <span class="hub-badge ${badgeClass}">${badgeText}</span>
                     <div class="team-controls" style="margin-left:10px;" onclick="event.stopPropagation();">

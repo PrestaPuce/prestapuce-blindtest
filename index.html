@@ -514,7 +514,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.175";
+        const CLIENT_VERSION = "1.176";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1350,6 +1350,11 @@
                 
                 if (!wasCaptain && isCaptain && newTeamName !== "Solo" && !isExiting && !isRoomClosing) {
                     alert(`👑 Bonne nouvelle ! Vous avez été promu Capitaine de l'équipe ${newTeamName} !`);
+                } else if (wasCaptain && !isCaptain && oldTeamName !== "Solo" && newTeamName === oldTeamName && !isExiting && !isRoomClosing) {
+                    alert(`ℹ️ L'animateur a transféré le rôle de Capitaine à un autre membre de l'équipe.`);
+                    if(document.getElementById('overlay-manage-team').style.display === 'flex') {
+                        closeTeamManagement();
+                    }
                 }
 
                 player.team = newTeamName; player.teamIcon = d.teamIcon || ""; 
