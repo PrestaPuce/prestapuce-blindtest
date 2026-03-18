@@ -17,7 +17,19 @@
         #bg-protection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(0, 0, 0, 0.5); pointer-events: none; }
         
         .box { max-width: 400px; margin: 0 auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .dashboard { display: none; max-width: 800px; margin: 0 auto 40px auto; }
+        
+        /* Dashboard élargi en mode Cockpit */
+        .dashboard { display: none; max-width: 1200px; width: 95%; margin: 0 auto 40px auto; }
+        
+        /* Grille double colonne pour les lobbies */
+        .lobbies-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-top: 20px; }
+        @media (max-width: 900px) { .lobbies-grid { grid-template-columns: 1fr; } }
+        
+        /* Listes avec scrolling interne */
+        .scroll-list { max-height: 50vh; overflow-y: auto; padding-right: 5px; }
+        .scroll-list::-webkit-scrollbar { width: 6px; }
+        .scroll-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+        .scroll-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: rgba(0,0,0,0.5); color: white; font-size: 1rem; outline: none; margin-bottom: 5px; user-select: auto; -webkit-user-select: auto; }
         .input-helper { display: block; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 15px; font-style: italic; text-align: left; padding-left: 5px; }
@@ -62,15 +74,13 @@
         .badge-inactive { background: rgba(243, 156, 18, 0.2); color: var(--gold); border: 1px solid var(--gold); }
         .hub-btn { padding: 8px 15px; font-size: 0.8rem; width: auto; margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
-        .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 200px; overflow-y: auto; justify-content: flex-start; }
-        .crest-wrapper { width: 50px; height: 50px; background: #ecf0f1; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; flex-shrink: 0; }
+        .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-start; }
+        .crest-wrapper { width: 50px; height: 50px; background: #ecf0f1; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; flex-shrink: 0; position: relative; }
         .crest-selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: scale(1.1); z-index: 2; }
         .crest-opt { width: 100%; height: 100%; object-fit: contain; }
-        .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 20px 0; text-align: center; display: none; backdrop-filter: blur(10px); }
+        .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 0 auto 20px auto; max-width: 600px; text-align: center; display: none; backdrop-filter: blur(10px); }
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .team-item { display: flex; align-items: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin-bottom: 8px; justify-content: space-between; flex-wrap: wrap; gap: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        .team-item.banned { border: 2px solid var(--danger); background: rgba(231, 76, 60, 0.2); opacity: 0.8; }
-        .team-item.inactive { border: 1px dashed rgba(255,255,255,0.3); background: rgba(0,0,0,0.2); opacity: 0.8; }
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin-bottom: 5px; transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.05); }
         .score-row.airlock-row { background: rgba(243, 156, 18, 0.2); border: 2px solid var(--gold); }
         .score-row.buzzer-active-row { background: rgba(46, 204, 113, 0.3) !important; border: 2px solid var(--success) !important; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); transform: scale(1.02); z-index: 10; position: relative; }
@@ -138,9 +148,7 @@
         .readonly-mode .team-controls { display: none !important; }
         .readonly-mode #mj-actions-bar { display: none !important; }
         .readonly-mode .current-player .action-grid { display: none !important; }
-        .readonly-mode .team-item.banned, .readonly-mode .team-item.inactive { display: none !important; }
         .readonly-mode #inactive-section, .readonly-mode #banned-section { display: none !important; }
-        .readonly-mode #mj-team-inactive-section, .readonly-mode #mj-team-banned-section { display: none !important; }
         .readonly-mode #player-search-container { display: none !important; }
     </style>
 </head>
@@ -148,7 +156,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display"></div>
+    <div class="version-tag" id="app-version-display">v1.184</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 15px; left: 15px; z-index: 9999; cursor: pointer;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
         <div class="flip-container">
@@ -254,17 +262,17 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.183</span>
+                    <span id="disp-v-mj">v1.184</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>Remote :</span>
-                    <span id="disp-v-remote">v1.153</span>
+                    <span id="disp-v-remote">v1.155</span>
                     <input type="text" id="inp-v-remote" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'remote', 'scores')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>Scores :</span>
-                    <span id="disp-v-scores">v1.168</span>
+                    <span id="disp-v-scores">v1.169</span>
                     <input type="text" id="inp-v-scores" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'scores', 'guide')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -326,19 +334,38 @@
         </div>
     </div>
 
+    <div id="modal-team-edit" class="modal-overlay">
+        <div class="modal-box" style="max-width: 600px; padding: 20px;">
+            <button class="modal-close-x" onclick="document.getElementById('modal-team-edit').style.display='none'">✖</button>
+            <h2 id="team-modal-title" style="color:var(--accent); margin-top:0; text-transform:uppercase;">CRÉER UNE ÉQUIPE</h2>
+            
+            <input type="text" id="modal-t-name" placeholder="Nom de l'équipe..." onkeypress="if(event.key==='Enter') saveTeamFromModal()" style="font-size:1.1rem; padding:15px; margin-bottom:15px;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <p style="margin:0; color:#bdc3c7; font-size:0.9rem;">Choisissez un blason :</p>
+                <button class="btn-tiny" style="width:auto; padding:0 10px; background:var(--blue);" onclick="document.getElementById('team-modal-upload').click()">📸 Uploader</button>
+                <input type="file" id="team-modal-upload" accept="image/*" style="display:none;" onchange="handleTeamModalUpload(this.files)">
+            </div>
+            
+            <div class="crest-picker scroll-list" id="modal-crest-grid" style="max-height: 250px; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin-bottom:20px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
+            
+            <button id="btn-save-team-modal" class="big-btn btn-green" onclick="saveTeamFromModal()" style="font-size:1.1rem;">💾 ENREGISTRER</button>
+        </div>
+    </div>
+
     <div id="screen-dashboard" class="dashboard">
         
         <div id="readonly-banner" style="display:none; background:var(--danger); color:white; font-weight:bold; font-size:1.2rem; padding:15px; border-radius:10px; margin-bottom:20px; text-align:center; box-shadow:0 4px 10px rgba(231,76,60,0.4); text-transform:uppercase; border:2px solid #c0392b;">
             🏁 Partie Terminée - Mode Lecture Seule
         </div>
 
-        <div class="room-info-card" id="room-info-card">
+        <div class="room-info-card" id="room-info-card" style="max-width:600px; margin:0 auto 20px auto;">
             <div id="display-event-name" style="font-size: 1.8rem; font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1.1;">PARTIE EN COURS</div>
             <div id="display-mj-name" style="font-size: 1.1rem; font-weight: 600; margin-top: 5px; opacity: 0.9;">Animé par MJ</div>
             <div style="font-size: 0.85rem; font-family: monospace; opacity: 0.7; margin-top: 5px; font-weight: bold;">SALLE N° <span id="display-room">----</span></div>
         </div>
         
-        <div id="mj-actions-bar" style="display:flex; gap:10px; margin-bottom:20px;">
+        <div id="mj-actions-bar" style="display:flex; gap:10px; margin-bottom:20px; max-width:600px; margin-left:auto; margin-right:auto;">
             <button id="btn-open-buzz" style="background:var(--blue); flex:1;" onclick="statusUpdate('ready')">Ouvrir Buzzers</button>
             <button style="background:var(--danger); flex:1;" onclick="fullReset()">RESET TITRE</button>
         </div>
@@ -355,46 +382,54 @@
             </div>
         </div>
 
-        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-top: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
-            <h3 style="margin-top:0; text-shadow: 0 1px 2px black; margin-bottom:15px;">Lobby des Équipes</h3>
+        <div class="lobbies-grid">
             
-            <div class="team-controls" style="display:flex; align-items: center; gap: 10px; margin-bottom:15px; width:100%;">
-                <input type="text" id="t-name" placeholder="Nom de l'équipe..." onkeypress="if(event.key==='Enter') { checkTeamForm(); if(!document.getElementById('btn-add-team').disabled) addTeam(); }" style="margin-bottom: 0;">
-                <div class="btn-folder" onclick="openLibraryProxy('self')" title="Bibliothèque de Blasons">📁</div>
-            </div>
-            <div class="team-controls crest-picker" id="crest-grid" style="margin-top: 5px;"></div>
-            <div class="team-controls" style="display:flex; gap:10px; margin-bottom:20px;">
-                <button id="btn-add-team" disabled onclick="addTeam()" style="flex:2;">CRÉER L'ÉQUIPE</button>
-                <button id="btn-cancel-edit" class="btn-cancel" onclick="cancelEdit()" style="flex:1; display:none;">ANNULER</button>
+            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0; text-shadow: 0 1px 2px black;">Lobby des Équipes</h3>
+                </div>
+                
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <div style="position:relative; flex:1;">
+                        <input type="text" id="mj-team-search" class="hub-search-bar" style="margin:0; padding-right:35px; width:100%; box-sizing:border-box;" placeholder="🔍 Chercher équipe..." oninput="renderTeamLobby(); document.getElementById('clear-mj-team-search').style.display = this.value.length > 0 ? 'block' : 'none';">
+                        <span id="clear-mj-team-search" onclick="document.getElementById('mj-team-search').value=''; renderTeamLobby(); this.style.display='none';" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none; font-size:1.2rem;">✕</span>
+                    </div>
+                    <button class="btn-tiny" style="width:48px; height:48px; font-size:1.5rem; background:var(--mj-color); margin:0; border-radius:10px;" onclick="openTeamModal(null)" title="Créer une Équipe">➕</button>
+                </div>
+                
+                <div id="mj-team-filters" style="display:flex; gap:5px; overflow-x:auto; margin-bottom:15px;">
+                    <button id="tfilter-btn-all" class="hub-tab active" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setMjTeamFilter('all')">Toutes</button>
+                    <button id="tfilter-btn-active" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setMjTeamFilter('active')">🟢 Actives</button>
+                    <button id="tfilter-btn-inactive" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setMjTeamFilter('inactive')">🟠 Pause</button>
+                    <button id="tfilter-btn-banned" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setMjTeamFilter('banned')">🔴 Bannies</button>
+                </div>
+                
+                <div id="mj-team-lobby-list" class="scroll-list" style="display:flex; flex-direction:column;"></div>
             </div>
             
-            <div style="position:relative; margin-bottom:15px;">
-                <input type="text" id="mj-team-search" class="hub-search-bar" style="margin-bottom:0; padding-right:40px;" placeholder="🔍 Chercher une équipe..." oninput="renderTeamLobby(); document.getElementById('clear-mj-team-search').style.display = this.value.length > 0 ? 'block' : 'none';">
-                <span id="clear-mj-team-search" onclick="document.getElementById('mj-team-search').value=''; renderTeamLobby(); this.style.display='none';" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none; font-size:1.2rem;">✕</span>
+            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column;">
+                <h3 style="margin-top:0; text-shadow: 0 1px 2px black; margin-bottom:15px;">Lobby Joueurs</h3>
+                
+                <div style="position:relative; margin-bottom:15px;">
+                    <input type="text" id="player-search" class="hub-search-bar" style="margin:0; padding-right:35px; width:100%; box-sizing:border-box;" placeholder="🔍 Chercher un joueur..." oninput="renderLobby(); document.getElementById('clear-mj-player-search').style.display = this.value.length > 0 ? 'block' : 'none';">
+                    <span id="clear-mj-player-search" onclick="document.getElementById('player-search').value=''; renderLobby(); this.style.display='none';" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none; font-size:1.2rem;">✕</span>
+                </div>
+                
+                <div id="player-filters" style="display:flex; gap:5px; overflow-x:auto; margin-bottom:15px;">
+                    <button id="filter-btn-all" class="hub-tab active" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setPlayerFilter('all')">Tous</button>
+                    <button id="filter-btn-active" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setPlayerFilter('active')">🟢 Actifs</button>
+                    <button id="filter-btn-inactive" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setPlayerFilter('inactive')">🟠 Pause</button>
+                    <button id="filter-btn-banned" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setPlayerFilter('banned')">🔴 Bannis</button>
+                </div>
+                
+                <div class="scroll-list">
+                    <div id="score-list"></div>
+                    <div id="inactive-section" style="display:none; margin-top:10px; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255,255,255,0.3); border-radius: 12px;"><h4 style="color:#bdc3c7; margin-top:0; font-size:0.9rem;">Joueurs Inactifs / Partis</h4><div id="inactive-list"></div></div>
+                    <div id="banned-section" style="display:none; margin-top:10px; padding: 10px; background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); border-radius: 12px;"><h4 style="color:var(--danger); margin-top:0; font-size:0.9rem;">Joueurs Expulsés</h4><div id="banned-list"></div></div>
+                </div>
             </div>
-            
-            <div id="mj-team-lobby-list" style="display:flex; flex-direction:column;"></div>
-        </div>
-        
-        <h3 style="text-shadow: 0 1px 2px black;">Lobby Joueurs</h3>
-        
-        <div id="player-search-container" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);">
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <input type="text" id="player-search" class="hub-search-bar" style="margin:0; flex:1;" placeholder="🔍 Chercher un joueur..." oninput="renderLobby()">
-            </div>
-            <div id="player-filters" style="display:flex; gap:5px; overflow-x:auto;">
-                <button id="filter-btn-all" class="hub-tab active" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('all')">Tous</button>
-                <button id="filter-btn-active" class="hub-tab" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('active')">🟢 Actifs</button>
-                <button id="filter-btn-inactive" class="hub-tab" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('inactive')">🟠 En Pause</button>
-                <button id="filter-btn-banned" class="hub-tab" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('banned')">🔴 Bannis</button>
-            </div>
-        </div>
 
-        <div id="score-list"></div>
-        <div id="inactive-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255,255,255,0.3); border-radius: 12px; backdrop-filter: blur(10px);"><h3 style="color:#bdc3c7; margin-top:0; font-size:1rem;">Joueurs Inactifs / Partis</h3><div id="inactive-list"></div></div>
-        <div id="banned-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); border-radius: 12px; backdrop-filter: blur(10px);"><h3 style="color:var(--danger); margin-top:0;">Joueurs Expulsés</h3><div id="banned-list"></div></div>
-
-        <div style="margin-top:30px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);">
+        </div> <div style="margin-top:30px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); max-width:600px; margin-left:auto; margin-right:auto;">
             <h3 style="color:var(--danger); margin-top:0; margin-bottom:15px; text-shadow:0 1px 2px black; text-align:center; text-transform:uppercase;">⚙️ Gestion de la salle</h3>
             <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 1.1rem; margin-bottom: 10px; width: 100%; box-shadow: 0 4px 10px rgba(241, 196, 15, 0.4);" onclick="triggerEndGame()" title="Bloque les buzzers, affiche le podium final, et passe la salle en lecture seule dans vos archives.">🏆 FIN DE PARTIE & ARCHIVER</button>
             
@@ -571,7 +606,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.183";
+        const APP_VERSION = "1.184";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -591,6 +626,7 @@
         let buzzProcessing = false;
         let curLbType = '', curLbIdx = 0, lbCrests = [], lbBgsDash = [], lbBgsModal = [];
         let currentPlayerFilter = 'all';
+        let currentMjTeamFilter = 'all'; // NOUVEAU FILTRE EQUIPES
         
         let mjRooms = [];
         let currentHubTab = 'active';
@@ -621,10 +657,9 @@
         
         function initSuperAdminListener() { if(isSuperAdmin) db.ref('users').on('value', snap => { allUsersData = snap.val() || {}; renderSAMjList(); }); }
         
-        // --- NOUVEAU SYSTEME DE VERSIONS IN-PLACE ---
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.183", remote: "v1.153", scores: "v1.168", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.184", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -646,40 +681,17 @@
         function handleVersionKey(e, current, next) {
             if(e.key === 'Enter') {
                 e.preventDefault();
-                
-                // Sauvegarde silencieuse globale à chaque frappe Entrée
-                const newV = {
-                    index: document.getElementById('inp-v-index').value.trim(),
-                    mj: document.getElementById('inp-v-mj').value.trim(),
-                    remote: document.getElementById('inp-v-remote').value.trim(),
-                    scores: document.getElementById('inp-v-scores').value.trim(),
-                    guide: document.getElementById('inp-v-guide').value.trim()
-                };
+                const newV = { index: document.getElementById('inp-v-index').value.trim(), mj: document.getElementById('inp-v-mj').value.trim(), remote: document.getElementById('inp-v-remote').value.trim(), scores: document.getElementById('inp-v-scores').value.trim(), guide: document.getElementById('inp-v-guide').value.trim() };
                 db.ref('config/versions').set(newV);
-                
-                // Saut automatique au champ suivant
-                if(next) {
-                    document.getElementById('inp-v-' + next).focus();
-                } else {
-                    document.getElementById('inp-v-' + current).blur();
-                }
+                if(next) { document.getElementById('inp-v-' + next).focus(); } else { document.getElementById('inp-v-' + current).blur(); }
             }
         }
 
         function updateAllVersions() { 
             if(!isSuperAdmin) return;
-            const newV = {
-                index: document.getElementById('inp-v-index').value.trim(),
-                mj: document.getElementById('inp-v-mj').value.trim(),
-                remote: document.getElementById('inp-v-remote').value.trim(),
-                scores: document.getElementById('inp-v-scores').value.trim(),
-                guide: document.getElementById('inp-v-guide').value.trim()
-            };
-            if(confirm("Forcer la mise à jour globale des versions ?")) {
-                db.ref('config/versions').set(newV).then(() => alert("Versions mises à jour avec succès !"));
-            }
+            const newV = { index: document.getElementById('inp-v-index').value.trim(), mj: document.getElementById('inp-v-mj').value.trim(), remote: document.getElementById('inp-v-remote').value.trim(), scores: document.getElementById('inp-v-scores').value.trim(), guide: document.getElementById('inp-v-guide').value.trim() };
+            if(confirm("Forcer la mise à jour globale des versions ?")) { db.ref('config/versions').set(newV).then(() => alert("Versions mises à jour avec succès !")); }
         }
-        // --------------------------------------------
 
         function renderSAMjList() {
             const container = document.getElementById('sa-mj-list'); container.innerHTML = "";
@@ -779,7 +791,7 @@
             const uid = activeLibraryUid || auth.currentUser.uid;
             db.ref(`users/${uid}/library`).once('value').then(snap => {
                 const libData = snap.val() || {};
-                if (!isProxyMode) { mjLibrary = libData; loadCrestGrid(); syncLibraryToRoom(); }
+                if (!isProxyMode) { mjLibrary = libData; syncLibraryToRoom(); }
                 renderModalLibraryGrid(libData); 
             }).catch(e => console.error("Erreur Library:", e));
         }
@@ -807,7 +819,13 @@
         function executeCrestDelete(key, urlToDelete) {
             const uid = activeLibraryUid || auth.currentUser.uid;
             if(!isProxyMode && globalTeams) { Object.keys(globalTeams).forEach(tKey => { if(globalTeams[tKey].icon === urlToDelete) roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad" }); }); }
-            db.ref(`users/${uid}/library/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => loadModalLibrary());
+            db.ref(`users/${uid}/library/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => {
+                loadModalLibrary();
+                if(document.getElementById('modal-team-edit').style.display === 'flex') {
+                    delete mjLibrary[key];
+                    loadModalCrestGrid();
+                }
+            });
         }
 
         async function handleFiles(files) {
@@ -816,29 +834,31 @@
             title.innerText = "✅ TERMINÉ !"; loadModalLibrary(); setTimeout(() => { title.innerText = orig; sub.innerText = "ou Cliquez"; }, 2000);
         }
 
-        function loadCrestGrid() {
-            const grid = document.getElementById('crest-grid'); if(!grid) return; grid.innerHTML = "";
-            const entries = Object.entries(mjLibrary || {}); const recent = entries.filter(e => e[0].startsWith('-')); const old = entries.filter(e => !e[0].startsWith('-')); recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
-            [...recent, ...old].forEach(entry => createCrestItem(entry[1], grid));
-            if (showDefaultCrests) { for(let i=0; i<30; i++) createCrestItem(createBlason(i), grid); }
+        // --- NOUVEL ALGORITHME MATHEMATHIQUE BLASONS PAR DEFAUT (SANS DOUBLONS) ---
+        function createBlason(i) { 
+            const colorPairs = [
+                ['#e74c3c', '#f1c40f'], ['#3498db', '#ecf0f1'], ['#2ecc71', '#2c3e50'],
+                ['#9b59b6', '#f1c40f'], ['#e67e22', '#2c3e50'], ['#1abc9c', '#ecf0f1'],
+                ['#34495e', '#e74c3c'], ['#f39c12', '#8e44ad'], ['#2980b9', '#27ae60'],
+                ['#c0392b', '#bdc3c7']
+            ];
+            const pair = colorPairs[Math.floor(i / 3) % 10];
+            const c1 = pair[0]; const c2 = pair[1];
+            const m = i % 3;
+            let p = "";
+            if (m === 0) p = `<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`;
+            else if (m === 1) p = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`;
+            else p = `<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`;
+            return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="800" height="800"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${p}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`; 
         }
-        function toggleDefaultCrests(checked) { showDefaultCrests = checked; if (!isProxyMode) { db.ref(`users/${auth.currentUser.uid}/showDefaultCrests`).set(checked); mjProfileData.showDefaultCrests = checked; loadCrestGrid(); } loadModalLibrary(); }
+
+        function toggleDefaultCrests(checked) { showDefaultCrests = checked; if (!isProxyMode) { db.ref(`users/${auth.currentUser.uid}/showDefaultCrests`).set(checked); mjProfileData.showDefaultCrests = checked; } loadModalLibrary(); }
 
         function openBgLibraryProxy(mode) { isProxyBgMode = (mode === 'proxy'); activeBgLibraryUid = isProxyBgMode ? targetMjUid : auth.currentUser.uid; modalSelectedBgUrl = ""; document.getElementById('btn-modal-bg-default').disabled = true; document.getElementById('btn-modal-bg-console').disabled = true; document.getElementById('modal-bg-library').style.display = 'flex'; loadBgLibrary('modal'); }
         function closeBgLibrary() { document.getElementById('modal-bg-library').style.display = 'none'; if(isProxyBgMode) { isProxyBgMode = false; activeBgLibraryUid = auth.currentUser.uid; } }
         function loadBgLibrary(mode) {
             const uid = (mode === 'modal') ? activeBgLibraryUid : auth.currentUser.uid;
-            db.ref(`users/${uid}/bgLibrary`).once('value').then(snap => { const libData = snap.val() || {}; if (mode === 'dashboard' || !isProxyBgMode) { mjBgLibrary = libData; renderBgGalleryDashboard(); } if (mode === 'modal') { renderBgGalleryModal(libData); } }).catch(e=>console.error(e));
-        }
-        function renderBgGalleryDashboard() {
-            const grid = document.getElementById('bg-gallery'); if(!grid) return; grid.innerHTML = ""; lbBgsDash = [];
-            Object.entries(mjBgLibrary || {}).reverse().forEach(e => lbBgsDash.push({key: e[0], url: e[1], isNative: false, type: 'bg', mode: 'dashboard'}));
-            lbBgsDash.forEach((item, i) => { 
-                const div = document.createElement('div'); div.className = 'bg-item'; 
-                if(selectedBgUrl === item.url) div.classList.add('bg-selected'); 
-                div.onclick = () => { document.querySelectorAll('#bg-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); selectedBgUrl = item.url; document.getElementById('btn-apply-bg').disabled = false; openLightbox(i, 'bgDash'); }; 
-                div.style.background = 'transparent'; div.innerHTML = `<img src="${item.url}">`; grid.appendChild(div); 
-            });
+            db.ref(`users/${uid}/bgLibrary`).once('value').then(snap => { const libData = snap.val() || {}; if (mode === 'dashboard' || !isProxyBgMode) { mjBgLibrary = libData; } if (mode === 'modal') { renderBgGalleryModal(libData); } }).catch(e=>console.error(e));
         }
         function renderBgGalleryModal(libData) {
             const grid = document.getElementById('bg-modal-gallery'); if(!grid) return; grid.innerHTML = ""; lbBgsModal = [];
@@ -849,14 +869,6 @@
                 div.onclick = () => { document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); modalSelectedBgUrl = item.url; document.getElementById('btn-modal-bg-default').disabled = false; document.getElementById('btn-modal-bg-console').disabled = false; openLightbox(i, 'bgModal'); }; 
                 div.style.background = 'transparent'; div.innerHTML = `<img src="${item.url}">`; grid.appendChild(div); 
             });
-        }
-        function executeBgDeleteDash(key, urlToDelete) {
-            const uid = auth.currentUser.uid;
-            if(selectedBgUrl === urlToDelete) { selectedBgUrl = ""; document.getElementById('btn-apply-bg').disabled = true; }
-            if(mjProfileData.defaultBackground === urlToDelete) { db.ref(`users/${uid}/defaultBackground`).remove(); mjProfileData.defaultBackground = null; }
-            if(mjProfileData.consoleBackground === urlToDelete) { db.ref(`users/${uid}/consoleBackground`).remove(); mjProfileData.consoleBackground = null; applyMjConsoleBg(null); }
-            if(currentRoomBgUrl === urlToDelete && roomRef) roomRef.child('customBackground').remove();
-            db.ref(`users/${uid}/bgLibrary/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => loadBgLibrary('dashboard'));
         }
         function executeBgDeleteModal(key, urlToDelete) {
             const uid = activeBgLibraryUid;
@@ -870,11 +882,9 @@
         function handleBgUpload(files, mode) { if(!files||files.length===0)return; const file=files[0], prefix=mode==='modal'?'bg-modal':'bg', title=document.getElementById(prefix+'-dz-title'), sub=document.getElementById(prefix+'-dz-sub'), orig=title.innerText, uid=mode==='modal'?activeBgLibraryUid:auth.currentUser.uid; title.innerText="⏳ Envoi..."; storage.ref(`mj_custom_bgs/${uid}/${Date.now()}_${file.name}`).put(file).then(s=>s.ref.getDownloadURL()).then(u=>{ db.ref(`users/${uid}/bgLibrary`).push(u).then(()=>{ title.innerText="✅ Ajouté !"; loadBgLibrary(mode); setTimeout(()=>{title.innerText=orig;sub.innerText="ou Cliquez";},3000); }); }).catch(e=>alert("Erreur: "+e.message)); }
         function addBgUrlToLibrary(mode) { const p=mode==='modal'?'bg-modal':'room-bg', i=document.getElementById(p+'-url-input'), u=i.value.trim(); if(!u||(!u.startsWith('http')&&!u.startsWith('data:image/')))return alert("URL invalide."); db.ref(`users/${mode==='modal'?activeBgLibraryUid:auth.currentUser.uid}/bgLibrary`).push(u).then(()=>{ i.value=""; loadBgLibrary(mode); }).catch(e=>alert("Erreur: "+e.message)); }
         function setModalBgAction(type) { if(!modalSelectedBgUrl)return; const uid=activeBgLibraryUid; if(type==='default'){ db.ref(`users/${uid}/defaultBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond par défaut enregistré !");if(!isProxyBgMode)mjProfileData.defaultBackground=modalSelectedBgUrl;}); } else { db.ref(`users/${uid}/consoleBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond console enregistré !");if(!isProxyBgMode){mjProfileData.consoleBackground=modalSelectedBgUrl;applyMjConsoleBg(modalSelectedBgUrl);}}); } }
-        function saveCustomBg() { if(!selectedBgUrl)return; const d=document.getElementById('check-default-bg').checked, c=document.getElementById('check-console-bg').checked, uid=auth.currentUser.uid; if(d){db.ref(`users/${uid}/defaultBackground`).set(selectedBgUrl);mjProfileData.defaultBackground=selectedBgUrl;} if(c){db.ref(`users/${uid}/consoleBackground`).set(selectedBgUrl);mjProfileData.consoleBackground=selectedBgUrl;applyMjConsoleBg(selectedBgUrl);}else{db.ref(`users/${uid}/consoleBackground`).remove();mjProfileData.consoleBackground=null;applyMjConsoleBg(null);} if(roomRef)roomRef.child('customBackground').set(selectedBgUrl).then(()=>alert("Appliqué !")); }
-        function resetCustomBg() { selectedBgUrl=""; document.querySelectorAll('#bg-gallery .bg-item').forEach(i=>i.classList.remove('bg-selected')); document.getElementById('btn-apply-bg').disabled=true; if(roomRef)roomRef.child('customBackground').remove().then(()=>alert("Fond par défaut de la salle réinitialisé.")); }
+        function applyMjConsoleBg(url) { const bg=document.getElementById('dynamic-bg'); if(url&&url!==""){ bg.style.background=`url('${url}') center/cover no-repeat`; bg.style.animation='none'; }else{ bg.style.background='linear-gradient(45deg, #0f0c29, #302b63, #24243e)'; bg.style.backgroundSize='300% 300%'; bg.style.animation='gradientBG 15s ease infinite'; } }
         
         function handleProfileFile(files) { if(!files||files.length===0)return; const storageRef=storage.ref(`mj_profile_logos/${auth.currentUser.uid}/logo`); document.getElementById('prof-logo-placeholder').style.opacity='0.3'; storageRef.put(files[0]).then(s=>s.ref.getDownloadURL()).then(u=>{ document.getElementById('prof-logo-placeholder').style.display='none'; const img=document.getElementById('prof-logo-preview'); img.src=u; img.style.display='block'; document.getElementById('prof-logo-url').value=u; }).catch(e=>alert("Erreur upload: "+e.message)); }
-        function applyMjConsoleBg(url) { const bg=document.getElementById('dynamic-bg'); if(url&&url!==""){ bg.style.background=`url('${url}') center/cover no-repeat`; bg.style.animation='none'; }else{ bg.style.background='linear-gradient(45deg, #0f0c29, #302b63, #24243e)'; bg.style.backgroundSize='300% 300%'; bg.style.animation='gradientBG 15s ease infinite'; } }
         
         function login() { const e=document.getElementById('mj-email').value.trim(), p=document.getElementById('mj-pass').value; if(e&&p)auth.signInWithEmailAndPassword(e,p).then(r=>loadMjData(r.user)).catch(()=>alert("Oups ! Identifiants incorrects.")); }
         function togglePasswordVisibility(id, icon) { const i=document.getElementById(id); if(i.type==='password'){ i.type='text'; icon.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 3.31 0 6.28-1.38 8.22-3.67l.48.48 2.73 2.73 1.27-1.27L3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>'; } else { i.type='password'; icon.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; } }
@@ -885,21 +895,12 @@
             
             if(isSuperAdmin) { 
                 document.getElementById('btn-super-admin').style.display='inline-block'; 
-                
-                ['index', 'mj', 'remote', 'scores', 'guide'].forEach(f => {
-                    document.getElementById('disp-v-' + f).style.display = 'none';
-                    document.getElementById('inp-v-' + f).style.display = 'inline-block';
-                });
+                ['index', 'mj', 'remote', 'scores', 'guide'].forEach(f => { document.getElementById('disp-v-' + f).style.display = 'none'; document.getElementById('inp-v-' + f).style.display = 'inline-block'; });
                 document.getElementById('sa-inline-save-btn').style.display='block';
-                
                 initSuperAdminListener(); 
             } else { 
                 document.getElementById('btn-super-admin').style.display='none'; 
-                
-                ['index', 'mj', 'remote', 'scores', 'guide'].forEach(f => {
-                    document.getElementById('disp-v-' + f).style.display = 'inline-block';
-                    document.getElementById('inp-v-' + f).style.display = 'none';
-                });
+                ['index', 'mj', 'remote', 'scores', 'guide'].forEach(f => { document.getElementById('disp-v-' + f).style.display = 'inline-block'; document.getElementById('inp-v-' + f).style.display = 'none'; });
                 document.getElementById('sa-inline-save-btn').style.display='none';
             }
             
@@ -908,7 +909,7 @@
                 const data = snap.val() || {};
                 if(!isSuperAdmin && data.isGuest !== true) { if(data.isBlocked || (data.expirationDate && data.expirationDate < Date.now())) { alert("⚠️ ACCÈS REFUSÉ. Abonnement expiré ou bloqué."); return auth.signOut().then(()=>location.reload()); } }
                 mjProfileData = data;
-                if (!data.library && data.customLogos) { let m={}; Object.values(data.customLogos).forEach((u,i)=>m['m_'+i]=u); db.ref(`users/${user.uid}/library`).set(m).then(()=>{ mjLibrary=m; loadCrestGrid(); }); } else { mjLibrary = data.library || {}; }
+                if (!data.library && data.customLogos) { let m={}; Object.values(data.customLogos).forEach((u,i)=>m['m_'+i]=u); db.ref(`users/${user.uid}/library`).set(m).then(()=>{ mjLibrary=m; }); } else { mjLibrary = data.library || {}; }
                 mjBgLibrary = data.bgLibrary || {};
                 if(data.defaultBackground) document.getElementById('check-default-bg').checked=true;
                 if(data.consoleBackground) { document.getElementById('check-console-bg').checked=true; applyMjConsoleBg(data.consoleBackground); } else applyMjConsoleBg(null);
@@ -1057,7 +1058,7 @@
         }
 
         function syncLibraryToRoom() { try { if(roomID && roomRef) roomRef.child('library').set(mjLibrary || {}); } catch(e){ console.error("Erreur sync library", e); } }
-        function initLibrarySync() { roomRef.child('library').on('value', snap => { const r = snap.val()||{}; const u = auth.currentUser.uid; if(!u)return; let h=false; Object.values(r).forEach(url => { if(!Object.values(mjLibrary).includes(url)){ db.ref(`users/${u}/library`).push(url); h=true; } }); if(h) loadModalLibrary(); }); }
+        function initLibrarySync() { roomRef.child('library').on('value', snap => { const r = snap.val()||{}; const u = auth.currentUser.uid; if(!u)return; let h=false; Object.values(r).forEach(url => { if(!Object.values(mjLibrary).includes(url)){ db.ref(`users/${u}/library`).push(url); h=true; } }); if(h) { loadModalLibrary(); if(document.getElementById('modal-team-edit').style.display === 'flex') loadModalCrestGrid(); } }); }
 
         let previousScreen = "screen-choice";
         function openAboutModal() { document.getElementById('modal-about').style.display = 'flex'; }
@@ -1118,7 +1119,6 @@
                 if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); 
             } 
         }
-        function createBlason(i) { const c=['#e74c3c','#3498db','#f1c40f','#2c3e50','#27ae60','#ecf0f1'], c1=c[i%c.length], c2=c[(i+1)%c.length], m=i%10; let p=(m===0)?`<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`:(m===1)?`<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`:`<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`; return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="800" height="800"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${p}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`; }
 
         function askMjNameAndCreate() { 
             document.getElementById('new-room-mj').value = mjProfileData.prenom || "MJ"; 
@@ -1153,7 +1153,11 @@
 
         function launchDashboard(id, mjName = null, eventName = null, isArchived = false) {
             roomID = id; buzzHistory = []; currentBuzzerId = null; currentPlayer = null;
-            currentPlayerFilter = 'all'; document.querySelectorAll('#player-filters button').forEach(btn => btn.classList.remove('active')); document.getElementById('filter-btn-all').classList.add('active'); if(document.getElementById('player-search')) document.getElementById('player-search').value = "";
+            currentPlayerFilter = 'all'; currentMjTeamFilter = 'all';
+            document.querySelectorAll('#player-filters button').forEach(btn => btn.classList.remove('active')); document.getElementById('filter-btn-all').classList.add('active'); 
+            document.querySelectorAll('#mj-team-filters button').forEach(btn => btn.classList.remove('active')); document.getElementById('tfilter-btn-all').classList.add('active'); 
+            if(document.getElementById('player-search')) document.getElementById('player-search').value = "";
+            if(document.getElementById('mj-team-search')) document.getElementById('mj-team-search').value = "";
             
             const btnDel = document.getElementById('btn-delete-room');
             if (btnDel) {
@@ -1199,7 +1203,6 @@
             try { syncLibraryToRoom(); } catch(e){ console.error(e); }
             try { initMJLogic(); } catch(e){ console.error(e); }
             try { initLibrarySync(); } catch(e){ console.error(e); }
-            try { loadCrestGrid(); } catch(e){ console.error(e); }
             try { loadBgLibrary('dashboard'); } catch(e){ console.error(e); }
             try { openScoreBoard(); } catch(e){ console.error(e); }
         }
@@ -1208,24 +1211,136 @@
         function toggleGuide() { const o = document.getElementById('overlay-guide'); if(o.style.display === 'flex') o.style.display = 'none'; else { o.style.display = 'flex'; document.getElementById('guide-iframe').src = "guide.html?t=" + Date.now(); } }
         function showRemoteQR() { const o = document.getElementById('overlay-remote-qr'); const q = document.getElementById('qrcode-remote'); q.innerHTML = ""; new QRCode(q, { text: window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/remote.html?room=" + roomID, width: 250, height: 250 }); o.style.display = 'flex'; }
 
-        function createCrestItem(url, container) { 
-            const w = document.createElement('div'); 
-            w.className = 'crest-wrapper'; 
-            if (selCrest === url) w.classList.add('crest-selected'); 
+        // --- NOUVELLE GESTION MODALE EQUIPE ---
+        function openTeamModal(tName) {
+            editingTeamKey = tName;
+            document.getElementById('modal-team-edit').style.display = 'flex';
+            const nameInput = document.getElementById('modal-t-name');
+            
+            if (tName) {
+                document.getElementById('team-modal-title').innerText = "MODIFIER L'ÉQUIPE";
+                nameInput.value = tName;
+                selCrest = globalTeams[tName] ? globalTeams[tName].icon : "";
+            } else {
+                document.getElementById('team-modal-title').innerText = "CRÉER UNE ÉQUIPE";
+                nameInput.value = "";
+                selCrest = "";
+            }
+            
+            loadModalCrestGrid();
+            setTimeout(() => nameInput.focus(), 100);
+        }
+
+        function loadModalCrestGrid() {
+            const grid = document.getElementById('modal-crest-grid'); if(!grid) return; grid.innerHTML = "";
+            const seen = new Set();
+            
+            const entries = Object.entries(mjLibrary || {});
+            const recent = entries.filter(e => e[0].startsWith('-'));
+            const old = entries.filter(e => !e[0].startsWith('-'));
+            recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
+            
+            [...recent, ...old].forEach(entry => {
+                const key = entry[0]; const url = entry[1];
+                if (!seen.has(url)) {
+                    seen.add(url);
+                    createModalCrestItem(key, url, grid, true);
+                }
+            });
+
+            if (showDefaultCrests) {
+                for(let i=0; i<30; i++) {
+                    const svg = createBlason(i);
+                    if (!seen.has(svg)) {
+                        seen.add(svg);
+                        createModalCrestItem(null, svg, grid, false);
+                    }
+                }
+            }
+        }
+
+        function createModalCrestItem(key, url, container, isCustom) {
+            const w = document.createElement('div');
+            w.className = 'crest-wrapper';
+            w.style.position = 'relative';
+            if (selCrest === url) w.classList.add('crest-selected');
+            
             if (url.startsWith('data:image/svg')) {
                 w.innerHTML = `<img src="${url}" class="crest-opt">`;
             } else {
-                w.style.background = 'transparent'; 
+                w.style.background = 'transparent';
                 w.innerHTML = `<img src="${url}" class="crest-opt" style="border-radius: 4px;">`;
             }
-            w.onclick = () => { document.querySelectorAll('.crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); w.classList.add('crest-selected'); selCrest = url; checkTeamForm(); }; 
-            container.appendChild(w); 
+
+            if (isCustom) {
+                const del = document.createElement('div');
+                del.className = 'lib-del';
+                del.innerHTML = '✖';
+                del.onclick = (e) => {
+                    e.stopPropagation();
+                    if(confirm("Supprimer définitivement ce blason ?")) {
+                        executeCrestDelete(key, url);
+                    }
+                };
+                w.appendChild(del);
+            }
+
+            w.onclick = () => {
+                document.querySelectorAll('#modal-crest-grid .crest-wrapper').forEach(i=>i.classList.remove('crest-selected'));
+                w.classList.add('crest-selected');
+                selCrest = url;
+            };
+            container.appendChild(w);
         }
-        function checkTeamForm() { document.getElementById('btn-add-team').disabled = !(document.getElementById('t-name').value.trim().length > 0 && selCrest !== ""); }
-        function editTeam(n) { const t = globalTeams[n]; editingTeamKey = n; document.getElementById('t-name').value = n; selCrest = t.icon; document.getElementById('btn-add-team').innerText = "ENREGISTRER MODIF"; document.getElementById('btn-add-team').style.background = "var(--blue)"; document.getElementById('btn-cancel-edit').style.display = "block"; loadCrestGrid(); checkTeamForm(); }
-        function cancelEdit() { editingTeamKey = null; document.getElementById('t-name').value = ""; selCrest = ""; document.getElementById('btn-add-team').innerText = "CRÉER L'ÉQUIPE"; document.getElementById('btn-add-team').style.background = "var(--mj-color)"; document.getElementById('btn-cancel-edit').style.display = "none"; loadCrestGrid(); checkTeamForm(); }
-        function addTeam() { const n = document.getElementById('t-name').value.trim(); if(n && selCrest) { if(mjProfileData.isGuest === true && !editingTeamKey && Object.keys(globalTeams).length >= 2) return alert("Limité à 2 équipes en Découverte."); if(editingTeamKey && editingTeamKey !== n) roomRef.child('teams/' + editingTeamKey).remove(); roomRef.child('teams/' + n).update({ icon: selCrest, active: true, bonus: 0 }); cancelEdit(); } }
-        
+
+        function handleTeamModalUpload(files) {
+            if(!files || files.length === 0) return;
+            const file = files[0];
+            const uid = auth.currentUser.uid;
+            document.getElementById('team-modal-title').innerText = "⏳ Upload en cours...";
+            storage.ref(`mj_library/${uid}/${Date.now()}_${file.name}`).put(file).then(s => s.ref.getDownloadURL()).then(u => {
+                db.ref(`users/${uid}/library`).push(u).then(() => {
+                    selCrest = u;
+                    document.getElementById('team-modal-title').innerText = editingTeamKey ? "MODIFIER L'ÉQUIPE" : "CRÉER UNE ÉQUIPE";
+                    // Sync is done automatically via initLibrarySync which calls loadModalCrestGrid
+                });
+            }).catch(e => {
+                alert("Erreur upload: " + e.message);
+                document.getElementById('team-modal-title').innerText = editingTeamKey ? "MODIFIER L'ÉQUIPE" : "CRÉER UNE ÉQUIPE";
+            });
+        }
+
+        function saveTeamFromModal() {
+            const n = document.getElementById('modal-t-name').value.trim();
+            if(!n) return alert("Veuillez saisir un nom d'équipe.");
+            if(!selCrest) return alert("Veuillez sélectionner un blason.");
+            
+            if(mjProfileData.isGuest === true && !editingTeamKey && Object.keys(globalTeams).length >= 2) return alert("Limité à 2 équipes en Découverte.");
+            
+            if(editingTeamKey && editingTeamKey !== n) {
+                roomRef.child('teams/' + editingTeamKey).once('value').then(snap => {
+                    const data = snap.val();
+                    roomRef.child('teams/' + n).set({...data, icon: selCrest}).then(() => {
+                        roomRef.child('teams/' + editingTeamKey).remove();
+                        roomRef.child('players').once('value', pSnap => {
+                            let updates = {};
+                            pSnap.forEach(p => {
+                                if(p.val().teamName === editingTeamKey) {
+                                    updates[p.key + '/teamName'] = n;
+                                    updates[p.key + '/teamIcon'] = selCrest;
+                                }
+                            });
+                            if(Object.keys(updates).length > 0) roomRef.child('players').update(updates);
+                        });
+                        document.getElementById('modal-team-edit').style.display = 'none';
+                    });
+                });
+            } else {
+                roomRef.child('teams/' + n).update({ icon: selCrest, active: true, bonus: globalTeams[n] ? globalTeams[n].bonus : 0 });
+                document.getElementById('modal-team-edit').style.display = 'none';
+            }
+        }
+
         function initMJLogic() {
             roomRef.child('eventName').on('value', snap => { if(snap.exists()) document.getElementById('display-event-name').innerText = snap.val(); else document.getElementById('display-event-name').innerText = "PARTIE EN COURS"; });
             roomRef.child('mjName').on('value', snap => { if(snap.exists()) document.getElementById('display-mj-name').innerText = "Animé par " + snap.val(); else document.getElementById('display-mj-name').innerText = "Animé par MJ"; });
@@ -1369,6 +1484,13 @@
         function saveFocus() { const active = document.activeElement; if (active && active.tagName === 'INPUT' && active.type === 'text') { return { id: active.id, start: active.selectionStart, end: active.selectionEnd, val: active.value }; } return null; }
         function restoreFocus(focusData) { if (focusData && focusData.id) { setTimeout(() => { const el = document.getElementById(focusData.id); if (el) { el.focus(); el.value = focusData.val; el.setSelectionRange(focusData.start, focusData.end); } }, 0); } }
 
+        function setMjTeamFilter(filter) {
+            currentMjTeamFilter = filter;
+            document.querySelectorAll('#mj-team-filters button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tfilter-btn-' + filter).classList.add('active');
+            renderTeamLobby();
+        }
+
         function renderTeamLobby() {
             if (isRenderingTeamLobby) return;
             isRenderingTeamLobby = true;
@@ -1382,10 +1504,16 @@
             
             Object.keys(globalTeams).forEach(k => {
                 const t = globalTeams[k];
-                if (searchVal && !k.toLowerCase().includes(searchVal)) return;
                 
                 const isA = t.active !== false;
                 const isBan = t.banned === true;
+                
+                if (currentMjTeamFilter === 'active' && (!isA || isBan)) return;
+                if (currentMjTeamFilter === 'inactive' && (isA || isBan)) return;
+                if (currentMjTeamFilter === 'banned' && !isBan) return;
+
+                if (searchVal && !k.toLowerCase().includes(searchVal)) return;
+                
                 const bo = t.bonus || 0;
                 
                 let badgeClass = isBan ? "badge-banned" : (!isA ? "badge-inactive" : "badge-active");
@@ -1415,7 +1543,7 @@
                 } else if(!isA) {
                     actionsHtml = `<span class="btn-icon btn-restore" onclick="openRestoreModal('${k.replace(/'/g, "\\'")}')" title="Réactiver">▶️</span><span class="btn-icon btn-del" onclick="banTeam('${k.replace(/'/g, "\\'")}')" title="Bannir">🚫</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${k.replace(/'/g, "\\'")}')" title="Supprimer">🗑️</span>`;
                 } else {
-                    actionsHtml = `<span class="btn-icon btn-pause" onclick="archiveTeam('${k.replace(/'/g, "\\'")}')" title="Mettre en pause">⏸️</span><span class="btn-icon btn-del" onclick="banTeam('${k.replace(/'/g, "\\'")}')" title="Bannir">🚫</span><span class="btn-icon btn-edit" onclick="editTeam('${k.replace(/'/g, "\\'")}')" title="Modifier">✎</span>`;
+                    actionsHtml = `<span class="btn-icon btn-pause" onclick="archiveTeam('${k.replace(/'/g, "\\'")}')" title="Mettre en pause">⏸️</span><span class="btn-icon btn-del" onclick="banTeam('${k.replace(/'/g, "\\'")}')" title="Bannir">🚫</span><span class="btn-icon btn-edit" onclick="openTeamModal('${k.replace(/'/g, "\\'")}')" title="Modifier">✎</span>`;
                 }
                 
                 let btnDisabled = isBan ? "disabled style='background:grey;'" : "";
