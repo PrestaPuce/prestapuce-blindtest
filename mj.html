@@ -16,7 +16,7 @@
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         #bg-protection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(0, 0, 0, 0.5); pointer-events: none; }
         
-        .box { max-width: 400px; margin: 80px auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .box { max-width: 400px; margin: 60px auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; background: rgba(0,0,0,0.5); color: white; font-size: 1rem; outline: none; margin-bottom: 5px; user-select: auto; -webkit-user-select: auto; }
         .input-helper { display: block; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 15px; font-style: italic; text-align: left; padding-left: 5px; }
         .section-title { margin: 20px 0 10px 0; font-size: 0.9rem; color: var(--accent); text-align: left; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
@@ -25,20 +25,21 @@
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; color: #dcdde1 !important; border:none !important;}
         .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: white !important; box-shadow: none !important; }
         .btn-cancel:hover:not(:disabled) { background: rgba(231, 76, 60, 0.2) !important; }
+        .countdown-btn { background: #e67e22 !important; cursor: wait !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(230, 126, 34, 0.6) !important; }
         
-        .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
+        .dashboard { display: none; max-width: 800px; margin: 60px auto 40px auto; }
         
-        /* APP BAR & FLIP 3D */
-        .app-bar { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.6); padding: 10px 20px 10px 90px; border-bottom: 2px solid var(--accent); position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); margin: -20px -20px 20px -20px; }
-        .app-bar-center { text-align: left; flex: 1; }
-        .app-bar-right { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-        .flip-container { width: 60px; height: 60px; perspective: 1000px; cursor: pointer; flex-shrink: 0; }
+        /* ANIMATION FLIP 3D DU LOGO */
+        .flip-container { width: 50px; height: 50px; perspective: 1000px; }
         .flip-inner { position: relative; width: 100%; height: 100%; text-align: center; transform-style: preserve-3d; transition: transform 0.6s; }
         .flip-inner.animate { animation: flipAnim 10s infinite; }
-        .flip-front, .flip-back { position: absolute; top: 0; left: 0; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 10px; background: rgba(0,0,0,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .flip-front, .flip-back { position: absolute; top: 0; left: 0; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 8px; background: rgba(0,0,0,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .flip-back { transform: rotateY(180deg); }
-        .flip-front img, .flip-back img { width: 100%; height: 100%; object-fit: contain; padding: 5px; box-sizing: border-box; }
+        .flip-front img, .flip-back img { width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box; }
         @keyframes flipAnim { 0%, 40% { transform: rotateY(0deg); } 50%, 90% { transform: rotateY(180deg); } 100% { transform: rotateY(360deg); } }
+
+        /* ENCART DORÉ (Le Header de Salle) */
+        .room-info-card { background: rgba(15, 15, 15, 0.9); color: white; padding: 20px; border-radius: 8px; text-align: left; margin-bottom: 20px; border-bottom: 2px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
 
         /* HUB MJ V2 */
         .hub-search-bar { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--accent); background: rgba(0,0,0,0.6); color: white; font-size: 1.1rem; outline: none; margin-bottom: 20px; transition: 0.3s; }
@@ -150,7 +151,7 @@
     <div id="bg-protection"></div>
     <div class="version-tag" id="app-version-display"></div>
 
-    <div id="global-mj-logo-container" style="display:none; position: fixed; top: 15px; left: 15px; z-index: 9999;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
+    <div id="global-mj-logo-container" style="display:none; position: fixed; top: 15px; left: 15px; z-index: 9999; cursor:pointer;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
         <div class="flip-container">
             <div class="flip-inner" id="logo-flip-inner">
                 <div class="flip-front">
@@ -161,6 +162,12 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="top-right-tools" style="display:none; position: fixed; top: 15px; right: 15px; gap: 8px; z-index: 9999;">
+        <button onclick="openScoreBoard()" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; font-size: 0.8rem; box-shadow: none; border-radius: 20px; margin:0; width: auto; backdrop-filter: blur(5px); transition: 0.2s;">📺 Scores</button>
+        <button onclick="showRemoteQR()" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; font-size: 0.8rem; box-shadow: none; border-radius: 20px; margin:0; width: auto; backdrop-filter: blur(5px); transition: 0.2s;">📱 Remote</button>
+        <button onclick="toggleGuide()" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; font-size: 0.8rem; box-shadow: none; border-radius: 20px; margin:0; width: auto; backdrop-filter: blur(5px); transition: 0.2s;">📖 Guide</button>
     </div>
 
     <div id="univ-lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:30000; align-items:center; justify-content:space-between; padding:0 20px; box-sizing:border-box;" onclick="if(event.target.id==='univ-lightbox') closeLightbox()">
@@ -185,7 +192,7 @@
         <p onclick="forgotPassword()" style="color:var(--accent); cursor:pointer; font-size:0.8rem; text-decoration: underline; margin-top: 10px;">Mot de passe oublié ?</p>
     </div>
 
-    <div id="screen-profile" class="box" style="display:none; max-height:90vh; overflow-y:auto; padding-bottom: 50px;">
+    <div id="screen-profile" class="box" style="display:none; max-height:90vh; overflow-y:auto; padding-bottom: 30px;">
         <h2 style="margin-bottom:20px; color:white;">MA CARTE DE VISITE</h2>
         <p class="section-title">👤 IDENTITÉ</p>
         <input type="text" id="prof-nom" placeholder="Nom" onkeypress="if(event.key==='Enter') saveProfile()">
@@ -206,33 +213,14 @@
         
         <p class="section-title">📁 BIBLIOTHÈQUE / MÉDIAS</p>
         <button onclick="openLibraryProxy('self')" style="background:var(--gold); color:black; margin-top:0;">🎨 Gérer mes Blasons</button>
+        <button onclick="openBgLibraryProxy('self')" style="background:var(--purple); color:white; margin-top:10px;">📺 Gérer mes Fonds</button>
         
-        <p class="section-title" style="margin-top:20px;">📺 PERSONNALISATION ÉCRAN</p>
-        <label for="room-bg-upload" id="bg-drop-zone" class="drop-zone" style="padding:15px; margin-bottom:10px;">
-            <span id="bg-dz-title" style="font-size:0.9rem; font-weight:bold; display:block; color:#85c1e9;">GLISSEZ VOTRE FOND ICI</span><span id="bg-dz-sub" style="font-size:0.7rem; color:#ecf0f1;">ou Cliquez</span>
-            <input type="file" id="room-bg-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files, 'dashboard')">
-        </label>
-        <div style="display:flex; gap:5px; margin-bottom:10px; align-items:center;">
-            <input type="text" id="room-bg-url-input" placeholder="Lien d'image (http...)" style="margin:0; flex:1; font-size:0.8rem; padding:8px;" onkeypress="if(event.key==='Enter') addBgUrlToLibrary('dashboard')">
-            <button style="background:var(--blue); width:auto; margin:0; padding:8px; font-size:0.8rem;" onclick="addBgUrlToLibrary('dashboard')">Ajouter</button>
-        </div>
-        <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; max-height: 150px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); margin-bottom:10px;">
-            <div id="bg-gallery" class="bg-gallery-wrapper"></div>
-        </div>
-        <div style="display:flex; gap:5px; margin-bottom:10px;">
-            <button id="btn-apply-bg" style="background:var(--blue); flex:2; margin:0; font-size:0.8rem; padding:10px;" onclick="saveCustomBg()" disabled>APPLIQUER LA SÉLECTION</button>
-            <button class="btn-cancel" style="flex:1; margin:0; font-size:0.8rem; padding:10px;" onclick="resetCustomBg()">Par défaut</button>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:5px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-bottom:15px;">
-            <label class="show-pass-container" style="margin-bottom:0; color:#ecf0f1; font-size:0.8rem;"><input type="checkbox" id="check-default-bg"> Appliquer par défaut (Prochaines salles)</label>
-            <label class="show-pass-container" style="margin-bottom:0; color:#ecf0f1; font-size:0.8rem;"><input type="checkbox" id="check-console-bg"> Appliquer ce fond sur ma Console</label>
-        </div>
-
-        <p class="section-title">SÉCURITÉ</p>
+        <p class="section-title" style="margin-top: 20px;">SÉCURITÉ</p>
         <div class="password-wrapper"><input type="password" id="prof-pass-current" placeholder="Mot de passe actuel" style="border-color:var(--danger);" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
         <div class="password-wrapper"><input type="password" id="prof-pass" placeholder="Nouveau mot de passe" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
         <div class="password-wrapper"><input type="password" id="prof-pass-conf" placeholder="Confirmer le mot de passe" style="margin-bottom:0;" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
         <span class="input-helper" style="margin-top:5px; margin-bottom:15px;">8 caractères, 1 Maj, 1 Min, 1 Chiffre, 1 Spécial.</span>
+        
         <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER</button>
         <button class="btn-cancel" onclick="closeProfile()">Retour</button>
         <button onclick="profileLogout()" style="background:var(--danger); margin-top:20px;">🚪 DÉCONNEXION</button>
@@ -247,7 +235,7 @@
             <div style="text-align:left; font-size:0.8rem; color:#ecf0f1; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px;">
                 <b style="color:var(--accent);">VERSIONS SYSTÈME</b><br>
                 <div style="display:flex; justify-content:space-between; margin-top:5px;"><span>Système Core :</span> <span id="current-version-display">...</span></div>
-                <div style="display:flex; justify-content:space-between; margin-top:2px;"><span>mj.html :</span> <span>v1.177</span></div>
+                <div style="display:flex; justify-content:space-between; margin-top:2px;"><span>mj.html :</span> <span>v1.178</span></div>
                 
                 <div id="sa-version-edit" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.2);">
                     <div style="display:flex; gap:5px;">
@@ -307,21 +295,14 @@
 
     <div id="screen-dashboard" class="dashboard">
         
-        <div class="app-bar">
-            <div class="app-bar-center">
-                <div id="display-event-name" style="font-size:1.4rem; font-weight:900; text-transform:uppercase; margin:0; line-height:1.1; text-shadow:0 2px 4px black;">PARTIE EN COURS</div>
-                <div id="display-mj-name" style="font-size:0.9rem; font-weight:600; margin-top:2px; color:#bdc3c7;">Animé par MJ</div>
-                <div style="font-size:0.8rem; font-family:monospace; margin-top:2px; color:var(--accent);">CODE SALLE : <span id="display-room" style="font-weight:bold; color:white;">----</span></div>
-            </div>
-            <div class="app-bar-right">
-                <button onclick="openScoreBoard()" style="background:rgba(211,84,0,0.9); box-shadow:0 2px 5px rgba(0,0,0,0.5);">📺 Scores</button>
-                <button onclick="showRemoteQR()" style="background:rgba(142,68,173,0.9); box-shadow:0 2px 5px rgba(0,0,0,0.5);">📱 Remote</button>
-                <button onclick="toggleGuide()" style="background:rgba(52,73,94,0.9); box-shadow:0 2px 5px rgba(0,0,0,0.5);">📖 Guide</button>
-            </div>
-        </div>
-
         <div id="readonly-banner" style="display:none; background:var(--danger); color:white; font-weight:bold; font-size:1.2rem; padding:15px; border-radius:10px; margin-bottom:20px; text-align:center; box-shadow:0 4px 10px rgba(231,76,60,0.4); text-transform:uppercase; border:2px solid #c0392b;">
             🏁 Partie Terminée - Mode Lecture Seule
+        </div>
+
+        <div class="room-info-card">
+            <div id="display-event-name" style="font-size: 1.8rem; font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1.1;">PARTIE EN COURS</div>
+            <div id="display-mj-name" style="font-size: 1.1rem; font-weight: 600; margin-top: 5px; opacity: 0.9;">Animé par MJ</div>
+            <div style="font-size: 0.85rem; font-family: monospace; opacity: 0.7; margin-top: 5px; font-weight: bold; color: var(--accent);">CODE SALLE : <span id="display-room" style="color: white;">----</span></div>
         </div>
         
         <div id="mj-actions-bar" style="display:flex; gap:10px; margin-bottom:20px;">
@@ -369,8 +350,8 @@
                 <input type="text" id="player-search" class="hub-search-bar" style="margin:0; flex:1;" placeholder="🔍 Chercher un joueur..." oninput="renderLobby()">
             </div>
             <div id="player-filters" style="display:flex; gap:5px; overflow-x:auto;">
-                <button id="filter-btn-all" class="hub-tab active" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('all')">Toutes</button>
-                <button id="filter-btn-active" class="hub-tab" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('active')">🟢 Actives</button>
+                <button id="filter-btn-all" class="hub-tab active" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('all')">Tous</button>
+                <button id="filter-btn-active" class="hub-tab" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('active')">🟢 Actifs</button>
                 <button id="filter-btn-inactive" class="hub-tab" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('inactive')">🟠 En Pause</button>
                 <button id="filter-btn-banned" class="hub-tab" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('banned')">🔴 Bannis</button>
             </div>
@@ -380,12 +361,13 @@
         <div id="inactive-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255,255,255,0.3); border-radius: 12px; backdrop-filter: blur(10px);"><h3 style="color:#bdc3c7; margin-top:0; font-size:1rem;">Joueurs Inactifs / Partis</h3><div id="inactive-list"></div></div>
         <div id="banned-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); border-radius: 12px; backdrop-filter: blur(10px);"><h3 style="color:var(--danger); margin-top:0;">Joueurs Expulsés</h3><div id="banned-list"></div></div>
 
-        <div style="margin-top:40px; border:2px solid #c0392b; padding:20px; border-radius:12px; background:rgba(192,57,43,0.15); backdrop-filter:blur(10px);">
-            <h3 style="color:var(--danger); margin-top:0; text-shadow:0 1px 2px black;">⚙️ GESTION DE LA SALLE</h3>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black;" onclick="triggerEndGame()" title="Bloque les buzzers, affiche le podium final, et passe la salle en lecture seule dans vos archives.">🏆 TERMINER LA PARTIE</button>
-                <button style="background:var(--blue);" onclick="quitRoom()" title="Ferme cette page et vous ramène à l'accueil sans détruire la salle (les données sont conservées).">🚪 QUITTER LA CONSOLE</button>
-                <button id="btn-delete-room" onmousedown="startDeleteHold(event)" onmouseup="cancelDeleteHold(event)" onmouseleave="cancelDeleteHold(event)" ontouchstart="startDeleteHold(event)" ontouchend="cancelDeleteHold(event)" title="ATTENTION : Supprime définitivement la salle et toutes ses données !">⚠️ SUPPRIMER DÉFINITIVEMENT</button>
+        <div style="margin-top:30px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);">
+            <h3 style="color:var(--danger); margin-top:0; margin-bottom:15px; text-shadow:0 1px 2px black; text-align:center; text-transform:uppercase;">⚙️ Gestion de la salle</h3>
+            <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 1.1rem; margin-bottom: 10px; width: 100%; box-shadow: 0 4px 10px rgba(241, 196, 15, 0.4);" onclick="triggerEndGame()" title="Bloque les buzzers, affiche le podium final, et passe la salle en lecture seule dans vos archives.">🏆 FIN DE PARTIE & ARCHIVER</button>
+            
+            <div style="display: flex; gap: 10px;">
+                <button style="background:var(--blue); flex: 1; margin: 0; font-size: 0.9rem; padding: 12px;" onclick="quitRoom()" title="Ferme cette page et vous ramène à l'accueil sans détruire la salle.">🚪 Quitter (Conserver)</button>
+                <button id="btn-delete-room" style="background:var(--danger); flex: 1; margin: 0; font-size: 0.9rem; padding: 12px;" onmousedown="startDeleteHold(event)" onmouseup="cancelDeleteHold(event)" onmouseleave="cancelDeleteHold(event)" ontouchstart="startDeleteHold(event)" ontouchend="cancelDeleteHold(event)" title="ATTENTION : Supprime définitivement la salle et toutes ses données !">⚠️ Supprimer (Détruire)</button>
             </div>
         </div>
     </div>
@@ -560,7 +542,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.177";
+        const APP_VERSION = "1.178";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -814,14 +796,8 @@
         
         function loadMjData(user) {
             isSuperAdmin = (user.email === 'contact@prestapuce.com'); activeLibraryUid = user.uid; activeBgLibraryUid = user.uid;
-            if(isSuperAdmin) { 
-                document.getElementById('btn-super-admin').style.display='inline-block'; 
-                document.getElementById('sa-version-edit').style.display='block'; 
-                initSuperAdminListener(); 
-            } else { 
-                document.getElementById('btn-super-admin').style.display='none'; 
-                document.getElementById('sa-version-edit').style.display='none'; 
-            }
+            if(isSuperAdmin) { document.getElementById('btn-super-admin').style.display='inline-block'; document.getElementById('sys-version-input').style.display='inline-block'; document.getElementById('btn-update-version').style.display='inline-block'; initSuperAdminListener(); } 
+            else { document.getElementById('btn-super-admin').style.display='none'; document.getElementById('sys-version-input').style.display='none'; document.getElementById('btn-update-version').style.display='none'; }
             db.ref('users/' + user.uid).update({ email: user.email });
             db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
@@ -844,6 +820,7 @@
                 document.getElementById('screen-dashboard').style.display="none"; 
                 document.getElementById('screen-choice').style.display="block"; 
                 document.getElementById('global-mj-logo-container').style.display="block";
+                document.getElementById('top-right-tools').style.display="none";
 
                 const rooms = snap.val() || {};
                 mjRooms = Object.keys(rooms).map(k => ({ id: k, ...rooms[k] }));
@@ -1018,6 +995,7 @@
         function showProfile() {
             if(document.getElementById('screen-choice').style.display==="block") previousScreen="screen-choice"; if(document.getElementById('screen-dashboard').style.display==="block") previousScreen="screen-dashboard";
             document.getElementById('screen-choice').style.display="none"; document.getElementById('screen-dashboard').style.display="none"; document.getElementById('screen-profile').style.display="block";
+            document.getElementById('top-right-tools').style.display="none";
             if(auth.currentUser) {
                 document.getElementById('prof-email').value=auth.currentUser.email; document.getElementById('prof-nom').value=mjProfileData.nom||""; document.getElementById('prof-prenom').value=mjProfileData.prenom||"";
                 const cl = mjProfileData.customLogo||""; document.getElementById('prof-logo-url').value=cl; updateLogoPreview(cl); document.getElementById('prof-link').value=mjProfileData.customLink||"";
@@ -1025,7 +1003,7 @@
                 const dz=document.getElementById('profile-drop-zone'); if(isG){dz.style.opacity='0.5';dz.style.pointerEvents='none';}else{dz.style.opacity='1';dz.style.pointerEvents='auto';}
             }
         }
-        function closeProfile() { document.getElementById('screen-profile').style.display="none"; document.getElementById(previousScreen).style.display="block"; }
+        function closeProfile() { document.getElementById('screen-profile').style.display="none"; document.getElementById(previousScreen).style.display="block"; if(previousScreen==="screen-dashboard") document.getElementById('top-right-tools').style.display="flex"; }
         
         async function saveProfile() {
             if(mjProfileData.isGuest===true) return alert("Action impossible en Découverte.");
@@ -1069,7 +1047,6 @@
                 if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); 
             } 
         }
-
         function createBlason(i) { const c=['#e74c3c','#3498db','#f1c40f','#2c3e50','#27ae60','#ecf0f1'], c1=c[i%c.length], c2=c[(i+1)%c.length], m=i%10; let p=(m===0)?`<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`:(m===1)?`<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`:`<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`; return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="800" height="800"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${p}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`; }
 
         function askMjNameAndCreate() { 
@@ -1111,13 +1088,14 @@
             if (btnDel) {
                 btnDel.disabled = false;
                 btnDel.classList.remove('holding');
-                btnDel.innerText = "⚠️ SUPPRIMER DÉFINITIVEMENT";
+                btnDel.innerText = "⚠️ Supprimer (Détruire)";
                 clearTimeout(holdTimer);
             }
             
             document.getElementById('screen-choice').style.display = "none"; 
             const dashboard = document.getElementById('screen-dashboard');
             dashboard.style.display = "block"; 
+            document.getElementById('top-right-tools').style.display = "flex";
             document.getElementById('display-room').innerText = roomID;
             
             if (eventName) document.getElementById('display-event-name').innerText = eventName;
@@ -1588,7 +1566,7 @@
         function toggleBlockPlayer(ps) { if(currentBlocked[ps]) roomRef.child('blockedPlayers/'+ps).remove(); else roomRef.child('blockedPlayers/'+ps).set(true); }
         
         function triggerEndGame() { 
-            if(confirm("🏁 Fin de partie ?\n\nCela bloquera les buzzers, affichera le podium sur l'écran géant, et passera la salle en Lecture Seule dans vos archives.")) { 
+            if(confirm("🏁 Fin de partie ?\n\nCela affichera le podium et placera cette salle dans vos Archives en Lecture Seule.")) { 
                 roomRef.child('gameState').set({status:'endGame', timestamp:Date.now()}); 
                 roomRef.update({ isArchived: true });
                 roomRef.child('buzzers').remove(); 
@@ -1678,7 +1656,7 @@
             const btn = document.getElementById('btn-delete-room');
             if(btn && !btn.disabled) {
                 btn.classList.remove('holding');
-                btn.innerText = "⚠️ SUPPRIMER DÉFINITIVEMENT";
+                btn.innerText = "⚠️ Supprimer (Détruire)";
             }
         }
     </script>
