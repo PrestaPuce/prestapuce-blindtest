@@ -18,6 +18,7 @@
         
         .box { max-width: 400px; margin: 0 auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         
+        /* Dashboard élargi à 98% */
         .dashboard { display: none; max-width: 1400px; width: 98%; margin: 0 auto 40px auto; }
         .lobbies-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-top: 20px; }
         @media (max-width: 900px) { .lobbies-grid { grid-template-columns: 1fr; } }
@@ -47,8 +48,10 @@
         .flip-front img, .flip-back img { width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box; }
         @keyframes flipAnim { 0%, 40% { transform: rotateY(0deg); } 50%, 90% { transform: rotateY(180deg); } 100% { transform: rotateY(360deg); } }
 
-        .ghost-ui { opacity: 0.3; transition: opacity 0.3s ease; }
-        .ghost-ui:hover { opacity: 1; }
+        /* Le Ghost UI : 100% opaque par défaut */
+        .ghost-ui { opacity: 1; transition: opacity 0.3s ease; }
+        .ghost-ui.faded { opacity: 0.3; }
+        .ghost-ui:hover { opacity: 1 !important; }
 
         #top-right-tools { display:none; position: fixed; top: 15px; right: 15px; gap: 8px; z-index: 9999; flex-direction: column; width: 90px; }
         .top-right-btn { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px; font-size: 0.75rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border-radius: 8px; margin:0; width: 100%; text-align: center; backdrop-filter: blur(5px); transition: 0.2s; cursor:pointer; font-weight:bold; }
@@ -94,18 +97,20 @@
         .crest-mini { width: 100%; height: 100%; object-fit: contain; }
         
         .team-controls { display: flex; align-items: center; gap: 2px; margin-left: auto; justify-content: flex-end; flex-shrink: 0; overflow: visible; }
-        .team-score-ctrl { display: flex; align-items: center; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 2px; margin-right: 5px; }
+        .team-score-ctrl { display: flex; align-items: center; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 2px; margin-right: 5px; height: 30px; }
         .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue); box-shadow: none; border-radius: 4px; cursor: pointer; color: white; border: none; }
         .team-bonus-val { font-size: 0.9rem; font-weight: bold; margin: 0 8px; color: var(--accent); min-width: 20px; text-align: center; }
         .player-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; flex-shrink: 0; overflow: visible; }
         
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; max-width: 100px; }
         
-        .dropdown-container { position: relative; display: flex; align-items: center; margin-left: 5px; }
-        .dropdown-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: 0.2s; padding: 0; }
+        /* --- LE VRAI MENU GLOBAL TÉLÉPORTÉ (Absolu dans le Body) --- */
+        .global-dropdown-menu { display: none; position: fixed; min-width: 220px; background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); z-index: 99999; flex-direction: column; overflow: hidden; padding: 5px 0; }
+        .global-dropdown-menu.show { display: flex; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .dropdown-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: 0.2s; padding: 0; margin-left: 2px; }
         .dropdown-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; min-width: 220px; background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 9999; flex-direction: column; overflow: hidden; margin-top: 5px; }
-        .dropdown-menu.show { display: flex; animation: fadeIn 0.2s; }
         .dropdown-item { padding: 12px 15px; cursor: pointer; text-align: left; font-size: 0.9rem; color: white; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; font-weight: normal; }
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:hover { background: rgba(255,255,255,0.15); padding-left: 20px; }
@@ -115,7 +120,7 @@
         .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed rgba(255,255,255,0.3); padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.3); transition: 0.3s; position: relative; margin-bottom: 10px; cursor: pointer; }
         .drop-zone.drag-active { border-color: #27ae60; background: rgba(39, 174, 96, 0.3); transform: scale(1.02); }
         
-        /* Modifs UX Profil MJ */
+        /* Modifs UX Profil MJ avec Drag&Drop visuel */
         .profile-drop { width: 150px; height: 150px; margin: 0 auto 5px auto; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border: 3px dashed #bdc3c7; position: relative; }
         .profile-drop.drag-active::after { content: "📥 DÉPOSEZ ICI"; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 204, 113, 0.95); color: white; font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 50; border-radius: 8px; border: 4px dashed white; box-sizing: border-box; pointer-events: none; text-align: center; line-height: 1.2; }
         .profile-drop img { width: 100%; height: 100%; object-fit: contain; }
@@ -173,7 +178,9 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.187</div>
+    <div class="version-tag" id="app-version-display">v1.188</div>
+
+    <div id="global-dropdown" class="global-dropdown-menu"></div>
 
     <div id="global-mj-logo-container" class="ghost-ui" style="display:none; position: fixed; top: 15px; left: 15px; z-index: 9999; cursor: pointer;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
         <div class="flip-container">
@@ -280,7 +287,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.187</span>
+                    <span id="disp-v-mj">v1.188</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -631,7 +638,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.187";
+        const APP_VERSION = "1.188";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -661,6 +668,7 @@
         let currentOpenTeam = null;
         let activeTeamBlacklist = [];
         let activeTeamBlacklistListener = null;
+        let activeDropdownBtn = null;
 
         function isValidPassword(pwd) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd); }
 
@@ -685,32 +693,65 @@
             
             document.addEventListener('keydown', e => { if(document.getElementById('univ-lightbox').style.display === 'flex') { if(e.key==='ArrowLeft') lbPrev(e); else if(e.key==='ArrowRight') lbNext(e); else if(e.key==='Escape') closeLightbox(e); } });
             
-            // Écouteur de scroll pour le mode Fantôme (Ghost UI)
-            window.addEventListener('scroll', () => {
-                const tools = document.getElementById('top-right-tools');
-                const logo = document.getElementById('global-mj-logo-container');
-                if(window.scrollY === 0) {
-                    tools.style.opacity = '1';
-                    logo.style.opacity = '1';
-                } else {
-                    tools.style.opacity = '';
-                    logo.style.opacity = '';
+            // SMART GHOST UI : Écoute les scrolls sur les listes (Lobbies) uniquement
+            document.addEventListener('scroll', function(e) {
+                closeGlobalDropdown(); // Le menu se referme si l'écran bouge
+                if (e.target.classList && e.target.classList.contains('scroll-list')) {
+                    const tools = document.getElementById('top-right-tools');
+                    const logo = document.getElementById('global-mj-logo-container');
+                    
+                    let isScrolled = false;
+                    document.querySelectorAll('.scroll-list').forEach(list => {
+                        if (list.scrollTop > 0) isScrolled = true;
+                    });
+                    
+                    if (isScrolled) {
+                        if(tools) tools.classList.add('faded');
+                        if(logo) logo.classList.add('faded');
+                    } else {
+                        if(tools) tools.classList.remove('faded');
+                        if(logo) logo.classList.remove('faded');
+                    }
+                }
+            }, true);
+            
+            document.addEventListener('click', function(e) {
+                const menu = document.getElementById('global-dropdown');
+                if (menu && menu.classList.contains('show') && !e.target.closest('.global-dropdown-menu') && !e.target.closest('.dropdown-btn')) {
+                    closeGlobalDropdown();
                 }
             });
         };
         
-        function toggleDropdown(id) { 
-            const el = document.getElementById(id);
-            const isShowing = el.classList.contains('show');
-            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show')); 
-            if(!isShowing) el.classList.add('show');
-        }
-        
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.dropdown-container')) {
-                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        // --- LOGIQUE DU MENU GLOBAL TÉLÉPORTÉ ---
+        function openGlobalDropdown(e, encodedHtml) {
+            e.stopPropagation();
+            const menu = document.getElementById('global-dropdown');
+            const btn = e.currentTarget;
+            
+            if (activeDropdownBtn === btn && menu.classList.contains('show')) {
+                closeGlobalDropdown();
+                return;
             }
-        });
+            
+            activeDropdownBtn = btn;
+            menu.innerHTML = decodeURIComponent(encodedHtml);
+            
+            const rect = btn.getBoundingClientRect();
+            menu.style.top = (rect.bottom + 5) + 'px';
+            menu.style.left = 'auto';
+            menu.style.right = (window.innerWidth - rect.right) + 'px';
+            
+            menu.classList.add('show');
+        }
+
+        function closeGlobalDropdown() {
+            const menu = document.getElementById('global-dropdown');
+            if(menu) {
+                menu.classList.remove('show');
+                activeDropdownBtn = null;
+            }
+        }
 
         function profileLogout() { auth.signOut().then(()=>location.reload()); }
         function openSuperAdmin() { if(!isSuperAdmin) return; document.getElementById('screen-choice').style.display = 'none'; document.getElementById('screen-super-admin').style.display = 'block'; }
@@ -720,7 +761,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.187", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.188", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1133,12 +1174,12 @@
                         <span class="hub-badge ${badgeClass}">${badgeText}</span>
                     </div>
                     <div id="details-${r.id}" class="hub-details" onclick="event.stopPropagation();">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
-                            <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:nowrap; gap:10px;">
+                            <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                                 <p style="margin:0 0 5px 0; color:#ecf0f1; font-size:0.9rem;">🎭 Animé par : <b>${r.mjName || "Animateur"}</b></p>
-                                ${r.isArchived ? `<p style="margin:0 0 5px 0; color:#ecf0f1; font-size:0.9rem;">👥 Joueurs : <b>${stats.count}</b></p><p style="margin:0 0 5px 0; color:var(--gold); font-size:0.9rem;">🏆 Vainqueur : <b>${stats.winner}</b></p>` : ''}
+                                ${r.isArchived ? `<p style="margin:0 0 5px 0; color:#ecf0f1; font-size:0.9rem;">👥 Joueurs : <b>${stats.count}</b></p><p style="margin:0; color:var(--gold); font-size:0.9rem;">🏆 Vainqueur : <b>${stats.winner}</b></p>` : ''}
                             </div>
-                            <div style="display:flex; gap:10px;">
+                            <div style="display:flex; gap:10px; flex-shrink:0;">
                                 ${btnAction}
                                 <button class="hub-btn" style="background:var(--danger);" onclick="deleteRoomFromHub('${r.id}', event)">🗑️ SUPPRIMER</button>
                             </div>
@@ -1558,29 +1599,23 @@
             aP.sort((a,b) => { if(a.uid===currentBuzzerId)return -1; if(b.uid===currentBuzzerId)return 1; let iA=buzzHistory.indexOf(a.name), iB=buzzHistory.indexOf(b.name); if(iA!==-1&&iB!==-1)return iB-iA; if(iA!==-1)return -1; if(iB!==-1)return 1; let rA=a.reconnectedAt||0, rB=b.reconnectedAt||0; if(rA===0&&rB>0)return -1; if(rA>0&&rB===0)return 1; if(rA>0&&rB>0)return rA-rB; return a.name.localeCompare(b.name); });
             
             aP.forEach(d => {
-                const safeName = d.name.replace(/'/g, "\\'");
+                const safeName = d.name.replace(/'/g, "&#39;");
                 let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
                 const iB = currentBlocked[d.name]; 
                 const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;">` : `<span style="font-size:1.2rem;margin-right:8px;">${d.avatar||'👤'}</span>`;
                 const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
                 
                 let dropdownItems = `
-                    <div class="dropdown-item" onclick="forceBuzzer('${d.uid}')">⚡ Forcer le buzzer</div>
-                    <div class="dropdown-item" onclick="toggleBlockPlayer('${safeName}')">${iB ? '🟢 Débloquer le buzzer' : '🛑 Bloquer le buzzer'}</div>
-                    <div class="dropdown-item" onclick="openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
-                    <div class="dropdown-item" onclick="pausePlayer('${d.uid}', '${safeName}')">⏸️ Mettre en pause</div>
-                    ${d.hasBeenWarned===true ? `<div class="dropdown-item" style="color:var(--danger);" onclick="kickPlayer('${d.uid}', '${safeName}')">🟥 Expulser le joueur</div>` : `<div class="dropdown-item" style="color:var(--gold);" onclick="warnPlayer('${d.uid}', '${safeName}')">🟨 Avertir le joueur</div>`}
-                    <div class="dropdown-item" style="color:var(--danger);" onclick="deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); forceBuzzer('${d.uid}')">⚡ Forcer le buzzer</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); toggleBlockPlayer('${safeName}')">${iB ? '🟢 Débloquer le buzzer' : '🛑 Bloquer le buzzer'}</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); pausePlayer('${d.uid}', '${safeName}')">⏸️ Mettre en pause</div>
+                    ${d.hasBeenWarned===true ? `<div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickPlayer('${d.uid}', '${safeName}')">🟥 Expulser le joueur</div>` : `<div class="dropdown-item" style="color:var(--gold);" onclick="closeGlobalDropdown(); warnPlayer('${d.uid}', '${safeName}')">🟨 Avertir le joueur</div>`}
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
                 `;
-
-                let actionsHtml = `
-                    <div class="dropdown-container" onclick="event.stopPropagation(); toggleDropdown('player-menu-${d.uid}')">
-                        <button class="dropdown-btn">⋮</button>
-                        <div class="dropdown-menu" id="player-menu-${d.uid}">
-                            ${dropdownItems}
-                        </div>
-                    </div>
-                `;
+                let encodedMenu = encodeURIComponent(dropdownItems);
+                
+                let actionsHtml = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
 
                 hA += `
                 <div class="${rC}">
@@ -1598,49 +1633,43 @@
             
             rP.forEach(d => { 
                 hsI=true; 
-                let rP_actions = `
-                    <div class="dropdown-container" onclick="event.stopPropagation(); toggleDropdown('player-menu-${d.uid}')">
-                        <button class="dropdown-btn">⋮</button>
-                        <div class="dropdown-menu" id="player-menu-${d.uid}">
-                            <div class="dropdown-item" onclick="openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
-                            <div class="dropdown-item" style="color:var(--success);" onclick="acceptRecovery('${d.uid}')">✅ Accepter la connexion</div>
-                            <div class="dropdown-item" style="color:var(--danger);" onclick="rejectRecovery('${d.uid}')">❌ Refuser</div>
-                        </div>
-                    </div>
+                let dropdownItems = `
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
+                    <div class="dropdown-item" style="color:var(--success);" onclick="closeGlobalDropdown(); acceptRecovery('${d.uid}')">✅ Accepter la connexion</div>
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); rejectRecovery('${d.uid}')">❌ Refuser</div>
                 `;
+                let encodedMenu = encodeURIComponent(dropdownItems);
+                let rP_actions = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
+                
                 hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls">${rP_actions}</div></div>`; 
             });
             
             iP.forEach(d => { 
                 hsI=true; 
-                const safeName = d.name.replace(/'/g, "\\'");
-                let iP_actions = `
-                    <div class="dropdown-container" onclick="event.stopPropagation(); toggleDropdown('player-menu-${d.uid}')">
-                        <button class="dropdown-btn">⋮</button>
-                        <div class="dropdown-menu" id="player-menu-${d.uid}">
-                            <div class="dropdown-item" onclick="openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
-                            <div class="dropdown-item" onclick="restoreInactivePlayer('${d.uid}')">▶️ Réactiver le joueur</div>
-                            <div class="dropdown-item" style="color:var(--danger);" onclick="kickPlayer('${d.uid}', '${safeName}')">🟥 Expulser</div>
-                            <div class="dropdown-item" style="color:var(--danger);" onclick="deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
-                        </div>
-                    </div>
+                const safeName = d.name.replace(/'/g, "&#39;");
+                let dropdownItems = `
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); restoreInactivePlayer('${d.uid}')">▶️ Réactiver le joueur</div>
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickPlayer('${d.uid}', '${safeName}')">🟥 Expulser</div>
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
                 `;
+                let encodedMenu = encodeURIComponent(dropdownItems);
+                let iP_actions = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
+                
                 hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls">${iP_actions}</div></div>`; 
             });
             
             bP.forEach(d => { 
                 hsB=true; 
-                const safeName = d.name.replace(/'/g, "\\'");
-                let bP_actions = `
-                    <div class="dropdown-container" onclick="event.stopPropagation(); toggleDropdown('player-menu-${d.uid}')">
-                        <button class="dropdown-btn">⋮</button>
-                        <div class="dropdown-menu" id="player-menu-${d.uid}">
-                            <div class="dropdown-item" onclick="openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
-                            <div class="dropdown-item" onclick="unkickPlayer('${d.uid}')">▶️ Réactiver le joueur</div>
-                            <div class="dropdown-item" style="color:var(--danger);" onclick="deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
-                        </div>
-                    </div>
+                const safeName = d.name.replace(/'/g, "&#39;");
+                let dropdownItems = `
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); unkickPlayer('${d.uid}')">▶️ Réactiver le joueur</div>
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
                 `;
+                let encodedMenu = encodeURIComponent(dropdownItems);
+                let bP_actions = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
+                
                 hB += `<div class="score-row" style="border:1px solid var(--danger);"><div style="flex:1;"><span style="color:var(--danger)"><b>${d.name}</b></span></div><div class="player-controls">${bP_actions}</div></div>`; 
             });
             
@@ -1713,41 +1742,34 @@
                 if (blockedCount > 0) statsHtml += ` - <span style="color:var(--danger);">${blockedCount} Exclu${blockedCount > 1 ? 's' : ''}</span>`;
                 statsHtml += `)`;
                 
-                const safeK = k.replace(/'/g, "\\'");
-                const menuId = k.replace(/\s+/g, '-').replace(/'/g, "\\'");
+                const safeK = k.replace(/'/g, "&#39;");
                 let btnDisabled = isBan ? "disabled" : "";
                 let dropdownItems = "";
 
                 if(isBan) {
                     dropdownItems = `
-                        <div class="dropdown-item" onclick="openRestoreModal('${safeK}')">▶️ Réactiver l'équipe</div>
-                        <div class="dropdown-item" style="color:var(--danger);" onclick="deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
+                        <div class="dropdown-item" onclick="closeGlobalDropdown(); openRestoreModal('${safeK}')">▶️ Réactiver l'équipe</div>
+                        <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
                     `;
                 } else if(!isA) {
                     dropdownItems = `
-                        <div class="dropdown-item" onclick="openTeamModal('${safeK}')">✏️ Éditer l'équipe</div>
-                        <div class="dropdown-item" onclick="openRestoreModal('${safeK}')">▶️ Réactiver l'équipe</div>
-                        <div class="dropdown-item" style="color:var(--danger);" onclick="kickTeam('${safeK}')">🟥 Expulser l'équipe</div>
-                        <div class="dropdown-item" style="color:var(--danger);" onclick="deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
+                        <div class="dropdown-item" onclick="closeGlobalDropdown(); openTeamModal('${safeK}')">✏️ Éditer l'équipe</div>
+                        <div class="dropdown-item" onclick="closeGlobalDropdown(); openRestoreModal('${safeK}')">▶️ Réactiver l'équipe</div>
+                        <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickTeam('${safeK}')">🟥 Expulser l'équipe</div>
+                        <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
                     `;
                 } else {
                     dropdownItems = `
-                        <div class="dropdown-item" onclick="toggleTeamBlock('${safeK}')">${isTeamMuted ? '🟢 Débloquer les buzzers' : '🛑 Bloquer les buzzers'}</div>
-                        <div class="dropdown-item" onclick="openTeamModal('${safeK}')">✏️ Éditer l'équipe</div>
-                        <div class="dropdown-item" onclick="archiveTeam('${safeK}')">⏸️ Mettre en pause</div>
-                        ${t.hasBeenWarned ? `<div class="dropdown-item" style="color:var(--danger);" onclick="kickTeam('${safeK}')">🟥 Expulser l'équipe</div>` : `<div class="dropdown-item" style="color:var(--gold);" onclick="warnTeam('${safeK}')">🟨 Avertir l'équipe</div>`}
-                        <div class="dropdown-item" style="color:var(--danger);" onclick="deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
+                        <div class="dropdown-item" onclick="closeGlobalDropdown(); toggleTeamBlock('${safeK}')">${isTeamMuted ? '🟢 Débloquer les buzzers' : '🛑 Bloquer les buzzers'}</div>
+                        <div class="dropdown-item" onclick="closeGlobalDropdown(); openTeamModal('${safeK}')">✏️ Éditer l'équipe</div>
+                        <div class="dropdown-item" onclick="closeGlobalDropdown(); archiveTeam('${safeK}')">⏸️ Mettre en pause</div>
+                        ${t.hasBeenWarned ? `<div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickTeam('${safeK}')">🟥 Expulser l'équipe</div>` : `<div class="dropdown-item" style="color:var(--gold);" onclick="closeGlobalDropdown(); warnTeam('${safeK}')">🟨 Avertir l'équipe</div>`}
+                        <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
                     `;
                 }
 
-                let actionsHtml = `
-                    <div class="dropdown-container" onclick="event.stopPropagation(); toggleDropdown('team-menu-${menuId}')">
-                        <button class="dropdown-btn">⋮</button>
-                        <div class="dropdown-menu" id="team-menu-${menuId}">
-                            ${dropdownItems}
-                        </div>
-                    </div>
-                `;
+                let encodedMenu = encodeURIComponent(dropdownItems);
+                let actionsHtml = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
                 
                 html += `
                 <div class="hub-line" style="margin-bottom:0; border-radius:8px; border-bottom-left-radius:0; border-bottom-right-radius:0;" onclick="toggleTeamAccordion('${safeK}')">
@@ -1852,13 +1874,19 @@
                 let statusDot = m.isBlocked ? "🔴" : "🟢";
                 let isCap = m.isCaptain ? "👑" : "";
                 
-                let buttonsHtml = "";
+                const safeName = m.name ? m.name.replace(/'/g, "&#39;") : "";
+                const safeTeamName = teamName.replace(/'/g, "&#39;");
+                let dropdownItems = "";
+                
                 if (m.isBlocked) {
-                    buttonsHtml = `<button onclick="pardonTeamMember('${m.id}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--success); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;" title="Gracier">🔄</button>`;
+                    dropdownItems = `<div class="dropdown-item" style="color:var(--success);" onclick="closeGlobalDropdown(); pardonTeamMember('${m.id}', '${safeTeamName}')">🔄 Gracier</div>`;
                 } else {
-                    let btnCap = m.isCaptain ? "" : `<button onclick="makeCaptain('${m.id}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--gold); border:none; color:black; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;" title="Nommer Capitaine">👑</button>`;
-                    buttonsHtml = `${btnCap} <button onclick="expelTeamMember('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${m.avatar}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--danger); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;" title="Expulser">✕</button>`;
+                    let btnCap = m.isCaptain ? "" : `<div class="dropdown-item" style="color:var(--gold);" onclick="closeGlobalDropdown(); makeCaptain('${m.id}', '${safeTeamName}')">👑 Nommer Capitaine</div>`;
+                    dropdownItems = `${btnCap} <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); expelTeamMember('${m.id}', '${safeName}', '${m.avatar}', '${safeTeamName}')">✕ Expulser de l'équipe</div>`;
                 }
+
+                let encodedMenu = encodeURIComponent(dropdownItems);
+                let actionsHtml = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
 
                 html += `
                 <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;">
@@ -1866,8 +1894,8 @@
                     ${av}
                     <b style="margin-left:10px; color:${m.isBlocked ? '#7f8c8d' : 'white'}; font-size:1rem;">${m.name} <span style="font-size:1.1rem;">${isCap}</span></b>
                     ${!m.isBlocked ? `<span style="color:var(--accent); margin-left:10px; font-size:0.85rem;">${m.pts || 0} pts</span>` : ''}
-                    <div style="margin-left:auto; display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
-                        ${buttonsHtml}
+                    <div style="margin-left:auto; display:flex; gap:5px; flex-wrap:nowrap; justify-content:flex-end;">
+                        ${actionsHtml}
                     </div>
                 </div>
                 `;
