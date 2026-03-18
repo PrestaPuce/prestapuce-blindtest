@@ -49,7 +49,8 @@
             100% { transform: rotateY(360deg); }
         }
 
-        .version-text { display: none; }
+        /* AFFICHEUR DE VERSION (En bas à droite) */
+        .version-tag { position: fixed; bottom: 1vh; right: 1vw; color: rgba(255, 255, 255, 0.3); font-size: clamp(0.7rem, 1.5vh, 1rem); font-family: monospace; z-index: 9999; pointer-events: none; }
         
         #qr-box { display: none; position: fixed; top: 1vh; left: 1vw; background: white; padding: 0.5vh; border-radius: 8px; text-align: center; color: black; z-index: 5000; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transform-origin: top left; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: zoom-in; width: 10.5vh; }
         #qr-box img { width: 100% !important; height: auto !important; display: block; }
@@ -149,6 +150,8 @@
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
     <div id="big-anim-overlay"></div>
+    
+    <div id="version-display" class="version-tag">v1.169</div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
@@ -206,7 +209,6 @@
                 <h1 id="event-name-display">PARTIE EN COURS</h1>
                 <div id="mj-name-display">Animé par MJ</div>
                 <div class="room-code-display">CODE SALLE : <span id="room-title" class="room-highlight">----</span></div>
-                <div id="version-display" class="version-text"></div>
             </div>
         </div>
     </header>
@@ -242,7 +244,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.168";
+        const CLIENT_VERSION = "1.169";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -257,11 +259,19 @@
         const db = firebase.database();
         const auth = firebase.auth();
         
+        // Écoute dynamique de la version depuis la base de données
+        db.ref('config/versions/scores').on('value', snap => {
+            if(snap.exists()) {
+                const versionDisp = document.getElementById('version-display');
+                if(versionDisp) versionDisp.innerText = snap.val();
+                document.title = "Scores - Presta'Puce (" + snap.val() + ")";
+            }
+        });
+
         let allGlobalRooms = [];
         let roomID = "";
         let roomRef = null;
 
-        // --- GESTION DU LOBBY ET BYPASS ---
         function checkLobbyOrRoom() {
             const urlParams = new URLSearchParams(window.location.search);
             roomID = urlParams.get('room');
@@ -377,8 +387,6 @@
             });
         }
 
-        // --- GESTION DU TABLEAU DES SCORES ---
-        
         let scoresData = {}, teamsData = {}, currentBuzzer = null, currentBuzzerId = null;
         let buzzHistory = [];
         let isGameFinished = false;
