@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Remote MJ - Presta'Puce (v1.153)</title>
+    <title>Remote MJ - Presta'Puce (v1.154)</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -73,7 +73,7 @@
             transition: 0.1s; 
         }
         .big-btn:active { transform: translateY(3px); box-shadow: none; }
-        .big-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+        .big-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; background: #7f8c8d !important; }
         
         /* COULEURS BOUTONS */
         .btn-open { background: var(--blue); font-size: 1.3rem; }
@@ -86,16 +86,34 @@
 
         .waiting-msg { color: #7f8c8d; font-style: italic; font-size: 1rem; }
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.3); font-size: 0.8rem; font-family: monospace; z-index: 9999; pointer-events: none; }
+
+        /* NOUVEAU : LEADERBOARD DE FIN DE PARTIE */
+        .leaderboard-zone { display: none; flex: 1; flex-direction: column; background: #111; overflow-y: auto; padding: 10px; }
+        .rank-card { background: var(--card-bg); border-radius: 8px; padding: 12px 10px; margin-bottom: 8px; display: flex; align-items: flex-start; border-left: 5px solid transparent; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .rank-1 { border-left-color: var(--gold); background: rgba(241, 196, 15, 0.15); }
+        .rank-2 { border-left-color: #bdc3c7; background: rgba(189, 195, 199, 0.15); }
+        .rank-3 { border-left-color: #cd7f32; background: rgba(205, 127, 50, 0.15); }
+        .rank-pos { font-size: 1.5rem; font-weight: bold; width: 40px; text-align: center; }
+        .rank-info { flex: 1; margin-left: 5px; display: flex; flex-direction: column; }
+        .rank-name { font-size: 1.1rem; font-weight: bold; color: white; display: flex; align-items: center; justify-content: space-between; }
+        .rank-pts { font-size: 1.3rem; color: var(--accent); font-weight: bold; margin-left: 10px; }
+        .team-members { font-size: 0.9rem; color: #ecf0f1; margin-top: 10px; display: none; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
+        .team-members.open { display: block; animation: fadeIn 0.2s ease; }
+        .member-line { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+        .member-line:last-child { border-bottom: none; }
+        .chevron { transition: transform 0.3s; font-size: 0.8rem; color: #bdc3c7; padding: 5px; }
+        .chevron.open { transform: rotate(180deg); }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.153</div>
+    <div class="version-tag">v1.154</div>
 
     <div id="screen-login">
         <h2 style="color:var(--accent);">REMOTE ANIMATEUR</h2>
-        <input type="email" id="mj-email" placeholder="Email MJ">
-        <input type="password" id="mj-pass" placeholder="Mot de passe">
+        <input type="email" id="mj-email" placeholder="Email MJ" onkeypress="if(event.key==='Enter') login()">
+        <input type="password" id="mj-pass" placeholder="Mot de passe" onkeypress="if(event.key==='Enter') login()">
         <button class="btn-login" onclick="login()">CONNEXION</button>
     </div>
 
@@ -109,13 +127,18 @@
             <div class="waiting-msg">En attente de buzz...</div>
         </div>
 
-        <div class="controls-zone">
+        <div class="controls-zone" id="zone-controls">
             <button id="btn-open-buzz" class="big-btn btn-open" onclick="openBuzzers()">🔊 OUVRIR BUZZERS</button>
             <button class="big-btn btn-gold" onclick="handleReward(3, 'finish')">+3 (Terminé)</button>
             <button class="big-btn btn-green" onclick="handleReward(1, 'finish')">+1 (Terminé)</button>
             <button class="big-btn btn-cyan" onclick="handleReward(1, 'partial')">+1 (On continue)</button>
             <button class="big-btn btn-error" onclick="handleError()">❌ ERREUR</button>
             <button class="big-btn btn-reset" onclick="fullReset()">🔄 RESET BUZZERS</button>
+        </div>
+
+        <div class="leaderboard-zone" id="zone-leaderboard">
+            <button class="big-btn btn-gold" style="margin-bottom:15px; min-height:50px; font-size:1rem; flex: 0 0 auto;" onclick="relaunchPodium()">🏆 RELANCER PODIUM ÉCRAN GÉANT</button>
+            <div id="leaderboard-content" style="flex:1; overflow-y:auto; padding-bottom:20px;"></div>
         </div>
     </div>
 
@@ -133,6 +156,7 @@
 
         let roomID = "", roomRef = null, currentPlayer = null;
         let allPlayersData = {};
+        let teamsData = {};
 
         const urlParams = new URLSearchParams(window.location.search);
         roomID = urlParams.get('room');
@@ -160,6 +184,10 @@
                 if(currentPlayer) updatePlayerZone(currentPlayer);
             });
 
+            roomRef.child('teams').on('value', snap => {
+                teamsData = snap.val() || {};
+            });
+
             roomRef.child('buzzers').on('value', snap => {
                 const b = snap.val();
                 if (b && b.id) {
@@ -175,19 +203,29 @@
                 const st = snap.val() ? snap.val().status : 'waiting';
                 const btn = document.getElementById('btn-open-buzz');
                 
-                // --- MODIFICATION ANTI-LAG (AFFICHAGE) ---
-                if(st === 'ready' || st === 'taken' || st === 'processing') {
-                    btn.innerText = st === 'processing' ? "⏳ ANALYSE..." : "✅ BUZZERS OUVERTS";
-                    btn.classList.add('active');
-                    if (st === 'processing') btn.style.background = "#e67e22"; else btn.style.background = "var(--mj-color)";
-                    btn.disabled = true;
+                // Si la partie est terminée, on affiche le classement !
+                if (st === 'endGame') {
+                    document.getElementById('zone-player').style.display = 'none';
+                    document.getElementById('zone-controls').style.display = 'none';
+                    document.getElementById('zone-leaderboard').style.display = 'flex';
+                    renderLeaderboard();
                 } else {
-                    btn.innerText = "🔊 OUVRIR BUZZERS";
-                    btn.classList.remove('active');
-                    btn.style.background = "var(--blue)";
-                    btn.disabled = false;
+                    document.getElementById('zone-player').style.display = 'flex';
+                    document.getElementById('zone-controls').style.display = 'flex';
+                    document.getElementById('zone-leaderboard').style.display = 'none';
+                    
+                    if(st === 'ready' || st === 'taken' || st === 'processing') {
+                        btn.innerText = st === 'processing' ? "⏳ ANALYSE..." : "✅ BUZZERS OUVERTS";
+                        btn.classList.add('active');
+                        if (st === 'processing') btn.style.background = "#e67e22"; else btn.style.background = "var(--mj-color)";
+                        btn.disabled = true;
+                    } else {
+                        btn.innerText = "🔊 OUVRIR BUZZERS";
+                        btn.classList.remove('active');
+                        btn.style.background = "var(--blue)";
+                        btn.disabled = false;
+                    }
                 }
-                // --- FIN MODIFICATION ---
             });
         }
 
@@ -224,17 +262,13 @@
             `;
         }
 
-        // --- DÉBUT MODIFICATION ANTI-LAG (OUVERTURE DES BUZZERS) ---
         function openBuzzers() {
             if (roomRef) {
-                // 1. On supprime les anciens tickets
                 roomRef.child('buzzAttempts').remove().then(() => {
-                    // 2. On ouvre la manche
                     statusUpdate('ready');
                 });
             }
         }
-        // --- FIN MODIFICATION ---
 
         function statusUpdate(st) { 
             roomRef.child('gameState').set({ status: st }); 
@@ -252,7 +286,6 @@
             roomRef.child('players/' + currentPlayer.id + '/pts').transaction(x => (x||0)+pts);
             if(mode === 'partial') {
                 roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
-                // On rouvre les buzzers proprement avec la nouvelle fonction
                 openBuzzers();
             } else fullReset();
         }
@@ -260,7 +293,6 @@
         function handleError() {
             if(!currentPlayer || !currentPlayer.pseudo) return;
             roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
-            // On rouvre les buzzers proprement avec la nouvelle fonction
             openBuzzers();
         }
 
@@ -271,14 +303,122 @@
         function warnPlayer(uid) {
             if(confirm("Envoyer un avertissement (Carton Jaune) à ce joueur ?")) {
                 roomRef.child('players/' + uid).update({ hasBeenWarned: true, pendingWarning: true });
-                handleError(); // Bloque le joueur et rouvre les buzzers instantanément
+                handleError(); 
             }
         }
 
         function kickPlayer(uid, pseudo) {
             if(confirm("Expulser " + pseudo + " (Carton Rouge) ?")) {
                 roomRef.child('players/' + uid).update({ banned: true, active: false });
-                handleError(); // Bloque le joueur et rouvre les buzzers instantanément
+                handleError(); 
+            }
+        }
+
+        // --- LEADERBOARD & RE-TRIGGER PODIUM ---
+        function renderLeaderboard() {
+            let rankingMap = new Map();
+            const listEquipes = Object.keys(teamsData);
+            const allPlayers = Object.keys(allPlayersData).map(uid => ({ ...allPlayersData[uid], uid: uid }));
+
+            // Calcul des points d'équipe
+            listEquipes.forEach(tName => {
+                const team = teamsData[tName];
+                if (team.banned === true) return;
+                let score = team.active === false ? (team.frozenScore || 0) : (team.bonus || 0);
+                rankingMap.set("team-" + tName, { 
+                    name: tName, 
+                    pts: score, 
+                    isTeam: true,
+                    members: []
+                });
+            });
+
+            // Ajout des points joueurs
+            allPlayers.forEach(p => {
+                const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
+                if (statutEquipe !== "Solo" && rankingMap.has("team-" + statutEquipe)) {
+                    let teamEntry = rankingMap.get("team-" + statutEquipe);
+                    teamEntry.pts += (p.pts || 0); 
+                    teamEntry.members.push(p);
+                } else {
+                    if (p.active !== false && !p.banned) { 
+                        rankingMap.set("solo-" + p.name, { 
+                            name: p.name, 
+                            pts: (p.pts || 0), 
+                            isTeam: false,
+                            members: []
+                        }); 
+                    }
+                }
+            });
+
+            // Tri par ordre décroissant
+            let sorted = Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts);
+            
+            let html = "";
+            sorted.forEach((item, idx) => {
+                let rank = idx + 1;
+                let rankClass = rank === 1 ? 'rank-1' : (rank === 2 ? 'rank-2' : (rank === 3 ? 'rank-3' : ''));
+                let medal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : rank));
+                
+                let membersHtml = "";
+                let clickAction = "";
+                let chevronHtml = "";
+                
+                if(item.isTeam && item.members.length > 0) {
+                    membersHtml = `<div class="team-members" id="members-${idx}">`;
+                    item.members.sort((a,b) => b.pts - a.pts).forEach(m => {
+                        membersHtml += `<div class="member-line"><span>${m.name}</span><span style="color:var(--accent); font-weight:bold;">${m.pts||0}</span></div>`;
+                    });
+                    membersHtml += `</div>`;
+                    chevronHtml = `<span class="chevron" id="chev-${idx}">▼</span>`;
+                    clickAction = `onclick="toggleTeamMembers(${idx})" style="cursor:pointer;"`;
+                }
+
+                html += `
+                    <div class="rank-card ${rankClass}" ${clickAction}>
+                        <div class="rank-pos">${medal}</div>
+                        <div class="rank-info">
+                            <div class="rank-name">
+                                <span>${item.name} ${item.isTeam ? '🛡️' : '👤'}</span>
+                                ${chevronHtml}
+                            </div>
+                            ${membersHtml}
+                        </div>
+                        <div class="rank-pts">${item.pts}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('leaderboard-content').innerHTML = html;
+        }
+
+        function toggleTeamMembers(idx) {
+            const el = document.getElementById('members-' + idx);
+            const icon = document.getElementById('chev-' + idx);
+            if(el.classList.contains('open')) {
+                el.classList.remove('open');
+                icon.classList.remove('open');
+            } else {
+                el.classList.add('open');
+                icon.classList.add('open');
+            }
+        }
+
+        function relaunchPodium() {
+            if(roomRef) {
+                // En modifiant le timestamp du status endGame, on force scores.html à relancer l'animation
+                roomRef.child('gameState').update({ timestamp: Date.now() });
+                
+                // Petit effet visuel sur le bouton
+                const btn = document.querySelector('#zone-leaderboard .btn-gold');
+                const oldText = btn.innerText;
+                btn.innerText = "✅ SIGNAL ENVOYÉ !";
+                btn.style.background = "var(--success)";
+                setTimeout(() => {
+                    btn.innerText = oldText;
+                    btn.style.background = "var(--gold)";
+                }, 2000);
             }
         }
     </script>
