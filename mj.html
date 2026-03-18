@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Console MJ Pro - Presta'Puce</title>
-    <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
+    <link rel="icon" id="page-favicon" type="image/png" href="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
@@ -25,10 +25,21 @@
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; top: 0; box-shadow: none; opacity: 0.6; color: #dcdde1 !important; border:none !important;}
         .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: white !important; box-shadow: none !important; }
         .btn-cancel:hover:not(:disabled) { background: rgba(231, 76, 60, 0.2) !important; }
-        .countdown-btn { background: #e67e22 !important; cursor: wait !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(230, 126, 34, 0.6) !important; }
         
         .dashboard { display: none; max-width: 800px; margin: 80px auto 40px auto; }
         
+        /* APP BAR & FLIP 3D */
+        .app-bar { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.6); padding: 10px 20px 10px 90px; border-bottom: 2px solid var(--accent); position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); margin: -20px -20px 20px -20px; }
+        .app-bar-center { text-align: left; flex: 1; }
+        .app-bar-right { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+        .flip-container { width: 60px; height: 60px; perspective: 1000px; cursor: pointer; flex-shrink: 0; }
+        .flip-inner { position: relative; width: 100%; height: 100%; text-align: center; transform-style: preserve-3d; transition: transform 0.6s; }
+        .flip-inner.animate { animation: flipAnim 10s infinite; }
+        .flip-front, .flip-back { position: absolute; top: 0; left: 0; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 10px; background: rgba(0,0,0,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .flip-back { transform: rotateY(180deg); }
+        .flip-front img, .flip-back img { width: 100%; height: 100%; object-fit: contain; padding: 5px; box-sizing: border-box; }
+        @keyframes flipAnim { 0%, 40% { transform: rotateY(0deg); } 50%, 90% { transform: rotateY(180deg); } 100% { transform: rotateY(360deg); } }
+
         /* HUB MJ V2 */
         .hub-search-bar { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--accent); background: rgba(0,0,0,0.6); color: white; font-size: 1.1rem; outline: none; margin-bottom: 20px; transition: 0.3s; }
         .hub-search-bar:focus { box-shadow: 0 0 15px rgba(241, 196, 15, 0.5); }
@@ -57,8 +68,8 @@
         .readonly-mode .team-item.banned, .readonly-mode .team-item.inactive { display: none !important; }
         .readonly-mode #inactive-section, .readonly-mode #banned-section { display: none !important; }
         .readonly-mode #mj-team-inactive-section, .readonly-mode #mj-team-banned-section { display: none !important; }
+        .readonly-mode #player-search-container { display: none !important; }
 
-        .room-info-card { background: var(--accent); color: black; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3); }
         .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-height: 200px; overflow-y: auto; justify-content: flex-start; }
         .crest-wrapper { width: 50px; height: 50px; background: #ecf0f1; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; flex-shrink: 0; }
         .crest-selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: scale(1.1); z-index: 2; }
@@ -139,8 +150,17 @@
     <div id="bg-protection"></div>
     <div class="version-tag" id="app-version-display"></div>
 
-    <div id="global-mj-logo-container" style="display:none; position: fixed; top: 20px; left: 20px; z-index: 9999;">
-        <img id="global-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" onclick="toggleProfile()" style="width:60px; height:60px; object-fit:contain; cursor:pointer; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background:var(--card-bg); transition: transform 0.2s;" title="Ouvrir / Fermer Mon Profil">
+    <div id="global-mj-logo-container" style="display:none; position: fixed; top: 15px; left: 15px; z-index: 9999;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
+        <div class="flip-container">
+            <div class="flip-inner" id="logo-flip-inner">
+                <div class="flip-front">
+                    <img src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad">
+                </div>
+                <div class="flip-back">
+                    <img id="flip-back-logo" src="">
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="univ-lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:30000; align-items:center; justify-content:space-between; padding:0 20px; box-sizing:border-box;" onclick="if(event.target.id==='univ-lightbox') closeLightbox()">
@@ -154,7 +174,7 @@
 
     <div id="screen-login" class="box" style="display:block;">
         <button class="btn-ghost" onclick="toggleGuide()">AIDE / GUIDE</button>
-        <img id="login-mj-logo" src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="width:70px; margin-bottom:15px; border-radius: 10px;">
+        <img id="login-mj-logo" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad" style="width:100px; margin-bottom:15px;">
         <h2>Accès MJ Sécurisé</h2>
         <input type="email" id="mj-email" placeholder="Email MJ" onkeypress="if(event.key==='Enter') login()">
         <div class="password-wrapper">
@@ -165,12 +185,13 @@
         <p onclick="forgotPassword()" style="color:var(--accent); cursor:pointer; font-size:0.8rem; text-decoration: underline; margin-top: 10px;">Mot de passe oublié ?</p>
     </div>
 
-    <div id="screen-profile" class="box" style="display:none; max-height:90vh; overflow-y:auto;">
+    <div id="screen-profile" class="box" style="display:none; max-height:90vh; overflow-y:auto; padding-bottom: 50px;">
         <h2 style="margin-bottom:20px; color:white;">MA CARTE DE VISITE</h2>
         <p class="section-title">👤 IDENTITÉ</p>
         <input type="text" id="prof-nom" placeholder="Nom" onkeypress="if(event.key==='Enter') saveProfile()">
         <input type="text" id="prof-prenom" placeholder="Prénom (Affiché aux joueurs)" onkeypress="if(event.key==='Enter') saveProfile()">
         <input type="email" id="prof-email" placeholder="Email (Identifiant)" style="border-color:var(--blue);" onkeypress="if(event.key==='Enter') saveProfile()">
+        
         <p class="section-title">🖼️ IMAGE DE MARQUE</p>
         <label for="prof-logo-upload" id="profile-drop-zone" class="drop-zone profile-drop">
             <img id="prof-logo-preview" src="" style="display:none;">
@@ -179,13 +200,35 @@
         </label>
         <span class="input-helper">Affiché sur les téléphones et sur l'écran géant.</span>
         <input type="hidden" id="prof-logo-url"> 
+        
         <p class="section-title">🌐 PUBLICITÉ / RÉSEAUX</p>
         <input type="text" id="prof-link" placeholder="Ex: https://monsite.com ou @moninsta" onkeypress="if(event.key==='Enter') saveProfile()">
+        
         <p class="section-title">📁 BIBLIOTHÈQUE / MÉDIAS</p>
         <button onclick="openLibraryProxy('self')" style="background:var(--gold); color:black; margin-top:0;">🎨 Gérer mes Blasons</button>
-        <button onclick="openBgLibraryProxy('self')" style="background:var(--purple); color:white; margin-top:10px;">📺 Gérer mes Fonds</button>
-        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:20px 0;">
-        <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent); text-align:left;">SÉCURITÉ</p>
+        
+        <p class="section-title" style="margin-top:20px;">📺 PERSONNALISATION ÉCRAN</p>
+        <label for="room-bg-upload" id="bg-drop-zone" class="drop-zone" style="padding:15px; margin-bottom:10px;">
+            <span id="bg-dz-title" style="font-size:0.9rem; font-weight:bold; display:block; color:#85c1e9;">GLISSEZ VOTRE FOND ICI</span><span id="bg-dz-sub" style="font-size:0.7rem; color:#ecf0f1;">ou Cliquez</span>
+            <input type="file" id="room-bg-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files, 'dashboard')">
+        </label>
+        <div style="display:flex; gap:5px; margin-bottom:10px; align-items:center;">
+            <input type="text" id="room-bg-url-input" placeholder="Lien d'image (http...)" style="margin:0; flex:1; font-size:0.8rem; padding:8px;" onkeypress="if(event.key==='Enter') addBgUrlToLibrary('dashboard')">
+            <button style="background:var(--blue); width:auto; margin:0; padding:8px; font-size:0.8rem;" onclick="addBgUrlToLibrary('dashboard')">Ajouter</button>
+        </div>
+        <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; max-height: 150px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); margin-bottom:10px;">
+            <div id="bg-gallery" class="bg-gallery-wrapper"></div>
+        </div>
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <button id="btn-apply-bg" style="background:var(--blue); flex:2; margin:0; font-size:0.8rem; padding:10px;" onclick="saveCustomBg()" disabled>APPLIQUER LA SÉLECTION</button>
+            <button class="btn-cancel" style="flex:1; margin:0; font-size:0.8rem; padding:10px;" onclick="resetCustomBg()">Par défaut</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:5px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-bottom:15px;">
+            <label class="show-pass-container" style="margin-bottom:0; color:#ecf0f1; font-size:0.8rem;"><input type="checkbox" id="check-default-bg"> Appliquer par défaut (Prochaines salles)</label>
+            <label class="show-pass-container" style="margin-bottom:0; color:#ecf0f1; font-size:0.8rem;"><input type="checkbox" id="check-console-bg"> Appliquer ce fond sur ma Console</label>
+        </div>
+
+        <p class="section-title">SÉCURITÉ</p>
         <div class="password-wrapper"><input type="password" id="prof-pass-current" placeholder="Mot de passe actuel" style="border-color:var(--danger);" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
         <div class="password-wrapper"><input type="password" id="prof-pass" placeholder="Nouveau mot de passe" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
         <div class="password-wrapper"><input type="password" id="prof-pass-conf" placeholder="Confirmer le mot de passe" style="margin-bottom:0;" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
@@ -193,6 +236,27 @@
         <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin-top:10px;">💾 ENREGISTRER</button>
         <button class="btn-cancel" onclick="closeProfile()">Retour</button>
         <button onclick="profileLogout()" style="background:var(--danger); margin-top:20px;">🚪 DÉCONNEXION</button>
+
+        <div style="margin-top:30px; background:rgba(0,0,0,0.6); padding:15px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); text-align:center;">
+            <img src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad" style="width:80px; margin-bottom:10px;">
+            <div style="font-size:0.8rem; color:#bdc3c7; margin-bottom:15px;">
+                Créé par <b>Presta'Puce</b><br>
+                &copy; <script>document.write(new Date().getFullYear())</script> Tous droits réservés.
+            </div>
+            
+            <div style="text-align:left; font-size:0.8rem; color:#ecf0f1; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px;">
+                <b style="color:var(--accent);">VERSIONS SYSTÈME</b><br>
+                <div style="display:flex; justify-content:space-between; margin-top:5px;"><span>Système Core :</span> <span id="current-version-display">...</span></div>
+                <div style="display:flex; justify-content:space-between; margin-top:2px;"><span>mj.html :</span> <span>v1.177</span></div>
+                
+                <div id="sa-version-edit" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.2);">
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="sys-version-input" placeholder="1.xxx" style="margin:0; flex:1; font-size:0.8rem; padding:5px;">
+                        <button id="btn-update-version" style="background:var(--danger); width:auto; margin:0; font-size:0.8rem; padding:5px 10px;" onclick="updateAppVersion()">Forcer Maj</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="screen-choice" class="box" style="display:none; max-width: 700px;">
@@ -217,7 +281,7 @@
     </div>
 
     <div id="screen-super-admin" class="dashboard" style="display:none; max-width: 900px;">
-        <div class="room-info" style="background: #c0392b; color: white;">👑 GESTION SUPER ADMIN</div>
+        <div class="room-info-card" style="background: #c0392b; color: white;">👑 GESTION SUPER ADMIN</div>
         <div style="display:flex; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
             <button style="background:var(--blue); width:auto;" onclick="document.getElementById('modal-sa-create').style.display='flex'">➕ Créer un compte MJ</button>
             <button class="btn-cancel" style="width:auto;" onclick="closeSuperAdmin()">Retour Accueil</button>
@@ -243,20 +307,21 @@
 
     <div id="screen-dashboard" class="dashboard">
         
+        <div class="app-bar">
+            <div class="app-bar-center">
+                <div id="display-event-name" style="font-size:1.4rem; font-weight:900; text-transform:uppercase; margin:0; line-height:1.1; text-shadow:0 2px 4px black;">PARTIE EN COURS</div>
+                <div id="display-mj-name" style="font-size:0.9rem; font-weight:600; margin-top:2px; color:#bdc3c7;">Animé par MJ</div>
+                <div style="font-size:0.8rem; font-family:monospace; margin-top:2px; color:var(--accent);">CODE SALLE : <span id="display-room" style="font-weight:bold; color:white;">----</span></div>
+            </div>
+            <div class="app-bar-right">
+                <button onclick="openScoreBoard()" style="background:rgba(211,84,0,0.9); box-shadow:0 2px 5px rgba(0,0,0,0.5);">📺 Scores</button>
+                <button onclick="showRemoteQR()" style="background:rgba(142,68,173,0.9); box-shadow:0 2px 5px rgba(0,0,0,0.5);">📱 Remote</button>
+                <button onclick="toggleGuide()" style="background:rgba(52,73,94,0.9); box-shadow:0 2px 5px rgba(0,0,0,0.5);">📖 Guide</button>
+            </div>
+        </div>
+
         <div id="readonly-banner" style="display:none; background:var(--danger); color:white; font-weight:bold; font-size:1.2rem; padding:15px; border-radius:10px; margin-bottom:20px; text-align:center; box-shadow:0 4px 10px rgba(231,76,60,0.4); text-transform:uppercase; border:2px solid #c0392b;">
             🏁 Partie Terminée - Mode Lecture Seule
-        </div>
-
-        <div class="room-info-card">
-            <div id="display-event-name" style="font-size: 1.8rem; font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1.1;">PARTIE EN COURS</div>
-            <div id="display-mj-name" style="font-size: 1.1rem; font-weight: 600; margin-top: 5px; opacity: 0.9;">Animé par MJ</div>
-            <div style="font-size: 0.85rem; font-family: monospace; opacity: 0.7; margin-top: 5px; font-weight: bold;">SALLE N° <span id="display-room">----</span></div>
-        </div>
-
-        <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom: 15px; flex-wrap: wrap;">
-            <button onclick="openScoreBoard()" style="width: auto; background: rgba(211, 84, 0, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">📺 Tableau des Scores</button>
-            <button onclick="showRemoteQR()" style="width: auto; background: rgba(142, 68, 173, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">📱 Remote</button>
-            <button onclick="toggleGuide()" style="width: auto; background: rgba(52, 73, 94, 0.9); padding: 8px 15px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">GUIDE</button>
         </div>
         
         <div id="mj-actions-bar" style="display:flex; gap:10px; margin-bottom:20px;">
@@ -298,53 +363,30 @@
         </div>
         
         <h3 style="text-shadow: 0 1px 2px black;">Lobby Joueurs</h3>
+        
+        <div id="player-search-container" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <input type="text" id="player-search" class="hub-search-bar" style="margin:0; flex:1;" placeholder="🔍 Chercher un joueur..." oninput="renderLobby()">
+            </div>
+            <div id="player-filters" style="display:flex; gap:5px; overflow-x:auto;">
+                <button id="filter-btn-all" class="hub-tab active" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('all')">Toutes</button>
+                <button id="filter-btn-active" class="hub-tab" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('active')">🟢 Actives</button>
+                <button id="filter-btn-inactive" class="hub-tab" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('inactive')">🟠 En Pause</button>
+                <button id="filter-btn-banned" class="hub-tab" style="margin:0; width:auto; flex:1;" onclick="setPlayerFilter('banned')">🔴 Bannis</button>
+            </div>
+        </div>
+
         <div id="score-list"></div>
         <div id="inactive-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255,255,255,0.3); border-radius: 12px; backdrop-filter: blur(10px);"><h3 style="color:#bdc3c7; margin-top:0; font-size:1rem;">Joueurs Inactifs / Partis</h3><div id="inactive-list"></div></div>
         <div id="banned-section" style="display:none; margin-top:20px; padding: 15px; background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); border-radius: 12px; backdrop-filter: blur(10px);"><h3 style="color:var(--danger); margin-top:0;">Joueurs Expulsés</h3><div id="banned-list"></div></div>
 
-        <div class="team-controls" style="margin-top:20px; border: 2px solid var(--gold); border-radius: 12px; background: rgba(243, 156, 18, 0.15); text-align: center; padding: 15px; backdrop-filter: blur(10px);">
-            <h3 style="color:var(--gold); margin-top:0; text-shadow: 0 1px 2px black;">PODIUM & RÉSULTATS</h3>
-            <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 1.1rem; margin-bottom: 0;" onclick="triggerEndGame()">🏁 Fin de partie & Archiver</button>
-        </div>
-
-        <div style="margin-top:20px; border: 1px solid var(--blue); padding: 20px; border-radius: 12px; background: rgba(52, 152, 219, 0.15); backdrop-filter: blur(10px);">
-            <h3 style="color:#85c1e9; margin-top:0; text-shadow: 0 1px 2px black;">📺 Personnalisation Écran Géant</h3>
-            <label for="room-bg-upload" id="bg-drop-zone" class="drop-zone" style="padding:15px;">
-                <span id="bg-dz-title" style="font-size:1rem; font-weight:bold; display:block; color:#85c1e9;">GLISSEZ VOTRE FOND ICI</span><span id="bg-dz-sub" style="font-size:0.8rem; color:#ecf0f1;">ou Cliquez pour parcourir</span>
-                <input type="file" id="room-bg-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(this.files, 'dashboard')">
-            </label>
-            <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
-                <input type="text" id="room-bg-url-input" placeholder="Lien d'image (http...)" style="margin:0; flex:1; font-size:0.9rem; padding:10px;" onkeypress="if(event.key==='Enter') addBgUrlToLibrary('dashboard')">
-                <button style="background:var(--blue); width:auto; margin:0; padding:10px 15px; font-size:0.9rem;" onclick="addBgUrlToLibrary('dashboard')">Ajouter</button>
+        <div style="margin-top:40px; border:2px solid #c0392b; padding:20px; border-radius:12px; background:rgba(192,57,43,0.15); backdrop-filter:blur(10px);">
+            <h3 style="color:var(--danger); margin-top:0; text-shadow:0 1px 2px black;">⚙️ GESTION DE LA SALLE</h3>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black;" onclick="triggerEndGame()" title="Bloque les buzzers, affiche le podium final, et passe la salle en lecture seule dans vos archives.">🏆 TERMINER LA PARTIE</button>
+                <button style="background:var(--blue);" onclick="quitRoom()" title="Ferme cette page et vous ramène à l'accueil sans détruire la salle (les données sont conservées).">🚪 QUITTER LA CONSOLE</button>
+                <button id="btn-delete-room" onmousedown="startDeleteHold(event)" onmouseup="cancelDeleteHold(event)" onmouseleave="cancelDeleteHold(event)" ontouchstart="startDeleteHold(event)" ontouchend="cancelDeleteHold(event)" title="ATTENTION : Supprime définitivement la salle et toutes ses données !">⚠️ SUPPRIMER DÉFINITIVEMENT</button>
             </div>
-            
-            <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; max-height: 250px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); margin-bottom:10px;">
-                <div id="bg-gallery" class="bg-gallery-wrapper"></div>
-            </div>
-
-            <div style="display:flex; gap:10px; margin-bottom: 10px;">
-                <button id="btn-apply-bg" style="background:var(--blue); flex:2; margin:0;" onclick="saveCustomBg()" disabled>APPLIQUER LA SÉLECTION</button>
-                <button class="btn-cancel" style="flex:1; margin:0;" onclick="resetCustomBg()">Fond par défaut</button>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:8px; margin-top:15px; background:rgba(0,0,0,0.3); padding:15px; border-radius:8px;">
-                <label class="show-pass-container" style="margin-bottom:0; color:#ecf0f1; font-size:0.85rem;"><input type="checkbox" id="check-default-bg"> Définir par défaut pour toutes mes prochaines salles</label>
-                <label class="show-pass-container" style="margin-bottom:0; color:#ecf0f1; font-size:0.85rem;"><input type="checkbox" id="check-console-bg"> Appliquer ce fond sur ma Console MJ</label>
-            </div>
-        </div>
-
-        <div style="margin-top:20px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);">
-            <h3 style="color:#bdc3c7; margin-top:0;">Administration Version</h3>
-            <div style="display:flex; gap:10px; align-items:center;">
-                <input type="text" id="sys-version-input" placeholder="1.xxx" style="margin:0; width:100px; display:none;">
-                <button id="btn-update-version" style="background:var(--blue); width:auto; margin:0; display:none;" onclick="updateAppVersion()">Mettre à jour</button>
-                <span style="font-size:0.8rem; color:#aaa;">Actuelle : <b id="current-version-display">...</b></span>
-            </div>
-        </div>
-
-        <div style="margin-top:40px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);">
-            <h3 style="color:var(--danger); margin-top:0;">Fermer la Console</h3>
-            <button style="background:var(--blue);" onclick="quitRoom()">🚪 Quitter le tableau de bord (Conserver données)</button>
-            <button id="btn-delete-room" onmousedown="startDeleteHold(event)" onmouseup="cancelDeleteHold(event)" onmouseleave="cancelDeleteHold(event)" ontouchstart="startDeleteHold(event)" ontouchend="cancelDeleteHold(event)">⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE</button>
         </div>
     </div>
 
@@ -518,7 +560,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.176";
+        const APP_VERSION = "1.177";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -537,6 +579,7 @@
 
         let buzzProcessing = false;
         let curLbType = '', curLbIdx = 0, lbCrests = [], lbBgsDash = [], lbBgsModal = [];
+        let currentPlayerFilter = 'all';
         
         let mjRooms = [];
         let currentHubTab = 'active';
@@ -689,7 +732,7 @@
 
         function executeCrestDelete(key, urlToDelete) {
             const uid = activeLibraryUid || auth.currentUser.uid;
-            if(!isProxyMode && globalTeams) { Object.keys(globalTeams).forEach(tKey => { if(globalTeams[tKey].icon === urlToDelete) roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" }); }); }
+            if(!isProxyMode && globalTeams) { Object.keys(globalTeams).forEach(tKey => { if(globalTeams[tKey].icon === urlToDelete) roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad" }); }); }
             db.ref(`users/${uid}/library/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => loadModalLibrary());
         }
 
@@ -771,8 +814,14 @@
         
         function loadMjData(user) {
             isSuperAdmin = (user.email === 'contact@prestapuce.com'); activeLibraryUid = user.uid; activeBgLibraryUid = user.uid;
-            if(isSuperAdmin) { document.getElementById('btn-super-admin').style.display='inline-block'; document.getElementById('sys-version-input').style.display='inline-block'; document.getElementById('btn-update-version').style.display='inline-block'; initSuperAdminListener(); } 
-            else { document.getElementById('btn-super-admin').style.display='none'; document.getElementById('sys-version-input').style.display='none'; document.getElementById('btn-update-version').style.display='none'; }
+            if(isSuperAdmin) { 
+                document.getElementById('btn-super-admin').style.display='inline-block'; 
+                document.getElementById('sa-version-edit').style.display='block'; 
+                initSuperAdminListener(); 
+            } else { 
+                document.getElementById('btn-super-admin').style.display='none'; 
+                document.getElementById('sa-version-edit').style.display='none'; 
+            }
             db.ref('users/' + user.uid).update({ email: user.email });
             db.ref('users/' + user.uid).once('value').then(snap => {
                 const data = snap.val() || {};
@@ -996,7 +1045,31 @@
             db.ref('users/'+user.uid).update(upd).then(()=>{ alert("Profil mis à jour !"); mjProfileData={...mjProfileData, ...upd}; document.getElementById('mj-display-name').innerText=upd.prenom||"MJ"; updateLogos(upd.customLogo); document.getElementById('prof-pass-current').value=""; document.getElementById('prof-pass').value=""; document.getElementById('prof-pass-conf').value=""; closeProfile(); }).catch(e=>alert("Erreur: "+e.message));
         }
 
-        function updateLogos(url) { const f = url || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png"; document.getElementById('global-mj-logo').src=f; document.getElementById('login-mj-logo').src=f; document.getElementById('page-favicon').href=f; if(roomRef&&roomID){ roomRef.child('mjLogo').set(f); if(mjProfileData.customLink)roomRef.child('mjLink').set(mjProfileData.customLink); } }
+        function updateLogos(url) { 
+            const defaultLogo = "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad";
+            const oldWixLogo = "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
+            const f = (url && url !== "" && url !== oldWixLogo && url !== defaultLogo) ? url : defaultLogo; 
+            
+            document.getElementById('login-mj-logo').src = defaultLogo; 
+            document.getElementById('page-favicon').href = f; 
+            
+            const flipInner = document.getElementById('logo-flip-inner');
+            const mjLogoImg = document.getElementById('flip-back-logo');
+            
+            if(f !== defaultLogo) {
+                if(mjLogoImg) mjLogoImg.src = f;
+                if(flipInner) flipInner.classList.add('animate');
+            } else {
+                if(mjLogoImg) mjLogoImg.src = "";
+                if(flipInner) flipInner.classList.remove('animate');
+            }
+
+            if(roomRef && roomID) { 
+                roomRef.child('mjLogo').set(f); 
+                if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); 
+            } 
+        }
+
         function createBlason(i) { const c=['#e74c3c','#3498db','#f1c40f','#2c3e50','#27ae60','#ecf0f1'], c1=c[i%c.length], c2=c[(i+1)%c.length], m=i%10; let p=(m===0)?`<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`:(m===1)?`<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`:`<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`; return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="800" height="800"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${p}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`; }
 
         function askMjNameAndCreate() { 
@@ -1032,12 +1105,13 @@
 
         function launchDashboard(id, mjName = null, eventName = null, isArchived = false) {
             roomID = id; buzzHistory = []; currentBuzzerId = null; currentPlayer = null;
+            currentPlayerFilter = 'all'; document.querySelectorAll('#player-filters button').forEach(btn => btn.classList.remove('active')); document.getElementById('filter-btn-all').classList.add('active'); if(document.getElementById('player-search')) document.getElementById('player-search').value = "";
             
             const btnDel = document.getElementById('btn-delete-room');
             if (btnDel) {
                 btnDel.disabled = false;
                 btnDel.classList.remove('holding');
-                btnDel.innerText = "⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE";
+                btnDel.innerText = "⚠️ SUPPRIMER DÉFINITIVEMENT";
                 clearTimeout(holdTimer);
             }
             
@@ -1067,7 +1141,8 @@
                 publicRef.onDisconnect().remove();
             }
 
-            try { roomRef.child('mjLogo').set(mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png"); } catch(e){}
+            const defLogo = "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad";
+            try { roomRef.child('mjLogo').set(mjProfileData.customLogo && mjProfileData.customLogo !== "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" ? mjProfileData.customLogo : defLogo); } catch(e){}
             try { if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); } catch(e){}
             try { roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true); } catch(e){}
             try { if(mjProfileData.defaultBackground) roomRef.child('customBackground').set(mjProfileData.defaultBackground); } catch(e){}
@@ -1082,7 +1157,7 @@
         }
 
         function initAdminListener() { db.ref('config/minVersion').on('value', snap => { const v = snap.val() || "1.000"; const d = document.getElementById('current-version-display'); if(d) d.innerText = v; const i = document.getElementById('sys-version-input'); if(i && i.value === "") i.value = v; }); }
-        function updateAppVersion() { const n = document.getElementById('sys-version-input').value.trim(); if(n && confirm("Forcer le rechargement de TOUS les joueurs ?")) db.ref('config/minVersion').set(n); }
+        function updateAppVersion() { const n = document.getElementById('sys-version-input').value.trim(); if(n && confirm("Forcer le rechargement de TOUS les joueurs ?")) db.ref('config/minVersion').set(n).then(() => alert("Mis à jour !")); }
         function openScoreBoard() { if(!roomID) return; window.open(window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/scores.html?room=" + roomID, '_blank'); }
         function toggleGuide() { const o = document.getElementById('overlay-guide'); if(o.style.display === 'flex') o.style.display = 'none'; else { o.style.display = 'flex'; document.getElementById('guide-iframe').src = "guide.html?t=" + Date.now(); } }
         function showRemoteQR() { const o = document.getElementById('overlay-remote-qr'); const q = document.getElementById('qrcode-remote'); q.innerHTML = ""; new QRCode(q, { text: window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/remote.html?room=" + roomID, width: 250, height: 250 }); o.style.display = 'flex'; }
@@ -1198,6 +1273,14 @@
             });
         }
 
+        // --- FILTRES LOBBY JOUEURS ---
+        function setPlayerFilter(filter) {
+            currentPlayerFilter = filter;
+            document.querySelectorAll('#player-filters button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('filter-btn-' + filter).classList.add('active');
+            renderLobby();
+        }
+
         // --- LOBBY DES JOUEURS (SOLO & ETATS) ---
         function renderLobby() {
             let hA = "", hI = "", hB = ""; let hsB = false, hsI = false;
@@ -1205,8 +1288,20 @@
             const is = document.getElementById('inactive-section'), bs = document.getElementById('banned-section');
             
             const aP = [], iP = [], rP = [], bP = [];
-            Object.keys(allPlayersData).forEach(uid => { const d = allPlayersData[uid]; if(!d)return; d.uid = uid; if(d.banned===true)bP.push(d); else if(d.active===false){if(d.recoveryRequest===true)rP.push(d);else iP.push(d);} else aP.push(d); });
+            const searchInput = document.getElementById('player-search');
+            const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : "";
+
+            Object.keys(allPlayersData).forEach(uid => { 
+                const d = allPlayersData[uid]; if(!d)return; d.uid = uid; 
+                if (searchVal && !d.name.toLowerCase().includes(searchVal)) return;
+
+                if(d.banned===true) bP.push(d); 
+                else if(d.active===false){if(d.recoveryRequest===true)rP.push(d);else iP.push(d);} 
+                else aP.push(d); 
+            });
+
             aP.sort((a,b) => { if(a.uid===currentBuzzerId)return -1; if(b.uid===currentBuzzerId)return 1; let iA=buzzHistory.indexOf(a.name), iB=buzzHistory.indexOf(b.name); if(iA!==-1&&iB!==-1)return iB-iA; if(iA!==-1)return -1; if(iB!==-1)return 1; let rA=a.reconnectedAt||0, rB=b.reconnectedAt||0; if(rA===0&&rB>0)return -1; if(rA>0&&rB===0)return 1; if(rA>0&&rB>0)return rA-rB; return a.name.localeCompare(b.name); });
+            
             aP.forEach(d => {
                 let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
                 const iB = currentBlocked[d.name]; const bS = iB ? "background:var(--danger);color:white;border:none;" : "background:transparent;border:1px solid var(--danger);opacity:0.6;";
@@ -1218,7 +1313,27 @@
             rP.forEach(d => { hsI=true; hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);width:auto;padding:0 10px;margin-right:5px;" onclick="openEditModal('${d.uid}')">✏️</button><button class="lobby-btn" style="background:var(--success);width:auto;padding:0 10px;" onclick="acceptRecovery('${d.uid}')">✅</button><button class="lobby-btn" style="background:var(--danger);width:auto;padding:0 10px;margin-left:5px;" onclick="rejectRecovery('${d.uid}')">❌</button></div></div>`; });
             iP.forEach(d => { hsI=true; hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')">✏️</button><button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${d.uid}')">✅</button><button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')">🟥</button><button class="lobby-btn btn-cancel" style="padding:0; width:30px; height:30px; border:1px solid var(--danger)!important;" onclick="deletePlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}', false)">🗑️</button></div></div>`; });
             bP.forEach(d => { hsB=true; hB += `<div class="team-item" style="border:1px solid var(--danger);justify-content:space-between;"><span style="color:var(--danger)"><b>${d.name}</b></span><div><button style="background:var(--blue);width:auto;padding:5px 15px;margin:0;font-size:0.8rem;margin-right:5px;" onclick="openEditModal('${d.uid}')">✏️</button><button style="background:var(--mj-color);width:auto;padding:5px 15px;margin:0;font-size:0.8rem;margin-right:5px;" onclick="unkickPlayer('${d.uid}')">Réhabiliter</button><button class="btn-cancel" style="width:auto;padding:5px 10px;margin:0;font-size:0.8rem;" onclick="deletePlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}', false)">🗑️</button></div></div>`; });
-            sl.innerHTML = hA; il.innerHTML = hI; bl.innerHTML = hB; bs.style.display = hsB ? "block" : "none"; is.style.display = hsI ? "block" : "none"; 
+            
+            sl.innerHTML = hA; il.innerHTML = hI; bl.innerHTML = hB; 
+            
+            // Logique d'affichage des filtres
+            if(currentPlayerFilter === 'all') {
+                sl.style.display = aP.length > 0 ? 'block' : 'none';
+                bs.style.display = hsB ? "block" : "none"; 
+                is.style.display = hsI ? "block" : "none";
+            } else if (currentPlayerFilter === 'active') {
+                sl.style.display = 'block';
+                bs.style.display = 'none';
+                is.style.display = 'none';
+            } else if (currentPlayerFilter === 'inactive') {
+                sl.style.display = 'none';
+                bs.style.display = 'none';
+                is.style.display = 'block';
+            } else if (currentPlayerFilter === 'banned') {
+                sl.style.display = 'none';
+                bs.style.display = 'block';
+                is.style.display = 'none';
+            }
         }
 
         // --- LOBBY DES ÉQUIPES ---
@@ -1453,7 +1568,7 @@
         function openEditModal(uid) { const d = allPlayersData[uid]; if(!d)return; editingPlayerUid=uid; editingPlayerOriginalPseudo=d.name; editingPlayerOriginalAvatar=d.avatar||"👤"; editingPlayerCurrentAvatar=editingPlayerOriginalAvatar; document.getElementById('edit-player-name').value=d.name; document.getElementById('btn-censor-avatar').style.display=(editingPlayerOriginalAvatar.length>20)?'block':'none'; updateEditAvatarPreview(); populateEditGallery(); document.getElementById('modal-edit-player').style.display='flex'; }
         function populateEditGallery() { const g=document.getElementById('edit-avatar-gallery'); g.innerHTML=""; const o=document.createElement('div'); o.className='edit-gallery-item original-avatar-item'; if(editingPlayerOriginalAvatar.length>20)o.innerHTML=`<img src="${editingPlayerOriginalAvatar}">`; else o.innerText=editingPlayerOriginalAvatar; o.onclick=()=>{editingPlayerCurrentAvatar=editingPlayerOriginalAvatar;updateEditAvatarPreview();}; g.appendChild(o); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='edit-gallery-item'; d.innerText=a; d.onclick=()=>{editingPlayerCurrentAvatar=a;updateEditAvatarPreview();}; g.appendChild(d); }); }
         function updateEditAvatarPreview() { const c=document.getElementById('edit-player-avatar-preview'); if(editingPlayerCurrentAvatar.length>20)c.innerHTML=`<img src="${editingPlayerCurrentAvatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`; else c.innerText=editingPlayerCurrentAvatar; }
-        function censorPlayerAvatar() { editingPlayerCurrentAvatar = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png"; updateEditAvatarPreview(); }
+        function censorPlayerAvatar() { editingPlayerCurrentAvatar = mjProfileData.customLogo || "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad"; updateEditAvatarPreview(); }
         function closeEditPlayerModal() { document.getElementById('modal-edit-player').style.display='none'; editingPlayerUid=null; }
         function savePlayerEdit() { if(!editingPlayerUid)return; const v=document.getElementById('edit-player-name').value.trim(); if(!/^[a-zA-Z0-9À-ÿ\s\-_]+$/.test(v)||v.length<2)return alert("Pseudo invalide (Lettres, chiffres, 2 car. min)."); let tk=false; Object.keys(allPlayersData).forEach(u=>{if(u!==editingPlayerUid&&allPlayersData[u].name&&allPlayersData[u].name.toLowerCase()===v.toLowerCase())tk=true;}); if(tk)return alert("Déjà utilisé."); roomRef.child('players/'+editingPlayerUid).update({name:v, avatar:editingPlayerCurrentAvatar}).then(()=>{ if(v!==editingPlayerOriginalPseudo&&currentBlocked[editingPlayerOriginalPseudo]){roomRef.child('blockedPlayers/'+editingPlayerOriginalPseudo).remove();roomRef.child('blockedPlayers/'+v).set(true);} if(currentBuzzerId===editingPlayerUid)roomRef.child('buzzers').update({pseudo:v, avatar:editingPlayerCurrentAvatar}); closeEditPlayerModal(); }); }
         function setPlayerScore(u, v) { roomRef.child('players/'+u).update({pts: parseInt(v)||0}); }
@@ -1473,7 +1588,7 @@
         function toggleBlockPlayer(ps) { if(currentBlocked[ps]) roomRef.child('blockedPlayers/'+ps).remove(); else roomRef.child('blockedPlayers/'+ps).set(true); }
         
         function triggerEndGame() { 
-            if(confirm("🏁 Fin de partie ?\n\nCela affichera le podium et placera cette salle dans vos Archives en Lecture Seule.")) { 
+            if(confirm("🏁 Fin de partie ?\n\nCela bloquera les buzzers, affichera le podium sur l'écran géant, et passera la salle en Lecture Seule dans vos archives.")) { 
                 roomRef.child('gameState').set({status:'endGame', timestamp:Date.now()}); 
                 roomRef.update({ isArchived: true });
                 roomRef.child('buzzers').remove(); 
@@ -1563,7 +1678,7 @@
             const btn = document.getElementById('btn-delete-room');
             if(btn && !btn.disabled) {
                 btn.classList.remove('holding');
-                btn.innerText = "⚠️ SUPPRIMER DÉFINITIVEMENT CETTE SALLE";
+                btn.innerText = "⚠️ SUPPRIMER DÉFINITIVEMENT";
             }
         }
     </script>
