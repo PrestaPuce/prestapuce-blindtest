@@ -246,26 +246,37 @@
             
             <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; text-align:left; font-size:0.9rem; color:#ecf0f1; border:1px solid rgba(255,255,255,0.1);">
                 <h4 style="margin-top:0; color:var(--accent); margin-bottom:10px;">VERSIONS SYSTÈME</h4>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Index :</span><span id="disp-v-index">v1.176</span></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>MJ :</span><span id="disp-v-mj">v1.182</span></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Remote :</span><span id="disp-v-remote">v1.153</span></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Scores :</span><span id="disp-v-scores">v1.168</span></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Guide :</span><span id="disp-v-guide">v1.022</span></div>
-            </div>
-
-            <div id="sa-versions-edit" style="display:none; margin-top:15px; background:rgba(192,57,43,0.15); border:1px dashed var(--danger); padding:15px; border-radius:8px; text-align:left;">
-                <h4 style="margin-top:0; color:var(--danger); margin-bottom:10px;">👑 ÉDITION SUPER ADMIN</h4>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-                    <div><label style="font-size:0.8rem; color:#bdc3c7;">Index</label><input type="text" id="inp-v-index" style="padding:8px; margin:0;"></div>
-                    <div><label style="font-size:0.8rem; color:#bdc3c7;">MJ</label><input type="text" id="inp-v-mj" style="padding:8px; margin:0;"></div>
-                    <div><label style="font-size:0.8rem; color:#bdc3c7;">Remote</label><input type="text" id="inp-v-remote" style="padding:8px; margin:0;"></div>
-                    <div><label style="font-size:0.8rem; color:#bdc3c7;">Scores</label><input type="text" id="inp-v-scores" style="padding:8px; margin:0;"></div>
-                    <div style="grid-column: span 2;"><label style="font-size:0.8rem; color:#bdc3c7;">Guide</label><input type="text" id="inp-v-guide" style="padding:8px; margin:0;"></div>
+                
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+                    <span>Index :</span>
+                    <span id="disp-v-index">v1.176</span>
+                    <input type="text" id="inp-v-index" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'index', 'mj')">
                 </div>
-                <button onclick="updateAllVersions()" style="background:var(--danger); margin:0; font-size:0.9rem; padding:10px;">💾 Mettre à jour en base</button>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+                    <span>MJ :</span>
+                    <span id="disp-v-mj">v1.183</span>
+                    <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+                    <span>Remote :</span>
+                    <span id="disp-v-remote">v1.153</span>
+                    <input type="text" id="inp-v-remote" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'remote', 'scores')">
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+                    <span>Scores :</span>
+                    <span id="disp-v-scores">v1.168</span>
+                    <input type="text" id="inp-v-scores" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'scores', 'guide')">
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+                    <span>Guide :</span>
+                    <span id="disp-v-guide">v1.022</span>
+                    <input type="text" id="inp-v-guide" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'guide', null)">
+                </div>
+                
+                <button id="sa-inline-save-btn" onclick="updateAllVersions()" style="display:none; background:var(--danger); margin-top:10px; margin-bottom:0; font-size:0.85rem; padding:8px;">💾 Forcer la mise à jour globale</button>
             </div>
             
-            <p style="font-size:0.75rem; color:#7f8c8d; margin-top:20px; margin-bottom:0;">&copy; <script>document.write(new Date().getFullYear())</script> Presta'Puce. Tous droits réservés.</p>
+            <p style="font-size:0.75rem; color:#7f8c8d; margin-top:20px; margin-bottom:0;">&copy; 2026 Presta'Puce. Tous droits réservés.</p>
         </div>
     </div>
 
@@ -560,7 +571,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.182";
+        const APP_VERSION = "1.183";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -610,9 +621,10 @@
         
         function initSuperAdminListener() { if(isSuperAdmin) db.ref('users').on('value', snap => { allUsersData = snap.val() || {}; renderSAMjList(); }); }
         
+        // --- NOUVEAU SYSTEME DE VERSIONS IN-PLACE ---
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.182", remote: "v1.153", scores: "v1.168", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.183", remote: "v1.153", scores: "v1.168", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -620,15 +632,38 @@
                 if(document.getElementById('disp-v-scores')) document.getElementById('disp-v-scores').innerText = v.scores;
                 if(document.getElementById('disp-v-guide')) document.getElementById('disp-v-guide').innerText = v.guide;
                 
-                if(document.getElementById('inp-v-index') && document.getElementById('inp-v-index').value === "") document.getElementById('inp-v-index').value = v.index;
-                if(document.getElementById('inp-v-mj') && document.getElementById('inp-v-mj').value === "") document.getElementById('inp-v-mj').value = v.mj;
-                if(document.getElementById('inp-v-remote') && document.getElementById('inp-v-remote').value === "") document.getElementById('inp-v-remote').value = v.remote;
-                if(document.getElementById('inp-v-scores') && document.getElementById('inp-v-scores').value === "") document.getElementById('inp-v-scores').value = v.scores;
-                if(document.getElementById('inp-v-guide') && document.getElementById('inp-v-guide').value === "") document.getElementById('inp-v-guide').value = v.guide;
+                if(document.getElementById('inp-v-index') && document.activeElement.id !== 'inp-v-index') document.getElementById('inp-v-index').value = v.index;
+                if(document.getElementById('inp-v-mj') && document.activeElement.id !== 'inp-v-mj') document.getElementById('inp-v-mj').value = v.mj;
+                if(document.getElementById('inp-v-remote') && document.activeElement.id !== 'inp-v-remote') document.getElementById('inp-v-remote').value = v.remote;
+                if(document.getElementById('inp-v-scores') && document.activeElement.id !== 'inp-v-scores') document.getElementById('inp-v-scores').value = v.scores;
+                if(document.getElementById('inp-v-guide') && document.activeElement.id !== 'inp-v-guide') document.getElementById('inp-v-guide').value = v.guide;
 
                 const appVersionDisp = document.getElementById('app-version-display');
                 if (appVersionDisp) appVersionDisp.innerText = v.mj || `v${APP_VERSION}`;
             }); 
+        }
+
+        function handleVersionKey(e, current, next) {
+            if(e.key === 'Enter') {
+                e.preventDefault();
+                
+                // Sauvegarde silencieuse globale à chaque frappe Entrée
+                const newV = {
+                    index: document.getElementById('inp-v-index').value.trim(),
+                    mj: document.getElementById('inp-v-mj').value.trim(),
+                    remote: document.getElementById('inp-v-remote').value.trim(),
+                    scores: document.getElementById('inp-v-scores').value.trim(),
+                    guide: document.getElementById('inp-v-guide').value.trim()
+                };
+                db.ref('config/versions').set(newV);
+                
+                // Saut automatique au champ suivant
+                if(next) {
+                    document.getElementById('inp-v-' + next).focus();
+                } else {
+                    document.getElementById('inp-v-' + current).blur();
+                }
+            }
         }
 
         function updateAllVersions() { 
@@ -640,10 +675,11 @@
                 scores: document.getElementById('inp-v-scores').value.trim(),
                 guide: document.getElementById('inp-v-guide').value.trim()
             };
-            if(confirm("Forcer la mise à jour des versions dans la base de données pour tous les joueurs ?")) {
+            if(confirm("Forcer la mise à jour globale des versions ?")) {
                 db.ref('config/versions').set(newV).then(() => alert("Versions mises à jour avec succès !"));
             }
         }
+        // --------------------------------------------
 
         function renderSAMjList() {
             const container = document.getElementById('sa-mj-list'); container.innerHTML = "";
@@ -849,11 +885,22 @@
             
             if(isSuperAdmin) { 
                 document.getElementById('btn-super-admin').style.display='inline-block'; 
-                document.getElementById('sa-versions-edit').style.display='block'; 
+                
+                ['index', 'mj', 'remote', 'scores', 'guide'].forEach(f => {
+                    document.getElementById('disp-v-' + f).style.display = 'none';
+                    document.getElementById('inp-v-' + f).style.display = 'inline-block';
+                });
+                document.getElementById('sa-inline-save-btn').style.display='block';
+                
                 initSuperAdminListener(); 
             } else { 
                 document.getElementById('btn-super-admin').style.display='none'; 
-                document.getElementById('sa-versions-edit').style.display='none'; 
+                
+                ['index', 'mj', 'remote', 'scores', 'guide'].forEach(f => {
+                    document.getElementById('disp-v-' + f).style.display = 'inline-block';
+                    document.getElementById('inp-v-' + f).style.display = 'none';
+                });
+                document.getElementById('sa-inline-save-btn').style.display='none';
             }
             
             db.ref('users/' + user.uid).update({ email: user.email });
