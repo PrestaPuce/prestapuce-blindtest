@@ -18,7 +18,6 @@
         
         .box { max-width: 400px; margin: 0 auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* Dashboard élargi à 98% */
         .dashboard { display: none; max-width: 1400px; width: 98%; margin: 0 auto 40px auto; }
         .lobbies-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-top: 20px; }
         @media (max-width: 900px) { .lobbies-grid { grid-template-columns: 1fr; } }
@@ -48,7 +47,7 @@
         .flip-front img, .flip-back img { width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box; }
         @keyframes flipAnim { 0%, 40% { transform: rotateY(0deg); } 50%, 90% { transform: rotateY(180deg); } 100% { transform: rotateY(360deg); } }
 
-        /* Le Ghost UI : 100% opaque par défaut */
+        /* Le Ghost UI : 100% opaque par defaut, 30% seulement au scroll global */
         .ghost-ui { opacity: 1; transition: opacity 0.3s ease; }
         .ghost-ui.faded { opacity: 0.3; }
         .ghost-ui:hover { opacity: 1 !important; }
@@ -71,11 +70,15 @@
         
         .hub-details { display: none; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 0 0 8px 8px; margin-top: -10px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); border-top: none; text-align: left; animation: slideDown 0.3s ease-out; overflow: visible; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
         .hub-badge { font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
         .badge-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
         .badge-archive { background: rgba(189, 195, 199, 0.2); color: #bdc3c7; border: 1px solid #bdc3c7; }
         .badge-banned { background: rgba(231, 76, 60, 0.2); color: var(--danger); border: 1px solid var(--danger); }
         .badge-inactive { background: rgba(243, 156, 18, 0.2); color: var(--gold); border: 1px solid var(--gold); }
+        
+        /* Boutons Hub Accueil stricts sur 1 ligne */
+        .hub-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 8px 15px; font-size: 0.8rem; width: auto; margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.3); white-space: nowrap; flex-shrink: 0; }
 
         .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-start; transition: 0.3s; position: relative; }
         .crest-picker.drag-active::after { content: "📥 DÉPOSEZ VOTRE FICHIER ICI"; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 204, 113, 0.95); color: white; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 50; border-radius: 8px; border: 4px dashed white; box-sizing: border-box; pointer-events: none; }
@@ -96,20 +99,20 @@
         .crest-mini-bg { background: white; padding: 0; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; width: 30px; height: 30px; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
         .crest-mini { width: 100%; height: 100%; object-fit: contain; }
         
-        .team-controls { display: flex; align-items: center; gap: 2px; margin-left: auto; justify-content: flex-end; flex-shrink: 0; overflow: visible; }
-        .team-score-ctrl { display: flex; align-items: center; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 2px; margin-right: 5px; height: 30px; }
-        .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue); box-shadow: none; border-radius: 4px; cursor: pointer; color: white; border: none; }
-        .team-bonus-val { font-size: 0.9rem; font-weight: bold; margin: 0 8px; color: var(--accent); min-width: 20px; text-align: center; }
-        .player-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; flex-shrink: 0; overflow: visible; }
+        /* Alignement Laser (Hauteurs fixes) */
+        .player-controls, .team-controls { display: flex; align-items: center; gap: 5px; margin-left: auto; justify-content: flex-end; flex-shrink: 0; height: 30px; box-sizing: border-box; }
+        .team-score-ctrl { display: flex; align-items: center; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 2px; margin-right: 5px; height: 30px; box-sizing: border-box; }
+        .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue); box-shadow: none; border-radius: 4px; cursor: pointer; color: white; border: none; flex-shrink: 0; }
+        .team-bonus-val { font-size: 0.9rem; font-weight: bold; margin: 0 8px; color: var(--accent); min-width: 20px; text-align: center; line-height: 24px; }
         
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; max-width: 100px; }
         
-        /* --- LE VRAI MENU GLOBAL TÉLÉPORTÉ (Absolu dans le Body) --- */
-        .global-dropdown-menu { display: none; position: fixed; min-width: 220px; background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); z-index: 99999; flex-direction: column; overflow: hidden; padding: 5px 0; }
-        .global-dropdown-menu.show { display: flex; animation: fadeIn 0.2s; }
+        /* Menu Contextuel Global (Téléporté) */
+        #global-dropdown { display: none; position: fixed; z-index: 99999; min-width: 220px; background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); flex-direction: column; overflow: hidden; padding: 5px 0; }
+        #global-dropdown.show { display: flex; animation: fadeIn 0.2s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         
-        .dropdown-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: 0.2s; padding: 0; margin-left: 2px; }
+        .dropdown-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white; width: 30px; height: 30px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: 0.2s; padding: 0; margin: 0; flex-shrink: 0; }
         .dropdown-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
         .dropdown-item { padding: 12px 15px; cursor: pointer; text-align: left; font-size: 0.9rem; color: white; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; font-weight: normal; }
         .dropdown-item:last-child { border-bottom: none; }
@@ -120,7 +123,7 @@
         .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed rgba(255,255,255,0.3); padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.3); transition: 0.3s; position: relative; margin-bottom: 10px; cursor: pointer; }
         .drop-zone.drag-active { border-color: #27ae60; background: rgba(39, 174, 96, 0.3); transform: scale(1.02); }
         
-        /* Modifs UX Profil MJ avec Drag&Drop visuel */
+        /* UX Profil MJ Drag & Drop */
         .profile-drop { width: 150px; height: 150px; margin: 0 auto 5px auto; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border: 3px dashed #bdc3c7; position: relative; }
         .profile-drop.drag-active::after { content: "📥 DÉPOSEZ ICI"; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 204, 113, 0.95); color: white; font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 50; border-radius: 8px; border: 4px dashed white; box-sizing: border-box; pointer-events: none; text-align: center; line-height: 1.2; }
         .profile-drop img { width: 100%; height: 100%; object-fit: contain; }
@@ -178,9 +181,9 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.188</div>
+    <div class="version-tag" id="app-version-display">v1.189</div>
 
-    <div id="global-dropdown" class="global-dropdown-menu"></div>
+    <div id="global-dropdown"></div>
 
     <div id="global-mj-logo-container" class="ghost-ui" style="display:none; position: fixed; top: 15px; left: 15px; z-index: 9999; cursor: pointer;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
         <div class="flip-container">
@@ -287,7 +290,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.188</span>
+                    <span id="disp-v-mj">v1.189</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -638,7 +641,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.188";
+        const APP_VERSION = "1.189";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -693,27 +696,8 @@
             
             document.addEventListener('keydown', e => { if(document.getElementById('univ-lightbox').style.display === 'flex') { if(e.key==='ArrowLeft') lbPrev(e); else if(e.key==='ArrowRight') lbNext(e); else if(e.key==='Escape') closeLightbox(e); } });
             
-            // SMART GHOST UI : Écoute les scrolls sur les listes (Lobbies) uniquement
-            document.addEventListener('scroll', function(e) {
-                closeGlobalDropdown(); // Le menu se referme si l'écran bouge
-                if (e.target.classList && e.target.classList.contains('scroll-list')) {
-                    const tools = document.getElementById('top-right-tools');
-                    const logo = document.getElementById('global-mj-logo-container');
-                    
-                    let isScrolled = false;
-                    document.querySelectorAll('.scroll-list').forEach(list => {
-                        if (list.scrollTop > 0) isScrolled = true;
-                    });
-                    
-                    if (isScrolled) {
-                        if(tools) tools.classList.add('faded');
-                        if(logo) logo.classList.add('faded');
-                    } else {
-                        if(tools) tools.classList.remove('faded');
-                        if(logo) logo.classList.remove('faded');
-                    }
-                }
-            }, true);
+            // SMART GHOST UI : Écoute les scrolls sur la page globale OU sur les listes internes
+            window.addEventListener('scroll', handleGhostUI, true);
             
             document.addEventListener('click', function(e) {
                 const menu = document.getElementById('global-dropdown');
@@ -723,26 +707,133 @@
             });
         };
         
-        // --- LOGIQUE DU MENU GLOBAL TÉLÉPORTÉ ---
-        function openGlobalDropdown(e, encodedHtml) {
-            e.stopPropagation();
-            const menu = document.getElementById('global-dropdown');
-            const btn = e.currentTarget;
+        function handleGhostUI(e) {
+            if (e.target.classList && e.target.classList.contains('scroll-list')) closeGlobalDropdown();
             
+            const tools = document.getElementById('top-right-tools');
+            const logo = document.getElementById('global-mj-logo-container');
+            
+            if (window.scrollY > 20) {
+                if(tools) tools.classList.add('faded');
+                if(logo) logo.classList.add('faded');
+            } else {
+                if(tools) tools.classList.remove('faded');
+                if(logo) logo.classList.remove('faded');
+            }
+        }
+        
+        // --- LOGIQUE DU MENU GLOBAL TÉLÉPORTÉ ---
+        function openPlayerMenu(e, uid) {
+            e.stopPropagation();
+            const d = allPlayersData[uid];
+            if(!d) return;
+            const safeName = d.name ? d.name.replace(/'/g, "\\'") : "";
+            const iB = currentBlocked[d.name];
+            
+            let html = "";
+            if(d.banned) {
+                 html = `
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${uid}')">✏️ Éditer le joueur</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); unkickPlayer('${uid}')">▶️ Réactiver le joueur</div>
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deletePlayerDefinitive('${uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
+                 `;
+            } else if (d.active === false && d.recoveryRequest) {
+                html = `
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${uid}')">✏️ Éditer le joueur</div>
+                    <div class="dropdown-item" style="color:var(--success);" onclick="closeGlobalDropdown(); acceptRecovery('${uid}')">✅ Accepter la connexion</div>
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); rejectRecovery('${uid}')">❌ Refuser</div>
+                `;
+            } else if (d.active === false) {
+                 html = `
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${uid}')">✏️ Éditer le joueur</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); restoreInactivePlayer('${uid}')">▶️ Réactiver le joueur</div>
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickPlayer('${uid}', '${safeName}')">🟥 Expulser</div>
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deletePlayerDefinitive('${uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
+                `;
+            } else {
+                html = `
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); forceBuzzer('${uid}')">⚡ Forcer le buzzer</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); toggleBlockPlayer('${safeName}')">${iB ? '🟢 Débloquer le buzzer' : '🛑 Bloquer le buzzer'}</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${uid}')">✏️ Éditer le joueur</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); pausePlayer('${uid}', '${safeName}')">⏸️ Mettre en pause</div>
+                    ${d.hasBeenWarned===true ? `<div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickPlayer('${uid}', '${safeName}')">🟥 Expulser le joueur</div>` : `<div class="dropdown-item" style="color:var(--gold);" onclick="closeGlobalDropdown(); warnPlayer('${uid}', '${safeName}')">🟨 Avertir le joueur</div>`}
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deletePlayerDefinitive('${uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
+                `;
+            }
+            showGlobalMenu(e.currentTarget, html);
+        }
+
+        function openTeamMenu(e, teamName) {
+            e.stopPropagation();
+            const t = globalTeams[teamName];
+            if(!t) return;
+            const safeK = teamName.replace(/'/g, "\\'");
+            const isA = t.active !== false;
+            const isBan = t.banned === true;
+            
+            let members = [];
+            Object.values(allPlayersData).forEach(p => {
+                if (p.teamName === teamName && p.active !== false && !p.banned) members.push(p);
+            });
+            const isTeamMuted = members.length > 0 && members.some(m => currentBlocked[m.name]);
+
+            let html = "";
+            if(isBan) {
+                html = `
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openRestoreModal('${safeK}')">▶️ Réactiver l'équipe</div>
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
+                `;
+            } else if(!isA) {
+                html = `
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openTeamModal('${safeK}')">✏️ Éditer l'équipe</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openRestoreModal('${safeK}')">▶️ Réactiver l'équipe</div>
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickTeam('${safeK}')">🟥 Expulser l'équipe</div>
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
+                `;
+            } else {
+                html = `
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); toggleTeamBlock('${safeK}')">${isTeamMuted ? '🟢 Débloquer les buzzers' : '🛑 Bloquer les buzzers'}</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openTeamModal('${safeK}')">✏️ Éditer l'équipe</div>
+                    <div class="dropdown-item" onclick="closeGlobalDropdown(); archiveTeam('${safeK}')">⏸️ Mettre en pause</div>
+                    ${t.hasBeenWarned ? `<div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickTeam('${safeK}')">🟥 Expulser l'équipe</div>` : `<div class="dropdown-item" style="color:var(--gold);" onclick="closeGlobalDropdown(); warnTeam('${safeK}')">🟨 Avertir l'équipe</div>`}
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
+                `;
+            }
+            showGlobalMenu(e.currentTarget, html);
+        }
+
+        function openMemberMenu(e, uid, teamName, isBlockedInTeam) {
+            e.stopPropagation();
+            const safeTeamName = teamName.replace(/'/g, "\\'");
+            let m = allPlayersData[uid];
+            if (!m) m = activeTeamBlacklist.find(x => x.id === uid);
+            if (!m) return;
+            const safeName = m.name ? m.name.replace(/'/g, "\\'") : "";
+            
+            let html = "";
+            if (isBlockedInTeam) {
+                html = `<div class="dropdown-item" style="color:var(--success);" onclick="closeGlobalDropdown(); pardonTeamMember('${uid}', '${safeTeamName}')">🔄 Gracier</div>`;
+            } else {
+                let btnCap = m.isCaptain ? "" : `<div class="dropdown-item" style="color:var(--gold);" onclick="closeGlobalDropdown(); makeCaptain('${uid}', '${safeTeamName}')">👑 Nommer Capitaine</div>`;
+                html = `${btnCap} <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); expelTeamMember('${uid}', '${safeName}', '${m.avatar}', '${safeTeamName}')">✕ Expulser de l'équipe</div>`;
+            }
+            showGlobalMenu(e.currentTarget, html);
+        }
+
+        function showGlobalMenu(btn, html) {
+            const menu = document.getElementById('global-dropdown');
             if (activeDropdownBtn === btn && menu.classList.contains('show')) {
                 closeGlobalDropdown();
                 return;
             }
-            
             activeDropdownBtn = btn;
-            menu.innerHTML = decodeURIComponent(encodedHtml);
+            menu.innerHTML = html;
+            menu.classList.add('show'); 
             
             const rect = btn.getBoundingClientRect();
             menu.style.top = (rect.bottom + 5) + 'px';
             menu.style.left = 'auto';
             menu.style.right = (window.innerWidth - rect.right) + 'px';
-            
-            menu.classList.add('show');
         }
 
         function closeGlobalDropdown() {
@@ -761,7 +852,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.188", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.189", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1160,9 +1251,12 @@
                 const badgeText = r.isArchived ? "🗄️ ARCHIVÉE" : "🟢 EN COURS";
                 const stats = getRoomStats(r);
                 
+                const safeMjName = (r.mjName || "Animateur").replace(/'/g, "\\'");
+                const safeEventName = eventName.replace(/'/g, "\\'");
+                
                 let btnAction = r.isArchived 
-                    ? `<button class="hub-btn" style="background:var(--blue);" onclick="launchDashboard('${r.id}', '${r.mjName}', '${r.eventName}', true); event.stopPropagation();">👁️ CONSULTER</button>`
-                    : `<button class="hub-btn" style="background:var(--success);" onclick="launchDashboard('${r.id}', '${r.mjName}', '${r.eventName}', false); event.stopPropagation();">▶️ REPRENDRE</button>`;
+                    ? `<button class="hub-btn" style="background:var(--blue); white-space: nowrap; flex-shrink: 0;" onclick="launchDashboard('${r.id}', '${safeMjName}', '${safeEventName}', true); event.stopPropagation();">👁️ CONSULTER</button>`
+                    : `<button class="hub-btn" style="background:var(--success); white-space: nowrap; flex-shrink: 0;" onclick="launchDashboard('${r.id}', '${safeMjName}', '${safeEventName}', false); event.stopPropagation();">▶️ REPRENDRE</button>`;
 
                 container.innerHTML += `
                     <div class="hub-line" onclick="toggleAccordion('${r.id}')">
@@ -1179,9 +1273,9 @@
                                 <p style="margin:0 0 5px 0; color:#ecf0f1; font-size:0.9rem;">🎭 Animé par : <b>${r.mjName || "Animateur"}</b></p>
                                 ${r.isArchived ? `<p style="margin:0 0 5px 0; color:#ecf0f1; font-size:0.9rem;">👥 Joueurs : <b>${stats.count}</b></p><p style="margin:0; color:var(--gold); font-size:0.9rem;">🏆 Vainqueur : <b>${stats.winner}</b></p>` : ''}
                             </div>
-                            <div style="display:flex; gap:10px; flex-shrink:0;">
+                            <div style="display:flex; gap:10px; flex-shrink:0; white-space: nowrap;">
                                 ${btnAction}
-                                <button class="hub-btn" style="background:var(--danger);" onclick="deleteRoomFromHub('${r.id}', event)">🗑️ SUPPRIMER</button>
+                                <button class="hub-btn" style="background:var(--danger); white-space: nowrap; flex-shrink: 0;" onclick="deleteRoomFromHub('${r.id}', event)">🗑️ SUPPRIMER</button>
                             </div>
                         </div>
                     </div>
@@ -1599,31 +1693,19 @@
             aP.sort((a,b) => { if(a.uid===currentBuzzerId)return -1; if(b.uid===currentBuzzerId)return 1; let iA=buzzHistory.indexOf(a.name), iB=buzzHistory.indexOf(b.name); if(iA!==-1&&iB!==-1)return iB-iA; if(iA!==-1)return -1; if(iB!==-1)return 1; let rA=a.reconnectedAt||0, rB=b.reconnectedAt||0; if(rA===0&&rB>0)return -1; if(rA>0&&rB===0)return 1; if(rA>0&&rB>0)return rA-rB; return a.name.localeCompare(b.name); });
             
             aP.forEach(d => {
-                const safeName = d.name.replace(/'/g, "&#39;");
                 let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
-                const iB = currentBlocked[d.name]; 
                 const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;">` : `<span style="font-size:1.2rem;margin-right:8px;">${d.avatar||'👤'}</span>`;
                 const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
                 
-                let dropdownItems = `
-                    <div class="dropdown-item" onclick="closeGlobalDropdown(); forceBuzzer('${d.uid}')">⚡ Forcer le buzzer</div>
-                    <div class="dropdown-item" onclick="closeGlobalDropdown(); toggleBlockPlayer('${safeName}')">${iB ? '🟢 Débloquer le buzzer' : '🛑 Bloquer le buzzer'}</div>
-                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
-                    <div class="dropdown-item" onclick="closeGlobalDropdown(); pausePlayer('${d.uid}', '${safeName}')">⏸️ Mettre en pause</div>
-                    ${d.hasBeenWarned===true ? `<div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickPlayer('${d.uid}', '${safeName}')">🟥 Expulser le joueur</div>` : `<div class="dropdown-item" style="color:var(--gold);" onclick="closeGlobalDropdown(); warnPlayer('${d.uid}', '${safeName}')">🟨 Avertir le joueur</div>`}
-                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
-                `;
-                let encodedMenu = encodeURIComponent(dropdownItems);
-                
-                let actionsHtml = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
+                let actionsHtml = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
 
                 hA += `
                 <div class="${rC}">
                     <div style="display:flex;align-items:center;flex:1;overflow:hidden;">${aH}<b style="margin-right:10px;">${d.name}</b><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div>
                     <div class="player-controls">
-                        <div style="display:flex;align-items:center;background:rgba(0,0,0,0.5);border-radius:4px;padding:2px;margin:0 2px;" title="Score Joueur">
+                        <div class="team-score-ctrl" title="Score Joueur">
                             <button class="btn-tiny" onclick="adj('${d.uid}',-1)" title="Retirer 1 point">-</button>
-                            <input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;">
+                            <input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;height:24px;">
                             <button class="btn-tiny" onclick="adj('${d.uid}',1)" title="Ajouter 1 point">+</button>
                         </div>
                         ${actionsHtml}
@@ -1633,43 +1715,19 @@
             
             rP.forEach(d => { 
                 hsI=true; 
-                let dropdownItems = `
-                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
-                    <div class="dropdown-item" style="color:var(--success);" onclick="closeGlobalDropdown(); acceptRecovery('${d.uid}')">✅ Accepter la connexion</div>
-                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); rejectRecovery('${d.uid}')">❌ Refuser</div>
-                `;
-                let encodedMenu = encodeURIComponent(dropdownItems);
-                let rP_actions = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
-                
+                let rP_actions = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
                 hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls">${rP_actions}</div></div>`; 
             });
             
             iP.forEach(d => { 
                 hsI=true; 
-                const safeName = d.name.replace(/'/g, "&#39;");
-                let dropdownItems = `
-                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
-                    <div class="dropdown-item" onclick="closeGlobalDropdown(); restoreInactivePlayer('${d.uid}')">▶️ Réactiver le joueur</div>
-                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickPlayer('${d.uid}', '${safeName}')">🟥 Expulser</div>
-                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
-                `;
-                let encodedMenu = encodeURIComponent(dropdownItems);
-                let iP_actions = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
-                
+                let iP_actions = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
                 hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls">${iP_actions}</div></div>`; 
             });
             
             bP.forEach(d => { 
                 hsB=true; 
-                const safeName = d.name.replace(/'/g, "&#39;");
-                let dropdownItems = `
-                    <div class="dropdown-item" onclick="closeGlobalDropdown(); openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
-                    <div class="dropdown-item" onclick="closeGlobalDropdown(); unkickPlayer('${d.uid}')">▶️ Réactiver le joueur</div>
-                    <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
-                `;
-                let encodedMenu = encodeURIComponent(dropdownItems);
-                let bP_actions = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
-                
+                let bP_actions = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
                 hB += `<div class="score-row" style="border:1px solid var(--danger);"><div style="flex:1;"><span style="color:var(--danger)"><b>${d.name}</b></span></div><div class="player-controls">${bP_actions}</div></div>`; 
             });
             
@@ -1732,44 +1790,15 @@
                 totalScore += bo;
                 if(!isA && !isBan) totalScore = t.frozenScore || 0;
                 
-                let isTeamMuted = false;
-                if (teamMembers.length > 0 && teamMembers.some(m => currentBlocked[m.name])) {
-                    isTeamMuted = true;
-                }
-
                 let blockedCount = t.blacklist ? Object.keys(t.blacklist).length : 0;
                 let statsHtml = `(<span style="color:var(--success);">${activeCount} Joueur${activeCount > 1 ? 's' : ''}</span>`;
                 if (blockedCount > 0) statsHtml += ` - <span style="color:var(--danger);">${blockedCount} Exclu${blockedCount > 1 ? 's' : ''}</span>`;
                 statsHtml += `)`;
                 
-                const safeK = k.replace(/'/g, "&#39;");
+                const safeK = k.replace(/'/g, "\\'");
                 let btnDisabled = isBan ? "disabled" : "";
-                let dropdownItems = "";
-
-                if(isBan) {
-                    dropdownItems = `
-                        <div class="dropdown-item" onclick="closeGlobalDropdown(); openRestoreModal('${safeK}')">▶️ Réactiver l'équipe</div>
-                        <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
-                    `;
-                } else if(!isA) {
-                    dropdownItems = `
-                        <div class="dropdown-item" onclick="closeGlobalDropdown(); openTeamModal('${safeK}')">✏️ Éditer l'équipe</div>
-                        <div class="dropdown-item" onclick="closeGlobalDropdown(); openRestoreModal('${safeK}')">▶️ Réactiver l'équipe</div>
-                        <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickTeam('${safeK}')">🟥 Expulser l'équipe</div>
-                        <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
-                    `;
-                } else {
-                    dropdownItems = `
-                        <div class="dropdown-item" onclick="closeGlobalDropdown(); toggleTeamBlock('${safeK}')">${isTeamMuted ? '🟢 Débloquer les buzzers' : '🛑 Bloquer les buzzers'}</div>
-                        <div class="dropdown-item" onclick="closeGlobalDropdown(); openTeamModal('${safeK}')">✏️ Éditer l'équipe</div>
-                        <div class="dropdown-item" onclick="closeGlobalDropdown(); archiveTeam('${safeK}')">⏸️ Mettre en pause</div>
-                        ${t.hasBeenWarned ? `<div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); kickTeam('${safeK}')">🟥 Expulser l'équipe</div>` : `<div class="dropdown-item" style="color:var(--gold);" onclick="closeGlobalDropdown(); warnTeam('${safeK}')">🟨 Avertir l'équipe</div>`}
-                        <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
-                    `;
-                }
-
-                let encodedMenu = encodeURIComponent(dropdownItems);
-                let actionsHtml = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
+                
+                let actionsHtml = `<button class="dropdown-btn" onclick="openTeamMenu(event, '${safeK}')">⋮</button>`;
                 
                 html += `
                 <div class="hub-line" style="margin-bottom:0; border-radius:8px; border-bottom-left-radius:0; border-bottom-right-radius:0;" onclick="toggleTeamAccordion('${safeK}')">
@@ -1855,11 +1884,11 @@
             Object.keys(allPlayersData).forEach(uid => {
                 const p = allPlayersData[uid];
                 if (p.teamName === teamName && p.active !== false && p.banned !== true) {
-                    displayList.push({ id: uid, isBlocked: false, ...p });
+                    displayList.push({ id: uid, isBlockedInTeam: false, ...p });
                 }
             });
             activeTeamBlacklist.forEach(m => {
-                displayList.push({ id: m.id, isBlocked: true, name: m.name, avatar: m.avatar, joinTimestamp: 0 });
+                displayList.push({ id: m.id, isBlockedInTeam: true, name: m.name, avatar: m.avatar, joinTimestamp: 0 });
             });
 
             if (query) { displayList = displayList.filter(m => m.name && m.name.toLowerCase().includes(query)); }
@@ -1871,29 +1900,18 @@
             let html = "";
             displayList.forEach(m => {
                 let av = (m.avatar && m.avatar.length > 20) ? `<img src="${m.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.5rem;">${m.avatar||'👤'}</span>`;
-                let statusDot = m.isBlocked ? "🔴" : "🟢";
+                let statusDot = m.isBlockedInTeam ? "🔴" : "🟢";
                 let isCap = m.isCaptain ? "👑" : "";
                 
-                const safeName = m.name ? m.name.replace(/'/g, "&#39;") : "";
-                const safeTeamName = teamName.replace(/'/g, "&#39;");
-                let dropdownItems = "";
-                
-                if (m.isBlocked) {
-                    dropdownItems = `<div class="dropdown-item" style="color:var(--success);" onclick="closeGlobalDropdown(); pardonTeamMember('${m.id}', '${safeTeamName}')">🔄 Gracier</div>`;
-                } else {
-                    let btnCap = m.isCaptain ? "" : `<div class="dropdown-item" style="color:var(--gold);" onclick="closeGlobalDropdown(); makeCaptain('${m.id}', '${safeTeamName}')">👑 Nommer Capitaine</div>`;
-                    dropdownItems = `${btnCap} <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); expelTeamMember('${m.id}', '${safeName}', '${m.avatar}', '${safeTeamName}')">✕ Expulser de l'équipe</div>`;
-                }
-
-                let encodedMenu = encodeURIComponent(dropdownItems);
-                let actionsHtml = `<button class="dropdown-btn" onclick="openGlobalDropdown(event, '${encodedMenu}')">⋮</button>`;
+                const safeTeamName = teamName.replace(/'/g, "\\'");
+                let actionsHtml = `<button class="dropdown-btn" onclick="openMemberMenu(event, '${m.id}', '${safeTeamName}', ${m.isBlockedInTeam})">⋮</button>`;
 
                 html += `
                 <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;">
                     <span style="margin-right:8px; font-size:0.8rem;">${statusDot}</span>
                     ${av}
-                    <b style="margin-left:10px; color:${m.isBlocked ? '#7f8c8d' : 'white'}; font-size:1rem;">${m.name} <span style="font-size:1.1rem;">${isCap}</span></b>
-                    ${!m.isBlocked ? `<span style="color:var(--accent); margin-left:10px; font-size:0.85rem;">${m.pts || 0} pts</span>` : ''}
+                    <b style="margin-left:10px; color:${m.isBlockedInTeam ? '#7f8c8d' : 'white'}; font-size:1rem;">${m.name} <span style="font-size:1.1rem;">${isCap}</span></b>
+                    ${!m.isBlockedInTeam ? `<span style="color:var(--accent); margin-left:10px; font-size:0.85rem;">${m.pts || 0} pts</span>` : ''}
                     <div style="margin-left:auto; display:flex; gap:5px; flex-wrap:nowrap; justify-content:flex-end;">
                         ${actionsHtml}
                     </div>
