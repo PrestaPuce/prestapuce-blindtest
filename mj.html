@@ -18,7 +18,8 @@
         
         .box { max-width: 400px; margin: 0 auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         
-        .dashboard { display: none; max-width: 1200px; width: 95%; margin: 0 auto 40px auto; }
+        /* Dashboard élargi en mode Cockpit V3 */
+        .dashboard { display: none; max-width: 1400px; width: 98%; margin: 0 auto 40px auto; }
         .lobbies-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-top: 20px; }
         @media (max-width: 900px) { .lobbies-grid { grid-template-columns: 1fr; } }
         
@@ -47,6 +48,10 @@
         .flip-front img, .flip-back img { width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box; }
         @keyframes flipAnim { 0%, 40% { transform: rotateY(0deg); } 50%, 90% { transform: rotateY(180deg); } 100% { transform: rotateY(360deg); } }
 
+        /* Ghost UI (Interface Fantôme) */
+        .ghost-ui { opacity: 0.3; transition: opacity 0.3s ease; }
+        .ghost-ui:hover { opacity: 1; }
+
         #top-right-tools { display:none; position: fixed; top: 15px; right: 15px; gap: 8px; z-index: 9999; flex-direction: column; width: 90px; }
         .top-right-btn { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px; font-size: 0.75rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border-radius: 8px; margin:0; width: 100%; text-align: center; backdrop-filter: blur(5px); transition: 0.2s; cursor:pointer; font-weight:bold; }
         .top-right-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); color: var(--accent); }
@@ -56,14 +61,14 @@
         .hub-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
         .hub-tab { flex: 1; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: #bdc3c7; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .hub-tab.active { background: var(--blue); color: white; border-color: var(--blue); box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4); }
-        .hub-line { display: flex; align-items: center; background: rgba(0,0,0,0.5); padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 5px; position: relative; z-index: 2; }
+        .hub-line { display: flex; align-items: center; background: rgba(0,0,0,0.5); padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 5px; position: relative; z-index: 2; overflow: visible; }
         .hub-line:hover { background: rgba(255,255,255,0.1); }
         .hub-arrow { transition: transform 0.3s ease; display: inline-block; margin-right: 10px; font-size: 0.9rem; color: var(--accent); }
         .hub-arrow.open { transform: rotate(90deg); }
         
         .hub-line-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; flex: 1; gap: 10px; }
         
-        .hub-details { display: none; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 0 0 8px 8px; margin-top: -10px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); border-top: none; text-align: left; animation: slideDown 0.3s ease-out; }
+        .hub-details { display: none; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 0 0 8px 8px; margin-top: -10px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); border-top: none; text-align: left; animation: slideDown 0.3s ease-out; overflow: visible; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .hub-badge { font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
         .badge-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
@@ -72,38 +77,43 @@
         .badge-inactive { background: rgba(243, 156, 18, 0.2); color: var(--gold); border: 1px solid var(--gold); }
         .hub-btn { padding: 8px 15px; font-size: 0.8rem; width: auto; margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
-        .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-start; transition: 0.3s; }
-        .crest-picker.drag-active { border: 2px dashed var(--success) !important; background: rgba(46, 204, 113, 0.2) !important; transform: scale(1.02); }
+        .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-start; transition: 0.3s; position: relative; }
+        /* Calque d'instruction Drag & Drop */
+        .crest-picker.drag-active::after { content: "📥 DÉPOSEZ VOTRE FICHIER ICI"; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 204, 113, 0.95); color: white; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 50; border-radius: 8px; border: 4px dashed white; box-sizing: border-box; pointer-events: none; }
         
         .crest-wrapper { width: 50px; height: 50px; background: #ecf0f1; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: visible; flex-shrink: 0; position: relative; }
         .crest-selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: scale(1.1); z-index: 2; }
         .crest-opt { width: 100%; height: 100%; object-fit: contain; border-radius: 4px; overflow: hidden; }
         
-        /* Croix de suppression pour les blasons uploadés */
         .crest-del-btn { position: absolute; top: -6px; right: -6px; background: var(--danger); color: white; width: 16px; height: 16px; border-radius: 50%; cursor: pointer; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 5; font-weight: bold; line-height: 1; }
         .crest-del-btn:hover { transform: scale(1.2); }
 
         .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 0 auto 20px auto; max-width: 600px; text-align: center; display: none; backdrop-filter: blur(10px); }
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         
-        .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin-bottom: 5px; transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.05); }
+        .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin-bottom: 5px; transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.05); overflow: visible; }
         .score-row.airlock-row { background: rgba(243, 156, 18, 0.2); border: 2px solid var(--gold); }
         .score-row.buzzer-active-row { background: rgba(46, 204, 113, 0.3) !important; border: 2px solid var(--success) !important; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); transform: scale(1.02); z-index: 10; position: relative; }
         .crest-mini-bg { background: white; padding: 0; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; width: 30px; height: 30px; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
         .crest-mini { width: 100%; height: 100%; object-fit: contain; }
         
-        .team-controls { display: flex; align-items: center; gap: 2px; margin-left: auto; justify-content: flex-end; flex-shrink: 0; }
+        .team-controls { display: flex; align-items: center; gap: 2px; margin-left: auto; justify-content: flex-end; flex-shrink: 0; overflow: visible; }
         .team-score-ctrl { display: flex; align-items: center; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 2px; margin-right: 5px; }
         .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue); box-shadow: none; border-radius: 4px; cursor: pointer; color: white; border: none; }
         .team-bonus-val { font-size: 0.9rem; font-weight: bold; margin: 0 8px; color: var(--accent); min-width: 20px; text-align: center; }
-        .player-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; flex-shrink: 0; }
+        .player-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; flex-shrink: 0; overflow: visible; }
         
-        .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; max-width: 80px; }
+        .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; max-width: 100px; }
         
-        /* Boutons d'action standards (Cockpit V2) */
-        .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0 2px; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; cursor:pointer; }
-        .lobby-btn:hover { transform: scale(1.1); }
-        .lobby-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        /* Menus Contextuels Dynamiques (Dropdown) */
+        .dropdown-container { position: relative; display: inline-block; margin-left: 5px; }
+        .dropdown-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: 0.2s; padding: 0; }
+        .dropdown-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; min-width: 220px; background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 9999; flex-direction: column; overflow: hidden; margin-top: 5px; }
+        .dropdown-menu.show { display: flex; animation: fadeIn 0.2s; }
+        .dropdown-item { padding: 12px 15px; cursor: pointer; text-align: left; font-size: 0.9rem; color: white; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; font-weight: normal; }
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover { background: rgba(255,255,255,0.15); padding-left: 20px; }
         
         input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; } input[type="number"] { -moz-appearance: textfield; }
         
@@ -155,7 +165,9 @@
         .readonly-mode .team-controls { display: none !important; }
         .readonly-mode #mj-actions-bar { display: none !important; }
         .readonly-mode .current-player .action-grid { display: none !important; }
+        .readonly-mode .team-item.banned, .readonly-mode .team-item.inactive { display: none !important; }
         .readonly-mode #inactive-section, .readonly-mode #banned-section { display: none !important; }
+        .readonly-mode #mj-team-inactive-section, .readonly-mode #mj-team-banned-section { display: none !important; }
         .readonly-mode #player-search-container { display: none !important; }
     </style>
 </head>
@@ -163,9 +175,9 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.185</div>
+    <div class="version-tag" id="app-version-display">v1.186</div>
 
-    <div id="global-mj-logo-container" style="display:none; position: fixed; top: 15px; left: 15px; z-index: 9999; cursor: pointer;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
+    <div id="global-mj-logo-container" class="ghost-ui" style="display:none; position: fixed; top: 15px; left: 15px; z-index: 9999; cursor: pointer;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
         <div class="flip-container">
             <div class="flip-inner" id="logo-flip-inner">
                 <div class="flip-front">
@@ -178,7 +190,7 @@
         </div>
     </div>
 
-    <div id="top-right-tools">
+    <div id="top-right-tools" class="ghost-ui">
         <button class="top-right-btn" onclick="openScoreBoard()">📺 Scores</button>
         <button class="top-right-btn" onclick="showRemoteQR()">📱 Remote</button>
         <button class="top-right-btn" onclick="toggleGuide()">📖 Guide</button>
@@ -269,7 +281,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.185</span>
+                    <span id="disp-v-mj">v1.186</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -347,6 +359,11 @@
             <h2 id="team-modal-title" style="color:var(--accent); margin-top:0; text-transform:uppercase;">CRÉER UNE ÉQUIPE</h2>
             
             <input type="text" id="modal-t-name" placeholder="Nom de l'équipe..." onkeypress="if(event.key==='Enter') saveTeamFromModal()" style="font-size:1.1rem; padding:15px; margin-bottom:15px;">
+            
+            <div class="switch-container" style="justify-content: flex-start; margin-bottom: 15px;">
+                <label for="modal-check-hide-default" style="cursor:pointer; color:#bdc3c7; font-size:0.9rem;">Afficher les blasons par défaut :</label>
+                <label class="switch"><input type="checkbox" id="modal-check-hide-default" onchange="toggleDefaultCrestsFromModal(this.checked)"><span class="slider"></span></label>
+            </div>
             
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <p style="margin:0; color:#bdc3c7; font-size:0.9rem;">Choisissez un blason ou <b style="color:white;">glissez une image ici</b> 📥 :</p>
@@ -615,7 +632,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.185";
+        const APP_VERSION = "1.186";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -659,11 +676,30 @@
             setupDragDrop('bg-drop-zone', f => handleBgUpload(f, 'dashboard')); 
             setupDragDrop('bg-modal-drop-zone', f => handleBgUpload(f, 'modal'));
             
-            // Le super Drag & Drop sur la grille des blasons
-            setupDragDrop('modal-crest-grid', f => handleTeamModalUpload(f));
+            // L'effet Drag & Drop sur la grille de la modale équipe
+            const crestGrid = document.getElementById('modal-crest-grid');
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(n => {
+                crestGrid.addEventListener(n, e=>{e.preventDefault();e.stopPropagation();}, false);
+            });
+            ['dragenter', 'dragover'].forEach(n => crestGrid.addEventListener(n, ()=>crestGrid.classList.add('drag-active'), false));
+            ['dragleave', 'drop'].forEach(n => crestGrid.addEventListener(n, ()=>crestGrid.classList.remove('drag-active'), false));
+            crestGrid.addEventListener('drop', e => handleTeamModalUpload(e.dataTransfer.files), false);
             
             document.addEventListener('keydown', e => { if(document.getElementById('univ-lightbox').style.display === 'flex') { if(e.key==='ArrowLeft') lbPrev(e); else if(e.key==='ArrowRight') lbNext(e); else if(e.key==='Escape') closeLightbox(e); } });
         };
+        
+        function toggleDropdown(id) { 
+            const el = document.getElementById(id);
+            const isShowing = el.classList.contains('show');
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show')); 
+            if(!isShowing) el.classList.add('show');
+        }
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-container')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            }
+        });
 
         function profileLogout() { auth.signOut().then(()=>location.reload()); }
         function openSuperAdmin() { if(!isSuperAdmin) return; document.getElementById('screen-choice').style.display = 'none'; document.getElementById('screen-super-admin').style.display = 'block'; }
@@ -673,7 +709,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.185", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.186", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -848,7 +884,6 @@
             title.innerText = "✅ TERMINÉ !"; loadModalLibrary(); setTimeout(() => { title.innerText = orig; sub.innerText = "ou Cliquez"; }, 2000);
         }
 
-        // --- NOUVEL ALGORITHME MATHEMATHIQUE BLASONS PAR DEFAUT ---
         function createBlason(i) { 
             const colorPairs = [
                 ['#e74c3c', '#f1c40f'], ['#3498db', '#ecf0f1'], ['#2ecc71', '#2c3e50'],
@@ -867,6 +902,19 @@
         }
 
         function toggleDefaultCrests(checked) { showDefaultCrests = checked; if (!isProxyMode) { db.ref(`users/${auth.currentUser.uid}/showDefaultCrests`).set(checked); mjProfileData.showDefaultCrests = checked; } loadModalLibrary(); }
+        
+        // --- SWITCH BLASONS DANS MODALE EQUIPE (SYNC SALLE) ---
+        function toggleDefaultCrestsFromModal(checked) {
+            showDefaultCrests = checked;
+            if (!isProxyMode) {
+                db.ref(`users/${auth.currentUser.uid}/showDefaultCrests`).set(checked);
+                if(roomRef) roomRef.child('showDefaultCrests').set(checked);
+                mjProfileData.showDefaultCrests = checked;
+                const mainSwitch = document.getElementById('check-hide-default');
+                if(mainSwitch) mainSwitch.checked = checked;
+            }
+            loadModalCrestGrid();
+        }
 
         function openBgLibraryProxy(mode) { isProxyBgMode = (mode === 'proxy'); activeBgLibraryUid = isProxyBgMode ? targetMjUid : auth.currentUser.uid; modalSelectedBgUrl = ""; document.getElementById('btn-modal-bg-default').disabled = true; document.getElementById('btn-modal-bg-console').disabled = true; document.getElementById('modal-bg-library').style.display = 'flex'; loadBgLibrary('modal'); }
         function closeBgLibrary() { document.getElementById('modal-bg-library').style.display = 'none'; if(isProxyBgMode) { isProxyBgMode = false; activeBgLibraryUid = auth.currentUser.uid; } }
@@ -940,7 +988,7 @@
                 document.getElementById('screen-dashboard').style.display="none"; 
                 document.getElementById('screen-choice').style.display="block"; 
                 document.getElementById('global-mj-logo-container').style.display="block";
-                document.getElementById('top-right-tools').style.display="none";
+                document.getElementById('top-right-tools').style.display="flex"; // Rendu visible pour le Ghost UI
 
                 const rooms = snap.val() || {};
                 mjRooms = Object.keys(rooms).map(k => ({ id: k, ...rooms[k] }));
@@ -1213,6 +1261,7 @@
             try { if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); } catch(e){}
             try { roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true); } catch(e){}
             try { if(mjProfileData.defaultBackground) roomRef.child('customBackground').set(mjProfileData.defaultBackground); } catch(e){}
+            try { roomRef.child('showDefaultCrests').set(showDefaultCrests); } catch(e){}
             
             try { syncLibraryToRoom(); } catch(e){ console.error(e); }
             try { initMJLogic(); } catch(e){ console.error(e); }
@@ -1225,10 +1274,11 @@
         function toggleGuide() { const o = document.getElementById('overlay-guide'); if(o.style.display === 'flex') o.style.display = 'none'; else { o.style.display = 'flex'; document.getElementById('guide-iframe').src = "guide.html?t=" + Date.now(); } }
         function showRemoteQR() { const o = document.getElementById('overlay-remote-qr'); const q = document.getElementById('qrcode-remote'); q.innerHTML = ""; new QRCode(q, { text: window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/remote.html?room=" + roomID, width: 250, height: 250 }); o.style.display = 'flex'; }
 
-        // --- GESTION DE L'ÉQUIPE (AVEC DRAG & DROP) ---
+        // --- GESTION DE L'ÉQUIPE ---
         function openTeamModal(tName) {
             editingTeamKey = tName;
             document.getElementById('modal-team-edit').style.display = 'flex';
+            document.getElementById('modal-check-hide-default').checked = showDefaultCrests;
             const nameInput = document.getElementById('modal-t-name');
             
             if (tName) {
@@ -1316,6 +1366,7 @@
                 db.ref(`users/${uid}/library`).push(u).then(() => {
                     selCrest = u;
                     document.getElementById('team-modal-title').innerText = editingTeamKey ? "MODIFIER L'ÉQUIPE" : "CRÉER UNE ÉQUIPE";
+                    loadModalCrestGrid(); 
                 });
             }).catch(e => {
                 alert("Erreur upload: " + e.message);
@@ -1444,7 +1495,7 @@
             roomRef.child('blockedPlayers').on('value', snap => { 
                 currentBlocked = snap.val() || {}; 
                 renderLobby(); 
-                renderTeamLobby(); // Update team mute buttons
+                renderTeamLobby(); 
             });
         }
 
@@ -1455,7 +1506,7 @@
             renderLobby();
         }
 
-        // --- AFFICHAGE LOBBY JOUEUR (UNIFORMISÉ) ---
+        // --- AFFICHAGE LOBBY JOUEUR ---
         function renderLobby() {
             let hA = "", hI = "", hB = ""; let hsB = false, hsI = false;
             const sl = document.getElementById('score-list'), il = document.getElementById('inactive-list'), bl = document.getElementById('banned-list');
@@ -1477,48 +1528,90 @@
             aP.sort((a,b) => { if(a.uid===currentBuzzerId)return -1; if(b.uid===currentBuzzerId)return 1; let iA=buzzHistory.indexOf(a.name), iB=buzzHistory.indexOf(b.name); if(iA!==-1&&iB!==-1)return iB-iA; if(iA!==-1)return -1; if(iB!==-1)return 1; let rA=a.reconnectedAt||0, rB=b.reconnectedAt||0; if(rA===0&&rB>0)return -1; if(rA>0&&rB===0)return 1; if(rA>0&&rB>0)return rA-rB; return a.name.localeCompare(b.name); });
             
             aP.forEach(d => {
+                const safeName = d.name.replace(/'/g, "\\'");
                 let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
                 const iB = currentBlocked[d.name]; 
-                const bS = iB ? "background:var(--danger);color:white;border:none;" : "background:transparent;border:1px solid var(--danger);opacity:0.6;";
                 const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;">` : `<span style="font-size:1.2rem;margin-right:8px;">${d.avatar||'👤'}</span>`;
                 const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
                 
-                const sB = d.hasBeenWarned===true ? 
-                    `<button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Expulser le joueur (Rouge)">🟥</button>` : 
-                    `<button class="lobby-btn" style="background:#f1c40f;color:black;" onclick="warnPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Avertir le joueur (Jaune)">🟨</button>`;
-                
+                let dropdownItems = `
+                    <div class="dropdown-item" onclick="forceBuzzer('${d.uid}')">⚡ Forcer le buzzer</div>
+                    <div class="dropdown-item" onclick="toggleBlockPlayer('${safeName}')">${iB ? '🟢 Débloquer le buzzer' : '🛑 Bloquer le buzzer'}</div>
+                    <div class="dropdown-item" onclick="openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
+                    <div class="dropdown-item" onclick="pausePlayer('${d.uid}', '${safeName}')">⏸️ Mettre en pause</div>
+                    ${d.hasBeenWarned===true ? `<div class="dropdown-item" style="color:var(--danger);" onclick="kickPlayer('${d.uid}', '${safeName}')">🟥 Expulser le joueur</div>` : `<div class="dropdown-item" style="color:var(--gold);" onclick="warnPlayer('${d.uid}', '${safeName}')">🟨 Avertir le joueur</div>`}
+                    <div class="dropdown-item" style="color:var(--danger);" onclick="deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
+                `;
+
+                let actionsHtml = `
+                    <div class="dropdown-container" onclick="event.stopPropagation(); toggleDropdown('player-menu-${d.uid}')">
+                        <button class="dropdown-btn">⋮</button>
+                        <div class="dropdown-menu" id="player-menu-${d.uid}">
+                            ${dropdownItems}
+                        </div>
+                    </div>
+                `;
+
                 hA += `
                 <div class="${rC}">
                     <div style="display:flex;align-items:center;flex:1;overflow:hidden;">${aH}<b style="margin-right:10px;">${d.name}</b><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div>
                     <div class="player-controls">
-                        <div style="display:flex;align-items:center;background:rgba(0,0,0,0.5);border-radius:4px;padding:2px;margin:0 2px;" title="Score">
+                        <div style="display:flex;align-items:center;background:rgba(0,0,0,0.5);border-radius:4px;padding:2px;margin:0 2px;" title="Score Joueur">
                             <button class="btn-tiny" onclick="adj('${d.uid}',-1)" title="Retirer 1 point">-</button>
                             <input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;">
                             <button class="btn-tiny" onclick="adj('${d.uid}',1)" title="Ajouter 1 point">+</button>
                         </div>
-                        <button class="lobby-btn" style="background:var(--accent);color:black;" onclick="forceBuzzer('${d.uid}')" title="Forcer Buzzer">⚡</button>
-                        <button class="lobby-btn" style="${bS}" onclick="toggleBlockPlayer('${d.name.replace(/'/g, "\\'")}')" title="${iB ? 'Débloquer le buzzer' : 'Bloquer le buzzer'}">🛑</button>
-                        <button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')" title="Éditer le joueur">✏️</button>
-                        <button class="lobby-btn" style="background:#7f8c8d;" onclick="pausePlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Mettre en pause">⏸️</button>
-                        ${sB}
-                        <button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deletePlayerDefinitive('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button>
+                        ${actionsHtml}
                     </div>
                 </div>`;
             });
             
             rP.forEach(d => { 
                 hsI=true; 
-                hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')" title="Éditer le joueur">✏️</button><button class="lobby-btn" style="background:var(--success);" onclick="acceptRecovery('${d.uid}')" title="Accepter la connexion">✅</button><button class="lobby-btn" style="background:var(--danger);" onclick="rejectRecovery('${d.uid}')" title="Refuser">❌</button></div></div>`; 
+                let rP_actions = `
+                    <div class="dropdown-container" onclick="event.stopPropagation(); toggleDropdown('player-menu-${d.uid}')">
+                        <button class="dropdown-btn">⋮</button>
+                        <div class="dropdown-menu" id="player-menu-${d.uid}">
+                            <div class="dropdown-item" onclick="openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
+                            <div class="dropdown-item" style="color:var(--success);" onclick="acceptRecovery('${d.uid}')">✅ Accepter la connexion</div>
+                            <div class="dropdown-item" style="color:var(--danger);" onclick="rejectRecovery('${d.uid}')">❌ Refuser</div>
+                        </div>
+                    </div>
+                `;
+                hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls">${rP_actions}</div></div>`; 
             });
             
             iP.forEach(d => { 
                 hsI=true; 
-                hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')" title="Éditer le joueur">✏️</button><button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${d.uid}')" title="Réactiver le joueur">▶️</button><button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Expulser">🟥</button><button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deletePlayerDefinitive('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button></div></div>`; 
+                const safeName = d.name.replace(/'/g, "\\'");
+                let iP_actions = `
+                    <div class="dropdown-container" onclick="event.stopPropagation(); toggleDropdown('player-menu-${d.uid}')">
+                        <button class="dropdown-btn">⋮</button>
+                        <div class="dropdown-menu" id="player-menu-${d.uid}">
+                            <div class="dropdown-item" onclick="openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
+                            <div class="dropdown-item" onclick="restoreInactivePlayer('${d.uid}')">▶️ Réactiver le joueur</div>
+                            <div class="dropdown-item" style="color:var(--danger);" onclick="kickPlayer('${d.uid}', '${safeName}')">🟥 Expulser</div>
+                            <div class="dropdown-item" style="color:var(--danger);" onclick="deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
+                        </div>
+                    </div>
+                `;
+                hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls">${iP_actions}</div></div>`; 
             });
             
             bP.forEach(d => { 
                 hsB=true; 
-                hB += `<div class="score-row" style="border:1px solid var(--danger);"><div style="flex:1;"><span style="color:var(--danger)"><b>${d.name}</b></span></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')" title="Éditer le joueur">✏️</button><button class="lobby-btn" style="background:var(--success);" onclick="unkickPlayer('${d.uid}')" title="Réactiver le joueur">▶️</button><button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deletePlayerDefinitive('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button></div></div>`; 
+                const safeName = d.name.replace(/'/g, "\\'");
+                let bP_actions = `
+                    <div class="dropdown-container" onclick="event.stopPropagation(); toggleDropdown('player-menu-${d.uid}')">
+                        <button class="dropdown-btn">⋮</button>
+                        <div class="dropdown-menu" id="player-menu-${d.uid}">
+                            <div class="dropdown-item" onclick="openEditModal('${d.uid}')">✏️ Éditer le joueur</div>
+                            <div class="dropdown-item" onclick="unkickPlayer('${d.uid}')">▶️ Réactiver le joueur</div>
+                            <div class="dropdown-item" style="color:var(--danger);" onclick="deletePlayerDefinitive('${d.uid}', '${safeName}')">🗑️ Supprimer définitivement</div>
+                        </div>
+                    </div>
+                `;
+                hB += `<div class="score-row" style="border:1px solid var(--danger);"><div style="flex:1;"><span style="color:var(--danger)"><b>${d.name}</b></span></div><div class="player-controls">${bP_actions}</div></div>`; 
             });
             
             sl.innerHTML = hA; il.innerHTML = hI; bl.innerHTML = hB; 
@@ -1539,7 +1632,7 @@
             renderTeamLobby();
         }
 
-        // --- AFFICHAGE LOBBY ÉQUIPE (UNIFORMISÉ) ---
+        // --- AFFICHAGE LOBBY ÉQUIPE ---
         function renderTeamLobby() {
             if (isRenderingTeamLobby) return;
             isRenderingTeamLobby = true;
@@ -1584,45 +1677,50 @@
                 if (teamMembers.length > 0 && teamMembers.some(m => currentBlocked[m.name])) {
                     isTeamMuted = true;
                 }
-
-                let muteBtnStyle = isTeamMuted ? "background:var(--danger);color:white;border:none;" : "background:transparent;border:1px solid var(--danger);opacity:0.6;";
                 
                 let blockedCount = t.blacklist ? Object.keys(t.blacklist).length : 0;
                 let statsHtml = `(<span style="color:var(--success);">${activeCount} Joueur${activeCount > 1 ? 's' : ''}</span>`;
                 if (blockedCount > 0) statsHtml += ` - <span style="color:var(--danger);">${blockedCount} Exclu${blockedCount > 1 ? 's' : ''}</span>`;
                 statsHtml += `)`;
                 
-                let actionsHtml = "";
+                const safeK = k.replace(/'/g, "\\'");
+                const menuId = k.replace(/\s+/g, '-').replace(/'/g, "\\'");
                 let btnDisabled = isBan ? "disabled" : "";
-                
+                let dropdownItems = "";
+
                 if(isBan) {
-                    actionsHtml = `
-                        <button class="lobby-btn" style="background:var(--success);" onclick="openRestoreModal('${k.replace(/'/g, "\\'")}')" title="Réactiver">▶️</button>
-                        <button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deleteTeamDefinitive('${k.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button>
+                    dropdownItems = `
+                        <div class="dropdown-item" onclick="openRestoreModal('${safeK}')">▶️ Réactiver l'équipe</div>
+                        <div class="dropdown-item" style="color:var(--danger);" onclick="deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
                     `;
                 } else if(!isA) {
-                    actionsHtml = `
-                        <button class="lobby-btn" style="background:var(--blue);" onclick="openTeamModal('${k.replace(/'/g, "\\'")}')" title="Éditer l'équipe">✏️</button>
-                        <button class="lobby-btn" style="background:var(--success);" onclick="openRestoreModal('${k.replace(/'/g, "\\'")}')" title="Réactiver">▶️</button>
-                        <button class="lobby-btn" style="background:#c0392b;" onclick="kickTeam('${k.replace(/'/g, "\\'")}')" title="Expulser l'équipe (Rouge)">🟥</button>
-                        <button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deleteTeamDefinitive('${k.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button>
+                    dropdownItems = `
+                        <div class="dropdown-item" onclick="openTeamModal('${safeK}')">✏️ Éditer l'équipe</div>
+                        <div class="dropdown-item" onclick="openRestoreModal('${safeK}')">▶️ Réactiver l'équipe</div>
+                        <div class="dropdown-item" style="color:var(--danger);" onclick="kickTeam('${safeK}')">🟥 Expulser l'équipe</div>
+                        <div class="dropdown-item" style="color:var(--danger);" onclick="deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
                     `;
                 } else {
-                    let warnBtn = t.hasBeenWarned ? 
-                        `<button class="lobby-btn" style="background:#c0392b;" onclick="kickTeam('${k.replace(/'/g, "\\'")}')" title="Expulser l'équipe (Rouge)">🟥</button>` : 
-                        `<button class="lobby-btn" style="background:#f1c40f;color:black;" onclick="warnTeam('${k.replace(/'/g, "\\'")}')" title="Avertir l'équipe (Jaune)">🟨</button>`;
-
-                    actionsHtml = `
-                        <button class="lobby-btn" style="${muteBtnStyle}" onclick="toggleTeamBlock('${k.replace(/'/g, "\\'")}')" title="${isTeamMuted ? 'Débloquer l\'équipe' : 'Bloquer l\'équipe'}">🛑</button>
-                        <button class="lobby-btn" style="background:var(--blue);" onclick="openTeamModal('${k.replace(/'/g, "\\'")}')" title="Éditer l'équipe">✏️</button>
-                        <button class="lobby-btn" style="background:#7f8c8d;" onclick="archiveTeam('${k.replace(/'/g, "\\'")}')" title="Mettre en pause">⏸️</button>
-                        ${warnBtn}
-                        <button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deleteTeamDefinitive('${k.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button>
+                    dropdownItems = `
+                        <div class="dropdown-item" onclick="toggleTeamBlock('${safeK}')">${isTeamMuted ? '🟢 Débloquer les buzzers' : '🛑 Bloquer les buzzers'}</div>
+                        <div class="dropdown-item" onclick="openTeamModal('${safeK}')">✏️ Éditer l'équipe</div>
+                        <div class="dropdown-item" onclick="archiveTeam('${safeK}')">⏸️ Mettre en pause</div>
+                        ${t.hasBeenWarned ? `<div class="dropdown-item" style="color:var(--danger);" onclick="kickTeam('${safeK}')">🟥 Expulser l'équipe</div>` : `<div class="dropdown-item" style="color:var(--gold);" onclick="warnTeam('${safeK}')">🟨 Avertir l'équipe</div>`}
+                        <div class="dropdown-item" style="color:var(--danger);" onclick="deleteTeamDefinitive('${safeK}')">🗑️ Supprimer définitivement</div>
                     `;
                 }
+
+                let actionsHtml = `
+                    <div class="dropdown-container" onclick="event.stopPropagation(); toggleDropdown('team-menu-${menuId}')">
+                        <button class="dropdown-btn">⋮</button>
+                        <div class="dropdown-menu" id="team-menu-${menuId}">
+                            ${dropdownItems}
+                        </div>
+                    </div>
+                `;
                 
                 html += `
-                <div class="hub-line" style="margin-bottom:0; border-radius:8px; border-bottom-left-radius:0; border-bottom-right-radius:0;" onclick="toggleTeamAccordion('${k.replace(/'/g, "\\'")}')">
+                <div class="hub-line" style="margin-bottom:0; border-radius:8px; border-bottom-left-radius:0; border-bottom-right-radius:0;" onclick="toggleTeamAccordion('${safeK}')">
                     <span id="team-arrow-${k}" class="hub-arrow">▶</span>
                     <div class="crest-mini-bg"><img src="${t.icon}" class="crest-mini"></div>
                     <div class="hub-line-text" style="flex: 1; margin-left:10px;">
@@ -1632,17 +1730,17 @@
                     <span class="hub-badge ${badgeClass}" style="margin: 0 10px;">${badgeText}</span>
                     <div class="team-controls" onclick="event.stopPropagation();">
                         <div class="team-score-ctrl" title="Score Bonus Équipe">
-                            <button class="btn-tiny" onclick="updateTeamBonus('${k.replace(/'/g, "\\'")}', -1)" ${btnDisabled} title="Retirer 1 point">-</button>
+                            <button class="btn-tiny" onclick="updateTeamBonus('${safeK}', -1)" ${btnDisabled} title="Retirer 1 point bonus">-</button>
                             <span class="team-bonus-val">${bo}</span>
-                            <button class="btn-tiny" onclick="updateTeamBonus('${k.replace(/'/g, "\\'")}', 1)" ${btnDisabled} title="Ajouter 1 point">+</button>
+                            <button class="btn-tiny" onclick="updateTeamBonus('${safeK}', 1)" ${btnDisabled} title="Ajouter 1 point bonus">+</button>
                         </div>
                         ${actionsHtml}
                     </div>
                 </div>
                 <div id="team-details-${k}" class="hub-details" style="display:none; margin-top:0; border-top:none; border-top-left-radius:0; border-top-right-radius:0; margin-bottom:10px;" onclick="event.stopPropagation();">
                     <div style="position:relative; margin-bottom:10px;">
-                        <input type="text" id="search-member-${k}" class="hub-search-bar" style="margin-bottom:0; padding:10px; font-size:0.9rem; padding-right:35px;" placeholder="🔍 Chercher un joueur..." oninput="renderTeamMembers('${k.replace(/'/g, "\\'")}')">
-                        <span id="clear-search-member-${k}" onclick="document.getElementById('search-member-${k}').value=''; renderTeamMembers('${k.replace(/'/g, "\\'")}');" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none;">✕</span>
+                        <input type="text" id="search-member-${k}" class="hub-search-bar" style="margin-bottom:0; padding:10px; font-size:0.9rem; padding-right:35px;" placeholder="🔍 Chercher un joueur (Actifs & Bloqués)..." oninput="renderTeamMembers('${safeK}')">
+                        <span id="clear-search-member-${k}" onclick="document.getElementById('search-member-${k}').value=''; renderTeamMembers('${safeK}');" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none;">✕</span>
                     </div>
                     <div id="list-member-${k}" style="display:flex; flex-direction:column; gap:5px;"></div>
                 </div>
