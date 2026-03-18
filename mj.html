@@ -18,14 +18,10 @@
         
         .box { max-width: 400px; margin: 0 auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* Dashboard élargi en mode Cockpit */
         .dashboard { display: none; max-width: 1200px; width: 95%; margin: 0 auto 40px auto; }
-        
-        /* Grille double colonne pour les lobbies */
         .lobbies-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-top: 20px; }
         @media (max-width: 900px) { .lobbies-grid { grid-template-columns: 1fr; } }
         
-        /* Listes avec scrolling interne */
         .scroll-list { max-height: 50vh; overflow-y: auto; padding-right: 5px; }
         .scroll-list::-webkit-scrollbar { width: 6px; }
         .scroll-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
@@ -64,41 +60,53 @@
         .hub-line:hover { background: rgba(255,255,255,0.1); }
         .hub-arrow { transition: transform 0.3s ease; display: inline-block; margin-right: 10px; font-size: 0.9rem; color: var(--accent); }
         .hub-arrow.open { transform: rotate(90deg); }
-        .hub-line-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; flex: 1; }
+        
+        .hub-line-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; flex: 1; gap: 10px; }
+        
         .hub-details { display: none; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 0 0 8px 8px; margin-top: -10px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); border-top: none; text-align: left; animation: slideDown 0.3s ease-out; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .hub-badge { font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-left: auto; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+        .hub-badge { font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
         .badge-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
         .badge-archive { background: rgba(189, 195, 199, 0.2); color: #bdc3c7; border: 1px solid #bdc3c7; }
         .badge-banned { background: rgba(231, 76, 60, 0.2); color: var(--danger); border: 1px solid var(--danger); }
         .badge-inactive { background: rgba(243, 156, 18, 0.2); color: var(--gold); border: 1px solid var(--gold); }
         .hub-btn { padding: 8px 15px; font-size: 0.8rem; width: auto; margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
-        .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-start; }
-        .crest-wrapper { width: 50px; height: 50px; background: #ecf0f1; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; flex-shrink: 0; position: relative; }
+        .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-start; transition: 0.3s; }
+        .crest-picker.drag-active { border: 2px dashed var(--success) !important; background: rgba(46, 204, 113, 0.2) !important; transform: scale(1.02); }
+        
+        .crest-wrapper { width: 50px; height: 50px; background: #ecf0f1; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: visible; flex-shrink: 0; position: relative; }
         .crest-selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: scale(1.1); z-index: 2; }
-        .crest-opt { width: 100%; height: 100%; object-fit: contain; }
+        .crest-opt { width: 100%; height: 100%; object-fit: contain; border-radius: 4px; overflow: hidden; }
+        
+        /* Croix de suppression pour les blasons uploadés */
+        .crest-del-btn { position: absolute; top: -6px; right: -6px; background: var(--danger); color: white; width: 16px; height: 16px; border-radius: 50%; cursor: pointer; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 5; font-weight: bold; line-height: 1; }
+        .crest-del-btn:hover { transform: scale(1.2); }
+
         .current-player { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 4px solid var(--accent); margin: 0 auto 20px auto; max-width: 600px; text-align: center; display: none; backdrop-filter: blur(10px); }
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .team-item { display: flex; align-items: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin-bottom: 8px; justify-content: space-between; flex-wrap: wrap; gap: 10px; border: 1px solid rgba(255,255,255,0.05); }
+        
         .score-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin-bottom: 5px; transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.05); }
         .score-row.airlock-row { background: rgba(243, 156, 18, 0.2); border: 2px solid var(--gold); }
         .score-row.buzzer-active-row { background: rgba(46, 204, 113, 0.3) !important; border: 2px solid var(--success) !important; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); transform: scale(1.02); z-index: 10; position: relative; }
-        .crest-mini-bg { background: white; padding: 0; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; width: 30px; height: 30px; align-items: center; justify-content: center; overflow: hidden; }
+        .crest-mini-bg { background: white; padding: 0; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; width: 30px; height: 30px; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
         .crest-mini { width: 100%; height: 100%; object-fit: contain; }
-        .btn-icon { cursor: pointer; font-weight: bold; font-size: 1.2rem; margin-left: 8px; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 4px; border:none; background:transparent;}
-        .btn-icon:hover { background: rgba(255,255,255,0.1); }
-        .btn-edit { color: var(--blue); } .btn-del { color: var(--danger); } .btn-restore { color: var(--success); } .btn-pause { color: #bdc3c7; }
-        .team-controls { display: flex; align-items: center; gap: 2px; }
+        
+        .team-controls { display: flex; align-items: center; gap: 2px; margin-left: auto; justify-content: flex-end; flex-shrink: 0; }
         .team-score-ctrl { display: flex; align-items: center; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 2px; margin-right: 5px; }
         .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue); box-shadow: none; border-radius: 4px; cursor: pointer; color: white; border: none; }
         .team-bonus-val { font-size: 0.9rem; font-weight: bold; margin: 0 8px; color: var(--accent); min-width: 20px; text-align: center; }
-        .player-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
-        .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; }
-        .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; cursor:pointer; }
+        .player-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; flex-shrink: 0; }
+        
+        .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; max-width: 80px; }
+        
+        /* Boutons d'action standards (Cockpit V2) */
+        .lobby-btn { width: 30px; height: 30px; padding: 0; margin: 0 2px; font-size: 1rem; line-height: 30px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px rgba(0,0,0,0.3); border:none; border-radius:4px; color:white; cursor:pointer; }
+        .lobby-btn:hover { transform: scale(1.1); }
+        .lobby-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
         input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; } input[type="number"] { -moz-appearance: textfield; }
-        .btn-folder { background: var(--gold); color: black; font-size: 1.4rem; width: 45px; height: 45px; padding: 0; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; margin-left: 5px; box-shadow: 0 4px rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer !important; flex-shrink: 0; }
-        .btn-folder:hover { transform: scale(1.05); }
+        
         .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed rgba(255,255,255,0.3); padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.3); transition: 0.3s; position: relative; margin-bottom: 10px; cursor: pointer; }
         .drop-zone.drag-active { border-color: #27ae60; background: rgba(39, 174, 96, 0.3); transform: scale(1.02); }
         .profile-drop { width: 150px; height: 150px; margin: 0 auto 5px auto; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border: 3px dashed #bdc3c7; }
@@ -112,9 +120,8 @@
         .modal-close-x { position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; background:var(--danger); color:white; font-weight:bold; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; box-shadow:0 2px 5px rgba(0,0,0,0.5); }
 
         .lib-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-content:start; }
-        .lib-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 0; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
-        .lib-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .lib-del { position: absolute; top: 0; right: 0; background: var(--danger); color: white; width: 22px; height: 22px; border-bottom-left-radius: 6px; cursor: pointer; font-size: 0.8rem; line-height: 22px; box-shadow: -1px 1px 3px rgba(0,0,0,0.3); font-weight: bold; z-index: 5; text-align: center; }
+        .lib-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 0; box-sizing: border-box; overflow: visible; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
+        .lib-item img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius:4px; }
         
         .switch-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; font-size: 1rem; color: white; font-weight: bold; }
         .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
@@ -156,7 +163,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.184</div>
+    <div class="version-tag" id="app-version-display">v1.185</div>
 
     <div id="global-mj-logo-container" style="display:none; position: fixed; top: 15px; left: 15px; z-index: 9999; cursor: pointer;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
         <div class="flip-container">
@@ -262,7 +269,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.184</span>
+                    <span id="disp-v-mj">v1.185</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -342,12 +349,12 @@
             <input type="text" id="modal-t-name" placeholder="Nom de l'équipe..." onkeypress="if(event.key==='Enter') saveTeamFromModal()" style="font-size:1.1rem; padding:15px; margin-bottom:15px;">
             
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <p style="margin:0; color:#bdc3c7; font-size:0.9rem;">Choisissez un blason :</p>
+                <p style="margin:0; color:#bdc3c7; font-size:0.9rem;">Choisissez un blason ou <b style="color:white;">glissez une image ici</b> 📥 :</p>
                 <button class="btn-tiny" style="width:auto; padding:0 10px; background:var(--blue);" onclick="document.getElementById('team-modal-upload').click()">📸 Uploader</button>
                 <input type="file" id="team-modal-upload" accept="image/*" style="display:none;" onchange="handleTeamModalUpload(this.files)">
             </div>
             
-            <div class="crest-picker scroll-list" id="modal-crest-grid" style="max-height: 250px; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin-bottom:20px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
+            <div class="crest-picker scroll-list" id="modal-crest-grid" style="max-height: 250px; background:rgba(0,0,0,0.5); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin-bottom:20px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
             
             <button id="btn-save-team-modal" class="big-btn btn-green" onclick="saveTeamFromModal()" style="font-size:1.1rem;">💾 ENREGISTRER</button>
         </div>
@@ -429,7 +436,9 @@
                 </div>
             </div>
 
-        </div> <div style="margin-top:30px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); max-width:600px; margin-left:auto; margin-right:auto;">
+        </div>
+
+        <div style="margin-top:30px; border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); max-width:600px; margin-left:auto; margin-right:auto;">
             <h3 style="color:var(--danger); margin-top:0; margin-bottom:15px; text-shadow:0 1px 2px black; text-align:center; text-transform:uppercase;">⚙️ Gestion de la salle</h3>
             <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 1.1rem; margin-bottom: 10px; width: 100%; box-shadow: 0 4px 10px rgba(241, 196, 15, 0.4);" onclick="triggerEndGame()" title="Bloque les buzzers, affiche le podium final, et passe la salle en lecture seule dans vos archives.">🏆 FIN DE PARTIE & ARCHIVER</button>
             
@@ -606,7 +615,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.184";
+        const APP_VERSION = "1.185";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -626,7 +635,7 @@
         let buzzProcessing = false;
         let curLbType = '', curLbIdx = 0, lbCrests = [], lbBgsDash = [], lbBgsModal = [];
         let currentPlayerFilter = 'all';
-        let currentMjTeamFilter = 'all'; // NOUVEAU FILTRE EQUIPES
+        let currentMjTeamFilter = 'all'; 
         
         let mjRooms = [];
         let currentHubTab = 'active';
@@ -645,8 +654,13 @@
             
             initVersionListener();
             
-            setupDragDrop('drop-zone', f => handleFiles(f)); setupDragDrop('profile-drop-zone', f => handleProfileFile(f));
-            setupDragDrop('bg-drop-zone', f => handleBgUpload(f, 'dashboard')); setupDragDrop('bg-modal-drop-zone', f => handleBgUpload(f, 'modal'));
+            setupDragDrop('drop-zone', f => handleFiles(f)); 
+            setupDragDrop('profile-drop-zone', f => handleProfileFile(f));
+            setupDragDrop('bg-drop-zone', f => handleBgUpload(f, 'dashboard')); 
+            setupDragDrop('bg-modal-drop-zone', f => handleBgUpload(f, 'modal'));
+            
+            // Le super Drag & Drop sur la grille des blasons
+            setupDragDrop('modal-crest-grid', f => handleTeamModalUpload(f));
             
             document.addEventListener('keydown', e => { if(document.getElementById('univ-lightbox').style.display === 'flex') { if(e.key==='ArrowLeft') lbPrev(e); else if(e.key==='ArrowRight') lbNext(e); else if(e.key==='Escape') closeLightbox(e); } });
         };
@@ -659,7 +673,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.184", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.185", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -834,7 +848,7 @@
             title.innerText = "✅ TERMINÉ !"; loadModalLibrary(); setTimeout(() => { title.innerText = orig; sub.innerText = "ou Cliquez"; }, 2000);
         }
 
-        // --- NOUVEL ALGORITHME MATHEMATHIQUE BLASONS PAR DEFAUT (SANS DOUBLONS) ---
+        // --- NOUVEL ALGORITHME MATHEMATHIQUE BLASONS PAR DEFAUT ---
         function createBlason(i) { 
             const colorPairs = [
                 ['#e74c3c', '#f1c40f'], ['#3498db', '#ecf0f1'], ['#2ecc71', '#2c3e50'],
@@ -1211,7 +1225,7 @@
         function toggleGuide() { const o = document.getElementById('overlay-guide'); if(o.style.display === 'flex') o.style.display = 'none'; else { o.style.display = 'flex'; document.getElementById('guide-iframe').src = "guide.html?t=" + Date.now(); } }
         function showRemoteQR() { const o = document.getElementById('overlay-remote-qr'); const q = document.getElementById('qrcode-remote'); q.innerHTML = ""; new QRCode(q, { text: window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/remote.html?room=" + roomID, width: 250, height: 250 }); o.style.display = 'flex'; }
 
-        // --- NOUVELLE GESTION MODALE EQUIPE ---
+        // --- GESTION DE L'ÉQUIPE (AVEC DRAG & DROP) ---
         function openTeamModal(tName) {
             editingTeamKey = tName;
             document.getElementById('modal-team-edit').style.display = 'flex';
@@ -1262,20 +1276,20 @@
         function createModalCrestItem(key, url, container, isCustom) {
             const w = document.createElement('div');
             w.className = 'crest-wrapper';
-            w.style.position = 'relative';
             if (selCrest === url) w.classList.add('crest-selected');
             
             if (url.startsWith('data:image/svg')) {
                 w.innerHTML = `<img src="${url}" class="crest-opt">`;
             } else {
                 w.style.background = 'transparent';
-                w.innerHTML = `<img src="${url}" class="crest-opt" style="border-radius: 4px;">`;
+                w.innerHTML = `<img src="${url}" class="crest-opt">`;
             }
 
             if (isCustom) {
                 const del = document.createElement('div');
-                del.className = 'lib-del';
+                del.className = 'crest-del-btn';
                 del.innerHTML = '✖';
+                del.title = "Supprimer ce blason";
                 del.onclick = (e) => {
                     e.stopPropagation();
                     if(confirm("Supprimer définitivement ce blason ?")) {
@@ -1302,7 +1316,6 @@
                 db.ref(`users/${uid}/library`).push(u).then(() => {
                     selCrest = u;
                     document.getElementById('team-modal-title').innerText = editingTeamKey ? "MODIFIER L'ÉQUIPE" : "CRÉER UNE ÉQUIPE";
-                    // Sync is done automatically via initLibrarySync which calls loadModalCrestGrid
                 });
             }).catch(e => {
                 alert("Erreur upload: " + e.message);
@@ -1431,6 +1444,7 @@
             roomRef.child('blockedPlayers').on('value', snap => { 
                 currentBlocked = snap.val() || {}; 
                 renderLobby(); 
+                renderTeamLobby(); // Update team mute buttons
             });
         }
 
@@ -1441,6 +1455,7 @@
             renderLobby();
         }
 
+        // --- AFFICHAGE LOBBY JOUEUR (UNIFORMISÉ) ---
         function renderLobby() {
             let hA = "", hI = "", hB = ""; let hsB = false, hsI = false;
             const sl = document.getElementById('score-list'), il = document.getElementById('inactive-list'), bl = document.getElementById('banned-list');
@@ -1463,15 +1478,48 @@
             
             aP.forEach(d => {
                 let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
-                const iB = currentBlocked[d.name]; const bS = iB ? "background:var(--danger);color:white;border:none;" : "background:transparent;border:1px solid var(--danger);opacity:0.6;";
-                let aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;">` : `<span style="font-size:1.2rem;margin-right:8px;">${d.avatar||'👤'}</span>`;
+                const iB = currentBlocked[d.name]; 
+                const bS = iB ? "background:var(--danger);color:white;border:none;" : "background:transparent;border:1px solid var(--danger);opacity:0.6;";
+                const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;">` : `<span style="font-size:1.2rem;margin-right:8px;">${d.avatar||'👤'}</span>`;
                 const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
-                const sB = d.hasBeenWarned===true ? `<button class="lobby-btn" style="background:#c0392b;margin:0 2px;" onclick="kickPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')">🟥</button>` : `<button class="lobby-btn" style="background:#f1c40f;color:black;margin:0 2px;" onclick="warnPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')">🟨</button>`;
-                hA += `<div class="${rC}"><div style="display:flex;align-items:center;flex:1;overflow:hidden;">${aH}<b style="margin-right:10px;">${d.name}</b><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div><div class="player-controls"><button class="lobby-btn" style="background:var(--accent);color:black;margin:0 2px;" onclick="forceBuzzer('${d.uid}')">⚡</button><button class="lobby-btn" style="${bS}margin:0 2px;" onclick="toggleBlockPlayer('${d.name.replace(/'/g, "\\'")}')">🛑</button><div style="display:flex;align-items:center;background:rgba(0,0,0,0.5);border-radius:4px;padding:2px;margin:0 5px;"><button class="btn-tiny" onclick="adj('${d.uid}',-1)">-</button><input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;"><button class="btn-tiny" onclick="adj('${d.uid}',1)">+</button></div><button class="lobby-btn" style="background:var(--blue);margin:0 2px;" onclick="openEditModal('${d.uid}')">✏️</button>${sB}<button class="lobby-btn btn-cancel" style="margin-left:2px; padding:0; width:30px; height:30px; border:1px solid var(--danger)!important;" onclick="deletePlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}', true)">🗑️</button></div></div>`;
+                
+                const sB = d.hasBeenWarned===true ? 
+                    `<button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Expulser le joueur (Rouge)">🟥</button>` : 
+                    `<button class="lobby-btn" style="background:#f1c40f;color:black;" onclick="warnPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Avertir le joueur (Jaune)">🟨</button>`;
+                
+                hA += `
+                <div class="${rC}">
+                    <div style="display:flex;align-items:center;flex:1;overflow:hidden;">${aH}<b style="margin-right:10px;">${d.name}</b><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div>
+                    <div class="player-controls">
+                        <div style="display:flex;align-items:center;background:rgba(0,0,0,0.5);border-radius:4px;padding:2px;margin:0 2px;" title="Score">
+                            <button class="btn-tiny" onclick="adj('${d.uid}',-1)" title="Retirer 1 point">-</button>
+                            <input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;">
+                            <button class="btn-tiny" onclick="adj('${d.uid}',1)" title="Ajouter 1 point">+</button>
+                        </div>
+                        <button class="lobby-btn" style="background:var(--accent);color:black;" onclick="forceBuzzer('${d.uid}')" title="Forcer Buzzer">⚡</button>
+                        <button class="lobby-btn" style="${bS}" onclick="toggleBlockPlayer('${d.name.replace(/'/g, "\\'")}')" title="${iB ? 'Débloquer le buzzer' : 'Bloquer le buzzer'}">🛑</button>
+                        <button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')" title="Éditer le joueur">✏️</button>
+                        <button class="lobby-btn" style="background:#7f8c8d;" onclick="pausePlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Mettre en pause">⏸️</button>
+                        ${sB}
+                        <button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deletePlayerDefinitive('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button>
+                    </div>
+                </div>`;
             });
-            rP.forEach(d => { hsI=true; hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);width:auto;padding:0 10px;margin-right:5px;" onclick="openEditModal('${d.uid}')">✏️</button><button class="lobby-btn" style="background:var(--success);width:auto;padding:0 10px;" onclick="acceptRecovery('${d.uid}')">✅</button><button class="lobby-btn" style="background:var(--danger);width:auto;padding:0 10px;margin-left:5px;" onclick="rejectRecovery('${d.uid}')">❌</button></div></div>`; });
-            iP.forEach(d => { hsI=true; hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')">✏️</button><button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${d.uid}')">✅</button><button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')">🟥</button><button class="lobby-btn btn-cancel" style="padding:0; width:30px; height:30px; border:1px solid var(--danger)!important;" onclick="deletePlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}', false)">🗑️</button></div></div>`; });
-            bP.forEach(d => { hsB=true; hB += `<div class="team-item" style="border:1px solid var(--danger);justify-content:space-between;"><span style="color:var(--danger)"><b>${d.name}</b></span><div><button style="background:var(--blue);width:auto;padding:5px 15px;margin:0;font-size:0.8rem;margin-right:5px;" onclick="openEditModal('${d.uid}')">✏️</button><button style="background:var(--mj-color);width:auto;padding:5px 15px;margin:0;font-size:0.8rem;margin-right:5px;" onclick="unkickPlayer('${d.uid}')">Réhabiliter</button><button class="btn-cancel" style="width:auto;padding:5px 10px;margin:0;font-size:0.8rem;" onclick="deletePlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}', false)">🗑️</button></div></div>`; });
+            
+            rP.forEach(d => { 
+                hsI=true; 
+                hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')" title="Éditer le joueur">✏️</button><button class="lobby-btn" style="background:var(--success);" onclick="acceptRecovery('${d.uid}')" title="Accepter la connexion">✅</button><button class="lobby-btn" style="background:var(--danger);" onclick="rejectRecovery('${d.uid}')" title="Refuser">❌</button></div></div>`; 
+            });
+            
+            iP.forEach(d => { 
+                hsI=true; 
+                hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')" title="Éditer le joueur">✏️</button><button class="lobby-btn" style="background:var(--success);" onclick="restoreInactivePlayer('${d.uid}')" title="Réactiver le joueur">▶️</button><button class="lobby-btn" style="background:#c0392b;" onclick="kickPlayer('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Expulser">🟥</button><button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deletePlayerDefinitive('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button></div></div>`; 
+            });
+            
+            bP.forEach(d => { 
+                hsB=true; 
+                hB += `<div class="score-row" style="border:1px solid var(--danger);"><div style="flex:1;"><span style="color:var(--danger)"><b>${d.name}</b></span></div><div class="player-controls"><button class="lobby-btn" style="background:var(--blue);" onclick="openEditModal('${d.uid}')" title="Éditer le joueur">✏️</button><button class="lobby-btn" style="background:var(--success);" onclick="unkickPlayer('${d.uid}')" title="Réactiver le joueur">▶️</button><button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deletePlayerDefinitive('${d.uid}', '${d.name.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button></div></div>`; 
+            });
             
             sl.innerHTML = hA; il.innerHTML = hI; bl.innerHTML = hB; 
             
@@ -1491,6 +1539,7 @@
             renderTeamLobby();
         }
 
+        // --- AFFICHAGE LOBBY ÉQUIPE (UNIFORMISÉ) ---
         function renderTeamLobby() {
             if (isRenderingTeamLobby) return;
             isRenderingTeamLobby = true;
@@ -1504,71 +1553,95 @@
             
             Object.keys(globalTeams).forEach(k => {
                 const t = globalTeams[k];
-                
                 const isA = t.active !== false;
                 const isBan = t.banned === true;
                 
                 if (currentMjTeamFilter === 'active' && (!isA || isBan)) return;
                 if (currentMjTeamFilter === 'inactive' && (isA || isBan)) return;
                 if (currentMjTeamFilter === 'banned' && !isBan) return;
-
                 if (searchVal && !k.toLowerCase().includes(searchVal)) return;
                 
                 const bo = t.bonus || 0;
-                
                 let badgeClass = isBan ? "badge-banned" : (!isA ? "badge-inactive" : "badge-active");
-                let badgeText = isBan ? "🔴 BANNIE" : (!isA ? "🟠 EN PAUSE" : "🟢 ACTIVE");
+                let badgeText = isBan ? "🔴 BANNIE" : (!isA ? "🟠 PAUSE" : "🟢 ACTIVE");
                 
                 let totalScore = 0;
                 let activeCount = 0;
+                let teamMembers = [];
                 Object.values(allPlayersData).forEach(p => { 
                     if(p.teamName === k) {
                         totalScore += (p.pts || 0);
-                        if(p.active !== false && p.banned !== true) activeCount++;
+                        if(p.active !== false && p.banned !== true) {
+                            activeCount++;
+                            teamMembers.push(p);
+                        }
                     }
                 });
                 totalScore += bo;
                 if(!isA && !isBan) totalScore = t.frozenScore || 0;
                 
-                let blockedCount = t.blacklist ? Object.keys(t.blacklist).length : 0;
-                let statsHtml = `(<span style="color:var(--success);">${activeCount} Actif${activeCount > 1 ? 's' : ''}</span>`;
-                if (blockedCount > 0) {
-                    statsHtml += ` - <span style="color:var(--danger);">${blockedCount} Banni${blockedCount > 1 ? 's' : ''}</span>`;
+                let isTeamMuted = false;
+                if (teamMembers.length > 0 && teamMembers.some(m => currentBlocked[m.name])) {
+                    isTeamMuted = true;
                 }
+
+                let muteBtnStyle = isTeamMuted ? "background:var(--danger);color:white;border:none;" : "background:transparent;border:1px solid var(--danger);opacity:0.6;";
+                
+                let blockedCount = t.blacklist ? Object.keys(t.blacklist).length : 0;
+                let statsHtml = `(<span style="color:var(--success);">${activeCount} Joueur${activeCount > 1 ? 's' : ''}</span>`;
+                if (blockedCount > 0) statsHtml += ` - <span style="color:var(--danger);">${blockedCount} Exclu${blockedCount > 1 ? 's' : ''}</span>`;
                 statsHtml += `)`;
                 
                 let actionsHtml = "";
-                if(isBan) {
-                    actionsHtml = `<span class="btn-icon btn-restore" onclick="openRestoreModal('${k.replace(/'/g, "\\'")}')" title="Restaurer">🔄</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${k.replace(/'/g, "\\'")}')" title="Supprimer">🗑️</span>`;
-                } else if(!isA) {
-                    actionsHtml = `<span class="btn-icon btn-restore" onclick="openRestoreModal('${k.replace(/'/g, "\\'")}')" title="Réactiver">▶️</span><span class="btn-icon btn-del" onclick="banTeam('${k.replace(/'/g, "\\'")}')" title="Bannir">🚫</span><span class="btn-icon btn-del" onclick="deleteTeamDefinitive('${k.replace(/'/g, "\\'")}')" title="Supprimer">🗑️</span>`;
-                } else {
-                    actionsHtml = `<span class="btn-icon btn-pause" onclick="archiveTeam('${k.replace(/'/g, "\\'")}')" title="Mettre en pause">⏸️</span><span class="btn-icon btn-del" onclick="banTeam('${k.replace(/'/g, "\\'")}')" title="Bannir">🚫</span><span class="btn-icon btn-edit" onclick="openTeamModal('${k.replace(/'/g, "\\'")}')" title="Modifier">✎</span>`;
-                }
+                let btnDisabled = isBan ? "disabled" : "";
                 
-                let btnDisabled = isBan ? "disabled style='background:grey;'" : "";
+                if(isBan) {
+                    actionsHtml = `
+                        <button class="lobby-btn" style="background:var(--success);" onclick="openRestoreModal('${k.replace(/'/g, "\\'")}')" title="Réactiver">▶️</button>
+                        <button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deleteTeamDefinitive('${k.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button>
+                    `;
+                } else if(!isA) {
+                    actionsHtml = `
+                        <button class="lobby-btn" style="background:var(--blue);" onclick="openTeamModal('${k.replace(/'/g, "\\'")}')" title="Éditer l'équipe">✏️</button>
+                        <button class="lobby-btn" style="background:var(--success);" onclick="openRestoreModal('${k.replace(/'/g, "\\'")}')" title="Réactiver">▶️</button>
+                        <button class="lobby-btn" style="background:#c0392b;" onclick="kickTeam('${k.replace(/'/g, "\\'")}')" title="Expulser l'équipe (Rouge)">🟥</button>
+                        <button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deleteTeamDefinitive('${k.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button>
+                    `;
+                } else {
+                    let warnBtn = t.hasBeenWarned ? 
+                        `<button class="lobby-btn" style="background:#c0392b;" onclick="kickTeam('${k.replace(/'/g, "\\'")}')" title="Expulser l'équipe (Rouge)">🟥</button>` : 
+                        `<button class="lobby-btn" style="background:#f1c40f;color:black;" onclick="warnTeam('${k.replace(/'/g, "\\'")}')" title="Avertir l'équipe (Jaune)">🟨</button>`;
+
+                    actionsHtml = `
+                        <button class="lobby-btn" style="${muteBtnStyle}" onclick="toggleTeamBlock('${k.replace(/'/g, "\\'")}')" title="${isTeamMuted ? 'Débloquer l\'équipe' : 'Bloquer l\'équipe'}">🛑</button>
+                        <button class="lobby-btn" style="background:var(--blue);" onclick="openTeamModal('${k.replace(/'/g, "\\'")}')" title="Éditer l'équipe">✏️</button>
+                        <button class="lobby-btn" style="background:#7f8c8d;" onclick="archiveTeam('${k.replace(/'/g, "\\'")}')" title="Mettre en pause">⏸️</button>
+                        ${warnBtn}
+                        <button class="lobby-btn btn-cancel" style="border:1px solid var(--danger)!important;" onclick="deleteTeamDefinitive('${k.replace(/'/g, "\\'")}')" title="Supprimer définitivement">🗑️</button>
+                    `;
+                }
                 
                 html += `
                 <div class="hub-line" style="margin-bottom:0; border-radius:8px; border-bottom-left-radius:0; border-bottom-right-radius:0;" onclick="toggleTeamAccordion('${k.replace(/'/g, "\\'")}')">
                     <span id="team-arrow-${k}" class="hub-arrow">▶</span>
                     <div class="crest-mini-bg"><img src="${t.icon}" class="crest-mini"></div>
-                    <div class="hub-line-text" style="margin-left:10px;">
-                        <b style="color:var(--accent); margin-right:8px;">${k}</b> 
-                        <span style="color:#bdc3c7; font-size:0.85rem;">| Score : <span id="score-team-${k}">${totalScore}</span> | <span style="font-weight:bold;">${statsHtml}</span></span>
+                    <div class="hub-line-text" style="flex: 1; margin-left:10px;">
+                        <b style="color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${k}</b> 
+                        <span style="color:#bdc3c7; font-size:0.85rem; margin-left:10px; white-space:nowrap;">Score : ${totalScore} | <span style="font-weight:bold;">${statsHtml}</span></span>
                     </div>
-                    <span class="hub-badge ${badgeClass}">${badgeText}</span>
-                    <div class="team-controls" style="margin-left:10px;" onclick="event.stopPropagation();">
-                        <div class="team-score-ctrl">
-                            <button class="btn-tiny" onclick="updateTeamBonus('${k.replace(/'/g, "\\'")}', -1)" ${btnDisabled}>-</button>
+                    <span class="hub-badge ${badgeClass}" style="margin: 0 10px;">${badgeText}</span>
+                    <div class="team-controls" onclick="event.stopPropagation();">
+                        <div class="team-score-ctrl" title="Score Bonus Équipe">
+                            <button class="btn-tiny" onclick="updateTeamBonus('${k.replace(/'/g, "\\'")}', -1)" ${btnDisabled} title="Retirer 1 point">-</button>
                             <span class="team-bonus-val">${bo}</span>
-                            <button class="btn-tiny" onclick="updateTeamBonus('${k.replace(/'/g, "\\'")}', 1)" ${btnDisabled}>+</button>
+                            <button class="btn-tiny" onclick="updateTeamBonus('${k.replace(/'/g, "\\'")}', 1)" ${btnDisabled} title="Ajouter 1 point">+</button>
                         </div>
                         ${actionsHtml}
                     </div>
                 </div>
                 <div id="team-details-${k}" class="hub-details" style="display:none; margin-top:0; border-top:none; border-top-left-radius:0; border-top-right-radius:0; margin-bottom:10px;" onclick="event.stopPropagation();">
                     <div style="position:relative; margin-bottom:10px;">
-                        <input type="text" id="search-member-${k}" class="hub-search-bar" style="margin-bottom:0; padding:10px; font-size:0.9rem; padding-right:35px;" placeholder="🔍 Chercher un joueur (Actifs & Bloqués)..." oninput="renderTeamMembers('${k.replace(/'/g, "\\'")}')">
+                        <input type="text" id="search-member-${k}" class="hub-search-bar" style="margin-bottom:0; padding:10px; font-size:0.9rem; padding-right:35px;" placeholder="🔍 Chercher un joueur..." oninput="renderTeamMembers('${k.replace(/'/g, "\\'")}')">
                         <span id="clear-search-member-${k}" onclick="document.getElementById('search-member-${k}').value=''; renderTeamMembers('${k.replace(/'/g, "\\'")}');" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none;">✕</span>
                     </div>
                     <div id="list-member-${k}" style="display:flex; flex-direction:column; gap:5px;"></div>
@@ -1653,10 +1726,10 @@
                 
                 let buttonsHtml = "";
                 if (m.isBlocked) {
-                    buttonsHtml = `<button onclick="pardonTeamMember('${m.id}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--success); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;">🔄 Gracier</button>`;
+                    buttonsHtml = `<button onclick="pardonTeamMember('${m.id}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--success); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;" title="Gracier">🔄</button>`;
                 } else {
-                    let btnCap = m.isCaptain ? "" : `<button onclick="makeCaptain('${m.id}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--gold); border:none; color:black; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;">👑 Nommer Capitaine</button>`;
-                    buttonsHtml = `${btnCap} <button onclick="expelTeamMember('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${m.avatar}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--danger); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;">✕ Expulser</button>`;
+                    let btnCap = m.isCaptain ? "" : `<button onclick="makeCaptain('${m.id}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--gold); border:none; color:black; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;" title="Nommer Capitaine">👑</button>`;
+                    buttonsHtml = `${btnCap} <button onclick="expelTeamMember('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${m.avatar}', '${teamName.replace(/'/g, "\\'")}')" style="background:var(--danger); border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer; font-weight:bold; width:auto; margin:0;" title="Expulser">✕</button>`;
                 }
 
                 html += `
@@ -1702,21 +1775,55 @@
         function censorPlayerAvatar() { editingPlayerCurrentAvatar = mjProfileData.customLogo || "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad"; updateEditAvatarPreview(); }
         function closeEditPlayerModal() { document.getElementById('modal-edit-player').style.display='none'; editingPlayerUid=null; }
         function savePlayerEdit() { if(!editingPlayerUid)return; const v=document.getElementById('edit-player-name').value.trim(); if(!/^[a-zA-Z0-9À-ÿ\s\-_]+$/.test(v)||v.length<2)return alert("Pseudo invalide (Lettres, chiffres, 2 car. min)."); let tk=false; Object.keys(allPlayersData).forEach(u=>{if(u!==editingPlayerUid&&allPlayersData[u].name&&allPlayersData[u].name.toLowerCase()===v.toLowerCase())tk=true;}); if(tk)return alert("Déjà utilisé."); roomRef.child('players/'+editingPlayerUid).update({name:v, avatar:editingPlayerCurrentAvatar}).then(()=>{ if(v!==editingPlayerOriginalPseudo&&currentBlocked[editingPlayerOriginalPseudo]){roomRef.child('blockedPlayers/'+editingPlayerOriginalPseudo).remove();roomRef.child('blockedPlayers/'+v).set(true);} if(currentBuzzerId===editingPlayerUid)roomRef.child('buzzers').update({pseudo:v, avatar:editingPlayerCurrentAvatar}); closeEditPlayerModal(); }); }
+        
         function setPlayerScore(u, v) { roomRef.child('players/'+u).update({pts: parseInt(v)||0}); }
         function warnPlayer(u, n) { if(confirm(`Avertissement (Jaune) à ${n} ?`)) roomRef.child('players/'+u).update({hasBeenWarned:true, pendingWarning:true}); }
+        function kickPlayer(u, n) { if(confirm(`Expulser ${n} (Rouge) ?`)) roomRef.child('players/'+u).update({banned:true, active:false}); }
+        function unkickPlayer(u) { roomRef.child('players/'+u).update({banned:false, active:true, reconnectedAt:Date.now()}); }
+        function pausePlayer(u, n) { if(confirm(`Mettre ${n} en pause ?`)) roomRef.child('players/'+u).update({active:false}); }
+        function restoreInactivePlayer(u) { roomRef.child('players/'+u).update({active:true, reconnectedAt:Date.now()}); }
+        function deletePlayerDefinitive(u, n) { if(confirm(`⚠️ Supprimer définitivement le joueur ${n} ?`)) roomRef.child('players/'+u).remove(); }
+        function togglePlayerTeam(u, c) { const i=(c==="Solo")?"":(globalTeams[c]?globalTeams[c].icon:""); roomRef.child('players/'+u).update({teamName:c, teamIcon:i, active:true}); }
+        function forceBuzzer(u) { const p=allPlayersData[u]; if(p) { roomRef.child('gameState').update({status:'taken'}); roomRef.child('buzzers').set({id:u, pseudo:p.name, avatar:p.avatar||"", teamName:p.teamName||"Solo", teamIcon:p.teamIcon||""}); } }
+        function toggleBlockPlayer(ps) { if(currentBlocked[ps]) roomRef.child('blockedPlayers/'+ps).remove(); else roomRef.child('blockedPlayers/'+ps).set(true); }
+
+        function warnTeam(n) { 
+            if(confirm(`Avertissement (Jaune) à l'équipe ${n} ?`)) {
+                roomRef.child('teams/'+n).update({hasBeenWarned:true});
+                Object.values(allPlayersData).forEach(p => {
+                    if (p.teamName === n && p.active !== false && !p.banned) {
+                        roomRef.child('players/' + p.uid).update({ hasBeenWarned: true, pendingWarning: true });
+                        roomRef.child('blockedPlayers/' + p.name).set(true); 
+                    }
+                });
+                statusUpdate('ready');
+            } 
+        }
+        function kickTeam(n) { if(confirm(`Expulser l'équipe ${n} (Rouge) ?`)) banTeam(n); }
+        function toggleTeamBlock(n) {
+            let members = [];
+            Object.values(allPlayersData).forEach(p => {
+                if (p.teamName === n && p.active !== false && !p.banned) members.push(p);
+            });
+            const isMuted = members.some(m => currentBlocked[m.name]);
+            if (isMuted) { members.forEach(m => roomRef.child('blockedPlayers/' + m.name).remove()); } 
+            else { let updates = {}; members.forEach(m => updates[m.name] = true); roomRef.child('blockedPlayers').update(updates); }
+        }
+
         function acceptRecovery(u) { roomRef.child('players/'+u).update({active:true, recoveryRequest:null, reconnectedAt:Date.now()}); }
         function rejectRecovery(u) { if(confirm("Refuser ?")) roomRef.child('players/'+u).update({recoveryRequest:null}); }
-        function archiveTeam(n) { if(confirm("Pause équipe "+n+" ?")) { let c=0; Object.values(allPlayersData).forEach(p=>{if(p.teamName===n)c+=(p.pts||0);}); c+=(globalTeams[n].bonus||0); let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, frozenScore:c, previousMembers:m, lastState:'active'}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:""})); } }
-        function banTeam(n) { if(confirm("Bannir équipe "+n+" ?")) { let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, banned:true, previousMembers:m, lastState:(globalTeams[n].active!==false?'active':'inactive')}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:"", active:true, banned:false})); } }
-        function openRestoreModal(n) { const t=globalTeams[n]; if(t.lastState==='active'||(!t.banned&&!t.active)){if(confirm("Réactiver "+n+" ?"))performRestore(n,'active');}else{pendingRestoreTeam=n; document.getElementById('restore-team-msg').innerText=`${n} était EN PAUSE avant d'être bannie.`; document.getElementById('modal-restore-team').style.display='flex';} }
+        
+        function archiveTeam(n) { if(confirm(`Mettre l'équipe ${n} en pause ?`)) { let c=0; Object.values(allPlayersData).forEach(p=>{if(p.teamName===n)c+=(p.pts||0);}); c+=(globalTeams[n].bonus||0); let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, frozenScore:c, previousMembers:m, lastState:'active'}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:""})); } }
+        function banTeam(n) { let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, banned:true, previousMembers:m, lastState:(globalTeams[n].active!==false?'active':'inactive')}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:"", active:true, banned:false})); }
+        function openRestoreModal(n) { const t=globalTeams[n]; if(t.lastState==='active'||(!t.banned&&!t.active)){if(confirm(`Réactiver l'équipe ${n} ?`))performRestore(n,'active');}else{pendingRestoreTeam=n; document.getElementById('restore-team-msg').innerText=`${n} était EN PAUSE avant d'être bannie.`; document.getElementById('modal-restore-team').style.display='flex';} }
         function confirmRestoreAction(m) { if(pendingRestoreTeam){performRestore(pendingRestoreTeam,m); closeRestoreModal();} }
         function closeRestoreModal() { document.getElementById('modal-restore-team').style.display='none'; pendingRestoreTeam=null; }
         function performRestore(n, s) { if(s==='active') roomRef.child('teams/'+n).update({active:true, banned:false, frozenScore:null, previousMembers:null}); else if(s==='inactive') roomRef.child('teams/'+n).update({active:false, banned:false}); }
-        function deleteTeamDefinitive(n) { if(confirm("⚠️ Supprimer DÉFINITIVEMENT "+n+" ?")) roomRef.child('teams/'+n).remove(); }
+        function deleteTeamDefinitive(n) { if(confirm(`⚠️ Supprimer DÉFINITIVEMENT l'équipe ${n} ?`)) roomRef.child('teams/'+n).remove(); }
         function updateTeamBonus(n, d) { const t=globalTeams[n]; if(t.active!==false)roomRef.child('teams/'+n+'/bonus').transaction(v=>(v||0)+d); else roomRef.child('teams/'+n).update({frozenScore:(t.frozenScore||0)+d, bonus:(t.bonus||0)+d}); }
-        function deletePlayer(u, n, a) { if(a) { if(confirm("Rendre inactif "+n+" ?")) roomRef.child('players/'+u).update({active:false}); } else { if(confirm("⚠️ Supprimer "+n+" définitivement ?")) roomRef.child('players/'+u).remove(); } }
-        function forceBuzzer(u) { const p=allPlayersData[u]; if(p) { roomRef.child('gameState').update({status:'taken'}); roomRef.child('buzzers').set({id:u, pseudo:p.name, avatar:p.avatar||"", teamName:p.teamName||"Solo", teamIcon:p.teamIcon||""}); } }
-        function toggleBlockPlayer(ps) { if(currentBlocked[ps]) roomRef.child('blockedPlayers/'+ps).remove(); else roomRef.child('blockedPlayers/'+ps).set(true); }
+        
+        function handleError() { if(currentPlayer&&currentPlayer.name) { roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready'); } }
+        function handleReward(pts, m) { if(!currentPlayer||!currentPlayer.id)return; const cp=allPlayersData[currentPlayer.id]?(allPlayersData[currentPlayer.id].pts||0):0; roomRef.child('players/'+currentPlayer.id).update({pts:cp+pts, active:true}); if(m==='partial'){roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready');}else fullReset(); }
         
         function triggerEndGame() { 
             if(confirm("🏁 Fin de partie ?\n\nCela affichera le podium et placera cette salle dans vos Archives en Lecture Seule.")) { 
@@ -1733,33 +1840,7 @@
                 document.getElementById('readonly-banner').style.display = 'block';
             } 
         }
-        
-        function statusUpdate(st) { 
-            if(roomRef) { 
-                roomRef.child('gameState').set({status:st}); 
-                if(st==='ready') { 
-                    roomRef.child('buzzers').remove(); 
-                    roomRef.child('buzzAttempts').remove(); 
-                    buzzProcessing = false;
-                } 
-            } 
-        }
 
-        function fullReset() { 
-            roomRef.child('blockedPlayers').remove(); 
-            roomRef.child('buzzers').remove(); 
-            roomRef.child('buzzAttempts').remove(); 
-            statusUpdate('waiting'); 
-        }
-        
-        function adj(u, v) { roomRef.child('players/'+u+'/pts').transaction(x=>(x||0)+v); }
-        function kickPlayer(u, n) { if(confirm("Bannir "+n+" (Rouge) ?")) roomRef.child('players/'+u).update({banned:true, active:false}); }
-        function unkickPlayer(u) { roomRef.child('players/'+u).update({banned:false, active:true, reconnectedAt:Date.now()}); }
-        function restoreInactivePlayer(u) { roomRef.child('players/'+u).update({active:true, reconnectedAt:Date.now()}); }
-        function togglePlayerTeam(u, c) { const i=(c==="Solo")?"":(globalTeams[c]?globalTeams[c].icon:""); roomRef.child('players/'+u).update({teamName:c, teamIcon:i, active:true}); }
-        function handleError() { if(currentPlayer&&currentPlayer.name) { roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready'); } }
-        function handleReward(pts, m) { if(!currentPlayer||!currentPlayer.id)return; const cp=allPlayersData[currentPlayer.id]?(allPlayersData[currentPlayer.id].pts||0):0; roomRef.child('players/'+currentPlayer.id).update({pts:cp+pts, active:true}); if(m==='partial'){roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready');}else fullReset(); }
-        
         function quitRoom() { 
             if(mjProfileData.isGuest===true) {
                 if(confirm("⚠️ SUPPRESSION DÉFINITIVE DE CETTE SALLE ?\nToutes les données (scores, équipes) seront perdues.")) {
