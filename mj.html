@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --mj-color: #2ecc71; --bg-color: transparent; --card-bg: rgba(44, 62, 80, 0.75); --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; --success: #27ae60; --purple: #8e44ad; }
-        body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; user-select: none; -webkit-user-select: none; }
+        body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px 20px 20px 20px; user-select: none; -webkit-user-select: none; }
         #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: linear-gradient(45deg, #0f0c29, #302b63, #24243e); background-size: 300% 300%; animation: gradientBG 15s ease infinite; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         #bg-protection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(0, 0, 0, 0.5); pointer-events: none; }
@@ -157,7 +157,7 @@
     <div id="bg-protection"></div>
     <div class="version-tag" id="app-version-display"></div>
 
-    <div id="global-mj-logo-container" style="display:none;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
+    <div id="global-mj-logo-container" style="display:none; position: fixed; top: 15px; left: 15px; z-index: 9999; cursor: pointer;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
         <div class="flip-container">
             <div class="flip-inner" id="logo-flip-inner">
                 <div class="flip-front">
@@ -544,7 +544,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.180";
+        const APP_VERSION = "1.181";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
