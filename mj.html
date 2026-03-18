@@ -18,7 +18,6 @@
         
         .box { max-width: 400px; margin: 0 auto 40px auto; background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* Dashboard élargi en mode Cockpit V3 */
         .dashboard { display: none; max-width: 1400px; width: 98%; margin: 0 auto 40px auto; }
         .lobbies-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-top: 20px; }
         @media (max-width: 900px) { .lobbies-grid { grid-template-columns: 1fr; } }
@@ -48,7 +47,6 @@
         .flip-front img, .flip-back img { width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box; }
         @keyframes flipAnim { 0%, 40% { transform: rotateY(0deg); } 50%, 90% { transform: rotateY(180deg); } 100% { transform: rotateY(360deg); } }
 
-        /* Ghost UI (Interface Fantôme) */
         .ghost-ui { opacity: 0.3; transition: opacity 0.3s ease; }
         .ghost-ui:hover { opacity: 1; }
 
@@ -75,10 +73,8 @@
         .badge-archive { background: rgba(189, 195, 199, 0.2); color: #bdc3c7; border: 1px solid #bdc3c7; }
         .badge-banned { background: rgba(231, 76, 60, 0.2); color: var(--danger); border: 1px solid var(--danger); }
         .badge-inactive { background: rgba(243, 156, 18, 0.2); color: var(--gold); border: 1px solid var(--gold); }
-        .hub-btn { padding: 8px 15px; font-size: 0.8rem; width: auto; margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
         .crest-picker { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-start; transition: 0.3s; position: relative; }
-        /* Calque d'instruction Drag & Drop */
         .crest-picker.drag-active::after { content: "📥 DÉPOSEZ VOTRE FICHIER ICI"; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 204, 113, 0.95); color: white; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 50; border-radius: 8px; border: 4px dashed white; box-sizing: border-box; pointer-events: none; }
         
         .crest-wrapper { width: 50px; height: 50px; background: #ecf0f1; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; overflow: visible; flex-shrink: 0; position: relative; }
@@ -105,8 +101,7 @@
         
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; max-width: 100px; }
         
-        /* Menus Contextuels Dynamiques (Dropdown) */
-        .dropdown-container { position: relative; display: inline-block; margin-left: 5px; }
+        .dropdown-container { position: relative; display: flex; align-items: center; margin-left: 5px; }
         .dropdown-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: 0.2s; padding: 0; }
         .dropdown-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
         .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; min-width: 220px; background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 9999; flex-direction: column; overflow: hidden; margin-top: 5px; }
@@ -119,7 +114,10 @@
         
         .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed rgba(255,255,255,0.3); padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.3); transition: 0.3s; position: relative; margin-bottom: 10px; cursor: pointer; }
         .drop-zone.drag-active { border-color: #27ae60; background: rgba(39, 174, 96, 0.3); transform: scale(1.02); }
-        .profile-drop { width: 150px; height: 150px; margin: 0 auto 5px auto; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border: 3px dashed #bdc3c7; }
+        
+        /* Modifs UX Profil MJ */
+        .profile-drop { width: 150px; height: 150px; margin: 0 auto 5px auto; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border: 3px dashed #bdc3c7; position: relative; }
+        .profile-drop.drag-active::after { content: "📥 DÉPOSEZ ICI"; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 204, 113, 0.95); color: white; font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 50; border-radius: 8px; border: 4px dashed white; box-sizing: border-box; pointer-events: none; text-align: center; line-height: 1.2; }
         .profile-drop img { width: 100%; height: 100%; object-fit: contain; }
         
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
@@ -175,7 +173,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.186</div>
+    <div class="version-tag" id="app-version-display">v1.187</div>
 
     <div id="global-mj-logo-container" class="ghost-ui" style="display:none; position: fixed; top: 15px; left: 15px; z-index: 9999; cursor: pointer;" onclick="toggleProfile()" title="Ouvrir / Fermer Mon Profil">
         <div class="flip-container">
@@ -228,9 +226,10 @@
         <p class="section-title">🖼️ IMAGE DE MARQUE</p>
         <label for="prof-logo-upload" id="profile-drop-zone" class="drop-zone profile-drop">
             <img id="prof-logo-preview" src="" style="display:none;">
-            <div id="prof-logo-placeholder" style="padding:10px; color:#bdc3c7;"><span style="font-size:2rem; display:block; margin-bottom:5px;">🖼️</span><span style="font-size:0.8rem; font-weight:bold; text-transform:uppercase;">VOTRE LOGO</span></div>
+            <div id="prof-logo-placeholder" style="padding:10px; color:#bdc3c7;"><span style="font-size:2rem; display:block; margin-bottom:5px;">🖼️</span><span style="font-size:0.8rem; font-weight:bold; text-transform:uppercase;">VOTRE LOGO<br><small style="text-transform:none;">Cliquez ou glissez une image ici</small></span></div>
             <input type="file" id="prof-logo-upload" accept="image/*" style="display:none;" onchange="handleProfileFile(this.files)">
         </label>
+        <button id="btn-undo-logo" class="btn-cancel" style="display:none; width:auto; padding:5px 15px; font-size:0.8rem; margin:0 auto 15px auto;" onclick="undoProfileLogo()">↩️ Annuler la modification</button>
         <span class="input-helper">Affiché sur les téléphones et sur l'écran géant.</span>
         <input type="hidden" id="prof-logo-url"> 
         
@@ -281,7 +280,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.186</span>
+                    <span id="disp-v-mj">v1.187</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -632,7 +631,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.186";
+        const APP_VERSION = "1.187";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -676,7 +675,6 @@
             setupDragDrop('bg-drop-zone', f => handleBgUpload(f, 'dashboard')); 
             setupDragDrop('bg-modal-drop-zone', f => handleBgUpload(f, 'modal'));
             
-            // L'effet Drag & Drop sur la grille de la modale équipe
             const crestGrid = document.getElementById('modal-crest-grid');
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(n => {
                 crestGrid.addEventListener(n, e=>{e.preventDefault();e.stopPropagation();}, false);
@@ -686,6 +684,19 @@
             crestGrid.addEventListener('drop', e => handleTeamModalUpload(e.dataTransfer.files), false);
             
             document.addEventListener('keydown', e => { if(document.getElementById('univ-lightbox').style.display === 'flex') { if(e.key==='ArrowLeft') lbPrev(e); else if(e.key==='ArrowRight') lbNext(e); else if(e.key==='Escape') closeLightbox(e); } });
+            
+            // Écouteur de scroll pour le mode Fantôme (Ghost UI)
+            window.addEventListener('scroll', () => {
+                const tools = document.getElementById('top-right-tools');
+                const logo = document.getElementById('global-mj-logo-container');
+                if(window.scrollY === 0) {
+                    tools.style.opacity = '1';
+                    logo.style.opacity = '1';
+                } else {
+                    tools.style.opacity = '';
+                    logo.style.opacity = '';
+                }
+            });
         };
         
         function toggleDropdown(id) { 
@@ -709,7 +720,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.186", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.187", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -903,7 +914,6 @@
 
         function toggleDefaultCrests(checked) { showDefaultCrests = checked; if (!isProxyMode) { db.ref(`users/${auth.currentUser.uid}/showDefaultCrests`).set(checked); mjProfileData.showDefaultCrests = checked; } loadModalLibrary(); }
         
-        // --- SWITCH BLASONS DANS MODALE EQUIPE (SYNC SALLE) ---
         function toggleDefaultCrestsFromModal(checked) {
             showDefaultCrests = checked;
             if (!isProxyMode) {
@@ -946,7 +956,26 @@
         function setModalBgAction(type) { if(!modalSelectedBgUrl)return; const uid=activeBgLibraryUid; if(type==='default'){ db.ref(`users/${uid}/defaultBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond par défaut enregistré !");if(!isProxyBgMode)mjProfileData.defaultBackground=modalSelectedBgUrl;}); } else { db.ref(`users/${uid}/consoleBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond console enregistré !");if(!isProxyBgMode){mjProfileData.consoleBackground=modalSelectedBgUrl;applyMjConsoleBg(modalSelectedBgUrl);}}); } }
         function applyMjConsoleBg(url) { const bg=document.getElementById('dynamic-bg'); if(url&&url!==""){ bg.style.background=`url('${url}') center/cover no-repeat`; bg.style.animation='none'; }else{ bg.style.background='linear-gradient(45deg, #0f0c29, #302b63, #24243e)'; bg.style.backgroundSize='300% 300%'; bg.style.animation='gradientBG 15s ease infinite'; } }
         
-        function handleProfileFile(files) { if(!files||files.length===0)return; const storageRef=storage.ref(`mj_profile_logos/${auth.currentUser.uid}/logo`); document.getElementById('prof-logo-placeholder').style.opacity='0.3'; storageRef.put(files[0]).then(s=>s.ref.getDownloadURL()).then(u=>{ document.getElementById('prof-logo-placeholder').style.display='none'; const img=document.getElementById('prof-logo-preview'); img.src=u; img.style.display='block'; document.getElementById('prof-logo-url').value=u; }).catch(e=>alert("Erreur upload: "+e.message)); }
+        function handleProfileFile(files) { 
+            if(!files||files.length===0)return; 
+            const storageRef=storage.ref(`mj_profile_logos/${auth.currentUser.uid}/logo_${Date.now()}`); 
+            document.getElementById('prof-logo-placeholder').style.opacity='0.3'; 
+            storageRef.put(files[0]).then(s=>s.ref.getDownloadURL()).then(u=>{ 
+                document.getElementById('prof-logo-placeholder').style.display='none'; 
+                const img=document.getElementById('prof-logo-preview'); 
+                img.src=u; img.style.display='block'; 
+                document.getElementById('prof-logo-url').value=u; 
+                document.getElementById('btn-undo-logo').style.display='block';
+                document.getElementById('prof-logo-placeholder').style.opacity='1';
+            }).catch(e=>alert("Erreur upload: "+e.message)); 
+        }
+
+        function undoProfileLogo() {
+            const originalLogo = mjProfileData.customLogo || "";
+            document.getElementById('prof-logo-url').value = originalLogo;
+            updateLogoPreview(originalLogo);
+            document.getElementById('btn-undo-logo').style.display = 'none';
+        }
         
         function login() { const e=document.getElementById('mj-email').value.trim(), p=document.getElementById('mj-pass').value; if(e&&p)auth.signInWithEmailAndPassword(e,p).then(r=>loadMjData(r.user)).catch(()=>alert("Oups ! Identifiants incorrects.")); }
         function togglePasswordVisibility(id, icon) { const i=document.getElementById(id); if(i.type==='password'){ i.type='text'; icon.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 3.31 0 6.28-1.38 8.22-3.67l.48.48 2.73 2.73 1.27-1.27L3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>'; } else { i.type='password'; icon.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; } }
@@ -988,7 +1017,7 @@
                 document.getElementById('screen-dashboard').style.display="none"; 
                 document.getElementById('screen-choice').style.display="block"; 
                 document.getElementById('global-mj-logo-container').style.display="block";
-                document.getElementById('top-right-tools').style.display="flex"; // Rendu visible pour le Ghost UI
+                document.getElementById('top-right-tools').style.display="flex"; 
 
                 const rooms = snap.val() || {};
                 mjRooms = Object.keys(rooms).map(k => ({ id: k, ...rooms[k] }));
@@ -1130,6 +1159,7 @@
             if(document.getElementById('screen-choice').style.display==="block") previousScreen="screen-choice"; if(document.getElementById('screen-dashboard').style.display==="block") previousScreen="screen-dashboard";
             document.getElementById('screen-choice').style.display="none"; document.getElementById('screen-dashboard').style.display="none"; document.getElementById('screen-profile').style.display="block";
             document.getElementById('top-right-tools').style.display="none";
+            document.getElementById('btn-undo-logo').style.display="none";
             if(auth.currentUser) {
                 document.getElementById('prof-email').value=auth.currentUser.email; document.getElementById('prof-nom').value=mjProfileData.nom||""; document.getElementById('prof-prenom').value=mjProfileData.prenom||"";
                 const cl = mjProfileData.customLogo||""; document.getElementById('prof-logo-url').value=cl; updateLogoPreview(cl); document.getElementById('prof-link').value=mjProfileData.customLink||"";
@@ -1677,7 +1707,7 @@
                 if (teamMembers.length > 0 && teamMembers.some(m => currentBlocked[m.name])) {
                     isTeamMuted = true;
                 }
-                
+
                 let blockedCount = t.blacklist ? Object.keys(t.blacklist).length : 0;
                 let statsHtml = `(<span style="color:var(--success);">${activeCount} Joueur${activeCount > 1 ? 's' : ''}</span>`;
                 if (blockedCount > 0) statsHtml += ` - <span style="color:var(--danger);">${blockedCount} Exclu${blockedCount > 1 ? 's' : ''}</span>`;
