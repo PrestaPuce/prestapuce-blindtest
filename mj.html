@@ -97,7 +97,6 @@
         .crest-mini-bg { background: white; padding: 0; border-radius: 4px; display: inline-flex; margin: 0 5px; vertical-align: middle; width: 30px; height: 30px; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
         .crest-mini { width: 100%; height: 100%; object-fit: contain; }
         
-        /* Alignement Laser (Hauteurs fixes) */
         .player-controls, .team-controls { display: flex; align-items: center; gap: 5px; margin-left: auto; justify-content: flex-end; flex-shrink: 0; height: 30px; box-sizing: border-box; }
         .team-score-ctrl { display: flex; align-items: center; background: rgba(0,0,0,0.5); border-radius: 5px; padding: 2px; margin-right: 5px; height: 30px; box-sizing: border-box; }
         .btn-tiny { width: 24px; height: 24px; line-height: 24px; padding: 0; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue); box-shadow: none; border-radius: 4px; cursor: pointer; color: white; border: none; flex-shrink: 0; }
@@ -105,7 +104,6 @@
         
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; max-width: 100px; }
         
-        /* Menu Contextuel Global (Téléporté) */
         #global-dropdown { display: none; position: fixed; z-index: 99999; min-width: 220px; background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); flex-direction: column; overflow: hidden; padding: 5px 0; }
         #global-dropdown.show { display: flex; animation: fadeIn 0.2s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
@@ -121,7 +119,6 @@
         .drop-zone { display: block; width: 100%; text-align: center; box-sizing: border-box; border: 3px dashed rgba(255,255,255,0.3); padding: 20px; border-radius: 10px; background: rgba(0,0,0,0.3); transition: 0.3s; position: relative; margin-bottom: 10px; cursor: pointer; }
         .drop-zone.drag-active { border-color: #27ae60; background: rgba(39, 174, 96, 0.3); transform: scale(1.02); }
         
-        /* UX Profil MJ Drag & Drop */
         .profile-drop { width: 150px; height: 150px; margin: 0 auto 5px auto; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border: 3px dashed #bdc3c7; position: relative; }
         .profile-drop.drag-active::after { content: "📥 DÉPOSEZ ICI"; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 204, 113, 0.95); color: white; font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 50; border-radius: 8px; border: 4px dashed white; box-sizing: border-box; pointer-events: none; text-align: center; line-height: 1.2; }
         .profile-drop img { width: 100%; height: 100%; object-fit: contain; }
@@ -144,7 +141,6 @@
         .bg-item img { width: 100%; height: 100%; object-fit: cover; }
         .bg-selected { border-color: var(--blue) !important; box-shadow: 0 0 10px var(--blue); transform: scale(1.05); z-index: 2; }
         
-        /* Ghost Crown Capitaine */
         .ghost-crown { cursor: pointer; opacity: 0.3; filter: grayscale(100%); transition: 0.2s; font-size: 1.1rem; margin-right: 5px; }
         .ghost-crown:hover { opacity: 1; filter: grayscale(0) drop-shadow(0 0 5px gold); }
 
@@ -189,7 +185,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.191</div>
+    <div class="version-tag" id="app-version-display">v1.192</div>
 
     <div id="global-dropdown"></div>
 
@@ -298,7 +294,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.191</span>
+                    <span id="disp-v-mj">v1.192</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -651,7 +647,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.191";
+        const APP_VERSION = "1.192";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -691,10 +687,8 @@
             
             initVersionListener();
             
-            // Initialisation Drag & Drop Global sur les Grilles (Plus de Drop Zones isolées)
             setupGridDragDrop('lib-grid', f => handleFiles(f));
             setupGridDragDrop('bg-modal-gallery', f => handleBgUpload(f, 'modal'));
-            
             setupGridDragDrop('profile-drop-zone', f => handleProfileFile(f));
             
             const crestGrid = document.getElementById('modal-crest-grid');
@@ -742,6 +736,224 @@
             }
         }
         
+        function login() { 
+            const e = document.getElementById('mj-email').value.trim();
+            const p = document.getElementById('mj-pass').value; 
+            
+            if(!e || !p) return alert("Veuillez saisir votre email et votre mot de passe.");
+            
+            document.getElementById('btn-login-submit').innerText = "⏳ Connexion...";
+            
+            auth.signInWithEmailAndPassword(e, p).then(r => {
+                loadMjData(r.user);
+            }).catch(err => {
+                document.getElementById('btn-login-submit').innerText = "Se Connecter";
+                alert("Oups ! Identifiants incorrects ou erreur : " + err.message);
+            }); 
+        }
+
+        function forgotPassword() { 
+            const e=document.getElementById('mj-email').value.trim(); 
+            if(e) {
+                auth.sendPasswordResetEmail(e).then(()=>alert("Email de réinitialisation envoyé !")).catch(err=>alert("Erreur: "+err.message)); 
+            } else {
+                alert("Veuillez saisir votre adresse email d'abord.");
+            }
+        }
+
+        function togglePasswordVisibility(id, icon) { const i=document.getElementById(id); if(i.type==='password'){ i.type='text'; icon.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 3.31 0 6.28-1.38 8.22-3.67l.48.48 2.73 2.73 1.27-1.27L3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>'; } else { i.type='password'; icon.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; } }
+
+        function loadMjData(user) {
+            isSuperAdmin = (user.email === 'contact@prestapuce.com'); 
+            activeLibraryUid = user.uid; 
+            activeBgLibraryUid = user.uid;
+            
+            if(isSuperAdmin) { 
+                document.getElementById('btn-super-admin').style.display='inline-block'; 
+                ['index', 'mj', 'remote', 'scores', 'guide'].forEach(f => { document.getElementById('disp-v-' + f).style.display = 'none'; document.getElementById('inp-v-' + f).style.display = 'inline-block'; });
+                document.getElementById('sa-inline-save-btn').style.display='block';
+                initSuperAdminListener(); 
+            } else { 
+                document.getElementById('btn-super-admin').style.display='none'; 
+                ['index', 'mj', 'remote', 'scores', 'guide'].forEach(f => { document.getElementById('disp-v-' + f).style.display = 'inline-block'; document.getElementById('inp-v-' + f).style.display = 'none'; });
+                document.getElementById('sa-inline-save-btn').style.display='none';
+            }
+            
+            db.ref('users/' + user.uid).update({ email: user.email }).catch(e => console.warn(e));
+            
+            db.ref('users/' + user.uid).once('value').then(snap => {
+                const data = snap.val() || {};
+                if(!isSuperAdmin && data.isGuest !== true) { 
+                    if(data.isBlocked || (data.expirationDate && data.expirationDate < Date.now())) { 
+                        alert("⚠️ ACCÈS REFUSÉ. Abonnement expiré ou bloqué."); 
+                        return auth.signOut().then(()=>location.reload()); 
+                    } 
+                }
+                mjProfileData = data;
+                if (!data.library && data.customLogos) { let m={}; Object.values(data.customLogos).forEach((u,i)=>m['m_'+i]=u); db.ref(`users/${user.uid}/library`).set(m).then(()=>{ mjLibrary=m; }); } else { mjLibrary = data.library || {}; }
+                mjBgLibrary = data.bgLibrary || {};
+                
+                if(data.defaultBackground) if(document.getElementById('check-default-bg')) document.getElementById('check-default-bg').checked=true;
+                if(data.consoleBackground) { if(document.getElementById('check-console-bg')) document.getElementById('check-console-bg').checked=true; applyMjConsoleBg(data.consoleBackground); } else applyMjConsoleBg(null);
+                
+                showDefaultCrests = (data.showDefaultCrests !== false); 
+                if(document.getElementById('check-hide-default')) document.getElementById('check-hide-default').checked = showDefaultCrests;
+                
+                document.getElementById('btn-login-submit').innerText = "Se Connecter";
+                
+                if(mjProfileData.isGuest === true) { 
+                    db.ref().update({[`users/${user.uid}/lastRoom`]:null, [`users/${user.uid}/library`]:null}).then(()=>{ mjProfileData.lastRoom=""; mjLibrary={}; document.getElementById('mj-display-name').innerText=mjProfileData.prenom||"MJ"; updateLogos(mjProfileData.customLogo); checkUserRoom(user.uid); }); 
+                } else { 
+                    document.getElementById('mj-display-name').innerText=data.prenom||"MJ"; updateLogos(data.customLogo); checkUserRoom(user.uid); 
+                }
+            }).catch(e => {
+                document.getElementById('btn-login-submit').innerText = "Se Connecter";
+                console.error("ERREUR CRITIQUE FIREBASE :", e);
+                alert("Erreur critique de la base de données. Détail : " + e.message);
+            });
+        }
+
+        function checkUserRoom(uid) {
+            db.ref('rooms').orderByChild('mj').equalTo(uid).once('value', snap => {
+                document.getElementById('screen-login').style.display="none"; 
+                document.getElementById('screen-profile').style.display="none"; 
+                document.getElementById('screen-dashboard').style.display="none"; 
+                document.getElementById('screen-choice').style.display="block"; 
+                document.getElementById('global-mj-logo-container').style.display="block";
+                document.getElementById('top-right-tools').style.display="none"; 
+
+                const rooms = snap.val() || {};
+                mjRooms = Object.keys(rooms).map(k => ({ id: k, ...rooms[k] }));
+                mjRooms.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+                
+                renderHubRooms();
+            }).catch(error => {
+                console.error(error);
+                alert("Erreur de connexion à la base de données : " + error.message);
+            });
+        }
+
+        function setHubTab(tab) { currentHubTab = tab; renderHubRooms(); }
+
+        function getRoomStats(room) {
+            const players = room.players || {};
+            const pKeys = Object.keys(players);
+            let count = pKeys.length;
+            if (count === 0) return { count: 0, winner: "Aucun participant" };
+            
+            let teamScores = {};
+            let isTeamGame = false;
+            Object.values(players).forEach(p => {
+                if(p.teamName && p.teamName !== "Solo") {
+                    isTeamGame = true;
+                    teamScores[p.teamName] = (teamScores[p.teamName] || 0) + (p.pts || 0);
+                }
+            });
+            
+            let winnerText = "";
+            if (isTeamGame) {
+                const sorted = Object.entries(teamScores).sort((a,b)=>b[1]-a[1]);
+                winnerText = sorted.length > 0 ? sorted[0][0] + " (" + sorted[0][1] + " pts)" : "-";
+            } else {
+                const sorted = Object.values(players).sort((a,b)=>(b.pts||0)-(a.pts||0));
+                winnerText = sorted.length > 0 ? sorted[0].name + " (" + (sorted[0].pts||0) + " pts)" : "-";
+            }
+            
+            return { count, winner: winnerText };
+        }
+
+        function toggleAccordion(id) {
+            const det = document.getElementById('details-' + id);
+            const arr = document.getElementById('arrow-' + id);
+            if (det.style.display === 'block') { det.style.display = 'none'; arr.classList.remove('open'); } 
+            else { document.querySelectorAll('.hub-details').forEach(el => el.style.display = 'none'); document.querySelectorAll('.hub-arrow').forEach(el => el.classList.remove('open')); det.style.display = 'block'; arr.classList.add('open'); }
+        }
+
+        function deleteRoomFromHub(rID, e) {
+            e.stopPropagation();
+            if(confirm("⚠️ Êtes-vous sûr de vouloir supprimer définitivement la salle n°" + rID + " ? Cette action est irréversible.")) {
+                backupAndDestroyRoom(rID).then(() => { mjRooms = mjRooms.filter(r => r.id !== rID); renderHubRooms(); });
+            }
+        }
+
+        function backupAndDestroyRoom(targetRoomID) {
+            return new Promise((resolve) => {
+                const rRef = db.ref('rooms/' + targetRoomID);
+                rRef.child('players').once('value').then(snap => {
+                    const players = snap.val() || {};
+                    const backupPromises = [];
+                    Object.keys(players).forEach(uid => {
+                        if (uid.length > 20 && !uid.startsWith("u_")) { 
+                            backupPromises.push(db.ref('users/' + uid + '/history/' + targetRoomID).set({ date: firebase.database.ServerValue.TIMESTAMP, pts: players[uid].pts || 0, teamName: players[uid].teamName || "Solo", eventName: document.getElementById('display-event-name').innerText || "Partie" }));
+                        }
+                    });
+                    Promise.all(backupPromises).then(() => { rRef.remove(); db.ref('activeRooms/' + targetRoomID).remove(); resolve(); }).catch(() => { rRef.remove(); db.ref('activeRooms/' + targetRoomID).remove(); resolve(); });
+                });
+            });
+        }
+
+        function renderHubRooms() {
+            const searchVal = document.getElementById('hub-search').value.trim().toLowerCase();
+            const container = document.getElementById('hub-list');
+            const tabs = document.getElementById('hub-tabs');
+            
+            container.innerHTML = "";
+
+            let filtered = [];
+            if (searchVal) {
+                tabs.style.display = 'none';
+                filtered = mjRooms.filter(r => {
+                    const e = (r.eventName || "").toLowerCase(); const m = (r.mjName || "").toLowerCase(); const d = new Date(r.createdAt || Date.now()).toLocaleDateString('fr-FR');
+                    return e.includes(searchVal) || m.includes(searchVal) || r.id.includes(searchVal) || d.includes(searchVal);
+                });
+            } else {
+                tabs.style.display = 'flex';
+                document.getElementById('tab-active').className = currentHubTab === 'active' ? 'hub-tab active' : 'hub-tab';
+                document.getElementById('tab-archive').className = currentHubTab === 'archive' ? 'hub-tab active' : 'hub-tab';
+                filtered = mjRooms.filter(r => currentHubTab === 'active' ? !r.isArchived : r.isArchived);
+            }
+
+            if (filtered.length === 0) { container.innerHTML = "<p style='color:#7f8c8d; font-style:italic; padding: 20px;'>Aucune salle ne correspond.</p>"; return; }
+
+            filtered.forEach(r => {
+                const d = new Date(r.createdAt || Date.now()); const dateStr = d.toLocaleDateString('fr-FR');
+                const eventName = r.eventName || "Partie Sans Nom";
+                const badgeClass = r.isArchived ? "badge-archive" : "badge-active";
+                const badgeText = r.isArchived ? "🗄️ ARCHIVÉE" : "🟢 EN COURS";
+                const stats = getRoomStats(r);
+                
+                const safeMjName = (r.mjName || "Animateur").replace(/'/g, "\\'");
+                const safeEventName = eventName.replace(/'/g, "\\'");
+                
+                let btnAction = r.isArchived 
+                    ? `<button class="hub-btn" style="background:var(--blue); white-space: nowrap; flex-shrink: 0;" onclick="launchDashboard('${r.id}', '${safeMjName}', '${safeEventName}', true); event.stopPropagation();">👁️ CONSULTER</button>`
+                    : `<button class="hub-btn" style="background:var(--success); white-space: nowrap; flex-shrink: 0;" onclick="launchDashboard('${r.id}', '${safeMjName}', '${safeEventName}', false); event.stopPropagation();">▶️ REPRENDRE</button>`;
+
+                container.innerHTML += `
+                    <div class="hub-line" onclick="toggleAccordion('${r.id}')">
+                        <span id="arrow-${r.id}" class="hub-arrow">▶</span>
+                        <div class="hub-line-text">
+                            <b style="color:var(--accent); margin-right:8px;">${eventName}</b> 
+                            <span style="color:#bdc3c7; font-size:0.85rem;">| ${dateStr} | #${r.id}</span>
+                        </div>
+                        <span class="hub-badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                    <div id="details-${r.id}" class="hub-details" onclick="event.stopPropagation();">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:nowrap; gap:10px;">
+                            <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                <p style="margin:0 0 5px 0; color:#ecf0f1; font-size:0.9rem;">🎭 Animé par : <b>${r.mjName || "Animateur"}</b></p>
+                                ${r.isArchived ? `<p style="margin:0 0 5px 0; color:#ecf0f1; font-size:0.9rem;">👥 Joueurs : <b>${stats.count}</b></p><p style="margin:0; color:var(--gold); font-size:0.9rem;">🏆 Vainqueur : <b>${stats.winner}</b></p>` : ''}
+                            </div>
+                            <div style="display:flex; gap:10px; flex-shrink:0; white-space: nowrap;">
+                                ${btnAction}
+                                <button class="hub-btn" style="background:var(--danger); white-space: nowrap; flex-shrink: 0;" onclick="deleteRoomFromHub('${r.id}', event)">🗑️ SUPPRIMER</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
         function openPlayerMenu(e, uid) {
             e.stopPropagation();
             const d = allPlayersData[uid];
@@ -863,456 +1075,26 @@
             }
         }
 
-        function profileLogout() { auth.signOut().then(()=>location.reload()); }
-        function openSuperAdmin() { if(!isSuperAdmin) return; document.getElementById('screen-choice').style.display = 'none'; document.getElementById('screen-super-admin').style.display = 'block'; }
-        function closeSuperAdmin() { document.getElementById('screen-super-admin').style.display = 'none'; document.getElementById('screen-choice').style.display = 'block'; }
-        
-        function initSuperAdminListener() { if(isSuperAdmin) db.ref('users').on('value', snap => { allUsersData = snap.val() || {}; renderSAMjList(); }); }
-        
-        function initVersionListener() { 
-            db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.191", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
-                
-                if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
-                if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
-                if(document.getElementById('disp-v-remote')) document.getElementById('disp-v-remote').innerText = v.remote;
-                if(document.getElementById('disp-v-scores')) document.getElementById('disp-v-scores').innerText = v.scores;
-                if(document.getElementById('disp-v-guide')) document.getElementById('disp-v-guide').innerText = v.guide;
-                
-                if(document.getElementById('inp-v-index') && document.activeElement.id !== 'inp-v-index') document.getElementById('inp-v-index').value = v.index;
-                if(document.getElementById('inp-v-mj') && document.activeElement.id !== 'inp-v-mj') document.getElementById('inp-v-mj').value = v.mj;
-                if(document.getElementById('inp-v-remote') && document.activeElement.id !== 'inp-v-remote') document.getElementById('inp-v-remote').value = v.remote;
-                if(document.getElementById('inp-v-scores') && document.activeElement.id !== 'inp-v-scores') document.getElementById('inp-v-scores').value = v.scores;
-                if(document.getElementById('inp-v-guide') && document.activeElement.id !== 'inp-v-guide') document.getElementById('inp-v-guide').value = v.guide;
-
-                const appVersionDisp = document.getElementById('app-version-display');
-                if (appVersionDisp) appVersionDisp.innerText = v.mj || `v${APP_VERSION}`;
-            }); 
-        }
-
-        function handleVersionKey(e, current, next) {
-            if(e.key === 'Enter') {
-                e.preventDefault();
-                const newV = { index: document.getElementById('inp-v-index').value.trim(), mj: document.getElementById('inp-v-mj').value.trim(), remote: document.getElementById('inp-v-remote').value.trim(), scores: document.getElementById('inp-v-scores').value.trim(), guide: document.getElementById('inp-v-guide').value.trim() };
-                db.ref('config/versions').set(newV);
-                if(next) { document.getElementById('inp-v-' + next).focus(); } else { document.getElementById('inp-v-' + current).blur(); }
-            }
-        }
-
-        function updateAllVersions() { 
-            if(!isSuperAdmin) return;
-            const newV = { index: document.getElementById('inp-v-index').value.trim(), mj: document.getElementById('inp-v-mj').value.trim(), remote: document.getElementById('inp-v-remote').value.trim(), scores: document.getElementById('inp-v-scores').value.trim(), guide: document.getElementById('inp-v-guide').value.trim() };
-            if(confirm("Forcer la mise à jour globale des versions ?")) { db.ref('config/versions').set(newV).then(() => alert("Versions mises à jour avec succès !")); }
-        }
-
-        function renderSAMjList() {
-            const container = document.getElementById('sa-mj-list'); container.innerHTML = "";
-            Object.keys(allUsersData).forEach(uid => {
-                const u = allUsersData[uid]; const email = u.email || "Inconnu"; const name = (u.prenom || "MJ") + " " + (u.nom || "");
-                let daysLeft = u.expirationDate ? Math.ceil((u.expirationDate - Date.now()) / 86400000) : 0; if (daysLeft < 0) daysLeft = 0;
-                let statusColor = "var(--success)"; let statusText = daysLeft + " Jours";
-                if(email === "contact@prestapuce.com" || daysLeft > 9000) { statusText = "NO LIMIT (SA)"; statusColor = "var(--gold)"; } 
-                else if (u.isBlocked) { statusColor = "var(--danger)"; statusText = "BLOQUÉ"; } 
-                else if (daysLeft <= 0) { statusColor = "#e67e22"; statusText = "EXPIRÉ"; }
-                container.innerHTML += `<div class="score-row" style="cursor:pointer;" onclick="openVault('${uid}')"><div style="flex:1;"><b>${email}</b><br><small style="color:#bdc3c7;">${name}</small></div><div><span style="color:${statusColor}; font-weight:bold; background:rgba(0,0,0,0.5); padding:5px 10px; border-radius:5px; border:1px solid ${statusColor};">${statusText}</span></div></div>`;
-            });
-        }
-        function openVault(uid) { targetMjUid = uid; document.getElementById('sa-vault-pass').value = ''; document.getElementById('modal-sa-vault').style.display = 'flex'; }
-        function verifyVaultPassword() { auth.signInWithEmailAndPassword(auth.currentUser.email, document.getElementById('sa-vault-pass').value).then(() => { document.getElementById('modal-sa-vault').style.display = 'none'; updateMjDetailsView(); document.getElementById('modal-sa-mj-details').style.display = 'flex'; }).catch(() => alert("Mot de passe incorrect !")); }
-        function updateMjDetailsView() {
-            if(!targetMjUid || !allUsersData[targetMjUid]) return; const u = allUsersData[targetMjUid];
-            document.getElementById('sa-det-prenom').value = u.prenom || ""; document.getElementById('sa-det-nom').value = u.nom || ""; document.getElementById('sa-det-email').value = u.email || "";
-            let daysLeft = u.expirationDate ? Math.ceil((u.expirationDate - Date.now()) / 86400000) : 0; if(daysLeft < 0) daysLeft = 0;
-            document.getElementById('sa-det-days-input').value = daysLeft;
-            const btnBlock = document.getElementById('btn-sa-block');
-            if(u.isBlocked) { btnBlock.innerText = "🟢 RÉACTIVER L'ACCÈS"; btnBlock.style.background = "var(--success)"; } else { btnBlock.innerText = "🔴 BLOQUER L'ACCÈS"; btnBlock.style.background = "var(--danger)"; }
-            document.getElementById('sa-det-pass-current').value = ""; document.getElementById('sa-det-pass-new').value = ""; document.getElementById('sa-det-pass-conf').value = "";
-        }
-        function adjSaDays(val) { const i = document.getElementById('sa-det-days-input'); let f = (parseInt(i.value) || 0) + val; if(f < 0) f = 0; i.value = f; }
-        function setUnlimited() { document.getElementById('sa-det-days-input').value = 9999; }
-        function saveSAMjDetails() {
-            if(!targetMjUid || !allUsersData[targetMjUid]) return; const u = allUsersData[targetMjUid]; const oldEmail = u.email || "";
-            const updates = { prenom: document.getElementById('sa-det-prenom').value.trim(), nom: document.getElementById('sa-det-nom').value.trim(), expirationDate: Date.now() + ((parseInt(document.getElementById('sa-det-days-input').value) || 0) * 86400000) };
-            const newEmail = document.getElementById('sa-det-email').value.trim(), currentPass = document.getElementById('sa-det-pass-current').value, newPass = document.getElementById('sa-det-pass-new').value, confPass = document.getElementById('sa-det-pass-conf').value;
-            const emailChanged = (newEmail !== oldEmail && newEmail !== ""); const passChanged = (newPass !== "");
-            if (emailChanged || passChanged) {
-                if(!currentPass) return alert("Mot de passe ACTUEL requis.");
-                if(passChanged) { if(newPass === currentPass) return alert("Le nouveau mdp doit être différent."); if(newPass !== confPass) return alert("Les mdps ne correspondent pas."); if(!isValidPassword(newPass)) return alert("Critères de sécurité non respectés."); }
-                const btn = document.getElementById('btn-sa-save'); btn.innerText = "⏳ MISE À JOUR..."; btn.disabled = true;
-                secondaryAuth.signInWithEmailAndPassword(oldEmail, currentPass).then(async (uc) => {
-                    try {
-                        if(emailChanged) await uc.user.updateEmail(newEmail); if(passChanged) await uc.user.updatePassword(newPass);
-                        updates.email = newEmail; await secondaryAuth.signOut();
-                        db.ref('users/' + targetMjUid).update(updates).then(() => { btn.innerText = "💾 ENREGISTRER"; btn.disabled = false; alert("Mis à jour !"); document.getElementById('modal-sa-mj-details').style.display = 'none'; });
-                    } catch(e) { await secondaryAuth.signOut(); btn.innerText = "💾 ENREGISTRER"; btn.disabled = false; alert("Erreur Auth : " + e.message); }
-                }).catch(e => { btn.innerText = "💾 ENREGISTRER"; btn.disabled = false; alert("Erreur : " + e.message); });
-            } else { db.ref('users/' + targetMjUid).update(updates).then(() => { alert("Enregistré !"); document.getElementById('modal-sa-mj-details').style.display = 'none'; }); }
-        }
-        function createMjAction() {
-            const email = document.getElementById('sa-create-email').value.trim(), pass = document.getElementById('sa-create-pass').value, prenom = document.getElementById('sa-create-prenom').value.trim();
-            if(!email || !isValidPassword(pass)) return alert("Email invalide ou mdp non sécurisé.");
-            secondaryAuth.createUserWithEmailAndPassword(email, pass).then((uc) => {
-                db.ref('users/' + uc.user.uid).set({ email: email, prenom: prenom, expirationDate: Date.now() + (30 * 86400000), isBlocked: false }).then(() => {
-                    secondaryAuth.signOut(); document.getElementById('modal-sa-create').style.display = 'none';
-                    document.getElementById('sa-create-email').value = ''; document.getElementById('sa-create-pass').value = ''; document.getElementById('sa-create-prenom').value = '';
-                    window.location.href = `mailto:${email}?subject=Accès MJ Presta'Puce&body=Lien: https://prestapuce.github.io/prestapuce-blindtest/mj%0AEmail: ${email}%0AMdp: ${pass}`;
+        function transferCaptaincy(oldId, oldName, newId, newName, teamName) {
+            if (confirm(`Êtes-vous sûr de vouloir enlever le capitanat à ${oldName || 'ce joueur'} pour le donner à ${newName} ?`)) {
+                let updates = {};
+                Object.keys(allPlayersData).forEach(k => {
+                    if (allPlayersData[k].teamName === teamName && allPlayersData[k].isCaptain) {
+                        updates[k + '/isCaptain'] = false;
+                    }
                 });
-            }).catch(e => alert("Erreur : " + e.message));
-        }
-        function deleteMjAccount() {
-            if(!targetMjUid || !allUsersData[targetMjUid]) return; const email = allUsersData[targetMjUid].email;
-            const pass = prompt(`⚠️ DANGER: Supprimer ${email} ?\nSaisir le mdp actuel pour supprimer l'Auth (ou vide pour juste BDD)`);
-            if(pass !== null) {
-                if(pass !== "") secondaryAuth.signInWithEmailAndPassword(email, pass).then((uc) => uc.user.delete().then(() => eraseMjDatabase(targetMjUid)).catch(e => { alert("Erreur Auth : " + e.message); eraseMjDatabase(targetMjUid); })).catch(e => { alert("Mdp incorrect."); eraseMjDatabase(targetMjUid); });
-                else eraseMjDatabase(targetMjUid);
-            }
-        }
-        function eraseMjDatabase(uid) { db.ref('users/' + uid).remove().then(() => { alert("Supprimé."); document.getElementById('modal-sa-mj-details').style.display = 'none'; }); }
-        function toggleBlockMj() { if(targetMjUid) db.ref('users/' + targetMjUid).update({ isBlocked: !allUsersData[targetMjUid].isBlocked }).then(() => setTimeout(updateMjDetailsView, 200)); }
-
-        function getCurArr() { if(curLbType === 'crest') return lbCrests; if(curLbType === 'bgModal') return lbBgsModal; return []; }
-        function openLightbox(idx, type) { curLbType = type; curLbIdx = idx; document.getElementById('univ-lightbox').style.display = 'flex'; updateLightbox(); }
-        function updateLightbox() {
-            let arr = getCurArr(); if(arr.length === 0) return closeLightbox();
-            if(curLbIdx >= arr.length) curLbIdx = 0; if(curLbIdx < 0) curLbIdx = arr.length - 1;
-            const item = arr[curLbIdx];
-            document.getElementById('lb-img').src = item.url;
-            document.getElementById('lb-del').style.display = item.isNative ? 'none' : 'flex';
-        }
-        function closeLightbox(e) { if(e) e.stopPropagation(); document.getElementById('univ-lightbox').style.display = 'none'; }
-        function lbPrev(e) { if(e) e.stopPropagation(); curLbIdx--; updateLightbox(); }
-        function lbNext(e) { if(e) e.stopPropagation(); curLbIdx++; updateLightbox(); }
-        
-        function physicalDelete(url) { if(url && url.includes('firebasestorage')) { try{ storage.refFromURL(url).delete().catch(e => console.log("Cloud err:", e.message)); }catch(err){} } }
-        function lbDelete(e) {
-            if(e) e.stopPropagation(); let arr = getCurArr(); const item = arr[curLbIdx]; if(item.isNative) return;
-            if(confirm("Voulez-vous vraiment supprimer définitivement cette image ?")) {
-                if(item.type === 'crest') executeCrestDelete(item.key, item.url);
-                else if(item.type === 'bg' && item.mode === 'modal') executeBgDeleteModal(item.key, item.url);
-                physicalDelete(item.url);
-                setTimeout(updateLightbox, 500); 
-            }
-        }
-
-        function openLibraryProxy(mode) { isProxyMode = (mode === 'proxy'); activeLibraryUid = isProxyMode ? targetMjUid : auth.currentUser.uid; document.getElementById('switch-container-lib').style.display = isProxyMode ? 'none' : 'flex'; document.getElementById('modal-library').style.display = 'flex'; loadModalLibrary(); }
-        function closeLibrary() { document.getElementById('modal-library').style.display = 'none'; if(isProxyMode) { isProxyMode = false; activeLibraryUid = auth.currentUser.uid; } }
-        
-        function loadModalLibrary() {
-            const uid = activeLibraryUid || auth.currentUser.uid;
-            db.ref(`users/${uid}/library`).once('value').then(snap => {
-                const libData = snap.val() || {};
-                if (!isProxyMode) { mjLibrary = libData; syncLibraryToRoom(); }
-                renderModalLibraryGrid(libData); 
-            }).catch(e => console.error("Erreur Library:", e));
-        }
-
-        function renderModalLibraryGrid(libData) {
-            const grid = document.getElementById('lib-grid'); if(!grid) return; grid.innerHTML = ""; lbCrests = [];
-            const entries = Object.entries(libData || {}); const recent = entries.filter(e => e[0].startsWith('-')); const old = entries.filter(e => !e[0].startsWith('-')); recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
-            [...recent, ...old].forEach(e => lbCrests.push({ key: e[0], url: e[1], isNative: false, type: 'crest' }));
-            if (showDefaultCrests) { for(let i=0; i<30; i++) lbCrests.push({ key: null, url: createBlason(i), isNative: true, type: 'crest' }); }
-            
-            if (lbCrests.length === 0) {
-                grid.innerHTML = "<p style='width:100%; grid-column: 1 / -1; text-align:center; color:#7f8c8d; font-style:italic;'>Aucun blason. Cliquez sur le dossier 📁 ou glissez une image ici.</p>";
-                return;
-            }
-
-            lbCrests.forEach((item, i) => { 
-                const div = document.createElement('div'); 
-                div.className = 'lib-item'; 
-                div.onclick = () => openLightbox(i, 'crest'); 
-                if (item.url.startsWith('data:image/svg')) {
-                     div.innerHTML = `<img src="${item.url}">`;
-                } else {
-                     div.style.background = 'transparent';
-                     div.style.border = 'none';
-                     div.innerHTML = `<img src="${item.url}" style="border-radius: 4px;">`;
-                     
-                     // Ajout de la petite croix rouge de suppression
-                     const del = document.createElement('div');
-                     del.className = 'lib-del';
-                     del.innerHTML = '✖';
-                     del.title = "Supprimer ce blason";
-                     del.onclick = (e) => {
-                         e.stopPropagation();
-                         if(confirm("Supprimer définitivement ce blason de votre galerie ?")) {
-                             executeCrestDelete(item.key, item.url);
-                         }
-                     };
-                     div.appendChild(del);
-                }
-                grid.appendChild(div); 
-            });
-        }
-
-        function addCrestUrlToLibrary() {
-            const u = document.getElementById('lib-url-input').value.trim();
-            if(!u || (!u.startsWith('http') && !u.startsWith('data:image/'))) return alert("URL invalide.");
-            db.ref(`users/${activeLibraryUid || auth.currentUser.uid}/library`).push(u).then(()=>{
-                document.getElementById('lib-url-input').value = "";
-                loadModalLibrary();
-            }).catch(e=>alert("Erreur: "+e.message));
-        }
-
-        function executeCrestDelete(key, urlToDelete) {
-            const uid = activeLibraryUid || auth.currentUser.uid;
-            if(!isProxyMode && globalTeams) { Object.keys(globalTeams).forEach(tKey => { if(globalTeams[tKey].icon === urlToDelete) roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad" }); }); }
-            db.ref(`users/${uid}/library/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => {
-                loadModalLibrary();
-                if(document.getElementById('modal-team-edit').style.display === 'flex') {
-                    delete mjLibrary[key];
-                    loadModalCrestGrid();
-                }
-            });
-        }
-
-        async function handleFiles(files) {
-            if(!files || files.length === 0) return; const uid = activeLibraryUid || auth.currentUser.uid;
-            for (let i = 0; i < files.length; i++) { 
-                try { 
-                    await new Promise((resolve, reject) => { storage.ref(`mj_library/${uid}/${Date.now()}_${files[i].name}`).put(files[i]).then(s => s.ref.getDownloadURL()).then(u => db.ref(`users/${uid}/library`).push(u).then(()=>resolve(u))).catch(reject); }); 
-                } catch(e){} 
-            }
-            loadModalLibrary(); 
-        }
-
-        function createBlason(i) { 
-            const colorPairs = [
-                ['#e74c3c', '#f1c40f'], ['#3498db', '#ecf0f1'], ['#2ecc71', '#2c3e50'],
-                ['#9b59b6', '#f1c40f'], ['#e67e22', '#2c3e50'], ['#1abc9c', '#ecf0f1'],
-                ['#34495e', '#e74c3c'], ['#f39c12', '#8e44ad'], ['#2980b9', '#27ae60'],
-                ['#c0392b', '#bdc3c7']
-            ];
-            const pair = colorPairs[Math.floor(i / 3) % 10];
-            const c1 = pair[0]; const c2 = pair[1];
-            const m = i % 3;
-            let p = "";
-            if (m === 0) p = `<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`;
-            else if (m === 1) p = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`;
-            else p = `<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`;
-            return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="800" height="800"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${p}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`; 
-        }
-
-        function toggleDefaultCrests(checked) { showDefaultCrests = checked; if (!isProxyMode) { db.ref(`users/${auth.currentUser.uid}/showDefaultCrests`).set(checked); mjProfileData.showDefaultCrests = checked; } loadModalLibrary(); }
-        
-        function toggleDefaultCrestsFromModal(checked) {
-            showDefaultCrests = checked;
-            if (!isProxyMode) {
-                db.ref(`users/${auth.currentUser.uid}/showDefaultCrests`).set(checked);
-                if(roomRef) roomRef.child('showDefaultCrests').set(checked);
-                mjProfileData.showDefaultCrests = checked;
-                const mainSwitch = document.getElementById('check-hide-default');
-                if(mainSwitch) mainSwitch.checked = checked;
-            }
-            loadModalCrestGrid();
-        }
-
-        function openBgLibraryProxy(mode) { isProxyBgMode = (mode === 'proxy'); activeBgLibraryUid = isProxyBgMode ? targetMjUid : auth.currentUser.uid; modalSelectedBgUrl = ""; document.getElementById('btn-modal-bg-default').disabled = true; document.getElementById('btn-modal-bg-console').disabled = true; document.getElementById('modal-bg-library').style.display = 'flex'; loadBgLibrary('modal'); }
-        function closeBgLibrary() { document.getElementById('modal-bg-library').style.display = 'none'; if(isProxyBgMode) { isProxyBgMode = false; activeBgLibraryUid = auth.currentUser.uid; } }
-        function loadBgLibrary(mode) {
-            const uid = (mode === 'modal') ? activeBgLibraryUid : auth.currentUser.uid;
-            db.ref(`users/${uid}/bgLibrary`).once('value').then(snap => { const libData = snap.val() || {}; if (mode === 'dashboard' || !isProxyBgMode) { mjBgLibrary = libData; } if (mode === 'modal') { renderBgGalleryModal(libData); } }).catch(e=>console.error(e));
-        }
-        function renderBgGalleryModal(libData) {
-            const grid = document.getElementById('bg-modal-gallery'); if(!grid) return; grid.innerHTML = ""; lbBgsModal = [];
-            Object.entries(libData || {}).reverse().forEach(e => lbBgsModal.push({key: e[0], url: e[1], isNative: false, type: 'bg', mode: 'modal'}));
-            
-            if (lbBgsModal.length === 0) {
-                grid.innerHTML = "<p style='width:100%; grid-column: 1 / -1; text-align:center; color:#7f8c8d; font-style:italic;'>Aucun fond d'écran. Cliquez sur le dossier 📁 ou glissez une image ici.</p>";
-                return;
-            }
-
-            lbBgsModal.forEach((item, i) => { 
-                const div = document.createElement('div'); div.className = 'bg-item'; 
-                if(modalSelectedBgUrl === item.url) div.classList.add('bg-selected'); 
-                div.onclick = () => { document.querySelectorAll('#bg-modal-gallery .bg-item').forEach(el => el.classList.remove('bg-selected')); div.classList.add('bg-selected'); modalSelectedBgUrl = item.url; document.getElementById('btn-modal-bg-default').disabled = false; document.getElementById('btn-modal-bg-console').disabled = false; openLightbox(i, 'bgModal'); }; 
-                div.style.background = 'transparent'; div.innerHTML = `<img src="${item.url}">`; grid.appendChild(div); 
-            });
-        }
-        function executeBgDeleteModal(key, urlToDelete) {
-            const uid = activeBgLibraryUid;
-            if(modalSelectedBgUrl === urlToDelete) { modalSelectedBgUrl = ""; document.getElementById('btn-modal-bg-default').disabled = true; document.getElementById('btn-modal-bg-console').disabled = true; }
-            db.ref(`users/${uid}/defaultBackground`).once('value', s => { if(s.val() === urlToDelete) db.ref(`users/${uid}/defaultBackground`).remove(); });
-            db.ref(`users/${uid}/consoleBackground`).once('value', s => { if(s.val() === urlToDelete) { db.ref(`users/${uid}/consoleBackground`).remove(); if(!isProxyBgMode) applyMjConsoleBg(null); } });
-            if (!isProxyBgMode && currentRoomBgUrl === urlToDelete && roomRef) roomRef.child('customBackground').remove();
-            db.ref(`users/${uid}/bgLibrary/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => loadBgLibrary('modal'));
-        }
-
-        function handleBgUpload(files, mode) { if(!files||files.length===0)return; const file=files[0], uid=mode==='modal'?activeBgLibraryUid:auth.currentUser.uid; storage.ref(`mj_custom_bgs/${uid}/${Date.now()}_${file.name}`).put(file).then(s=>s.ref.getDownloadURL()).then(u=>{ db.ref(`users/${uid}/bgLibrary`).push(u).then(()=>{ loadBgLibrary(mode); }); }).catch(e=>alert("Erreur: "+e.message)); }
-        function addBgUrlToLibrary(mode) { const p=mode==='modal'?'bg-modal':'room-bg', i=document.getElementById(p+'-url-input'), u=i.value.trim(); if(!u||(!u.startsWith('http')&&!u.startsWith('data:image/')))return alert("URL invalide."); db.ref(`users/${mode==='modal'?activeBgLibraryUid:auth.currentUser.uid}/bgLibrary`).push(u).then(()=>{ i.value=""; loadBgLibrary(mode); }).catch(e=>alert("Erreur: "+e.message)); }
-        function setModalBgAction(type) { if(!modalSelectedBgUrl)return; const uid=activeBgLibraryUid; if(type==='default'){ db.ref(`users/${uid}/defaultBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond par défaut enregistré !");if(!isProxyBgMode)mjProfileData.defaultBackground=modalSelectedBgUrl;}); } else { db.ref(`users/${uid}/consoleBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond console enregistré !");if(!isProxyBgMode){mjProfileData.consoleBackground=modalSelectedBgUrl;applyMjConsoleBg(modalSelectedBgUrl);}}); } }
-        function applyMjConsoleBg(url) { const bg=document.getElementById('dynamic-bg'); if(url&&url!==""){ bg.style.background=`url('${url}') center/cover no-repeat`; bg.style.animation='none'; }else{ bg.style.background='linear-gradient(45deg, #0f0c29, #302b63, #24243e)'; bg.style.backgroundSize='300% 300%'; bg.style.animation='gradientBG 15s ease infinite'; } }
-        
-        function handleProfileFile(files) { 
-            if(!files||files.length===0)return; 
-            const storageRef=storage.ref(`mj_profile_logos/${auth.currentUser.uid}/logo_${Date.now()}`); 
-            document.getElementById('prof-logo-placeholder').style.opacity='0.3'; 
-            storageRef.put(files[0]).then(s=>s.ref.getDownloadURL()).then(u=>{ 
-                document.getElementById('prof-logo-placeholder').style.display='none'; 
-                const img=document.getElementById('prof-logo-preview'); 
-                img.src=u; img.style.display='block'; 
-                document.getElementById('prof-logo-url').value=u; 
-                document.getElementById('btn-undo-logo').style.display='block';
-                document.getElementById('prof-logo-placeholder').style.opacity='1';
-            }).catch(e=>alert("Erreur upload: "+e.message)); 
-        }
-
-        function undoProfileLogo() {
-            const originalLogo = mjProfileData.customLogo || "";
-            document.getElementById('prof-logo-url').value = originalLogo;
-            updateLogoPreview(originalLogo);
-            document.getElementById('btn-undo-logo').style.display = 'none';
-        }
-        
-        // ... (Rest of Profile/Auth code is unchanged)
-        
-        function updateLogoPreview(u) { const p=document.getElementById('prof-logo-preview'), h=document.getElementById('prof-logo-placeholder'); if(u){p.src=u;p.style.display='block';h.style.display='none';}else{p.style.display='none';h.style.display='block';} }
-        function showProfile() {
-            if(document.getElementById('screen-choice').style.display==="block") previousScreen="screen-choice"; if(document.getElementById('screen-dashboard').style.display==="block") previousScreen="screen-dashboard";
-            document.getElementById('screen-choice').style.display="none"; document.getElementById('screen-dashboard').style.display="none"; document.getElementById('screen-profile').style.display="block";
-            document.getElementById('top-right-tools').style.display="none";
-            document.getElementById('btn-undo-logo').style.display="none";
-            if(auth.currentUser) {
-                document.getElementById('prof-email').value=auth.currentUser.email; document.getElementById('prof-nom').value=mjProfileData.nom||""; document.getElementById('prof-prenom').value=mjProfileData.prenom||"";
-                const cl = mjProfileData.customLogo||""; document.getElementById('prof-logo-url').value=cl; updateLogoPreview(cl); document.getElementById('prof-link').value=mjProfileData.customLink||"";
-                const isG = mjProfileData.isGuest===true; ['prof-nom','prof-prenom','prof-link','prof-email'].forEach(id=>document.getElementById(id).disabled=isG); document.getElementById('btn-save-profile').disabled=isG;
-                const dz=document.getElementById('profile-drop-zone'); if(isG){dz.style.opacity='0.5';dz.style.pointerEvents='none';}else{dz.style.opacity='1';dz.style.pointerEvents='auto';}
-            }
-        }
-        function closeProfile() { document.getElementById('screen-profile').style.display="none"; document.getElementById(previousScreen).style.display="block"; if(previousScreen==="screen-dashboard") document.getElementById('top-right-tools').style.display="flex"; }
-        
-        async function saveProfile() {
-            if(mjProfileData.isGuest===true) return alert("Action impossible en Découverte.");
-            const user = auth.currentUser; if(!user) return;
-            const newE = document.getElementById('prof-email').value.trim(), passC = document.getElementById('prof-pass-current').value, pass1 = document.getElementById('prof-pass').value, pass2 = document.getElementById('prof-pass-conf').value;
-            const eCh = newE!==user.email, pCh = pass1!=="";
-            const upd = { nom: document.getElementById('prof-nom').value.trim(), prenom: document.getElementById('prof-prenom').value.trim(), customLogo: document.getElementById('prof-logo-url').value.trim(), customLink: document.getElementById('prof-link').value.trim() };
-            if (eCh || pCh) {
-                if(!passC) return alert("Mot de passe ACTUEL requis.");
-                if(pCh) { if(pass1===passC) return alert("Le nouveau mdp doit être différent."); if(pass1!==pass2) return alert("Mots de passe différents."); if(!isValidPassword(pass1)) return alert("Critères de sécurité non respectés."); }
-                try {
-                    await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, passC));
-                    if (eCh) { await user.updateEmail(newE); upd.email = newE; }
-                    if (pCh) await user.updatePassword(pass1);
-                } catch(e) { return alert("Mot de passe actuel incorrect."); }
-            }
-            db.ref('users/'+user.uid).update(upd).then(()=>{ alert("Profil mis à jour !"); mjProfileData={...mjProfileData, ...upd}; document.getElementById('mj-display-name').innerText=upd.prenom||"MJ"; updateLogos(upd.customLogo); document.getElementById('prof-pass-current').value=""; document.getElementById('prof-pass').value=""; document.getElementById('prof-pass-conf').value=""; closeProfile(); }).catch(e=>alert("Erreur: "+e.message));
-        }
-
-        function updateLogos(url) { 
-            const defaultLogo = "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad";
-            const oldWixLogo = "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
-            const f = (url && url !== "" && url !== oldWixLogo && url !== defaultLogo) ? url : defaultLogo; 
-            
-            document.getElementById('login-mj-logo').src = defaultLogo; 
-            document.getElementById('page-favicon').href = f; 
-            
-            const flipInner = document.getElementById('logo-flip-inner');
-            const mjLogoImg = document.getElementById('flip-back-logo');
-            
-            if(f !== defaultLogo) {
-                if(mjLogoImg) mjLogoImg.src = f;
-                if(flipInner) flipInner.classList.add('animate');
-            } else {
-                if(mjLogoImg) mjLogoImg.src = "";
-                if(flipInner) flipInner.classList.remove('animate');
-            }
-
-            if(roomRef && roomID) { 
-                roomRef.child('mjLogo').set(f); 
-                if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); 
-            } 
-        }
-
-        function askMjNameAndCreate() { 
-            document.getElementById('new-room-mj').value = mjProfileData.prenom || "MJ"; 
-            document.getElementById('new-room-name').value = ""; 
-            document.getElementById('modal-create-room').style.display = 'flex'; 
-            setTimeout(() => document.getElementById('new-room-name').focus(), 100); 
-        }
-        
-        function confirmCreateRoom() { 
-            const mjName = document.getElementById('new-room-mj').value.trim() || "Animateur"; 
-            const eventName = document.getElementById('new-room-name').value.trim() || "Partie en cours"; 
-            const d = new Date(); 
-            const dateStr = d.getFullYear().toString() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); 
-            const rndStr = String(Math.floor(Math.random() * 1000)).padStart(3, '0'); 
-            const newRoomID = `${dateStr}${rndStr}`; 
-            
-            document.getElementById('modal-create-room').style.display = 'none'; 
-            
-            const initialData = {
-                mj: auth.currentUser.uid,
-                mjName: mjName,
-                eventName: eventName,
-                createdAt: firebase.database.ServerValue.TIMESTAMP,
-                gameState: { status: 'waiting' },
-                isArchived: false
-            };
-
-            db.ref('rooms/' + newRoomID).set(initialData).then(() => {
-                launchDashboard(newRoomID, mjName, eventName, false);
-            });
-        }
-
-        function launchDashboard(id, mjName = null, eventName = null, isArchived = false) {
-            roomID = id; buzzHistory = []; currentBuzzerId = null; currentPlayer = null;
-            currentPlayerFilter = 'all'; currentMjTeamFilter = 'all';
-            document.querySelectorAll('#player-filters button').forEach(btn => btn.classList.remove('active')); document.getElementById('filter-btn-all').classList.add('active'); 
-            document.querySelectorAll('#mj-team-filters button').forEach(btn => btn.classList.remove('active')); document.getElementById('tfilter-btn-all').classList.add('active'); 
-            if(document.getElementById('player-search')) document.getElementById('player-search').value = "";
-            if(document.getElementById('mj-team-search')) document.getElementById('mj-team-search').value = "";
-            
-            const btnDel = document.getElementById('btn-delete-room');
-            if (btnDel) {
-                btnDel.disabled = false;
-                btnDel.classList.remove('holding');
-                btnDel.innerText = "⚠️ Supprimer (Détruire)";
-                clearTimeout(holdTimer);
-            }
-            
-            document.getElementById('screen-choice').style.display = "none"; 
-            const dashboard = document.getElementById('screen-dashboard');
-            dashboard.style.display = "block"; 
-            document.getElementById('top-right-tools').style.display = "flex";
-            document.getElementById('display-room').innerText = roomID;
-            
-            if (eventName) document.getElementById('display-event-name').innerText = eventName;
-            if (mjName) document.getElementById('display-mj-name').innerText = "Animé par " + mjName;
-
-            roomRef = db.ref('rooms/' + id);
-
-            if(isArchived) {
-                dashboard.classList.add('readonly-mode');
-                document.getElementById('readonly-banner').style.display = 'block';
-            } else {
-                dashboard.classList.remove('readonly-mode');
-                document.getElementById('readonly-banner').style.display = 'none';
                 
-                let activeRoomData = { id: roomID, status: 'open', timestamp: firebase.database.ServerValue.TIMESTAMP };
-                if (mjName) activeRoomData.mjName = mjName;
-                if (eventName) activeRoomData.eventName = eventName;
+                if(oldId && allPlayersData[oldId]) {
+                    updates[oldId + '/isCaptain'] = false;
+                    updates[oldId + '/captainMessage'] = `ℹ️ ${newName} vous a remplacé en tant que Capitaine de l'équipe.`;
+                }
                 
-                const publicRef = db.ref('activeRooms/' + roomID);
-                publicRef.set(activeRoomData);
-                publicRef.onDisconnect().remove();
+                updates[newId + '/isCaptain'] = true;
+                updates[newId + '/captainMessage'] = `👑 Vous avez pris la place de ${oldName || "l'ancien capitaine"} en tant que Capitaine !`;
+                
+                roomRef.child('players').update(updates);
             }
-
-            const defLogo = "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad";
-            try { roomRef.child('mjLogo').set(mjProfileData.customLogo && mjProfileData.customLogo !== "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" ? mjProfileData.customLogo : defLogo); } catch(e){}
-            try { if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); } catch(e){}
-            try { roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true); } catch(e){}
-            try { if(mjProfileData.defaultBackground) roomRef.child('customBackground').set(mjProfileData.defaultBackground); } catch(e){}
-            try { roomRef.child('showDefaultCrests').set(showDefaultCrests); } catch(e){}
-            
-            try { syncLibraryToRoom(); } catch(e){ console.error(e); }
-            try { initMJLogic(); } catch(e){ console.error(e); }
-            try { initLibrarySync(); } catch(e){ console.error(e); }
-            try { loadBgLibrary('dashboard'); } catch(e){ console.error(e); }
-            try { openScoreBoard(); } catch(e){ console.error(e); }
         }
-
-        // ... (Rest of game logic)
 
         function initMJLogic() {
             roomRef.child('eventName').on('value', snap => { if(snap.exists()) document.getElementById('display-event-name').innerText = snap.val(); else document.getElementById('display-event-name').innerText = "PARTIE EN COURS"; });
@@ -1431,30 +1213,211 @@
             });
         }
 
-        // --- TRANSFERT CAPITANAT ---
-        function transferCaptaincy(oldId, oldName, newId, newName, teamName) {
-            if (confirm(`Êtes-vous sûr de vouloir enlever le capitanat à ${oldName || 'ce joueur'} pour le donner à ${newName} ?`)) {
-                let updates = {};
-                // Reset tous les capitaines de l'équipe par sécurité
-                Object.keys(allPlayersData).forEach(k => {
-                    if (allPlayersData[k].teamName === teamName && allPlayersData[k].isCaptain) {
-                        updates[k + '/isCaptain'] = false;
-                    }
-                });
-                
-                if(oldId && allPlayersData[oldId]) {
-                    updates[oldId + '/isCaptain'] = false;
-                    updates[oldId + '/captainMessage'] = `ℹ️ ${newName} vous a remplacé en tant que Capitaine de l'équipe.`;
-                }
-                
-                updates[newId + '/isCaptain'] = true;
-                updates[newId + '/captainMessage'] = `👑 Vous avez pris la place de ${oldName || "l'ancien capitaine"} en tant que Capitaine !`;
-                
-                roomRef.child('players').update(updates);
-            }
+        function setPlayerFilter(filter) {
+            currentPlayerFilter = filter;
+            document.querySelectorAll('#player-filters button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('filter-btn-' + filter).classList.add('active');
+            renderLobby();
         }
 
-        // ... (Filtres et autres fonctions intactes)
+        function saveFocus() { const active = document.activeElement; if (active && active.tagName === 'INPUT' && active.type === 'text') { return { id: active.id, start: active.selectionStart, end: active.selectionEnd, val: active.value }; } return null; }
+        function restoreFocus(focusData) { if (focusData && focusData.id) { setTimeout(() => { const el = document.getElementById(focusData.id); if (el) { el.focus(); el.value = focusData.val; el.setSelectionRange(focusData.start, focusData.end); } }, 0); } }
+
+        function renderLobby() {
+            let hA = "", hI = "", hB = ""; let hsB = false, hsI = false;
+            const sl = document.getElementById('score-list'), il = document.getElementById('inactive-list'), bl = document.getElementById('banned-list');
+            const is = document.getElementById('inactive-section'), bs = document.getElementById('banned-section');
+            
+            const aP = [], iP = [], rP = [], bP = [];
+            const searchInput = document.getElementById('player-search');
+            const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : "";
+
+            Object.keys(allPlayersData).forEach(uid => { 
+                const d = allPlayersData[uid]; if(!d)return; d.uid = uid; 
+                if (searchVal && !d.name.toLowerCase().includes(searchVal)) return;
+
+                if(d.banned===true) bP.push(d); 
+                else if(d.active===false){if(d.recoveryRequest===true)rP.push(d);else iP.push(d);} 
+                else aP.push(d); 
+            });
+
+            aP.sort((a,b) => { if(a.uid===currentBuzzerId)return -1; if(b.uid===currentBuzzerId)return 1; let iA=buzzHistory.indexOf(a.name), iB=buzzHistory.indexOf(b.name); if(iA!==-1&&iB!==-1)return iB-iA; if(iA!==-1)return -1; if(iB!==-1)return 1; let rA=a.reconnectedAt||0, rB=b.reconnectedAt||0; if(rA===0&&rB>0)return -1; if(rA>0&&rB===0)return 1; if(rA>0&&rB>0)return rA-rB; return a.name.localeCompare(b.name); });
+            
+            aP.forEach(d => {
+                let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
+                const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;">` : `<span style="font-size:1.2rem;margin-right:8px;">${d.avatar||'👤'}</span>`;
+                const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
+                
+                let actionsHtml = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
+
+                hA += `
+                <div class="${rC}">
+                    <div style="display:flex;align-items:center;flex:1;overflow:hidden;">${aH}<b style="margin-right:10px;">${d.name}</b><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div>
+                    <div class="player-controls">
+                        <div class="team-score-ctrl" title="Score Joueur">
+                            <button class="btn-tiny" onclick="adj('${d.uid}',-1)" title="Retirer 1 point">-</button>
+                            <input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;height:24px;">
+                            <button class="btn-tiny" onclick="adj('${d.uid}',1)" title="Ajouter 1 point">+</button>
+                        </div>
+                        ${actionsHtml}
+                    </div>
+                </div>`;
+            });
+            
+            rP.forEach(d => { 
+                hsI=true; 
+                let rP_actions = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
+                hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls">${rP_actions}</div></div>`; 
+            });
+            
+            iP.forEach(d => { 
+                hsI=true; 
+                let iP_actions = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
+                hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls">${iP_actions}</div></div>`; 
+            });
+            
+            bP.forEach(d => { 
+                hsB=true; 
+                let bP_actions = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
+                hB += `<div class="score-row" style="border:1px solid var(--danger);"><div style="flex:1;"><span style="color:var(--danger)"><b>${d.name}</b></span></div><div class="player-controls">${bP_actions}</div></div>`; 
+            });
+            
+            sl.innerHTML = hA; il.innerHTML = hI; bl.innerHTML = hB; 
+            
+            if(currentPlayerFilter === 'all') { sl.style.display = aP.length > 0 ? 'block' : 'none'; bs.style.display = hsB ? "block" : "none"; is.style.display = hsI ? "block" : "none"; } 
+            else if (currentPlayerFilter === 'active') { sl.style.display = 'block'; bs.style.display = 'none'; is.style.display = 'none'; } 
+            else if (currentPlayerFilter === 'inactive') { sl.style.display = 'none'; bs.style.display = 'none'; is.style.display = 'block'; } 
+            else if (currentPlayerFilter === 'banned') { sl.style.display = 'none'; bs.style.display = 'block'; is.style.display = 'none'; }
+        }
+
+        function setMjTeamFilter(filter) {
+            currentMjTeamFilter = filter;
+            document.querySelectorAll('#mj-team-filters button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tfilter-btn-' + filter).classList.add('active');
+            renderTeamLobby();
+        }
+
+        function renderTeamLobby() {
+            if (isRenderingTeamLobby) return;
+            isRenderingTeamLobby = true;
+            
+            const container = document.getElementById('mj-team-lobby-list');
+            const searchInput = document.getElementById('mj-team-search');
+            const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : "";
+            
+            const focusData = saveFocus();
+            let html = "";
+            
+            Object.keys(globalTeams).forEach(k => {
+                const t = globalTeams[k];
+                const isA = t.active !== false;
+                const isBan = t.banned === true;
+                
+                if (currentMjTeamFilter === 'active' && (!isA || isBan)) return;
+                if (currentMjTeamFilter === 'inactive' && (isA || isBan)) return;
+                if (currentMjTeamFilter === 'banned' && !isBan) return;
+                if (searchVal && !k.toLowerCase().includes(searchVal)) return;
+                
+                const bo = t.bonus || 0;
+                let badgeClass = isBan ? "badge-banned" : (!isA ? "badge-inactive" : "badge-active");
+                let badgeText = isBan ? "🔴 BANNIE" : (!isA ? "🟠 INACTIVE" : "🟢 ACTIVE");
+                
+                let totalScore = 0;
+                let activeCount = 0;
+                let teamMembers = [];
+                Object.values(allPlayersData).forEach(p => { 
+                    if(p.teamName === k) {
+                        totalScore += (p.pts || 0);
+                        if(p.active !== false && p.banned !== true) {
+                            activeCount++;
+                            teamMembers.push(p);
+                        }
+                    }
+                });
+                totalScore += bo;
+                if(!isA && !isBan) totalScore = t.frozenScore || 0;
+                
+                let blockedCount = t.blacklist ? Object.keys(t.blacklist).length : 0;
+                let statsHtml = `(<span style="color:var(--success);">${activeCount} Joueur${activeCount > 1 ? 's' : ''}</span>`;
+                if (blockedCount > 0) statsHtml += ` - <span style="color:var(--danger);">${blockedCount} Exclu${blockedCount > 1 ? 's' : ''}</span>`;
+                statsHtml += `)`;
+                
+                const safeK = k.replace(/'/g, "\\'");
+                let btnDisabled = isBan ? "disabled" : "";
+                
+                let actionsHtml = `<button class="dropdown-btn" onclick="openTeamMenu(event, '${safeK}')">⋮</button>`;
+                
+                html += `
+                <div class="hub-line" style="margin-bottom:0; border-radius:8px; border-bottom-left-radius:0; border-bottom-right-radius:0;" onclick="toggleTeamAccordion('${safeK}')">
+                    <span id="team-arrow-${k}" class="hub-arrow">▶</span>
+                    <div class="crest-mini-bg"><img src="${t.icon}" class="crest-mini"></div>
+                    <div class="hub-line-text" style="flex: 1; margin-left:10px;">
+                        <b style="color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${k}</b> 
+                        <span style="color:#bdc3c7; font-size:0.85rem; margin-left:10px; white-space:nowrap;">Score : ${totalScore} | <span style="font-weight:bold;">${statsHtml}</span></span>
+                    </div>
+                    <span class="hub-badge ${badgeClass}" style="margin: 0 10px;">${badgeText}</span>
+                    <div class="team-controls" onclick="event.stopPropagation();">
+                        <div class="team-score-ctrl" title="Score Bonus Équipe">
+                            <button class="btn-tiny" onclick="updateTeamBonus('${safeK}', -1)" ${btnDisabled} title="Retirer 1 point bonus">-</button>
+                            <span class="team-bonus-val">${bo}</span>
+                            <button class="btn-tiny" onclick="updateTeamBonus('${safeK}', 1)" ${btnDisabled} title="Ajouter 1 point bonus">+</button>
+                        </div>
+                        ${actionsHtml}
+                    </div>
+                </div>
+                <div id="team-details-${k}" class="hub-details" style="display:none; margin-top:0; border-top:none; border-top-left-radius:0; border-top-right-radius:0; margin-bottom:10px;" onclick="event.stopPropagation();">
+                    <div style="position:relative; margin-bottom:10px;">
+                        <input type="text" id="search-member-${k}" class="hub-search-bar" style="margin-bottom:0; padding:10px; font-size:0.9rem; padding-right:35px;" placeholder="🔍 Chercher un joueur (Actifs & Bloqués)..." oninput="renderTeamMembers('${safeK}')">
+                        <span id="clear-search-member-${k}" onclick="document.getElementById('search-member-${k}').value=''; renderTeamMembers('${safeK}');" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none;">✕</span>
+                    </div>
+                    <div id="list-member-${k}" style="display:flex; flex-direction:column; gap:5px;"></div>
+                </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            if (currentOpenTeam && document.getElementById('team-details-' + currentOpenTeam)) {
+                document.getElementById('team-details-' + currentOpenTeam).style.display = 'block';
+                document.getElementById('team-arrow-' + currentOpenTeam).classList.add('open');
+                renderTeamMembers(currentOpenTeam);
+            }
+            
+            restoreFocus(focusData);
+            isRenderingTeamLobby = false;
+        }
+
+        function toggleTeamAccordion(teamName) {
+            if (currentOpenTeam === teamName) {
+                document.getElementById('team-details-' + teamName).style.display = 'none';
+                document.getElementById('team-arrow-' + teamName).classList.remove('open');
+                if (activeTeamBlacklistListener) roomRef.child('teams/'+teamName+'/blacklist').off('value', activeTeamBlacklistListener);
+                currentOpenTeam = null;
+                return;
+            }
+            if (currentOpenTeam) {
+                const oldDet = document.getElementById('team-details-' + currentOpenTeam);
+                if (oldDet) oldDet.style.display = 'none';
+                const oldArr = document.getElementById('team-arrow-' + currentOpenTeam);
+                if (oldArr) oldArr.classList.remove('open');
+                if (activeTeamBlacklistListener) roomRef.child('teams/'+currentOpenTeam+'/blacklist').off('value', activeTeamBlacklistListener);
+            }
+            
+            currentOpenTeam = teamName;
+            const newDet = document.getElementById('team-details-' + teamName);
+            if (newDet) newDet.style.display = 'block';
+            const newArr = document.getElementById('team-arrow-' + teamName);
+            if (newArr) newArr.classList.add('open');
+
+            activeTeamBlacklistListener = roomRef.child('teams/'+teamName+'/blacklist').on('value', snap => {
+                activeTeamBlacklist = [];
+                snap.forEach(child => {
+                    activeTeamBlacklist.push({ id: child.key, ...child.val() });
+                });
+                renderTeamMembers(teamName);
+            });
+        }
+
         function renderTeamMembers(teamName) {
             const list = document.getElementById('list-member-' + teamName);
             if (!list) return;
@@ -1481,7 +1444,6 @@
 
             if (displayList.length === 0) { list.innerHTML = "<div style='color:#7f8c8d; font-style:italic; padding:10px;'>Aucun joueur trouvé.</div>"; return; }
 
-            // Identification de l'actuel capitaine pour le transfert croisé
             let currentCaptainId = null;
             let currentCaptainName = "Inconnu";
             displayList.forEach(m => { if(m.isCaptain) { currentCaptainId = m.id; currentCaptainName = m.name; } });
@@ -1504,7 +1466,6 @@
                 const safeTeamName = teamName.replace(/'/g, "\\'");
                 let actionsHtml = `<button class="dropdown-btn" onclick="openMemberMenu(event, '${m.id}', '${safeTeamName}', ${m.isBlockedInTeam}, ${m.isCaptain||false}, '${currentCaptainId||''}', '${currentCaptainName.replace(/'/g, "\\'")}')">⋮</button>`;
 
-                // Le module de score express
                 let scoreCtrl = !m.isBlockedInTeam ? `<div style="display:flex;align-items:center;background:rgba(0,0,0,0.5);border-radius:4px;padding:2px;margin:0 10px;"><button class="btn-tiny" onclick="adj('${m.id}',-1)">-</button><input type="number" value="${m.pts||0}" onchange="setPlayerScore('${m.id}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;"><button class="btn-tiny" onclick="adj('${m.id}',1)">+</button></div>` : "";
 
                 html += `
@@ -1523,43 +1484,21 @@
             list.innerHTML = html;
         }
 
-        // Fonctions standard pour que l'intégration tourne
-        function openTeamModal(tName) {
-            editingTeamKey = tName;
-            document.getElementById('modal-team-edit').style.display = 'flex';
-            document.getElementById('modal-check-hide-default').checked = showDefaultCrests;
-            const nameInput = document.getElementById('modal-t-name');
-            if (tName) { document.getElementById('team-modal-title').innerText = "MODIFIER L'ÉQUIPE"; nameInput.value = tName; selCrest = globalTeams[tName] ? globalTeams[tName].icon : ""; } 
-            else { document.getElementById('team-modal-title').innerText = "CRÉER UNE ÉQUIPE"; nameInput.value = ""; selCrest = ""; }
-            loadModalCrestGrid(); setTimeout(() => nameInput.focus(), 100);
+        function expelTeamMember(uid, name, avatar, teamName) {
+            if(confirm(`Expulser ${name} de l'équipe ?\n\nIl repassera en Solo et sera mis sur la liste noire de l'équipe.`)) {
+                roomRef.child('teams/' + teamName + '/blacklist/' + uid).set({ name: name, avatar: avatar });
+                roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", isCaptain: false });
+            }
         }
+        function pardonTeamMember(uid, teamName) { roomRef.child('teams/' + teamName + '/blacklist/' + uid).remove(); }
 
-        function loadModalCrestGrid() {
-            const grid = document.getElementById('modal-crest-grid'); if(!grid) return; grid.innerHTML = "";
-            const seen = new Set();
-            const entries = Object.entries(mjLibrary || {}); const recent = entries.filter(e => e[0].startsWith('-')); const old = entries.filter(e => !e[0].startsWith('-')); recent.sort((a, b) => a[0].localeCompare(b[0])).reverse();
-            [...recent, ...old].forEach(entry => { const key = entry[0]; const url = entry[1]; if (!seen.has(url)) { seen.add(url); createModalCrestItem(key, url, grid, true); } });
-            if (showDefaultCrests) { for(let i=0; i<30; i++) { const svg = createBlason(i); if (!seen.has(svg)) { seen.add(svg); createModalCrestItem(null, svg, grid, false); } } }
-        }
-
-        function createModalCrestItem(key, url, container, isCustom) {
-            const w = document.createElement('div'); w.className = 'crest-wrapper'; if (selCrest === url) w.classList.add('crest-selected');
-            if (url.startsWith('data:image/svg')) { w.innerHTML = `<img src="${url}" class="crest-opt">`; } else { w.style.background = 'transparent'; w.innerHTML = `<img src="${url}" class="crest-opt">`; }
-            w.onclick = () => { document.querySelectorAll('#modal-crest-grid .crest-wrapper').forEach(i=>i.classList.remove('crest-selected')); w.classList.add('crest-selected'); selCrest = url; };
-            container.appendChild(w);
-        }
-        function handleTeamModalUpload(files) {
-            if(!files || files.length === 0) return; const file = files[0]; const uid = auth.currentUser.uid; document.getElementById('team-modal-title').innerText = "⏳ Upload en cours...";
-            storage.ref(`mj_library/${uid}/${Date.now()}_${file.name}`).put(file).then(s => s.ref.getDownloadURL()).then(u => { db.ref(`users/${uid}/library`).push(u).then(() => { selCrest = u; document.getElementById('team-modal-title').innerText = editingTeamKey ? "MODIFIER L'ÉQUIPE" : "CRÉER UNE ÉQUIPE"; loadModalCrestGrid(); }); }).catch(e => { alert("Erreur upload: " + e.message); document.getElementById('team-modal-title').innerText = editingTeamKey ? "MODIFIER L'ÉQUIPE" : "CRÉER UNE ÉQUIPE"; });
-        }
-        function saveTeamFromModal() {
-            const n = document.getElementById('modal-t-name').value.trim(); if(!n) return alert("Veuillez saisir un nom d'équipe."); if(!selCrest) return alert("Veuillez sélectionner un blason.");
-            if(mjProfileData.isGuest === true && !editingTeamKey && Object.keys(globalTeams).length >= 2) return alert("Limité à 2 équipes en Découverte.");
-            if(editingTeamKey && editingTeamKey !== n) { roomRef.child('teams/' + editingTeamKey).once('value').then(snap => { const data = snap.val(); roomRef.child('teams/' + n).set({...data, icon: selCrest}).then(() => { roomRef.child('teams/' + editingTeamKey).remove(); roomRef.child('players').once('value', pSnap => { let updates = {}; pSnap.forEach(p => { if(p.val().teamName === editingTeamKey) { updates[p.key + '/teamName'] = n; updates[p.key + '/teamIcon'] = selCrest; } }); if(Object.keys(updates).length > 0) roomRef.child('players').update(updates); }); document.getElementById('modal-team-edit').style.display = 'none'; }); }); } 
-            else { roomRef.child('teams/' + n).update({ icon: selCrest, active: true, bonus: globalTeams[n] ? globalTeams[n].bonus : 0 }); document.getElementById('modal-team-edit').style.display = 'none'; }
-        }
-
-        // Rest of standard functions...
+        function openEditModal(uid) { const d = allPlayersData[uid]; if(!d)return; editingPlayerUid=uid; editingPlayerOriginalPseudo=d.name; editingPlayerOriginalAvatar=d.avatar||"👤"; editingPlayerCurrentAvatar=editingPlayerOriginalAvatar; document.getElementById('edit-player-name').value=d.name; document.getElementById('btn-censor-avatar').style.display=(editingPlayerOriginalAvatar.length>20)?'block':'none'; updateEditAvatarPreview(); populateEditGallery(); document.getElementById('modal-edit-player').style.display='flex'; }
+        function populateEditGallery() { const g=document.getElementById('edit-avatar-gallery'); g.innerHTML=""; const o=document.createElement('div'); o.className='edit-gallery-item original-avatar-item'; if(editingPlayerOriginalAvatar.length>20)o.innerHTML=`<img src="${editingPlayerOriginalAvatar}">`; else o.innerText=editingPlayerOriginalAvatar; o.onclick=()=>{editingPlayerCurrentAvatar=editingPlayerOriginalAvatar;updateEditAvatarPreview();}; g.appendChild(o); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='edit-gallery-item'; d.innerText=a; d.onclick=()=>{editingPlayerCurrentAvatar=a;updateEditAvatarPreview();}; g.appendChild(d); }); }
+        function updateEditAvatarPreview() { const c=document.getElementById('edit-player-avatar-preview'); if(editingPlayerCurrentAvatar.length>20)c.innerHTML=`<img src="${editingPlayerCurrentAvatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`; else c.innerText=editingPlayerCurrentAvatar; }
+        function censorPlayerAvatar() { editingPlayerCurrentAvatar = mjProfileData.customLogo || "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad"; updateEditAvatarPreview(); }
+        function closeEditPlayerModal() { document.getElementById('modal-edit-player').style.display='none'; editingPlayerUid=null; }
+        function savePlayerEdit() { if(!editingPlayerUid)return; const v=document.getElementById('edit-player-name').value.trim(); if(!/^[a-zA-Z0-9À-ÿ\s\-_]+$/.test(v)||v.length<2)return alert("Pseudo invalide (Lettres, chiffres, 2 car. min)."); let tk=false; Object.keys(allPlayersData).forEach(u=>{if(u!==editingPlayerUid&&allPlayersData[u].name&&allPlayersData[u].name.toLowerCase()===v.toLowerCase())tk=true;}); if(tk)return alert("Déjà utilisé."); roomRef.child('players/'+editingPlayerUid).update({name:v, avatar:editingPlayerCurrentAvatar}).then(()=>{ if(v!==editingPlayerOriginalPseudo&&currentBlocked[editingPlayerOriginalPseudo]){roomRef.child('blockedPlayers/'+editingPlayerOriginalPseudo).remove();roomRef.child('blockedPlayers/'+v).set(true);} if(currentBuzzerId===editingPlayerUid)roomRef.child('buzzers').update({pseudo:v, avatar:editingPlayerCurrentAvatar}); closeEditPlayerModal(); }); }
+        
         function setPlayerScore(u, v) { roomRef.child('players/'+u).update({pts: parseInt(v)||0}); }
         function warnPlayer(u, n) { if(confirm(`Avertissement (Jaune) à ${n} ?`)) roomRef.child('players/'+u).update({hasBeenWarned:true, pendingWarning:true}); }
         function kickPlayer(u, n) { if(confirm(`Expulser ${n} (Rouge) ?`)) roomRef.child('players/'+u).update({banned:true, active:false}); }
@@ -1571,7 +1510,137 @@
         function forceBuzzer(u) { const p=allPlayersData[u]; if(p) { roomRef.child('gameState').update({status:'taken'}); roomRef.child('buzzers').set({id:u, pseudo:p.name, avatar:p.avatar||"", teamName:p.teamName||"Solo", teamIcon:p.teamIcon||""}); } }
         function toggleBlockPlayer(ps) { if(currentBlocked[ps]) roomRef.child('blockedPlayers/'+ps).remove(); else roomRef.child('blockedPlayers/'+ps).set(true); }
 
-        // Maintien des autres blocs intacts pour la fluidité...
+        function warnTeam(n) { 
+            if(confirm(`Avertissement (Jaune) à l'équipe ${n} ?`)) {
+                roomRef.child('teams/'+n).update({hasBeenWarned:true});
+                Object.values(allPlayersData).forEach(p => {
+                    if (p.teamName === n && p.active !== false && !p.banned) {
+                        roomRef.child('players/' + p.uid).update({ hasBeenWarned: true, pendingWarning: true });
+                        roomRef.child('blockedPlayers/' + p.name).set(true); 
+                    }
+                });
+                statusUpdate('ready');
+            } 
+        }
+        function kickTeam(n) { if(confirm(`Expulser l'équipe ${n} (Rouge) ?`)) banTeam(n); }
+        function toggleTeamBlock(n) {
+            let members = [];
+            Object.values(allPlayersData).forEach(p => {
+                if (p.teamName === n && p.active !== false && !p.banned) members.push(p);
+            });
+            const isMuted = members.some(m => currentBlocked[m.name]);
+            if (isMuted) { members.forEach(m => roomRef.child('blockedPlayers/' + m.name).remove()); } 
+            else { let updates = {}; members.forEach(m => updates[m.name] = true); roomRef.child('blockedPlayers').update(updates); }
+        }
+
+        function acceptRecovery(u) { roomRef.child('players/'+u).update({active:true, recoveryRequest:null, reconnectedAt:Date.now()}); }
+        function rejectRecovery(u) { if(confirm("Refuser ?")) roomRef.child('players/'+u).update({recoveryRequest:null}); }
+        
+        function archiveTeam(n) { if(confirm(`Mettre l'équipe ${n} en pause ?`)) { let c=0; Object.values(allPlayersData).forEach(p=>{if(p.teamName===n)c+=(p.pts||0);}); c+=(globalTeams[n].bonus||0); let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, frozenScore:c, previousMembers:m, lastState:'active'}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:""})); } }
+        function banTeam(n) { let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, banned:true, previousMembers:m, lastState:(globalTeams[n].active!==false?'active':'inactive')}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:"", active:true, banned:false})); }
+        function openRestoreModal(n) { const t=globalTeams[n]; if(t.lastState==='active'||(!t.banned&&!t.active)){if(confirm(`Réactiver l'équipe ${n} ?`))performRestore(n,'active');}else{pendingRestoreTeam=n; document.getElementById('restore-team-msg').innerText=`${n} était EN PAUSE avant d'être bannie.`; document.getElementById('modal-restore-team').style.display='flex';} }
+        function confirmRestoreAction(m) { if(pendingRestoreTeam){performRestore(pendingRestoreTeam,m); closeRestoreModal();} }
+        function closeRestoreModal() { document.getElementById('modal-restore-team').style.display='none'; pendingRestoreTeam=null; }
+        function performRestore(n, s) { if(s==='active') roomRef.child('teams/'+n).update({active:true, banned:false, frozenScore:null, previousMembers:null}); else if(s==='inactive') roomRef.child('teams/'+n).update({active:false, banned:false}); }
+        function deleteTeamDefinitive(n) { if(confirm(`⚠️ Supprimer DÉFINITIVEMENT l'équipe ${n} ?`)) roomRef.child('teams/'+n).remove(); }
+        function updateTeamBonus(n, d) { const t=globalTeams[n]; if(t.active!==false)roomRef.child('teams/'+n+'/bonus').transaction(v=>(v||0)+d); else roomRef.child('teams/'+n).update({frozenScore:(t.frozenScore||0)+d, bonus:(t.bonus||0)+d}); }
+        
+        function handleError() { if(currentPlayer&&currentPlayer.name) { roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready'); } }
+        function handleReward(pts, m) { if(!currentPlayer||!currentPlayer.id)return; const cp=allPlayersData[currentPlayer.id]?(allPlayersData[currentPlayer.id].pts||0):0; roomRef.child('players/'+currentPlayer.id).update({pts:cp+pts, active:true}); if(m==='partial'){roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready');}else fullReset(); }
+        
+        function triggerEndGame() { 
+            if(confirm("🏁 Fin de partie ?\n\nCela affichera le podium et placera cette salle dans vos Archives en Lecture Seule.")) { 
+                roomRef.child('gameState').set({status:'endGame', timestamp:Date.now()}); 
+                roomRef.update({ isArchived: true });
+                roomRef.child('buzzers').remove(); 
+                roomRef.child('buzzAttempts').remove(); 
+                
+                const publicRef = db.ref('activeRooms/' + roomID);
+                publicRef.remove();
+                publicRef.onDisconnect().cancel();
+
+                document.getElementById('screen-dashboard').classList.add('readonly-mode');
+                document.getElementById('readonly-banner').style.display = 'block';
+            } 
+        }
+
+        function quitRoom() { 
+            if(mjProfileData.isGuest===true) {
+                if(confirm("⚠️ SUPPRESSION DÉFINITIVE DE CETTE SALLE ?\nToutes les données (scores, équipes) seront perdues.")) {
+                    roomRef.child('gameState').set({status:'closing', timestamp:Date.now()});
+                    setTimeout(() => {
+                        roomRef.remove(); 
+                        db.ref('activeRooms/'+roomID).remove(); 
+                        checkUserRoom(auth.currentUser.uid);
+                    }, 5000);
+                }
+            } else { 
+                if(roomRef) roomRef.child('buzzers').off(); 
+                if(!document.getElementById('screen-dashboard').classList.contains('readonly-mode') && roomID) {
+                    const publicRef = db.ref('activeRooms/' + roomID);
+                    publicRef.remove();
+                    publicRef.onDisconnect().cancel();
+                }
+                checkUserRoom(auth.currentUser.uid); 
+            } 
+        }
+        
+        function startDeleteHold(e) {
+            if(e) e.preventDefault();
+            const btn = document.getElementById('btn-delete-room');
+            if(btn.disabled) return;
+            
+            btn.classList.add('holding');
+            btn.innerText = "⏳ MAINTENEZ POUR SUPPRIMER...";
+            
+            holdTimer = setTimeout(() => {
+                btn.classList.remove('holding');
+                btn.innerText = "💥 SUPPRESSION EN COURS...";
+                btn.disabled = true;
+                
+                roomRef.child('gameState').set({status:'closing', timestamp:Date.now()});
+                
+                backupAndDestroyRoom(roomID).then(() => {
+                    checkUserRoom(auth.currentUser.uid);
+                });
+            }, 5000);
+        }
+
+        function cancelDeleteHold(e) {
+            if(e) e.preventDefault();
+            clearTimeout(holdTimer);
+            const btn = document.getElementById('btn-delete-room');
+            if(btn && !btn.disabled) {
+                btn.classList.remove('holding');
+                btn.innerText = "⚠️ Supprimer (Détruire)";
+            }
+        }
+        
+        function statusUpdate(st) { 
+            if(roomRef) { 
+                roomRef.child('gameState').set({status:st}); 
+                if(st==='ready') { 
+                    roomRef.child('buzzers').remove(); 
+                    roomRef.child('buzzAttempts').remove(); 
+                    buzzProcessing = false;
+                } 
+            } 
+        }
+
+        function fullReset() { 
+            if(roomRef) {
+                roomRef.child('blockedPlayers').remove(); 
+                roomRef.child('buzzers').remove(); 
+                roomRef.child('buzzAttempts').remove(); 
+                statusUpdate('waiting'); 
+            }
+        }
+        
+        function adj(u, v) { roomRef.child('players/'+u+'/pts').transaction(x=>(x||0)+v); }
+        
+        function syncLibraryToRoom() { try { if(roomID && roomRef) roomRef.child('library').set(mjLibrary || {}); } catch(e){ console.error("Erreur sync library", e); } }
+        
+        function initLibrarySync() { roomRef.child('library').on('value', snap => { const r = snap.val()||{}; const u = auth.currentUser.uid; if(!u)return; let h=false; Object.values(r).forEach(url => { if(!Object.values(mjLibrary).includes(url)){ db.ref(`users/${u}/library`).push(url); h=true; } }); if(h) { loadModalLibrary(); if(document.getElementById('modal-team-edit').style.display === 'flex') loadModalCrestGrid(); } }); }
     </script>
 </body>
 </html>
