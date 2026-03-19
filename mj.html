@@ -208,7 +208,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.198</div>
+    <div class="version-tag" id="app-version-display">v1.199</div>
 
     <div id="global-dropdown"></div>
 
@@ -317,7 +317,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.198</span>
+                    <span id="disp-v-mj">v1.199</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -670,7 +670,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.198";
+        const APP_VERSION = "1.199";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -929,7 +929,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.198", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.199", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1965,25 +1965,51 @@
                 let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; 
                 Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
                 
-                const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;">` : `<span style="font-size:1.2rem;margin-right:8px;">${d.avatar||'👤'}</span>`;
+                const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.2rem;">${d.avatar||'👤'}</span>`;
                 let actionsHtml = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
+
+                // Création de la pastille d'état
+                let stateDot = d.status === 2 ? '🔴' : (d.status === 1 ? '🟠' : (d.uid === currentBuzzerId ? '🔔' : '🟢'));
 
                 if (d.status === 2) {
                     hsB = true;
-                    hB += `<div class="score-row" style="border:1px solid var(--danger);"><div style="flex:1;"><span style="color:var(--danger)"><b>${d.name}</b></span></div><div class="player-controls">${actionsHtml}</div></div>`;
+                    hB += `<div class="score-row" style="border:1px solid var(--danger);">
+                                <div style="display:flex; align-items:center; flex:1; gap:10px;">
+                                    <span style="width:25px; text-align:center; font-size:0.8rem;">${stateDot}</span>
+                                    <span style="color:var(--danger)"><b>${d.name}</b></span>
+                                </div>
+                                <div class="player-controls" style="width:135px; justify-content:flex-end;">${actionsHtml}</div>
+                           </div>`;
                 } else if (d.status === 1) {
                     hsI = true;
                     if (d.recoveryRequest) {
-                        hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls">${actionsHtml}</div></div>`;
+                        hI += `<div class="score-row airlock-row">
+                                    <div style="display:flex; align-items:center; flex:1; gap:10px;">
+                                        <span style="width:25px; text-align:center; font-size:0.8rem;">${stateDot}</span>
+                                        <b>${d.name}</b> <small style="color:var(--gold);font-style:italic;">Tentative de reconnexion...</small>
+                                    </div>
+                                    <div class="player-controls" style="width:135px; justify-content:flex-end;">${actionsHtml}</div>
+                               </div>`;
                     } else {
-                        hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls">${actionsHtml}</div></div>`;
+                        hI += `<div class="score-row" style="opacity:0.6;">
+                                    <div style="display:flex; align-items:center; flex:1; gap:10px;">
+                                        <span style="width:25px; text-align:center; font-size:0.8rem;">${stateDot}</span>
+                                        <b>${d.name}</b> <small>(${d.pts||0} pts)</small>
+                                    </div>
+                                    <div class="player-controls" style="width:135px; justify-content:flex-end;">${actionsHtml}</div>
+                               </div>`;
                     }
                 } else {
                     const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
                     hA += `
                     <div class="${rC}">
-                        <div style="display:flex;align-items:center;flex:1;overflow:hidden;">${aH}<b style="margin-right:10px;">${d.name}</b><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div>
-                        <div class="player-controls">
+                        <div style="display:flex;align-items:center;flex:1; gap:10px;">
+                            <span style="width:25px; text-align:center; font-size:0.8rem;">${stateDot}</span>
+                            <div style="width:35px; display:flex; justify-content:center; align-items:center;">${aH}</div>
+                            <b style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${d.name}</b>
+                            <select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)" style="margin-right:15px; width:130px;">${tO}</select>
+                        </div>
+                        <div class="player-controls" style="width:135px; justify-content:flex-end;">
                             <div class="team-score-ctrl" title="Score Joueur">
                                 <button class="btn-tiny" onclick="adj('${d.uid}',-1)" title="Retirer 1 point">-</button>
                                 <input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;height:24px;">
@@ -2178,13 +2204,16 @@
                 const safeName = m.name ? m.name.replace(/'/g, "\\'") : "";
                 const safeTeam = teamName.replace(/'/g, "\\'");
                 
+                // On impose 25px de large pour que les couronnes soient parfaitement empilées
+                let crown = m.isCaptain ? `<span style="display:inline-block; width:25px; text-align:center;">👑</span>` : `<span class="ghost-crown" style="display:inline-block; width:25px; text-align:center;" title="Nommer capitaine" onclick="transferCaptaincy('', '', '${m.id}', '${safeName}', '${safeTeam}')">👑</span>`;
+
                 html += `
-                <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px; ${m.status===-1 ? 'border:1px solid #2ecc71;' : ''}">
-                    <span style="margin-right:8px; font-size:0.8rem;">${m.status===-1 ? '🔔' : '🟢'}</span>
-                    ${m.isCaptain ? '👑' : `<span class="ghost-crown" title="Nommer capitaine" onclick="transferCaptaincy('', '', '${m.id}', '${safeName}', '${safeTeam}')">👑</span>`}
-                    ${av}
-                    <b style="margin-left:10px; flex:1;">${m.name}</b>
-                    <div style="display:flex; align-items:center; gap:5px;">
+                <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px; margin-bottom:4px; ${m.status===-1 ? 'border:1px solid #2ecc71;' : ''}">
+                    <span style="width:25px; text-align:center; font-size:0.8rem;">${m.status===-1 ? '🔔' : '🟢'}</span>
+                    ${crown}
+                    <div style="width:35px; display:flex; justify-content:center; align-items:center; margin-right:10px;">${av}</div>
+                    <b style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.name}</b>
+                    <div style="display:flex; align-items:center; gap:5px; width:135px; justify-content:flex-end;">
                         <div class="team-score-ctrl">
                             <button class="btn-tiny" onclick="adj('${m.id}',-1)">-</button>
                             <span style="min-width:25px; text-align:center; color:var(--accent); font-weight:bold;">${m.pts||0}</span>
