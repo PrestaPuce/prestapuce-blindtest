@@ -1386,7 +1386,7 @@
                 if (d.avatar && d.avatar !== player.avatar) { player.avatar = d.avatar; profileChanged = true; }
                 if (profileChanged) { localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar})); localStorage.setItem('presta_player_session', JSON.stringify(player)); }
 
-                /* --- PATCH V1.178 : RADAR DE CAPITANAT (Corrigé) --- */
+                /* --- PATCH V1.178 : RADAR DE CAPITANAT (Final) --- */
                 const wasCaptain = isCaptain;
                 isCaptain = d.isCaptain === true;
 
@@ -1397,25 +1397,21 @@
                     checkWhyKickedAndShowModal(oldTeamName);
                 }
                 
-                // Interception du message de transfert de couronne envoyé par le MJ
+                // Si le MJ a envoyé une phrase personnalisée (MJ -> Joueur), on l'affiche
                 if (d.captainMessage) {
                     alert(d.captainMessage);
-                    // On efface le message pour qu'il ne s'affiche qu'une seule fois
+                    // On efface le message de la BDD après lecture pour éviter les répétitions
                     roomRef.child('players/' + myUserID + '/captainMessage').remove();
                 } else {
-                    // Fallback de sécurité au cas où l'attribution s'est faite sans message
+                    // Fallback automatique (Succession sans intervention du MJ)
                     if (!wasCaptain && isCaptain && newTeamName !== "Solo" && !isExiting && !isRoomClosing) {
                         alert(`👑 Bonne nouvelle ! Vous avez été promu Capitaine de l'équipe ${newTeamName} !`);
                     } else if (wasCaptain && !isCaptain && oldTeamName !== "Solo" && newTeamName === oldTeamName && !isExiting && !isRoomClosing) {
-                        // Phrase rendue 100% neutre pour ne pas accuser le MJ à tort
                         alert(`ℹ️ Le rôle de Capitaine a été réattribué à un autre joueur de l'équipe.`);
-                        if(document.getElementById('overlay-manage-team').style.display === 'flex') {
-                            closeTeamManagement();
-                        }
                     }
                 }
 
-                player.team = newTeamName; player.teamIcon = d.teamIcon || ""; 
+                player.team = newTeamName; player.teamIcon = d.teamIcon || "";
                 /* ------------------------------------------------ */
                 
                 updateGameHeader(); monitorTeamChanges(player.team); 

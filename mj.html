@@ -1790,25 +1790,27 @@
             }
         }
 
-        /* --- PATCH V1.206 : TEXTES PERSONNALISÉS TRANSFERT CAPITAINE --- */
+        /* --- PATCH V1.206 : PHRASES DE TRANSFERT PERSONNALISÉES --- */
         function transferCaptaincy(oldId, oldName, newId, newName, teamName) {
-            if (confirm(`Êtes-vous sûr de vouloir enlever le capitanat à ${oldName || 'ce joueur'} pour le donner à ${newName} ?`)) {
+            const displayOld = oldName || "L'ancien capitaine";
+            if (confirm(`Êtes-vous sûr de vouloir enlever le capitanat à ${displayOld} pour le donner à ${newName} ?`)) {
                 let updates = {};
+                // On retire la couronne à tout le monde dans l'équipe pour être sûr
                 Object.keys(allPlayersData).forEach(k => {
                     if (allPlayersData[k].teamName === teamName && allPlayersData[k].isCaptain) {
                         updates[k + '/isCaptain'] = false;
                     }
                 });
                 
-                if(oldId && allPlayersData[oldId]) {
+                // Message pour l'ancien capitaine
+                if(oldId) {
                     updates[oldId + '/isCaptain'] = false;
-                    // Le message exact pour l'ancien capitaine
-                    updates[oldId + '/captainMessage'] = `ℹ️ Vous n'êtes plus capitaine. Le nouveau capitaine est ${newName}.`;
+                    updates[oldId + '/captainMessage'] = `ℹ️ Vous n'êtes plus capitaine de l'équipe ${teamName}. ${newName} est le nouveau capitaine.`;
                 }
                 
+                // Message pour le nouveau capitaine
                 updates[newId + '/isCaptain'] = true;
-                // Le message exact pour le nouveau capitaine
-                updates[newId + '/captainMessage'] = `👑 Pour information, ${oldName || "l'ancien capitaine"} n'est plus le capitaine de cette équipe. Vous devenez le nouveau capitaine.`;
+                updates[newId + '/captainMessage'] = `👑 ${displayOld} n'est plus capitaine. Vous êtes le nouveau capitaine de l'équipe ${teamName} !`;
                 
                 roomRef.child('players').update(updates);
             }
