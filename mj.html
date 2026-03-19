@@ -208,7 +208,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.197</div>
+    <div class="version-tag" id="app-version-display">v1.198</div>
 
     <div id="global-dropdown"></div>
 
@@ -317,7 +317,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.197</span>
+                    <span id="disp-v-mj">v1.198</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -670,7 +670,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.197";
+        const APP_VERSION = "1.198";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -929,7 +929,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.197", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.198", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1919,11 +1919,15 @@
             
             // En-têtes de tri Lobby Joueurs
             const sortHtml = `
-                <div class="sort-header">
-                    <div style="width:30px; text-align:center;" class="sort-col ${playerSort.col==='status'?'sort-active':''}" onclick="setSort('player','status')" title="Trier par État">${getSortArrow('player','status')}</div>
-                    <div style="flex:1; margin-left:10px;" class="sort-col ${playerSort.col==='name'?'sort-active':''}" onclick="setSort('player','name')" title="Trier par Nom">${getSortArrow('player','name')} Nom</div>
-                    <div style="width:100px; text-align:right; margin-right:45px;" class="sort-col ${playerSort.col==='pts'?'sort-active':''}" onclick="setSort('player','pts')" title="Trier par Score">${getSortArrow('player','pts')} Score</div>
-                    <div style="width:30px;"></div>
+                <div class="sort-header" style="display: flex; justify-content: space-between; padding: 8px 10px; margin-bottom: 5px;">
+                    <div style="display: flex; flex: 1; align-items: center; gap: 10px;">
+                        <div class="sort-col ${playerSort.col==='status'?'sort-active':''}" onclick="setSort('player','status')" title="Trier par État" style="width:50px;">${getSortArrow('player','status')} ÉTAT</div>
+                        <div class="sort-col ${playerSort.col==='name'?'sort-active':''}" onclick="setSort('player','name')" title="Trier par Nom" style="flex:1;">${getSortArrow('player','name')} NOM</div>
+                    </div>
+                    <div style="display: flex; align-items: center; width: 135px;">
+                        <div class="sort-col ${playerSort.col==='pts'?'sort-active':''}" onclick="setSort('player','pts')" title="Trier par Score" style="width: 90px; justify-content: center;">${getSortArrow('player','pts')} SCORE</div>
+                        <div style="width: 35px;"></div>
+                    </div>
                 </div>`;
             
             let pArr = [];
@@ -2018,11 +2022,15 @@
             const focusData = saveFocus();
 
             const sortHtml = `
-                <div class="sort-header">
-                    <div style="width:30px; text-align:center;" class="sort-col ${teamSort.col==='status'?'sort-active':''}" onclick="setSort('team','status')" title="Trier par État">${getSortArrow('team','status')}</div>
-                    <div style="flex:1; margin-left:45px;" class="sort-col ${teamSort.col==='name'?'sort-active':''}" onclick="setSort('team','name')" title="Trier par Nom">${getSortArrow('team','name')} Équipe</div>
-                    <div style="width:100px; text-align:right; margin-right:45px;" class="sort-col ${teamSort.col==='score'?'sort-active':''}" onclick="setSort('team','score')" title="Trier par Score">${getSortArrow('team','score')} Score</div>
-                    <div style="width:30px;"></div>
+                <div class="sort-header" style="display: flex; justify-content: space-between; padding: 8px 15px; margin-bottom: 5px;">
+                    <div style="display: flex; flex: 1; align-items: center; gap: 10px;">
+                        <div class="sort-col ${teamSort.col==='status'?'sort-active':''}" onclick="setSort('team','status')" title="Trier par État" style="width:50px;">${getSortArrow('team','status')} ÉTAT</div>
+                        <div class="sort-col ${teamSort.col==='name'?'sort-active':''}" onclick="setSort('team','name')" title="Trier par Nom" style="flex:1; margin-left: 10px;">${getSortArrow('team','name')} ÉQUIPE</div>
+                    </div>
+                    <div style="display: flex; align-items: center; width: 145px;">
+                        <div class="sort-col ${teamSort.col==='score'?'sort-active':''}" onclick="setSort('team','score')" title="Trier par Score" style="width: 90px; justify-content: center;">${getSortArrow('team','score')} SCORE</div>
+                        <div style="width: 35px;"></div>
+                    </div>
                 </div>`;
             container.innerHTML = sortHtml;
 
@@ -2152,11 +2160,16 @@
             });
 
             const sortHtml = `
-                <div class="sort-header" style="margin-top:10px;">
-                    <div style="width:20px; text-align:center;" class="sort-col" onclick="setSort('member','status')" title="État">${getSortArrow('member','status')}</div>
-                    <div style="width:30px; text-align:center;" class="sort-col ${memberSort.col==='cpt'?'sort-active':''}" onclick="setSort('member','cpt')" title="Trier par succession">${getSortArrow('member','cpt')} CPT</div>
-                    <div style="flex:1; margin-left:10px;" class="sort-col ${memberSort.col==='name'?'sort-active':''}" onclick="setSort('member','name')" title="Trier par Nom">${getSortArrow('member','name')} Joueur</div>
-                    <div style="width:80px; text-align:right; margin-right:40px;" class="sort-col ${memberSort.col==='pts'?'sort-active':''}" onclick="setSort('member','pts')" title="Trier par Score">${getSortArrow('member','pts')} Pts</div>
+                <div class="sort-header" style="display: flex; justify-content: space-between; padding: 8px; margin-top: 10px; margin-bottom: 5px;">
+                    <div style="display: flex; flex: 1; align-items: center; gap: 5px;">
+                        <div class="sort-col" onclick="setSort('member','status')" title="État" style="width:45px; font-size:0.65rem;">${getSortArrow('member','status')} ÉTAT</div>
+                        <div class="sort-col ${memberSort.col==='cpt'?'sort-active':''}" onclick="setSort('member','cpt')" title="Trier par succession" style="width:40px; font-size:0.65rem;">${getSortArrow('member','cpt')} CPT</div>
+                        <div class="sort-col ${memberSort.col==='name'?'sort-active':''}" onclick="setSort('member','name')" title="Trier par Nom" style="flex:1;">${getSortArrow('member','name')} NOM</div>
+                    </div>
+                    <div style="display: flex; align-items: center; width: 135px;">
+                        <div class="sort-col ${memberSort.col==='pts'?'sort-active':''}" onclick="setSort('member','pts')" title="Trier par Score" style="width: 90px; justify-content: center;">${getSortArrow('member','pts')} SCORE</div>
+                        <div style="width: 35px;"></div>
+                    </div>
                 </div>`;
 
             let html = sortHtml;
