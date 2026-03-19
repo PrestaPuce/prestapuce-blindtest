@@ -514,7 +514,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.177";
+        const CLIENT_VERSION = "1.178";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -759,11 +759,14 @@
                     if(!autoLogin && savedProfile) {
                         try {
                             const p = JSON.parse(savedProfile);
-                            if(p.pseudo && p.avatar) {
+                            // 🛡️ SÉCURITÉ 1 : Rejet du cache corrompu (undefined/null)
+                            if(p.pseudo && p.avatar && p.pseudo !== "undefined" && p.pseudo !== "null") {
                                 document.getElementById('reuse-pseudo-display').innerText = p.pseudo;
                                 const avImg = document.getElementById('reuse-avatar-preview');
                                 if(p.avatar.length > 20) { avImg.src = p.avatar; avImg.style.display='block'; } else { avImg.style.display='none'; }
                                 document.getElementById('overlay-reuse').style.display = 'flex'; return;
+                            } else {
+                                localStorage.removeItem('buzz_lastProfile'); // Purge du cache
                             }
                         } catch(e) {}
                     }
@@ -772,6 +775,17 @@
                         if(snapUser.exists()) {
                             const data = snapUser.val();
                             if(data.banned) { alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
+                            
+                            // 🛡️ SÉCURITÉ 2 : Destruction du joueur fantôme dans Firebase
+                            if(!data.name || data.name === "undefined" || data.name === "null") {
+                                snapUser.ref.remove();
+                                localStorage.removeItem('presta_player_session');
+                                myUserID = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                                localStorage.setItem('buzz_userId', myUserID);
+                                navigateTo('step-welcome');
+                                return;
+                            }
+
                             player = { pseudo: data.name, avatar: data.avatar, team: data.teamName || "Solo", teamIcon: data.teamIcon || "" };
                             showReconnectScreen(); return;
                         }
@@ -956,6 +970,7 @@
             });
         }
 
+        /* --- PATCH V1.178 : VERROUILLAGE ATOMIQUE (Anti-Doublon Capitaine) --- */
         function joinTeam(name, icon) { 
             if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
             
@@ -967,8 +982,8 @@
                 }
                 
                 player.team = name; player.teamIcon = icon; 
-                
                 const trueTime = Date.now() + serverTimeOffset;
+                
                 roomRef.child('players').once('value', snapPlayers => {
                     let hasCaptain = false;
                     let activeMembers = 0;
@@ -979,15 +994,30 @@
                             if (p.isCaptain) hasCaptain = true;
                         }
                     });
-                    const becomeCaptain = (!hasCaptain || activeMembers === 0);
                     
-                    if(isEditing) { 
-                        roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { finishEdit(true); }); 
-                    } else if (isRecovering) {
-                        roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { isRecovering = false; finishEdit(false); }); 
-                    } else { 
-                        isCaptain = becomeCaptain;
-                        showRecap(); 
+                    // Fonction d'enregistrement final
+                    const executeJoin = (becomeCaptain) => {
+                        if(isEditing) { 
+                            roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { finishEdit(true); }); 
+                        } else if (isRecovering) {
+                            roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { isRecovering = false; finishEdit(false); }); 
+                        } else { 
+                            isCaptain = becomeCaptain;
+                            showRecap(); 
+                        }
+                    };
+
+                    // Si l'équipe n'a pas de capitaine, on tente de poser le verrou
+                    if (!hasCaptain || activeMembers === 0) {
+                        roomRef.child('teams/' + name + '/captainLock').transaction(currentLock => {
+                            if (currentLock === null || currentLock === myUserID) return myUserID; // Verrou libre, on le prend
+                            return undefined; // Trop tard, un autre joueur l'a pris la même milliseconde
+                        }, (error, committed, snapshot) => {
+                            executeJoin(committed); // 'committed' vaut true si on a réussi à prendre le verrou
+                        });
+                    } else {
+                        // L'équipe a déjà un capitaine
+                        executeJoin(false);
                     }
                 });
             });
@@ -1356,6 +1386,7 @@
                 if (d.avatar && d.avatar !== player.avatar) { player.avatar = d.avatar; profileChanged = true; }
                 if (profileChanged) { localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar})); localStorage.setItem('presta_player_session', JSON.stringify(player)); }
 
+                /* --- PATCH V1.178 : RADAR DE CAPITANAT (Corrigé) --- */
                 const wasCaptain = isCaptain;
                 isCaptain = d.isCaptain === true;
 
@@ -1366,16 +1397,26 @@
                     checkWhyKickedAndShowModal(oldTeamName);
                 }
                 
-                if (!wasCaptain && isCaptain && newTeamName !== "Solo" && !isExiting && !isRoomClosing) {
-                    alert(`👑 Bonne nouvelle ! Vous avez été promu Capitaine de l'équipe ${newTeamName} !`);
-                } else if (wasCaptain && !isCaptain && oldTeamName !== "Solo" && newTeamName === oldTeamName && !isExiting && !isRoomClosing) {
-                    alert(`ℹ️ L'animateur a transféré le rôle de Capitaine à un autre membre de l'équipe.`);
-                    if(document.getElementById('overlay-manage-team').style.display === 'flex') {
-                        closeTeamManagement();
+                // Interception du message de transfert de couronne envoyé par le MJ
+                if (d.captainMessage) {
+                    alert(d.captainMessage);
+                    // On efface le message pour qu'il ne s'affiche qu'une seule fois
+                    roomRef.child('players/' + myUserID + '/captainMessage').remove();
+                } else {
+                    // Fallback de sécurité au cas où l'attribution s'est faite sans message
+                    if (!wasCaptain && isCaptain && newTeamName !== "Solo" && !isExiting && !isRoomClosing) {
+                        alert(`👑 Bonne nouvelle ! Vous avez été promu Capitaine de l'équipe ${newTeamName} !`);
+                    } else if (wasCaptain && !isCaptain && oldTeamName !== "Solo" && newTeamName === oldTeamName && !isExiting && !isRoomClosing) {
+                        // Phrase rendue 100% neutre pour ne pas accuser le MJ à tort
+                        alert(`ℹ️ Le rôle de Capitaine a été réattribué à un autre joueur de l'équipe.`);
+                        if(document.getElementById('overlay-manage-team').style.display === 'flex') {
+                            closeTeamManagement();
+                        }
                     }
                 }
 
                 player.team = newTeamName; player.teamIcon = d.teamIcon || ""; 
+                /* ------------------------------------------------ */
                 
                 updateGameHeader(); monitorTeamChanges(player.team); 
                 document.getElementById('game-score').innerText = d.pts || 0; 
