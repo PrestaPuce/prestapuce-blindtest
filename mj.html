@@ -184,31 +184,36 @@
         .readonly-mode #inactive-section, .readonly-mode #banned-section { display: none !important; }
         .readonly-mode #mj-team-inactive-section, .readonly-mode #mj-team-banned-section { display: none !important; }
         .readonly-mode #player-search-container { display: none !important; }
-		/* --- PATCH V1.197 : CSS TRI & CADRE VERT --- */
-        /* Correction rognage cadre vert */
-        .score-row.buzzer-active-row { 
-            box-shadow: inset 0 0 10px #2ecc71, 0 0 15px rgba(46, 204, 113, 0.4) !important; 
-            transform: scale(1) !important; 
-            border: 2px solid var(--success) !important;
-            margin: 2px 0;
-        }
-        /* Style des en-têtes de tri */
-        .sort-header { 
-            display: flex; background: rgba(255,255,255,0.1); 
-            border-radius: 5px; margin-bottom: 8px; padding: 5px 10px;
-            font-size: 0.75rem; font-weight: bold; color: #bdc3c7;
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .sort-col { cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
-        .sort-col:hover { color: var(--accent); }
-        .sort-active { color: var(--accent); }
+        /* --- PATCH V1.200 : CSS GRID & COMPACTAGE --- */
+        .score-row.buzzer-active-row { box-shadow: inset 0 0 10px #2ecc71, 0 0 15px rgba(46, 204, 113, 0.4) !important; transform: scale(1) !important; border: 2px solid var(--success) !important; margin: 1px 0; }
+        .sort-header { display: flex; background: rgba(255,255,255,0.1); border-radius: 5px; margin-bottom: 4px; padding: 4px 8px; font-size: 0.70rem; font-weight: bold; color: #bdc3c7; text-transform: uppercase; letter-spacing: 0.5px; }
+        .sort-col { cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; white-space: nowrap; }
+        .sort-col:hover { color: var(--accent); } .sort-active { color: var(--accent); }
+        
+        /* Compactage extrême des lignes */
+        .score-row { padding: 4px 8px; margin-bottom: 2px; min-height: 38px; }
+        .hub-line { padding: 4px 8px; margin-bottom: 2px; min-height: 38px; }
+        .hub-details { padding: 8px; margin-top: -5px; }
+        .crest-mini-bg { width: 24px; height: 24px; margin: 0; }
+        .player-controls, .team-controls { height: 28px; }
+        .btn-tiny { width: 22px; height: 22px; line-height: 22px; }
+        
+        /* Les Grilles Mathématiques (Le Fil à Plomb) */
+        .grid-player { display: grid; grid-template-columns: 50px 40px 1fr 120px 140px; align-items: center; gap: 5px; }
+        .grid-team { display: grid; grid-template-columns: 50px 35px 1fr 70px 130px; align-items: center; gap: 5px; }
+        .grid-member { display: grid; grid-template-columns: 50px 30px 40px 1fr 140px; align-items: center; gap: 5px; }
+        
+        /* Ajustements internes grille */
+        .grid-cell-center { display: flex; justify-content: center; align-items: center; }
+        .grid-cell-right { display: flex; justify-content: flex-end; align-items: center; }
+        .grid-cell-left { display: flex; justify-content: flex-start; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     </style>
 </head>
 <body>
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.199</div>
+    <div class="version-tag" id="app-version-display">v1.200</div>
 
     <div id="global-dropdown"></div>
 
@@ -317,7 +322,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.199</span>
+                    <span id="disp-v-mj">v1.200</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -670,7 +675,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.199";
+        const APP_VERSION = "1.200";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -929,7 +934,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.199", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.200", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1917,17 +1922,13 @@
             const sl = document.getElementById('score-list'), il = document.getElementById('inactive-list'), bl = document.getElementById('banned-list');
             const is = document.getElementById('inactive-section'), bs = document.getElementById('banned-section');
             
-            // En-têtes de tri Lobby Joueurs
             const sortHtml = `
-                <div class="sort-header" style="display: flex; justify-content: space-between; padding: 8px 10px; margin-bottom: 5px;">
-                    <div style="display: flex; flex: 1; align-items: center; gap: 10px;">
-                        <div class="sort-col ${playerSort.col==='status'?'sort-active':''}" onclick="setSort('player','status')" title="Trier par État" style="width:50px;">${getSortArrow('player','status')} ÉTAT</div>
-                        <div class="sort-col ${playerSort.col==='name'?'sort-active':''}" onclick="setSort('player','name')" title="Trier par Nom" style="flex:1;">${getSortArrow('player','name')} NOM</div>
-                    </div>
-                    <div style="display: flex; align-items: center; width: 135px;">
-                        <div class="sort-col ${playerSort.col==='pts'?'sort-active':''}" onclick="setSort('player','pts')" title="Trier par Score" style="width: 90px; justify-content: center;">${getSortArrow('player','pts')} SCORE</div>
-                        <div style="width: 35px;"></div>
-                    </div>
+                <div class="sort-header grid-player" style="padding-right:12px;">
+                    <div class="sort-col grid-cell-center ${playerSort.col==='status'?'sort-active':''}" onclick="setSort('player','status')" title="Trier par État">${getSortArrow('player','status')} ÉTAT</div>
+                    <div></div>
+                    <div class="sort-col grid-cell-left ${playerSort.col==='name'?'sort-active':''}" onclick="setSort('player','name')" title="Trier par Nom">${getSortArrow('player','name')} NOM</div>
+                    <div class="sort-col grid-cell-left ${playerSort.col==='team'?'sort-active':''}" onclick="setSort('player','team')" title="Trier par Mode/Équipe">${getSortArrow('player','team')} MODE</div>
+                    <div class="sort-col grid-cell-center ${playerSort.col==='pts'?'sort-active':''}" onclick="setSort('player','pts')" title="Trier par Score">${getSortArrow('player','pts')} SCORE</div>
                 </div>`;
             
             let pArr = [];
@@ -1937,13 +1938,13 @@
                 pArr.push({ uid: uid, status: status, ...d }); 
             });
 
-            // Logique de Tri Dynamique "Excel"
             pArr.sort((a, b) => {
                 if (a.uid === currentBuzzerId) return -1; if (b.uid === currentBuzzerId) return 1;
                 let valA, valB;
                 if (playerSort.col === 'name') { valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); }
                 else if (playerSort.col === 'pts') { valA = a.pts || 0; valB = b.pts || 0; }
                 else if (playerSort.col === 'status') { valA = a.status; valB = b.status; }
+                else if (playerSort.col === 'team') { valA = (a.teamName||"Solo").toLowerCase(); valB = (b.teamName||"Solo").toLowerCase(); }
                 else {
                     let iA=buzzHistory.indexOf(a.name), iB=buzzHistory.indexOf(b.name);
                     if(iA!==-1 || iB!==-1) return iB-iA;
@@ -1954,10 +1955,8 @@
                 return 0;
             });
 
-            hA = sortHtml; // On injecte l'en-tête en premier
-
-            const searchInput = document.getElementById('player-search');
-            const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : "";
+            hA = sortHtml;
+            const searchVal = document.getElementById('player-search') ? document.getElementById('player-search').value.trim().toLowerCase() : "";
 
             pArr.forEach(d => {
                 if (searchVal && !d.name.toLowerCase().includes(searchVal)) return;
@@ -1965,55 +1964,40 @@
                 let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; 
                 Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
                 
-                const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.2rem;">${d.avatar||'👤'}</span>`;
+                const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.2rem;">${d.avatar||'👤'}</span>`;
                 let actionsHtml = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
-
-                // Création de la pastille d'état
                 let stateDot = d.status === 2 ? '🔴' : (d.status === 1 ? '🟠' : (d.uid === currentBuzzerId ? '🔔' : '🟢'));
 
                 if (d.status === 2) {
                     hsB = true;
-                    hB += `<div class="score-row" style="border:1px solid var(--danger);">
-                                <div style="display:flex; align-items:center; flex:1; gap:10px;">
-                                    <span style="width:25px; text-align:center; font-size:0.8rem;">${stateDot}</span>
-                                    <span style="color:var(--danger)"><b>${d.name}</b></span>
-                                </div>
-                                <div class="player-controls" style="width:135px; justify-content:flex-end;">${actionsHtml}</div>
+                    hB += `<div class="score-row grid-player" style="border:1px solid var(--danger);">
+                                <div class="grid-cell-center" style="font-size:0.8rem;">${stateDot}</div><div class="grid-cell-center">${aH}</div>
+                                <div class="grid-cell-left" style="color:var(--danger)"><b>${d.name}</b></div><div></div>
+                                <div class="player-controls grid-cell-right">${actionsHtml}</div>
                            </div>`;
                 } else if (d.status === 1) {
                     hsI = true;
-                    if (d.recoveryRequest) {
-                        hI += `<div class="score-row airlock-row">
-                                    <div style="display:flex; align-items:center; flex:1; gap:10px;">
-                                        <span style="width:25px; text-align:center; font-size:0.8rem;">${stateDot}</span>
-                                        <b>${d.name}</b> <small style="color:var(--gold);font-style:italic;">Tentative de reconnexion...</small>
-                                    </div>
-                                    <div class="player-controls" style="width:135px; justify-content:flex-end;">${actionsHtml}</div>
-                               </div>`;
-                    } else {
-                        hI += `<div class="score-row" style="opacity:0.6;">
-                                    <div style="display:flex; align-items:center; flex:1; gap:10px;">
-                                        <span style="width:25px; text-align:center; font-size:0.8rem;">${stateDot}</span>
-                                        <b>${d.name}</b> <small>(${d.pts||0} pts)</small>
-                                    </div>
-                                    <div class="player-controls" style="width:135px; justify-content:flex-end;">${actionsHtml}</div>
-                               </div>`;
-                    }
+                    let txt = d.recoveryRequest ? `<small style="color:var(--gold);font-style:italic;">Tentative...</small>` : `<small>(${d.pts||0} pts)</small>`;
+                    let rClass = d.recoveryRequest ? "score-row airlock-row grid-player" : "score-row grid-player";
+                    let opac = d.recoveryRequest ? "1" : "0.6";
+                    hI += `<div class="${rClass}" style="opacity:${opac};">
+                                <div class="grid-cell-center" style="font-size:0.8rem;">${stateDot}</div><div class="grid-cell-center">${aH}</div>
+                                <div class="grid-cell-left"><b>${d.name}</b> &nbsp;${txt}</div><div></div>
+                                <div class="player-controls grid-cell-right">${actionsHtml}</div>
+                           </div>`;
                 } else {
-                    const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
+                    const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row grid-player" : "score-row grid-player";
                     hA += `
                     <div class="${rC}">
-                        <div style="display:flex;align-items:center;flex:1; gap:10px;">
-                            <span style="width:25px; text-align:center; font-size:0.8rem;">${stateDot}</span>
-                            <div style="width:35px; display:flex; justify-content:center; align-items:center;">${aH}</div>
-                            <b style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${d.name}</b>
-                            <select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)" style="margin-right:15px; width:130px;">${tO}</select>
-                        </div>
-                        <div class="player-controls" style="width:135px; justify-content:flex-end;">
-                            <div class="team-score-ctrl" title="Score Joueur">
-                                <button class="btn-tiny" onclick="adj('${d.uid}',-1)" title="Retirer 1 point">-</button>
-                                <input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;height:24px;">
-                                <button class="btn-tiny" onclick="adj('${d.uid}',1)" title="Ajouter 1 point">+</button>
+                        <div class="grid-cell-center" style="font-size:0.8rem;">${stateDot}</div>
+                        <div class="grid-cell-center">${aH}</div>
+                        <div class="grid-cell-left"><b>${d.name}</b></div>
+                        <div class="grid-cell-left"><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)" style="width:110px;">${tO}</select></div>
+                        <div class="player-controls grid-cell-right">
+                            <div class="team-score-ctrl">
+                                <button class="btn-tiny" onclick="adj('${d.uid}',-1)">-</button>
+                                <input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:35px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0;">
+                                <button class="btn-tiny" onclick="adj('${d.uid}',1)">+</button>
                             </div>
                             ${actionsHtml}
                         </div>
@@ -2022,7 +2006,6 @@
             });
             
             sl.innerHTML = hA; il.innerHTML = hI; bl.innerHTML = hB; 
-            
             let activeCount = pArr.filter(p => p.status === 0).length;
             if(currentPlayerFilter === 'all') { sl.style.display = activeCount > 0 ? 'block' : 'none'; bs.style.display = hsB ? "block" : "none"; is.style.display = hsI ? "block" : "none"; } 
             else if (currentPlayerFilter === 'active') { sl.style.display = 'block'; bs.style.display = 'none'; is.style.display = 'none'; } 
@@ -2048,25 +2031,33 @@
             const focusData = saveFocus();
 
             const sortHtml = `
-                <div class="sort-header" style="display: flex; justify-content: space-between; padding: 8px 15px; margin-bottom: 5px;">
-                    <div style="display: flex; flex: 1; align-items: center; gap: 10px;">
-                        <div class="sort-col ${teamSort.col==='status'?'sort-active':''}" onclick="setSort('team','status')" title="Trier par État" style="width:50px;">${getSortArrow('team','status')} ÉTAT</div>
-                        <div class="sort-col ${teamSort.col==='name'?'sort-active':''}" onclick="setSort('team','name')" title="Trier par Nom" style="flex:1; margin-left: 10px;">${getSortArrow('team','name')} ÉQUIPE</div>
-                    </div>
-                    <div style="display: flex; align-items: center; width: 145px;">
-                        <div class="sort-col ${teamSort.col==='score'?'sort-active':''}" onclick="setSort('team','score')" title="Trier par Score" style="width: 90px; justify-content: center;">${getSortArrow('team','score')} SCORE</div>
-                        <div style="width: 35px;"></div>
-                    </div>
+                <div class="sort-header grid-team" style="padding-right:12px;">
+                    <div class="sort-col grid-cell-center ${teamSort.col==='status'?'sort-active':''}" onclick="setSort('team','status')" title="Trier par État">${getSortArrow('team','status')} ÉTAT</div>
+                    <div></div>
+                    <div class="sort-col grid-cell-left ${teamSort.col==='name'?'sort-active':''}" onclick="setSort('team','name')" title="Trier par Nom">${getSortArrow('team','name')} ÉQUIPE</div>
+                    <div class="sort-col grid-cell-center ${teamSort.col==='score'?'sort-active':''}" onclick="setSort('team','score')" title="Trier par Score Total">${getSortArrow('team','score')} SCORE</div>
+                    <div class="sort-col grid-cell-center" title="Ajuster les Bonus">BONUS</div>
                 </div>`;
             container.innerHTML = sortHtml;
 
             let tArr = Object.keys(globalTeams).map(k => {
                 const t = globalTeams[k];
-                let total = 0; Object.values(allPlayersData).forEach(p => { if(p.teamName === k) total += (p.pts || 0); });
+                let total = 0; let activeCount = 0;
+                Object.values(allPlayersData).forEach(p => { 
+                    if(p.teamName === k) {
+                        total += (p.pts || 0);
+                        if(p.active !== false && !p.banned) activeCount++;
+                    } 
+                });
                 total += (t.bonus || 0);
-                let status = 0; if(t.banned) status=2; else if(t.active===false) status=1;
+                
+                let status = 0; 
+                if(t.banned) status=2; 
+                else if(t.active===false) status=1;
+                else if(activeCount === 0) status=3; // 3 = Vide (Pastille Noire)
+
                 let hasBuzzer = Object.values(allPlayersData).some(p => p.teamName === k && p.uid === currentBuzzerId);
-                return { key: k, status: status, totalScore: total, hasBuzzer: hasBuzzer, ...t };
+                return { key: k, status: status, totalScore: total, activeCount: activeCount, hasBuzzer: hasBuzzer, ...t };
             });
 
             tArr.sort((a, b) => {
@@ -2084,26 +2075,22 @@
             let html = sortHtml;
             tArr.forEach(t => {
                 const k = t.key;
-                if (currentMjTeamFilter === 'active' && (t.status !== 0)) return;
+                if (currentMjTeamFilter === 'active' && (t.status !== 0 && t.status !== 3)) return;
                 if (currentMjTeamFilter === 'inactive' && t.status !== 1) return;
                 if (currentMjTeamFilter === 'banned' && t.status !== 2) return;
                 if (searchVal && !k.toLowerCase().includes(searchVal)) return;
                 
-                let badgeClass = t.status === 2 ? "badge-banned" : (t.status === 1 ? "badge-inactive" : "badge-active");
-                let badgeText = t.status === 2 ? "🔴 BANNIE" : (t.status === 1 ? "🟠 INACTIVE" : "🟢 ACTIVE");
-                let activeCount = Object.values(allPlayersData).filter(p => p.teamName === k && p.active !== false && !p.banned).length;
+                let stateDot = t.status === 2 ? '🔴' : (t.status === 1 ? '🟠' : (t.status === 3 ? '⚫' : '🟢'));
                 const safeK = k.replace(/'/g, "\\'");
+                const border = t.hasBuzzer ? 'border:2px solid #2ecc71; background:rgba(46,204,113,0.1);' : '';
                 
                 html += `
-                <div class="hub-line" style="margin-bottom:0; border-radius:8px; ${t.hasBuzzer ? 'border:2px solid #2ecc71; background:rgba(46,204,113,0.1);' : ''}" onclick="toggleTeamAccordion('${safeK}')">
-                    <span id="team-arrow-${k}" class="hub-arrow">▶</span>
-                    <div class="crest-mini-bg"><img src="${t.icon}" class="crest-mini"></div>
-                    <div class="hub-line-text" style="flex: 1; margin-left:10px;">
-                        <b style="color:var(--accent);">${k}</b> 
-                        <span style="color:#bdc3c7; font-size:0.85rem; margin-left:10px;">Score : ${t.totalScore} | Actifs : ${activeCount}</span>
-                    </div>
-                    <span class="hub-badge ${badgeClass}" style="margin: 0 10px;">${badgeText}</span>
-                    <div class="team-controls" onclick="event.stopPropagation();">
+                <div class="hub-line grid-team" style="${border}" onclick="toggleTeamAccordion('${safeK}')">
+                    <div class="grid-cell-center"><span id="team-arrow-${k}" class="hub-arrow" style="margin-right:5px;">▶</span><span style="font-size:0.7rem;">${stateDot}</span></div>
+                    <div class="grid-cell-center"><div class="crest-mini-bg"><img src="${t.icon}" class="crest-mini"></div></div>
+                    <div class="grid-cell-left"><b style="color:var(--accent);">${k}</b>&nbsp;<span style="color:#bdc3c7; font-size:0.75rem;">(${t.activeCount} j.)</span></div>
+                    <div class="grid-cell-center"><b style="color:white; font-size:1.1rem;">${t.totalScore}</b></div>
+                    <div class="team-controls grid-cell-right" onclick="event.stopPropagation();">
                         <div class="team-score-ctrl">
                             <button class="btn-tiny" onclick="updateTeamBonus('${safeK}', -1)">-</button>
                             <span class="team-bonus-val">${t.bonus || 0}</span>
@@ -2112,8 +2099,8 @@
                         <button class="dropdown-btn" onclick="openTeamMenu(event, '${safeK}')">⋮</button>
                     </div>
                 </div>
-                <div id="team-details-${k}" class="hub-details" style="display:none; margin-top:0; border-top:none; margin-bottom:10px;" onclick="event.stopPropagation();">
-                    <div id="list-member-${k}" style="display:flex; flex-direction:column; gap:5px;"></div>
+                <div id="team-details-${k}" class="hub-details" style="display:none;" onclick="event.stopPropagation();">
+                    <div id="list-member-${k}"></div>
                 </div>`;
             });
             container.innerHTML = html;
@@ -2169,7 +2156,6 @@
                 }
             });
 
-            // Tri Succession : Buzzer > Capitaine > Ordre d'arrivée
             displayList.sort((a, b) => {
                 if (a.status === -1) return -1; if (b.status === -1) return 1;
                 let valA, valB;
@@ -2186,44 +2172,39 @@
             });
 
             const sortHtml = `
-                <div class="sort-header" style="display: flex; justify-content: space-between; padding: 8px; margin-top: 10px; margin-bottom: 5px;">
-                    <div style="display: flex; flex: 1; align-items: center; gap: 5px;">
-                        <div class="sort-col" onclick="setSort('member','status')" title="État" style="width:45px; font-size:0.65rem;">${getSortArrow('member','status')} ÉTAT</div>
-                        <div class="sort-col ${memberSort.col==='cpt'?'sort-active':''}" onclick="setSort('member','cpt')" title="Trier par succession" style="width:40px; font-size:0.65rem;">${getSortArrow('member','cpt')} CPT</div>
-                        <div class="sort-col ${memberSort.col==='name'?'sort-active':''}" onclick="setSort('member','name')" title="Trier par Nom" style="flex:1;">${getSortArrow('member','name')} NOM</div>
-                    </div>
-                    <div style="display: flex; align-items: center; width: 135px;">
-                        <div class="sort-col ${memberSort.col==='pts'?'sort-active':''}" onclick="setSort('member','pts')" title="Trier par Score" style="width: 90px; justify-content: center;">${getSortArrow('member','pts')} SCORE</div>
-                        <div style="width: 35px;"></div>
-                    </div>
+                <div class="sort-header grid-member" style="margin-top:0; padding-right:12px;">
+                    <div class="sort-col grid-cell-center" onclick="setSort('member','status')" title="État">${getSortArrow('member','status')} ÉTAT</div>
+                    <div class="sort-col grid-cell-center ${memberSort.col==='cpt'?'sort-active':''}" onclick="setSort('member','cpt')" title="Trier par succession">${getSortArrow('member','cpt')} CPT</div>
+                    <div></div>
+                    <div class="sort-col grid-cell-left ${memberSort.col==='name'?'sort-active':''}" onclick="setSort('member','name')" title="Trier par Nom">${getSortArrow('member','name')} NOM</div>
+                    <div class="sort-col grid-cell-center ${memberSort.col==='pts'?'sort-active':''}" onclick="setSort('member','pts')" title="Trier par Score">${getSortArrow('member','pts')} SCORE</div>
                 </div>`;
 
             let html = sortHtml;
             displayList.forEach(m => {
-                let av = (m.avatar && m.avatar.length > 20) ? `<img src="${m.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.5rem;">${m.avatar||'👤'}</span>`;
+                let av = (m.avatar && m.avatar.length > 20) ? `<img src="${m.avatar}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.2rem;">${m.avatar||'👤'}</span>`;
                 const safeName = m.name ? m.name.replace(/'/g, "\\'") : "";
                 const safeTeam = teamName.replace(/'/g, "\\'");
                 
-                // On impose 25px de large pour que les couronnes soient parfaitement empilées
-                let crown = m.isCaptain ? `<span style="display:inline-block; width:25px; text-align:center;">👑</span>` : `<span class="ghost-crown" style="display:inline-block; width:25px; text-align:center;" title="Nommer capitaine" onclick="transferCaptaincy('', '', '${m.id}', '${safeName}', '${safeTeam}')">👑</span>`;
+                let crown = m.isCaptain ? `<span style="font-size:1.1rem;">👑</span>` : `<span class="ghost-crown" style="font-size:1.1rem;" title="Nommer capitaine" onclick="transferCaptaincy('', '', '${m.id}', '${safeName}', '${safeTeam}')">👑</span>`;
 
                 html += `
-                <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px; margin-bottom:4px; ${m.status===-1 ? 'border:1px solid #2ecc71;' : ''}">
-                    <span style="width:25px; text-align:center; font-size:0.8rem;">${m.status===-1 ? '🔔' : '🟢'}</span>
-                    ${crown}
-                    <div style="width:35px; display:flex; justify-content:center; align-items:center; margin-right:10px;">${av}</div>
-                    <b style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.name}</b>
-                    <div style="display:flex; align-items:center; gap:5px; width:135px; justify-content:flex-end;">
+                <div class="score-row grid-member" style="background:rgba(255,255,255,0.05); ${m.status===-1 ? 'border:1px solid #2ecc71;' : 'border:none; border-bottom:1px solid rgba(255,255,255,0.05);'}">
+                    <div class="grid-cell-center" style="font-size:0.7rem;">${m.status===-1 ? '🔔' : '🟢'}</div>
+                    <div class="grid-cell-center">${crown}</div>
+                    <div class="grid-cell-center">${av}</div>
+                    <div class="grid-cell-left"><b>${m.name}</b></div>
+                    <div class="team-controls grid-cell-right">
                         <div class="team-score-ctrl">
                             <button class="btn-tiny" onclick="adj('${m.id}',-1)">-</button>
-                            <span style="min-width:25px; text-align:center; color:var(--accent); font-weight:bold;">${m.pts||0}</span>
+                            <span class="team-bonus-val" style="min-width:20px;">${m.pts||0}</span>
                             <button class="btn-tiny" onclick="adj('${m.id}',1)">+</button>
                         </div>
                         <button class="dropdown-btn" onclick="openMemberMenu(event, '${m.id}', '${safeTeam}', false, ${m.isCaptain||false})">⋮</button>
                     </div>
                 </div>`;
             });
-            list.innerHTML = html;
+            list.innerHTML = `<div style="display:flex; flex-direction:column; gap:2px;">${html}</div>`;
         }
 
         function expelTeamMember(uid, name, avatar, teamName) {
