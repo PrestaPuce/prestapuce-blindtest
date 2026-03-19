@@ -514,7 +514,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.176";
+        const CLIENT_VERSION = "1.177";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -541,8 +541,26 @@
         function releaseWakeLock() {
             if (wakeLock !== null) { wakeLock.release().catch(()=>{}); wakeLock = null; }
         }
+        /* --- PATCH V1.177 : ANTI-AFK (PAGE VISIBILITY API) --- */
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && document.getElementById('step-game').classList.contains('active')) requestWakeLock();
+            
+            // Logique Anti-AFK : On prévient le MJ si le joueur masque l'application
+            if (roomRef && myUserID && gameState !== 'endGame' && gameState !== 'closing') {
+                if (document.hidden || document.visibilityState === 'hidden') {
+                    // Le joueur a réduit le navigateur
+                    roomRef.child('players/' + myUserID).update({ active: false });
+                } else {
+                    // Le joueur revient sur le navigateur
+                    roomRef.child('players/' + myUserID).once('value', snap => {
+                        const p = snap.val();
+                        // On ne le réactive automatiquement QUE s'il n'est pas banni et s'il n'a pas de requête de récupération manuelle
+                        if (p && !p.banned && p.active === false && !p.recoveryRequest) {
+                            roomRef.child('players/' + myUserID).update({ active: true, reconnectedAt: Date.now() });
+                        }
+                    });
+                }
+            }
         });
 
         function compressImage(file, maxWidth, callback) {
