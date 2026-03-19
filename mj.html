@@ -181,7 +181,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.189</div>
+    <div class="version-tag" id="app-version-display">v1.190</div>
 
     <div id="global-dropdown"></div>
 
@@ -290,7 +290,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.189</span>
+                    <span id="disp-v-mj">v1.190</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -433,7 +433,7 @@
                 <div id="mj-team-filters" style="display:flex; gap:5px; overflow-x:auto; margin-bottom:15px;">
                     <button id="tfilter-btn-all" class="hub-tab active" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setMjTeamFilter('all')">Toutes</button>
                     <button id="tfilter-btn-active" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setMjTeamFilter('active')">🟢 Actives</button>
-                    <button id="tfilter-btn-inactive" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setMjTeamFilter('inactive')">🟠 Pause</button>
+                    <button id="tfilter-btn-inactive" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setMjTeamFilter('inactive')">🟠 Inactives</button>
                     <button id="tfilter-btn-banned" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setMjTeamFilter('banned')">🔴 Bannies</button>
                 </div>
                 
@@ -451,7 +451,7 @@
                 <div id="player-filters" style="display:flex; gap:5px; overflow-x:auto; margin-bottom:15px;">
                     <button id="filter-btn-all" class="hub-tab active" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setPlayerFilter('all')">Tous</button>
                     <button id="filter-btn-active" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setPlayerFilter('active')">🟢 Actifs</button>
-                    <button id="filter-btn-inactive" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setPlayerFilter('inactive')">🟠 Pause</button>
+                    <button id="filter-btn-inactive" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setPlayerFilter('inactive')">🟠 Inactifs</button>
                     <button id="filter-btn-banned" class="hub-tab" style="margin:0; width:auto; flex:1; padding:8px 5px; font-size:0.8rem;" onclick="setPlayerFilter('banned')">🔴 Bannis</button>
                 </div>
                 
@@ -641,7 +641,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.189";
+        const APP_VERSION = "1.190";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -852,7 +852,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.189", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.190", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1149,7 +1149,7 @@
                 document.getElementById('screen-dashboard').style.display="none"; 
                 document.getElementById('screen-choice').style.display="block"; 
                 document.getElementById('global-mj-logo-container').style.display="block";
-                document.getElementById('top-right-tools').style.display="flex"; 
+                document.getElementById('top-right-tools').style.display="none"; 
 
                 const rooms = snap.val() || {};
                 mjRooms = Object.keys(rooms).map(k => ({ id: k, ...rooms[k] }));
@@ -1576,6 +1576,31 @@
             
             roomRef.child('players').on('value', snap => { 
                 allPlayersData = snap.val() || {}; 
+                
+                // GENDARME DES CAPITAINES (Anti-doublon)
+                let teamCaptains = {};
+                let fixNeeded = false;
+                let updates = {};
+                
+                Object.keys(allPlayersData).forEach(uid => {
+                    const p = allPlayersData[uid];
+                    if (p.teamName && p.teamName !== "Solo" && p.isCaptain) {
+                        if (!teamCaptains[p.teamName]) {
+                            teamCaptains[p.teamName] = { uid: uid, ts: p.joinTimestamp || 0 };
+                        } else {
+                            fixNeeded = true;
+                            if ((p.joinTimestamp || 0) < teamCaptains[p.teamName].ts) {
+                                updates[teamCaptains[p.teamName].uid + '/isCaptain'] = false;
+                                teamCaptains[p.teamName] = { uid: uid, ts: p.joinTimestamp || 0 };
+                            } else {
+                                updates[uid + '/isCaptain'] = false;
+                            }
+                        }
+                    }
+                });
+                
+                if (fixNeeded) roomRef.child('players').update(updates);
+                
                 renderLobby(); 
                 renderTeamLobby();
             });
@@ -1660,7 +1685,6 @@
             roomRef.child('blockedPlayers').on('value', snap => { 
                 currentBlocked = snap.val() || {}; 
                 renderLobby(); 
-                renderTeamLobby(); 
             });
         }
 
@@ -1773,7 +1797,7 @@
                 
                 const bo = t.bonus || 0;
                 let badgeClass = isBan ? "badge-banned" : (!isA ? "badge-inactive" : "badge-active");
-                let badgeText = isBan ? "🔴 BANNIE" : (!isA ? "🟠 PAUSE" : "🟢 ACTIVE");
+                let badgeText = isBan ? "🔴 BANNIE" : (!isA ? "🟠 INACTIVE" : "🟢 ACTIVE");
                 
                 let totalScore = 0;
                 let activeCount = 0;
@@ -2066,6 +2090,29 @@
                 btn.innerText = "⚠️ Supprimer (Détruire)";
             }
         }
+        
+        /* FONCTIONS VITALES RESTAURÉES DEPUIS LA 1.183 */
+        function statusUpdate(st) { 
+            if(roomRef) { 
+                roomRef.child('gameState').set({status:st}); 
+                if(st==='ready') { 
+                    roomRef.child('buzzers').remove(); 
+                    roomRef.child('buzzAttempts').remove(); 
+                    buzzProcessing = false;
+                } 
+            } 
+        }
+
+        function fullReset() { 
+            if(roomRef) {
+                roomRef.child('blockedPlayers').remove(); 
+                roomRef.child('buzzers').remove(); 
+                roomRef.child('buzzAttempts').remove(); 
+                statusUpdate('waiting'); 
+            }
+        }
+        
+        function adj(u, v) { roomRef.child('players/'+u+'/pts').transaction(x=>(x||0)+v); }
     </script>
 </body>
 </html>
