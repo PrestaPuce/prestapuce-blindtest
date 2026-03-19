@@ -184,13 +184,31 @@
         .readonly-mode #inactive-section, .readonly-mode #banned-section { display: none !important; }
         .readonly-mode #mj-team-inactive-section, .readonly-mode #mj-team-banned-section { display: none !important; }
         .readonly-mode #player-search-container { display: none !important; }
+		/* --- PATCH V1.197 : CSS TRI & CADRE VERT --- */
+        /* Correction rognage cadre vert */
+        .score-row.buzzer-active-row { 
+            box-shadow: inset 0 0 10px #2ecc71, 0 0 15px rgba(46, 204, 113, 0.4) !important; 
+            transform: scale(1) !important; 
+            border: 2px solid var(--success) !important;
+            margin: 2px 0;
+        }
+        /* Style des en-têtes de tri */
+        .sort-header { 
+            display: flex; background: rgba(255,255,255,0.1); 
+            border-radius: 5px; margin-bottom: 8px; padding: 5px 10px;
+            font-size: 0.75rem; font-weight: bold; color: #bdc3c7;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .sort-col { cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
+        .sort-col:hover { color: var(--accent); }
+        .sort-active { color: var(--accent); }
     </style>
 </head>
 <body>
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.196</div>
+    <div class="version-tag" id="app-version-display">v1.197</div>
 
     <div id="global-dropdown"></div>
 
@@ -299,7 +317,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.196</span>
+                    <span id="disp-v-mj">v1.197</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -652,7 +670,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.196";
+        const APP_VERSION = "1.197";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -668,6 +686,10 @@
         let showDefaultCrests = true, pendingRestoreTeam = null, currentBuzzerId = null, buzzHistory = [];
         let editingPlayerUid = null, editingPlayerOriginalPseudo = "", editingPlayerOriginalAvatar = "", editingPlayerCurrentAvatar = "";
         let isSuperAdmin = false, allUsersData = {}, targetMjUid = null;
+		// --- PATCH V1.197 : VARIABLES DE TRI ---
+        let playerSort = { col: 'default', asc: true };
+        let teamSort = { col: 'default', asc: true };
+        let memberSort = { col: 'default', asc: true };
 
         let buzzProcessing = false;
         let curLbType = '', curLbIdx = 0, lbCrests = [], lbBgsDash = [], lbBgsModal = [];
@@ -741,6 +763,19 @@
             }
         }
         
+		// --- PATCH V1.197 : LOGIQUE DE TRI ---
+        function setSort(type, col) {
+            let sortObj = (type === 'player') ? playerSort : (type === 'team') ? teamSort : memberSort;
+            if (sortObj.col === col) { sortObj.asc = !sortObj.asc; } else { sortObj.col = col; sortObj.asc = true; }
+            if (type === 'player') renderLobby(); else if (type === 'team') renderTeamLobby(); else renderTeamMembers(currentOpenTeam);
+        }
+
+        function getSortArrow(type, col) {
+            let sortObj = (type === 'player') ? playerSort : (type === 'team') ? teamSort : memberSort;
+            if (sortObj.col !== col) return "↕️";
+            return sortObj.asc ? "🔼" : "🔽";
+        }
+		
         function login() { 
             const e = document.getElementById('mj-email').value.trim();
             const p = document.getElementById('mj-pass').value; 
@@ -894,7 +929,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.196", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.176", mj: "v1.197", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1882,63 +1917,84 @@
             const sl = document.getElementById('score-list'), il = document.getElementById('inactive-list'), bl = document.getElementById('banned-list');
             const is = document.getElementById('inactive-section'), bs = document.getElementById('banned-section');
             
-            const aP = [], iP = [], rP = [], bP = [];
+            // En-têtes de tri Lobby Joueurs
+            const sortHtml = `
+                <div class="sort-header">
+                    <div style="width:30px; text-align:center;" class="sort-col ${playerSort.col==='status'?'sort-active':''}" onclick="setSort('player','status')" title="Trier par État">${getSortArrow('player','status')}</div>
+                    <div style="flex:1; margin-left:10px;" class="sort-col ${playerSort.col==='name'?'sort-active':''}" onclick="setSort('player','name')" title="Trier par Nom">${getSortArrow('player','name')} Nom</div>
+                    <div style="width:100px; text-align:right; margin-right:45px;" class="sort-col ${playerSort.col==='pts'?'sort-active':''}" onclick="setSort('player','pts')" title="Trier par Score">${getSortArrow('player','pts')} Score</div>
+                    <div style="width:30px;"></div>
+                </div>`;
+            
+            let pArr = [];
+            Object.keys(allPlayersData).forEach(uid => { 
+                const d = allPlayersData[uid]; if(!d)return;
+                let status = 0; if(d.banned) status=2; else if(d.active===false) status=1;
+                pArr.push({ uid: uid, status: status, ...d }); 
+            });
+
+            // Logique de Tri Dynamique "Excel"
+            pArr.sort((a, b) => {
+                if (a.uid === currentBuzzerId) return -1; if (b.uid === currentBuzzerId) return 1;
+                let valA, valB;
+                if (playerSort.col === 'name') { valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); }
+                else if (playerSort.col === 'pts') { valA = a.pts || 0; valB = b.pts || 0; }
+                else if (playerSort.col === 'status') { valA = a.status; valB = b.status; }
+                else {
+                    let iA=buzzHistory.indexOf(a.name), iB=buzzHistory.indexOf(b.name);
+                    if(iA!==-1 || iB!==-1) return iB-iA;
+                    valA = a.name.toLowerCase(); valB = b.name.toLowerCase();
+                }
+                if (valA < valB) return playerSort.asc ? -1 : 1;
+                if (valA > valB) return playerSort.asc ? 1 : -1;
+                return 0;
+            });
+
+            hA = sortHtml; // On injecte l'en-tête en premier
+
             const searchInput = document.getElementById('player-search');
             const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : "";
 
-            Object.keys(allPlayersData).forEach(uid => { 
-                const d = allPlayersData[uid]; if(!d)return; d.uid = uid; 
+            pArr.forEach(d => {
                 if (searchVal && !d.name.toLowerCase().includes(searchVal)) return;
 
-                if(d.banned===true) bP.push(d); 
-                else if(d.active===false){if(d.recoveryRequest===true)rP.push(d);else iP.push(d);} 
-                else aP.push(d); 
-            });
-
-            aP.sort((a,b) => { if(a.uid===currentBuzzerId)return -1; if(b.uid===currentBuzzerId)return 1; let iA=buzzHistory.indexOf(a.name), iB=buzzHistory.indexOf(b.name); if(iA!==-1&&iB!==-1)return iB-iA; if(iA!==-1)return -1; if(iB!==-1)return 1; let rA=a.reconnectedAt||0, rB=b.reconnectedAt||0; if(rA===0&&rB>0)return -1; if(rA>0&&rB===0)return 1; if(rA>0&&rB>0)return rA-rB; return a.name.localeCompare(b.name); });
-            
-            aP.forEach(d => {
-                let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
-                const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;">` : `<span style="font-size:1.2rem;margin-right:8px;">${d.avatar||'👤'}</span>`;
-                const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
+                let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; 
+                Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
                 
+                const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;">` : `<span style="font-size:1.2rem;margin-right:8px;">${d.avatar||'👤'}</span>`;
                 let actionsHtml = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
 
-                hA += `
-                <div class="${rC}">
-                    <div style="display:flex;align-items:center;flex:1;overflow:hidden;">${aH}<b style="margin-right:10px;">${d.name}</b><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div>
-                    <div class="player-controls">
-                        <div class="team-score-ctrl" title="Score Joueur">
-                            <button class="btn-tiny" onclick="adj('${d.uid}',-1)" title="Retirer 1 point">-</button>
-                            <input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;height:24px;">
-                            <button class="btn-tiny" onclick="adj('${d.uid}',1)" title="Ajouter 1 point">+</button>
+                if (d.status === 2) {
+                    hsB = true;
+                    hB += `<div class="score-row" style="border:1px solid var(--danger);"><div style="flex:1;"><span style="color:var(--danger)"><b>${d.name}</b></span></div><div class="player-controls">${actionsHtml}</div></div>`;
+                } else if (d.status === 1) {
+                    hsI = true;
+                    if (d.recoveryRequest) {
+                        hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls">${actionsHtml}</div></div>`;
+                    } else {
+                        hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls">${actionsHtml}</div></div>`;
+                    }
+                } else {
+                    const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row" : "score-row";
+                    hA += `
+                    <div class="${rC}">
+                        <div style="display:flex;align-items:center;flex:1;overflow:hidden;">${aH}<b style="margin-right:10px;">${d.name}</b><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div>
+                        <div class="player-controls">
+                            <div class="team-score-ctrl" title="Score Joueur">
+                                <button class="btn-tiny" onclick="adj('${d.uid}',-1)" title="Retirer 1 point">-</button>
+                                <input type="number" value="${d.pts||0}" onchange="setPlayerScore('${d.uid}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;height:24px;">
+                                <button class="btn-tiny" onclick="adj('${d.uid}',1)" title="Ajouter 1 point">+</button>
+                            </div>
+                            ${actionsHtml}
                         </div>
-                        ${actionsHtml}
-                    </div>
-                </div>`;
-            });
-            
-            rP.forEach(d => { 
-                hsI=true; 
-                let rP_actions = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
-                hI += `<div class="score-row airlock-row"><div style="flex:1;"><b>${d.name}</b> <small style="color:var(--gold);display:block;font-style:italic;">Tentative...</small></div><div class="player-controls">${rP_actions}</div></div>`; 
-            });
-            
-            iP.forEach(d => { 
-                hsI=true; 
-                let iP_actions = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
-                hI += `<div class="score-row" style="opacity:0.6;"><div style="flex:1;"><b>${d.name}</b> <small>(${d.pts||0} pts)</small></div><div class="player-controls">${iP_actions}</div></div>`; 
-            });
-            
-            bP.forEach(d => { 
-                hsB=true; 
-                let bP_actions = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
-                hB += `<div class="score-row" style="border:1px solid var(--danger);"><div style="flex:1;"><span style="color:var(--danger)"><b>${d.name}</b></span></div><div class="player-controls">${bP_actions}</div></div>`; 
+                    </div>`;
+                }
             });
             
             sl.innerHTML = hA; il.innerHTML = hI; bl.innerHTML = hB; 
             
-            if(currentPlayerFilter === 'all') { sl.style.display = aP.length > 0 ? 'block' : 'none'; bs.style.display = hsB ? "block" : "none"; is.style.display = hsI ? "block" : "none"; } 
+            let activeCount = pArr.filter(p => p.status === 0).length;
+            if(currentPlayerFilter === 'all') { sl.style.display = activeCount > 0 ? 'block' : 'none'; bs.style.display = hsB ? "block" : "none"; is.style.display = hsI ? "block" : "none"; } 
             else if (currentPlayerFilter === 'active') { sl.style.display = 'block'; bs.style.display = 'none'; is.style.display = 'none'; } 
             else if (currentPlayerFilter === 'inactive') { sl.style.display = 'none'; bs.style.display = 'none'; is.style.display = 'block'; } 
             else if (currentPlayerFilter === 'banned') { sl.style.display = 'none'; bs.style.display = 'block'; is.style.display = 'none'; }
@@ -1957,89 +2013,80 @@
         function renderTeamLobby() {
             if (isRenderingTeamLobby) return;
             isRenderingTeamLobby = true;
-            
             const container = document.getElementById('mj-team-lobby-list');
-            const searchInput = document.getElementById('mj-team-search');
-            const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : "";
-            
+            const searchVal = document.getElementById('mj-team-search').value.trim().toLowerCase();
             const focusData = saveFocus();
-            let html = "";
-            
-            Object.keys(globalTeams).forEach(k => {
+
+            const sortHtml = `
+                <div class="sort-header">
+                    <div style="width:30px; text-align:center;" class="sort-col ${teamSort.col==='status'?'sort-active':''}" onclick="setSort('team','status')" title="Trier par État">${getSortArrow('team','status')}</div>
+                    <div style="flex:1; margin-left:45px;" class="sort-col ${teamSort.col==='name'?'sort-active':''}" onclick="setSort('team','name')" title="Trier par Nom">${getSortArrow('team','name')} Équipe</div>
+                    <div style="width:100px; text-align:right; margin-right:45px;" class="sort-col ${teamSort.col==='score'?'sort-active':''}" onclick="setSort('team','score')" title="Trier par Score">${getSortArrow('team','score')} Score</div>
+                    <div style="width:30px;"></div>
+                </div>`;
+            container.innerHTML = sortHtml;
+
+            let tArr = Object.keys(globalTeams).map(k => {
                 const t = globalTeams[k];
-                const isA = t.active !== false;
-                const isBan = t.banned === true;
-                
-                if (currentMjTeamFilter === 'active' && (!isA || isBan)) return;
-                if (currentMjTeamFilter === 'inactive' && (isA || isBan)) return;
-                if (currentMjTeamFilter === 'banned' && !isBan) return;
+                let total = 0; Object.values(allPlayersData).forEach(p => { if(p.teamName === k) total += (p.pts || 0); });
+                total += (t.bonus || 0);
+                let status = 0; if(t.banned) status=2; else if(t.active===false) status=1;
+                let hasBuzzer = Object.values(allPlayersData).some(p => p.teamName === k && p.uid === currentBuzzerId);
+                return { key: k, status: status, totalScore: total, hasBuzzer: hasBuzzer, ...t };
+            });
+
+            tArr.sort((a, b) => {
+                if (a.hasBuzzer) return -1; if (b.hasBuzzer) return 1;
+                let valA, valB;
+                if (teamSort.col === 'name') { valA = a.key.toLowerCase(); valB = b.key.toLowerCase(); }
+                else if (teamSort.col === 'score') { valA = a.totalScore; valB = b.totalScore; }
+                else if (teamSort.col === 'status') { valA = a.status; valB = b.status; }
+                else { valA = a.key.toLowerCase(); valB = b.key.toLowerCase(); }
+                if (valA < valB) return teamSort.asc ? -1 : 1;
+                if (valA > valB) return teamSort.asc ? 1 : -1;
+                return 0;
+            });
+
+            let html = sortHtml;
+            tArr.forEach(t => {
+                const k = t.key;
+                if (currentMjTeamFilter === 'active' && (t.status !== 0)) return;
+                if (currentMjTeamFilter === 'inactive' && t.status !== 1) return;
+                if (currentMjTeamFilter === 'banned' && t.status !== 2) return;
                 if (searchVal && !k.toLowerCase().includes(searchVal)) return;
                 
-                const bo = t.bonus || 0;
-                let badgeClass = isBan ? "badge-banned" : (!isA ? "badge-inactive" : "badge-active");
-                let badgeText = isBan ? "🔴 BANNIE" : (!isA ? "🟠 INACTIVE" : "🟢 ACTIVE");
-                
-                let totalScore = 0;
-                let activeCount = 0;
-                let teamMembers = [];
-                Object.values(allPlayersData).forEach(p => { 
-                    if(p.teamName === k) {
-                        totalScore += (p.pts || 0);
-                        if(p.active !== false && p.banned !== true) {
-                            activeCount++;
-                            teamMembers.push(p);
-                        }
-                    }
-                });
-                totalScore += bo;
-                if(!isA && !isBan) totalScore = t.frozenScore || 0;
-                
-                let blockedCount = t.blacklist ? Object.keys(t.blacklist).length : 0;
-                let statsHtml = `(<span style="color:var(--success);">${activeCount} Joueur${activeCount > 1 ? 's' : ''}</span>`;
-                if (blockedCount > 0) statsHtml += ` - <span style="color:var(--danger);">${blockedCount} Exclu${blockedCount > 1 ? 's' : ''}</span>`;
-                statsHtml += `)`;
-                
+                let badgeClass = t.status === 2 ? "badge-banned" : (t.status === 1 ? "badge-inactive" : "badge-active");
+                let badgeText = t.status === 2 ? "🔴 BANNIE" : (t.status === 1 ? "🟠 INACTIVE" : "🟢 ACTIVE");
+                let activeCount = Object.values(allPlayersData).filter(p => p.teamName === k && p.active !== false && !p.banned).length;
                 const safeK = k.replace(/'/g, "\\'");
-                let btnDisabled = isBan ? "disabled" : "";
-                
-                let actionsHtml = `<button class="dropdown-btn" onclick="openTeamMenu(event, '${safeK}')">⋮</button>`;
                 
                 html += `
-                <div class="hub-line" style="margin-bottom:0; border-radius:8px; border-bottom-left-radius:0; border-bottom-right-radius:0;" onclick="toggleTeamAccordion('${safeK}')">
+                <div class="hub-line" style="margin-bottom:0; border-radius:8px; ${t.hasBuzzer ? 'border:2px solid #2ecc71; background:rgba(46,204,113,0.1);' : ''}" onclick="toggleTeamAccordion('${safeK}')">
                     <span id="team-arrow-${k}" class="hub-arrow">▶</span>
                     <div class="crest-mini-bg"><img src="${t.icon}" class="crest-mini"></div>
                     <div class="hub-line-text" style="flex: 1; margin-left:10px;">
-                        <b style="color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${k}</b> 
-                        <span style="color:#bdc3c7; font-size:0.85rem; margin-left:10px; white-space:nowrap;">Score : ${totalScore} | <span style="font-weight:bold;">${statsHtml}</span></span>
+                        <b style="color:var(--accent);">${k}</b> 
+                        <span style="color:#bdc3c7; font-size:0.85rem; margin-left:10px;">Score : ${t.totalScore} | Actifs : ${activeCount}</span>
                     </div>
                     <span class="hub-badge ${badgeClass}" style="margin: 0 10px;">${badgeText}</span>
                     <div class="team-controls" onclick="event.stopPropagation();">
-                        <div class="team-score-ctrl" title="Score Bonus Équipe">
-                            <button class="btn-tiny" onclick="updateTeamBonus('${safeK}', -1)" ${btnDisabled} title="Retirer 1 point bonus">-</button>
-                            <span class="team-bonus-val">${bo}</span>
-                            <button class="btn-tiny" onclick="updateTeamBonus('${safeK}', 1)" ${btnDisabled} title="Ajouter 1 point bonus">+</button>
+                        <div class="team-score-ctrl">
+                            <button class="btn-tiny" onclick="updateTeamBonus('${safeK}', -1)">-</button>
+                            <span class="team-bonus-val">${t.bonus || 0}</span>
+                            <button class="btn-tiny" onclick="updateTeamBonus('${safeK}', 1)">+</button>
                         </div>
-                        ${actionsHtml}
+                        <button class="dropdown-btn" onclick="openTeamMenu(event, '${safeK}')">⋮</button>
                     </div>
                 </div>
-                <div id="team-details-${k}" class="hub-details" style="display:none; margin-top:0; border-top:none; border-top-left-radius:0; border-top-right-radius:0; margin-bottom:10px;" onclick="event.stopPropagation();">
-                    <div style="position:relative; margin-bottom:10px;">
-                        <input type="text" id="search-member-${k}" class="hub-search-bar" style="margin-bottom:0; padding:10px; font-size:0.9rem; padding-right:35px;" placeholder="🔍 Chercher un joueur (Actifs & Bloqués)..." oninput="renderTeamMembers('${safeK}')">
-                        <span id="clear-search-member-${k}" onclick="document.getElementById('search-member-${k}').value=''; renderTeamMembers('${safeK}');" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:white; display:none;">✕</span>
-                    </div>
+                <div id="team-details-${k}" class="hub-details" style="display:none; margin-top:0; border-top:none; margin-bottom:10px;" onclick="event.stopPropagation();">
                     <div id="list-member-${k}" style="display:flex; flex-direction:column; gap:5px;"></div>
-                </div>
-                `;
+                </div>`;
             });
-            
             container.innerHTML = html;
-            
-            if (currentOpenTeam && document.getElementById('team-details-' + currentOpenTeam)) {
-                document.getElementById('team-details-' + currentOpenTeam).style.display = 'block';
-                document.getElementById('team-arrow-' + currentOpenTeam).classList.add('open');
-                renderTeamMembers(currentOpenTeam);
+            if (currentOpenTeam) {
+                const det = document.getElementById('team-details-' + currentOpenTeam);
+                if (det) { det.style.display = 'block'; document.getElementById('team-arrow-' + currentOpenTeam).classList.add('open'); renderTeamMembers(currentOpenTeam); }
             }
-            
             restoreFocus(focusData);
             isRenderingTeamLobby = false;
         }
@@ -2078,65 +2125,61 @@
         function renderTeamMembers(teamName) {
             const list = document.getElementById('list-member-' + teamName);
             if (!list) return;
-            const searchInput = document.getElementById('search-member-' + teamName);
-            const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
-            
-            const clearBtn = document.getElementById('clear-search-member-' + teamName);
-            if (clearBtn) clearBtn.style.display = query.length > 0 ? 'block' : 'none';
 
             let displayList = [];
             Object.keys(allPlayersData).forEach(uid => {
                 const p = allPlayersData[uid];
                 if (p.teamName === teamName && p.active !== false && p.banned !== true) {
-                    displayList.push({ id: uid, isBlockedInTeam: false, ...p });
+                    let status = (uid === currentBuzzerId) ? -1 : 0;
+                    displayList.push({ id: uid, isBlockedInTeam: false, status: status, ...p });
                 }
             });
-            activeTeamBlacklist.forEach(m => {
-                displayList.push({ id: m.id, isBlockedInTeam: true, name: m.name, avatar: m.avatar, joinTimestamp: 0 });
+
+            // Tri Succession : Buzzer > Capitaine > Ordre d'arrivée
+            displayList.sort((a, b) => {
+                if (a.status === -1) return -1; if (b.status === -1) return 1;
+                let valA, valB;
+                if (memberSort.col === 'name') { valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); }
+                else if (memberSort.col === 'pts') { valA = a.pts || 0; valB = b.pts || 0; }
+                else if (memberSort.col === 'cpt') { valA = a.joinTimestamp; valB = b.joinTimestamp; }
+                else {
+                    if (a.isCaptain) return -1; if (b.isCaptain) return 1;
+                    valA = a.joinTimestamp; valB = b.joinTimestamp;
+                }
+                if (valA < valB) return memberSort.asc ? -1 : 1;
+                if (valA > valB) return memberSort.asc ? 1 : -1;
+                return 0;
             });
 
-            if (query) { displayList = displayList.filter(m => m.name && m.name.toLowerCase().includes(query)); }
+            const sortHtml = `
+                <div class="sort-header" style="margin-top:10px;">
+                    <div style="width:20px; text-align:center;" class="sort-col" onclick="setSort('member','status')" title="État">${getSortArrow('member','status')}</div>
+                    <div style="width:30px; text-align:center;" class="sort-col ${memberSort.col==='cpt'?'sort-active':''}" onclick="setSort('member','cpt')" title="Trier par succession">${getSortArrow('member','cpt')} CPT</div>
+                    <div style="flex:1; margin-left:10px;" class="sort-col ${memberSort.col==='name'?'sort-active':''}" onclick="setSort('member','name')" title="Trier par Nom">${getSortArrow('member','name')} Joueur</div>
+                    <div style="width:80px; text-align:right; margin-right:40px;" class="sort-col ${memberSort.col==='pts'?'sort-active':''}" onclick="setSort('member','pts')" title="Trier par Score">${getSortArrow('member','pts')} Pts</div>
+                </div>`;
 
-            displayList.sort((a,b) => (a.joinTimestamp || 0) - (b.joinTimestamp || 0));
-
-            if (displayList.length === 0) { list.innerHTML = "<div style='color:#7f8c8d; font-style:italic; padding:10px;'>Aucun joueur trouvé.</div>"; return; }
-
-            let currentCaptainId = null;
-            let currentCaptainName = "Inconnu";
-            displayList.forEach(m => { if(m.isCaptain) { currentCaptainId = m.id; currentCaptainName = m.name; } });
-
-            let html = "";
+            let html = sortHtml;
             displayList.forEach(m => {
                 let av = (m.avatar && m.avatar.length > 20) ? `<img src="${m.avatar}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.5rem;">${m.avatar||'👤'}</span>`;
-                let statusDot = m.isBlockedInTeam ? "🔴" : "🟢";
+                const safeName = m.name ? m.name.replace(/'/g, "\\'") : "";
+                const safeTeam = teamName.replace(/'/g, "\\'");
                 
-                let isCap = "";
-                if (m.isCaptain) {
-                    isCap = `<span style="font-size:1.1rem; margin-right:5px;" title="Capitaine actuel">👑</span>`;
-                } else if (!m.isBlockedInTeam) {
-                    const safeName = m.name ? m.name.replace(/'/g, "\\'") : "";
-                    const safeCapName = currentCaptainName.replace(/'/g, "\\'");
-                    const safeTeamName = teamName.replace(/'/g, "\\'");
-                    isCap = `<span class="ghost-crown" title="Nommer ce joueur capitaine" onclick="transferCaptaincy('${currentCaptainId||''}', '${safeCapName}', '${m.id}', '${safeName}', '${safeTeamName}')">👑</span>`;
-                }
-                
-                const safeTeamName = teamName.replace(/'/g, "\\'");
-                let actionsHtml = `<button class="dropdown-btn" onclick="openMemberMenu(event, '${m.id}', '${safeTeamName}', ${m.isBlockedInTeam}, ${m.isCaptain||false}, '${currentCaptainId||''}', '${currentCaptainName.replace(/'/g, "\\'")}')">⋮</button>`;
-
-                let scoreCtrl = !m.isBlockedInTeam ? `<div style="display:flex;align-items:center;background:rgba(0,0,0,0.5);border-radius:4px;padding:2px;margin:0 10px;"><button class="btn-tiny" onclick="adj('${m.id}',-1)">-</button><input type="number" value="${m.pts||0}" onchange="setPlayerScore('${m.id}', this.value)" style="width:40px;text-align:center;background:transparent;border:none;color:var(--accent);font-weight:bold;font-size:1rem;padding:0;margin:0 2px;"><button class="btn-tiny" onclick="adj('${m.id}',1)">+</button></div>` : "";
-
                 html += `
-                <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;">
-                    <span style="margin-right:8px; font-size:0.8rem;">${statusDot}</span>
-                    ${isCap}
+                <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px; ${m.status===-1 ? 'border:1px solid #2ecc71;' : ''}">
+                    <span style="margin-right:8px; font-size:0.8rem;">${m.status===-1 ? '🔔' : '🟢'}</span>
+                    ${m.isCaptain ? '👑' : `<span class="ghost-crown" title="Nommer capitaine" onclick="transferCaptaincy('', '', '${m.id}', '${safeName}', '${safeTeam}')">👑</span>`}
                     ${av}
-                    <b style="margin-left:10px; color:${m.isBlockedInTeam ? '#7f8c8d' : 'white'}; font-size:1rem;">${m.name}</b>
-                    <div style="margin-left:auto; display:flex; align-items:center; gap:5px; flex-wrap:nowrap; justify-content:flex-end;">
-                        ${scoreCtrl}
-                        ${actionsHtml}
+                    <b style="margin-left:10px; flex:1;">${m.name}</b>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <div class="team-score-ctrl">
+                            <button class="btn-tiny" onclick="adj('${m.id}',-1)">-</button>
+                            <span style="min-width:25px; text-align:center; color:var(--accent); font-weight:bold;">${m.pts||0}</span>
+                            <button class="btn-tiny" onclick="adj('${m.id}',1)">+</button>
+                        </div>
+                        <button class="dropdown-btn" onclick="openMemberMenu(event, '${m.id}', '${safeTeam}', false, ${m.isCaptain||false})">⋮</button>
                     </div>
-                </div>
-                `;
+                </div>`;
             });
             list.innerHTML = html;
         }
@@ -2298,6 +2341,7 @@
 		
 		// --- PATCH V1.196 : CORRECTION AUDIT (FONCTION MANQUANTE) ---
         function kickTeam(n) { if(confirm(`Expulser l'équipe ${n} (Rouge) ?`)) banTeam(n); }
+		
     </script>
 </body>
 </html>
