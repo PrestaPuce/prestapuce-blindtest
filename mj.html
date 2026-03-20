@@ -226,7 +226,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.209</div>
+    <div class="version-tag" id="app-version-display">v1.210</div>
 
     <div id="global-dropdown"></div>
 
@@ -335,7 +335,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.209</span>
+                    <span id="disp-v-mj">v1.210</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -688,7 +688,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.209";
+        const APP_VERSION = "1.210";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -947,7 +947,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.209", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.210", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1266,6 +1266,7 @@
             showGlobalMenu(e.currentTarget, html);
         }
 
+        /* --- PATCH V1.210 : MENU MEMBRE SÉCURISÉ --- */
         function openMemberMenu(e, uid, teamName, isBlockedInTeam, isCaptain, currentCapId, currentCapName) {
             e.stopPropagation();
             const safeTeamName = teamName.replace(/'/g, "\\'");
@@ -1274,11 +1275,14 @@
             if (!m) return;
             const safeName = m.name ? m.name.replace(/'/g, "\\'") : "";
             
+            // Sécurité si currentCapName n'est pas fourni
+            const safeCapName = currentCapName ? currentCapName.replace(/'/g, "\\'") : "";
+            
             let html = "";
             if (isBlockedInTeam) {
                 html = `<div class="dropdown-item" style="color:var(--success);" onclick="closeGlobalDropdown(); pardonTeamMember('${uid}', '${safeTeamName}')">🔄 Gracier</div>`;
             } else {
-                let btnCap = isCaptain ? "" : `<div class="dropdown-item" style="color:var(--gold);" onclick="closeGlobalDropdown(); transferCaptaincy('${currentCapId||''}', '${currentCapName.replace(/'/g, "\\'")}', '${uid}', '${safeName}', '${safeTeamName}')">👑 Nommer Capitaine</div>`;
+                let btnCap = isCaptain ? "" : `<div class="dropdown-item" style="color:var(--gold);" onclick="closeGlobalDropdown(); transferCaptaincy('${currentCapId||''}', '${safeCapName}', '${uid}', '${safeName}', '${safeTeamName}')">👑 Nommer Capitaine</div>`;
                 html = `${btnCap} <div class="dropdown-item" style="color:var(--danger);" onclick="closeGlobalDropdown(); expelTeamMember('${uid}', '${safeName}', '${m.avatar}', '${safeTeamName}')">✕ Expulser de l'équipe</div>`;
             }
             showGlobalMenu(e.currentTarget, html);
@@ -1790,7 +1794,7 @@
             }
         }
 
-        /* --- PATCH V1.206 : PHRASES DE TRANSFERT PERSONNALISÉES --- */
+        /* --- PATCH V1.210 : PHRASES DE TRANSFERT EXACTES --- */
         function transferCaptaincy(oldId, oldName, newId, newName, teamName) {
             const displayOld = oldName || "L'ancien capitaine";
             if (confirm(`Êtes-vous sûr de vouloir enlever le capitanat à ${displayOld} pour le donner à ${newName} ?`)) {
@@ -1802,15 +1806,15 @@
                     }
                 });
                 
-                // Message pour l'ancien capitaine
+                // Message exact pour l'ancien capitaine
                 if(oldId) {
                     updates[oldId + '/isCaptain'] = false;
-                    updates[oldId + '/captainMessage'] = `ℹ️ Vous n'êtes plus capitaine de l'équipe ${teamName}. ${newName} est le nouveau capitaine.`;
+                    updates[oldId + '/captainMessage'] = `ℹ️ Vous avez été destitué du rôle de capitaine de l'équipe ${teamName}. Le rôle de capitaine a été attribué à ${newName}.`;
                 }
                 
-                // Message pour le nouveau capitaine
+                // Message exact pour le nouveau capitaine
                 updates[newId + '/isCaptain'] = true;
-                updates[newId + '/captainMessage'] = `👑 ${displayOld} n'est plus capitaine. Vous êtes le nouveau capitaine de l'équipe ${teamName} !`;
+                updates[newId + '/captainMessage'] = `👑 ${displayOld} n'est plus capitaine. Vous êtes le nouveau capitaine de l'équipe ${teamName}.`;
                 
                 roomRef.child('players').update(updates);
             }
@@ -2264,7 +2268,7 @@
             });
         }
 
-        /* --- PATCH 3.24 : AFFICHAGE DES INACTIFS DANS L'ACCORDÉON --- */
+        /* --- PATCH V1.210 : DÉTECTION DU CAPITAINE ACTUEL --- */
         function renderTeamMembers(teamName) {
             const list = document.getElementById('list-member-' + teamName);
             if (!list) return;
@@ -2275,6 +2279,16 @@
                 if (p.teamName === teamName && p.banned !== true) {
                     let status = (uid === currentBuzzerId) ? -1 : (p.active === false ? 1 : 0);
                     displayList.push({ id: uid, status: status, ...p });
+                }
+            });
+
+            // On cherche l'ID et le nom du capitaine actuel
+            let currentCapId = "";
+            let currentCapName = "";
+            displayList.forEach(m => {
+                if (m.isCaptain) {
+                    currentCapId = m.id;
+                    currentCapName = m.name || "Inconnu";
                 }
             });
 
@@ -2293,6 +2307,8 @@
                     <div class="grid-cell-left">SCORE</div>
                 </div>`;
 
+            let safeCapName = currentCapName.replace(/'/g, "\\'");
+
             displayList.forEach(m => {
                 let av = (m.avatar && m.avatar.length > 20) ? `<img src="${m.avatar}" style="width:18px;height:18px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.1rem;">${m.avatar||'👤'}</span>`;
                 let safeName = (m.name || "Inconnu").replace(/'/g, "\\'");
@@ -2301,7 +2317,8 @@
                 let rowStyle = isInactive ? "opacity:0.5; background:rgba(0,0,0,0.2);" : "background:rgba(255,255,255,0.05);";
                 let stateIcon = isInactive ? "🟠" : (m.status === -1 ? "🔔" : "🟢");
 
-                let crown = m.isCaptain ? `👑` : (isInactive ? "" : `<span class="ghost-crown" onclick="transferCaptaincy('', '', '${m.id}', '${safeName}', '${teamName}')">👑</span>`);
+                // On injecte les VRAIES informations du capitaine actuel
+                let crown = m.isCaptain ? `👑` : (isInactive ? "" : `<span class="ghost-crown" onclick="transferCaptaincy('${currentCapId}', '${safeCapName}', '${m.id}', '${safeName}', '${teamName}')">👑</span>`);
 
                 html += `
                 <div class="score-row grid-member" style="${rowStyle} border-bottom:1px solid rgba(255,255,255,0.05); padding: 4px 0;">
@@ -2310,7 +2327,7 @@
                     <div class="grid-cell-left" style="gap:6px; font-size:0.85rem;">${av}<b>${m.name || "Inconnu"} ${isInactive ? '(Hors-ligne)' : ''}</b></div>
                     <div class="team-controls">
                         <span style="font-weight:bold; color:var(--accent);">${m.pts||0}</span>
-                        <button class="dropdown-btn" onclick="openMemberMenu(event, '${m.id}', '${teamName}', false, ${m.isCaptain||false})">⋮</button>
+                        <button class="dropdown-btn" onclick="openMemberMenu(event, '${m.id}', '${teamName}', false, ${m.isCaptain||false}, '${currentCapId}', '${safeCapName}')">⋮</button>
                     </div>
                 </div>`;
             });
