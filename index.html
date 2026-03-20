@@ -523,7 +523,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.181";
+        const CLIENT_VERSION = "1.182";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -585,12 +585,20 @@
             }; reader.readAsDataURL(file);
         }
 
+        /* --- PATCH V1.182 : GÉNÉRATION DES 30 BLASONS UNIQUES --- */
         function createBlason(i) {
-            const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#ecf0f1'];
-            const c1 = colors[i % colors.length]; const c2 = colors[(i+1) % colors.length]; let pattern = ""; const mod = i % 10;
-            if(mod === 0) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`;
-            else if(mod === 1) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`;
-            else pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`;
+            const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2c3e50', '#27ae60', '#8e44ad'];
+            const c1 = colors[i % 6]; 
+            const c2 = colors[(i + 2) % 6]; 
+            let pattern = ""; 
+            const pType = Math.floor(i / 6) % 5;
+            
+            if(pType === 0) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="40" width="20" height="100" fill="${c2}"/><rect y="40" width="100" height="20" fill="${c2}"/>`;
+            else if(pType === 1) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="${c2}" stroke-width="20"/>`;
+            else if(pType === 2) pattern = `<rect width="100" height="100" fill="${c1}"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="${c2}"/>`;
+            else if(pType === 3) pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="0" y="50" width="100" height="50" fill="${c2}"/>`;
+            else pattern = `<rect width="100" height="100" fill="${c1}"/><rect x="50" y="0" width="50" height="100" fill="${c2}"/>`;
+            
             return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="shield"><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z"/></clipPath></defs><g clip-path="url(#shield)">${pattern}</g><path d="M10 0 H90 V40 C90 80 50 100 50 100 C50 100 10 80 10 40 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`)}`;
         }
 
@@ -1059,12 +1067,20 @@
 
         function showTeamPreview() { document.getElementById('team-crest-choices').style.display='none'; document.getElementById('team-crest-gallery').style.display='none'; document.getElementById('team-preview-img').src=selectedTeamCrest; document.getElementById('team-preview').style.display='flex'; }
         
+        /* --- PATCH V1.182 : SÉCURITÉ D'ENREGISTREMENT GALERIE MJ --- */
         function createNewTeam() { 
             const name = document.getElementById('new-team-name').value.trim(); 
             if(name.length < 2 || !selectedTeamCrest) return alert("Nom et blason requis."); 
-            if (selectedTeamCrest.startsWith('data:image')) {
-                roomRef.child('library').push(selectedTeamCrest).then(() => { roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); }); });
-            } else { roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); }); }
+            
+            // On vérifie spécifiquement que c'est un "jpeg" (Upload personnalisé compressé)
+            if (selectedTeamCrest.startsWith('data:image/jpeg')) {
+                roomRef.child('library').push(selectedTeamCrest).then(() => { 
+                    roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); }); 
+                });
+            } else { 
+                // Si c'est un SVG par défaut, on l'utilise juste sans l'ajouter à la galerie MJ
+                roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); }); 
+            }
         }
 
         function openSettings() { document.getElementById('overlay-settings').style.display = 'flex'; }

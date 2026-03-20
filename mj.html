@@ -226,7 +226,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.211</div>
+    <div class="version-tag" id="app-version-display">v1.213</div>
 
     <div id="global-dropdown"></div>
 
@@ -250,11 +250,17 @@
     </div>
 
     <div id="univ-lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:30000; align-items:center; justify-content:space-between; padding:0 20px; box-sizing:border-box;" onclick="if(event.target.id==='univ-lightbox') closeLightbox()">
+        
+        <div style="position:absolute; top:20px; right:20px; color:white; font-size:2rem; cursor:pointer; z-index:30002; background:rgba(255,255,255,0.1); width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:0.2s; box-shadow:0 4px 10px rgba(0,0,0,0.5);" onclick="closeLightbox()" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'" title="Fermer la galerie">✖</div>
+
         <div style="color:white; font-size:3rem; cursor:pointer; padding:20px; user-select:none; z-index:30001;" onclick="lbPrev(event)">◀</div>
-        <div style="position:relative; max-width:80%; max-height:80%; display:flex; justify-content:center; align-items:center; z-index:30001;">
-            <img id="lb-img" src="" style="max-width:100%; max-height:80vh; object-fit:contain; border-radius:10px; cursor:pointer; box-shadow:0 10px 30px rgba(0,0,0,0.8);" onclick="closeLightbox(event)">
-            <div id="lb-del" style="position:absolute; top:-20px; right:-20px; background:var(--danger); color:white; width:45px; height:45px; border-radius:50%; font-weight:bold; font-size:1.5rem; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.5);" onclick="lbDelete(event)" title="Supprimer définitivement">✖</div>
+        
+        <div style="position:relative; max-width:80%; max-height:90%; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:30001;">
+            <img id="lb-img" src="" style="max-width:100%; max-height:75vh; object-fit:contain; border-radius:10px; cursor:default; box-shadow:0 10px 30px rgba(0,0,0,0.8);" onclick="event.stopPropagation()">
+            
+            <button id="lb-del" style="margin-top:20px; background:var(--danger); color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; display:flex; align-items:center; gap:10px; box-shadow:0 4px 10px rgba(0,0,0,0.5); transition:0.2s;" onclick="lbDelete(event)" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="Supprimer définitivement cette image">🗑️ SUPPRIMER L'IMAGE</button>
         </div>
+        
         <div style="color:white; font-size:3rem; cursor:pointer; padding:20px; user-select:none; z-index:30001;" onclick="lbNext(event)">▶</div>
     </div>
 
@@ -335,7 +341,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.211</span>
+                    <span id="disp-v-mj">v1.213</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -688,7 +694,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.211";
+        const APP_VERSION = "1.213";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -947,7 +953,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.211", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.213", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
