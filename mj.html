@@ -227,7 +227,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.215</div>
+    <div class="version-tag" id="app-version-display">v1.216</div>
 
     <div id="global-dropdown"></div>
 
@@ -342,7 +342,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.215</span>
+                    <span id="disp-v-mj">v1.216</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -695,7 +695,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.215";
+        const APP_VERSION = "1.216";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -954,7 +954,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.215", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.216", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -2142,27 +2142,37 @@
             renderTeamLobby();
         }
 
-        /* --- PATCH V1.215 : RADAR UNIFIÉ ET ACCORDÉON ULTIME --- */
+        /* --- PATCH V1.216 : CORRECTION CRASH LOBBY & RECHERCHE --- */
         function renderTeamLobby() {
             const container = document.getElementById('lobby-teams-list');
-            const searchVal = document.getElementById('search-teams').value.toLowerCase().trim();
+            if (!container) return;
+
+            const searchInput = document.getElementById('search-teams');
+            const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
             container.innerHTML = '';
             
-            let teamListDisplay = Object.keys(globalTeams).sort((a, b) => {
-                let sA = globalTeams[a].active === false ? (globalTeams[a].frozenScore||0) : (globalTeams[a].bonus||0);
-                let sB = globalTeams[b].active === false ? (globalTeams[b].frozenScore||0) : (globalTeams[b].bonus||0);
+            // SÉCURITÉ : On détecte automatiquement la bonne variable de ta base de données
+            const currentTeams = (typeof teamsData !== 'undefined') ? teamsData : ((typeof allTeamsData !== 'undefined') ? allTeamsData : ((typeof globalTeams !== 'undefined') ? globalTeams : {}));
+            
+            let teamListDisplay = Object.keys(currentTeams).sort((a, b) => {
+                let sA = currentTeams[a].active === false ? (currentTeams[a].frozenScore||0) : (currentTeams[a].bonus||0);
+                let sB = currentTeams[b].active === false ? (currentTeams[b].frozenScore||0) : (currentTeams[b].bonus||0);
                 if (sB !== sA) return sB - sA;
                 return a.localeCompare(b);
             });
 
             teamListDisplay.forEach(k => {
-                const t = globalTeams[k];
-                if (t.banned === true) return;
-                const safeK = k.replace(/'/g, "\\'");
+                const t = currentTeams[k];
+                if (!t || t.banned === true) return;
                 
+                // CORRECTION : On applique le filtre de la barre de recherche
+                if (searchVal && !k.toLowerCase().includes(searchVal)) return;
+                
+                const safeK = k.replace(/'/g, "\\'");
+
                 // CALCUL DU RADAR
                 let cTotal = 0, cActive = 0, cInactive = 0, cBanned = 0;
-                Object.values(allPlayersData).forEach(p => {
+                Object.values(allPlayersData || {}).forEach(p => {
                     if (p.teamName === k) {
                         cTotal++;
                         if (p.banned) cBanned++;
@@ -2179,7 +2189,7 @@
                 let html = `
                 <div class="team-card ${t.active===false?'team-paused':''}">
                     <div class="team-header" onclick="toggleTeamAccordion('${safeK}')">
-                        <div class="team-crest"><img src="${t.icon}"></div>
+                        <div class="team-crest"><img src="${t.icon || ''}"></div>
                         <div class="team-name">
                             <div style="display:flex; align-items:center; gap:5px;">
                                 ${statusBadge} <span class="team-title-text">${k}</span>
@@ -2205,42 +2215,11 @@
                 container.innerHTML += html;
             });
             
-            Object.keys(globalTeams).forEach(k => {
-                if(openAccordions[k]) {
+            Object.keys(currentTeams).forEach(k => {
+                if(typeof openAccordions !== 'undefined' && openAccordions[k]) {
                     const body = document.getElementById('team-body-' + k.replace(/'/g, "\\'"));
                     if(body) { body.classList.add('open'); renderTeamMembers(k); }
                 }
-            });
-        }
-
-        function toggleTeamAccordion(teamName) {
-            if (currentOpenTeam === teamName) {
-                document.getElementById('team-details-' + teamName).style.display = 'none';
-                document.getElementById('team-arrow-' + teamName).classList.remove('open');
-                if (activeTeamBlacklistListener) roomRef.child('teams/'+teamName+'/blacklist').off('value', activeTeamBlacklistListener);
-                currentOpenTeam = null;
-                return;
-            }
-            if (currentOpenTeam) {
-                const oldDet = document.getElementById('team-details-' + currentOpenTeam);
-                if (oldDet) oldDet.style.display = 'none';
-                const oldArr = document.getElementById('team-arrow-' + currentOpenTeam);
-                if (oldArr) oldArr.classList.remove('open');
-                if (activeTeamBlacklistListener) roomRef.child('teams/'+currentOpenTeam+'/blacklist').off('value', activeTeamBlacklistListener);
-            }
-            
-            currentOpenTeam = teamName;
-            const newDet = document.getElementById('team-details-' + teamName);
-            if (newDet) newDet.style.display = 'block';
-            const newArr = document.getElementById('team-arrow-' + teamName);
-            if (newArr) newArr.classList.add('open');
-
-            activeTeamBlacklistListener = roomRef.child('teams/'+teamName+'/blacklist').on('value', snap => {
-                activeTeamBlacklist = [];
-                snap.forEach(child => {
-                    activeTeamBlacklist.push({ id: child.key, ...child.val() });
-                });
-                renderTeamMembers(teamName);
             });
         }
 
@@ -2248,22 +2227,24 @@
             const list = document.getElementById('list-member-' + teamName);
             if (!list) return;
 
+            const currentTeams = (typeof teamsData !== 'undefined') ? teamsData : ((typeof allTeamsData !== 'undefined') ? allTeamsData : ((typeof globalTeams !== 'undefined') ? globalTeams : {}));
+            const tData = currentTeams[teamName] || {};
+            
             let displayList = [];
-            const tData = globalTeams[teamName] || {};
             const activeTeamBlacklist = tData.blacklist ? Object.keys(tData.blacklist).map(k => ({id: k, ...tData.blacklist[k]})) : [];
 
             // 1. Membres actuels
-            Object.keys(allPlayersData).forEach(uid => {
+            Object.keys(allPlayersData || {}).forEach(uid => {
                 const p = allPlayersData[uid];
                 if (p.teamName === teamName && p.banned !== true) {
-                    let status = (uid === currentBuzzerId) ? -1 : (p.active === false ? 1 : 0);
+                    let status = (typeof currentBuzzerId !== 'undefined' && uid === currentBuzzerId) ? -1 : (p.active === false ? 1 : 0);
                     displayList.push({ id: uid, status: status, isExpelled: false, ...p });
                 }
             });
 
             // 2. Membres expulsés
             activeTeamBlacklist.forEach(b => {
-                const p = allPlayersData[b.id] || {};
+                const p = (allPlayersData && allPlayersData[b.id]) ? allPlayersData[b.id] : {};
                 displayList.push({ 
                     id: b.id, status: 2, isExpelled: true, name: p.name || b.name || "Inconnu", avatar: p.avatar || b.avatar || "👤", pts: p.pts || 0, isCaptain: false 
                 });
@@ -2278,6 +2259,7 @@
             // Logique de tri dynamique
             displayList.sort((a, b) => {
                 let valA, valB;
+                if (typeof memberSort === 'undefined') return 0;
                 if (memberSort.col === 'status') { valA = a.status; valB = b.status; }
                 else if (memberSort.col === 'captain') { valA = a.isCaptain ? 1 : 0; valB = b.isCaptain ? 1 : 0; }
                 else if (memberSort.col === 'name') { valA = (a.name||"").toLowerCase(); valB = (b.name||"").toLowerCase(); }
@@ -2295,10 +2277,10 @@
 
             let html = `
                 <div class="sort-header grid-member" style="margin-top:0; opacity:0.8; font-size:0.7rem;">
-                    <div class="sort-col grid-cell-center ${memberSort.col==='status'?'sort-active':''}" onclick="setSort('member','status')" title="Trier par État">${getSortArrow('member','status')} ÉTAT</div>
-                    <div class="sort-col grid-cell-center ${memberSort.col==='captain'?'sort-active':''}" onclick="setSort('member','captain')" title="Trier par Capitaine">${getSortArrow('member','captain')} CPT</div>
-                    <div class="sort-col grid-cell-left ${memberSort.col==='name'?'sort-active':''}" onclick="setSort('member','name')" title="Trier par Nom">${getSortArrow('member','name')} NOM</div>
-                    <div class="sort-col grid-cell-center ${memberSort.col==='pts'?'sort-active':''}" onclick="setSort('member','pts')" title="Trier par Score">${getSortArrow('member','pts')} SCORE</div>
+                    <div class="sort-col grid-cell-center ${typeof memberSort!=='undefined' && memberSort.col==='status'?'sort-active':''}" onclick="setSort('member','status')" title="Trier par État">${getSortArrow('member','status')} ÉTAT</div>
+                    <div class="sort-col grid-cell-center ${typeof memberSort!=='undefined' && memberSort.col==='captain'?'sort-active':''}" onclick="setSort('member','captain')" title="Trier par Capitaine">${getSortArrow('member','captain')} CPT</div>
+                    <div class="sort-col grid-cell-left ${typeof memberSort!=='undefined' && memberSort.col==='name'?'sort-active':''}" onclick="setSort('member','name')" title="Trier par Nom">${getSortArrow('member','name')} NOM</div>
+                    <div class="sort-col grid-cell-center ${typeof memberSort!=='undefined' && memberSort.col==='pts'?'sort-active':''}" onclick="setSort('member','pts')" title="Trier par Score">${getSortArrow('member','pts')} SCORE</div>
                     <div></div>
                 </div>`;
 
@@ -2342,6 +2324,37 @@
                 </div>`;
             });
             list.innerHTML = `<div style="display:flex; flex-direction:column; gap:2px;">${html}</div>`;
+        }
+
+        function toggleTeamAccordion(teamName) {
+            if (currentOpenTeam === teamName) {
+                document.getElementById('team-details-' + teamName).style.display = 'none';
+                document.getElementById('team-arrow-' + teamName).classList.remove('open');
+                if (activeTeamBlacklistListener) roomRef.child('teams/'+teamName+'/blacklist').off('value', activeTeamBlacklistListener);
+                currentOpenTeam = null;
+                return;
+            }
+            if (currentOpenTeam) {
+                const oldDet = document.getElementById('team-details-' + currentOpenTeam);
+                if (oldDet) oldDet.style.display = 'none';
+                const oldArr = document.getElementById('team-arrow-' + currentOpenTeam);
+                if (oldArr) oldArr.classList.remove('open');
+                if (activeTeamBlacklistListener) roomRef.child('teams/'+currentOpenTeam+'/blacklist').off('value', activeTeamBlacklistListener);
+            }
+            
+            currentOpenTeam = teamName;
+            const newDet = document.getElementById('team-details-' + teamName);
+            if (newDet) newDet.style.display = 'block';
+            const newArr = document.getElementById('team-arrow-' + teamName);
+            if (newArr) newArr.classList.add('open');
+
+            activeTeamBlacklistListener = roomRef.child('teams/'+teamName+'/blacklist').on('value', snap => {
+                activeTeamBlacklist = [];
+                snap.forEach(child => {
+                    activeTeamBlacklist.push({ id: child.key, ...child.val() });
+                });
+                renderTeamMembers(teamName);
+            });
         }
 
         function expelTeamMember(uid, name, avatar, teamName) {
