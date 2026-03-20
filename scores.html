@@ -151,7 +151,7 @@
     <div id="bg-protection"></div>
     <div id="big-anim-overlay"></div>
     
-    <div id="version-display" class="version-tag">v1.169</div>
+    <div id="version-display" class="version-tag">v1.170</div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
@@ -244,7 +244,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.169";
+        const CLIENT_VERSION = "1.170";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -513,6 +513,7 @@
             previousPts[id] = newPts;
         }
 
+        /* --- PATCH V1.170 : STATS DÉTAILLÉES & CAPITAINE --- */
         function calculateGlobalScores() {
             const listEquipes = Object.keys(teamsData);
             const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
@@ -528,9 +529,12 @@
                     pts: score, 
                     icon: team.icon, 
                     isTeam: true, 
-                    count: 0,
-                    historicalCount: 0,
-                    isActive: team.active !== false 
+                    count: 0,           // Actifs
+                    historicalCount: 0, // Total
+                    tInactive: 0,       // Inactifs
+                    tBanned: 0,         // Bannis
+                    isActive: team.active !== false,
+                    captainName: ""     // Nom du capitaine
                 });
             });
 
@@ -538,10 +542,22 @@
                 const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
                 if (statutEquipe !== "Solo" && rankingMap.has("team-" + statutEquipe)) {
                     let teamEntry = rankingMap.get("team-" + statutEquipe);
+                    
+                    teamEntry.historicalCount++;
+                    if (p.banned) {
+                        teamEntry.tBanned++;
+                    } else if (p.active === false) {
+                        teamEntry.tInactive++;
+                    } else {
+                        teamEntry.count++;
+                    }
+                    
+                    if (p.isCaptain) {
+                        teamEntry.captainName = p.name;
+                    }
+
                     if (teamEntry.isActive) { 
                         teamEntry.pts += (p.pts || 0); 
-                        teamEntry.historicalCount++;
-                        if (p.active !== false) teamEntry.count++; 
                     }
                 } else {
                     if (p.active !== false && !p.banned) { 
@@ -664,6 +680,7 @@
             const listEquipes = Object.keys(teamsData);
             let pListHTML = "";
             
+            /* --- PATCH V1.170 : AFFICHAGE LIGNE ÉQUIPE OPTIMISÉE --- */
             allPlayers.sort((a, b) => {
                 if (a.active === false && b.active !== false) return 1;
                 if (a.active !== false && b.active === false) return -1;
@@ -686,10 +703,13 @@
                     displayPtsP = animatingScores[idP].currentPts;
                 }
                 
+                // Couronne dans la liste de gauche pour les capitaines
+                let crownIcon = p.isCaptain ? '<span style="margin-left:5px; filter:drop-shadow(0 0 5px gold); font-size: 1.1em;">👑</span>' : '';
+
                 pListHTML += `
                     <div class="card ${buzzedClass} ${inactiveClass}" data-id="${idP}">
                         <div class="avatar">${renderAvatar(p.avatar)}</div>
-                        <div class="info"><b>${p.name}</b> <span class="team-tag">(${enEquipe ? p.teamName : "Solo"})</span></div>
+                        <div class="info"><b>${p.name}${crownIcon}</b> <span class="team-tag">(${enEquipe ? p.teamName : "Solo"})</span></div>
                         <div class="pts">${displayPtsP}</div>
                     </div>`;
             });
@@ -709,7 +729,6 @@
                     iconHtml = `<span>${renderAvatar(item.avatar)}</span>`;
                 }
                 
-                let finalName = item.name + (item.isTeam ? (item.isActive ? ` <span class="team-tag">(${item.count} j)</span>` : ` <span class="pause-badge">EN PAUSE</span>`) : ' <span class="team-tag">(Solo)</span>');
                 let inactiveClass = item.isActive ? "" : " inactive-card";
                 
                 let rankClass = "";
@@ -724,10 +743,43 @@
                     displayPtsG = animatingScores[idG].currentPts;
                 }
 
+                // LAYOUT ÉQUIPE : Nom+Capitaine à gauche | Radar au centre
+                let infoHtml = "";
+                if (item.isTeam) {
+                    let capStr = item.captainName ? `👑 Cap. ${item.captainName}` : `👑 Aucun`;
+                    let statsStr = `👥 ${item.historicalCount} &nbsp;|&nbsp; 🟢 ${item.count} &nbsp;|&nbsp; 🟠 ${item.tInactive} &nbsp;|&nbsp; 🔴 ${item.tBanned}`;
+                    
+                    infoHtml = `
+                        <div style="display:flex; flex-direction:row; align-items:center; justify-content:space-between; width:100%;">
+                            <div style="display:flex; flex-direction:column; justify-content:center; line-height:1.2; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:1;">
+                                <div style="display:flex; align-items:center; gap:0.5vw;">
+                                    <b style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</b>
+                                    ${!item.isActive ? '<span class="pause-badge">EN PAUSE</span>' : ''}
+                                </div>
+                                <div style="font-size: clamp(0.7rem, 1.6vh, 0.95rem); color: var(--gold); font-weight: bold; margin-top: 0.3vh; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    ${capStr}
+                                </div>
+                            </div>
+                            <div style="font-size: clamp(0.6rem, 1.5vh, 0.85rem); color: #bdc3c7; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 8px; white-space: nowrap; margin-left: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                                ${statsStr}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    infoHtml = `
+                        <div style="display:flex; flex-direction:column; justify-content:center; line-height:1.2; width:100%; text-overflow: ellipsis; overflow: hidden;">
+                            <b style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</b>
+                            <div style="font-size: clamp(0.6rem, 1.5vh, 0.9rem); color: #bdc3c7; font-weight: normal; margin-top: 0.3vh;">Solo</div>
+                        </div>
+                    `;
+                }
+
                 gListHTML += `
                     <div class="card${inactiveClass}${rankClass}" data-id="${idG}">
                         <div class="crest">${iconHtml}</div>
-                        <div class="info"><b>${finalName}</b></div>
+                        <div class="info" style="align-items: center; width: 100%;">
+                            ${infoHtml}
+                        </div>
                         <div class="pts">${displayPtsG}</div>
                     </div>`;
             });
@@ -760,6 +812,7 @@
             container.innerHTML = ""; 
             
             const visualOrder = [1, 0, 2]; 
+            /* --- PATCH V1.170 : AFFICHAGE DU CAPITAINE SUR LE PODIUM --- */
             visualOrder.forEach(idx => { 
                 if (top3[idx]) { 
                     const item = top3[idx]; 
@@ -771,9 +824,12 @@
                     
                     let avatarDisplay = item.isTeam ? `<div class="crest-bg" style="width:10vh; height:10vh; margin:0 auto;"><img src="${item.icon}" style="width:100%; height:100%; object-fit:contain;"></div>` : renderAvatar(item.avatar, 50); 
                     
+                    // Ajout du nom du Capitaine sous le nom de l'équipe
+                    let capHtml = (item.isTeam && item.captainName) ? `<div style="font-size: clamp(0.9rem, 2vh, 1.5rem); color: var(--gold); margin-bottom: 1.5vh; font-weight: bold; text-shadow: 0 2px 4px black;">👑 Cap. ${item.captainName}</div>` : '';
+
                     const div = document.createElement('div'); 
                     div.className = `step rank-${rank}`; 
-                    div.innerHTML = `${imgHtml}<div class="winner-name">${item.name}</div>${avatarDisplay}<div class="winner-score">${item.pts} pts</div><div class="step-block">${rank}</div>`; 
+                    div.innerHTML = `${imgHtml}<div class="winner-name">${item.name}</div>${capHtml}${avatarDisplay}<div class="winner-score">${item.pts} pts</div><div class="step-block">${rank}</div>`; 
                     container.appendChild(div); 
                 } 
             }); 
