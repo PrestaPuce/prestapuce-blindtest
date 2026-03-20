@@ -227,7 +227,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.217</div>
+    <div class="version-tag" id="app-version-display">v1.218</div>
 
     <div id="global-dropdown"></div>
 
@@ -342,7 +342,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.217</span>
+                    <span id="disp-v-mj">v1.218</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -695,7 +695,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.217";
+        const APP_VERSION = "1.218";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -954,7 +954,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.217", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.218", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -2142,17 +2142,18 @@
             renderTeamLobby();
         }
 
-        /* --- PATCH V1.216 : CORRECTION CRASH LOBBY & RECHERCHE --- */
+        /* --- PATCH V1.217 : CORRECTION DES IDs HTML & FILTRES --- */
         function renderTeamLobby() {
-            const container = document.getElementById('lobby-teams-list');
+            // CORRECTION 1 : Le bon ID du container est 'mj-team-lobby-list'
+            const container = document.getElementById('mj-team-lobby-list');
             if (!container) return;
 
-            const searchInput = document.getElementById('search-teams');
+            // CORRECTION 2 : Le bon ID de la barre de recherche est 'mj-team-search'
+            const searchInput = document.getElementById('mj-team-search');
             const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
             container.innerHTML = '';
             
-            // SÉCURITÉ : On détecte automatiquement la bonne variable de ta base de données
-            const currentTeams = (typeof teamsData !== 'undefined') ? teamsData : ((typeof allTeamsData !== 'undefined') ? allTeamsData : ((typeof globalTeams !== 'undefined') ? globalTeams : {}));
+            const currentTeams = (typeof globalTeams !== 'undefined') ? globalTeams : {};
             
             let teamListDisplay = Object.keys(currentTeams).sort((a, b) => {
                 let sA = currentTeams[a].active === false ? (currentTeams[a].frozenScore||0) : (currentTeams[a].bonus||0);
@@ -2163,9 +2164,15 @@
 
             teamListDisplay.forEach(k => {
                 const t = currentTeams[k];
-                if (!t || t.banned === true) return;
+                if (!t) return;
                 
-                // CORRECTION : On applique le filtre de la barre de recherche
+                // GESTION DES FILTRES (Tous, Actifs, Inactifs, Bannis)
+                if (currentMjTeamFilter === 'active' && t.active === false) return;
+                if (currentMjTeamFilter === 'inactive' && t.active !== false) return;
+                if (currentMjTeamFilter === 'banned' && t.banned !== true) return;
+                if (currentMjTeamFilter !== 'banned' && t.banned === true) return; // Cache les bannies par défaut
+                
+                // GESTION DE LA RECHERCHE
                 if (searchVal && !k.toLowerCase().includes(searchVal)) return;
                 
                 const safeK = k.replace(/'/g, "\\'");
@@ -2216,9 +2223,9 @@
             });
             
             Object.keys(currentTeams).forEach(k => {
-                if(typeof openAccordions !== 'undefined' && openAccordions[k]) {
+                if(typeof currentOpenTeam !== 'undefined' && currentOpenTeam === k) {
                     const body = document.getElementById('team-body-' + k.replace(/'/g, "\\'"));
-                    if(body) { body.classList.add('open'); renderTeamMembers(k); }
+                    if(body) { body.style.display = 'block'; renderTeamMembers(k); }
                 }
             });
         }
