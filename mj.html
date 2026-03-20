@@ -205,8 +205,8 @@
         /* Grilles ajustées. On donne un peu plus de place à l'ÉTAT et CPT pour éviter les chevauchements */
         .grid-player { display: grid; grid-template-columns: 50px 1fr 90px 110px; align-items: center; gap: 5px; }
         .grid-team { display: grid; grid-template-columns: 20px 50px 1fr 60px 110px; align-items: center; gap: 5px; }
-        .grid-member { display: grid; grid-template-columns: 50px 45px 1fr 110px; align-items: center; gap: 5px; }
-        
+        /* --- PATCH V1.214 : GRILLE 5 COLONNES ACCORDÉON --- */
+        .grid-member { display: grid; grid-template-columns: 40px 35px 1fr 90px 30px; align-items: center; gap: 5px; }        
         .grid-cell-center { display: flex; justify-content: center; align-items: center; }
         /* MIN-WIDTH: 0 EST VITAL : Il empêche les textes longs d'exploser la grille vers la droite ! */
         .grid-cell-left { display: flex; justify-content: flex-start; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
@@ -226,7 +226,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.213</div>
+    <div class="version-tag" id="app-version-display">v1.214</div>
 
     <div id="global-dropdown"></div>
 
@@ -341,7 +341,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.213</span>
+                    <span id="disp-v-mj">v1.214</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -694,7 +694,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.213";
+        const APP_VERSION = "1.214";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -953,7 +953,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.213", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.214", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -2274,7 +2274,7 @@
             });
         }
 
-        /* --- PATCH V1.210 : DÉTECTION DU CAPITAINE ACTUEL --- */
+        /* --- PATCH V1.214 : ACCORDÉON (TRI, SCORE CENTRÉ ET PASTILLES) --- */
         function renderTeamMembers(teamName) {
             const list = document.getElementById('list-member-' + teamName);
             if (!list) return;
@@ -2288,29 +2288,37 @@
                 }
             });
 
-            // On cherche l'ID et le nom du capitaine actuel
             let currentCapId = "";
             let currentCapName = "";
             displayList.forEach(m => {
-                if (m.isCaptain) {
-                    currentCapId = m.id;
-                    currentCapName = m.name || "Inconnu";
-                }
+                if (m.isCaptain) { currentCapId = m.id; currentCapName = m.name || "Inconnu"; }
             });
 
+            // Tri dynamique
             displayList.sort((a, b) => {
-                if (a.status === -1) return -1; if (b.status === -1) return 1;
-                if (a.status !== b.status) return a.status - b.status;
-                if (a.isCaptain) return -1; if (b.isCaptain) return 1;
-                return (a.name || "").localeCompare(b.name || "");
+                let valA, valB;
+                if (memberSort.col === 'status') { valA = a.status; valB = b.status; }
+                else if (memberSort.col === 'captain') { valA = a.isCaptain ? 1 : 0; valB = b.isCaptain ? 1 : 0; }
+                else if (memberSort.col === 'name') { valA = (a.name||"").toLowerCase(); valB = (b.name||"").toLowerCase(); }
+                else if (memberSort.col === 'pts') { valA = a.pts || 0; valB = b.pts || 0; }
+                else { 
+                    if (a.status === -1) return -1; if (b.status === -1) return 1;
+                    if (a.status !== b.status) return a.status - b.status;
+                    if (a.isCaptain) return -1; if (b.isCaptain) return 1;
+                    valA = (a.name || "").toLowerCase(); valB = (b.name || "").toLowerCase();
+                }
+                if (valA < valB) return memberSort.asc ? -1 : 1;
+                if (valA > valB) return memberSort.asc ? 1 : -1;
+                return 0;
             });
 
             let html = `
                 <div class="sort-header grid-member" style="margin-top:0; opacity:0.8; font-size:0.7rem;">
-                    <div class="grid-cell-center">ÉTAT</div>
-                    <div class="grid-cell-center">CPT</div>
-                    <div class="grid-cell-left">NOM</div>
-                    <div class="grid-cell-left">SCORE</div>
+                    <div class="sort-col grid-cell-center ${memberSort.col==='status'?'sort-active':''}" onclick="setSort('member','status')" title="Trier par État">${getSortArrow('member','status')} ÉTAT</div>
+                    <div class="sort-col grid-cell-center ${memberSort.col==='captain'?'sort-active':''}" onclick="setSort('member','captain')" title="Trier par Capitaine">${getSortArrow('member','captain')} CPT</div>
+                    <div class="sort-col grid-cell-left ${memberSort.col==='name'?'sort-active':''}" onclick="setSort('member','name')" title="Trier par Nom">${getSortArrow('member','name')} NOM</div>
+                    <div class="sort-col grid-cell-center ${memberSort.col==='pts'?'sort-active':''}" onclick="setSort('member','pts')" title="Trier par Score">${getSortArrow('member','pts')} SCORE</div>
+                    <div></div>
                 </div>`;
 
             let safeCapName = currentCapName.replace(/'/g, "\\'");
@@ -2321,19 +2329,25 @@
                 let isInactive = m.status === 1;
                 
                 let rowStyle = isInactive ? "opacity:0.5; background:rgba(0,0,0,0.2);" : "background:rgba(255,255,255,0.05);";
+                
+                // Pastille de joueur statique (clic désactivé pour le moment)
                 let stateIcon = isInactive ? "🟠" : (m.status === -1 ? "🔔" : "🟢");
-
-                // On injecte les VRAIES informations du capitaine actuel
+				
                 let crown = m.isCaptain ? `👑` : (isInactive ? "" : `<span class="ghost-crown" onclick="transferCaptaincy('${currentCapId}', '${safeCapName}', '${m.id}', '${safeName}', '${teamName}')">👑</span>`);
 
+                // Intégration dans la grille à 5 colonnes avec marges
                 html += `
-                <div class="score-row grid-member" style="${rowStyle} border-bottom:1px solid rgba(255,255,255,0.05); padding: 4px 0;">
-                    <div class="grid-cell-center" style="font-size:0.6rem;">${stateIcon}</div>
+                <div class="score-row grid-member" style="${rowStyle} border-bottom:1px solid rgba(255,255,255,0.05); padding: 4px 8px;">
+                    <div class="grid-cell-center" style="font-size:0.8rem;">${stateIcon}</div>
                     <div class="grid-cell-center">${crown}</div>
-                    <div class="grid-cell-left" style="gap:6px; font-size:0.85rem;">${av}<b>${m.name || "Inconnu"} ${isInactive ? '(Hors-ligne)' : ''}</b></div>
-                    <div class="team-controls">
-                        <span style="font-weight:bold; color:var(--accent);">${m.pts||0}</span>
-                        <button class="dropdown-btn" onclick="openMemberMenu(event, '${m.id}', '${teamName}', false, ${m.isCaptain||false}, '${currentCapId}', '${safeCapName}')">⋮</button>
+                    <div class="grid-cell-left" style="gap:6px; font-size:0.85rem;">${av}<b style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name || "Inconnu"} ${isInactive ? '<small>(Hors-ligne)</small>' : ''}</b></div>
+                    <div class="team-score-ctrl" style="justify-content:center; background:rgba(0,0,0,0.4); padding:0 2px; border-radius:4px;">
+                        <button class="btn-tiny" onclick="adj('${m.id}',-1)">-</button>
+                        <span style="font-weight:bold; color:var(--accent); min-width:20px; text-align:center;">${m.pts||0}</span>
+                        <button class="btn-tiny" onclick="adj('${m.id}',1)">+</button>
+                    </div>
+                    <div class="grid-cell-center">
+                        <button class="dropdown-btn" style="margin:0;" onclick="openMemberMenu(event, '${m.id}', '${teamName}', false, ${m.isCaptain||false}, '${currentCapId}', '${safeCapName}')">⋮</button>
                     </div>
                 </div>`;
             });
