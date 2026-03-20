@@ -514,7 +514,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.178";
+        const CLIENT_VERSION = "1.179";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1377,8 +1377,14 @@
                 const d = snap.val(); 
                 if(!d) { if(roomRef) roomRef.off(); alert("Votre compte a été supprimé définitivement."); localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
                 if(d.banned) { if(roomRef) roomRef.off(); alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
-                if(d.active === false) { if(roomRef) roomRef.off(); alert(`⏸️ Vous avez été désactivé par ${mjName}.\nTant que la partie continue, vous pouvez vous reconnecter et récupérer vos données.\n\nSi c'est une erreur, relancez la page.`); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
-
+                
+                /* --- PATCH V1.179 : PAUSE INTENTIONNELLE DU MJ UNIQUEMENT --- */
+                if(d.active === false && d.kickedByMj === true) { 
+                    if(roomRef) roomRef.off(); 
+                    alert(`⏸️ Vous avez été mis en pause par ${mjName}.\nVous pourrez vous reconnecter plus tard si l'animateur vous y autorise.`); 
+                    window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; 
+                    return; 
+                }
                 if (d.pendingWarning === true) { document.getElementById('overlay-warning').style.display = 'flex'; }
 
                 let profileChanged = false;

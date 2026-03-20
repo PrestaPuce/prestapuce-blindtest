@@ -226,7 +226,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.208</div>
+    <div class="version-tag" id="app-version-display">v1.209</div>
 
     <div id="global-dropdown"></div>
 
@@ -330,12 +330,12 @@
                 
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>Index :</span>
-                    <span id="disp-v-index">v1.176</span>
+                    <span id="disp-v-index">v1.179</span>
                     <input type="text" id="inp-v-index" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'index', 'mj')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.208</span>
+                    <span id="disp-v-mj">v1.209</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -688,7 +688,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.208";
+        const APP_VERSION = "1.209";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -947,7 +947,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.176", mj: "v1.208", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.209", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -2443,7 +2443,13 @@
         }
 		
 		// --- PATCH V1.195 : FONCTIONS DU MENU CONTEXTUEL MANQUANTES ---
-        function pausePlayer(u, n) { if(confirm(`Mettre ${n} en pause ?`)) roomRef.child('players/'+u).update({active:false}); }
+        function pausePlayer(u, n) { 
+            if(confirm(`Mettre ${n} en pause ?`)) {
+                // On ajoute kickedByMj: true pour que le téléphone comprenne que c'est intentionnel
+                roomRef.child('players/'+u).update({active: false, kickedByMj: true}); 
+            }
+        }
+		
         function deletePlayerDefinitive(u, n) { if(confirm(`⚠️ Supprimer définitivement le joueur ${n} ?`)) roomRef.child('players/'+u).remove(); }
         
         function warnTeam(n) { 
