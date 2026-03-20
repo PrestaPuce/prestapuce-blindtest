@@ -58,14 +58,14 @@
         #qr-label { font-size: 0.8vh; font-weight: bold; margin-top: 0.2vh; transition: font-size 0.3s; }
         #qr-box.zoomed #qr-label { font-size: 3vmin; margin-top: 1vmin; }
 
-        #btn-fullscreen { display: none; position: fixed; top: 1vh; right: 1vw; z-index: 2000; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0; border-radius: 50%; cursor: pointer; width: 4vh; height: 4vh; align-items: center; justify-content: center; transition: all 0.3s ease; opacity: 0.4; }
+        #btn-fullscreen { display: none; position: fixed; top: 1vh; right: 1vw; z-index: 5000; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0; border-radius: 50%; cursor: pointer; width: 4vh; height: 4vh; align-items: center; justify-content: center; transition: all 0.3s ease; opacity: 0.4; }
         #btn-fullscreen:hover { opacity: 1; background: var(--accent); color: black; transform: scale(1.1); }
         #btn-fullscreen svg { width: 60%; height: 60%; fill: currentColor; }
         .hide-ui { opacity: 0 !important; pointer-events: none; }
 
         #btn-hof { display: none; position: fixed; top: 6vh; right: 1vw; background: rgba(0,0,0,0.5); border: 1px solid var(--accent); color: var(--accent); padding: 0.5vh 1.5vw; border-radius: 15px; cursor: pointer; font-size: clamp(0.6rem, 1.5vh, 1rem); font-weight: bold; transition: 0.2s; z-index: 1500; }
         #btn-hof:hover { background: var(--accent); color: black; }
-
+		
         .main-container { display: none; grid-template-columns: 1fr 1fr; gap: 2vw; flex-grow: 1; padding: 0 1vw; overflow: hidden; margin-top: 0; }
         .column-wrapper { display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
         .column-title { text-align: center; font-size: clamp(1rem, 3vh, 2rem); color: var(--accent); text-transform: uppercase; border-bottom: 1px solid rgba(241, 196, 15, 0.5); flex-shrink: 0; letter-spacing: 1px; padding-bottom: 2px; margin-bottom: 5px; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
@@ -103,23 +103,28 @@
         .rank-3-card { border: 1px solid var(--bronze) !important; box-shadow: 0 0 10px rgba(205, 127, 50, 0.3) !important; background: rgba(205, 127, 50, 0.2) !important; border-left: 0.5vw solid var(--bronze) !important; }
         .rank-3-card .pts { background: var(--bronze) !important; color: white !important; }
 
-        #podium-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 20, 0.98); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; }
-        .podium-container { display: flex; align-items: flex-end; justify-content: center; gap: 3vw; margin-top: 5vh; }
+        /* PODIUM CSS CORRIGÉ (V1.171) */
+        #podium-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #141414; z-index: 3000; flex-direction: column; align-items: center; justify-content: center; padding: 2vh; box-sizing: border-box; overflow-y: auto; }
+        #podium-content { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; }
+        .podium-container { display: flex; align-items: flex-end; justify-content: center; gap: 3vw; margin-top: 2vh; }
         .step { text-align: center; display: flex; flex-direction: column; align-items: center; width: 20vw; }
         .step-block { width: 100%; border-radius: 15px 15px 0 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 2vh; font-size: 4vh; font-weight: bold; color: rgba(0,0,0,0.5); box-shadow: 0 1vh 3vh rgba(0,0,0,0.5); }
         
-        .rank-1 .trophy-img { width: 25vh; height: 25vh; margin-bottom: 2vh; }
-        .rank-1 .step-block { height: 30vh; background: linear-gradient(to bottom, #f1c40f, #f39c12); }
-        .rank-2 .trophy-img { width: 18vh; height: 18vh; margin-bottom: 2vh; animation: trophyZoom 1.5s infinite alternate; }
-        .rank-2 .step-block { height: 20vh; background: linear-gradient(to bottom, #bdc3c7, #7f8c8d); }
-        .rank-3 .trophy-img { width: 15vh; height: 15vh; margin-bottom: 2vh; animation: trophyZoom 1.5s infinite alternate; }
-        .rank-3 .step-block { height: 15vh; background: linear-gradient(to bottom, #e67e22, #d35400); }
+        .rank-1 .trophy-img { width: 20vh; height: 20vh; margin-bottom: 1vh; animation: popTrophy 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, bounceTrophy 2s ease-in-out 0.6s infinite !important; }
+        .rank-1 .step-block { height: 25vh; background: linear-gradient(to bottom, #f1c40f, #f39c12); }
+        .rank-2 .trophy-img { width: 15vh; height: 15vh; margin-bottom: 1vh; animation: trophyZoom 1.5s infinite alternate; }
+        .rank-2 .step-block { height: 18vh; background: linear-gradient(to bottom, #bdc3c7, #7f8c8d); }
+        .rank-3 .trophy-img { width: 12vh; height: 12vh; margin-bottom: 1vh; animation: trophyZoom 1.5s infinite alternate; }
+        .rank-3 .step-block { height: 12vh; background: linear-gradient(to bottom, #e67e22, #d35400); }
         .winner-name { font-size: clamp(1.2rem, 3vh, 2.5rem); font-weight: bold; margin-bottom: 1vh; text-shadow: 0 2px 4px black; }
         .winner-score { font-size: clamp(1.5rem, 4vh, 3rem); color: var(--accent); font-weight: 900; }
         
         @keyframes trophyZoom { 0% { transform: scale(1); filter: drop-shadow(0 0 0 transparent); } 100% { transform: scale(1.1); filter: drop-shadow(0 1vh 1vh rgba(255,255,255,0.2)); } }
-        @keyframes bounceTrophyScore { 0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 transparent); } 50% { transform: scale(1.15) translateY(-2vh); filter: drop-shadow(0 2vh 2vh rgba(241,196,15,0.6)); } }
-        .champion-trophy { animation: bounceTrophyScore 2s ease-in-out infinite !important; }
+        @keyframes bounceTrophy { 0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 transparent); } 50% { transform: scale(1.1) translateY(-2vh); filter: drop-shadow(0 2vh 2vh rgba(241,196,15,0.6)); } }
+        @keyframes popTrophy { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        #podium-content h1 { font-size: clamp(2rem, 8vw, 2.5rem); margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; line-height: 1.1; }
+        #podium-content p { font-size: 1.3rem; color: white; margin: 0; font-weight: bold; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; }
+		.champion-trophy { animation: bounceTrophyScore 2s ease-in-out infinite !important; }
 
         .nav-btn { padding:1.5vh 3vw; font-size:2vh; background:var(--bg-color); color:white; border:1px solid white; border-radius:1vh; cursor:pointer; margin: 0 1vw; transition: 0.2s; }
         .nav-btn:hover { background: white; color: black; }
@@ -151,7 +156,7 @@
     <div id="bg-protection"></div>
     <div id="big-anim-overlay"></div>
     
-    <div id="version-display" class="version-tag">v1.170</div>
+    <div id="version-display" class="version-tag">v1.171</div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
@@ -244,7 +249,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.170";
+        const CLIENT_VERSION = "1.171";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -454,10 +459,23 @@
                 else { linkElement.href = "#"; linkElement.style.pointerEvents = "none"; }
             });
             
+            /* --- PATCH V1.171 : BYPASS PODIUM AU CHARGEMENT --- */
+            let initialScoreLoad = true;
             roomRef.child('gameState').on('value', snap => {
                 const state = snap.val();
-                if (state && state.status === 'endGame') { isGameFinished = true; showPodium(); } 
-                else { isGameFinished = false; showLeaderboard(); }
+                if (state && state.status === 'endGame') { 
+                    isGameFinished = true; 
+                    if (initialScoreLoad) {
+                        showLeaderboard(); // Affiche direct le tableau si la partie était déjà finie
+                    } else {
+                        showPodium(); // Affiche le podium si le MJ clique sur "FIN DE PARTIE" en direct
+                    }
+                } 
+                else { 
+                    isGameFinished = false; 
+                    showLeaderboard(); 
+                }
+                initialScoreLoad = false;
             });
 
             roomRef.child('buzzers').on('value', snap => {

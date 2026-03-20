@@ -523,7 +523,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.182";
+        const CLIENT_VERSION = "1.183";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1632,31 +1632,43 @@
         function showQR() { const url = window.location.href.split('?')[0] + "?room=" + roomID; document.getElementById('qrcode-display').innerHTML = ""; new QRCode(document.getElementById("qrcode-display"), { text: url, width: 200, height: 200 }); document.getElementById('qr-room-code').innerText = roomID; document.getElementById('overlay-qr').style.display = 'flex'; }
         function showShare() { const url = window.location.href.split('?')[0] + "?room=" + roomID; if (navigator.share) { navigator.share({ title: 'Blind Test - Presta\'Puce', text: `Rejoins ma partie de Blind Test ! Code Salle: ${roomID}`, url: url }).catch(console.error); } else { prompt("Copie ce lien pour le partager :", url); } }
         
+        /* --- PATCH V1.183 : CALCUL DU RANG EXACT (GROUPÉ) --- */
         function showEndGame() {
-            if (player.team !== "Solo") {
-                roomRef.child('players').once('value', snap => {
-                    const all = snap.val() || {};
-                    let teamScores = {};
-                    Object.values(all).forEach(p => {
-                        if (p.teamName && p.teamName !== "Solo") {
-                            if (!teamScores[p.teamName]) teamScores[p.teamName] = 0;
-                            teamScores[p.teamName] += (p.pts || 0);
-                        }
-                    });
-                    const sortedTeams = Object.keys(teamScores).map(t => ({name: t, pts: teamScores[t]})).sort((a,b) => b.pts - a.pts);
-                    const rank = sortedTeams.findIndex(t => t.name === player.team) + 1;
-                    const pts = teamScores[player.team] || 0;
-                    renderPodiumUI(rank, `Équipe ${player.team}`, pts);
+            roomRef.child('players').once('value', snap => {
+                const all = snap.val() || {};
+                let rankingMap = new Map();
+                
+                // 1. On regroupe les scores (Équipes vs Solos)
+                Object.values(all).forEach(p => {
+                    const tName = p.teamName && p.teamName !== "Solo" ? p.teamName : "Solo";
+                    if (tName !== "Solo") {
+                        if (!rankingMap.has("team-" + tName)) rankingMap.set("team-" + tName, { name: tName, pts: 0, isTeam: true });
+                        rankingMap.get("team-" + tName).pts += (p.pts || 0);
+                    } else {
+                        rankingMap.set("solo-" + p.name, { name: p.name, pts: p.pts || 0, isTeam: false });
+                    }
                 });
-            } else {
-                roomRef.child('players').once('value', snap => {
-                    const all = snap.val() || {};
-                    const sorted = Object.values(all).sort((a,b) => b.pts - a.pts);
-                    const rank = sorted.findIndex(p => p.name === player.pseudo) + 1;
-                    const pts = sorted.find(p => p.name === player.pseudo)?.pts || 0;
-                    renderPodiumUI(rank, player.pseudo, pts);
+
+                // 2. On ajoute les bonus des équipes
+                Object.keys(globalTeams).forEach(t => {
+                    if (rankingMap.has("team-" + t)) {
+                        rankingMap.get("team-" + t).pts += (globalTeams[t].bonus || 0);
+                    }
                 });
-            }
+
+                // 3. On trie le tout
+                const sorted = Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts);
+                
+                // 4. On trouve MON entrée exacte et on calcule mon vrai rang
+                let myEntryName = player.team !== "Solo" ? player.team : player.pseudo;
+                let myEntry = sorted.find(x => x.name === myEntryName && x.isTeam === (player.team !== "Solo"));
+                
+                let rank = myEntry ? sorted.findIndex(x => x === myEntry) + 1 : 0;
+                let pts = myEntry ? myEntry.pts : 0;
+                let displayName = player.team !== "Solo" ? `Équipe ${player.team}` : player.pseudo;
+                
+                renderPodiumUI(rank, displayName, pts);
+            });
         }
 
         function renderPodiumUI(rank, name, pts) {
