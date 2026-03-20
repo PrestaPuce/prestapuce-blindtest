@@ -156,7 +156,7 @@
     <div id="bg-protection"></div>
     <div id="big-anim-overlay"></div>
     
-    <div id="version-display" class="version-tag">v1.171</div>
+    <div id="version-display" class="version-tag">v1.173</div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
@@ -249,7 +249,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.171";
+        const CLIENT_VERSION = "1.173";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -531,7 +531,7 @@
             previousPts[id] = newPts;
         }
 
-        /* --- PATCH V1.170 : STATS DÉTAILLÉES & CAPITAINE --- */
+        /* --- PATCH V1.173 : STATS DÉTAILLÉES, BANNIS & TRI --- */
         function calculateGlobalScores() {
             const listEquipes = Object.keys(teamsData);
             const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
@@ -574,25 +574,28 @@
                         teamEntry.captainName = p.name;
                     }
 
-                    if (teamEntry.isActive) { 
+                    // CORRECTION 1 : On bloque l'ajout de points si le joueur est banni
+                    if (teamEntry.isActive && !p.banned) { 
                         teamEntry.pts += (p.pts || 0); 
                     }
                 } else {
-                    if (p.active !== false && !p.banned) { 
+                    // CORRECTION 2 : On garde les Solos inactifs (on exclut juste les bannis)
+                    if (!p.banned) { 
                         rankingMap.set("solo-" + p.name, { 
                             dataId: "solo-" + p.name, 
                             name: p.name, 
                             pts: (p.pts || 0), 
                             avatar: p.avatar, 
                             isTeam: false, 
-                            isActive: true, 
+                            isActive: p.active !== false, // Gère dynamiquement si grisé ou non
                             count: 1,
                             historicalCount: 1
                         }); 
                     }
                 }
             });
-            return Array.from(rankingMap.values());
+            // CORRECTION 3 : On trie le classement du plus grand score au plus petit !
+            return Array.from(rankingMap.values()).sort((a, b) => b.pts - a.pts);
         }
 
         function getSortedRanking() {

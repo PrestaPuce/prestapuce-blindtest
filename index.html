@@ -523,7 +523,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.185";
+        const CLIENT_VERSION = "1.186";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1634,37 +1634,32 @@
         function showQR() { const url = window.location.href.split('?')[0] + "?room=" + roomID; document.getElementById('qrcode-display').innerHTML = ""; new QRCode(document.getElementById("qrcode-display"), { text: url, width: 200, height: 200 }); document.getElementById('qr-room-code').innerText = roomID; document.getElementById('overlay-qr').style.display = 'flex'; }
         function showShare() { const url = window.location.href.split('?')[0] + "?room=" + roomID; if (navigator.share) { navigator.share({ title: 'Blind Test - Presta\'Puce', text: `Rejoins ma partie de Blind Test ! Code Salle: ${roomID}`, url: url }).catch(console.error); } else { prompt("Copie ce lien pour le partager :", url); } }
         
-        /* --- PATCH V1.184 : CORRECTION CRASH FIN DE PARTIE --- */
+        /* --- PATCH V1.186 : SÉPARATION DES SCORES BANNIS --- */
         function showEndGame() {
-            // On télécharge toute la salle d'un coup (Joueurs + Équipes)
             roomRef.once('value', snap => {
                 const data = snap.val() || {};
                 const allPlayers = data.players || {};
                 const allTeams = data.teams || {};
                 let rankingMap = new Map();
                 
-                // 1. On regroupe les scores (Équipes vs Solos)
                 Object.values(allPlayers).forEach(p => {
                     const tName = p.teamName && p.teamName !== "Solo" ? p.teamName : "Solo";
                     if (tName !== "Solo") {
                         if (!rankingMap.has("team-" + tName)) rankingMap.set("team-" + tName, { name: tName, pts: 0, isTeam: true });
-                        rankingMap.get("team-" + tName).pts += (p.pts || 0);
+                        if (!p.banned) rankingMap.get("team-" + tName).pts += (p.pts || 0);
                     } else {
-                        rankingMap.set("solo-" + p.name, { name: p.name, pts: p.pts || 0, isTeam: false });
+                        if (!p.banned) rankingMap.set("solo-" + p.name, { name: p.name, pts: p.pts || 0, isTeam: false });
                     }
                 });
 
-                // 2. On ajoute les bonus des équipes (en cherchant dans allTeams)
                 Object.keys(allTeams).forEach(t => {
                     if (rankingMap.has("team-" + t)) {
                         rankingMap.get("team-" + t).pts += (allTeams[t].bonus || 0);
                     }
                 });
 
-                // 3. On trie le tout du plus grand score au plus petit
                 const sorted = Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts);
                 
-                // 4. On trouve MON entrée exacte et on calcule mon vrai rang
                 let myEntryName = player.team !== "Solo" ? player.team : player.pseudo;
                 let myEntry = sorted.find(x => x.name === myEntryName && x.isTeam === (player.team !== "Solo"));
                 
@@ -1672,7 +1667,6 @@
                 let pts = myEntry ? myEntry.pts : 0;
                 let displayName = player.team !== "Solo" ? `Équipe ${player.team}` : player.pseudo;
                 
-                // 5. On affiche la belle interface
                 renderPodiumUI(rank, displayName, pts);
             });
         }
