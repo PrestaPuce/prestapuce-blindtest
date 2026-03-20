@@ -226,7 +226,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.213</div>
+    <div class="version-tag" id="app-version-display">v1.214</div>
 
     <div id="global-dropdown"></div>
 
@@ -341,7 +341,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.213</span>
+                    <span id="disp-v-mj">v1.214</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -694,7 +694,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.213";
+        const APP_VERSION = "1.214";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -953,7 +953,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.213", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.214", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1131,12 +1131,21 @@
             });
         }
 
+        /* --- PATCH V1.215 : COMPTEURS ONGLETS D'ACCUEIL --- */
         function renderHubRooms() {
             const searchVal = document.getElementById('hub-search').value.trim().toLowerCase();
             const container = document.getElementById('hub-list');
             const tabs = document.getElementById('hub-tabs');
             
             container.innerHTML = "";
+
+            // On compte le total avant d'appliquer les filtres de recherche
+            let cActive = 0, cArchive = 0;
+            mjRooms.forEach(r => { if(r.isArchived) cArchive++; else cActive++; });
+            
+            // Mise à jour visuelle des boutons
+            document.getElementById('tab-active').innerText = `🟢 EN COURS (${cActive})`;
+            document.getElementById('tab-archive').innerText = `🗄️ ARCHIVES (${cArchive})`;
 
             let filtered = [];
             if (searchVal) {
@@ -1826,8 +1835,11 @@
             }
         }
 		
-		/* --- PATCH 3.23 : SUCCESSION AUTOMATIQUE SI INACTIF --- */
+        /* --- PATCH 3.23 / V1.214 : SUCCESSION AUTOMATIQUE (DÉSACTIVÉE EN FIN DE JEU) --- */
         function handleCaptainSuccession(teamName) {
+            // Sécurité : Si la partie est archivée/en lecture seule, on ne fait plus de succession
+            if (document.getElementById('screen-dashboard').classList.contains('readonly-mode')) return;
+
             const members = Object.keys(allPlayersData)
                 .map(uid => ({ uid, ...allPlayersData[uid] }))
                 .filter(p => p.teamName === teamName && !p.banned);

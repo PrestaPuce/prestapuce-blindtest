@@ -523,7 +523,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.184";
+        const CLIENT_VERSION = "1.185";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1455,7 +1455,7 @@
                     checkWhyKickedAndShowModal(oldTeamName);
                 }
                 
-                /* --- PATCH V1.181 : ALERTE TUTORIEL CAPITAINE --- */
+                /* --- PATCH V1.185 : ALERTE TUTORIEL CAPITAINE (SILENCE EN FIN DE JEU) --- */
                 // Si le MJ a envoyé une phrase personnalisée (MJ -> Joueur), on l'affiche
                 if (d.captainMessage) {
                     let finalMsg = d.captainMessage;
@@ -1463,14 +1463,16 @@
                     if (!wasCaptain && isCaptain) {
                         finalMsg += "\n\n💡 NOUVEAU POUVOIR : Vous pouvez maintenant cliquer sur la couronne 👑 en haut de l'écran pour gérer votre équipe !";
                     }
-                    alert(finalMsg);
+                    // On n'affiche le pop-up QUE si le jeu est encore en cours
+                    if (gameState !== 'endGame' && gameState !== 'closing') alert(finalMsg);
+                    
                     // On efface le message de la BDD après lecture pour éviter les répétitions
                     roomRef.child('players/' + myUserID + '/captainMessage').remove();
                 } else {
                     // Fallback automatique (Succession sans intervention du MJ)
-                    if (!wasCaptain && isCaptain && newTeamName !== "Solo" && !isExiting && !isRoomClosing) {
+                    if (!wasCaptain && isCaptain && newTeamName !== "Solo" && !isExiting && !isRoomClosing && gameState !== 'endGame' && gameState !== 'closing') {
                         alert(`👑 Bonne nouvelle ! Vous avez été promu Capitaine de l'équipe ${newTeamName} !\n\n💡 NOUVEAU POUVOIR : Cliquez sur la couronne 👑 en haut de l'écran pour gérer votre équipe.`);
-                    } else if (wasCaptain && !isCaptain && oldTeamName !== "Solo" && newTeamName === oldTeamName && !isExiting && !isRoomClosing) {
+                    } else if (wasCaptain && !isCaptain && oldTeamName !== "Solo" && newTeamName === oldTeamName && !isExiting && !isRoomClosing && gameState !== 'endGame' && gameState !== 'closing') {
                         alert(`ℹ️ Le rôle de Capitaine a été réattribué à un autre joueur de l'équipe.`);
                     }
                 }
@@ -1531,7 +1533,7 @@
         function setInactiveAndAction(callback) { if(roomRef && myUserID) { roomRef.child('players/' + myUserID).update({ active: false }).then(() => { callback(); }).catch(() => { callback(); }); } else { callback(); } }
 
         function handleExitAction(action) {
-            if (isCaptain && player.team !== "Solo" && action !== 'save') {
+            if (isCaptain && player.team !== "Solo" && action !== 'save' && gameState !== 'endGame' && gameState !== 'closing') {
                 roomRef.child('players').orderByChild('teamName').equalTo(player.team).once('value', snap => {
                     let members = [];
                     snap.forEach(child => {
