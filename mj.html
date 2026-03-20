@@ -205,20 +205,8 @@
         /* Grilles ajustées. On donne un peu plus de place à l'ÉTAT et CPT pour éviter les chevauchements */
         .grid-player { display: grid; grid-template-columns: 50px 1fr 90px 110px; align-items: center; gap: 5px; }
         .grid-team { display: grid; grid-template-columns: 20px 50px 1fr 60px 110px; align-items: center; gap: 5px; }
-        /* --- PATCH V1.215 : ALIGNEMENT ACCORDÉON --- */
-        .grid-member { display: grid; grid-template-columns: 60px 45px 1fr 60px 30px; align-items: center; gap: 5px; }
-        /* --- PATCH V1.219 : DESIGN LOBBY ÉQUIPES (CSS MANQUANT) --- */
-        .team-card { background: rgba(0,0,0,0.4); border-radius: 8px; margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; transition: 0.2s; }
-        .team-paused { opacity: 0.6; filter: grayscale(30%); }
-        .team-header { display: flex; align-items: center; padding: 10px; cursor: pointer; gap: 15px; }
-        .team-header:hover { background: rgba(255,255,255,0.1); }
-        .team-crest { width: 40px; height: 40px; border-radius: 6px; overflow: hidden; background: #ecf0f1; flex-shrink: 0; padding: 2px; display: flex; align-items: center; justify-content: center; }
-        .team-crest img { width: 100%; height: 100%; object-fit: contain; display: block; }
-        .team-name { flex: 1; text-align: left; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-        .team-title-text { font-size: 1.1rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .team-body { display: none; background: rgba(0,0,0,0.2); padding: 5px; border-top: 1px solid rgba(255,255,255,0.05); }
-        .team-status-badge { transition: 0.2s; }
-        .team-status-badge:hover { transform: scale(1.3); }
+        .grid-member { display: grid; grid-template-columns: 50px 45px 1fr 110px; align-items: center; gap: 5px; }
+        
         .grid-cell-center { display: flex; justify-content: center; align-items: center; }
         /* MIN-WIDTH: 0 EST VITAL : Il empêche les textes longs d'exploser la grille vers la droite ! */
         .grid-cell-left { display: flex; justify-content: flex-start; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
@@ -238,7 +226,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.219</div>
+    <div class="version-tag" id="app-version-display">v1.213</div>
 
     <div id="global-dropdown"></div>
 
@@ -353,7 +341,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.219</span>
+                    <span id="disp-v-mj">v1.213</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -706,7 +694,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.219";
+        const APP_VERSION = "1.213";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -965,7 +953,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.219", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.213", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1143,21 +1131,12 @@
             });
         }
 
-        /* --- PATCH V1.215 : COMPTEURS ONGLETS D'ACCUEIL --- */
         function renderHubRooms() {
             const searchVal = document.getElementById('hub-search').value.trim().toLowerCase();
             const container = document.getElementById('hub-list');
             const tabs = document.getElementById('hub-tabs');
             
             container.innerHTML = "";
-
-            // On compte le total avant d'appliquer les filtres de recherche
-            let cActive = 0, cArchive = 0;
-            mjRooms.forEach(r => { if(r.isArchived) cArchive++; else cActive++; });
-            
-            // Mise à jour visuelle des boutons
-            document.getElementById('tab-active').innerText = `🟢 EN COURS (${cActive})`;
-            document.getElementById('tab-archive').innerText = `🗄️ ARCHIVES (${cArchive})`;
 
             let filtered = [];
             if (searchVal) {
@@ -1847,11 +1826,8 @@
             }
         }
 		
-        /* --- PATCH 3.23 / V1.214 : SUCCESSION AUTOMATIQUE (DÉSACTIVÉE EN FIN DE JEU) --- */
+		/* --- PATCH 3.23 : SUCCESSION AUTOMATIQUE SI INACTIF --- */
         function handleCaptainSuccession(teamName) {
-            // Sécurité : Si la partie est archivée/en lecture seule, on ne fait plus de succession
-            if (document.getElementById('screen-dashboard').classList.contains('readonly-mode')) return;
-
             const members = Object.keys(allPlayersData)
                 .map(uid => ({ uid, ...allPlayersData[uid] }))
                 .filter(p => p.teamName === teamName && !p.banned);
@@ -2153,195 +2129,118 @@
             renderTeamLobby();
         }
 
-        /* --- PATCH V1.217 : CORRECTION DES IDs HTML & FILTRES --- */
         function renderTeamLobby() {
-            // CORRECTION 1 : Le bon ID du container est 'mj-team-lobby-list'
+            if (isRenderingTeamLobby) return;
+            isRenderingTeamLobby = true;
             const container = document.getElementById('mj-team-lobby-list');
-            if (!container) return;
+            const searchVal = document.getElementById('mj-team-search').value.trim().toLowerCase();
+            const focusData = saveFocus();
 
-            // CORRECTION 2 : Le bon ID de la barre de recherche est 'mj-team-search'
-            const searchInput = document.getElementById('mj-team-search');
-            const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
-            container.innerHTML = '';
-            
-            const currentTeams = (typeof globalTeams !== 'undefined') ? globalTeams : {};
-            
-            let teamListDisplay = Object.keys(currentTeams).sort((a, b) => {
-                let sA = currentTeams[a].active === false ? (currentTeams[a].frozenScore||0) : (currentTeams[a].bonus||0);
-                let sB = currentTeams[b].active === false ? (currentTeams[b].frozenScore||0) : (currentTeams[b].bonus||0);
-                if (sB !== sA) return sB - sA;
-                return a.localeCompare(b);
-            });
-
-            teamListDisplay.forEach(k => {
-                const t = currentTeams[k];
-                if (!t) return;
-                
-                // GESTION DES FILTRES (Tous, Actifs, Inactifs, Bannis)
-                if (currentMjTeamFilter === 'active' && t.active === false) return;
-                if (currentMjTeamFilter === 'inactive' && t.active !== false) return;
-                if (currentMjTeamFilter === 'banned' && t.banned !== true) return;
-                if (currentMjTeamFilter !== 'banned' && t.banned === true) return; // Cache les bannies par défaut
-                
-                // GESTION DE LA RECHERCHE
-                if (searchVal && !k.toLowerCase().includes(searchVal)) return;
-                
-                const safeK = k.replace(/'/g, "\\'");
-
-                // CALCUL DU RADAR
-                let cTotal = 0, cActive = 0, cInactive = 0, cBanned = 0;
-                Object.values(allPlayersData || {}).forEach(p => {
-                    if (p.teamName === k) {
-                        cTotal++;
-                        if (p.banned) cBanned++;
-                        else if (p.active === false) cInactive++;
-                        else cActive++;
-                    }
-                });
-                const bList = t.blacklist ? Object.keys(t.blacklist) : [];
-                bList.forEach(() => { cTotal++; cBanned++; });
-
-                let statsStr = `👥 ${cTotal} &nbsp;|&nbsp; 🟢 ${cActive} &nbsp;|&nbsp; 🟠 ${cInactive} &nbsp;|&nbsp; 🔴 ${cBanned}`;
-                let statusBadge = t.active === false ? `<span class="team-status-badge pause" style="cursor:pointer;" onclick="quickTeamState('${safeK}', false)" title="Modifier l'état">🟠</span>` : `<span class="team-status-badge active" style="cursor:pointer;" onclick="quickTeamState('${safeK}', true)" title="Modifier l'état">🟢</span>`;
-
-                let html = `
-                <div class="team-card ${t.active===false?'team-paused':''}">
-                    <div class="team-header" onclick="toggleTeamAccordion('${safeK}')">
-                        <div class="team-crest"><img src="${t.icon || ''}"></div>
-                        <div class="team-name">
-                            <div style="display:flex; align-items:center; gap:5px;">
-                                ${statusBadge} <span class="team-title-text">${k}</span>
-                            </div>
-                            <div style="font-size: clamp(0.6rem, 1.5vh, 0.8rem); color: #bdc3c7; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 8px; margin-top: 5px; border: 1px solid rgba(255,255,255,0.1); display: inline-block;">
-                                ${statsStr}
-                            </div>
-                        </div>
-                        
-                        <div class="team-controls">
-                            <div class="team-score-ctrl">
-                                <button class="btn-tiny" onclick="event.stopPropagation(); updateTeamBonus('${safeK}', -1)">-</button>
-                                <span class="team-bonus-val" style="min-width:18px;">${t.bonus || 0}</span>
-                                <button class="btn-tiny" onclick="event.stopPropagation(); updateTeamBonus('${safeK}', 1)">+</button>
-                            </div>
-                            <button class="dropdown-btn" onclick="openTeamMenu(event, '${safeK}')">⋮</button>
-                        </div>
-                    </div>
-                    <div class="team-body" id="team-body-${safeK}">
-                        <div id="list-member-${safeK}"></div>
-                    </div>
+            const sortHtml = `
+                <div class="sort-header grid-team">
+                    <div></div>
+                    <div class="sort-col grid-cell-center ${teamSort.col==='status'?'sort-active':''}" onclick="setSort('team','status')" title="Trier par État">${getSortArrow('team','status')} ÉTAT</div>
+                    <div class="sort-col grid-cell-left ${teamSort.col==='name'?'sort-active':''}" onclick="setSort('team','name')" title="Trier par Nom">${getSortArrow('team','name')} ÉQUIPE</div>
+                    <div class="sort-col grid-cell-center ${teamSort.col==='score'?'sort-active':''}" onclick="setSort('team','score')" title="Trier par Score Total">${getSortArrow('team','score')} SCORE</div>
+                    <div class="sort-col grid-cell-left ${teamSort.col==='bonus'?'sort-active':''}" onclick="setSort('team','bonus')" title="Trier par Bonus">${getSortArrow('team','bonus')} BONUS</div>
                 </div>`;
-                container.innerHTML += html;
-            });
-            
-            Object.keys(currentTeams).forEach(k => {
-                if(typeof currentOpenTeam !== 'undefined' && currentOpenTeam === k) {
-                    const body = document.getElementById('team-body-' + k.replace(/'/g, "\\'"));
-                    if(body) { body.style.display = 'block'; renderTeamMembers(k); }
-                }
-            });
-        }
+            container.innerHTML = sortHtml;
 
-        function renderTeamMembers(teamName) {
-            const list = document.getElementById('list-member-' + teamName);
-            if (!list) return;
+            let counts = { all: 0, active: 0, inactive: 0, banned: 0 };
 
-            const currentTeams = (typeof teamsData !== 'undefined') ? teamsData : ((typeof allTeamsData !== 'undefined') ? allTeamsData : ((typeof globalTeams !== 'undefined') ? globalTeams : {}));
-            const tData = currentTeams[teamName] || {};
-            
-            let displayList = [];
-            const activeTeamBlacklist = tData.blacklist ? Object.keys(tData.blacklist).map(k => ({id: k, ...tData.blacklist[k]})) : [];
-
-            // 1. Membres actuels
-            Object.keys(allPlayersData || {}).forEach(uid => {
-                const p = allPlayersData[uid];
-                if (p.teamName === teamName && p.banned !== true) {
-                    let status = (typeof currentBuzzerId !== 'undefined' && uid === currentBuzzerId) ? -1 : (p.active === false ? 1 : 0);
-                    displayList.push({ id: uid, status: status, isExpelled: false, ...p });
-                }
-            });
-
-            // 2. Membres expulsés
-            activeTeamBlacklist.forEach(b => {
-                const p = (allPlayersData && allPlayersData[b.id]) ? allPlayersData[b.id] : {};
-                displayList.push({ 
-                    id: b.id, status: 2, isExpelled: true, name: p.name || b.name || "Inconnu", avatar: p.avatar || b.avatar || "👤", pts: p.pts || 0, isCaptain: false 
+            let tArr = Object.keys(globalTeams).map(k => {
+                const t = globalTeams[k];
+                let total = 0, aC = 0, iC = 0, bC = 0;
+                Object.values(allPlayersData).forEach(p => { 
+                    if(p.teamName === k) {
+                        total += (p.pts || 0);
+                        if(p.banned) bC++;
+                        else if(p.active === false) iC++;
+                        else aC++;
+                    } 
                 });
+                total += (t.bonus || 0);
+                
+                let status = 0; 
+                if(t.banned) status=2; 
+                else if(t.active===false) status=1;
+                else if((aC+iC+bC) === 0) status=3;
+
+                counts.all++;
+                if (status === 2) counts.banned++;
+                else if (status === 1) counts.inactive++;
+                else counts.active++;
+
+                let hasBuzzer = Object.values(allPlayersData).some(p => p.teamName === k && p.uid === currentBuzzerId);
+                return { key: k, status: status, totalScore: total, aC: aC, iC: iC, bC: bC, hasBuzzer: hasBuzzer, ...t };
             });
 
-            let currentCapId = "";
-            let currentCapName = "";
-            displayList.forEach(m => {
-                if (m.isCaptain && !m.isExpelled) { currentCapId = m.id; currentCapName = m.name || "Inconnu"; }
-            });
+            document.getElementById('tfilter-btn-all').innerText = `Toutes (${counts.all})`;
+            document.getElementById('tfilter-btn-active').innerText = `🟢 Actives (${counts.active})`;
+            document.getElementById('tfilter-btn-inactive').innerText = `🟠 Inactives (${counts.inactive})`;
+            document.getElementById('tfilter-btn-banned').innerText = `🔴 Bannies (${counts.banned})`;
 
-            // Logique de tri dynamique
-            displayList.sort((a, b) => {
+            tArr.sort((a, b) => {
+                if (a.hasBuzzer) return -1; if (b.hasBuzzer) return 1;
                 let valA, valB;
-                if (typeof memberSort === 'undefined') return 0;
-                if (memberSort.col === 'status') { valA = a.status; valB = b.status; }
-                else if (memberSort.col === 'captain') { valA = a.isCaptain ? 1 : 0; valB = b.isCaptain ? 1 : 0; }
-                else if (memberSort.col === 'name') { valA = (a.name||"").toLowerCase(); valB = (b.name||"").toLowerCase(); }
-                else if (memberSort.col === 'pts') { valA = a.pts || 0; valB = b.pts || 0; }
-                else { 
-                    if (a.status === -1) return -1; if (b.status === -1) return 1;
-                    if (a.status !== b.status) return a.status - b.status;
-                    if (a.isCaptain) return -1; if (b.isCaptain) return 1;
-                    valA = (a.name || "").toLowerCase(); valB = (b.name || "").toLowerCase();
-                }
-                if (valA < valB) return memberSort.asc ? -1 : 1;
-                if (valA > valB) return memberSort.asc ? 1 : -1;
+                if (teamSort.col === 'name') { valA = a.key.toLowerCase(); valB = b.key.toLowerCase(); }
+                else if (teamSort.col === 'score') { valA = a.totalScore; valB = b.totalScore; }
+                else if (teamSort.col === 'bonus') { valA = a.bonus || 0; valB = b.bonus || 0; }
+                else if (teamSort.col === 'status') { valA = a.status; valB = b.status; }
+                else { valA = a.key.toLowerCase(); valB = b.key.toLowerCase(); }
+                if (valA < valB) return teamSort.asc ? -1 : 1;
+                if (valA > valB) return teamSort.asc ? 1 : -1;
                 return 0;
             });
 
-            let html = `
-                <div class="sort-header grid-member" style="margin-top:0; opacity:0.8; font-size:0.7rem;">
-                    <div class="sort-col grid-cell-center ${typeof memberSort!=='undefined' && memberSort.col==='status'?'sort-active':''}" onclick="setSort('member','status')" title="Trier par État">${getSortArrow('member','status')} ÉTAT</div>
-                    <div class="sort-col grid-cell-center ${typeof memberSort!=='undefined' && memberSort.col==='captain'?'sort-active':''}" onclick="setSort('member','captain')" title="Trier par Capitaine">${getSortArrow('member','captain')} CPT</div>
-                    <div class="sort-col grid-cell-left ${typeof memberSort!=='undefined' && memberSort.col==='name'?'sort-active':''}" onclick="setSort('member','name')" title="Trier par Nom">${getSortArrow('member','name')} NOM</div>
-                    <div class="sort-col grid-cell-center ${typeof memberSort!=='undefined' && memberSort.col==='pts'?'sort-active':''}" onclick="setSort('member','pts')" title="Trier par Score">${getSortArrow('member','pts')} SCORE</div>
-                    <div></div>
-                </div>`;
-
-            let safeCapName = currentCapName.replace(/'/g, "\\'");
-
-            displayList.forEach(m => {
-                let av = (m.avatar && m.avatar.length > 20) ? `<img src="${m.avatar}" style="width:18px;height:18px;border-radius:50%;object-fit:cover; ${m.isExpelled ? 'filter:grayscale(100%); opacity:0.5;' : ''}">` : `<span style="font-size:1.1rem; ${m.isExpelled ? 'filter:grayscale(100%); opacity:0.5;' : ''}">${m.avatar||'👤'}</span>`;
-                let safeName = (m.name || "Inconnu").replace(/'/g, "\\'");
-                let isInactive = m.status === 1;
+            let html = sortHtml;
+            tArr.forEach(t => {
+                const k = t.key;
+                if (currentMjTeamFilter === 'active' && (t.status !== 0 && t.status !== 3)) return;
+                if (currentMjTeamFilter === 'inactive' && t.status !== 1) return;
+                if (currentMjTeamFilter === 'banned' && t.status !== 2) return;
+                if (searchVal && !k.toLowerCase().includes(searchVal)) return;
                 
-                let rowStyle = "background:rgba(255,255,255,0.05);";
-                let stateIcon = "🟢";
-                let extraNameInfo = "";
-                let nameColor = "white";
+                let stateDot = t.status === 2 ? '🔴' : (t.status === 1 ? '🟠' : (t.status === 3 ? '⚫' : '🟢'));
+                
+                let statsHtml = `<span style="font-size:0.75rem; font-style:italic; margin-left:8px; opacity:0.9;">Joueurs : `;
+                let parts = [];
+                if(t.aC > 0) parts.push(`<span style="color:var(--success); font-weight:bold;">${t.aC} actif${t.aC > 1 ? 's' : ''}</span>`);
+                if(t.iC > 0) parts.push(`<span style="color:var(--gold); font-weight:bold;">${t.iC} inactif${t.iC > 1 ? 's' : ''}</span>`);
+                if(t.bC > 0) parts.push(`<span style="color:var(--danger); font-weight:bold;">${t.bC} banni${t.bC > 1 ? 's' : ''}</span>`);
+                if(parts.length === 0) statsHtml += `<span style="color:#bdc3c7;">0</span>`;
+                else statsHtml += parts.join(', ');
+                statsHtml += `</span>`;
 
-                if (m.isExpelled) {
-                    rowStyle = "background:rgba(231,76,60,0.15); border: 1px dashed var(--danger); opacity: 0.8;";
-                    stateIcon = "🔴";
-                    extraNameInfo = " <small style='color:var(--danger); font-style:italic;'>(Expulsé)</small>";
-                    nameColor = "#bdc3c7";
-                } else if (isInactive) {
-                    rowStyle = "opacity:0.5; background:rgba(0,0,0,0.2);";
-                    stateIcon = "🟠";
-                    extraNameInfo = " <small>(Hors-ligne)</small>";
-                } else if (m.status === -1) {
-                    stateIcon = "🔔";
-                }
-
-                let crown = m.isCaptain ? `👑` : (m.isExpelled || isInactive ? "" : `<span class="ghost-crown" onclick="transferCaptaincy('${currentCapId}', '${safeCapName}', '${m.id}', '${safeName}', '${teamName}')">👑</span>`);
-                let clickableBadge = `<span style="cursor:pointer; transition:0.2s; display:inline-block;" onclick="quickPlayerState('${m.id}', '${teamName}', ${m.status}, ${m.isExpelled})" onmouseover="this.style.transform='scale(1.3)'" onmouseout="this.style.transform='scale(1)'" title="Modifier l'état">${stateIcon}</span>`;
-
+                const safeK = k.replace(/'/g, "\\'");
+                const border = t.hasBuzzer ? 'border:2px solid #2ecc71; background:rgba(46,204,113,0.1);' : '';
+                
                 html += `
-                <div class="score-row grid-member" style="${rowStyle} border-bottom:1px solid rgba(255,255,255,0.05); padding: 4px 8px;">
-                    <div class="grid-cell-center" style="font-size:0.8rem;">${clickableBadge}</div>
-                    <div class="grid-cell-center">${crown}</div>
-                    <div class="grid-cell-left" style="gap:6px; font-size:0.85rem;">${av}<b style="color:${nameColor}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name || "Inconnu"}${extraNameInfo}</b></div>
-                    <div class="grid-cell-center" style="font-weight:bold; color:${m.isExpelled ? '#7f8c8d' : 'var(--accent)'};">${m.pts||0}</div>
-                    <div class="grid-cell-center">
-                        <button class="dropdown-btn" style="margin:0;" onclick="openMemberMenu(event, '${m.id}', '${teamName}', ${m.isExpelled}, ${m.isCaptain||false}, '${currentCapId}', '${safeCapName}')">⋮</button>
+                <div class="hub-line grid-team" style="${border}" onclick="toggleTeamAccordion('${safeK}')" title="Cliquez pour voir les détails et les joueurs de l'équipe">
+                    <div class="grid-cell-center"><span id="team-arrow-${k}" class="hub-arrow" style="margin-right:0; font-size:0.75rem;">▶</span></div>
+                    <div class="grid-cell-center" style="font-size:0.75rem;">${stateDot}</div>
+                    <div class="grid-cell-left" style="gap:6px;"><div style="width:20px;height:20px;background:white;border-radius:3px;overflow:hidden;display:flex;justify-content:center;align-items:center;flex-shrink:0;"><img src="${t.icon}" style="width:100%;height:100%;object-fit:contain;"></div><b style="color:var(--accent); overflow:hidden;text-overflow:ellipsis;">${k}</b>${statsHtml}</div>
+                    <div class="grid-cell-center"><b style="color:white; font-size:1.05rem;">${t.totalScore}</b></div>
+                    <div class="team-controls">
+                        <div class="team-score-ctrl">
+                            <button class="btn-tiny" onclick="event.stopPropagation(); updateTeamBonus('${safeK}', -1)">-</button>
+                            <span class="team-bonus-val" style="min-width:18px;">${t.bonus || 0}</span>
+                            <button class="btn-tiny" onclick="event.stopPropagation(); updateTeamBonus('${safeK}', 1)">+</button>
+                        </div>
+                        <button class="dropdown-btn" onclick="openTeamMenu(event, '${safeK}')">⋮</button>
                     </div>
+                </div>
+                <div id="team-details-${k}" class="hub-details" style="display:none;" onclick="event.stopPropagation();">
+                    <div id="list-member-${k}"></div>
                 </div>`;
             });
-            list.innerHTML = `<div style="display:flex; flex-direction:column; gap:2px;">${html}</div>`;
+            container.innerHTML = html;
+            if (currentOpenTeam) {
+                const det = document.getElementById('team-details-' + currentOpenTeam);
+                if (det) { det.style.display = 'block'; document.getElementById('team-arrow-' + currentOpenTeam).classList.add('open'); renderTeamMembers(currentOpenTeam); }
+            }
+            restoreFocus(focusData);
+            isRenderingTeamLobby = false;
         }
 
         function toggleTeamAccordion(teamName) {
@@ -2375,51 +2274,80 @@
             });
         }
 
+        /* --- PATCH V1.210 : DÉTECTION DU CAPITAINE ACTUEL --- */
+        function renderTeamMembers(teamName) {
+            const list = document.getElementById('list-member-' + teamName);
+            if (!list) return;
+
+            let displayList = [];
+            Object.keys(allPlayersData).forEach(uid => {
+                const p = allPlayersData[uid];
+                if (p.teamName === teamName && p.banned !== true) {
+                    let status = (uid === currentBuzzerId) ? -1 : (p.active === false ? 1 : 0);
+                    displayList.push({ id: uid, status: status, ...p });
+                }
+            });
+
+            // On cherche l'ID et le nom du capitaine actuel
+            let currentCapId = "";
+            let currentCapName = "";
+            displayList.forEach(m => {
+                if (m.isCaptain) {
+                    currentCapId = m.id;
+                    currentCapName = m.name || "Inconnu";
+                }
+            });
+
+            displayList.sort((a, b) => {
+                if (a.status === -1) return -1; if (b.status === -1) return 1;
+                if (a.status !== b.status) return a.status - b.status;
+                if (a.isCaptain) return -1; if (b.isCaptain) return 1;
+                return (a.name || "").localeCompare(b.name || "");
+            });
+
+            let html = `
+                <div class="sort-header grid-member" style="margin-top:0; opacity:0.8; font-size:0.7rem;">
+                    <div class="grid-cell-center">ÉTAT</div>
+                    <div class="grid-cell-center">CPT</div>
+                    <div class="grid-cell-left">NOM</div>
+                    <div class="grid-cell-left">SCORE</div>
+                </div>`;
+
+            let safeCapName = currentCapName.replace(/'/g, "\\'");
+
+            displayList.forEach(m => {
+                let av = (m.avatar && m.avatar.length > 20) ? `<img src="${m.avatar}" style="width:18px;height:18px;border-radius:50%;object-fit:cover;">` : `<span style="font-size:1.1rem;">${m.avatar||'👤'}</span>`;
+                let safeName = (m.name || "Inconnu").replace(/'/g, "\\'");
+                let isInactive = m.status === 1;
+                
+                let rowStyle = isInactive ? "opacity:0.5; background:rgba(0,0,0,0.2);" : "background:rgba(255,255,255,0.05);";
+                let stateIcon = isInactive ? "🟠" : (m.status === -1 ? "🔔" : "🟢");
+
+                // On injecte les VRAIES informations du capitaine actuel
+                let crown = m.isCaptain ? `👑` : (isInactive ? "" : `<span class="ghost-crown" onclick="transferCaptaincy('${currentCapId}', '${safeCapName}', '${m.id}', '${safeName}', '${teamName}')">👑</span>`);
+
+                html += `
+                <div class="score-row grid-member" style="${rowStyle} border-bottom:1px solid rgba(255,255,255,0.05); padding: 4px 0;">
+                    <div class="grid-cell-center" style="font-size:0.6rem;">${stateIcon}</div>
+                    <div class="grid-cell-center">${crown}</div>
+                    <div class="grid-cell-left" style="gap:6px; font-size:0.85rem;">${av}<b>${m.name || "Inconnu"} ${isInactive ? '(Hors-ligne)' : ''}</b></div>
+                    <div class="team-controls">
+                        <span style="font-weight:bold; color:var(--accent);">${m.pts||0}</span>
+                        <button class="dropdown-btn" onclick="openMemberMenu(event, '${m.id}', '${teamName}', false, ${m.isCaptain||false}, '${currentCapId}', '${safeCapName}')">⋮</button>
+                    </div>
+                </div>`;
+            });
+            list.innerHTML = `<div style="display:flex; flex-direction:column; gap:2px;">${html}</div>`;
+        }
+
         function expelTeamMember(uid, name, avatar, teamName) {
             if(confirm(`Expulser ${name} de l'équipe ?\n\nIl repassera en Solo et sera mis sur la liste noire de l'équipe.`)) {
                 roomRef.child('teams/' + teamName + '/blacklist/' + uid).set({ name: name, avatar: avatar });
                 roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", isCaptain: false });
             }
         }
-        /* --- PATCH V1.215 : LA RÈGLE D'OR DE LA GRÂCE --- */
-        function pardonTeamMember(uid, teamName) { 
-            roomRef.child('teams/' + teamName + '/blacklist/' + uid).remove(); 
-            // On lève la punition globale pour qu'il puisse rejouer, mais il reste en Solo (pas de réintégration forcée)
-            roomRef.child('players/' + uid).update({ banned: null });
-        }
+        function pardonTeamMember(uid, teamName) { roomRef.child('teams/' + teamName + '/blacklist/' + uid).remove(); }
 
-        /* --- PATCH V1.215 : PASTILLES INTERACTIVES --- */
-        function quickTeamState(teamName, isActive) {
-            event.stopPropagation();
-            let choice = prompt(`ÉTAT DE L'ÉQUIPE : ${teamName}\n\n1 : ${isActive ? 'Mettre en pause 🟠' : 'Réactiver 🟢'}\n2 : Bannir l'équipe 🔴\n\nEntrez votre choix (1 ou 2) :`);
-            if (choice === "1") {
-                roomRef.child('teams/'+teamName).update({active: !isActive});
-            } else if (choice === "2") {
-                if(confirm(`⚠️ Bannir définitivement l'équipe ${teamName} ?`)) {
-                    roomRef.child('teams/'+teamName).update({banned: true});
-                }
-            }
-        }
-
-        function quickPlayerState(uid, teamName, status, isExpelled) {
-            event.stopPropagation();
-            if (isExpelled) {
-                if(confirm("GRACIER ?\nCe joueur sera retiré de la liste noire de l'équipe, mais il devra rejoindre l'équipe manuellement depuis son téléphone.")) {
-                    pardonTeamMember(uid, teamName);
-                }
-            } else if (status === 1) {
-                if(confirm("RÉACTIVER ?\nForcer le statut de ce joueur en Actif 🟢 ?")) {
-                    roomRef.child('players/'+uid).update({active: true});
-                }
-            } else if (status === 0 || status === -1) {
-                let choice = prompt(`ÉTAT DU JOUEUR\n\n1 : Mettre en pause 🟠\n2 : Expulser de l'équipe 🔴\n\nEntrez votre choix (1 ou 2) :`);
-                if (choice === "1") {
-                    roomRef.child('players/'+uid).update({active: false});
-                } else if (choice === "2") {
-                    kickTeamMember(uid, teamName);
-                }
-            }
-        }
         function openEditModal(uid) { const d = allPlayersData[uid]; if(!d)return; editingPlayerUid=uid; editingPlayerOriginalPseudo=d.name; editingPlayerOriginalAvatar=d.avatar||"👤"; editingPlayerCurrentAvatar=editingPlayerOriginalAvatar; document.getElementById('edit-player-name').value=d.name; document.getElementById('btn-censor-avatar').style.display=(editingPlayerOriginalAvatar.length>20)?'block':'none'; updateEditAvatarPreview(); populateEditGallery(); document.getElementById('modal-edit-player').style.display='flex'; }
         function populateEditGallery() { const g=document.getElementById('edit-avatar-gallery'); g.innerHTML=""; const o=document.createElement('div'); o.className='edit-gallery-item original-avatar-item'; if(editingPlayerOriginalAvatar.length>20)o.innerHTML=`<img src="${editingPlayerOriginalAvatar}">`; else o.innerText=editingPlayerOriginalAvatar; o.onclick=()=>{editingPlayerCurrentAvatar=editingPlayerOriginalAvatar;updateEditAvatarPreview();}; g.appendChild(o); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='edit-gallery-item'; d.innerText=a; d.onclick=()=>{editingPlayerCurrentAvatar=a;updateEditAvatarPreview();}; g.appendChild(d); }); }
         function updateEditAvatarPreview() { const c=document.getElementById('edit-player-avatar-preview'); if(editingPlayerCurrentAvatar.length>20)c.innerHTML=`<img src="${editingPlayerCurrentAvatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`; else c.innerText=editingPlayerCurrentAvatar; }
