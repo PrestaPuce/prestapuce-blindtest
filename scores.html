@@ -156,7 +156,7 @@
     <div id="bg-protection"></div>
     <div id="big-anim-overlay"></div>
     
-    <div id="version-display" class="version-tag">v1.173</div>
+    <div id="version-display" class="version-tag">v1.174</div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
@@ -249,7 +249,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.173";
+        const CLIENT_VERSION = "1.174";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -663,6 +663,7 @@
             });
         }
 
+        /* --- PATCH V1.174 : RÉPARATION DU CLASSEMENT EN DIRECT --- */
         function executeStepAnimation(dataId, start, end) {
             if (activeIntervals[dataId]) clearInterval(activeIntervals[dataId]);
             
@@ -684,6 +685,9 @@
                         clearInterval(activeIntervals[dataId]); 
                         delete activeIntervals[dataId];
                         delete animatingScores[dataId]; 
+                        
+                        // C'EST ICI LA MAGIE : On force le tableau à se re-trier en direct une fois l'animation finie !
+                        updateDisplay(); 
                     }
                 } else {
                     clearInterval(activeIntervals[dataId]); 
