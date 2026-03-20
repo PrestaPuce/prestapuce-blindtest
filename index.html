@@ -357,6 +357,11 @@
             </div>
             <div class="buzzer-container">
                 <div class="score-container">
+                    <div class="score-row">
+                        <span class="score-label">Ton Score : </span>
+                        <span class="score-value" id="game-score">0</span>
+                    </div>
+                    
                     <div class="score-row" id="row-team-score" style="display:none; flex-direction:column; gap:6px; margin-top:10px;">
                         <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
                             <span class="score-label" id="label-team-score">Score Équipe : </span>
@@ -518,7 +523,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.180";
+        const CLIENT_VERSION = "1.181";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1434,15 +1439,21 @@
                     checkWhyKickedAndShowModal(oldTeamName);
                 }
                 
+                /* --- PATCH V1.181 : ALERTE TUTORIEL CAPITAINE --- */
                 // Si le MJ a envoyé une phrase personnalisée (MJ -> Joueur), on l'affiche
                 if (d.captainMessage) {
-                    alert(d.captainMessage);
+                    let finalMsg = d.captainMessage;
+                    // On ajoute l'astuce de la couronne uniquement si le joueur VIENT de devenir capitaine
+                    if (!wasCaptain && isCaptain) {
+                        finalMsg += "\n\n💡 NOUVEAU POUVOIR : Vous pouvez maintenant cliquer sur la couronne 👑 en haut de l'écran pour gérer votre équipe !";
+                    }
+                    alert(finalMsg);
                     // On efface le message de la BDD après lecture pour éviter les répétitions
                     roomRef.child('players/' + myUserID + '/captainMessage').remove();
                 } else {
                     // Fallback automatique (Succession sans intervention du MJ)
                     if (!wasCaptain && isCaptain && newTeamName !== "Solo" && !isExiting && !isRoomClosing) {
-                        alert(`👑 Bonne nouvelle ! Vous avez été promu Capitaine de l'équipe ${newTeamName} !`);
+                        alert(`👑 Bonne nouvelle ! Vous avez été promu Capitaine de l'équipe ${newTeamName} !\n\n💡 NOUVEAU POUVOIR : Cliquez sur la couronne 👑 en haut de l'écran pour gérer votre équipe.`);
                     } else if (wasCaptain && !isCaptain && oldTeamName !== "Solo" && newTeamName === oldTeamName && !isExiting && !isRoomClosing) {
                         alert(`ℹ️ Le rôle de Capitaine a été réattribué à un autre joueur de l'équipe.`);
                     }
