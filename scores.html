@@ -156,7 +156,7 @@
     <div id="bg-protection"></div>
     <div id="big-anim-overlay"></div>
     
-    <div id="version-display" class="version-tag">v1.174</div>
+    <div id="version-display" class="version-tag">v1.175</div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
@@ -249,7 +249,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.174";
+        const CLIENT_VERSION = "1.175";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -531,10 +531,14 @@
             previousPts[id] = newPts;
         }
 
-        /* --- PATCH V1.173 : STATS DÉTAILLÉES, BANNIS & TRI --- */
+        /* --- PATCH V1.175 : STATS DÉTAILLÉES & EXORCISME FANTÔMES --- */
         function calculateGlobalScores() {
             const listEquipes = Object.keys(teamsData);
-            const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
+            // CORRECTION 1 : On désintègre les joueurs fantômes ("undefined") avant tout calcul !
+            const allPlayers = Object.keys(scoresData)
+                .map(uid => ({ ...scoresData[uid], uid: uid }))
+                .filter(p => p.name && p.name !== "undefined" && p.name.trim() !== "");
+                
             let rankingMap = new Map();
 
             listEquipes.forEach(tName => {
@@ -542,17 +546,9 @@
                 if (team.banned === true) return;
                 let score = team.active === false ? (team.frozenScore || 0) : (team.bonus || 0);
                 rankingMap.set("team-" + tName, { 
-                    dataId: "team-" + tName, 
-                    name: tName, 
-                    pts: score, 
-                    icon: team.icon, 
-                    isTeam: true, 
-                    count: 0,           // Actifs
-                    historicalCount: 0, // Total
-                    tInactive: 0,       // Inactifs
-                    tBanned: 0,         // Bannis
-                    isActive: team.active !== false,
-                    captainName: ""     // Nom du capitaine
+                    dataId: "team-" + tName, name: tName, pts: score, icon: team.icon, 
+                    isTeam: true, count: 0, historicalCount: 0, tInactive: 0, tBanned: 0, 
+                    isActive: team.active !== false, captainName: "" 
                 });
             });
 
@@ -560,41 +556,23 @@
                 const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
                 if (statutEquipe !== "Solo" && rankingMap.has("team-" + statutEquipe)) {
                     let teamEntry = rankingMap.get("team-" + statutEquipe);
-                    
                     teamEntry.historicalCount++;
-                    if (p.banned) {
-                        teamEntry.tBanned++;
-                    } else if (p.active === false) {
-                        teamEntry.tInactive++;
-                    } else {
-                        teamEntry.count++;
-                    }
+                    if (p.banned) teamEntry.tBanned++;
+                    else if (p.active === false) teamEntry.tInactive++;
+                    else teamEntry.count++;
                     
-                    if (p.isCaptain) {
-                        teamEntry.captainName = p.name;
-                    }
-
-                    // CORRECTION 1 : On bloque l'ajout de points si le joueur est banni
-                    if (teamEntry.isActive && !p.banned) { 
-                        teamEntry.pts += (p.pts || 0); 
-                    }
+                    if (p.isCaptain) teamEntry.captainName = p.name;
+                    if (teamEntry.isActive && !p.banned) teamEntry.pts += (p.pts || 0); 
                 } else {
-                    // CORRECTION 2 : On garde les Solos inactifs (on exclut juste les bannis)
                     if (!p.banned) { 
                         rankingMap.set("solo-" + p.name, { 
-                            dataId: "solo-" + p.name, 
-                            name: p.name, 
-                            pts: (p.pts || 0), 
-                            avatar: p.avatar, 
-                            isTeam: false, 
-                            isActive: p.active !== false, // Gère dynamiquement si grisé ou non
-                            count: 1,
-                            historicalCount: 1
+                            dataId: "solo-" + p.name, name: p.name, pts: (p.pts || 0), 
+                            avatar: p.avatar, isTeam: false, isActive: p.active !== false, 
+                            count: 1, historicalCount: 1
                         }); 
                     }
                 }
             });
-            // CORRECTION 3 : On trie le classement du plus grand score au plus petit !
             return Array.from(rankingMap.values()).sort((a, b) => b.pts - a.pts);
         }
 
@@ -620,7 +598,10 @@
                 let timeB = lastPointTime[b.dataId] || 0;
                 if (timeB !== timeA) return timeA - timeB; 
                 
-                return a.name.localeCompare(b.name); 
+                // CORRECTION 2 : Bouclier absolu contre le crash alphabétique !
+                const safeNameA = a.name || "Inconnu";
+                const safeNameB = b.name || "Inconnu";
+                return safeNameA.localeCompare(safeNameB); 
             });
         }
 
@@ -697,7 +678,10 @@
         }
 
         function updateDisplay() {
-            const allPlayers = Object.keys(scoresData).map(uid => ({ ...scoresData[uid], uid: uid }));
+            // CORRECTION 3 : On bloque l'affichage visuel des fantômes pour l'écran géant
+            const allPlayers = Object.keys(scoresData)
+                .map(uid => ({ ...scoresData[uid], uid: uid }))
+                .filter(p => p.name && p.name !== "undefined" && p.name.trim() !== "");
             
             allPlayers.forEach(p => trackScores('player-' + p.uid, p.pts || 0));
             calculateGlobalScores().forEach(item => trackScores(item.dataId, item.pts));
@@ -705,7 +689,6 @@
             const listEquipes = Object.keys(teamsData);
             let pListHTML = "";
             
-            /* --- PATCH V1.170 : AFFICHAGE LIGNE ÉQUIPE OPTIMISÉE --- */
             allPlayers.sort((a, b) => {
                 if (a.active === false && b.active !== false) return 1;
                 if (a.active !== false && b.active === false) return -1;
@@ -728,7 +711,6 @@
                     displayPtsP = animatingScores[idP].currentPts;
                 }
                 
-                // Couronne dans la liste de gauche pour les capitaines
                 let crownIcon = p.isCaptain ? '<span style="margin-left:5px; filter:drop-shadow(0 0 5px gold); font-size: 1.1em;">👑</span>' : '';
 
                 pListHTML += `
@@ -768,7 +750,6 @@
                     displayPtsG = animatingScores[idG].currentPts;
                 }
 
-                // LAYOUT ÉQUIPE : Nom+Capitaine à gauche | Radar au centre
                 let infoHtml = "";
                 if (item.isTeam) {
                     let capStr = item.captainName ? `👑 Cap. ${item.captainName}` : `👑 Aucun`;
