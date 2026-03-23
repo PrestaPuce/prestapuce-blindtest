@@ -523,7 +523,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.186";
+        const CLIENT_VERSION = "1.187";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -808,7 +808,19 @@
                         }
                         navigateTo('step-welcome');
                     });
-                } else { alert("Salle introuvable !"); navigateTo('step-room'); }
+                } else { 
+                    /* --- PATCH V1.187 : MESSAGE D'ERREUR CHALEUREUX ET DYNAMIQUE --- */
+                    db.ref('rooms/' + roomID + '/mjName').once('value', mjSnap => {
+                        if (mjSnap.exists()) {
+                            // La salle existe mais est cachée (réseau coupé ou navigateur fermé)
+                            alert("Salle fermée ou momentanément indisponible.\nVeuillez vous renseigner auprès de " + mjSnap.val() + ".");
+                        } else {
+                            // La salle n'existe vraiment pas (ou a été définitivement supprimée)
+                            alert("Salle introuvable ou définitivement supprimée.");
+                        }
+                        navigateTo('step-room');
+                    });
+                }
             });
         }
         
