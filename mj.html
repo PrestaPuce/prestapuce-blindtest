@@ -226,7 +226,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.218</div>
+    <div class="version-tag" id="app-version-display">v1.219</div>
 
     <div id="global-dropdown"></div>
 
@@ -347,7 +347,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.218</span>
+                    <span id="disp-v-mj">v1.219</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -449,33 +449,35 @@
             🏁 Partie Terminée - Mode Lecture Seule
         </div>
 
-        <div class="room-info-card" id="room-info-card" style="max-width:850px; margin:0 auto 20px auto; position:relative; padding:15px;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:15px;">
-                
-                <div style="display:flex; flex-direction:column; gap:10px; flex:1; min-width:140px; z-index:10;">
-                    <button id="btn-open-buzz" style="background:var(--blue); margin:0; font-size:0.9rem; padding:10px; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3);" onclick="statusUpdate('ready')" title="Ouvrir les buzzers pour la prochaine question">Ouvrir Buzzers</button>
-                    <button style="background:var(--danger); margin:0; font-size:0.9rem; padding:10px; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3);" onclick="fullReset()" title="Réinitialiser l'état de tous les buzzers">🧹 Reset Titre</button>
+        <div class="room-info-card" id="room-info-card" style="max-width:850px; margin:0 auto 20px auto; position:relative; padding:15px; padding-top:20px;">
+
+            <div style="position:absolute; top:10px; right:10px; display:flex; gap:8px; align-items:center; z-index:15;">
+                <div id="network-status-container" title="État de la connexion au serveur : En ligne" style="background:rgba(0,0,0,0.5); width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.2); cursor:help;">
+                    <span id="network-status-dot" style="font-size: 0.85rem; line-height:1;">🟢</span>
+                </div>
+                <button onclick="forceRoomOpen()" title="Recréer la porte d'entrée publique en cas de bug réseau" style="background:rgba(0,0,0,0.5); border:1px solid white; color:white; width:30px; height:30px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px; box-shadow:none; cursor:pointer; font-size:1rem; margin:0; transition:0.2s;">🔄</button>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:15px;">
+
+                <div style="display:flex; flex-direction:column; gap:8px; width:150px; flex-shrink:0; z-index:10;">
+                    <button id="btn-open-buzz" style="background:var(--success); margin:0; font-size:0.9rem; padding:10px; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2);" onclick="statusUpdate('ready')" title="Ouvrir les buzzers pour la prochaine question">Ouvrir Buzzers</button>
+                    <button style="background:var(--danger); margin:0; font-size:0.9rem; padding:10px; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2);" onclick="fullReset()" title="Réinitialiser l'état de tous les buzzers">🧹 Reset Titre</button>
                 </div>
 
-                <div style="flex:2; text-align:center; min-width:220px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                    <div id="display-event-name" style="font-size: 1.5rem; font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1.1;">PARTIE EN COURS</div>
-                    <div id="display-mj-name" style="font-size: 1rem; font-weight: 600; margin-top: 5px; opacity: 0.9;">Animé par MJ</div>
-                    <div style="font-size: 0.85rem; font-family: monospace; opacity: 0.7; margin-top: 5px; font-weight: bold; margin-bottom:15px;">SALLE N° <span id="display-room">----</span></div>
-                    <button style="background: linear-gradient(to bottom, #f1c40f, #f39c12); color: black; font-size: 0.95rem; padding:8px 25px; margin: 0; width: auto; font-weight:bold; border-radius:20px; box-shadow: 0 4px 10px rgba(241, 196, 15, 0.4);" onclick="triggerEndGame()" title="Clôturer l'événement, afficher le podium et archiver la salle">🏆 FIN DE PARTIE</button>
+                <div style="flex:1; text-align:center; min-width:200px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                    <div id="display-event-name" style="font-size: 1.6rem; font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1.1; color:black;">PARTIE EN COURS</div>
+                    <div id="display-mj-name" style="font-size: 1rem; font-weight: 600; margin-top: 5px; opacity: 0.9; color:black;">Animé par MJ</div>
+                    <div style="font-size: 0.85rem; font-family: monospace; opacity: 0.7; margin-top: 5px; font-weight: bold; margin-bottom:15px; color:black;">SALLE N° <span id="display-room">----</span></div>
+                    
+                    <button style="background: #1a1a1a; color: white; border: 2px solid white; font-size: 0.95rem; padding:8px 25px; margin: 0; width: auto; font-weight:bold; border-radius:20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform:uppercase;" onclick="triggerEndGame()" title="Clôturer l'événement, afficher le podium et archiver la salle">🏁 FIN DE PARTIE 🏆</button>
                 </div>
 
-                <div style="display:flex; flex-direction:column; gap:10px; flex:1; min-width:140px; align-items:flex-end; z-index:10;">
-                    <div style="display:flex; gap:8px; justify-content:flex-end; width:100%;">
-                        <div id="network-status-container" title="État de la connexion au serveur : En ligne" style="background:rgba(0,0,0,0.5); width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.2); cursor:help;">
-                            <span id="network-status-dot" style="font-size: 0.9rem; line-height:1;">🟢</span>
-                        </div>
-                        <button onclick="forceRoomOpen()" title="Recréer la porte d'entrée publique en cas de bug réseau" style="background:rgba(0,0,0,0.5); border:1px solid var(--accent); color:var(--accent); width:35px; height:35px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px; box-shadow:none; cursor:pointer; font-size:1rem; margin:0; transition:0.2s;">🔄</button>
-                    </div>
-                    <div style="display:flex; gap:8px; width:100%;">
-                        <button style="background:var(--blue); margin:0; padding:10px; font-size:0.85rem; flex:1; box-shadow:0 4px 6px rgba(0,0,0,0.3);" onclick="quitRoom()" title="Fermer cette fenêtre sans détruire la salle">🚪 Quitter</button>
-                        <button id="btn-delete-room" style="background:var(--danger); margin:0; padding:10px; font-size:0.85rem; flex:1; box-shadow:0 4px 6px rgba(0,0,0,0.3);" onmousedown="startDeleteHold(event)" onmouseup="cancelDeleteHold(event)" onmouseleave="cancelDeleteHold(event)" ontouchstart="startDeleteHold(event)" ontouchend="cancelDeleteHold(event)" title="ATTENTION : Détruire définitivement la salle !">⚠️ Supprimer</button>
-                    </div>
+                <div style="display:flex; flex-direction:column; gap:8px; width:150px; flex-shrink:0; z-index:10;">
+                    <button style="background:var(--blue); margin:0; padding:6px; font-size:0.9rem; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2); line-height:1.2;" onclick="quitRoom()" title="Fermer cette fenêtre sans détruire la salle">🚪 Quitter<br><small style="font-size:0.7rem; opacity:0.8; font-weight:normal;">(Sauvegarder)</small></button>
+                    <button id="btn-delete-room" style="background:var(--danger); margin:0; padding:6px; font-size:0.9rem; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2); line-height:1.2;" onmousedown="startDeleteHold(event)" onmouseup="cancelDeleteHold(event)" onmouseleave="cancelDeleteHold(event)" ontouchstart="startDeleteHold(event)" ontouchend="cancelDeleteHold(event)" title="ATTENTION : Détruire définitivement la salle !">⚠️ Supprimer<br><small style="font-size:0.7rem; opacity:0.8; font-weight:normal;">(Détruire)</small></button>
                 </div>
+
             </div>
         </div>
         
@@ -708,7 +710,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.218";
+        const APP_VERSION = "1.219";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -980,7 +982,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.218", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.219", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1991,11 +1993,12 @@
                 const st = snap.val() ? snap.val().status : 'waiting'; 
                 const btn = document.getElementById('btn-open-buzz'); 
                 if(st === 'ready' || st === 'taken' || st === 'processing') { 
-                    btn.innerText = st === 'processing' ? "⏳ ANALYSE..." : "✅ Buzzers Ouverts"; 
+                    btn.innerHTML = st === 'processing' ? "⏳ ANALYSE..." : "✅ Buzzers Ouverts"; 
                     btn.style.background = st === 'processing' ? "#e67e22" : "#27ae60"; 
                     btn.disabled = true; 
                 } else { 
-                    btn.innerText = "Ouvrir Buzzers"; btn.style.background = "#3498db"; btn.disabled = false; 
+                    /* PATCH 1.219 : Retour au Vert (Success) par défaut */
+                    btn.innerHTML = "Ouvrir Buzzers"; btn.style.background = "var(--success)"; btn.disabled = false; 
                 } 
             });
 
@@ -2530,7 +2533,7 @@
             if(btn.disabled) return;
             
             btn.classList.add('holding');
-            btn.innerText = "⏳ MAINTENEZ POUR SUPPRIMER...";
+            btn.innerHTML = "⏳ MAINTENEZ...<br><small style=\"font-size:0.7rem; opacity:0.8; font-weight:normal;\">(Détruire)</small>";
             
             holdTimer = setTimeout(() => {
                 btn.classList.remove('holding');
@@ -2551,7 +2554,8 @@
             const btn = document.getElementById('btn-delete-room');
             if(btn && !btn.disabled) {
                 btn.classList.remove('holding');
-                btn.innerText = "⚠️ Supprimer (Détruire)";
+                /* PATCH 1.219 : Maintien du sous-texte */
+                btn.innerHTML = "⚠️ Supprimer<br><small style=\"font-size:0.7rem; opacity:0.8; font-weight:normal;\">(Détruire)</small>";
             }
         }
 		
