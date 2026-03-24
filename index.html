@@ -408,7 +408,13 @@
             <h2 style="color:var(--gold); margin-top:0;">GÉRER L'ÉQUIPE</h2>
             
             <p style="color:#bdc3c7; font-size:0.9rem; margin-bottom:5px; text-align:left;">Nom de l'équipe :</p>
-            <input type="text" id="manage-team-name" style="width:100%; box-sizing:border-box; padding:12px; font-size:1.1rem;" onkeypress="if(event.key==='Enter') renameTeamFromManage()">
+            <div style="display:flex; gap:10px; align-items:center; width:100%;">
+                <input type="text" id="manage-team-name" style="flex:1; box-sizing:border-box; padding:12px; font-size:1.1rem; margin-bottom:0;" 
+                    oninput="document.getElementById('btn-save-team-name').style.display = this.value.trim() !== player.team ? 'block' : 'none';" 
+                    onblur="if(this.value.trim() === '') { this.value = player.team; document.getElementById('btn-save-team-name').style.display = 'none'; }"
+                    onkeypress="if(event.key==='Enter') renameTeamFromManage()">
+                <button id="btn-save-team-name" onclick="renameTeamFromManage()" style="display:none; background:var(--success); color:white; border:none; border-radius:8px; padding:0 15px; font-weight:bold; cursor:pointer; height:47px; flex-shrink:0; font-size:1.2rem;">✅</button>
+            </div>
             
             <button class="settings-btn" onclick="openCrestEdit()" style="margin-top:10px; border: 1px solid var(--accent); color: var(--accent); text-align: center;">📸 Modifier le Blason</button>
             
@@ -523,7 +529,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.190";
+        const CLIENT_VERSION = "1.192";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1297,7 +1303,9 @@
                             roomRef.child('teams/'+player.team).remove();
                             player.team = newName;
                             updateGameHeader();
-                            alert("Équipe renommée !");
+                            // PATCH V1.192 : On cache le bouton de validation
+                            document.getElementById('btn-save-team-name').style.display = 'none';
+                            alert("Équipe renommée avec succès !");
                         });
                     });
                 });
