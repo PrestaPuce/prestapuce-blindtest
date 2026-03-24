@@ -180,7 +180,7 @@
         @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes scorePop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.5); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
     </style>
-    <div id="version-display" class="version-tag">v1.180</div>
+    <div id="version-display" class="version-tag">v1.189</div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
@@ -273,7 +273,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.180";
+        const CLIENT_VERSION = "1.189";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -715,7 +715,7 @@
             const listEquipes = Object.keys(teamsData);
             let pListHTML = "";
             
-            // PATCH V1.180 : Séquençage Show TV (Identité ➔ Défloutage ➔ Score pur)
+            // PATCH V1.189 : Séquençage Show TV (Identité ➔ Défloutage ➔ Score pur)
             const giantWrapper = document.getElementById('giant-buzzer-wrapper');
             const giantDisplay = document.getElementById('giant-buzzer-display');
             const infoZone = document.getElementById('giant-player-info');
