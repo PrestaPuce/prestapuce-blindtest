@@ -529,7 +529,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.192";
+        const CLIENT_VERSION = "1.193";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1287,25 +1287,44 @@
             }
         }
 
+        // PATCH V1.193 : Migration complète de l'équipe (Points, Joueurs, Nettoyage MJ)
         function renameTeamFromManage() {
             const newName = document.getElementById('manage-team-name').value.trim();
-            if(newName.length < 2) return alert("Nom trop court.");
-            if(newName === player.team) return alert("C'est déjà le nom de l'équipe.");
+            const oldName = player.team;
             
-            roomRef.child('teams/'+newName).once('value', snap => {
-                if(snap.exists()) return alert("Ce nom d'équipe est déjà pris.");
+            if(newName.length < 2) return alert("Nom trop court.");
+            if(newName === oldName) return alert("C'est déjà le nom de l'équipe.");
+            
+            // 1. On vérifie que le nouveau nom n'existe pas déjà
+            roomRef.child('teams/' + newName).once('value', snapNew => {
+                if(snapNew.exists()) return alert("Ce nom d'équipe est déjà pris.");
                 
-                roomRef.child('teams/'+newName).set({icon: player.teamIcon}).then(() => {
-                    roomRef.child('players').orderByChild('teamName').equalTo(player.team).once('value', snapPlayers => {
-                        let updates = {};
-                        snapPlayers.forEach(child => { updates[child.key + '/teamName'] = newName; });
-                        roomRef.child('players').update(updates).then(() => {
-                            roomRef.child('teams/'+player.team).remove();
-                            player.team = newName;
-                            updateGameHeader();
-                            // PATCH V1.192 : On cache le bouton de validation
-                            document.getElementById('btn-save-team-name').style.display = 'none';
-                            alert("Équipe renommée avec succès !");
+                // 2. On récupère TOUTES les données de l'ancienne équipe (pour ne pas perdre les points !)
+                roomRef.child('teams/' + oldName).once('value', snapOld => {
+                    let teamData = snapOld.val() || { icon: player.teamIcon, pts: 0 };
+                    
+                    // 3. On crée la nouvelle équipe avec les données exactes
+                    roomRef.child('teams/' + newName).set(teamData).then(() => {
+                        
+                        // 4. On déplace tous les joueurs vers ce nouveau nom
+                        roomRef.child('players').orderByChild('teamName').equalTo(oldName).once('value', snapPlayers => {
+                            let updates = {};
+                            snapPlayers.forEach(child => { 
+                                updates[child.key + '/teamName'] = newName; 
+                            });
+                            
+                            roomRef.child('players').update(updates).then(() => {
+                                
+                                // 5. On supprime l'ancienne équipe pour nettoyer le lobby MJ
+                                roomRef.child('teams/' + oldName).remove().then(() => {
+                                    player.team = newName;
+                                    updateGameHeader(); // Met à jour l'affichage du joueur
+                                    
+                                    // On cache le bouton de validation
+                                    document.getElementById('btn-save-team-name').style.display = 'none';
+                                    alert("Équipe renommée avec succès !");
+                                });
+                            });
                         });
                     });
                 });
