@@ -226,7 +226,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.223</div>
+    <div class="version-tag" id="app-version-display">v1.224</div>
 
     <div id="global-dropdown"></div>
 
@@ -347,7 +347,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.223</span>
+                    <span id="disp-v-mj">v1.224</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -712,7 +712,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.223";
+        const APP_VERSION = "1.224";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -734,6 +734,7 @@
         let memberSort = { col: 'default', asc: true };
 
         let buzzProcessing = false;
+		let currentGameState = 'waiting';
         let curLbType = '', curLbIdx = 0, lbCrests = [], lbBgsDash = [], lbBgsModal = [];
         let currentPlayerFilter = 'all';
         let currentMjTeamFilter = 'all'; 
@@ -984,7 +985,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.223", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.224", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1697,7 +1698,13 @@
                 });
             }
 
-            const defLogo = "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad";            try { roomRef.child('mjLogo').set(mjProfileData.customLogo && mjProfileData.customLogo !== "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" ? mjProfileData.customLogo : defLogo); } catch(e){}
+            if (!isArchived) {
+                // PATCH V1.224 : Purge des buzzers fantômes au démarrage
+                fullReset();
+            }
+            
+            const defLogo = "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad";
+			try { roomRef.child('mjLogo').set(mjProfileData.customLogo && mjProfileData.customLogo !== "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" ? mjProfileData.customLogo : defLogo); } catch(e){}
             try { if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); } catch(e){}
             try { roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true); } catch(e){}
             try { if(mjProfileData.defaultBackground) roomRef.child('customBackground').set(mjProfileData.defaultBackground); } catch(e){}
@@ -1994,15 +2001,20 @@
 
             roomRef.child('gameState').on('value', snap => { 
                 const st = snap.val() ? snap.val().status : 'waiting'; 
+                currentGameState = st; // PATCH V1.224 : Mémorisation de l'état
+                
                 const btn = document.getElementById('btn-open-buzz'); 
                 if(st === 'ready' || st === 'taken' || st === 'processing') { 
                     btn.innerHTML = st === 'processing' ? "⏳ ANALYSE..." : "✅ Buzzers Ouverts"; 
                     btn.style.background = st === 'processing' ? "#e67e22" : "#27ae60"; 
                     btn.disabled = true; 
                 } else { 
-                    /* PATCH 1.219 : Retour au Vert (Success) par défaut */
                     btn.innerHTML = "Ouvrir Buzzers"; btn.style.background = "var(--success)"; btn.disabled = false; 
                 } 
+                
+                // On force le Lobby à se redessiner pour éteindre la lumière verte
+                renderLobby();
+                renderTeamLobby();
             });
 
             roomRef.child('buzzAttempts').on('value', snap => {
@@ -2154,8 +2166,7 @@
                 let actionsHtml = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
                 /* --- PATCH 3.25 : COURONNE LOBBY JOUEURS --- */
                 let crownIcon = d.isCaptain ? '<span style="margin-left:5px; filter:drop-shadow(0 0 2px gold);">👑</span>' : '';
-				let stateDot = d.status === 2 ? '🔴' : (d.status === 1 ? '🟠' : (d.uid === currentBuzzerId ? '🔔' : '🟢'));
-
+				let stateDot = d.status === 2 ? '🔴' : (d.status === 1 ? '🟠' : ((d.uid === currentBuzzerId && currentGameState !== 'awarded') ? '🔔' : '🟢'));
                 if (d.status === 2) {
                     hsB = true;
                     hB += `<div class="score-row grid-player" style="border:1px solid var(--danger);">
@@ -2176,7 +2187,7 @@
                                 <div class="player-controls">${actionsHtml}</div>
                            </div>`;
                 } else {
-                    const rC = (d.uid===currentBuzzerId) ? "score-row buzzer-active-row grid-player" : "score-row grid-player";
+                    const rC = (d.uid === currentBuzzerId && currentGameState !== 'awarded') ? "score-row buzzer-active-row grid-player" : "score-row grid-player";
                     hA += `
                     <div class="${rC}">
                         <div class="grid-cell-center" style="font-size:0.75rem;">${stateDot}</div>
@@ -2253,7 +2264,7 @@
                 else if (status === 1) counts.inactive++;
                 else counts.active++;
 
-                let hasBuzzer = Object.values(allPlayersData).some(p => p.teamName === k && p.uid === currentBuzzerId);
+                let hasBuzzer = Object.values(allPlayersData).some(p => p.teamName === k && p.uid === currentBuzzerId && currentGameState !== 'awarded');
                 return { key: k, status: status, totalScore: total, aC: aC, iC: iC, bC: bC, hasBuzzer: hasBuzzer, ...t };
             });
 

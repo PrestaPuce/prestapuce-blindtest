@@ -155,8 +155,15 @@
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
     <div id="big-anim-overlay"></div>
-    
-    <div id="version-display" class="version-tag">v1.175</div>
+    <div id="giant-buzzer-display" style="display:none; flex-direction:column; align-items:center; justify-content:center; background:rgba(46, 204, 113, 0.95); border:4px solid white; border-radius:20px; padding:2vh 5vw; margin: 1vh auto 2vh auto; box-shadow:0 10px 30px rgba(0,0,0,0.8); z-index:500; text-align:center; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        <div id="giant-buzzer-avatar" style="width:12vh; height:12vh; font-size:8vh; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:1vh; box-shadow:0 5px 15px rgba(0,0,0,0.5); overflow:hidden;">👤</div>
+        <div id="giant-buzzer-name" style="font-size:4vh; font-weight:900; color:white; text-transform:uppercase; text-shadow:0 4px 10px rgba(0,0,0,0.5);">PSEUDO</div>
+        <div id="giant-buzzer-team" style="font-size:2vh; font-weight:bold; color:var(--accent); text-shadow:0 2px 5px rgba(0,0,0,0.8);">ÉQUIPE</div>
+    </div>
+    <style>
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+    <div id="version-display" class="version-tag">v1.176</div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
@@ -249,7 +256,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.175";
+        const CLIENT_VERSION = "1.176";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -398,6 +405,7 @@
         
         let previousPts = {}; 
         let lastPointTime = {}; 
+        let currentGameState = 'waiting'; // PATCH V1.176
         let pendingAnimations = {}; 
         let animatingScores = {}; 
         let activeIntervals = {};
@@ -459,11 +467,12 @@
                 else { linkElement.href = "#"; linkElement.style.pointerEvents = "none"; }
             });
             
-            /* --- PATCH V1.171 : BYPASS PODIUM AU CHARGEMENT --- */
+            /* --- PATCH V1.171 / 1.176 : BYPASS PODIUM ET GESTION ÉTAT --- */
             let initialScoreLoad = true;
             roomRef.child('gameState').on('value', snap => {
                 const state = snap.val();
-                if (state && state.status === 'endGame') { 
+                currentGameState = state ? state.status : 'waiting'; // Mémorise l'état
+                if (state && state.status === 'endGame') {
                     isGameFinished = true; 
                     if (initialScoreLoad) {
                         showLeaderboard(); // Affiche direct le tableau si la partie était déjà finie
@@ -689,6 +698,27 @@
             const listEquipes = Object.keys(teamsData);
             let pListHTML = "";
             
+            // PATCH V1.176 : Afficheur Géant
+            const giantBox = document.getElementById('giant-buzzer-display');
+            if (currentBuzzerId && currentGameState !== 'awarded') {
+                const buzzerPlayer = allPlayers.find(pl => pl.uid === currentBuzzerId);
+                if (buzzerPlayer) {
+                    giantBox.style.display = 'flex';
+                    document.getElementById('giant-buzzer-name').innerText = buzzerPlayer.name;
+                    document.getElementById('giant-buzzer-team').innerText = (buzzerPlayer.teamName && listEquipes.includes(buzzerPlayer.teamName)) ? `Équipe ${buzzerPlayer.teamName}` : 'Solo';
+                    let av = buzzerPlayer.avatar;
+                    if(av && av.length > 20) {
+                        document.getElementById('giant-buzzer-avatar').innerHTML = `<img src="${av}" style="width:100%; height:100%; object-fit:cover;">`;
+                    } else {
+                        document.getElementById('giant-buzzer-avatar').innerHTML = av || '👤';
+                    }
+                } else {
+                    giantBox.style.display = 'none';
+                }
+            } else {
+                giantBox.style.display = 'none';
+            }
+
             allPlayers.sort((a, b) => {
                 if (a.active === false && b.active !== false) return 1;
                 if (a.active !== false && b.active === false) return -1;
@@ -704,7 +734,9 @@
                 const idP = 'player-' + p.uid;
                 const enEquipe = p.teamName && listEquipes.includes(p.teamName);
                 const inactiveClass = p.active === false ? "inactive-card" : "";
-                const buzzedClass = (p.uid === currentBuzzerId) ? "last-buzzed" : "";
+                
+                // PATCH V1.176 : On éteint l'encadré vert si les points sont donnés
+                const buzzedClass = (p.uid === currentBuzzerId && currentGameState !== 'awarded') ? "last-buzzed" : "";
                 
                 let displayPtsP = p.pts || 0;
                 if (animatingScores[idP] !== undefined) {
