@@ -161,26 +161,25 @@
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
     <div id="big-anim-overlay"></div>
-    <div id="giant-buzzer-wrapper" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:4500; align-items:center; justify-content:center;">
-        <div id="giant-buzzer-display" style="display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(46, 204, 113, 0.95); border:4px solid white; border-radius:30px; padding:5vh 8vw; box-shadow:0 20px 50px rgba(0,0,0,0.9); text-align:center; min-width: 40vw; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+    <div id="giant-buzzer-wrapper" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:4500; align-items:center; justify-content:center;">
+        
+        <div id="giant-buzzer-display" style="display:flex; flex-direction:column; align-items:center; background:rgba(46, 204, 113, 0.95); border:4px solid white; border-radius:30px; padding:5vh 8vw; box-shadow:0 20px 50px rgba(0,0,0,0.9); text-align:center; min-width: 40vw;">
+            <div id="giant-buzzer-avatar" style="width:18vh; height:18vh; font-size:12vh; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:2vh; border: 5px solid white; overflow:hidden;">👤</div>
+            <div id="giant-buzzer-name" style="font-size:6vh; font-weight:900; color:white; text-transform:uppercase;">PSEUDO</div>
             
-            <div id="giant-player-info">
-                <div id="giant-buzzer-avatar" style="width:18vh; height:18vh; font-size:12vh; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:2vh; box-shadow:0 8px 25px rgba(0,0,0,0.6); border: 5px solid white; overflow:hidden; margin-left:auto; margin-right:auto;">👤</div>
-                <div id="giant-buzzer-name" style="font-size:6vh; font-weight:900; color:white; text-transform:uppercase; text-shadow:0 4px 10px rgba(0,0,0,0.5);">PSEUDO</div>
-                <div id="giant-buzzer-team" style="font-size:3vh; font-weight:bold; color:var(--accent); text-shadow:0 2px 5px rgba(0,0,0,0.8);">ÉQUIPE</div>
-            </div>
-
-            <div id="giant-score-anim" style="display:none; flex-direction:column; align-items:center;">
-                <div id="giant-points-pop" style="font-size:12vh; font-weight:900; color:white; animation: scorePop 0.6s ease-out;">+3</div>
-                <div id="giant-total-score" style="font-size:5vh; color:white; opacity:0.9;">Total: 0 pts</div>
+            <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:1vh;">
+                <img id="giant-team-icon" style="width:5vh; height:5vh; object-fit:contain; display:none;">
+                <div id="giant-buzzer-team" style="font-size:3vh; font-weight:bold; color:var(--accent);">ÉQUIPE</div>
             </div>
         </div>
+
+        <div id="giant-score-anim" style="display:none; position:absolute; font-size:25vh; font-weight:900; color:white; text-shadow:0 10px 30px rgba(0,0,0,0.9); animation: scorePop 0.8s ease-out;">+3</div>
     </div>
     <style>
         @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes scorePop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.5); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
     </style>
-    <div id="version-display" class="version-tag">v1.189</div>
+    <div id="version-display" class="version-tag">v1.181</div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
@@ -273,7 +272,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.189";
+        const CLIENT_VERSION = "1.181";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -715,10 +714,9 @@
             const listEquipes = Object.keys(teamsData);
             let pListHTML = "";
             
-            // PATCH V1.189 : Séquençage Show TV (Identité ➔ Défloutage ➔ Score pur)
+            // PATCH V1.181 : Séquençage Show TV Strict
             const giantWrapper = document.getElementById('giant-buzzer-wrapper');
             const giantDisplay = document.getElementById('giant-buzzer-display');
-            const infoZone = document.getElementById('giant-player-info');
             const scoreZone = document.getElementById('giant-score-anim');
 
             if (currentBuzzerId) {
@@ -728,61 +726,54 @@
                     giantWrapper.style.display = 'flex';
 
                     if (currentGameState === 'awarded') {
-                        // ÉTAPE 2 : Défloutage total + Affichage pure du Score (+3)
-                        infoZone.style.display = 'none';
-                        scoreZone.style.display = 'flex';
-                        
-                        // On rend tout transparent pour voir le tableau derrière !
-                        giantWrapper.style.background = 'transparent';
-                        giantDisplay.style.background = 'transparent';
-                        giantDisplay.style.border = 'none';
-                        giantDisplay.style.boxShadow = 'none';
+                        // 1. On efface la grosse tête et le fond noir INSTANTANÉMENT
+                        giantDisplay.style.display = 'none';
                         document.body.classList.remove('blur-active'); 
+                        giantWrapper.style.background = 'transparent';
                         
-                        let ptsPop = document.getElementById('giant-points-pop');
+                        // 2. On calcule les points : S'il y a des points, on affiche le chiffre flottant, sinon rien.
                         let ptsGagnes = (buzzerPlayer.pts || 0) - (previousPts['player-'+currentBuzzerId] || 0);
                         if (ptsGagnes > 0) {
-                            ptsPop.innerText = `+${ptsGagnes}`;
-                            ptsPop.dataset.lastPts = ptsGagnes;
-                        } else if (ptsPop.dataset.lastPts) {
-                            ptsPop.innerText = `+${ptsPop.dataset.lastPts}`;
+                            scoreZone.style.display = 'block';
+                            scoreZone.innerText = `+${ptsGagnes}`;
+                        } else {
+                            scoreZone.style.display = 'none'; // Pas de +0 !
                         }
 
-                        // On efface le chiffre après 1.5 secondes
-                        setTimeout(() => {
-                            if (currentGameState === 'awarded') giantWrapper.style.display = 'none';
-                        }, 1500);
+                        // 3. On ferme totalement le wrapper après 1.5s
+                        setTimeout(() => { if (currentGameState === 'awarded') giantWrapper.style.display = 'none'; }, 1500);
 
                     } else {
-                        // ÉTAPE 1 : Le Buzz ! (Flou + Visage + Blason)
+                        // Mode BUZZ : On met le flou, l'encart vert, et on cache le score flottant
                         document.body.classList.add('blur-active'); 
                         giantWrapper.style.background = 'rgba(0,0,0,0.6)';
-                        giantDisplay.style.background = 'rgba(46, 204, 113, 0.95)';
-                        giantDisplay.style.border = '4px solid white';
-                        giantDisplay.style.boxShadow = '0 20px 50px rgba(0,0,0,0.9)';
-                        
-                        infoZone.style.display = 'block';
+                        giantDisplay.style.display = 'flex';
                         scoreZone.style.display = 'none';
                         
+                        // Infos du joueur
                         document.getElementById('giant-buzzer-name').innerText = buzzerPlayer.name;
                         let isTeam = buzzerPlayer.teamName && listEquipes.includes(buzzerPlayer.teamName);
                         document.getElementById('giant-buzzer-team').innerText = isTeam ? `Équipe ${buzzerPlayer.teamName}` : 'Solo';
                         
+                        // Blason (récupéré depuis teamsData qui est déjà en mémoire pour le classement)
                         const iconImg = document.getElementById('giant-team-icon');
                         if (isTeam && typeof teamsData !== 'undefined' && teamsData[buzzerPlayer.teamName] && teamsData[buzzerPlayer.teamName].icon) {
                             iconImg.src = teamsData[buzzerPlayer.teamName].icon;
                             iconImg.style.display = 'block';
                         } else {
-                            if(iconImg) iconImg.style.display = 'none';
+                            iconImg.style.display = 'none';
                         }
                         
+                        // Avatar propre (On force l'arrondi parfait même sur les photos)
                         let av = buzzerPlayer.avatar;
-                        if(av && av.length > 20) document.getElementById('giant-buzzer-avatar').innerHTML = `<img src="${av}" style="width:100%; height:100%; object-fit:cover;">`;
-                        else document.getElementById('giant-buzzer-avatar').innerHTML = av || '👤';
+                        if (av && av.length > 20) {
+                            document.getElementById('giant-buzzer-avatar').innerHTML = `<img src="${av}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                        } else {
+                            document.getElementById('giant-buzzer-avatar').innerHTML = av || '👤';
+                        }
                     }
                 }
             } else {
-                // Pas de buzzer = Rien à l'écran
                 giantWrapper.style.display = 'none';
                 document.body.classList.remove('blur-active');
             }
