@@ -226,7 +226,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.226</div>
+    <div class="version-tag" id="app-version-display">v1.228</div>
 
     <div id="global-dropdown"></div>
 
@@ -347,7 +347,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.226</span>
+                    <span id="disp-v-mj">v1.228</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -712,7 +712,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.226";
+        const APP_VERSION = "1.228";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -985,7 +985,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.226", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.228", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1326,6 +1326,7 @@
             showGlobalMenu(e.currentTarget, html);
         }
 
+        // PATCH V1.228 : Ouverture intelligente du menu (Option A)
         function showGlobalMenu(btn, html) {
             const menu = document.getElementById('global-dropdown');
             if (activeDropdownBtn === btn && menu.classList.contains('show')) {
@@ -1334,12 +1335,30 @@
             }
             activeDropdownBtn = btn;
             menu.innerHTML = html;
-            menu.classList.add('show'); 
+            
+            // On le rend visible un quart de seconde pour calculer sa vraie taille
+            menu.style.display = 'flex'; 
+            menu.style.opacity = '0'; // On le cache le temps du calcul
             
             const rect = btn.getBoundingClientRect();
-            menu.style.top = (rect.bottom + 5) + 'px';
+            const menuHeight = menu.offsetHeight; // On récupère la vraie hauteur du menu !
+            const spaceBelow = window.innerHeight - rect.bottom;
+            
+            // L'Intelligence de l'Option A
+            if (spaceBelow < menuHeight + 10) {
+                // Il n'y a pas assez de place en bas -> On l'ouvre VERS LE HAUT
+                menu.style.top = (rect.top - menuHeight - 5) + 'px';
+            } else {
+                // Il y a de la place -> On l'ouvre VERS LE BAS normalement
+                menu.style.top = (rect.bottom + 5) + 'px';
+            }
+            
             menu.style.left = 'auto';
             menu.style.right = (window.innerWidth - rect.right) + 'px';
+            
+            // On le réaffiche avec l'animation
+            menu.style.opacity = '1';
+            menu.classList.add('show'); 
         }
 
         function closeGlobalDropdown() {
@@ -2175,7 +2194,7 @@
                 let actionsHtml = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
                 /* --- PATCH 3.25 : COURONNE LOBBY JOUEURS --- */
                 let crownIcon = d.isCaptain ? '<span style="margin-left:5px; filter:drop-shadow(0 0 2px gold);">👑</span>' : '';
-				let stateDot = d.status === 2 ? '🔴' : (d.status === 1 ? '🟠' : ((d.uid === currentBuzzerId && currentGameState !== 'awarded') ? '🔔' : '🟢'));
+				let stateDot = d.status === 2 ? '🔴' : (d.status === 1 ? '🟠' : ((d.uid === currentBuzzerId && let stateDot = d.status === 2 ? '🔴' : (d.status === 1 ? '🟠' : ((d.uid === currentBuzzerId && currentGameState === 'taken') ? '🔔' : '🟢'));) ? '🔔' : '🟢'));
                 if (d.status === 2) {
                     hsB = true;
                     hB += `<div class="score-row grid-player" style="border:1px solid var(--danger);">
@@ -2196,7 +2215,8 @@
                                 <div class="player-controls">${actionsHtml}</div>
                            </div>`;
                 } else {
-                    const rC = (d.uid === currentBuzzerId && currentGameState !== 'awarded') ? "score-row buzzer-active-row grid-player" : "score-row grid-player";
+                    // PATCH V1.227 : La ligne du lobby ne brille en vert que si l'état est 'taken'
+                    const rC = (d.uid === currentBuzzerId && currentGameState === 'taken') ? "score-row buzzer-active-row grid-player" : "score-row grid-player";
                     hA += `
                     <div class="${rC}">
                         <div class="grid-cell-center" style="font-size:0.75rem;">${stateDot}</div>
