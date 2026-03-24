@@ -226,7 +226,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.224</div>
+    <div class="version-tag" id="app-version-display">v1.225</div>
 
     <div id="global-dropdown"></div>
 
@@ -347,7 +347,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.224</span>
+                    <span id="disp-v-mj">v1.225</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -712,7 +712,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.224";
+        const APP_VERSION = "1.225";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -985,7 +985,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.224", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.225", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1999,22 +1999,23 @@
                 renderLobby(); 
             });
 
-            roomRef.child('gameState').on('value', snap => { 
-                const st = snap.val() ? snap.val().status : 'waiting'; 
-                currentGameState = st; // PATCH V1.224 : Mémorisation de l'état
+            // PATCH V1.225 : On cache le joueur sur la console MJ après les points
+            roomRef.child('gameState').on('value', snap => {
+                const st = snap.val() ? snap.val().status : 'waiting';
+                currentGameState = st; // On mémorise l'état
                 
-                const btn = document.getElementById('btn-open-buzz'); 
-                if(st === 'ready' || st === 'taken' || st === 'processing') { 
-                    btn.innerHTML = st === 'processing' ? "⏳ ANALYSE..." : "✅ Buzzers Ouverts"; 
-                    btn.style.background = st === 'processing' ? "#e67e22" : "#27ae60"; 
-                    btn.disabled = true; 
-                } else { 
-                    btn.innerHTML = "Ouvrir Buzzers"; btn.style.background = "var(--success)"; btn.disabled = false; 
-                } 
+                const zonePlayer = document.getElementById('zone-player');
+                if (st === 'awarded') {
+                    if (zonePlayer) zonePlayer.style.display = 'none'; // On cache !
+                } else if (st !== 'endGame') {
+                    if (zonePlayer && typeof currentPlayer !== 'undefined' && currentPlayer) {
+                        zonePlayer.style.display = 'flex'; // On réaffiche si un nouveau buzz arrive
+                    }
+                }
                 
-                // On force le Lobby à se redessiner pour éteindre la lumière verte
-                renderLobby();
-                renderTeamLobby();
+                if (st === 'endGame') showEndGame();
+                else if (st === 'closing') showClosingScreen();
+                else { document.getElementById('podium-zone').style.display = 'none'; updateMJUI(st); }
             });
 
             roomRef.child('buzzAttempts').on('value', snap => {
