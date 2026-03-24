@@ -529,7 +529,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.193";
+        const CLIENT_VERSION = "1.194";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1088,6 +1088,8 @@
         /* --- PATCH V1.182 : SÉCURITÉ D'ENREGISTREMENT GALERIE MJ --- */
         function createNewTeam() { 
             const name = document.getElementById('new-team-name').value.trim(); 
+			// PATCH V1.194 : Vigile Anti-Crash BDD
+            if(/[.#$\[\]/]/.test(name)) return alert("Les caractères suivants sont interdits : . # $ [ ] /");
             if(name.length < 2 || !selectedTeamCrest) return alert("Nom et blason requis."); 
             
             // On vérifie spécifiquement que c'est un "jpeg" (Upload personnalisé compressé)
@@ -1291,7 +1293,8 @@
         function renameTeamFromManage() {
             const newName = document.getElementById('manage-team-name').value.trim();
             const oldName = player.team;
-            
+            // PATCH V1.194 : Vigile Anti-Crash BDD
+            if(/[.#$\[\]/]/.test(newName)) return alert("Les caractères suivants sont interdits : . # $ [ ] /");
             if(newName.length < 2) return alert("Nom trop court.");
             if(newName === oldName) return alert("C'est déjà le nom de l'équipe.");
             
