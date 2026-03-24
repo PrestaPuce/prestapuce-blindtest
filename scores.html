@@ -179,7 +179,7 @@
         @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes scorePop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.5); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
     </style>
-    <div id="version-display" class="version-tag">v1.181</div>
+    <div id="version-display" class="version-tag">v1.182</div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
@@ -272,7 +272,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.181";
+        const CLIENT_VERSION = "1.182";
         
         document.addEventListener("DOMContentLoaded", () => {
             document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
@@ -487,14 +487,15 @@
             let initialScoreLoad = true;
             roomRef.child('gameState').on('value', snap => {
                 const state = snap.val();
-                currentGameState = state ? state.status : 'waiting'; // Mémorise l'état
+                currentGameState = state ? state.status : 'waiting';
+                
+                // LA MAGIE EST ICI : On rafraîchit l'écran instantanément au clic
+                updateDisplay(); 
+
                 if (state && state.status === 'endGame') {
                     isGameFinished = true; 
-                    if (initialScoreLoad) {
-                        showLeaderboard(); // Affiche direct le tableau si la partie était déjà finie
-                    } else {
-                        showPodium(); // Affiche le podium si le MJ clique sur "FIN DE PARTIE" en direct
-                    }
+                    if (initialScoreLoad) showLeaderboard(); 
+                    else showPodium(); 
                 } 
                 else { 
                     isGameFinished = false; 
@@ -714,7 +715,7 @@
             const listEquipes = Object.keys(teamsData);
             let pListHTML = "";
             
-            // PATCH V1.181 : Séquençage Show TV Strict
+            // PATCH V1.182 : Règle d'or absolue (Action = Disparition de l'encart)
             const giantWrapper = document.getElementById('giant-buzzer-wrapper');
             const giantDisplay = document.getElementById('giant-buzzer-display');
             const scoreZone = document.getElementById('giant-score-anim');
@@ -725,37 +726,17 @@
                 if (buzzerPlayer) {
                     giantWrapper.style.display = 'flex';
 
-                    if (currentGameState === 'awarded') {
-                        // 1. On efface la grosse tête et le fond noir INSTANTANÉMENT
-                        giantDisplay.style.display = 'none';
-                        document.body.classList.remove('blur-active'); 
-                        giantWrapper.style.background = 'transparent';
-                        
-                        // 2. On calcule les points : S'il y a des points, on affiche le chiffre flottant, sinon rien.
-                        let ptsGagnes = (buzzerPlayer.pts || 0) - (previousPts['player-'+currentBuzzerId] || 0);
-                        if (ptsGagnes > 0) {
-                            scoreZone.style.display = 'block';
-                            scoreZone.innerText = `+${ptsGagnes}`;
-                        } else {
-                            scoreZone.style.display = 'none'; // Pas de +0 !
-                        }
-
-                        // 3. On ferme totalement le wrapper après 1.5s
-                        setTimeout(() => { if (currentGameState === 'awarded') giantWrapper.style.display = 'none'; }, 1500);
-
-                    } else {
-                        // Mode BUZZ : On met le flou, l'encart vert, et on cache le score flottant
+                    // TANT QUE LE JOUEUR A LA MAIN (Buzz en cours)
+                    if (currentGameState === 'taken') {
                         document.body.classList.add('blur-active'); 
                         giantWrapper.style.background = 'rgba(0,0,0,0.6)';
                         giantDisplay.style.display = 'flex';
                         scoreZone.style.display = 'none';
                         
-                        // Infos du joueur
                         document.getElementById('giant-buzzer-name').innerText = buzzerPlayer.name;
                         let isTeam = buzzerPlayer.teamName && listEquipes.includes(buzzerPlayer.teamName);
                         document.getElementById('giant-buzzer-team').innerText = isTeam ? `Équipe ${buzzerPlayer.teamName}` : 'Solo';
                         
-                        // Blason (récupéré depuis teamsData qui est déjà en mémoire pour le classement)
                         const iconImg = document.getElementById('giant-team-icon');
                         if (isTeam && typeof teamsData !== 'undefined' && teamsData[buzzerPlayer.teamName] && teamsData[buzzerPlayer.teamName].icon) {
                             iconImg.src = teamsData[buzzerPlayer.teamName].icon;
@@ -764,12 +745,28 @@
                             iconImg.style.display = 'none';
                         }
                         
-                        // Avatar propre (On force l'arrondi parfait même sur les photos)
                         let av = buzzerPlayer.avatar;
-                        if (av && av.length > 20) {
-                            document.getElementById('giant-buzzer-avatar').innerHTML = `<img src="${av}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                        if (av && av.length > 20) document.getElementById('giant-buzzer-avatar').innerHTML = `<img src="${av}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                        else document.getElementById('giant-buzzer-avatar').innerHTML = av || '👤';
+
+                    } 
+                    // DÈS QU'UN BOUTON EST CLIQUÉ (+3, +1, Erreur...)
+                    else {
+                        // 1. On détruit l'encart vert et le flou INSTANTANÉMENT
+                        giantDisplay.style.display = 'none';
+                        document.body.classList.remove('blur-active'); 
+                        giantWrapper.style.background = 'transparent';
+                        
+                        // 2. A-t-il gagné des points ?
+                        let ptsGagnes = (buzzerPlayer.pts || 0) - (previousPts['player-'+currentBuzzerId] || 0);
+                        if (ptsGagnes > 0) {
+                            // Oui : On affiche le +3 ou +1 flottant
+                            scoreZone.style.display = 'block';
+                            scoreZone.innerText = `+${ptsGagnes}`;
+                            setTimeout(() => { if (currentGameState !== 'taken') giantWrapper.style.display = 'none'; }, 1500);
                         } else {
-                            document.getElementById('giant-buzzer-avatar').innerHTML = av || '👤';
+                            // Non (Erreur) : On coupe tout immédiatement
+                            giantWrapper.style.display = 'none';
                         }
                     }
                 }
