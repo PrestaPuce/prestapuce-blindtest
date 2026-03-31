@@ -655,7 +655,100 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.198";
+	    // ==========================================
+        // MOTEUR MODALE CRM PROFIL (WIZARD)
+        // ==========================================
+        let currentCrmStep = 1;
+
+        // Fonction pour ouvrir la modale (depuis n'importe où)
+        function openCRMModal() {
+            document.getElementById('modal-crm-profile').style.display = 'flex';
+            currentCrmStep = 1;
+            updateCRMUI();
+        }
+
+        // Fonction pour fermer la modale
+        function closeCRMModal() {
+            document.getElementById('modal-crm-profile').style.display = 'none';
+        }
+
+        // Moteur de rafraîchissement de l'interface
+        function updateCRMUI() {
+            // Cacher toutes les étapes
+            document.getElementById('crm-step-1').style.display = 'none';
+            document.getElementById('crm-step-2').style.display = 'none';
+            document.getElementById('crm-step-3').style.display = 'none';
+            
+            // Afficher l'étape actuelle
+            document.getElementById('crm-step-' + currentCrmStep).style.display = 'block';
+            
+            // Mise à jour des ronds et des lignes (Stepper)
+            for (let i = 1; i <= 3; i++) {
+                const dot = document.getElementById('step-dot-' + i);
+                const line = document.getElementById('step-line-' + (i - 1));
+                
+                if (i < currentCrmStep) {
+                    dot.className = 'crm-step completed'; // Rond validé (vert)
+                    if(line) line.className = 'crm-step-line active'; // Ligne validée (verte)
+                } else if (i === currentCrmStep) {
+                    dot.className = 'crm-step active'; // Rond en cours (bleu)
+                    if(line) line.className = 'crm-step-line'; // Ligne en attente
+                } else {
+                    dot.className = 'crm-step'; // Rond en attente
+                    if(line) line.className = 'crm-step-line';
+                }
+            }
+
+            // Gestion des boutons (Suivant / Retour / Valider)
+            const btnBack = document.getElementById('btn-crm-back');
+            const btnNext = document.getElementById('btn-crm-next');
+            
+            btnNext.classList.remove('btn-success'); // Enlever le vert par défaut
+            
+            if (currentCrmStep === 1) {
+                btnBack.style.display = 'none';
+                btnNext.style.width = '100%';
+                btnNext.innerText = 'Étape Suivante';
+            } else if (currentCrmStep === 2) {
+                btnBack.style.display = 'block';
+                btnNext.style.width = '60%';
+                btnNext.innerText = 'Étape Suivante';
+            } else if (currentCrmStep === 3) {
+                btnBack.style.display = 'block';
+                btnNext.style.width = '60%';
+                btnNext.innerText = 'Créer mon Compte !';
+                btnNext.classList.add('btn-success'); // Bouton de finalisation en vert
+            }
+            
+            // Pour l'instant (Phase 1), le bouton n'est pas bloqué pour te laisser tester la navigation
+            btnNext.disabled = false; 
+        }
+
+        function crmNextStep() {
+            if (currentCrmStep < 3) {
+                currentCrmStep++;
+                updateCRMUI();
+            } else {
+                alert('Toute l\'interface fonctionne ! Prochaine étape : Brancher Firebase (Phase 3).');
+            }
+        }
+
+        function crmPrevStep() {
+            if (currentCrmStep > 1) {
+                currentCrmStep--;
+                updateCRMUI();
+            }
+        }
+
+        // La validation par la touche "Entrée"
+        function simulateCRMCheck(e) {
+            if (e && e.key === 'Enter') {
+                const btn = document.getElementById('btn-crm-next');
+                if(!btn.disabled) crmNextStep();
+            }
+        }
+		
+        const CLIENT_VERSION = "1.199";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1937,99 +2030,6 @@
             if (rank === 1) {
                 document.getElementById('sound-applause').play().catch(()=>{}); 
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 6000 });
-            }
-        }
-		
-		// ==========================================
-        // MOTEUR MODALE CRM PROFIL (WIZARD)
-        // ==========================================
-        let currentCrmStep = 1;
-
-        // Fonction pour ouvrir la modale (depuis n'importe où)
-        function openCRMModal() {
-            document.getElementById('modal-crm-profile').style.display = 'flex';
-            currentCrmStep = 1;
-            updateCRMUI();
-        }
-
-        // Fonction pour fermer la modale
-        function closeCRMModal() {
-            document.getElementById('modal-crm-profile').style.display = 'none';
-        }
-
-        // Moteur de rafraîchissement de l'interface
-        function updateCRMUI() {
-            // Cacher toutes les étapes
-            document.getElementById('crm-step-1').style.display = 'none';
-            document.getElementById('crm-step-2').style.display = 'none';
-            document.getElementById('crm-step-3').style.display = 'none';
-            
-            // Afficher l'étape actuelle
-            document.getElementById('crm-step-' + currentCrmStep).style.display = 'block';
-            
-            // Mise à jour des ronds et des lignes (Stepper)
-            for (let i = 1; i <= 3; i++) {
-                const dot = document.getElementById('step-dot-' + i);
-                const line = document.getElementById('step-line-' + (i - 1));
-                
-                if (i < currentCrmStep) {
-                    dot.className = 'crm-step completed'; // Rond validé (vert)
-                    if(line) line.className = 'crm-step-line active'; // Ligne validée (verte)
-                } else if (i === currentCrmStep) {
-                    dot.className = 'crm-step active'; // Rond en cours (bleu)
-                    if(line) line.className = 'crm-step-line'; // Ligne en attente
-                } else {
-                    dot.className = 'crm-step'; // Rond en attente
-                    if(line) line.className = 'crm-step-line';
-                }
-            }
-
-            // Gestion des boutons (Suivant / Retour / Valider)
-            const btnBack = document.getElementById('btn-crm-back');
-            const btnNext = document.getElementById('btn-crm-next');
-            
-            btnNext.classList.remove('btn-success'); // Enlever le vert par défaut
-            
-            if (currentCrmStep === 1) {
-                btnBack.style.display = 'none';
-                btnNext.style.width = '100%';
-                btnNext.innerText = 'Étape Suivante';
-            } else if (currentCrmStep === 2) {
-                btnBack.style.display = 'block';
-                btnNext.style.width = '60%';
-                btnNext.innerText = 'Étape Suivante';
-            } else if (currentCrmStep === 3) {
-                btnBack.style.display = 'block';
-                btnNext.style.width = '60%';
-                btnNext.innerText = 'Créer mon Compte !';
-                btnNext.classList.add('btn-success'); // Bouton de finalisation en vert
-            }
-            
-            // Pour l'instant (Phase 1), le bouton n'est pas bloqué pour te laisser tester la navigation
-            btnNext.disabled = false; 
-        }
-
-        function crmNextStep() {
-            if (currentCrmStep < 3) {
-                currentCrmStep++;
-                updateCRMUI();
-            } else {
-                alert('Toute l\'interface fonctionne ! Prochaine étape : Brancher Firebase (Phase 3).');
-            }
-        }
-
-        function crmPrevStep() {
-            if (currentCrmStep > 1) {
-                currentCrmStep--;
-                updateCRMUI();
-            }
-        }
-
-        // La validation par la touche "Entrée"
-        function simulateCRMCheck(e) {
-            if (e && e.key === 'Enter') {
-                const btn = document.getElementById('btn-crm-next');
-                if(!btn.disabled) crmNextStep();
             }
         }
 		
