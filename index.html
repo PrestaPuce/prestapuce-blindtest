@@ -529,7 +529,7 @@
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
     <script>
-        const CLIENT_VERSION = "1.194";
+        const CLIENT_VERSION = "1.197";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -560,16 +560,14 @@
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && document.getElementById('step-game').classList.contains('active')) requestWakeLock();
             
-            // Logique Anti-AFK : On prévient le MJ si le joueur masque l'application
             if (roomRef && myUserID && gameState !== 'endGame' && gameState !== 'closing') {
                 if (document.hidden || document.visibilityState === 'hidden') {
-                    // Le joueur a réduit le navigateur
+                    logEvent('NETWORK', `📉 ${player.pseudo||'Un joueur'} a mis l'application en arrière-plan`); // 🟢 CAPTEUR
                     roomRef.child('players/' + myUserID).update({ active: false });
                 } else {
-                    // Le joueur revient sur le navigateur
+                    logEvent('NETWORK', `📈 ${player.pseudo||'Un joueur'} est revenu sur l'application`); // 🟢 CAPTEUR
                     roomRef.child('players/' + myUserID).once('value', snap => {
                         const p = snap.val();
-                        // On ne le réactive automatiquement QUE s'il n'est pas banni et s'il n'a pas de requête de récupération manuelle
                         if (p && !p.banned && p.active === false && !p.recoveryRequest) {
                             roomRef.child('players/' + myUserID).update({ active: true, reconnectedAt: Date.now() });
                         }
@@ -617,6 +615,17 @@
             serverTimeOffset = snap.val() || 0;
         });
         let hasBuzzedLocally = false;
+        let buzzerReadyTime = 0; // 🟢 Chronomètre local anti-latence
+
+        // 🟢 MOTEUR DU MOUCHARD (Côté Joueur)
+        function logEvent(actionType, message) {
+            if (!roomID) return;
+            db.ref('rooms/' + roomID + '/debugLog').push({
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                type: actionType,
+                msg: message
+            });
+        }
 
         let roomID = "", roomRef = null, myUserID = ""; 
         let player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
@@ -839,6 +848,7 @@
 
         function resumeGame() {
             roomRef.child('players/' + myUserID).once('value', snap => {
+                logEvent('SYSTEM', `🔄 ${player.pseudo} s'est reconnecté à la partie`); // 🟢 CAPTEUR
                 if(snap.exists()) { 
                     snap.ref.update({ active: true }); 
                 } else { 
@@ -852,7 +862,10 @@
 
         function resetAndNewPlayer() {
             if(confirm("Attention : Vous allez perdre votre progression actuelle sur ce téléphone et un nouveau joueur sera créé.")) {
-                if(roomRef && myUserID) roomRef.child('players/' + myUserID).update({active: false});
+                if(roomRef && myUserID) {
+                    logEvent('SYSTEM', `🚪 ${player.pseudo} a réinitialisé son profil local`); // 🟢 CAPTEUR
+                    roomRef.child('players/' + myUserID).update({active: false});
+                }
                 myUserID = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
                 localStorage.setItem('buzz_userId', myUserID); localStorage.removeItem('presta_player_session'); localStorage.removeItem('buzz_lastProfile');
                 player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" }; navigateTo('step-welcome');
@@ -936,13 +949,18 @@
                     }
                 }
                 
-                if(isEditing) { roomRef.child('players/' + myUserID).update({ name: val }); player.pseudo = val; finishEdit(true); return; }
+                if(isEditing) { 
+                    logEvent('SYSTEM', `✏️ ${player.pseudo} a changé son pseudo en ${val}`); // 🟢 CAPTEUR
+                    roomRef.child('players/' + myUserID).update({ name: val }); 
+                    player.pseudo = val; finishEdit(true); return; 
+                }
                 player.pseudo = val; navigateTo('step-avatar');
             });
         }
 
         function startRecoveryProcess(targetUid, data) {
             pendingRecoveryUid = targetUid;
+            logEvent('SYSTEM', `🙋 ${data.name} a envoyé une demande de reconnexion`); // 🟢 CAPTEUR
             roomRef.child('players/' + targetUid).update({ recoveryRequest: true });
             
             navigateTo('step-recovery-wait');
@@ -968,7 +986,11 @@
 
         function cancelRecovery(msg) {
             if(recoveryRef) recoveryRef.off();
-            if(pendingRecoveryUid) { roomRef.child('players/' + pendingRecoveryUid).update({ recoveryRequest: null }); pendingRecoveryUid = null; }
+            if(pendingRecoveryUid) { 
+                logEvent('SYSTEM', `❌ Demande de reconnexion annulée par le joueur`); // 🟢 CAPTEUR
+                roomRef.child('players/' + pendingRecoveryUid).update({ recoveryRequest: null }); 
+                pendingRecoveryUid = null; 
+            }
             if(msg && typeof msg === 'string') alert(msg);
             navigateTo('step-pseudo', false);
         }
@@ -977,9 +999,26 @@
         function handleFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectAvatar(base64); }); } }
         function renderAvatarGrid() { const g=document.getElementById('avatar-grid'); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='grid-item grid-item-emoji'; d.innerText=a; d.onclick=()=>selectAvatar(a); g.appendChild(d); }); }
         
-        function selectAvatar(av) { player.avatar = av; if(isEditing) { roomRef.child('players/' + myUserID).update({avatar: av}); finishEdit(true); } else navigateTo('step-mode'); }
-        function selectMode(mode) { player.team = mode; player.teamIcon = ""; if(isEditing) { roomRef.child('players/' + myUserID).update({teamName: "Solo", teamIcon: "", isCaptain: false}); finishEdit(true); } else { if(mode === 'Solo') showRecap(); else goToTeamAction(); } }
-        
+        function selectAvatar(av) { 
+            player.avatar = av; 
+            if(isEditing) { 
+                logEvent('SYSTEM', `✏️ ${player.pseudo} a changé son avatar`); // 🟢 CAPTEUR
+                roomRef.child('players/' + myUserID).update({avatar: av}); 
+                finishEdit(true); 
+            } else navigateTo('step-mode'); 
+        }
+		
+		function selectMode(mode) { 
+            player.team = mode; player.teamIcon = ""; 
+            if(isEditing) { 
+                logEvent('SYSTEM', `🛡️ ${player.pseudo} a quitté son équipe pour passer en Solo`); // 🟢 CAPTEUR
+                roomRef.child('players/' + myUserID).update({teamName: "Solo", teamIcon: "", isCaptain: false}); 
+                finishEdit(true); 
+            } else { 
+                if(mode === 'Solo') showRecap(); else goToTeamAction(); 
+            } 
+        }
+		
         function goToTeamAction() { navigateTo('step-team-action'); }
         
         function goToTeamCreate() { 
@@ -1033,8 +1072,10 @@
                     // Fonction d'enregistrement final
                     const executeJoin = (becomeCaptain) => {
                         if(isEditing) { 
+                            logEvent('SYSTEM', `🤝 ${player.pseudo} a rejoint l'équipe ${name}`); // 🟢 CAPTEUR
                             roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { finishEdit(true); }); 
                         } else if (isRecovering) {
+                            logEvent('SYSTEM', `🤝 ${player.pseudo} a rejoint l'équipe ${name}`); // 🟢 CAPTEUR
                             roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { isRecovering = false; finishEdit(false); }); 
                         } else { 
                             isCaptain = becomeCaptain;
@@ -1086,19 +1127,21 @@
         function showTeamPreview() { document.getElementById('team-crest-choices').style.display='none'; document.getElementById('team-crest-gallery').style.display='none'; document.getElementById('team-preview-img').src=selectedTeamCrest; document.getElementById('team-preview').style.display='flex'; }
         
         /* --- PATCH V1.182 : SÉCURITÉ D'ENREGISTREMENT GALERIE MJ --- */
-        function createNewTeam() { 
+		function createNewTeam() { 
             const name = document.getElementById('new-team-name').value.trim(); 
-			// PATCH V1.194 : Vigile Anti-Crash BDD
-            if(/[.#$\[\]/]/.test(name)) return alert("Les caractères suivants sont interdits : . # $ [ ] /");
+            // PATCH V1.194 : Vigile Anti-Crash BDD
+			if(/[.#$\[\]/]/.test(name)) return alert("Les caractères suivants sont interdits : . # $ [ ] /");
             if(name.length < 2 || !selectedTeamCrest) return alert("Nom et blason requis."); 
             
             // On vérifie spécifiquement que c'est un "jpeg" (Upload personnalisé compressé)
             if (selectedTeamCrest.startsWith('data:image/jpeg')) {
                 roomRef.child('library').push(selectedTeamCrest).then(() => { 
+                    logEvent('SYSTEM', `🛡️ Joueur ${player.pseudo} a créé l'équipe ${name}`); // 🟢 CAPTEUR
                     roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); }); 
                 });
             } else { 
                 // Si c'est un SVG par défaut, on l'utilise juste sans l'ajouter à la galerie MJ
+                logEvent('SYSTEM', `🛡️ Joueur ${player.pseudo} a créé l'équipe ${name}`); // 🟢 CAPTEUR
                 roomRef.child('teams/'+name).set({icon: selectedTeamCrest}).then(()=>{ joinTeam(name, selectedTeamCrest); }); 
             }
         }
@@ -1129,6 +1172,7 @@
             if(!isReconnect) {
                 const trueTime = Date.now() + serverTimeOffset;
                 let becomeCaptain = isCaptain;
+                logEvent('SYSTEM', `📥 ${player.pseudo} a rejoint la partie (${player.team})`); // 🟢 CAPTEUR
                 roomRef.child('players/' + myUserID).set({ 
                     name: player.pseudo, pts: 0, avatar: player.avatar, 
                     teamName: player.team, teamIcon: player.teamIcon, 
@@ -1274,57 +1318,50 @@
             if(confirm(`Êtes-vous sûr de vouloir céder votre rôle de Capitaine à ${newName} ?\nVous redeviendrez un simple membre de l'équipe.`)) {
                 let updates = {};
                 const teamName = player.team;
-                
-                // On retire la couronne au joueur actuel
+                logEvent('SYSTEM', `👑 Capitaine ${player.pseudo} a cédé son rôle à ${newName}`); // 🟢 CAPTEUR
                 updates[myUserID + '/isCaptain'] = false;
                 updates[myUserID + '/captainMessage'] = `ℹ️ Vous n'êtes plus capitaine de l'équipe ${teamName}. ${newName} est le nouveau capitaine.`;
-                
-                // On donne la couronne au nouveau
                 updates[newUid + '/isCaptain'] = true;
                 updates[newUid + '/captainMessage'] = `👑 ${player.pseudo} n'est plus capitaine. Vous êtes le nouveau capitaine de l'équipe ${teamName} !`;
                 
-                roomRef.child('players').update(updates).then(() => {
-                    closeTeamManagement();
-                });
+                roomRef.child('players').update(updates).then(() => { closeTeamManagement(); });
             }
         }
-
-        // PATCH V1.193 : Migration complète de l'équipe (Points, Joueurs, Nettoyage MJ)
+        
+		// PATCH V1.193 : Migration complète de l'équipe (Points, Joueurs, Nettoyage MJ)
         function renameTeamFromManage() {
             const newName = document.getElementById('manage-team-name').value.trim();
             const oldName = player.team;
             // PATCH V1.194 : Vigile Anti-Crash BDD
-            if(/[.#$\[\]/]/.test(newName)) return alert("Les caractères suivants sont interdits : . # $ [ ] /");
+			if(/[.#$\[\]/]/.test(newName)) return alert("Les caractères suivants sont interdits : . # $ [ ] /");
             if(newName.length < 2) return alert("Nom trop court.");
             if(newName === oldName) return alert("C'est déjà le nom de l'équipe.");
             
             // 1. On vérifie que le nouveau nom n'existe pas déjà
-            roomRef.child('teams/' + newName).once('value', snapNew => {
+			roomRef.child('teams/' + newName).once('value', snapNew => {
                 if(snapNew.exists()) return alert("Ce nom d'équipe est déjà pris.");
                 
-                // 2. On récupère TOUTES les données de l'ancienne équipe (pour ne pas perdre les points !)
+				// 2. On récupère TOUTES les données de l'ancienne équipe (pour ne pas perdre les points !)
                 roomRef.child('teams/' + oldName).once('value', snapOld => {
                     let teamData = snapOld.val() || { icon: player.teamIcon, pts: 0 };
                     
-                    // 3. On crée la nouvelle équipe avec les données exactes
+					// 3. On crée la nouvelle équipe avec les données exactes
                     roomRef.child('teams/' + newName).set(teamData).then(() => {
+                        logEvent('SYSTEM', `🛠️ Capitaine ${player.pseudo} a renommé l'équipe ${oldName} en ${newName}`); // 🟢 L'ULTIME CAPTEUR
                         
-                        // 4. On déplace tous les joueurs vers ce nouveau nom
+						// 4. On déplace tous les joueurs vers ce nouveau nom
                         roomRef.child('players').orderByChild('teamName').equalTo(oldName).once('value', snapPlayers => {
                             let updates = {};
-                            snapPlayers.forEach(child => { 
-                                updates[child.key + '/teamName'] = newName; 
-                            });
-                            
-                            roomRef.child('players').update(updates).then(() => {
+                            snapPlayers.forEach(child => { updates[child.key + '/teamName'] = newName; });
                                 
-                                // 5. On supprime l'ancienne équipe pour nettoyer le lobby MJ
+								// 5. On supprime l'ancienne équipe pour nettoyer le lobby MJ
+                                roomRef.child('players').update(updates).then(() => {
                                 roomRef.child('teams/' + oldName).remove().then(() => {
                                     player.team = newName;
-                                    updateGameHeader(); // Met à jour l'affichage du joueur
+                                    updateGameHeader(); 
                                     
-                                    // On cache le bouton de validation
-                                    document.getElementById('btn-save-team-name').style.display = 'none';
+									// On cache le bouton de validation
+									document.getElementById('btn-save-team-name').style.display = 'none';
                                     alert("Équipe renommée avec succès !");
                                 });
                             });
@@ -1333,7 +1370,7 @@
                 });
             });
         }
-
+		
         function openCrestEdit() {
             document.getElementById('edit-crest-choices').style.display = 'flex';
             document.getElementById('edit-crest-gallery').style.display = 'none';
@@ -1369,6 +1406,7 @@
         }
 
         function saveNewCrest(iconUrl) {
+            logEvent('SYSTEM', `🛠️ Capitaine ${player.pseudo} a modifié le blason de l'équipe`); // 🟢 CAPTEUR
             roomRef.child('teams/'+player.team).update({icon: iconUrl}).then(() => {
                 document.getElementById('overlay-crest-edit').style.display='none';
                 alert("Blason mis à jour !");
@@ -1377,12 +1415,14 @@
 
         function expelMember(uid, name, avatar) {
             if(confirm(`Expulser ${name} de l'équipe ?\n\nIl sera ajouté à la liste noire et repassera en Solo.`)) {
+                logEvent('PUNISH', `Capitaine ${player.pseudo} a expulsé ${name} de l'équipe`); // 🟢 CAPTEUR
                 roomRef.child('teams/' + player.team + '/blacklist/' + uid).set({ name: name, avatar: avatar });
                 roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", isCaptain: false });
             }
         }
 
         function pardonMember(uid) {
+            logEvent('SYSTEM', `Capitaine ${player.pseudo} a gracié un membre banni`); // 🟢 CAPTEUR
             roomRef.child('teams/' + player.team + '/blacklist/' + uid).remove();
         }
         // --- FIN GESTION ÉQUIPE ---
@@ -1418,10 +1458,33 @@
         function handleKickedChoice(choice) {
             document.getElementById('overlay-team-kicked').style.display = 'none';
             if (choice === 'solo') { 
+                logEvent('SYSTEM', `🛡️ ${player.pseudo} accepte son expulsion et passe en Solo`); // 🟢 CAPTEUR
                 player.team = "Solo"; player.teamIcon = ""; isCaptain = false; updateGameHeader(); 
                 if(roomRef && myUserID) { roomRef.child('players/' + myUserID).update({ teamName: "Solo", teamIcon: "", isCaptain: false }); }
             } 
             else if (choice === 'change') { isRecovering = true; isCaptain = false; navigateTo('step-team-action'); }
+        }
+        
+        // ... (Laisse la fonction monitorReinstatedTeam intacte) ...
+
+        function handleReinstatedChoice(choice) {
+            document.getElementById('overlay-team-reinstated').style.display = 'none';
+            if (choice === 'yes') { document.getElementById('overlay-team-kicked').style.display = 'none'; }
+            if (choice === 'yes' && kickedFromTeam) {
+                roomRef.child('teams/' + kickedFromTeam).once('value', snap => {
+                    const t = snap.val();
+                    if(t && t.active !== false && t.banned !== true) {
+                        logEvent('SYSTEM', `🤝 ${player.pseudo} a réintégré son équipe réhabilitée (${kickedFromTeam})`); // 🟢 CAPTEUR
+                        player.team = kickedFromTeam; player.teamIcon = t.icon || ""; updateGameHeader();
+                        roomRef.child('players/' + myUserID).update({ teamName: player.team, teamIcon: player.teamIcon });
+                        localStorage.setItem('presta_player_session', JSON.stringify(player));
+                        monitorTeamChanges(player.team);
+                        document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
+                        navigateTo('step-game', false);
+                    }
+                    kickedFromTeam = ""; 
+                });
+            } else { kickedFromTeam = ""; }
         }
 
         function monitorReinstatedTeam(teamName) {
@@ -1438,25 +1501,6 @@
                     reinstatedTeamRef.off('value', reinstatedTeamCallback); reinstatedTeamRef = null; reinstatedTeamCallback = null;
                 }
             });
-        }
-
-        function handleReinstatedChoice(choice) {
-            document.getElementById('overlay-team-reinstated').style.display = 'none';
-            if (choice === 'yes') { document.getElementById('overlay-team-kicked').style.display = 'none'; }
-            if (choice === 'yes' && kickedFromTeam) {
-                roomRef.child('teams/' + kickedFromTeam).once('value', snap => {
-                    const t = snap.val();
-                    if(t && t.active !== false && t.banned !== true) {
-                        player.team = kickedFromTeam; player.teamIcon = t.icon || ""; updateGameHeader();
-                        roomRef.child('players/' + myUserID).update({ teamName: player.team, teamIcon: player.teamIcon });
-                        localStorage.setItem('presta_player_session', JSON.stringify(player));
-                        monitorTeamChanges(player.team);
-                        document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
-                        navigateTo('step-game', false);
-                    }
-                    kickedFromTeam = ""; 
-                });
-            } else { kickedFromTeam = ""; }
         }
 
         function startBuzzer() {
@@ -1555,14 +1599,24 @@
             roomRef.child('gameState').on('value', snap => { 
                 const st = snap.val(); 
                 
-                /* PATCH V1.188 : On débloque aussi le clic local quand les points sont donnés */
+				/* PATCH V1.188 : On débloque aussi le clic local quand les points sont donnés */
                 if (st && (st.status === 'ready' || st.status === 'waiting' || st.status === 'awarded')) hasBuzzedLocally = false;
                 
                 if (st && st.status === 'endGame') showEndGame(); 
                 else if (st && st.status === 'closing') showClosingScreen(); 
-                else { gameState = st ? st.status : 'waiting'; document.getElementById('podium-zone').style.display = 'none'; updateUI(); } 
+                else { 
+                    const newStatus = st ? st.status : 'waiting';
+                    // 🟢 DÉMARRAGE DU CHRONO QUAND L'ÉCRAN DEVIENT VERT
+                    if (newStatus === 'ready' && gameState !== 'ready') {
+                        buzzerReadyTime = Date.now();
+                    } else if (newStatus !== 'ready') {
+                        buzzerReadyTime = 0;
+                    }
+                    gameState = newStatus; 
+                    document.getElementById('podium-zone').style.display = 'none'; 
+                    updateUI(); 
+                } 
             });
-
             roomRef.child('buzzers').on('value', snap => {
                 const val = snap.val(); currentBuzzer = val ? val.pseudo : null; currentBuzzerId = val ? val.id : null;
                 if (val && (currentBuzzerId === myUserID || currentBuzzer === player.pseudo) && currentWinner !== player.pseudo) { document.getElementById('sound-win').play().catch(()=>{}); if(navigator.vibrate) navigator.vibrate([200, 100, 200]); }
@@ -1571,11 +1625,23 @@
             roomRef.child('blockedPlayers/' + player.pseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
         }
 
-        function acknowledgeWarning() { document.getElementById('overlay-warning').style.display = 'none'; if (roomRef && myUserID) { roomRef.child('players/' + myUserID).update({ pendingWarning: null }); } }
-        
+        function acknowledgeWarning() { 
+            document.getElementById('overlay-warning').style.display = 'none'; 
+            if (roomRef && myUserID) { 
+                logEvent('SYSTEM', `⚠️ ${player.pseudo} a pris connaissance de son avertissement`); // 🟢 CAPTEUR
+                roomRef.child('players/' + myUserID).update({ pendingWarning: null }); 
+            } 
+        }
+		
         function handleExit(message, redirect) { if(roomRef) roomRef.off(); alert(message); localStorage.removeItem('presta_player_session'); if(redirect && mjLink && mjLink.startsWith('http')) { window.location.href = mjLink; } else { location.reload(); } }
-        function setInactiveAndAction(callback) { if(roomRef && myUserID) { roomRef.child('players/' + myUserID).update({ active: false }).then(() => { callback(); }).catch(() => { callback(); }); } else { callback(); } }
-
+        
+		function setInactiveAndAction(callback) { 
+            if(roomRef && myUserID) { 
+                logEvent('SYSTEM', `🚪 ${player.pseudo} a quitté volontairement la salle`); // 🟢 CAPTEUR
+                roomRef.child('players/' + myUserID).update({ active: false }).then(() => { callback(); }).catch(() => { callback(); }); 
+            } else { callback(); } 
+        }
+		
         function handleExitAction(action) {
             if (isCaptain && player.team !== "Solo" && action !== 'save' && gameState !== 'endGame' && gameState !== 'closing') {
                 roomRef.child('players').orderByChild('teamName').equalTo(player.team).once('value', snap => {
@@ -1591,6 +1657,7 @@
                         members.sort((a,b) => (a.joinTimestamp || 0) - (b.joinTimestamp || 0));
                         const successor = members[0];
                         if(confirm(`⚠️ ATTENTION CAPITAINE !\n\nSi vous quittez, vous perdrez votre statut.\nC'est ${successor.name} qui prendra votre place en tant que nouveau chef.\n\nVoulez-vous vraiment quitter ?`)) {
+                            logEvent('SYSTEM', `👑 Auto-transfert : ${successor.name} devient Capitaine suite au départ de ${player.pseudo}`); // 🟢 CAPTEUR
                             roomRef.child('players/' + successor.id).update({isCaptain: true}).then(() => {
                                 roomRef.child('players/' + myUserID).update({isCaptain: false}).then(() => {
                                     executeExitAction(action);
@@ -1649,6 +1716,7 @@
             hasBuzzedLocally = true;
             
             const trueTime = Date.now() + serverTimeOffset;
+            const reactionTime = buzzerReadyTime > 0 ? (Date.now() - buzzerReadyTime) : 0; // 🟢 CALCUL DU TEMPS
             
             roomRef.child('buzzAttempts/' + myUserID).set({
                 id: myUserID, 
@@ -1658,6 +1726,8 @@
                 teamIcon: player.teamIcon,
                 timestamp: trueTime
             });
+            
+            logEvent('BUZZ_PLAYER', `⏱️ ${player.pseudo} a cliqué en ${reactionTime} ms`); // 🟢 CAPTEUR
             
             updateUI(); 
         }

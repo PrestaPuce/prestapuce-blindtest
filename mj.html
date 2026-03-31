@@ -226,7 +226,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.231</div>
+    <div class="version-tag" id="app-version-display">v1.239</div>
 
     <div id="global-dropdown"></div>
 
@@ -347,7 +347,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.231</span>
+                    <span id="disp-v-mj">v1.239</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -712,7 +712,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.231";
+        const APP_VERSION = "1.239";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -748,6 +748,49 @@
         let activeTeamBlacklist = [];
         let activeTeamBlacklistListener = null;
         let activeDropdownBtn = null;
+		
+		// PATCH V1.232 : Moteur du Mouchard (Audit Log)
+        function logEvent(actionType, message) {
+            // Sécurité : On n'enregistre que si une salle est active
+            if (!roomID) return; 
+            
+            firebase.database().ref('rooms/' + roomID + '/debugLog').push({
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                type: actionType, 
+                msg: message
+            });
+        }
+		
+		// PATCH V1.232 : Téléchargement du fichier d'historique
+        function downloadAuditLog(targetRoomId, e) {
+            if (e) e.stopPropagation(); // 🟢 Empêche l'accordéon de bouger
+            firebase.database().ref('rooms/' + targetRoomId + '/debugLog').once('value', snap => {
+                if (!snap.exists()) {
+                    return alert("Aucun historique disponible pour cette salle.");
+                }
+                
+                let logText = "=========================================================\r\n";
+                logText += "HISTORIQUE DE DEBUG - SALLE : " + targetRoomId + "\r\n";
+                logText += "=========================================================\r\n\r\n";
+                
+                snap.forEach(child => {
+                    const l = child.val();
+                    const d = new Date(l.timestamp);
+                    const time = d.toLocaleString('fr-FR'); 
+                    logText += `[${time}] ${l.type} : ${l.msg}\r\n`;
+                });
+                
+                const blob = new Blob([logText], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Audit_Salle_${targetRoomId}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
 
         function isValidPassword(pwd) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd); }
 
@@ -861,63 +904,7 @@
 
 // --- PATCH V1.194 : FONCTIONS PROFIL & SYNCHRO ---
         function toggleProfile() { const p = document.getElementById('screen-profile'); if(p.style.display==="block") closeProfile(); else showProfile(); }
-        function showProfile() {
-            if(document.getElementById('screen-choice').style.display==="block") previousScreen="screen-choice"; if(document.getElementById('screen-dashboard').style.display==="block") previousScreen="screen-dashboard";
-            document.getElementById('screen-choice').style.display="none"; document.getElementById('screen-dashboard').style.display="none"; document.getElementById('screen-profile').style.display="block";
-            document.getElementById('top-right-tools').style.display="none";
-            document.getElementById('btn-undo-logo').style.display="none";
-            if(auth.currentUser) {
-                document.getElementById('prof-email').value=auth.currentUser.email; document.getElementById('prof-nom').value=mjProfileData.nom||""; document.getElementById('prof-prenom').value=mjProfileData.prenom||"";
-                const cl = mjProfileData.customLogo||""; document.getElementById('prof-logo-url').value=cl; updateLogoPreview(cl); document.getElementById('prof-link').value=mjProfileData.customLink||"";
-                const isG = mjProfileData.isGuest===true; ['prof-nom','prof-prenom','prof-link','prof-email'].forEach(id=>document.getElementById(id).disabled=isG); document.getElementById('btn-save-profile').disabled=isG;
-                const dz=document.getElementById('profile-drop-zone'); if(isG){dz.style.opacity='0.5';dz.style.pointerEvents='none';}else{dz.style.opacity='1';dz.style.pointerEvents='auto';}
-            }
-        }
-        function closeProfile() { document.getElementById('screen-profile').style.display="none"; document.getElementById(previousScreen).style.display="block"; if(previousScreen==="screen-dashboard") document.getElementById('top-right-tools').style.display="flex"; }
-        async function saveProfile() {
-            if(mjProfileData.isGuest===true) return alert("Action impossible en Découverte.");
-            const user = auth.currentUser; if(!user) return;
-            const newE = document.getElementById('prof-email').value.trim(), passC = document.getElementById('prof-pass-current').value, pass1 = document.getElementById('prof-pass').value, pass2 = document.getElementById('prof-pass-conf').value;
-            const eCh = newE!==user.email, pCh = pass1!=="";
-            const upd = { nom: document.getElementById('prof-nom').value.trim(), prenom: document.getElementById('prof-prenom').value.trim(), customLogo: document.getElementById('prof-logo-url').value.trim(), customLink: document.getElementById('prof-link').value.trim() };
-            if (eCh || pCh) {
-                if(!passC) return alert("Mot de passe ACTUEL requis.");
-                if(pCh) { if(pass1===passC) return alert("Le nouveau mdp doit être différent."); if(pass1!==pass2) return alert("Mots de passe différents."); if(!isValidPassword(pass1)) return alert("Critères de sécurité non respectés."); }
-                try {
-                    await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, passC));
-                    if (eCh) { await user.updateEmail(newE); upd.email = newE; }
-                    if (pCh) await user.updatePassword(pass1);
-                } catch(e) { return alert("Mot de passe actuel incorrect."); }
-            }
-            db.ref('users/'+user.uid).update(upd).then(()=>{ alert("Profil mis à jour !"); mjProfileData={...mjProfileData, ...upd}; document.getElementById('mj-display-name').innerText=upd.prenom||"MJ"; updateLogos(upd.customLogo); document.getElementById('prof-pass-current').value=""; document.getElementById('prof-pass').value=""; document.getElementById('prof-pass-conf').value=""; closeProfile(); }).catch(e=>alert("Erreur: "+e.message));
-        }
-        function updateLogos(url) { 
-            const defaultLogo = "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad";
-            const oldWixLogo = "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
-            const f = (url && url !== "" && url !== oldWixLogo && url !== defaultLogo) ? url : defaultLogo; 
-            document.getElementById('login-mj-logo').src = defaultLogo; 
-            document.getElementById('page-favicon').href = f; 
-            const flipInner = document.getElementById('logo-flip-inner');
-            const mjLogoImg = document.getElementById('flip-back-logo');
-            if(f !== defaultLogo) { if(mjLogoImg) mjLogoImg.src = f; if(flipInner) flipInner.classList.add('animate'); } 
-            else { if(mjLogoImg) mjLogoImg.src = ""; if(flipInner) flipInner.classList.remove('animate'); }
-            if(roomRef && roomID) { roomRef.child('mjLogo').set(f); if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); } 
-        }
-        function handleProfileFile(files) { 
-            if(!files||files.length===0)return; 
-            const storageRef=storage.ref(`mj_profile_logos/${auth.currentUser.uid}/logo_${Date.now()}`); 
-            document.getElementById('prof-logo-placeholder').style.opacity='0.3'; 
-            storageRef.put(files[0]).then(s=>s.ref.getDownloadURL()).then(u=>{ 
-                document.getElementById('prof-logo-placeholder').style.display='none'; 
-                const img=document.getElementById('prof-logo-preview'); 
-                img.src=u; img.style.display='block'; 
-                document.getElementById('prof-logo-url').value=u; 
-                document.getElementById('btn-undo-logo').style.display='block';
-                document.getElementById('prof-logo-placeholder').style.opacity='1';
-            }).catch(e=>alert("Erreur upload: "+e.message)); 
-        }
-        function undoProfileLogo() { const originalLogo = mjProfileData.customLogo || ""; document.getElementById('prof-logo-url').value = originalLogo; updateLogoPreview(originalLogo); document.getElementById('btn-undo-logo').style.display = 'none'; }
-        function updateLogoPreview(u) { const p=document.getElementById('prof-logo-preview'), h=document.getElementById('prof-logo-placeholder'); if(u){p.src=u;p.style.display='block';h.style.display='none';}else{p.style.display='none';h.style.display='block';} }
+        
         function profileLogout() { auth.signOut().then(()=>location.reload()); }
         
         function syncLibraryToRoom() { try { if(roomID && roomRef) roomRef.child('library').set(mjLibrary || {}); } catch(e){ console.error("Erreur sync library", e); } }
@@ -985,7 +972,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.231", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.239", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -1217,6 +1204,7 @@
                             </div>
                             <div style="display:flex; gap:10px; flex-shrink:0; white-space: nowrap;">
                                 ${btnAction}
+								<button class="hub-btn" title="Télécharger l'historique (Mode Debug)" style="background:var(--purple); white-space: nowrap; flex-shrink: 0;" onclick="downloadAuditLog('${r.id}', event)">📝 HISTORIQUE</button>
                                 <button class="hub-btn" style="background:var(--danger); white-space: nowrap; flex-shrink: 0;" onclick="deleteRoomFromHub('${r.id}', event)">🗑️ SUPPRIMER</button>
                             </div>
                         </div>
@@ -1476,7 +1464,14 @@
 
         function executeCrestDelete(key, urlToDelete) {
             const uid = activeLibraryUid || auth.currentUser.uid;
-            if(!isProxyMode && globalTeams) { Object.keys(globalTeams).forEach(tKey => { if(globalTeams[tKey].icon === urlToDelete) roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad" }); }); }
+            if(!isProxyMode && globalTeams) { 
+                Object.keys(globalTeams).forEach(tKey => { 
+                    if(globalTeams[tKey].icon === urlToDelete) {
+                        logEvent('SYSTEM', `🛠️ Remplacement auto du blason supprimé pour l'équipe ${tKey}`); // 🟢 L'ULTIME CAPTEUR
+                        roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad" }); 
+                    }
+                }); 
+            }
             db.ref(`users/${uid}/library/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => {
                 loadModalLibrary();
                 if(document.getElementById('modal-team-edit').style.display === 'flex') {
@@ -1519,7 +1514,10 @@
             showDefaultCrests = checked;
             if (!isProxyMode) {
                 db.ref(`users/${auth.currentUser.uid}/showDefaultCrests`).set(checked);
-                if(roomRef) roomRef.child('showDefaultCrests').set(checked);
+                if(roomRef) {
+                    logEvent('SYSTEM', `MJ a ${checked ? 'affiché' : 'masqué'} les blasons par défaut`); // 🟢 CAPTEUR
+                    roomRef.child('showDefaultCrests').set(checked);
+                }
                 mjProfileData.showDefaultCrests = checked;
                 const mainSwitch = document.getElementById('check-hide-default');
                 if(mainSwitch) mainSwitch.checked = checked;
@@ -1554,7 +1552,12 @@
             if(modalSelectedBgUrl === urlToDelete) { modalSelectedBgUrl = ""; document.getElementById('btn-modal-bg-default').disabled = true; document.getElementById('btn-modal-bg-console').disabled = true; }
             db.ref(`users/${uid}/defaultBackground`).once('value', s => { if(s.val() === urlToDelete) db.ref(`users/${uid}/defaultBackground`).remove(); });
             db.ref(`users/${uid}/consoleBackground`).once('value', s => { if(s.val() === urlToDelete) { db.ref(`users/${uid}/consoleBackground`).remove(); if(!isProxyBgMode) applyMjConsoleBg(null); } });
-            if (!isProxyBgMode && currentRoomBgUrl === urlToDelete && roomRef) roomRef.child('customBackground').remove();
+            
+            if (!isProxyBgMode && currentRoomBgUrl === urlToDelete && roomRef) {
+                logEvent('SYSTEM', `🛠️ Le MJ a supprimé le fond d'écran actif de sa galerie (Réinitialisation auto)`); // 🟢 L'ULTIME CAPTEUR
+                roomRef.child('customBackground').remove();
+            }
+            
             db.ref(`users/${uid}/bgLibrary/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => loadBgLibrary('modal'));
         }
 
@@ -1637,6 +1640,7 @@
             }
 
             if(roomRef && roomID) { 
+                logEvent('SYSTEM', `MJ a mis à jour son identité visuelle en direct (Logo/Lien)`); // 🟢 L'AVANT-DERNIER CAPTEUR
                 roomRef.child('mjLogo').set(f); 
                 if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); 
             } 
@@ -1654,25 +1658,39 @@
             const eventName = document.getElementById('new-room-name').value.trim() || "Partie en cours"; 
             // PATCH V1.231 : Vigile Anti-Crash BDD
             if(/[.#$\[\]/]/.test(mjName) || /[.#$\[\]/]/.test(eventName)) return alert("Les caractères suivants sont interdits : . # $ [ ] /");
-			const d = new Date(); 
-            const dateStr = d.getFullYear().toString() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); 
-            const rndStr = String(Math.floor(Math.random() * 1000)).padStart(3, '0'); 
-            const newRoomID = `${dateStr}${rndStr}`; 
             
-            document.getElementById('modal-create-room').style.display = 'none'; 
+            const d = new Date(); 
+            const dateStr = d.getFullYear().toString() + (d.getMonth()+1).toString().padStart(2,'0') + d.getDate().toString().padStart(2,'0');
+            const randomSuffix = Math.floor(Math.random() * 999).toString().padStart(3,'0');
+            const newRoomId = dateStr + randomSuffix; 
             
-            const initialData = {
-                mj: auth.currentUser.uid,
+            const initialData = { 
+                mj: currentUserUid, 
                 mjName: mjName,
+                mjLogo: mjProfileData.logoUrl || "",
+                mjLink: mjProfileData.redirectUrl || "",
+                isGuestRoom: mjProfileData.isGuest === true,
                 eventName: eventName,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
-                gameState: { status: 'waiting' },
-                isArchived: false
-            };
-
-            db.ref('rooms/' + newRoomID).set(initialData).then(() => {
-                launchDashboard(newRoomID, mjName, eventName, false);
-            });
+                isArchived: false,
+                isPaused: false,
+                gameState: { status: 'waiting' }
+            }; 
+            
+            db.ref('rooms/' + newRoomId).set(initialData).then(() => { 
+                db.ref('activeRooms/' + newRoomId).set(true); 
+                roomID = newRoomId; 
+                roomRef = db.ref('rooms/' + roomID); 
+                
+                // 🟢 CAPTEUR DE CRÉATION
+                logEvent('SYSTEM', `Ouverture officielle de la salle : ${eventName}`);
+                
+                document.getElementById('modal-create-room').style.display = 'none'; 
+                document.getElementById('screen-dashboard').style.display = 'flex'; 
+                document.getElementById('screen-hub').style.display = 'none'; 
+                setupMJListeners(); 
+                updateDashboardHeader();
+            }); 
         }
 
         function launchDashboard(id, mjName = null, eventName = null, isArchived = false) {
@@ -1884,8 +1902,8 @@
         function saveTeamFromModal() {
             const n = document.getElementById('modal-t-name').value.trim();
             if(!n) return alert("Veuillez saisir un nom d'équipe.");
-			// PATCH V1.231 : Vigile Anti-Crash BDD
-            if(/[.#$\[\]/]/.test(n)) return alert("Les caractères suivants sont interdits : . # $ [ ] /");
+            // PATCH V1.231 : Vigile Anti-Crash BDD
+			if(/[.#$\[\]/]/.test(n)) return alert("Les caractères suivants sont interdits : . # $ [ ] /");
             if(!selCrest) return alert("Veuillez sélectionner un blason.");
             
             if(mjProfileData.isGuest === true && !editingTeamKey && Object.keys(globalTeams).length >= 2) return alert("Limité à 2 équipes en Découverte.");
@@ -1894,6 +1912,7 @@
                 roomRef.child('teams/' + editingTeamKey).once('value').then(snap => {
                     const data = snap.val();
                     roomRef.child('teams/' + n).set({...data, icon: selCrest}).then(() => {
+                        logEvent('SYSTEM', `MJ a renommé l'équipe ${editingTeamKey} en ${n}`); // 🟢 CAPTEUR
                         roomRef.child('teams/' + editingTeamKey).remove();
                         roomRef.child('players').once('value', pSnap => {
                             let updates = {};
@@ -1909,11 +1928,11 @@
                     });
                 });
             } else {
-                /* --- PATCH 3.20 : ANTI-ÉCRASEMENT --- */
+			    /* --- PATCH 3.20 : ANTI-ÉCRASEMENT --- */
                 if (!editingTeamKey && globalTeams[n]) {
                     return alert("Ce nom d'équipe existe déjà. Veuillez en choisir un autre.");
                 }
-                
+                logEvent('SYSTEM', `MJ a ${editingTeamKey ? 'modifié' : 'créé'} l'équipe : ${n}`); // 🟢 CAPTEUR
                 roomRef.child('teams/' + n).update({ icon: selCrest, active: true, bonus: globalTeams[n] ? globalTeams[n].bonus : 0 });
                 document.getElementById('modal-team-edit').style.display = 'none';
             }
@@ -1923,21 +1942,19 @@
         function transferCaptaincy(oldId, oldName, newId, newName, teamName) {
             const displayOld = oldName || "L'ancien capitaine";
             if (confirm(`Êtes-vous sûr de vouloir enlever le capitanat à ${displayOld} pour le donner à ${newName} ?`)) {
+                logEvent('SYSTEM', `MJ a transféré le capitanat de ${teamName} à ${newName}`); // 🟢 CAPTEUR
                 let updates = {};
-                // On retire la couronne à tout le monde dans l'équipe pour être sûr
                 Object.keys(allPlayersData).forEach(k => {
                     if (allPlayersData[k].teamName === teamName && allPlayersData[k].isCaptain) {
                         updates[k + '/isCaptain'] = false;
                     }
                 });
                 
-                // Message exact pour l'ancien capitaine
                 if(oldId) {
                     updates[oldId + '/isCaptain'] = false;
                     updates[oldId + '/captainMessage'] = `ℹ️ Vous avez été destitué du rôle de capitaine de l'équipe ${teamName}. Le rôle de capitaine a été attribué à ${newName}.`;
                 }
                 
-                // Message exact pour le nouveau capitaine
                 updates[newId + '/isCaptain'] = true;
                 updates[newId + '/captainMessage'] = `👑 ${displayOld} n'est plus capitaine. Vous êtes le nouveau capitaine de l'équipe ${teamName}.`;
                 
@@ -1971,6 +1988,7 @@
                     updates[nextId + '/isCaptain'] = true;
                     updates[nextId + '/captainMessage'] = `👑 ${oldName} n'est plus actif. Vous êtes le nouveau capitaine de l'équipe ${teamName} !`;
                     
+                    logEvent('SYSTEM', `👑 Succession auto : ${nextName} devient capitaine de ${teamName}`); // 🟢 CAPTEUR
                     roomRef.child('players').update(updates);
                 }
             }
@@ -2018,7 +2036,10 @@
                     }
                 });
                 
-                if (fixNeeded) roomRef.child('players').update(updates);
+                if (fixNeeded) {
+                    logEvent('SYSTEM', `🛠️ Le système a destitué automatiquement un capitaine en doublon`); // 🟢 CAPTEUR
+                    roomRef.child('players').update(updates);
+                }
                 
                 // --- DÉCLENCHEMENT DE LA SUCCESSION AUTOMATIQUE ---
                 teamsToCheck.forEach(team => {
@@ -2097,6 +2118,7 @@
                             });
                             
                             if (winner) {
+                                logEvent('BUZZ', `⚡ ${winner.pseudo} a pris la main !`); // 🟢 CAPTEUR
                                 roomRef.child('buzzers').set({ 
                                     id: winner.id, 
                                     pseudo: winner.pseudo, 
@@ -2500,37 +2522,140 @@
 
         function expelTeamMember(uid, name, avatar, teamName) {
             if(confirm(`Expulser ${name} de l'équipe ?\n\nIl repassera en Solo et sera mis sur la liste noire de l'équipe.`)) {
+                logEvent('PUNISH', `MJ a expulsé ${name} de l'équipe ${teamName}`); // 🟢 CAPTEUR
                 roomRef.child('teams/' + teamName + '/blacklist/' + uid).set({ name: name, avatar: avatar });
                 roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", isCaptain: false });
             }
         }
-        function pardonTeamMember(uid, teamName) { roomRef.child('teams/' + teamName + '/blacklist/' + uid).remove(); }
-
+		
+        function pardonTeamMember(uid, teamName) { 
+            logEvent('SYSTEM', `MJ a gracié un joueur de la liste noire de ${teamName}`); // 🟢 CAPTEUR
+            roomRef.child('teams/' + teamName + '/blacklist/' + uid).remove(); 
+        }
+		
         function openEditModal(uid) { const d = allPlayersData[uid]; if(!d)return; editingPlayerUid=uid; editingPlayerOriginalPseudo=d.name; editingPlayerOriginalAvatar=d.avatar||"👤"; editingPlayerCurrentAvatar=editingPlayerOriginalAvatar; document.getElementById('edit-player-name').value=d.name; document.getElementById('btn-censor-avatar').style.display=(editingPlayerOriginalAvatar.length>20)?'block':'none'; updateEditAvatarPreview(); populateEditGallery(); document.getElementById('modal-edit-player').style.display='flex'; }
         function populateEditGallery() { const g=document.getElementById('edit-avatar-gallery'); g.innerHTML=""; const o=document.createElement('div'); o.className='edit-gallery-item original-avatar-item'; if(editingPlayerOriginalAvatar.length>20)o.innerHTML=`<img src="${editingPlayerOriginalAvatar}">`; else o.innerText=editingPlayerOriginalAvatar; o.onclick=()=>{editingPlayerCurrentAvatar=editingPlayerOriginalAvatar;updateEditAvatarPreview();}; g.appendChild(o); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='edit-gallery-item'; d.innerText=a; d.onclick=()=>{editingPlayerCurrentAvatar=a;updateEditAvatarPreview();}; g.appendChild(d); }); }
         function updateEditAvatarPreview() { const c=document.getElementById('edit-player-avatar-preview'); if(editingPlayerCurrentAvatar.length>20)c.innerHTML=`<img src="${editingPlayerCurrentAvatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`; else c.innerText=editingPlayerCurrentAvatar; }
         function censorPlayerAvatar() { editingPlayerCurrentAvatar = mjProfileData.customLogo || "https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad"; updateEditAvatarPreview(); }
         function closeEditPlayerModal() { document.getElementById('modal-edit-player').style.display='none'; editingPlayerUid=null; }
-        function savePlayerEdit() { if(!editingPlayerUid)return; const v=document.getElementById('edit-player-name').value.trim(); if(!/^[a-zA-Z0-9À-ÿ\s\-_]+$/.test(v)||v.length<2)return alert("Pseudo invalide (Lettres, chiffres, 2 car. min)."); let tk=false; Object.keys(allPlayersData).forEach(u=>{if(u!==editingPlayerUid&&allPlayersData[u].name&&allPlayersData[u].name.toLowerCase()===v.toLowerCase())tk=true;}); if(tk)return alert("Déjà utilisé."); roomRef.child('players/'+editingPlayerUid).update({name:v, avatar:editingPlayerCurrentAvatar}).then(()=>{ if(v!==editingPlayerOriginalPseudo&&currentBlocked[editingPlayerOriginalPseudo]){roomRef.child('blockedPlayers/'+editingPlayerOriginalPseudo).remove();roomRef.child('blockedPlayers/'+v).set(true);} if(currentBuzzerId===editingPlayerUid)roomRef.child('buzzers').update({pseudo:v, avatar:editingPlayerCurrentAvatar}); closeEditPlayerModal(); }); }
         
-        function setPlayerScore(u, v) { roomRef.child('players/'+u).update({pts: parseInt(v)||0}); }
-        function warnPlayer(u, n) { if(confirm(`Avertissement (Jaune) à ${n} ?`)) roomRef.child('players/'+u).update({hasBeenWarned:true, pendingWarning:true}); }
-        function acceptRecovery(u) { roomRef.child('players/'+u).update({active:true, recoveryRequest:null, reconnectedAt:Date.now()}); }
-        function rejectRecovery(u) { if(confirm("Refuser ?")) roomRef.child('players/'+u).update({recoveryRequest:null}); }
-        function archiveTeam(n) { if(confirm("Pause équipe "+n+" ?")) { let c=0; Object.values(allPlayersData).forEach(p=>{if(p.teamName===n)c+=(p.pts||0);}); c+=(globalTeams[n].bonus||0); let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, frozenScore:c, previousMembers:m, lastState:'active'}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:""})); } }
-        function banTeam(n) { if(confirm("Bannir équipe "+n+" ?")) { let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, banned:true, previousMembers:m, lastState:(globalTeams[n].active!==false?'active':'inactive')}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:"", active:true, banned:false})); } }
+		function savePlayerEdit() { 
+            if(!editingPlayerUid)return; 
+            const v=document.getElementById('edit-player-name').value.trim(); 
+            if(!/^[a-zA-Z0-9À-ÿ\s\-_]+$/.test(v)||v.length<2)return alert("Pseudo invalide (Lettres, chiffres, 2 car. min)."); 
+            let tk=false; 
+            Object.keys(allPlayersData).forEach(u=>{if(u!==editingPlayerUid&&allPlayersData[u].name&&allPlayersData[u].name.toLowerCase()===v.toLowerCase())tk=true;}); 
+            if(tk)return alert("Déjà utilisé."); 
+            
+            logEvent('SYSTEM', `MJ a édité le profil du joueur : ${v}`); // 🟢 CAPTEUR
+            
+            roomRef.child('players/'+editingPlayerUid).update({name:v, avatar:editingPlayerCurrentAvatar}).then(()=>{ 
+                if(v!==editingPlayerOriginalPseudo&&currentBlocked[editingPlayerOriginalPseudo]){
+                    roomRef.child('blockedPlayers/'+editingPlayerOriginalPseudo).remove();
+                    roomRef.child('blockedPlayers/'+v).set(true);
+                } 
+                if(currentBuzzerId===editingPlayerUid) roomRef.child('buzzers').update({pseudo:v, avatar:editingPlayerCurrentAvatar}); 
+                closeEditPlayerModal(); 
+            }); 
+        }
+        
+        function setPlayerScore(u, v) { 
+            logEvent('SCORE', `MJ a fixé manuellement le score à ${v}`); // 🟢 CAPTEUR
+            roomRef.child('players/'+u).update({pts: parseInt(v)||0}); 
+        }
+        
+		function warnPlayer(u, n) { 
+            if(confirm(`Avertissement (Jaune) à ${n} ?`)) {
+                logEvent('PUNISH', `MJ a donné un AVERTISSEMENT au joueur : ${n}`); // 🟢 CAPTEUR
+                roomRef.child('players/'+u).update({hasBeenWarned:true, pendingWarning:true}); 
+            }
+        }
+
+        function acceptRecovery(u) { 
+            logEvent('SYSTEM', `MJ a autorisé une demande de reconnexion`); // 🟢 CAPTEUR
+            roomRef.child('players/'+u).update({active:true, recoveryRequest:null, reconnectedAt:Date.now()}); 
+        }
+
+        function rejectRecovery(u) { 
+            if(confirm("Refuser ?")) {
+                logEvent('PUNISH', `MJ a refusé une demande de reconnexion`); // 🟢 CAPTEUR
+                roomRef.child('players/'+u).update({recoveryRequest:null}); 
+            }
+        }
+
+        function archiveTeam(n) { 
+            if(confirm("Pause équipe "+n+" ?")) { 
+                logEvent('SYSTEM', `MJ a mis en PAUSE l'équipe ${n}`); // 🟢 CAPTEUR
+                let c=0; Object.values(allPlayersData).forEach(p=>{if(p.teamName===n)c+=(p.pts||0);}); c+=(globalTeams[n].bonus||0); let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, frozenScore:c, previousMembers:m, lastState:'active'}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:""})); 
+            } 
+        }
+
+        function banTeam(n) { 
+            if(confirm("Bannir équipe "+n+" ?")) { 
+                logEvent('PUNISH', `MJ a BANNI l'équipe ${n}`); // 🟢 CAPTEUR
+                let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, banned:true, previousMembers:m, lastState:(globalTeams[n].active!==false?'active':'inactive')}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:"", active:true, banned:false})); 
+            } 
+        }
+
         function openRestoreModal(n) { const t=globalTeams[n]; if(t.lastState==='active'||(!t.banned&&!t.active)){if(confirm("Réactiver "+n+" ?"))performRestore(n,'active');}else{pendingRestoreTeam=n; document.getElementById('restore-team-msg').innerText=`${n} était EN PAUSE avant d'être bannie.`; document.getElementById('modal-restore-team').style.display='flex';} }
         function confirmRestoreAction(m) { if(pendingRestoreTeam){performRestore(pendingRestoreTeam,m); closeRestoreModal();} }
         function closeRestoreModal() { document.getElementById('modal-restore-team').style.display='none'; pendingRestoreTeam=null; }
-        function performRestore(n, s) { if(s==='active') roomRef.child('teams/'+n).update({active:true, banned:false, frozenScore:null, previousMembers:null}); else if(s==='inactive') roomRef.child('teams/'+n).update({active:false, banned:false}); }
-        function deleteTeamDefinitive(n) { if(confirm("⚠️ Supprimer DÉFINITIVEMENT "+n+" ?")) roomRef.child('teams/'+n).remove(); }
-        function updateTeamBonus(n, d) { const t=globalTeams[n]; if(t.active!==false)roomRef.child('teams/'+n+'/bonus').transaction(v=>(v||0)+d); else roomRef.child('teams/'+n).update({frozenScore:(t.frozenScore||0)+d, bonus:(t.bonus||0)+d}); }
-        function deletePlayer(u, n, a) { if(a) { if(confirm("Rendre inactif "+n+" ?")) roomRef.child('players/'+u).update({active:false}); } else { if(confirm("⚠️ Supprimer "+n+" définitivement ?")) roomRef.child('players/'+u).remove(); } }
-        function forceBuzzer(u) { const p=allPlayersData[u]; if(p) { roomRef.child('gameState').update({status:'taken'}); roomRef.child('buzzers').set({id:u, pseudo:p.name, avatar:p.avatar||"", teamName:p.teamName||"Solo", teamIcon:p.teamIcon||""}); } }
-        function toggleBlockPlayer(ps) { if(currentBlocked[ps]) roomRef.child('blockedPlayers/'+ps).remove(); else roomRef.child('blockedPlayers/'+ps).set(true); }
+        function performRestore(n, s) { 
+            logEvent('SYSTEM', `MJ a RESTAURÉ l'équipe ${n} (Mode: ${s})`); // 🟢 CAPTEUR
+            if(s==='active') roomRef.child('teams/'+n).update({active:true, banned:false, frozenScore:null, previousMembers:null}); 
+            else if(s==='inactive') roomRef.child('teams/'+n).update({active:false, banned:false}); 
+        }
+
+        function deleteTeamDefinitive(n) { 
+            if(confirm(`⚠️ Supprimer DÉFINITIVEMENT l'équipe ${n} ?`)) {
+                logEvent('SYSTEM', `MJ a supprimé l'équipe : ${n}`); // 🟢 CAPTEUR
+                roomRef.child('teams/'+n).remove(); 
+            }
+        }
+        
+		function updateTeamBonus(n, d) { 
+            const t=globalTeams[n]; 
+            logEvent('SCORE', `Ajustement bonus MJ : ${d>0?'+':''}${d} pts pour l'équipe ${n}`); // 🟢 CAPTEUR
+            if(t.active!==false)roomRef.child('teams/'+n+'/bonus').transaction(v=>(v||0)+d); 
+            else roomRef.child('teams/'+n).update({frozenScore:(t.frozenScore||0)+d, bonus:(t.bonus||0)+d}); 
+        }
+
+        function deletePlayer(u, n, a) { 
+            if(a) { 
+                if(confirm("Rendre inactif "+n+" ?")) {
+                    logEvent('SYSTEM', `MJ a forcé l'inactivité du joueur : ${n}`); // 🟢 CAPTEUR
+                    roomRef.child('players/'+u).update({active:false}); 
+                }
+            } else { 
+                if(confirm("⚠️ Supprimer "+n+" définitivement ?")) {
+                    logEvent('SYSTEM', `MJ a supprimé définitivement le joueur : ${n}`); // 🟢 CAPTEUR
+                    roomRef.child('players/'+u).remove(); 
+                }
+            } 
+        }
+
+        function forceBuzzer(u) { 
+            const p=allPlayersData[u]; 
+            if(p) { 
+                logEvent('SYSTEM', `MJ a FORCÉ LE BUZZER pour ${p.name}`); // 🟢 CAPTEUR
+                roomRef.child('gameState').update({status:'taken'}); 
+                roomRef.child('buzzers').set({id:u, pseudo:p.name, avatar:p.avatar||"", teamName:p.teamName||"Solo", teamIcon:p.teamIcon||""}); 
+            } 
+        }
+
+        function toggleBlockPlayer(ps) { 
+            if(currentBlocked[ps]) {
+                logEvent('SYSTEM', `MJ a débloqué le buzzer de ${ps}`); // 🟢 CAPTEUR
+                roomRef.child('blockedPlayers/'+ps).remove(); 
+            } else { 
+                logEvent('PUNISH', `MJ a bloqué le buzzer de ${ps}`); // 🟢 CAPTEUR
+                roomRef.child('blockedPlayers/'+ps).set(true); 
+            }
+        }
         
         function triggerEndGame() { 
             if(confirm("🏁 Fin de partie ?\n\nCela affichera le podium et placera cette salle dans vos Archives en Lecture Seule.")) { 
+                logEvent('SYSTEM', "🏁 MJ a déclenché la FIN DE PARTIE"); // 🟢 CAPTEUR
                 roomRef.child('gameState').set({status:'endGame', timestamp:Date.now()}); 
                 roomRef.update({ isArchived: true });
                 roomRef.child('buzzers').remove(); 
@@ -2549,6 +2674,7 @@
             if(roomRef) { 
                 roomRef.child('gameState').set({status:st}); 
                 if(st==='ready') { 
+                    logEvent('SYSTEM', "Ouverture des buzzers"); // 🟢 CAPTEUR
                     roomRef.child('buzzers').remove(); 
                     roomRef.child('buzzAttempts').remove(); 
                     buzzProcessing = false;
@@ -2557,22 +2683,56 @@
         }
 
         function fullReset() { 
+            logEvent('SYSTEM', "Reset global (Nettoyage des buzzers et blocages)"); // 🟢 CAPTEUR
             roomRef.child('blockedPlayers').remove(); 
             roomRef.child('buzzers').remove(); 
             roomRef.child('buzzAttempts').remove(); 
             statusUpdate('waiting'); 
         }
         
-        function adj(u, v) { roomRef.child('players/'+u+'/pts').transaction(x=>(x||0)+v); }
-        function kickPlayer(u, n) { if(confirm("Bannir "+n+" (Rouge) ?")) roomRef.child('players/'+u).update({banned:true, active:false}); }
-        function unkickPlayer(u) { roomRef.child('players/'+u).update({banned:false, active:true, reconnectedAt:Date.now()}); }
-        function restoreInactivePlayer(u) { roomRef.child('players/'+u).update({active:true, reconnectedAt:Date.now()}); }
-        function togglePlayerTeam(u, c) { const i=(c==="Solo")?"":(globalTeams[c]?globalTeams[c].icon:""); roomRef.child('players/'+u).update({teamName:c, teamIcon:i, active:true}); }
-        function handleError() { if(currentPlayer&&currentPlayer.name) { roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); statusUpdate('ready'); } }
+        function adj(u, v) { 
+            logEvent('SCORE', `MJ a ajusté le score d'un joueur (${v > 0 ? '+' : ''}${v})`); // 🟢 CAPTEUR
+            roomRef.child('players/'+u+'/pts').transaction(x=>(x||0)+v); 
+        }
+        
+		function kickPlayer(u, n) { 
+            if(confirm("Bannir "+n+" (Rouge) ?")) {
+                logEvent('PUNISH', `MJ a banni le joueur : ${n}`); // 🟢 CAPTEUR
+                roomRef.child('players/'+u).update({banned:true, active:false}); 
+            }
+        }
+
+        function unkickPlayer(u) { 
+            logEvent('SYSTEM', `MJ a levé le bannissement d'un joueur`); // 🟢 CAPTEUR
+            roomRef.child('players/'+u).update({banned:false, active:true, reconnectedAt:Date.now()}); 
+        }
+
+        function restoreInactivePlayer(u) { 
+            logEvent('SYSTEM', `MJ a forcé la réactivation d'un joueur inactif`); // 🟢 CAPTEUR
+            roomRef.child('players/'+u).update({active:true, reconnectedAt:Date.now()}); 
+        }
+        
+		function togglePlayerTeam(u, c) { 
+            const i=(c==="Solo")?"":(globalTeams[c]?globalTeams[c].icon:""); 
+            const pName = allPlayersData[u] ? allPlayersData[u].name : "Un joueur";
+            logEvent('SYSTEM', `MJ a déplacé ${pName} vers : ${c}`); // 🟢 CAPTEUR
+            roomRef.child('players/'+u).update({teamName:c, teamIcon:i, active:true}); 
+        }
+
+        function handleError() { 
+            if(currentPlayer&&currentPlayer.name) { 
+                logEvent('PUNISH', `Erreur : ${currentPlayer.name} bloqué(e)`); // 🟢 CAPTEUR
+                roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); 
+                statusUpdate('ready'); 
+            } 
+        }
+
         function handleReward(pts, m) { 
             if(!currentPlayer||!currentPlayer.id)return; 
             const cp=allPlayersData[currentPlayer.id]?(allPlayersData[currentPlayer.id].pts||0):0; 
             roomRef.child('players/'+currentPlayer.id).update({pts:cp+pts, active:true}); 
+            
+            logEvent('SCORE', `+${pts} point(s) pour ${currentPlayer.name}`); // 🟢 CAPTEUR
             
             if(m==='partial'){ 
                 roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); 
@@ -2642,15 +2802,21 @@
 		// --- PATCH V1.195 : FONCTIONS DU MENU CONTEXTUEL MANQUANTES ---
         function pausePlayer(u, n) { 
             if(confirm(`Mettre ${n} en pause ?`)) {
-                // On ajoute kickedByMj: true pour que le téléphone comprenne que c'est intentionnel
+                logEvent('SYSTEM', `MJ a mis le joueur ${n} en PAUSE`); // 🟢 CAPTEUR
                 roomRef.child('players/'+u).update({active: false, kickedByMj: true}); 
             }
         }
 		
-        function deletePlayerDefinitive(u, n) { if(confirm(`⚠️ Supprimer définitivement le joueur ${n} ?`)) roomRef.child('players/'+u).remove(); }
+        function deletePlayerDefinitive(u, n) { 
+            if(confirm(`⚠️ Supprimer définitivement le joueur ${n} ?`)) {
+                logEvent('SYSTEM', `MJ a supprimé définitivement le joueur : ${n}`); // 🟢 CAPTEUR
+                roomRef.child('players/'+u).remove(); 
+            }
+        }
         
         function warnTeam(n) { 
             if(confirm(`Avertissement (Jaune) à l'équipe ${n} ?`)) {
+                logEvent('PUNISH', `MJ a donné un AVERTISSEMENT à l'équipe : ${n}`); // 🟢 CAPTEUR
                 roomRef.child('teams/'+n).update({hasBeenWarned:true});
                 Object.values(allPlayersData).forEach(p => {
                     if (p.teamName === n && p.active !== false && !p.banned) {
@@ -2668,14 +2834,19 @@
                 if (p.teamName === n && p.active !== false && !p.banned) members.push(p);
             });
             const isMuted = members.some(m => currentBlocked[m.name]);
-            if (isMuted) { members.forEach(m => roomRef.child('blockedPlayers/' + m.name).remove()); } 
-            else { let updates = {}; members.forEach(m => updates[m.name] = true); roomRef.child('blockedPlayers').update(updates); }
+            if (isMuted) { 
+                logEvent('SYSTEM', `MJ a DÉBLOQUÉ les buzzers de l'équipe ${n}`); // 🟢 CAPTEUR
+                members.forEach(m => roomRef.child('blockedPlayers/' + m.name).remove()); 
+            } 
+            else { 
+                logEvent('PUNISH', `MJ a BLOQUÉ les buzzers de l'équipe ${n}`); // 🟢 CAPTEUR
+                let updates = {}; 
+                members.forEach(m => updates[m.name] = true); 
+                roomRef.child('blockedPlayers').update(updates); 
+            }
         }
         
-        function deleteTeamDefinitive(n) { if(confirm(`⚠️ Supprimer DÉFINITIVEMENT l'équipe ${n} ?`)) roomRef.child('teams/'+n).remove(); }
-        // --------------------------------------------------------------
-		
-		// --- PATCH V1.196 : CORRECTION AUDIT (FONCTION MANQUANTE) ---
+        // --- PATCH V1.196 : CORRECTION AUDIT (FONCTION MANQUANTE) ---
         function kickTeam(n) { if(confirm(`Expulser l'équipe ${n} (Rouge) ?`)) banTeam(n); }
 		
     </script>
