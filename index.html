@@ -562,17 +562,29 @@
             </div>
             
             <div id="crm-part-1" style="display:block; text-align: left;">
-                <button style="width:100%; padding:12px; background:white; color:black; font-weight:bold; border-radius:8px; border:none; margin-bottom:15px; cursor:pointer;">Continuer avec Google</button>
-                <div style="text-align:center; color:#bdc3c7; font-size:0.8rem; margin-bottom:10px;">OU</div>
+                <button style="width:100%; padding:12px; background:white; color:#444; font-size:0.95rem; font-weight:bold; border-radius:8px; border:none; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width:20px; height:20px;">
+                    Créer avec mon compte Google
+                </button>
+                <div style="text-align:center; color:#bdc3c7; font-size:0.8rem; margin-bottom:10px; font-weight:bold;">OU INSCRIPTION CLASSIQUE</div>
                 
                 <label class="crm-label">E-mail *</label>
                 <input type="email" id="crm-email" class="crm-input" placeholder="joueur@mail.com" onkeyup="window.crmCheckEnter(event)">
                 
                 <label class="crm-label">Confirmer l'E-mail *</label>
-                <input type="email" id="crm-email-conf" class="crm-input" placeholder="Retapez votre e-mail" onkeyup="window.crmCheckEnter(event)">
+                <input type="email" id="crm-email-conf" class="crm-input" placeholder="Retapez votre e-mail" autocomplete="off" onkeyup="window.crmCheckEnter(event)">
                 
                 <label class="crm-label">Mot de passe *</label>
-                <input type="password" id="crm-pwd" class="crm-input" placeholder="8 car., 1 Maj, 1 min, 1 chiffre, 1 spécial" onkeyup="window.crmCheckEnter(event)">
+                <div style="position:relative;">
+                    <input type="password" id="crm-pwd" class="crm-input" placeholder="8 car., 1 Maj, 1 min, 1 chiffre, 1 spécial" onkeyup="window.crmCheckEnter(event)">
+                    <span onclick="window.toggleCRMPwd('crm-pwd')" style="position:absolute; right:10px; top:10px; cursor:pointer; font-size:1.2rem;" title="Afficher/Masquer le mot de passe">👁️</span>
+                </div>
+
+                <label class="crm-label">Confirmer le Mot de passe *</label>
+                <div style="position:relative;">
+                    <input type="password" id="crm-pwd-conf" class="crm-input" placeholder="Retapez votre mot de passe" onkeyup="window.crmCheckEnter(event)">
+                    <span onclick="window.toggleCRMPwd('crm-pwd-conf')" style="position:absolute; right:10px; top:10px; cursor:pointer; font-size:1.2rem;" title="Afficher/Masquer le mot de passe">👁️</span>
+                </div>
             </div>
 
             <div id="crm-part-2" style="display:none; text-align: left;">
@@ -610,7 +622,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.201";
+        const CLIENT_VERSION = "1.203";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1973,6 +1985,12 @@
             }
         };
 
+        // 4. LE PETIT ŒIL : Afficher/Masquer le mot de passe
+        window.toggleCRMPwd = function(id) {
+            var x = document.getElementById(id);
+            if (x.type === "password") { x.type = "text"; } else { x.type = "password"; }
+        };
+
         window.crmNext = function() {
             window.showCRMError(""); // Reset erreur
 
@@ -1981,15 +1999,17 @@
                 var m1 = document.getElementById('crm-email').value;
                 var m2 = document.getElementById('crm-email-conf').value;
                 var pwd = document.getElementById('crm-pwd').value;
+                var pwdConf = document.getElementById('crm-pwd-conf').value;
                 
-                if(!m1 || !m2 || !pwd) { window.showCRMError("Veuillez remplir tous les champs."); return; }
+                if(!m1 || !m2 || !pwd || !pwdConf) { window.showCRMError("Veuillez remplir tous les champs."); return; }
                 if(!m1.includes('@')) { window.showCRMError("Format d'e-mail invalide."); return; }
                 if(m1 !== m2) { window.showCRMError("Les adresses e-mail ne correspondent pas."); return; }
+                if(pwd !== pwdConf) { window.showCRMError("Les mots de passe ne correspondent pas."); return; }
                 
                 // Vérification du mot de passe (8 car, 1 maj, 1 min, 1 chiffre, 1 spécial)
                 var pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
                 if(!pwdRegex.test(pwd)) { 
-                    window.showCRMError("Mot de passe faible (min 8 car, 1 Maj, 1 min, 1 chiffre, 1 spécial)."); 
+                    window.showCRMError("Mot de passe trop faible (min 8 car, 1 Maj, 1 min, 1 chiffre, 1 spécial)."); 
                     return; 
                 }
             }
