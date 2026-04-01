@@ -542,15 +542,18 @@
         .crm-step-line.active { background: #27ae60; }
         .crm-row { display: flex; gap: 10px; margin-bottom: 5px; }
         .crm-col { flex: 1; display: flex; flex-direction: column; }
+        .crm-input { width:100%; padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px; box-sizing: border-box; }
+        .crm-input:focus { outline: none; border-color: var(--primary); }
+        .crm-label { color:var(--primary); font-size:0.8rem; font-weight:bold; margin-bottom: 2px; display: block;}
         @media (max-width: 600px) { .crm-row { flex-direction: column; gap: 0; } }
     </style>
 
-    <div id="modal-crm-profile" class="overlay-full" style="z-index: 9999999;">
+    <div id="modal-crm-profile" class="overlay-full" style="z-index: 9999999; display: none;">
         <div class="settings-content crm-modal" style="position: relative; max-height: 90vh; overflow-y: auto; text-align:center;">
             <button onclick="window.closeCRMModal()" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer;">X</button>
             
             <h2 style="margin-top:0; color: white;">Créer mon Compte</h2>
-            <p style="color: #bdc3c7; font-size: 0.85rem; margin-top:-10px;">Rejoignez Buzz ta Puce et conservez vos statistiques !</p>
+            <p style="color: #bdc3c7; font-size: 0.85rem; margin-top:-10px;">Rejoignez Buzz ta Puce et conservez vos stats !</p>
             
             <div class="crm-stepper">
                 <div class="crm-step active" id="s-dot-1">1</div><div class="crm-step-line" id="s-line-1"></div>
@@ -560,27 +563,46 @@
             
             <div id="crm-part-1" style="display:block; text-align: left;">
                 <button style="width:100%; padding:12px; background:white; color:black; font-weight:bold; border-radius:8px; border:none; margin-bottom:15px; cursor:pointer;">Continuer avec Google</button>
-                <label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">E-mail *</label>
-                <input type="email" style="width:100%; padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" placeholder="joueur@mail.com" onkeyup="window.crmCheckEnter(event)">
+                <div style="text-align:center; color:#bdc3c7; font-size:0.8rem; margin-bottom:10px;">OU</div>
+                
+                <label class="crm-label">E-mail *</label>
+                <input type="email" id="crm-email" class="crm-input" placeholder="joueur@mail.com" onkeyup="window.crmCheckEnter(event)">
+                
+                <label class="crm-label">Confirmer l'E-mail *</label>
+                <input type="email" id="crm-email-conf" class="crm-input" placeholder="Retapez votre e-mail" onkeyup="window.crmCheckEnter(event)">
+                
+                <label class="crm-label">Mot de passe *</label>
+                <input type="password" id="crm-pwd" class="crm-input" placeholder="8 car., 1 Maj, 1 min, 1 chiffre, 1 spécial" onkeyup="window.crmCheckEnter(event)">
             </div>
 
             <div id="crm-part-2" style="display:none; text-align: left;">
                 <div class="crm-row">
-                    <div class="crm-col"><label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">Prénom *</label><input type="text" style="padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" onkeyup="window.crmCheckEnter(event)"></div>
-                    <div class="crm-col"><label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">Nom *</label><input type="text" style="padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" onkeyup="window.crmCheckEnter(event)"></div>
+                    <div class="crm-col"><label class="crm-label">Prénom *</label><input type="text" id="crm-firstname" class="crm-input" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)"></div>
+                    <div class="crm-col"><label class="crm-label">Nom *</label><input type="text" id="crm-lastname" class="crm-input" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)"></div>
                 </div>
                 <div class="crm-row">
-                    <div class="crm-col"><label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">Code Postal *</label><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="ex: 75001" style="padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" onkeyup="window.crmCheckEnter(event)"></div>
-                    <div class="crm-col"><label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">Ville *</label><input type="text" style="padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" onkeyup="window.crmCheckEnter(event)"></div>
+                    <div class="crm-col"><label class="crm-label">Téléphone *</label><input type="tel" id="crm-phone" inputmode="tel" class="crm-input" placeholder="ex: 0612345678" onkeyup="window.crmCheckEnter(event)"></div>
+                    <div class="crm-col"><label class="crm-label">Entreprise (Optionnel)</label><input type="text" id="crm-company" class="crm-input" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)"></div>
+                </div>
+                <div class="crm-row">
+                    <div class="crm-col"><label class="crm-label">Code Postal *</label><input type="text" id="crm-zip" class="crm-input" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="ex: 75001" oninput="window.fetchCity(this)" onkeyup="window.crmCheckEnter(event)"></div>
+                    <div class="crm-col"><label class="crm-label">Ville *</label><input type="text" id="crm-city" class="crm-input" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)"></div>
                 </div>
             </div>
 
             <div id="crm-part-3" style="display:none; text-align: left;">
-                <label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">Pseudo Favori *</label>
-                <input type="text" style="width:100%; padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" placeholder="Votre pseudo en jeu" onkeyup="window.crmCheckEnter(event)">
+                <label class="crm-label">Pseudo Favori *</label>
+                <input type="text" id="crm-pseudo" class="crm-input" placeholder="Votre pseudo en jeu" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)">
+                
+                <label class="crm-label">Mon Avatar</label>
+                <div style="border:1px dashed var(--primary); padding:20px; text-align:center; border-radius:8px; color:#bdc3c7; cursor:pointer;" onclick="alert('Upload de photo en construction')">
+                    📥 Cliquez pour ajouter une photo
+                </div>
             </div>
 
-            <div style="display:flex; gap:10px; margin-top:15px;">
+            <div id="crm-error" style="color: #e74c3c; font-size: 0.85rem; font-weight: bold; min-height: 20px; margin-top:5px;"></div>
+
+            <div style="display:flex; gap:10px; margin-top:10px;">
                 <button id="btn-c-back" onclick="window.crmPrev()" style="display:none; width:40%; padding:12px; background:transparent; color:white; border:2px solid #e74c3c; border-radius:8px; font-weight:bold; cursor:pointer;">Retour</button>
                 <button id="btn-c-next" onclick="window.crmNext()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Étape Suivante</button>
             </div>
@@ -588,7 +610,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.200";
+        const CLIENT_VERSION = "1.201";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1874,14 +1896,13 @@
         }
 		
 		// ==========================================
-        // MOTEUR MODALE CRM PROFIL (TOTALEMENT ISOLÉ)
+        // MOTEUR MODALE CRM PROFIL (PHASE 2 - INTELLIGENCE)
         // ==========================================
         window.crmStep = 1;
 
         window.openCRMModal = function() {
             var m = document.getElementById('modal-crm-profile');
             if(m) { m.style.display = 'flex'; window.crmStep = 1; window.updateCRM(); }
-            else { alert("Modale introuvable !"); }
         };
 
         window.closeCRMModal = function() {
@@ -1889,7 +1910,32 @@
             if(m) m.style.display = 'none';
         };
 
+        // 1. FILTRE FIREBASE : Supprime instantanément les caractères interdits
+        window.sanitizeCRM = function(input) {
+            input.value = input.value.replace(/[.#$\[\]]/g, '');
+        };
+
+        // 2. API CODE POSTAL : Remplit la ville automatiquement
+        window.fetchCity = function(input) {
+            input.value = input.value.replace(/[^0-9]/g, ''); // Forcer uniquement des chiffres
+            if(input.value.length === 5) {
+                fetch('https://geo.api.gouv.fr/communes?codePostal=' + input.value)
+                .then(res => res.json())
+                .then(data => {
+                    if(data && data.length > 0) {
+                        // Remplir le champ ville avec le premier résultat
+                        document.getElementById('crm-city').value = data[0].nom;
+                    }
+                }).catch(e => console.log(e));
+            }
+        };
+
+        window.showCRMError = function(msg) {
+            document.getElementById('crm-error').innerText = msg;
+        };
+
         window.updateCRM = function() {
+            window.showCRMError(""); // Effacer les erreurs à chaque changement
             for(var i=1; i<=3; i++) {
                 var p = document.getElementById('crm-part-' + i);
                 if(p) p.style.display = (i === window.crmStep) ? 'block' : 'none';
@@ -1928,8 +1974,53 @@
         };
 
         window.crmNext = function() {
-            if(window.crmStep < 3) { window.crmStep++; window.updateCRM(); }
-            else { alert('Interface Validée !'); }
+            window.showCRMError(""); // Reset erreur
+
+            // --- VÉRIFICATIONS ÉTAPE 1 (Identifiants) ---
+            if(window.crmStep === 1) {
+                var m1 = document.getElementById('crm-email').value;
+                var m2 = document.getElementById('crm-email-conf').value;
+                var pwd = document.getElementById('crm-pwd').value;
+                
+                if(!m1 || !m2 || !pwd) { window.showCRMError("Veuillez remplir tous les champs."); return; }
+                if(!m1.includes('@')) { window.showCRMError("Format d'e-mail invalide."); return; }
+                if(m1 !== m2) { window.showCRMError("Les adresses e-mail ne correspondent pas."); return; }
+                
+                // Vérification du mot de passe (8 car, 1 maj, 1 min, 1 chiffre, 1 spécial)
+                var pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+                if(!pwdRegex.test(pwd)) { 
+                    window.showCRMError("Mot de passe faible (min 8 car, 1 Maj, 1 min, 1 chiffre, 1 spécial)."); 
+                    return; 
+                }
+            }
+
+            // --- VÉRIFICATIONS ÉTAPE 2 (Infos) ---
+            if(window.crmStep === 2) {
+                var prenom = document.getElementById('crm-firstname').value;
+                var nom = document.getElementById('crm-lastname').value;
+                var tel = document.getElementById('crm-phone').value;
+                var zip = document.getElementById('crm-zip').value;
+                var ville = document.getElementById('crm-city').value;
+                
+                if(!prenom || !nom || !tel || !zip || !ville) { 
+                    window.showCRMError("Veuillez remplir les champs obligatoires (*)."); 
+                    return; 
+                }
+                
+                // 3. LA MAGIE UX : Copier le Prénom dans le Pseudo si ce dernier est vide
+                var pseudo = document.getElementById('crm-pseudo');
+                if(prenom && pseudo.value.trim() === "") {
+                    pseudo.value = prenom;
+                }
+            }
+
+            // Si tout est bon, on passe à l'étape suivante
+            if(window.crmStep < 3) { 
+                window.crmStep++; 
+                window.updateCRM(); 
+            } else { 
+                alert('Toutes les sécurités sont validées ! Prêt pour Firebase (Phase 3).'); 
+            }
         };
 
         window.crmPrev = function() {
