@@ -131,38 +131,14 @@
         
         @keyframes bounceTrophy { 0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 transparent); } 50% { transform: scale(1.1) translateY(-10px); filter: drop-shadow(0 10px 15px rgba(241,196,15,0.6)); } }
         .champion-trophy { animation: popTrophy 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, bounceTrophy 2s ease-in-out 0.6s infinite !important; }
-		
-		/* --- CHANTIER 4.16 : MODALE CRM PROFIL --- */
-        .crm-modal { max-width: 600px; width: 95%; }
-        .crm-stepper { display: flex; align-items: center; justify-content: center; margin-top: 15px; margin-bottom: 25px; }
-        .crm-step { width: 35px; height: 35px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #bdc3c7; border: 2px solid transparent; transition: 0.3s; z-index: 2; }
-        .crm-step.active { background: var(--primary); color: white; border-color: white; box-shadow: 0 0 15px rgba(52, 152, 219, 0.5); transform: scale(1.1); }
-        .crm-step.completed { background: #27ae60; color: white; border-color: #27ae60; }
-        .crm-step-line { height: 3px; width: 50px; background: rgba(255,255,255,0.1); margin: 0 -5px; z-index: 1; transition: 0.3s; }
-        .crm-step-line.active { background: #27ae60; }
-        
-        .btn-google { background: white; color: #444; border: none; border-radius: 8px; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; margin-bottom: 20px; transition: 0.2s; box-shadow: 0 4px rgba(0,0,0,0.2); }
-        .btn-google:hover { background: #f1f1f1; top: 0px; }
-        .btn-google:active { top: 2px; box-shadow: 0 2px rgba(0,0,0,0.2); }
-        .btn-google img { width: 24px; height: 24px; }
-        
-        .crm-separator { display: flex; align-items: center; text-align: center; margin-bottom: 20px; }
-        .crm-separator::before, .crm-separator::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255,255,255,0.2); }
-        .crm-separator span { padding: 0 15px; color: rgba(255,255,255,0.5); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
-        
-        .form-row { display: flex; gap: 15px; margin-bottom: 5px; }
-        .form-col { flex: 1; display: flex; flex-direction: column; }
-        @media (max-width: 600px) { .form-row { flex-direction: column; gap: 0; } }
-        
-        /* Bouton vert pour la finalisation */
-        .btn-success { background: #27ae60 !important; }
-        .btn-success:hover:not(:disabled) { opacity: 0.9; box-shadow: 0 0 15px rgba(39, 174, 96, 0.5); }
     </style>
 </head>
 <body>
 
-    <button style="background: #f1c40f; color: black; width: 100%; padding: 15px; font-weight: bold; font-size: 1.2rem; border: none; cursor: pointer; position: relative; z-index: 99999; margin-bottom: 10px;" onclick="openCRMModal()">🛠️ TESTER LA MODALE PROFIL</button>
-	
+	<button onclick="window.openCRMModal()" style="position: fixed; bottom: 20px; right: 20px; background: #f1c40f; color: black; padding: 15px 20px; font-weight: bold; border-radius: 50px; border: 2px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 999999; cursor: pointer;">
+        🛠️ TESTER MODALE
+    </button>
+
     <div id="version-display" class="version-tag"></div>
 
     <div class="wizard-container">
@@ -551,204 +527,68 @@
         <div id="podium-content"></div>
         <button class="btn-main" onclick="showClosingScreen()" style="margin-top:30px;">Terminer</button>
     </div>
-    <div id="modal-crm-profile" class="modal-overlay" style="display: none;">
-        <div class="modal-box crm-modal">
-            <button class="modal-close-x" onclick="closeCRMModal()" title="Fermer la fenêtre d'inscription">X</button>
-            <div class="modal-header">
-                <h2 id="crm-modal-title">Créer mon Compte Joueur</h2>
-                <p style="font-size:0.85rem; color:#bdc3c7; margin-top:-10px; margin-bottom:15px;">Rejoignez l'équipe Buzz ta Puce et conservez vos statistiques !</p>
-                
-                <div class="crm-stepper">
-                    <div class="crm-step active" id="step-dot-1" title="Étape 1 : Identifiants de connexion">1</div>
-                    <div class="crm-step-line" id="step-line-1"></div>
-                    <div class="crm-step" id="step-dot-2" title="Étape 2 : Vos informations personnelles">2</div>
-                    <div class="crm-step-line" id="step-line-2"></div>
-                    <div class="crm-step" id="step-dot-3" title="Étape 3 : Votre profil et galerie de jeu">3</div>
-                </div>
-            </div>
-            
-            <div class="modal-body crm-body">
-                
-                <div id="crm-step-1" class="crm-step-content active">
-                    <button class="btn-google" title="Créer un compte rapidement avec votre profil Google" onclick="alert('Module Google en construction (Phase 3)')">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google"> Continuer avec Google
-                    </button>
-                    
-                    <div class="crm-separator"><span>OU INSCRIPTION CLASSIQUE</span></div>
-                    
-                    <label class="section-title">Adresse E-mail *</label>
-                    <input type="email" id="crm-email" placeholder="ex: joueur@gmail.com" onkeyup="simulateCRMCheck(event)">
-                    
-                    <label class="section-title">Confirmer l'E-mail *</label>
-                    <input type="email" id="crm-email-confirm" placeholder="Retapez votre e-mail" onkeyup="simulateCRMCheck(event)">
-                    
-                    <label class="section-title">Mot de passe *</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="crm-password" placeholder="8 caractères, 1 Maj, 1 min, 1 chiffre, 1 spécial" onkeyup="simulateCRMCheck(event)">
-                    </div>
-                </div>
 
-                <div id="crm-step-2" class="crm-step-content" style="display: none;">
-                    <div class="form-row">
-                        <div class="form-col">
-                            <label class="section-title">Prénom *</label>
-                            <input type="text" id="crm-firstname" placeholder="Votre prénom" onkeyup="simulateCRMCheck(event)">
-                        </div>
-                        <div class="form-col">
-                            <label class="section-title">Nom *</label>
-                            <input type="text" id="crm-lastname" placeholder="Votre nom" onkeyup="simulateCRMCheck(event)">
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-col">
-                            <label class="section-title">Date de naissance *</label>
-                            <input type="date" id="crm-dob" onchange="simulateCRMCheck(event)">
-                        </div>
-                        <div class="form-col">
-                            <label class="section-title">Téléphone *</label>
-                            <input type="tel" id="crm-phone" inputmode="tel" placeholder="ex: 06 12 34 56 78" onkeyup="simulateCRMCheck(event)">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-col">
-                            <label class="section-title">Code Postal *</label>
-                            <input type="text" id="crm-zip" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="ex: 75001" title="Saisissez 5 chiffres" onkeyup="simulateCRMCheck(event)">
-                        </div>
-                        <div class="form-col">
-                            <label class="section-title">Ville *</label>
-                            <input type="text" id="crm-city" placeholder="Recherche automatique..." onkeyup="simulateCRMCheck(event)">
-                        </div>
-                    </div>
-                    
-                    <label class="section-title">Entreprise (Facultatif)</label>
-                    <input type="text" id="crm-company" placeholder="Si vous jouez avec vos collègues de travail" onkeyup="simulateCRMCheck(event)">
-                </div>
-
-                <div id="crm-step-3" class="crm-step-content" style="display: none;">
-                    <label class="section-title">Pseudo Favori *</label>
-                    <input type="text" id="crm-pseudo" placeholder="Votre nom de scène pour jouer" onkeyup="simulateCRMCheck(event)">
-                    
-                    <label class="section-title">Mon Avatar Principal</label>
-                    <div class="profile-drop" id="crm-avatar-drop" onclick="alert('Upload de photo en construction (Phase 4)')" title="Cliquez ou déposez une photo pour l'utiliser comme avatar">
-                        <span style="color:#bdc3c7; font-size: 0.8rem; text-align:center;">📥 Cliquez ici pour<br>ajouter une photo</span>
-                    </div>
-                    
-                    <label class="section-title">Ma Galerie (Souvenirs)</label>
-                    <div class="lib-grid" id="crm-gallery" style="min-height: 80px; border: 1px dashed rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
-                        <span style="color:rgba(255,255,255,0.5); font-size:0.8rem; width:100%; text-align:center; grid-column: 1 / -1;">Vos photos d'équipes apparaîtront ici</span>
-                    </div>
-                </div>
-                
-            </div>
-            
-            <div class="modal-footer" style="display: flex; gap: 10px; margin-top: 15px;">
-                <button id="btn-crm-back" class="btn-cancel" style="display: none; width: 40%; margin:0;" onclick="crmPrevStep()" title="Revenir à l'étape précédente">Retour</button>
-                <button id="btn-crm-next" style="width: 100%; margin:0;" onclick="crmNextStep()" title="Passez à l'étape suivante">Étape Suivante</button>
-            </div>
-        </div>
-    </div>
-	
     <audio id="sound-click" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/BUZZER.WAV?alt=media&token=43ced984-3c6a-4167-b0dc-4cd97d7760dd" preload="auto"></audio>
     <audio id="sound-win" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Buzzer%20champion.mp3?alt=media&token=8425ad5e-69a3-4a57-966e-58df8ff39701" preload="auto"></audio>
     <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
 
+	<style>
+        .crm-modal { max-width: 600px; width: 95%; background: var(--card); border: 2px solid var(--primary); }
+        .crm-stepper { display: flex; align-items: center; justify-content: center; margin: 15px 0 25px 0; }
+        .crm-step { width: 35px; height: 35px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #bdc3c7; transition: 0.3s; z-index: 2; }
+        .crm-step.active { background: var(--primary); color: white; box-shadow: 0 0 10px var(--primary); transform: scale(1.1); }
+        .crm-step.completed { background: #27ae60; color: white; }
+        .crm-step-line { height: 3px; width: 50px; background: rgba(255,255,255,0.1); margin: 0 -5px; z-index: 1; transition: 0.3s; }
+        .crm-step-line.active { background: #27ae60; }
+        .crm-row { display: flex; gap: 10px; margin-bottom: 5px; }
+        .crm-col { flex: 1; display: flex; flex-direction: column; }
+        @media (max-width: 600px) { .crm-row { flex-direction: column; gap: 0; } }
+    </style>
+
+    <div id="modal-crm-profile" class="overlay-full" style="z-index: 9999999;">
+        <div class="settings-content crm-modal" style="position: relative; max-height: 90vh; overflow-y: auto; text-align:center;">
+            <button onclick="window.closeCRMModal()" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer;">X</button>
+            
+            <h2 style="margin-top:0; color: white;">Créer mon Compte</h2>
+            <p style="color: #bdc3c7; font-size: 0.85rem; margin-top:-10px;">Rejoignez Buzz ta Puce et conservez vos statistiques !</p>
+            
+            <div class="crm-stepper">
+                <div class="crm-step active" id="s-dot-1">1</div><div class="crm-step-line" id="s-line-1"></div>
+                <div class="crm-step" id="s-dot-2">2</div><div class="crm-step-line" id="s-line-2"></div>
+                <div class="crm-step" id="s-dot-3">3</div>
+            </div>
+            
+            <div id="crm-part-1" style="display:block; text-align: left;">
+                <button style="width:100%; padding:12px; background:white; color:black; font-weight:bold; border-radius:8px; border:none; margin-bottom:15px; cursor:pointer;">Continuer avec Google</button>
+                <label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">E-mail *</label>
+                <input type="email" style="width:100%; padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" placeholder="joueur@mail.com" onkeyup="window.crmCheckEnter(event)">
+            </div>
+
+            <div id="crm-part-2" style="display:none; text-align: left;">
+                <div class="crm-row">
+                    <div class="crm-col"><label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">Prénom *</label><input type="text" style="padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" onkeyup="window.crmCheckEnter(event)"></div>
+                    <div class="crm-col"><label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">Nom *</label><input type="text" style="padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" onkeyup="window.crmCheckEnter(event)"></div>
+                </div>
+                <div class="crm-row">
+                    <div class="crm-col"><label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">Code Postal *</label><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="ex: 75001" style="padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" onkeyup="window.crmCheckEnter(event)"></div>
+                    <div class="crm-col"><label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">Ville *</label><input type="text" style="padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" onkeyup="window.crmCheckEnter(event)"></div>
+                </div>
+            </div>
+
+            <div id="crm-part-3" style="display:none; text-align: left;">
+                <label style="color:var(--primary); font-size:0.8rem; font-weight:bold;">Pseudo Favori *</label>
+                <input type="text" style="width:100%; padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px;" placeholder="Votre pseudo en jeu" onkeyup="window.crmCheckEnter(event)">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button id="btn-c-back" onclick="window.crmPrev()" style="display:none; width:40%; padding:12px; background:transparent; color:white; border:2px solid #e74c3c; border-radius:8px; font-weight:bold; cursor:pointer;">Retour</button>
+                <button id="btn-c-next" onclick="window.crmNext()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Étape Suivante</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-	    // ==========================================
-        // MOTEUR MODALE CRM PROFIL (WIZARD)
-        // ==========================================
-        let currentCrmStep = 1;
-
-        // Fonction pour ouvrir la modale (depuis n'importe où)
-        function openCRMModal() {
-            document.getElementById('modal-crm-profile').style.display = 'flex';
-            currentCrmStep = 1;
-            updateCRMUI();
-        }
-
-        // Fonction pour fermer la modale
-        function closeCRMModal() {
-            document.getElementById('modal-crm-profile').style.display = 'none';
-        }
-
-        // Moteur de rafraîchissement de l'interface
-        function updateCRMUI() {
-            // Cacher toutes les étapes
-            document.getElementById('crm-step-1').style.display = 'none';
-            document.getElementById('crm-step-2').style.display = 'none';
-            document.getElementById('crm-step-3').style.display = 'none';
-            
-            // Afficher l'étape actuelle
-            document.getElementById('crm-step-' + currentCrmStep).style.display = 'block';
-            
-            // Mise à jour des ronds et des lignes (Stepper)
-            for (let i = 1; i <= 3; i++) {
-                const dot = document.getElementById('step-dot-' + i);
-                const line = document.getElementById('step-line-' + (i - 1));
-                
-                if (i < currentCrmStep) {
-                    dot.className = 'crm-step completed'; // Rond validé (vert)
-                    if(line) line.className = 'crm-step-line active'; // Ligne validée (verte)
-                } else if (i === currentCrmStep) {
-                    dot.className = 'crm-step active'; // Rond en cours (bleu)
-                    if(line) line.className = 'crm-step-line'; // Ligne en attente
-                } else {
-                    dot.className = 'crm-step'; // Rond en attente
-                    if(line) line.className = 'crm-step-line';
-                }
-            }
-
-            // Gestion des boutons (Suivant / Retour / Valider)
-            const btnBack = document.getElementById('btn-crm-back');
-            const btnNext = document.getElementById('btn-crm-next');
-            
-            btnNext.classList.remove('btn-success'); // Enlever le vert par défaut
-            
-            if (currentCrmStep === 1) {
-                btnBack.style.display = 'none';
-                btnNext.style.width = '100%';
-                btnNext.innerText = 'Étape Suivante';
-            } else if (currentCrmStep === 2) {
-                btnBack.style.display = 'block';
-                btnNext.style.width = '60%';
-                btnNext.innerText = 'Étape Suivante';
-            } else if (currentCrmStep === 3) {
-                btnBack.style.display = 'block';
-                btnNext.style.width = '60%';
-                btnNext.innerText = 'Créer mon Compte !';
-                btnNext.classList.add('btn-success'); // Bouton de finalisation en vert
-            }
-            
-            // Pour l'instant (Phase 1), le bouton n'est pas bloqué pour te laisser tester la navigation
-            btnNext.disabled = false; 
-        }
-
-        function crmNextStep() {
-            if (currentCrmStep < 3) {
-                currentCrmStep++;
-                updateCRMUI();
-            } else {
-                alert('Toute l\'interface fonctionne ! Prochaine étape : Brancher Firebase (Phase 3).');
-            }
-        }
-
-        function crmPrevStep() {
-            if (currentCrmStep > 1) {
-                currentCrmStep--;
-                updateCRMUI();
-            }
-        }
-
-        // La validation par la touche "Entrée"
-        function simulateCRMCheck(e) {
-            if (e && e.key === 'Enter') {
-                const btn = document.getElementById('btn-crm-next');
-                if(!btn.disabled) crmNextStep();
-            }
-        }
-		
-        const CLIENT_VERSION = "1.199";
+        const CLIENT_VERSION = "1.200";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -2033,6 +1873,72 @@
             }
         }
 		
+		// ==========================================
+        // MOTEUR MODALE CRM PROFIL (TOTALEMENT ISOLÉ)
+        // ==========================================
+        window.crmStep = 1;
+
+        window.openCRMModal = function() {
+            var m = document.getElementById('modal-crm-profile');
+            if(m) { m.style.display = 'flex'; window.crmStep = 1; window.updateCRM(); }
+            else { alert("Modale introuvable !"); }
+        };
+
+        window.closeCRMModal = function() {
+            var m = document.getElementById('modal-crm-profile');
+            if(m) m.style.display = 'none';
+        };
+
+        window.updateCRM = function() {
+            for(var i=1; i<=3; i++) {
+                var p = document.getElementById('crm-part-' + i);
+                if(p) p.style.display = (i === window.crmStep) ? 'block' : 'none';
+        
+                var d = document.getElementById('s-dot-' + i);
+                var l = document.getElementById('s-line-' + i);
+        
+                if(d) {
+                    if(i < window.crmStep) d.className = 'crm-step completed';
+                    else if(i === window.crmStep) d.className = 'crm-step active';
+                    else d.className = 'crm-step';
+                }
+                if(l) {
+                    if(i < window.crmStep) l.className = 'crm-step-line active';
+                    else l.className = 'crm-step-line';
+                }
+            }
+
+            var bb = document.getElementById('btn-c-back');
+            var bn = document.getElementById('btn-c-next');
+    
+            if(bn) {
+                bn.style.background = 'var(--primary)';
+                if(window.crmStep === 1) {
+                    if(bb) bb.style.display = 'none';
+                    bn.style.width = '100%'; bn.innerText = 'Étape Suivante';
+                } else if(window.crmStep === 2) {
+                    if(bb) bb.style.display = 'block';
+                    bn.style.width = '60%'; bn.innerText = 'Étape Suivante';
+                } else if(window.crmStep === 3) {
+                    if(bb) bb.style.display = 'block';
+                    bn.style.width = '60%'; bn.innerText = 'Créer mon Compte !';
+                    bn.style.background = '#27ae60';
+                }
+            }
+        };
+
+        window.crmNext = function() {
+            if(window.crmStep < 3) { window.crmStep++; window.updateCRM(); }
+            else { alert('Interface Validée !'); }
+        };
+
+        window.crmPrev = function() {
+            if(window.crmStep > 1) { window.crmStep--; window.updateCRM(); }
+        };
+
+        window.crmCheckEnter = function(e) {
+            if(e && e.key === 'Enter') window.crmNext();
+        };
     </script>
 </body>
 </html>
