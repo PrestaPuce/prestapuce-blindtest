@@ -6,8 +6,9 @@
     <title>Presta'Puce - Blind Test</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -621,7 +622,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.204";
+        const CLIENT_VERSION = "1.205";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -2035,12 +2036,79 @@
                 }
             }
 
-            // Si tout est bon, on passe à l'étape suivante
+            // Si tout est bon, on passe à l'étape suivante ou on ENVOIE À FIREBASE
             if(window.crmStep < 3) { 
                 window.crmStep++; 
                 window.updateCRM(); 
             } else { 
-                alert('Toutes les sécurités sont validées ! Prêt pour Firebase (Phase 3).'); 
+                // PHASE 3 : CRÉATION DU COMPTE FIREBASE
+                var btnNext = document.getElementById('btn-c-next');
+                var originalText = btnNext.innerText;
+                btnNext.innerText = "Création en cours... ⏳";
+                btnNext.disabled = true; // Empêche de cliquer 2 fois
+
+                var email = document.getElementById('crm-email').value;
+                var pwd = document.getElementById('crm-pwd').value;
+
+                // 1. Firebase Auth : Création du coffre-fort identifiants
+                firebase.auth().createUserWithEmailAndPassword(email, pwd)
+                .then(function(userCredential) {
+                    var user = userCredential.user;
+                    
+                    // 2. Envoi de l'e-mail de validation (Validation Douce)
+                    user.sendEmailVerification();
+
+                    // 3. Firebase Database : Sauvegarde de la Fiche CRM Joueur
+                    var prenom = document.getElementById('crm-firstname').value;
+                    var nom = document.getElementById('crm-lastname').value;
+                    var tel = document.getElementById('crm-phone').value;
+                    var zip = document.getElementById('crm-zip').value;
+                    var ville = document.getElementById('crm-city').value;
+                    var pseudo = document.getElementById('crm-pseudo').value;
+                    var company = document.getElementById('crm-company').value;
+
+                    // Création du dossier du joueur dans la base de données
+                    return firebase.database().ref('users_crm/' + user.uid).set({
+                        email: email,
+                        firstName: prenom,
+                        lastName: nom,
+                        phone: tel,
+                        zip: zip,
+                        city: ville,
+                        pseudo: pseudo,
+                        company: company,
+                        createdAt: firebase.database.ServerValue.TIMESTAMP,
+                        stats: {
+                            gamesPlayed: 0,
+                            totalPoints: 0,
+                            fastestBuzz: 9999,
+                            teamsJoined: 0
+                        }
+                    });
+                })
+                .then(function() {
+                    alert("🎉 Bienvenue dans l'équipe ! Un e-mail de confirmation vous a été envoyé. Vous pouvez fermer cette fenêtre et commencer à jouer !");
+                    window.closeCRMModal();
+                    
+                    // Remettre le bouton à la normale pour la prochaine fois
+                    btnNext.innerText = originalText;
+                    btnNext.disabled = false;
+                })
+                .catch(function(error) {
+                    console.error("Erreur Firebase :", error);
+                    var msg = "Erreur lors de la création du compte.";
+                    // Traduction des erreurs courantes pour le joueur
+                    if(error.code === 'auth/email-already-in-use') {
+                        msg = "Cette adresse e-mail possède déjà un compte !";
+                    } else if(error.code === 'auth/network-request-failed') {
+                        msg = "Erreur réseau. Vérifiez votre connexion internet.";
+                    }
+                    window.showCRMError(msg);
+                    
+                    // Remettre le bouton à la normale en cas d'erreur
+                    btnNext.innerText = originalText;
+                    btnNext.disabled = false;
+                });
             }
         };
 
