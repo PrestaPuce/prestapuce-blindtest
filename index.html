@@ -535,17 +535,17 @@
 
 	<style>
         .crm-modal { max-width: 600px; width: 95%; background: var(--card); border: 2px solid var(--primary); }
-        .crm-stepper { display: flex; align-items: center; justify-content: center; margin: 15px 0 25px 0; }
-        .crm-step { width: 35px; height: 35px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #bdc3c7; transition: 0.3s; z-index: 2; }
-        .crm-step.active { background: var(--primary); color: white; box-shadow: 0 0 10px var(--primary); transform: scale(1.1); }
+		.crm-stepper { display: flex; align-items: center; justify-content: center; margin: 5px 0 15px 0; }
+        .crm-row { display: flex; gap: 8px; margin-bottom: 0px; }
+        .crm-input { width:100%; padding:8px; margin-bottom:6px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px; box-sizing: border-box; font-size: 0.9rem; }
+        .crm-label { color:var(--primary); font-size:0.75rem; font-weight:bold; margin-bottom: 1px; display: block;}
+        .crm-row { display: flex; gap: 10px; margin-bottom: 5px; }
+		.crm-step.active { background: var(--primary); color: white; box-shadow: 0 0 10px var(--primary); transform: scale(1.1); }
         .crm-step.completed { background: #27ae60; color: white; }
         .crm-step-line { height: 3px; width: 50px; background: rgba(255,255,255,0.1); margin: 0 -5px; z-index: 1; transition: 0.3s; }
         .crm-step-line.active { background: #27ae60; }
-        .crm-row { display: flex; gap: 10px; margin-bottom: 5px; }
         .crm-col { flex: 1; display: flex; flex-direction: column; }
-        .crm-input { width:100%; padding:10px; margin-bottom:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:5px; box-sizing: border-box; }
         .crm-input:focus { outline: none; border-color: var(--primary); }
-        .crm-label { color:var(--primary); font-size:0.8rem; font-weight:bold; margin-bottom: 2px; display: block;}
         @media (max-width: 600px) { .crm-row { flex-direction: column; gap: 0; } }
     </style>
 
@@ -622,7 +622,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.205";
+        const CLIENT_VERSION = "1.206";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
