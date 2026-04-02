@@ -617,9 +617,8 @@
                 <label class="crm-label">Pseudo Favori *</label>
                 <input type="text" id="crm-pseudo" class="crm-input" placeholder="Votre pseudo en jeu" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)">
                 
-                <label class="crm-label">Mon Avatar</label>
-                <div style="border:1px dashed var(--primary); padding:20px; text-align:center; border-radius:8px; color:#bdc3c7; cursor:pointer;" onclick="alert('Upload de photo en construction')">
-                    📥 Cliquez pour ajouter une photo
+                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px dashed rgba(255,255,255,0.2);">
+                    <p style="color: #bdc3c7; font-size: 0.85rem; margin: 0; text-align: center;">📷 Votre photo de profil sera configurée à l'étape suivante, juste avant de jouer !</p>
                 </div>
             </div>
 
@@ -659,7 +658,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.213";
+        const CLIENT_VERSION = "1.214";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1950,6 +1949,7 @@
         window.crmStep = 1;
         window.isGoogleAuthMode = false; // Permet de savoir si on vient de Google
         window.googleUser = null;
+        window.googleAvatar = ""; // 🚀 NOUVEAU : On prépare la variable photo
 
         window.openCRMModal = function() {
             var m = document.getElementById('modal-crm-profile');
@@ -1958,6 +1958,7 @@
                 window.crmStep = 1; 
                 window.isGoogleAuthMode = false; // On reset en classique
                 window.googleUser = null;
+                window.googleAvatar = ""; // 🚀 NOUVEAU : Reset
                 window.updateCRM(); 
             }
         };
@@ -1994,6 +1995,9 @@
                             fName = parts[0];
                             lName = parts.slice(1).join(' ');
                         }
+                        
+                        // 🚀 NOUVEAU : Vol silencieux de la photo
+                        window.googleAvatar = user.photoURL || "";
                         
                         // Pré-remplissage invisible
                         document.getElementById('crm-firstname').value = fName;
@@ -2166,6 +2170,7 @@
                         city: ville,
                         pseudo: pseudo,
                         company: company,
+                        avatar: window.googleAvatar || "", // 🚀 On sauvegarde l'avatar Google
                         createdAt: firebase.database.ServerValue.TIMESTAMP,
                         stats: { gamesPlayed: 0, totalPoints: 0, fastestBuzz: 9999, teamsJoined: 0 }
                     }).then(function() {
@@ -2179,9 +2184,15 @@
                         
                         window.closeCRMModal();
                         
+                        // --- 🚀 SYNCHRONISATION AVEC LE JEU (FIX CAPITAINE) ---
+                        player.id = userUID; // Indispensable pour être reconnu comme Capitaine
                         player.pseudo = finalPseudo;
+                        if (window.googleAvatar) player.avatar = window.googleAvatar;
+                        
                         var gamePseudoInput = document.getElementById('input-pseudo');
                         if (gamePseudoInput) gamePseudoInput.value = finalPseudo;
+                        
+                        // On le propulse vers l'écran Avatar
                         navigateTo('step-avatar');
                         
                         btnNext.innerText = originalText;
@@ -2266,14 +2277,19 @@
                 firebase.database().ref('users_crm/' + user.uid).once('value').then(function(snap) {
                     if(snap.exists()) {
                         var data = snap.val();
-                        player.pseudo = data.pseudo || data.firstName; // On charge son pseudo
-                        alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
                         
+                        // --- 🚀 INITIALISATION DU JOUEUR (FIX CAPITAINE) ---
+                        player.id = user.uid;
+                        player.pseudo = data.pseudo || data.firstName;
+                        if(data.avatar) player.avatar = data.avatar;
+                        
+                        alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
                         window.closeLoginModal();
                         
-                        // ON PROPULSE LE JOUEUR DIRECTEMENT DANS LE JEU (En zappant la demande de nom)
                         document.getElementById('input-pseudo').value = player.pseudo;
-                        navigateTo('step-avatar');
+                        
+                        // On le renvoie à l'étape Pseudo pour préparer le futur système "Temporaire/Défaut"
+                        navigateTo('step-pseudo'); 
                     } else {
                         errDiv.innerText = "Profil introuvable.";
                     }
