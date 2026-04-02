@@ -224,14 +224,22 @@
 
         <div id="step-avatar" class="step-screen">
             <div class="screen-header"><h2>Ton Look</h2></div>
-            <div class="screen-content content-top">
-                <div id="avatar-choices" class="selection-mode-container" style="flex:1;">
-                    <div class="choice-card" onclick="document.getElementById('file-input').click()"><div class="choice-icon">📸</div><div class="choice-content"><b>Photo / Selfie</b><span>Ou choisir une image.</span></div></div>
-                    <div class="moderation-warning">⚠️ Images modérées par l'animateur. Tout contenu vulgaire entraînera un bannissement.</div>
-                    <div class="choice-card" onclick="showAvatarGallery()"><div class="choice-icon">🦁</div><div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div></div>
-                    <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
+            <div class="screen-content content-top" style="align-items: center; width: 100%; max-width: 350px;">
+                <p id="avatar-status-text" style="color:var(--primary); font-weight:bold; margin-bottom:10px;">Identité pour cette partie :</p>
+                <img id="avatar-preview" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Puce" style="width:120px; height:120px; border-radius:50%; border:3px solid var(--primary); margin-bottom:15px; object-fit:cover;">
+                
+                <div id="avatar-express-actions" style="width:100%; display:flex; flex-direction:column; gap:10px;">
+                    <button class="btn-main" onclick="window.useCurrentAvatar()" style="width:100%; background:#27ae60;">🚀 Utiliser et continuer</button>
+                    <button class="btn-main" onclick="window.showClassicAvatarMenu()" style="width:100%; background:#34495e; font-size:0.9rem;">Modifier la photo / l'avatar</button>
                 </div>
-                <div id="avatar-gallery-view" class="gallery-container">
+
+                <div id="avatar-choices" class="selection-mode-container" style="display:none; width:100%;">
+                    <div class="choice-card" onclick="document.getElementById('file-input').click()"><div class="choice-icon">📸</div><div class="choice-content"><b>Photo / Selfie</b><span>Ou choisir une image.</span></div></div>
+                    <div class="choice-card" onclick="showAvatarGallery()"><div class="choice-icon">🦁</div><div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div></div>
+                    <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*" style="display:none" onchange="handleFileUpload(this)">
+                </div>
+
+                <div id="avatar-gallery-view" class="gallery-container" style="width:100%;">
                     <div class="common-grid" id="avatar-grid"></div>
                 </div>
             </div>
@@ -617,8 +625,16 @@
                 <label class="crm-label">Pseudo Favori *</label>
                 <input type="text" id="crm-pseudo" class="crm-input" placeholder="Votre pseudo en jeu" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)">
                 
-                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px dashed rgba(255,255,255,0.2);">
-                    <p style="color: #bdc3c7; font-size: 0.85rem; margin: 0; text-align: center;">📷 Votre photo de profil sera configurée à l'étape suivante, juste avant de jouer !</p>
+                <div id="crm-classic-avatar-zone" style="margin-top:10px;">
+                    <label class="crm-label">Photo de Profil (Optionnel)</label>
+                    <div style="border:1px dashed var(--primary); padding:15px; text-align:center; border-radius:8px; color:#bdc3c7; cursor:pointer;" onclick="document.getElementById('crm-file-input').click()">
+                        <span style="font-size:1.5rem;">📷</span><br><span style="font-size:0.85rem;">Définir une photo</span>
+                    </div>
+                    <input type="file" id="crm-file-input" accept=".jpg,.jpeg,.png,.webp,image/*" style="display:none" onchange="window.handleCRMFileUpload(this)">
+                </div>
+
+                <div id="crm-google-avatar-zone" style="display:none; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px dashed rgba(255,255,255,0.2);">
+                    <p style="color: #bdc3c7; font-size: 0.85rem; margin: 0; text-align: center;">✅ Photo Google récupérée ! <br>Vous pourrez la valider juste après.</p>
                 </div>
             </div>
 
@@ -658,7 +674,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.214";
+        const CLIENT_VERSION = "1.217";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1131,11 +1147,46 @@
         function selectAvatar(av) { 
             player.avatar = av; 
             if(isEditing) { 
-                logEvent('SYSTEM', `✏️ ${player.pseudo} a changé son avatar`); // 🟢 CAPTEUR
+                logEvent('SYSTEM', `✏️ ${player.pseudo} a changé son avatar`);
                 roomRef.child('players/' + myUserID).update({avatar: av}); 
                 finishEdit(true); 
-            } else navigateTo('step-mode'); 
+            } else { 
+                // Mise à jour de l'aperçu et retour à l'écran Express
+                document.getElementById('avatar-preview').src = (av.length > 20) ? av : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + av;
+                document.getElementById('avatar-gallery-view').style.display = 'none';
+                document.getElementById('avatar-choices').style.display = 'none';
+                document.getElementById('avatar-express-actions').style.display = 'flex';
+                document.getElementById('avatar-status-text').innerText = "Nouvelle identité prête :";
+            } 
         }
+
+        window.showClassicAvatarMenu = function() {
+            document.getElementById('avatar-express-actions').style.display = 'none';
+            document.getElementById('avatar-choices').style.display = 'flex';
+            document.getElementById('avatar-status-text').innerText = "Choisissez votre photo :";
+        };
+
+        window.useCurrentAvatar = function() {
+            // FIX CAPITAINE : Inscription officielle dans la salle
+            if (roomId && player.id) {
+                db.ref('rooms/' + roomId + '/players/' + player.id).update({
+                    pseudo: player.pseudo,
+                    avatar: player.avatar,
+                    status: 'active',
+                    lastActive: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+            navigateTo('step-mode');
+        };
+
+        window.handleCRMFileUpload = function(input) {
+            if(input.files[0]) { 
+                compressImage(input.files[0], 300, function(base64) { 
+                    window.googleAvatar = base64; // On utilise la même variable pour stocker la photo
+                    alert("Photo ajoutée !");
+                }); 
+            }
+        };
 		
 		function selectMode(mode) { 
             player.team = mode; player.teamIcon = ""; 
@@ -2082,8 +2133,17 @@
                     bn.style.width = '60%'; bn.innerText = 'Étape Suivante';
                 } else if(window.crmStep === 3) {
                     if(bb) bb.style.display = 'block';
-                    bn.style.width = '60%'; bn.innerText = 'Créer mon Compte !';
-                    bn.style.background = '#27ae60';
+                    bn.style.width = '60%'; bn.style.background = '#27ae60';
+                    
+                    if(window.isGoogleAuthMode) {
+                        document.getElementById('crm-google-avatar-zone').style.display = 'block';
+                        document.getElementById('crm-classic-avatar-zone').style.display = 'none';
+                        bn.innerText = 'Finaliser !';
+                    } else {
+                        document.getElementById('crm-google-avatar-zone').style.display = 'none';
+                        document.getElementById('crm-classic-avatar-zone').style.display = 'block';
+                        bn.innerText = 'Créer mon Compte !';
+                    }
                 }
             }
         };
@@ -2175,28 +2235,24 @@
                         stats: { gamesPlayed: 0, totalPoints: 0, fastestBuzz: 9999, teamsJoined: 0 }
                     }).then(function() {
                         var finalPseudo = document.getElementById('crm-pseudo').value;
-                        
-                        if (isGoogle) {
-                            alert("🎉 Inscription Google terminée avec succès ! \n\nCommencez à jouer tout de suite !");
-                        } else {
-                            alert("🎉 Bienvenue dans l'équipe ! \n\nUn e-mail de confirmation vous a été envoyé (Pensez à vérifier vos SPAMS !). \n\nCommencez à jouer tout de suite !");
-                        }
+                        if (isGoogle) alert("🎉 Inscription Google terminée avec succès !");
+                        else alert("🎉 Bienvenue ! Un e-mail de confirmation vous a été envoyé (Vérifiez vos SPAMS !).");
                         
                         window.closeCRMModal();
                         
-                        // --- 🚀 SYNCHRONISATION AVEC LE JEU (FIX CAPITAINE) ---
-                        player.id = userUID; // Indispensable pour être reconnu comme Capitaine
+                        // FIX CAPITAINE & PHOTO
+                        player.id = userUID; 
                         player.pseudo = finalPseudo;
                         if (window.googleAvatar) player.avatar = window.googleAvatar;
                         
                         var gamePseudoInput = document.getElementById('input-pseudo');
                         if (gamePseudoInput) gamePseudoInput.value = finalPseudo;
                         
-                        // On le propulse vers l'écran Avatar
-                        navigateTo('step-avatar');
+                        var preview = document.getElementById('avatar-preview');
+                        if(preview && player.avatar) preview.src = (player.avatar.length > 20) ? player.avatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + player.avatar;
                         
-                        btnNext.innerText = originalText;
-                        btnNext.disabled = false;
+                        navigateTo('step-avatar');
+                        btnNext.innerText = originalText; btnNext.disabled = false;
                     });
                 };
 
