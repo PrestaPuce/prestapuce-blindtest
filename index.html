@@ -691,7 +691,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.220";
+        const CLIENT_VERSION = "1.222";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1170,6 +1170,7 @@
         function handleFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectAvatar(base64); }); } }
         function renderAvatarGrid() { const g=document.getElementById('avatar-grid'); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='grid-item grid-item-emoji'; d.innerText=a; d.onclick=()=>selectAvatar(a); g.appendChild(d); }); }
         
+        // --- PATCH V1.222 CORRIGÉ : Synchronisation Totale de l'Aperçu ---
         function selectAvatar(av) { 
             player.avatar = av; 
             if(isEditing) { 
@@ -1179,14 +1180,18 @@
             } else { 
                 var preview = document.getElementById('avatar-preview');
                 
-                // FIX: On copie exactement l'image cliquée dans la galerie
-                var galleryImg = document.querySelector('#avatar-grid img[src*="' + av + '"]');
-                if (galleryImg) {
-                    preview.src = galleryImg.src;
-                } else {
-                    preview.src = (av.length > 20) ? av : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + av;
+                // Au lieu de chercher dans la grille, on reconstruit l'URL exacte
+                if(preview) {
+                    // Si av est long (>20 chars), c'est une image base64 (caméra/upload)
+                    if (av.length > 20) {
+                        preview.src = av;
+                    } else {
+                        // Sinon c'content un 'seed' Dicebear, on utilise le lien exact
+                        preview.src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + av;
+                    }
                 }
                 
+                // On cache la galerie et on montre les boutons de validation
                 document.getElementById('avatar-gallery-view').style.display = 'none';
                 document.getElementById('avatar-choices').style.display = 'none';
                 document.getElementById('avatar-express-actions').style.display = 'flex';
