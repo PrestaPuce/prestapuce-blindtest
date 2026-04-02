@@ -574,7 +574,7 @@
             </div>
             
             <div id="crm-part-1" style="display:block; text-align: left;">
-                <button style="width:100%; padding:12px; background:white; color:#444; font-size:0.95rem; font-weight:bold; border-radius:8px; border:none; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                <button style="width:100%; padding:12px; background:white; color:#444; font-size:0.95rem; font-weight:bold; border-radius:8px; border:none; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" onclick="window.startGoogleAuth()">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width:20px; height:20px;">
                     Créer avec mon compte Google
                 </button>
@@ -638,7 +638,7 @@
             <h2 style="margin-top:0; color: white;">Bon Retour !</h2>
             <p style="color: #bdc3c7; font-size: 0.85rem; margin-top:-10px; margin-bottom: 20px;">Connectez-vous pour retrouver vos stats.</p>
             
-            <button style="width:100%; padding:12px; background:white; color:#444; font-size:0.95rem; font-weight:bold; border-radius:8px; border:none; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" onclick="alert('Google arrive au prochain patch !')">
+            <button style="width:100%; padding:12px; background:white; color:#444; font-size:0.95rem; font-weight:bold; border-radius:8px; border:none; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" onclick="window.startGoogleAuth()">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width:20px; height:20px;">
                 Connexion avec Google
             </button>
@@ -659,7 +659,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.212";
+        const CLIENT_VERSION = "1.213";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1945,13 +1945,75 @@
         }
 		
 		// ==========================================
-        // MOTEUR MODALE CRM PROFIL (PHASE 2 - INTELLIGENCE)
+        // MOTEUR MODALE CRM PROFIL
         // ==========================================
         window.crmStep = 1;
+        window.isGoogleAuthMode = false; // Permet de savoir si on vient de Google
+        window.googleUser = null;
 
         window.openCRMModal = function() {
             var m = document.getElementById('modal-crm-profile');
-            if(m) { m.style.display = 'flex'; window.crmStep = 1; window.updateCRM(); }
+            if(m) { 
+                m.style.display = 'flex'; 
+                window.crmStep = 1; 
+                window.isGoogleAuthMode = false; // On reset en classique
+                window.googleUser = null;
+                window.updateCRM(); 
+            }
+        };
+
+        // 🚀 NOUVEAU : LE MOTEUR INTERCEPTEUR GOOGLE
+        window.startGoogleAuth = function() {
+            var provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider).then(function(result) {
+                var user = result.user;
+                
+                // On fouille dans la base de données pour voir s'il est connu
+                firebase.database().ref('users_crm/' + user.uid).once('value').then(function(snap) {
+                    if(snap.exists()) {
+                        // CAS 1 : JOUEUR EXISTANT -> Connexion instantanée !
+                        var data = snap.val();
+                        player.pseudo = data.pseudo || data.firstName;
+                        alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
+                        
+                        window.closeLoginModal();
+                        window.closeCRMModal();
+                        
+                        var gamePseudoInput = document.getElementById('input-pseudo');
+                        if (gamePseudoInput) gamePseudoInput.value = player.pseudo;
+                        navigateTo('step-avatar');
+                    } else {
+                        // CAS 2 : NOUVEAU JOUEUR GOOGLE -> On le dépose à l'étape 2 !
+                        window.isGoogleAuthMode = true;
+                        window.googleUser = user;
+                        
+                        // Découpage automatique du nom Google (Prénom / Nom)
+                        var fName = ""; var lName = "";
+                        if(user.displayName) {
+                            var parts = user.displayName.split(' ');
+                            fName = parts[0];
+                            lName = parts.slice(1).join(' ');
+                        }
+                        
+                        // Pré-remplissage invisible
+                        document.getElementById('crm-firstname').value = fName;
+                        document.getElementById('crm-lastname').value = lName;
+                        document.getElementById('crm-email').value = user.email;
+                        
+                        // On ferme la fenêtre de connexion si elle était ouverte, on ouvre la CRM à l'Étape 2
+                        window.closeLoginModal();
+                        var m = document.getElementById('modal-crm-profile');
+                        if(m) m.style.display = 'flex';
+                        window.crmStep = 2; // LE SAUT D'ÉTAPE MAGIQUE !
+                        window.updateCRM();
+                        
+                        alert("👋 Bonjour " + fName + " ! Votre compte Google est lié.\nVeuillez juste compléter ces informations pour finaliser votre profil.");
+                    }
+                });
+            }).catch(function(error) {
+                console.error("Erreur Google:", error);
+                window.showCRMError("Erreur Google : " + error.message);
+            });
         };
 
         window.closeCRMModal = function() {
@@ -2082,31 +2144,21 @@
                 var btnNext = document.getElementById('btn-c-next');
                 var originalText = btnNext.innerText;
                 btnNext.innerText = "Création en cours... ⏳";
-                btnNext.disabled = true; // Empêche de cliquer 2 fois
+                btnNext.disabled = true;
 
                 var email = document.getElementById('crm-email').value;
-                var pwd = document.getElementById('crm-pwd').value;
+                var prenom = document.getElementById('crm-firstname').value;
+                var nom = document.getElementById('crm-lastname').value;
+                var tel = document.getElementById('crm-phone').value;
+                var zip = document.getElementById('crm-zip').value;
+                var ville = document.getElementById('crm-city').value;
+                var pseudo = document.getElementById('crm-pseudo').value;
+                var company = document.getElementById('crm-company').value;
 
-                // 1. Firebase Auth : Création du coffre-fort identifiants
-                firebase.auth().createUserWithEmailAndPassword(email, pwd)
-                .then(function(userCredential) {
-                    var user = userCredential.user;
-                    
-                    // 2. Envoi de l'e-mail de validation (Validation Douce)
-                    user.sendEmailVerification();
-
-                    // 3. Firebase Database : Sauvegarde de la Fiche CRM Joueur
-                    var prenom = document.getElementById('crm-firstname').value;
-                    var nom = document.getElementById('crm-lastname').value;
-                    var tel = document.getElementById('crm-phone').value;
-                    var zip = document.getElementById('crm-zip').value;
-                    var ville = document.getElementById('crm-city').value;
-                    var pseudo = document.getElementById('crm-pseudo').value;
-                    var company = document.getElementById('crm-company').value;
-
-                    // Création du dossier du joueur dans la base de données
-                    return firebase.database().ref('users_crm/' + user.uid).set({
-                        email: email,
+                // Fonction universelle d'écriture dans la base
+                var saveToDatabase = function(userUID, userEmail, isGoogle) {
+                    return firebase.database().ref('users_crm/' + userUID).set({
+                        email: userEmail,
                         firstName: prenom,
                         lastName: nom,
                         phone: tel,
@@ -2115,46 +2167,55 @@
                         pseudo: pseudo,
                         company: company,
                         createdAt: firebase.database.ServerValue.TIMESTAMP,
-                        stats: {
-                            gamesPlayed: 0,
-                            totalPoints: 0,
-                            fastestBuzz: 9999,
-                            teamsJoined: 0
+                        stats: { gamesPlayed: 0, totalPoints: 0, fastestBuzz: 9999, teamsJoined: 0 }
+                    }).then(function() {
+                        var finalPseudo = document.getElementById('crm-pseudo').value;
+                        
+                        if (isGoogle) {
+                            alert("🎉 Inscription Google terminée avec succès ! \n\nCommencez à jouer tout de suite !");
+                        } else {
+                            alert("🎉 Bienvenue dans l'équipe ! \n\nUn e-mail de confirmation vous a été envoyé (Pensez à vérifier vos SPAMS !). \n\nCommencez à jouer tout de suite !");
                         }
+                        
+                        window.closeCRMModal();
+                        
+                        player.pseudo = finalPseudo;
+                        var gamePseudoInput = document.getElementById('input-pseudo');
+                        if (gamePseudoInput) gamePseudoInput.value = finalPseudo;
+                        navigateTo('step-avatar');
+                        
+                        btnNext.innerText = originalText;
+                        btnNext.disabled = false;
                     });
-                })
-                .then(function() {
-                    // On force la relecture du pseudo directement dans la case
-                    var finalPseudo = document.getElementById('crm-pseudo').value;
-                    
-                    alert("🎉 Bienvenue dans l'équipe ! \n\nUn e-mail de confirmation vous a été envoyé (Pensez à vérifier vos SPAMS !). \n\nCommencez à jouer tout de suite !");
-                    window.closeCRMModal();
-                    
-                    // ON PROPULSE LE JOUEUR DIRECTEMENT DANS LE JEU LA PREMIERE FOIS
-                    player.pseudo = finalPseudo;
-                    var gamePseudoInput = document.getElementById('input-pseudo');
-                    if (gamePseudoInput) gamePseudoInput.value = finalPseudo;
-                    
-                    navigateTo('step-avatar');
-                    
-                    btnNext.innerText = originalText;
-                    btnNext.disabled = false;
-                })
-                .catch(function(error) {
-                    console.error("Erreur Firebase :", error);
-                    var msg = "Erreur lors de la création du compte.";
-                    // Traduction des erreurs courantes pour le joueur
-                    if(error.code === 'auth/email-already-in-use') {
-                        msg = "Cette adresse e-mail possède déjà un compte !";
-                    } else if(error.code === 'auth/network-request-failed') {
-                        msg = "Erreur réseau. Vérifiez votre connexion internet.";
-                    }
-                    window.showCRMError(msg);
-                    
-                    // Remettre le bouton à la normale en cas d'erreur
-                    btnNext.innerText = originalText;
-                    btnNext.disabled = false;
-                });
+                };
+
+                // BIFURCATION : GOOGLE ou CLASSIQUE ?
+                if (window.isGoogleAuthMode && window.googleUser) {
+                    // MODE GOOGLE : Le coffre-fort Auth existe déjà, on écrit juste dans la Database
+                    saveToDatabase(window.googleUser.uid, window.googleUser.email, true).catch(function(error) {
+                        console.error("Erreur Firebase :", error);
+                        window.showCRMError("Erreur d'écriture dans la base de données.");
+                        btnNext.innerText = originalText; btnNext.disabled = false;
+                    });
+                } else {
+                    // MODE CLASSIQUE : On crée d'abord le coffre-fort (Mot de passe)
+                    var pwd = document.getElementById('crm-pwd').value;
+                    firebase.auth().createUserWithEmailAndPassword(email, pwd)
+                    .then(function(userCredential) {
+                        var user = userCredential.user;
+                        user.sendEmailVerification(); // Envoi du mail
+                        return saveToDatabase(user.uid, email, false);
+                    })
+                    .catch(function(error) {
+                        console.error("Erreur Firebase :", error);
+                        var msg = "Erreur lors de la création du compte.";
+                        if(error.code === 'auth/email-already-in-use') msg = "Cette adresse e-mail possède déjà un compte !";
+                        else if(error.code === 'auth/network-request-failed') msg = "Erreur réseau. Vérifiez votre connexion internet.";
+                        window.showCRMError(msg);
+                        
+                        btnNext.innerText = originalText; btnNext.disabled = false;
+                    });
+                }
             }
         };
 
