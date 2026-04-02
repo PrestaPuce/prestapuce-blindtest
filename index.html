@@ -136,10 +136,6 @@
 </head>
 <body>
 
-	<button onclick="window.openCRMModal()" style="position: fixed; bottom: 20px; right: 20px; background: #f1c40f; color: black; padding: 15px 20px; font-weight: bold; border-radius: 50px; border: 2px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 999999; cursor: pointer;">
-        🛠️ TESTER MODALE
-    </button>
-
     <div id="version-display" class="version-tag"></div>
 
     <div class="wizard-container">
@@ -203,8 +199,8 @@
             <div class="screen-header"><h2>Que veux-tu faire ?</h2></div>
             <div class="screen-content">
                 <div class="choice-card" onclick="navigateTo('step-pseudo')"><div class="choice-icon">⚡</div><div class="choice-content"><b>Partie Rapide</b><span>Accès invité immédiat.</span></div></div>
-                <div class="choice-card" onclick="alert('Bientôt disponible !')"><div class="choice-icon">🔐</div><div class="choice-content"><b>Se Connecter</b><span>Récupère ton historique.</span></div></div>
-                <div class="choice-card" onclick="alert('Bientôt disponible !')"><div class="choice-icon">✨</div><div class="choice-content"><b>Créer un Compte</b><span>Sauvegarde tes scores.</span></div></div>
+                <div class="choice-card" onclick="window.openLoginModal()"><div class="choice-icon">🔐</div><div class="choice-content"><b>Se Connecter</b><span>Récupère ton historique.</span></div></div>
+                <div class="choice-card" onclick="window.openCRMModal()"><div class="choice-icon">✨</div><div class="choice-content"><b>Créer un Compte</b><span>Sauvegarde tes scores.</span></div></div>
             </div>
         </div>
 
@@ -635,9 +631,35 @@
             </div>
         </div>
     </div>
+	
+	<div id="modal-crm-login" class="overlay-full" style="z-index: 9999999; display: none;">
+        <div class="settings-content crm-modal" style="position: relative; max-width: 400px; text-align:center;">
+            <button onclick="window.closeLoginModal()" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer;">X</button>
+            <h2 style="margin-top:0; color: white;">Bon Retour !</h2>
+            <p style="color: #bdc3c7; font-size: 0.85rem; margin-top:-10px; margin-bottom: 20px;">Connectez-vous pour retrouver vos stats.</p>
+            
+            <button style="width:100%; padding:12px; background:white; color:#444; font-size:0.95rem; font-weight:bold; border-radius:8px; border:none; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" onclick="alert('Google arrive au prochain patch !')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width:20px; height:20px;">
+                Connexion avec Google
+            </button>
+            <div style="text-align:center; color:#bdc3c7; font-size:0.8rem; margin-bottom:10px; font-weight:bold;">OU</div>
+            
+            <div style="text-align: left;">
+                <label class="crm-label">E-mail</label>
+                <input type="email" id="login-email" class="crm-input" placeholder="joueur@mail.com">
+                <label class="crm-label">Mot de passe</label>
+                <input type="password" id="login-pwd" class="crm-input" placeholder="Votre mot de passe">
+            </div>
+            
+            <div id="login-error" style="color: #e74c3c; font-size: 0.85rem; font-weight: bold; min-height: 20px; margin-top:5px; margin-bottom: 10px;"></div>
+            
+            <button id="btn-do-login" class="btn-main" style="width:100%;" onclick="window.processLogin()">Se Connecter</button>
+            <p style="margin-top: 15px; font-size: 0.85rem;"><a href="#" style="color: var(--primary);" onclick="window.resetPassword()">Mot de passe oublié ?</a></p>
+        </div>
+    </div>
 
     <script>
-        const CLIENT_VERSION = "1.208";
+        const CLIENT_VERSION = "1.211";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -2102,10 +2124,14 @@
                     });
                 })
                 .then(function() {
-                    alert("🎉 Bienvenue dans l'équipe ! Un e-mail de confirmation vous a été envoyé. Vous pouvez fermer cette fenêtre et commencer à jouer !");
+                    alert("🎉 Bienvenue dans l'équipe ! \n\nUn e-mail de confirmation vous a été envoyé (Pensez à vérifier vos SPAMS !). \n\nCommencez à jouer tout de suite !");
                     window.closeCRMModal();
                     
-                    // Remettre le bouton à la normale pour la prochaine fois
+                    // ON PROPULSE LE JOUEUR DIRECTEMENT DANS LE JEU LA PREMIERE FOIS
+                    player.pseudo = pseudo;
+                    document.getElementById('input-pseudo').value = pseudo;
+                    navigateTo('step-avatar');
+                    
                     btnNext.innerText = originalText;
                     btnNext.disabled = false;
                 })
@@ -2134,6 +2160,77 @@
         window.crmCheckEnter = function(e) {
             if(e && e.key === 'Enter') window.crmNext();
         };
+		
+		// ==========================================
+        // MOTEUR DE CONNEXION (LOGIN & SÉCURITÉ)
+        // ==========================================
+        window.openLoginModal = function() {
+            var m = document.getElementById('modal-crm-login');
+            if(m) { m.style.display = 'flex'; document.getElementById('login-error').innerText = ""; }
+        };
+
+        window.closeLoginModal = function() {
+            var m = document.getElementById('modal-crm-login');
+            if(m) m.style.display = 'none';
+        };
+
+        window.processLogin = function() {
+            var email = document.getElementById('login-email').value;
+            var pwd = document.getElementById('login-pwd').value;
+            var errDiv = document.getElementById('login-error');
+            var btn = document.getElementById('btn-do-login');
+
+            if(!email || !pwd) { errDiv.innerText = "Veuillez remplir tous les champs."; return; }
+            
+            btn.innerText = "Connexion... ⏳"; btn.disabled = true; errDiv.innerText = "";
+
+            firebase.auth().signInWithEmailAndPassword(email, pwd)
+            .then(function(userCredential) {
+                var user = userCredential.user;
+                
+                // 🛑 LE BLOCAGE ANTI-RECONNEXION SI EMAIL NON VÉRIFIÉ
+                if (!user.emailVerified) {
+                    firebase.auth().signOut(); // On le déconnecte de force
+                    btn.innerText = "Se Connecter"; btn.disabled = false;
+                    alert("⚠️ ACCÈS REFUSÉ ⚠️\n\nVous n'avez pas encore validé votre adresse e-mail.\n\nVeuillez cliquer sur le lien envoyé à " + email + " (Vérifiez vos SPAMS !) avant de pouvoir vous connecter.");
+                    return;
+                }
+
+                // ✅ CONNEXION RÉUSSIE : On récupère ses données pour jouer
+                firebase.database().ref('users_crm/' + user.uid).once('value').then(function(snap) {
+                    if(snap.exists()) {
+                        var data = snap.val();
+                        player.pseudo = data.pseudo || data.firstName; // On charge son pseudo
+                        alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
+                        
+                        window.closeLoginModal();
+                        
+                        // ON PROPULSE LE JOUEUR DIRECTEMENT DANS LE JEU (En zappant la demande de nom)
+                        document.getElementById('input-pseudo').value = player.pseudo;
+                        navigateTo('step-avatar');
+                    } else {
+                        errDiv.innerText = "Profil introuvable.";
+                    }
+                    btn.innerText = "Se Connecter"; btn.disabled = false;
+                });
+            })
+            .catch(function(error) {
+                console.error(error);
+                btn.innerText = "Se Connecter"; btn.disabled = false;
+                if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') errDiv.innerText = "E-mail ou mot de passe incorrect.";
+                else if(error.code === 'auth/too-many-requests') errDiv.innerText = "Trop de tentatives. Réessayez plus tard.";
+                else errDiv.innerText = "Erreur de connexion.";
+            });
+        };
+
+        window.resetPassword = function() {
+            var email = document.getElementById('login-email').value;
+            if(!email || !email.includes('@')) { document.getElementById('login-error').innerText = "Entrez votre e-mail au-dessus d'abord."; return; }
+            firebase.auth().sendPasswordResetEmail(email).then(function() {
+                alert("Un lien pour réinitialiser votre mot de passe a été envoyé à " + email + " (Vérifiez vos spams !).");
+            }).catch(function(error) { document.getElementById('login-error').innerText = "Erreur : " + error.message; });
+        };
+		
     </script>
 </body>
 </html>
