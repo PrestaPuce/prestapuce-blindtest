@@ -1,0 +1,34 @@
+=========================================================
+MINI MASTER PLAN : CHANTIER 4.16 (Fiche CRM Joueur)
+=========================================================
+
+🧱 PHASE 1 : L'Interface (UI) et la Navigation (Le Squelette)
+* [FAIT] 1.1 - Le Bouton d'Accès : Intégration du menu d'accueil avec les choix "Partie Rapide", "Se Connecter" et "Créer un Compte".
+* [FAIT] 1.2 - La Modale "Wizard" (Étape par Étape) : Création de la grande fenêtre superposée avec navigation fluide (Étape 1 : Identifiants, Étape 2 : Infos Persos, Étape 3 : Pseudo).
+* [FAIT] 1.3 - Ergonomie & Sécurité Visuelle : Boutons gris (désactivés) pour les champs obligatoires et validation globale par la touche "Entrée".
+* [À FAIRE] 1.4 - Gestion du Profil et RGPD : Création d'un menu de paramètres permettant la modification des informations personnelles et l'intégration d'un bouton rouge pour supprimer le compte.
+
+⚙️ PHASE 2 : Les Données et l'Automatisation (Le Moteur)
+* [FAIT] 2.1 - Sécurité des Champs : Application stricte du filtre de caractères interdits sur toutes les saisies textuelles pour protéger Firebase.
+* [FAIT] 2.2 - L'API Code Postal : Intégration de l'API gouvernementale pour bloquer le champ à 5 chiffres et auto-remplir le champ "Ville".
+* [FAIT] 2.3 - Ergonomie Visuelle (CSS) : Isolation du design de la modale pour éviter les conflits avec le jeu, et ajout d'une case à cocher pour afficher/masquer le mot de passe.
+
+🔐 PHASE 3 : L'Authentification et Firebase (Le Cœur)
+* [FAIT] 3.1 - Google Auth Intelligent : Bouton de connexion pour récupérer le mail/nom, saut direct à l'étape 2, et vol silencieux de l'avatar Google.
+* [FAIT] 3.2 - La Création de Compte Classique : Script d'envoi des données vers Firebase Authentication et Realtime Database (dossier users_crm).
+* [FAIT] 3.3 - La Sécurité de Connexion : E-mail automatique de confirmation, première session libre pour jouer de suite, blocage strict aux reconnexions si l'e-mail n'est pas validé.
+* [FAIT] 3.4 - Moteur de Jeu (Fix Capitaine) : Synchronisation de l'UID Firebase (player.id) au moment de la connexion pour garantir les droits de création d'équipe.
+
+🖼️ PHASE 4 : Le Sas du Jeu, L'Identité et La Galerie
+* [À FAIRE] 4.1 - La Logique "Défaut vs Temporaire" (Pseudo) : À la reconnexion, demander au joueur si la modification de son pseudo devient le nouveau pseudo par défaut, ou si elle est provisoire.
+* [À FAIRE] 4.2 - La Logique "Défaut vs Temporaire" (Avatar) : Proposer la photo par défaut (ex: Google) à l'entrée en jeu. Proposer de la modifier de façon temporaire ou de définir un nouveau défaut.
+* [À FAIRE] 4.3 - La Galerie Personnelle : Espace de stockage Firebase hybride pour conserver les photos personnelles et permettre de piocher dedans.
+* [À FAIRE] 4.4 - L'Équipe par Défaut : Mémorisation de l'équipe habituelle pour proposer une reconnexion et recréation rapide en un clic à la session suivante.
+
+📊 PHASE 5 : Le Moteur de Statistiques (Le Hall of Fame)
+* [À FAIRE] 5.1 - Le Récepteur de Fin de Partie : Modification du script de fin pour envoyer le score, le temps de réaction et le rang dans le profil Firebase.
+* [À FAIRE] 5.2 - Le Tableau de Bord Joueur : Création de l'interface visuelle dans la modale profil pour afficher ses records et son historique.
+
+🔌 PHASE 6 : Le Mode "Local / Hors-Ligne" (Préparation MJ)
+* [À FAIRE] 6.1 - Le Détecteur de Réseau : Script qui masque la création de compte complète si le réseau est local.
+* [À FAIRE] 6.2 - Le Mode "Sauvegarder mon score" : Saisie de l'e-mail uniquement pour préparer une synchronisation asynchrone lors du retour en ligne.
