@@ -229,21 +229,38 @@
                 <img id="avatar-preview" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Puce" style="width:120px; height:120px; border-radius:50%; border:3px solid var(--primary); margin-bottom:15px; object-fit:cover;">
                 
                 <div id="avatar-express-actions" style="width:100%; display:flex; flex-direction:column; gap:10px;">
-                    <button class="btn-main" onclick="window.useCurrentAvatar()" style="width:100%; background:#27ae60;">🚀 Utiliser et continuer</button>
+                    <button class="btn-main" onclick="navigateTo('step-mode')" style="width:100%; background:#27ae60;">🚀 Utiliser et continuer</button>
                     <button class="btn-main" onclick="window.showClassicAvatarMenu()" style="width:100%; background:#34495e; font-size:0.9rem;">Modifier la photo / l'avatar</button>
                 </div>
 
-                <div id="avatar-choices" style="display:none; width:100%; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0;">
-                    <div class="choice-card" onclick="document.getElementById('file-input').click()"><div class="choice-icon">📸</div><div class="choice-content"><b>Photo / Selfie</b><span>Ou choisir une image.</span></div></div>
+                <div id="avatar-choices" style="display:none; width:100%; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+                    <div class="choice-card" onclick="document.getElementById('file-input').click()"><div class="choice-icon">📸</div><div class="choice-content"><b>Photo / Selfie</b><span>Prendre une photo avec la caméra.</span></div></div>
                     <div class="choice-card" onclick="showAvatarGallery()"><div class="choice-icon">🦁</div><div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div></div>
-                    <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*" style="display:none" onchange="handleFileUpload(this)">
+                    <input type="file" id="file-input" accept="image/*" capture="user" style="display:none" onchange="handleFileUpload(this)">
                 </div>
 
-                <div id="avatar-gallery-view" class="gallery-container" style="width:100%;">
+                <div id="avatar-gallery-view" class="gallery-container" style="display:none; width:100%;">
                     <div class="common-grid" id="avatar-grid"></div>
                 </div>
             </div>
         </div>
+
+        <script>
+            // FIX: Auto-réinitialisation visuelle de l'écran (si on fait retour)
+            var stepAvatarEl = document.getElementById('step-avatar');
+            if(stepAvatarEl) {
+                new MutationObserver(function(mutations) {
+                    mutations.forEach(function(m) {
+                        if (m.attributeName === "class" && m.target.classList.contains('active')) {
+                            document.getElementById('avatar-express-actions').style.display = 'flex';
+                            document.getElementById('avatar-choices').style.display = 'none';
+                            document.getElementById('avatar-gallery-view').style.display = 'none';
+                            document.getElementById('avatar-status-text').innerText = "Identité pour cette partie :";
+                        }
+                    });
+                }).observe(stepAvatarEl, { attributes: true });
+            }
+        </script>
 
         <div id="step-mode" class="step-screen">
             <div class="screen-header"><h2>Ta Stratégie ?</h2></div>
@@ -674,7 +691,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.218";
+        const CLIENT_VERSION = "1.219";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1160,8 +1177,16 @@
                 roomRef.child('players/' + myUserID).update({avatar: av}); 
                 finishEdit(true); 
             } else { 
-                // Mise à jour de l'aperçu et retour à l'écran Express
-                document.getElementById('avatar-preview').src = (av.length > 20) ? av : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + av;
+                var preview = document.getElementById('avatar-preview');
+                
+                // FIX: On copie exactement l'image cliquée dans la galerie
+                var galleryImg = document.querySelector('#avatar-grid img[src*="' + av + '"]');
+                if (galleryImg) {
+                    preview.src = galleryImg.src;
+                } else {
+                    preview.src = (av.length > 20) ? av : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + av;
+                }
+                
                 document.getElementById('avatar-gallery-view').style.display = 'none';
                 document.getElementById('avatar-choices').style.display = 'none';
                 document.getElementById('avatar-express-actions').style.display = 'flex';
