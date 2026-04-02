@@ -659,7 +659,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.211";
+        const CLIENT_VERSION = "1.212";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -2124,12 +2124,17 @@
                     });
                 })
                 .then(function() {
+                    // On force la relecture du pseudo directement dans la case
+                    var finalPseudo = document.getElementById('crm-pseudo').value;
+                    
                     alert("🎉 Bienvenue dans l'équipe ! \n\nUn e-mail de confirmation vous a été envoyé (Pensez à vérifier vos SPAMS !). \n\nCommencez à jouer tout de suite !");
                     window.closeCRMModal();
                     
                     // ON PROPULSE LE JOUEUR DIRECTEMENT DANS LE JEU LA PREMIERE FOIS
-                    player.pseudo = pseudo;
-                    document.getElementById('input-pseudo').value = pseudo;
+                    player.pseudo = finalPseudo;
+                    var gamePseudoInput = document.getElementById('input-pseudo');
+                    if (gamePseudoInput) gamePseudoInput.value = finalPseudo;
+                    
                     navigateTo('step-avatar');
                     
                     btnNext.innerText = originalText;
