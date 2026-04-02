@@ -233,7 +233,7 @@
                     <button class="btn-main" onclick="window.showClassicAvatarMenu()" style="width:100%; background:#34495e; font-size:0.9rem;">Modifier la photo / l'avatar</button>
                 </div>
 
-                <div id="avatar-choices" class="selection-mode-container" style="display:none; width:100%;">
+                <div id="avatar-choices" style="display:none; width:100%; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0;">
                     <div class="choice-card" onclick="document.getElementById('file-input').click()"><div class="choice-icon">📸</div><div class="choice-content"><b>Photo / Selfie</b><span>Ou choisir une image.</span></div></div>
                     <div class="choice-card" onclick="showAvatarGallery()"><div class="choice-icon">🦁</div><div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div></div>
                     <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*" style="display:none" onchange="handleFileUpload(this)">
@@ -674,7 +674,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.217";
+        const CLIENT_VERSION = "1.218";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -896,6 +896,15 @@
 
         function goBack() {
             if(isEditing) { finishEdit(true); return; }
+            
+            const currentScreen = document.querySelector('.step-screen.active');
+            if (currentScreen && currentScreen.id === 'step-avatar') {
+                // Règle spéciale : Depuis l'avatar, le bouton retour renvoie toujours au Pseudo
+                document.getElementById('input-pseudo').value = player.pseudo;
+                navigateTo('step-pseudo', false);
+                return;
+            }
+
             if(stepHistory.length === 0) return;
             if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
             const previous = stepHistory.pop(); navigateTo(previous, false); 
@@ -2025,6 +2034,11 @@
                     if(snap.exists()) {
                         // CAS 1 : JOUEUR EXISTANT -> Connexion instantanée !
                         var data = snap.val();
+                        
+                        player.id = user.uid;
+                        myUserID = user.uid; // LE FAMEUX BADGE !
+                        localStorage.setItem('buzz_userId', myUserID);
+                        
                         player.pseudo = data.pseudo || data.firstName;
                         alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
                         
@@ -2242,6 +2256,8 @@
                         
                         // FIX CAPITAINE & PHOTO
                         player.id = userUID; 
+                        myUserID = userUID; // LE FAMEUX BADGE !
+                        localStorage.setItem('buzz_userId', myUserID);
                         player.pseudo = finalPseudo;
                         if (window.googleAvatar) player.avatar = window.googleAvatar;
                         
@@ -2336,6 +2352,9 @@
                         
                         // --- 🚀 INITIALISATION DU JOUEUR (FIX CAPITAINE) ---
                         player.id = user.uid;
+                        myUserID = user.uid; // LE FAMEUX BADGE !
+                        localStorage.setItem('buzz_userId', myUserID);
+                        
                         player.pseudo = data.pseudo || data.firstName;
                         if(data.avatar) player.avatar = data.avatar;
                         
