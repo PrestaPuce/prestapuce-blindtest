@@ -236,7 +236,7 @@
                 <div id="avatar-choices" style="display:none; width:100%; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
                     <div class="choice-card" onclick="document.getElementById('file-input').click()"><div class="choice-icon">📸</div><div class="choice-content"><b>Photo / Selfie</b><span>Prendre une photo avec la caméra.</span></div></div>
                     <div class="choice-card" onclick="showAvatarGallery()"><div class="choice-icon">🦁</div><div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div></div>
-                    <input type="file" id="file-input" accept="image/*" capture="user" style="display:none" onchange="handleFileUpload(this)">
+                    <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
                 </div>
 
                 <div id="avatar-gallery-view" class="gallery-container" style="display:none; width:100%;">
@@ -691,7 +691,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.219";
+        const CLIENT_VERSION = "1.220";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1258,7 +1258,7 @@
             });
         }
 
-        /* --- PATCH V1.178 : VERROUILLAGE ATOMIQUE (Anti-Doublon Capitaine) --- */
+        /* --- PATCH V1.178 CORRIGÉ : VERROUILLAGE ATOMIQUE (Anti-Doublon Capitaine) --- */
         function joinTeam(name, icon) { 
             if(teamListRef && teamListCallback) { teamListRef.off('value', teamListCallback); }
             
@@ -1272,24 +1272,24 @@
                 player.team = name; player.teamIcon = icon; 
                 const trueTime = Date.now() + serverTimeOffset;
                 
-                roomRef.child('players').once('value', snapPlayers => {
+                // On vérifie directement l'équipe pour voir si elle a déjà un capitaine
+                roomRef.child('players').orderByChild('teamName').equalTo(name).once('value', snapPlayers => {
                     let hasCaptain = false;
-                    let activeMembers = 0;
                     snapPlayers.forEach(child => {
                         const p = child.val();
-                        if (p.teamName === name && p.active !== false && p.banned !== true && child.key !== myUserID) {
-                            activeMembers++;
-                            if (p.isCaptain) hasCaptain = true;
+                        // Si on trouve un joueur actif qui est capitaine (et que ce n'est pas nous)
+                        if (p.active !== false && p.banned !== true && p.isCaptain === true && child.key !== myUserID) {
+                            hasCaptain = true;
                         }
                     });
                     
                     // Fonction d'enregistrement final
                     const executeJoin = (becomeCaptain) => {
                         if(isEditing) { 
-                            logEvent('SYSTEM', `🤝 ${player.pseudo} a rejoint l'équipe ${name}`); // 🟢 CAPTEUR
+                            logEvent('SYSTEM', `🤝 ${player.pseudo} a rejoint l'équipe ${name}`); 
                             roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { finishEdit(true); }); 
                         } else if (isRecovering) {
-                            logEvent('SYSTEM', `🤝 ${player.pseudo} a rejoint l'équipe ${name}`); // 🟢 CAPTEUR
+                            logEvent('SYSTEM', `🤝 ${player.pseudo} a rejoint l'équipe ${name}`); 
                             roomRef.child('players/' + myUserID).update({teamName: name, teamIcon: icon, joinTimestamp: trueTime, isCaptain: becomeCaptain}).then(() => { isRecovering = false; finishEdit(false); }); 
                         } else { 
                             isCaptain = becomeCaptain;
@@ -1297,18 +1297,8 @@
                         }
                     };
 
-                    // Si l'équipe n'a pas de capitaine, on tente de poser le verrou
-                    if (!hasCaptain || activeMembers === 0) {
-                        roomRef.child('teams/' + name + '/captainLock').transaction(currentLock => {
-                            if (currentLock === null || currentLock === myUserID) return myUserID; // Verrou libre, on le prend
-                            return undefined; // Trop tard, un autre joueur l'a pris la même milliseconde
-                        }, (error, committed, snapshot) => {
-                            executeJoin(committed); // 'committed' vaut true si on a réussi à prendre le verrou
-                        });
-                    } else {
-                        // L'équipe a déjà un capitaine
-                        executeJoin(false);
-                    }
+                    // Si aucun capitaine n'a été trouvé, le joueur devient capitaine
+                    executeJoin(!hasCaptain);
                 });
             });
         }
