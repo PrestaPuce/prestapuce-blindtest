@@ -226,8 +226,9 @@
             <div class="screen-header"><h2>Ton Look</h2></div>
             <div class="screen-content content-top" style="align-items: center; width: 100%; max-width: 350px;">
                 <p id="avatar-status-text" style="color:var(--primary); font-weight:bold; margin-bottom:10px;">Identité pour cette partie :</p>
-                <img id="avatar-preview" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Puce" style="width:120px; height:120px; border-radius:50%; border:3px solid var(--primary); margin-bottom:15px; object-fit:cover;">
-                
+                <div id="avatar-preview" style="width:120px; height:120px; border-radius:50%; border:3px solid var(--primary); margin-bottom:15px; display:flex; align-items:center; justify-content:center; font-size:4rem; background:var(--card); overflow:hidden;">
+					<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Puce" style="width:100%; height:100%; object-fit:cover;">
+				</div>                
                 <div id="avatar-express-actions" style="width:100%; display:flex; flex-direction:column; gap:10px;">
                     <button class="btn-main" onclick="navigateTo('step-mode')" style="width:100%; background:#27ae60;">🚀 Utiliser et continuer</button>
                     <button class="btn-main" onclick="window.showClassicAvatarMenu()" style="width:100%; background:#34495e; font-size:0.9rem;">Modifier la photo / l'avatar</button>
@@ -691,7 +692,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.222";
+        const CLIENT_VERSION = "1.223";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1170,7 +1171,6 @@
         function handleFileUpload(input) { if(input.files[0]) { compressImage(input.files[0], 300, function(base64) { selectAvatar(base64); }); } }
         function renderAvatarGrid() { const g=document.getElementById('avatar-grid'); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='grid-item grid-item-emoji'; d.innerText=a; d.onclick=()=>selectAvatar(a); g.appendChild(d); }); }
         
-        // --- PATCH V1.222 CORRIGÉ : Synchronisation Totale de l'Aperçu ---
         function selectAvatar(av) { 
             player.avatar = av; 
             if(isEditing) { 
@@ -1179,19 +1179,14 @@
                 finishEdit(true); 
             } else { 
                 var preview = document.getElementById('avatar-preview');
-                
-                // Au lieu de chercher dans la grille, on reconstruit l'URL exacte
                 if(preview) {
-                    // Si av est long (>20 chars), c'est une image base64 (caméra/upload)
                     if (av.length > 20) {
-                        preview.src = av;
+                        preview.innerHTML = `<img src="${av}" style="width:100%; height:100%; object-fit:cover;">`;
                     } else {
-                        // Sinon c'content un 'seed' Dicebear, on utilise le lien exact
-                        preview.src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + av;
+                        preview.innerHTML = av;
                     }
                 }
                 
-                // On cache la galerie et on montre les boutons de validation
                 document.getElementById('avatar-gallery-view').style.display = 'none';
                 document.getElementById('avatar-choices').style.display = 'none';
                 document.getElementById('avatar-express-actions').style.display = 'flex';
@@ -2285,8 +2280,7 @@
                         if (gamePseudoInput) gamePseudoInput.value = finalPseudo;
                         
                         var preview = document.getElementById('avatar-preview');
-                        if(preview && player.avatar) preview.src = (player.avatar.length > 20) ? player.avatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + player.avatar;
-                        
+                        if(preview && player.avatar) { if(player.avatar.length > 20) preview.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`; else preview.innerHTML = player.avatar; }                        
                         navigateTo('step-avatar');
                         btnNext.innerText = originalText; btnNext.disabled = false;
                     });
