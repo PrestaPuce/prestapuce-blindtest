@@ -701,7 +701,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.229";
+        const CLIENT_VERSION = "1.230";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -2121,7 +2121,7 @@
                         
                         var gamePseudoInput = document.getElementById('input-pseudo');
                         if (gamePseudoInput) gamePseudoInput.value = player.pseudo;
-                        navigateTo('step-avatar');
+                        navigateTo('step-pseudo');
                     } else {
                         // CAS 2 : NOUVEAU JOUEUR GOOGLE -> On le dépose à l'étape 2 !
                         window.isGoogleAuthMode = true;
