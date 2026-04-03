@@ -225,22 +225,24 @@
         .btn-quick { width: 24px; height: 24px; border-radius: 4px; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; transition: 0.2s; padding:0; margin:0; }
         .btn-quick-check { background: #27ae60; } .btn-quick-check:hover { background: #2ecc71; transform: scale(1.1); }
         .btn-quick-cancel { background: #c0392b; } .btn-quick-cancel:hover { background: #e74c3c; transform: scale(1.1); }
-		/* --- PATCH V1.248 : ALERTE ÉQUIPE --- */
-        @keyframes pulseOrangeTeam {
-            0% { background-color: rgba(0,0,0,0.5); border-color: transparent; }
-            50% { background-color: rgba(243, 156, 18, 0.4) !important; border-color: #f39c12 !important; }
-            100% { background-color: rgba(0,0,0,0.5); border-color: transparent; }
+		/* --- PATCH V1.249 : ALERTES SYNCHRONISÉES --- */
+        @keyframes pulseOrangeUrgent {
+            0% { background-color: rgba(0,0,0,0.5); }
+            50% { background-color: rgba(243, 156, 18, 0.6) !important; }
+            100% { background-color: rgba(0,0,0,0.5); }
         }
         .recovery-alert-team {
-            animation: pulseOrangeTeam 1.5s infinite !important;
+            animation: pulseOrangeUrgent 1.2s infinite !important;
+            border: 1px solid #f39c12 !important;
         }
+        /* On réutilise ton animation pulse-alert existante pour le joueur interne */
     </style>
 </head>
 <body>
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.248</div>
+    <div class="version-tag" id="app-version-display">v1.249</div>
 
     <div id="global-dropdown"></div>
 
@@ -361,7 +363,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.248</span>
+                    <span id="disp-v-mj">v1.249</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -726,7 +728,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.248";
+        const APP_VERSION = "1.249";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -986,7 +988,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.248", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.249", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -2415,16 +2417,20 @@
 
                 const safeK = k.replace(/'/g, "\\'");
                 
-                // 🚀 NOUVEAU : Scanner l'équipe pour trouver une urgence de reconnexion
+                // Détection de l'urgence
                 let hasEmergency = false;
-                Object.values(allPlayersData).forEach(p => {
-                    if (p.teamName === k && p.recoveryRequest) hasEmergency = true;
-                });
+                for (let pId in allPlayersData) {
+                    if (allPlayersData[pId].teamName === k && allPlayersData[pId].recoveryRequest) {
+                        hasEmergency = true;
+                        break;
+                    }
+                }
                 
                 let rowClasses = "hub-line grid-team";
                 if (hasEmergency) rowClasses += " recovery-alert-team";
 
-                const border = t.hasBuzzer ? 'border:2px solid #2ecc71; background:rgba(46,204,113,0.1);' : '';
+                // Si l'équipe a le buzzer, on garde la bordure verte mais on laisse l'alerte orange dominer le fond
+                const border = t.hasBuzzer ? 'border:2px solid #2ecc71;' : '';
                 
                 html += `
                 <div class="${rowClasses}" style="${border}" onclick="toggleTeamAccordion('${safeK}')" title="Cliquez pour voir les détails et les joueurs de l'équipe">
@@ -2544,11 +2550,12 @@
                 let isInactive = m.status === 1;
                 
                 let rowStyle = isInactive ? "opacity:0.5; background:rgba(0,0,0,0.2);" : "background:rgba(255,255,255,0.05);";
+                let recoveryClass = ""; // 🚀 NOUVEAU
                 let quickActions = "";
                 
-                // 🚀 NOUVEAU : Si récupération, on affiche les boutons et on change la ligne
                 if (m.recoveryRequest) {
-                    rowStyle = "opacity:1; background:rgba(243, 156, 18, 0.2);";
+                    rowStyle = "opacity:1;"; // On laisse la classe gérer le fond
+                    recoveryClass = "pulse-alert"; // 🚀 On utilise ton animation existante
                     quickActions = `<div class="recovery-actions">
                         <button class="btn-quick btn-quick-check" onclick="acceptRecovery('${m.id}')" title="Accepter">✔</button>
                         <button class="btn-quick btn-quick-cancel" onclick="rejectRecovery('${m.id}')" title="Refuser">✖</button>
@@ -2562,7 +2569,7 @@
 				
                 // Intégration dans la grille à 5 colonnes avec marges
                 html += `
-                <div class="score-row grid-member" style="${rowStyle} border-bottom:1px solid rgba(255,255,255,0.05); padding: 4px 8px;">
+                <div class="score-row grid-member ${recoveryClass}" style="${rowStyle} border-bottom:1px solid rgba(255,255,255,0.05); padding: 4px 8px;">
                     <div class="grid-cell-center" style="font-size:0.8rem;">${stateIcon}</div>
                     <div class="grid-cell-center">${crown}</div>
                     <div class="grid-cell-left" style="gap:6px; font-size:0.85rem; display:flex; align-items:center;">
