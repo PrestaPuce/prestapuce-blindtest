@@ -225,15 +225,15 @@
         .btn-quick { width: 24px; height: 24px; border-radius: 4px; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; transition: 0.2s; padding:0; margin:0; }
         .btn-quick-check { background: #27ae60; } .btn-quick-check:hover { background: #2ecc71; transform: scale(1.1); }
         .btn-quick-cancel { background: #c0392b; } .btn-quick-cancel:hover { background: #e74c3c; transform: scale(1.1); }
-		/* --- PATCH V1.249 : ALERTES SYNCHRONISÉES --- */
+		/* --- PATCH V1.250 : ALERTE ÉQUIPE (PRIORITÉ ABSOLUE) --- */
         @keyframes pulseOrangeUrgent {
-            0% { background-color: rgba(0,0,0,0.5); }
-            50% { background-color: rgba(243, 156, 18, 0.6) !important; }
-            100% { background-color: rgba(0,0,0,0.5); }
+            0% { box-shadow: inset 0 0 0 0 rgba(243, 156, 18, 0.8), 0 0 0 0 rgba(243, 156, 18, 0); background-color: rgba(0,0,0,0.5); }
+            50% { box-shadow: inset 0 0 0 2px #f39c12, 0 0 15px rgba(243, 156, 18, 0.6); background-color: rgba(243, 156, 18, 0.4) !important; }
+            100% { box-shadow: inset 0 0 0 0 rgba(243, 156, 18, 0.8), 0 0 0 0 rgba(243, 156, 18, 0); background-color: rgba(0,0,0,0.5); }
         }
         .recovery-alert-team {
             animation: pulseOrangeUrgent 1.2s infinite !important;
-            border: 1px solid #f39c12 !important;
+            border-color: transparent !important; /* Laisse le box-shadow faire le travail pour éviter les sauts */
         }
         /* On réutilise ton animation pulse-alert existante pour le joueur interne */
     </style>
@@ -242,7 +242,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.249</div>
+    <div class="version-tag" id="app-version-display">v1.250</div>
 
     <div id="global-dropdown"></div>
 
@@ -363,7 +363,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.249</span>
+                    <span id="disp-v-mj">v1.250</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -728,7 +728,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.249";
+        const APP_VERSION = "1.250";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -988,7 +988,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.249", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.250", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -2429,8 +2429,8 @@
                 let rowClasses = "hub-line grid-team";
                 if (hasEmergency) rowClasses += " recovery-alert-team";
 
-                // Si l'équipe a le buzzer, on garde la bordure verte mais on laisse l'alerte orange dominer le fond
-                const border = t.hasBuzzer ? 'border:2px solid #2ecc71;' : '';
+                // 🚀 NOUVEAU : Si urgence, on supprime totalement la bordure verte pour ne pas bloquer l'animation CSS
+                const border = (t.hasBuzzer && !hasEmergency) ? 'border:2px solid #2ecc71; background:rgba(46,204,113,0.1);' : '';
                 
                 html += `
                 <div class="${rowClasses}" style="${border}" onclick="toggleTeamAccordion('${safeK}')" title="Cliquez pour voir les détails et les joueurs de l'équipe">
