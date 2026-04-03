@@ -220,13 +220,18 @@
         }
         .pulse-alert { animation: pulseAlert 2s infinite; border-color: var(--gold) !important; }
         .tab-pulse { animation: pulseAlert 2s infinite; background: rgba(243, 156, 18, 0.3) !important; border-color: var(--gold) !important; color: white !important; }
+		/* --- PATCH V1.246 : BOUTONS RÉCUPÉRATION RAPIDE --- */
+        .recovery-actions { display: inline-flex; gap: 5px; margin-right: 5px; }
+        .btn-quick { width: 24px; height: 24px; border-radius: 4px; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; transition: 0.2s; padding:0; margin:0; }
+        .btn-quick-check { background: #27ae60; } .btn-quick-check:hover { background: #2ecc71; transform: scale(1.1); }
+        .btn-quick-cancel { background: #c0392b; } .btn-quick-cancel:hover { background: #e74c3c; transform: scale(1.1); }
     </style>
 </head>
 <body>
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.245</div>
+    <div class="version-tag" id="app-version-display">v1.246</div>
 
     <div id="global-dropdown"></div>
 
@@ -347,7 +352,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.245</span>
+                    <span id="disp-v-mj">v1.246</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -712,7 +717,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.245";
+        const APP_VERSION = "1.246";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -972,7 +977,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.245", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.246", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -2246,9 +2251,17 @@
                 Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
                 
                 const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;">` : `<span style="font-size:1.1rem;flex-shrink:0;width:20px;text-align:center;">${d.avatar||'👤'}</span>`;
-                let actionsHtml = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
-                /* --- PATCH 3.25 : COURONNE LOBBY JOUEURS --- */
-                let crownIcon = d.isCaptain ? '<span style="margin-left:5px; filter:drop-shadow(0 0 2px gold);">👑</span>' : '';
+                
+                // 🚀 NOUVEAU : Ajout des boutons rapides si demande de récupération
+                let actionsHtml = "";
+                if (d.recoveryRequest) {
+                    actionsHtml += `<div class="recovery-actions">
+                        <button class="btn-quick btn-quick-check" onclick="acceptRecovery('${d.uid}')" title="Accepter la connexion">✔</button>
+                        <button class="btn-quick btn-quick-cancel" onclick="rejectRecovery('${d.uid}')" title="Refuser">✖</button>
+                    </div>`;
+                }
+                actionsHtml += `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
+                /* --- PATCH 3.25 : COURONNE LOBBY JOUEURS --- */let crownIcon = d.isCaptain ? '<span style="margin-left:5px; filter:drop-shadow(0 0 2px gold);">👑</span>' : '';
 				// Si l'état est pris (taken) ET que c'est le joueur en cours, on met la cloche
                 // Sinon on garde le point vert standard
                 let stateDot = d.status === 2 ? '🔴' : (d.status === 1 ? '🟠' : ((d.uid === currentBuzzerId && currentGameState === 'taken') ? '🔔' : '🟢'));
@@ -2508,12 +2521,22 @@
                 let isInactive = m.status === 1;
                 
                 let rowStyle = isInactive ? "opacity:0.5; background:rgba(0,0,0,0.2);" : "background:rgba(255,255,255,0.05);";
+                let quickActions = "";
+                
+                // 🚀 NOUVEAU : Si récupération, on affiche les boutons et on change la ligne
+                if (m.recoveryRequest) {
+                    rowStyle = "opacity:1; background:rgba(243, 156, 18, 0.2);";
+                    quickActions = `<div class="recovery-actions">
+                        <button class="btn-quick btn-quick-check" onclick="acceptRecovery('${m.id}')" title="Accepter">✔</button>
+                        <button class="btn-quick btn-quick-cancel" onclick="rejectRecovery('${m.id}')" title="Refuser">✖</button>
+                    </div>`;
+                }
                 
                 // Pastille de joueur statique (clic désactivé pour le moment)
-                let stateIcon = isInactive ? "🟠" : (m.status === -1 ? "🔔" : "🟢");
+                let stateIcon = m.recoveryRequest ? "⚠️" : (isInactive ? "🟠" : (m.status === -1 ? "🔔" : "🟢"));
 				
                 let crown = m.isCaptain ? `👑` : (isInactive ? "" : `<span class="ghost-crown" onclick="transferCaptaincy('${currentCapId}', '${safeCapName}', '${m.id}', '${safeName}', '${teamName}')">👑</span>`);
-
+				
                 // Intégration dans la grille à 5 colonnes avec marges
                 html += `
                 <div class="score-row grid-member" style="${rowStyle} border-bottom:1px solid rgba(255,255,255,0.05); padding: 4px 8px;">
@@ -2525,7 +2548,8 @@
                         <span style="font-weight:bold; color:var(--accent); min-width:20px; text-align:center;">${m.pts||0}</span>
                         <button class="btn-tiny" onclick="adj('${m.id}',1)">+</button>
                     </div>
-                    <div class="grid-cell-center">
+                    <div class="grid-cell-center" style="display:flex; gap:5px;">
+                        ${quickActions}
                         <button class="dropdown-btn" style="margin:0;" onclick="openMemberMenu(event, '${m.id}', '${teamName}', false, ${m.isCaptain||false}, '${currentCapId}', '${safeCapName}')">⋮</button>
                     </div>
                 </div>`;
