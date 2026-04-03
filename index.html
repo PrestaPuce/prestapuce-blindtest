@@ -631,6 +631,9 @@
                 </div>
                 <div class="crm-row">
                     <div class="crm-col"><label class="crm-label">Téléphone *</label><input type="tel" id="crm-phone" inputmode="tel" class="crm-input" placeholder="ex: 0612345678" onkeyup="window.crmCheckEnter(event)"></div>
+                    <div class="crm-col"><label class="crm-label">Naissance *</label><input type="date" id="crm-dob" class="crm-input" onkeyup="window.crmCheckEnter(event)"></div>
+                </div>
+                <div class="crm-row">
                     <div class="crm-col"><label class="crm-label">Entreprise (Optionnel)</label><input type="text" id="crm-company" class="crm-input" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)"></div>
                 </div>
                 <div class="crm-row">
@@ -692,7 +695,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.223";
+        const CLIENT_VERSION = "1.226";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1092,12 +1095,19 @@
             }
         }
 
+        // --- PATCH V1.226 : VIDEUR ANTI-CLONES + RÉCUPÉRATION MJ ---
         function validatePseudo() {
             const val = document.getElementById('input-pseudo').value.trim();
             const regex = /^[a-zA-Z0-9À-ÿ\s\-_]+$/;
             if (!regex.test(val)) return alert("Caractères autorisés : Lettres, Chiffres, Espaces, Tirets (-), Underscore (_).");
             if(val.length < 2) return alert("Pseudo trop court !");
             
+            if (!roomRef) {
+                // Pas de salle connectée, on valide directement
+                finalizePseudoValidation(val);
+                return;
+            }
+
             roomRef.child('players').once('value', snap => {
                 const players = snap.val() || {};
                 let takenUid = null;
@@ -1114,20 +1124,57 @@
                 
                 if(takenUid) {
                     if (isEditing) { return alert("Ce pseudo est déjà pris."); }
-                    if(!isInactive) { return alert("Ce pseudo est déjà pris et le joueur est actuellement en ligne."); } 
-                    else {
-                        if (confirm("Ce profil existe déjà mais est inactif.\nVoulez-vous demander à l'animateur de le récupérer ?")) { startRecoveryProcess(takenUid, targetData); }
+                    
+                    if(!isInactive) { 
+                        // Joueur EN LIGNE -> On bloque et on suggère l'année de naissance
+                        suggestNewPseudo(val, "Ce pseudo est déjà pris et le joueur est actuellement en ligne.");
+                        return; 
+                    } else {
+                        // Joueur HORS LIGNE -> On propose la récupération MJ
+                        if (confirm("Ce profil existe déjà mais est inactif.\nVoulez-vous demander à l'animateur de le récupérer ?")) { 
+                            startRecoveryProcess(takenUid, targetData); 
+                        } else {
+                            // S'il refuse la récupération, on suggère l'année de naissance
+                            suggestNewPseudo(val, "Veuillez utiliser un autre pseudo.");
+                        }
                         return;
                     }
                 }
                 
-                if(isEditing) { 
-                    logEvent('SYSTEM', `✏️ ${player.pseudo} a changé son pseudo en ${val}`); // 🟢 CAPTEUR
-                    roomRef.child('players/' + myUserID).update({ name: val }); 
-                    player.pseudo = val; finishEdit(true); return; 
-                }
-                player.pseudo = val; navigateTo('step-avatar');
+                if(isEditing) { roomRef.child('players/' + myUserID).update({ name: val }); player.pseudo = val; finishEdit(true); return; }
+                
+                // La voie est libre
+                finalizePseudoValidation(val);
             });
+        }
+
+        // Le sous-moteur de suggestion (Année de naissance)
+        function suggestNewPseudo(baseVal, msgPrefix) {
+            var suggestion = baseVal + Math.floor(10 + Math.random() * 90);
+            if (myUserID) {
+                firebase.database().ref('users_crm/' + myUserID).once('value').then(function(userSnap) {
+                    if (userSnap.exists() && userSnap.val().dob) {
+                        var annee = userSnap.val().dob.substring(0, 4);
+                        suggestion = baseVal + annee;
+                    }
+                    alert("⚠️ " + msgPrefix + "\nSuggestion : " + suggestion);
+                    document.getElementById('input-pseudo').value = suggestion;
+                });
+            } else {
+                alert("⚠️ " + msgPrefix + "\nSuggestion : " + suggestion);
+                document.getElementById('input-pseudo').value = suggestion;
+            }
+        }
+
+        // Le sous-moteur de validation finale (Mise à jour Avatar)
+        function finalizePseudoValidation(val) {
+            player.pseudo = val; 
+            var preview = document.getElementById('avatar-preview');
+            if(preview && player.avatar) { 
+                if(player.avatar.length > 20) preview.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`; 
+                else preview.innerHTML = player.avatar; 
+            }
+            navigateTo('step-avatar');
         }
 
         function startRecoveryProcess(targetUid, data) {
@@ -2213,20 +2260,14 @@
                 var prenom = document.getElementById('crm-firstname').value;
                 var nom = document.getElementById('crm-lastname').value;
                 var tel = document.getElementById('crm-phone').value;
+                var dob = document.getElementById('crm-dob').value;
                 var zip = document.getElementById('crm-zip').value;
                 var ville = document.getElementById('crm-city').value;
                 
-                if(!prenom || !nom || !tel || !zip || !ville) { 
+                if(!prenom || !nom || !tel || !dob || !zip || !ville) { 
                     window.showCRMError("Veuillez remplir les champs obligatoires (*)."); 
                     return; 
                 }
-                
-                // 3. LA MAGIE UX : Copier le Prénom dans le Pseudo si ce dernier est vide
-                var pseudo = document.getElementById('crm-pseudo');
-                if(prenom && pseudo.value.trim() === "") {
-                    pseudo.value = prenom;
-                }
-            }
 
             // Si tout est bon, on passe à l'étape suivante ou on ENVOIE À FIREBASE
             if(window.crmStep < 3) { 
@@ -2243,6 +2284,7 @@
                 var prenom = document.getElementById('crm-firstname').value;
                 var nom = document.getElementById('crm-lastname').value;
                 var tel = document.getElementById('crm-phone').value;
+                var dob = document.getElementById('crm-dob').value;
                 var zip = document.getElementById('crm-zip').value;
                 var ville = document.getElementById('crm-city').value;
                 var pseudo = document.getElementById('crm-pseudo').value;
@@ -2255,6 +2297,7 @@
                         firstName: prenom,
                         lastName: nom,
                         phone: tel,
+                        dob: dob,
                         zip: zip,
                         city: ville,
                         pseudo: pseudo,
