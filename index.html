@@ -695,7 +695,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.226";
+        const CLIENT_VERSION = "1.228";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -2130,6 +2130,7 @@
                         document.getElementById('crm-firstname').value = fName;
                         document.getElementById('crm-lastname').value = lName;
                         document.getElementById('crm-email').value = user.email;
+                        document.getElementById('crm-pseudo').value = fName; // 🚀 NOUVEAU : On pré-remplit le pseudo
                         
                         // On ferme la fenêtre de connexion si elle était ouverte, on ouvre la CRM à l'Étape 2
                         window.closeLoginModal();
@@ -2268,7 +2269,21 @@
                     window.showCRMError("Veuillez remplir les champs obligatoires (*)."); 
                     return; 
                 }
-			}
+            } // 🚀 LA FAMEUSE ACCOLADE RÉPARÉE EST ICI !
+
+            // --- VÉRIFICATIONS ÉTAPE 3 (Pseudo) ---
+            if(window.crmStep === 3) {
+                var checkPseudo = document.getElementById('crm-pseudo').value.trim();
+                if(checkPseudo.length < 2) {
+                    window.showCRMError("Veuillez choisir un pseudo (min. 2 caractères).");
+                    return;
+                }
+                const regex = /^[a-zA-Z0-9À-ÿ\s\-_]+$/;
+                if (!regex.test(checkPseudo)) {
+                    window.showCRMError("Caractères autorisés : Lettres, Chiffres, Espaces, Tirets (-), Underscore (_).");
+                    return;
+                }
+            }
 
             // Si tout est bon, on passe à l'étape suivante ou on ENVOIE À FIREBASE
             if(window.crmStep < 3) { 
@@ -2323,9 +2338,8 @@
                         var gamePseudoInput = document.getElementById('input-pseudo');
                         if (gamePseudoInput) gamePseudoInput.value = finalPseudo;
                         
-                        var preview = document.getElementById('avatar-preview');
-                        if(preview && player.avatar) { if(player.avatar.length > 20) preview.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`; else preview.innerHTML = player.avatar; }                        
-                        navigateTo('step-avatar');
+                        // 🚀 REDIRECTION VERS LE VIDEUR ANTI-CLONES
+                        navigateTo('step-pseudo');
                         btnNext.innerText = originalText; btnNext.disabled = false;
                     });
                 };
