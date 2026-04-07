@@ -208,7 +208,15 @@
             <div class="screen-content">
                 <h2>Ton Nom de Scène ?</h2>
                 <input type="text" id="input-pseudo" placeholder="Ex: Batman, Zorro..." maxlength="12">
-                <button class="btn-main" onclick="validatePseudo()">Suivant</button>
+                <button id="btn-pseudo-next" class="btn-main" onclick="validatePseudo()">Suivant</button>
+
+                <div id="pseudo-choice-container" style="display:none; margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; width: 100%; max-width: 350px;">
+                    <p style="font-size:0.85em; margin-bottom:12px; color:var(--accent);">Ce pseudo est différent de ton profil.</p>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <button class="btn-main" onclick="window.handlePseudoChoice(true)" style="padding:12px; font-size:1rem; background:var(--success);">💾 Sauver dans mon profil</button>
+                        <button class="btn-main" onclick="window.handlePseudoChoice(false)" style="padding:12px; font-size:1rem; background:#444;">🕒 Juste pour cette partie</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -701,7 +709,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.230";
+        const CLIENT_VERSION = "1.231";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1108,9 +1116,17 @@
             if (!regex.test(val)) return alert("Caractères autorisés : Lettres, Chiffres, Espaces, Tirets (-), Underscore (_).");
             if(val.length < 2) return alert("Pseudo trop court !");
             
+            const choiceContainer = document.getElementById('pseudo-choice-container');
+            const nextBtn = document.getElementById('btn-pseudo-next');
+
             if (!roomRef) {
-                // Pas de salle connectée, on valide directement
-                finalizePseudoValidation(val);
+                // Pas de salle connectée
+                if (player.id && window.crmPseudo && val !== window.crmPseudo) {
+                    choiceContainer.style.display = 'block';
+                    if (nextBtn) nextBtn.style.display = 'none';
+                } else {
+                    finalizePseudoValidation(val);
+                }
                 return;
             }
 
@@ -1149,8 +1165,13 @@
                 
                 if(isEditing) { roomRef.child('players/' + myUserID).update({ name: val }); player.pseudo = val; finishEdit(true); return; }
                 
-                // La voie est libre
-                finalizePseudoValidation(val);
+                // 🚀 NOUVEAU : La voie est libre, vérifions si on doit proposer la sauvegarde CRM
+                if (player.id && window.crmPseudo && val !== window.crmPseudo) {
+                    choiceContainer.style.display = 'block';
+                    if (nextBtn) nextBtn.style.display = 'none';
+                } else {
+                    finalizePseudoValidation(val);
+                }
             });
         }
 
@@ -2114,6 +2135,7 @@
                         localStorage.setItem('buzz_userId', myUserID);
                         
                         player.pseudo = data.pseudo || data.firstName;
+                        window.crmPseudo = player.pseudo; // 🚀 Mémorisation
                         alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
                         
                         window.closeLoginModal();
@@ -2345,6 +2367,7 @@
                         myUserID = userUID; // LE FAMEUX BADGE !
                         localStorage.setItem('buzz_userId', myUserID);
                         player.pseudo = finalPseudo;
+                        window.crmPseudo = player.pseudo; // 🚀 Mémorisation
                         if (window.googleAvatar) player.avatar = window.googleAvatar;
                         
                         var gamePseudoInput = document.getElementById('input-pseudo');
@@ -2440,6 +2463,7 @@
                         localStorage.setItem('buzz_userId', myUserID);
                         
                         player.pseudo = data.pseudo || data.firstName;
+                        window.crmPseudo = player.pseudo; // 🚀 Mémorisation
                         if(data.avatar) player.avatar = data.avatar;
                         
                         alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
@@ -2470,6 +2494,19 @@
             firebase.auth().sendPasswordResetEmail(email).then(function() {
                 alert("Un lien pour réinitialiser votre mot de passe a été envoyé à " + email + " (Vérifiez vos spams !).");
             }).catch(function(error) { document.getElementById('login-error').innerText = "Erreur : " + error.message; });
+        };
+		
+		// --- PATCH V1.231 : GESTION DU CHOIX PSEUDO ---
+        window.handlePseudoChoice = function(saveToCrm) {
+            const val = document.getElementById('input-pseudo').value.trim();
+            if (saveToCrm && player.id) {
+                // Mise à jour dans le CRM (dossier users_crm)
+                firebase.database().ref('users_crm/' + player.id).update({ pseudo: val }).then(() => {
+                    window.crmPseudo = val; // On met à jour la mémoire locale
+                });
+            }
+            // Dans tous les cas, on valide la suite du jeu
+            finalizePseudoValidation(val);
         };
 		
     </script>
