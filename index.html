@@ -730,7 +730,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.237";
+        const CLIENT_VERSION = "1.238";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1331,7 +1331,7 @@
                 expressActions.style.display = 'none';
                 choiceContainer.style.display = 'block';
             } else {
-                window.useCurrentAvatar();
+                navigateTo('step-mode'); // LE VRAI CODE D'ORIGINE
             }
         };
 
@@ -2560,11 +2560,11 @@
                 // Mise à jour dans le CRM
                 firebase.database().ref('users_crm/' + player.id).update({ avatar: player.avatar }).then(() => {
                     window.crmAvatar = player.avatar; // On met à jour la mémoire locale
-                    window.useCurrentAvatar();
+                    navigateTo('step-mode'); // LE VRAI CODE D'ORIGINE
                 });
             } else {
                 // Juste pour la session
-                window.useCurrentAvatar();
+                navigateTo('step-mode'); // LE VRAI CODE D'ORIGINE
             }
         };
 		
