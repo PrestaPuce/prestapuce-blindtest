@@ -238,14 +238,16 @@
 					<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Puce" style="width:100%; height:100%; object-fit:cover;">
 				</div>                
                 <div id="avatar-express-actions" style="width:100%; display:flex; flex-direction:column; gap:10px;">
-                    <button class="btn-main" onclick="navigateTo('step-mode')" style="width:100%; background:#27ae60;">🚀 Utiliser et continuer</button>
+                    <button class="btn-main" onclick="validateAvatarChoice()" style="width:100%; background:#27ae60;">🚀 Utiliser et continuer</button>
                     <button class="btn-main" onclick="window.showClassicAvatarMenu()" style="width:100%; background:#34495e; font-size:0.9rem;">Modifier la photo / l'avatar</button>
                 </div>
 
-                <div id="avatar-choices" style="display:none; width:100%; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
-                    <div class="choice-card" onclick="document.getElementById('file-input').click()"><div class="choice-icon">📸</div><div class="choice-content"><b>Photo / Selfie</b><span>Prendre une photo avec la caméra.</span></div></div>
-                    <div class="choice-card" onclick="showAvatarGallery()"><div class="choice-icon">🦁</div><div class="choice-content"><b>Galerie Avatars</b><span>Choisis un personnage.</span></div></div>
-                    <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
+                <div id="avatar-choice-container" style="display:none; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; width: 100%; text-align: center;">
+                    <p style="font-size:0.85em; margin-bottom:12px; color:var(--accent);">Cet avatar est différent de ton profil.</p>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <button class="btn-main" onclick="window.handleAvatarChoice(true)" style="padding:12px; font-size:1rem; background:var(--success);">💾 Sauver dans mon profil</button>
+                        <button class="btn-main" onclick="window.handleAvatarChoice(false)" style="padding:12px; font-size:1rem; background:#444;">🕒 Juste pour cette partie</button>
+                    </div>
                 </div>
 
                 <div id="avatar-gallery-view" class="gallery-container" style="display:none; width:100%;">
@@ -709,7 +711,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.231";
+        const CLIENT_VERSION = "1.232";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1291,6 +1293,20 @@
                 });
             }
             navigateTo('step-mode');
+        };
+		
+		// --- PATCH V1.232 : VALIDATEUR D'AVATAR ---
+        window.validateAvatarChoice = function() {
+            const choiceContainer = document.getElementById('avatar-choice-container');
+            const expressActions = document.getElementById('avatar-express-actions');
+            
+            // Si le joueur a un profil, et que son avatar actuel est différent de celui en mémoire
+            if (player.id && window.crmAvatar !== undefined && player.avatar !== window.crmAvatar) {
+                expressActions.style.display = 'none';
+                choiceContainer.style.display = 'block';
+            } else {
+                window.useCurrentAvatar();
+            }
         };
 
         window.handleCRMFileUpload = function(input) {
@@ -2159,6 +2175,7 @@
                         
                         // 🚀 NOUVEAU : Vol silencieux de la photo
                         window.googleAvatar = user.photoURL || "";
+						window.crmAvatar = window.googleAvatar; // 🚀 Mémorisation Avatar
                         
                         // Pré-remplissage invisible
                         document.getElementById('crm-firstname').value = fName;
@@ -2369,7 +2386,8 @@
                         player.pseudo = finalPseudo;
                         window.crmPseudo = player.pseudo; // 🚀 Mémorisation
                         if (window.googleAvatar) player.avatar = window.googleAvatar;
-                        
+                        window.crmAvatar = player.avatar; // 🚀 Mémorisation Avatar
+						
                         var gamePseudoInput = document.getElementById('input-pseudo');
                         if (gamePseudoInput) gamePseudoInput.value = finalPseudo;
                         
@@ -2465,7 +2483,8 @@
                         player.pseudo = data.pseudo || data.firstName;
                         window.crmPseudo = player.pseudo; // 🚀 Mémorisation
                         if(data.avatar) player.avatar = data.avatar;
-                        
+                        window.crmAvatar = player.avatar; // 🚀 Mémorisation Avatar
+						
                         alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
                         window.closeLoginModal();
                         
@@ -2507,6 +2526,20 @@
             }
             // Dans tous les cas, on valide la suite du jeu
             finalizePseudoValidation(val);
+        };
+		
+		// --- PATCH V1.232 : GESTION DU CHOIX AVATAR ---
+        window.handleAvatarChoice = function(saveToCrm) {
+            if (saveToCrm && player.id) {
+                // Mise à jour dans le CRM
+                firebase.database().ref('users_crm/' + player.id).update({ avatar: player.avatar }).then(() => {
+                    window.crmAvatar = player.avatar; // On met à jour la mémoire locale
+                    window.useCurrentAvatar();
+                });
+            } else {
+                // Juste pour la session
+                window.useCurrentAvatar();
+            }
         };
 		
     </script>
