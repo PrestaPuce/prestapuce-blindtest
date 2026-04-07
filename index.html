@@ -231,15 +231,23 @@
         </div>
 
         <div id="step-avatar" class="step-screen">
-            <div class="screen-header"><h2>Ton Look</h2></div>
-            <div class="screen-content content-top" style="align-items: center; width: 100%; max-width: 350px;">
-                <p id="avatar-status-text" style="color:var(--primary); font-weight:bold; margin-bottom:10px;">Identité pour cette partie :</p>
-                <div id="avatar-preview" style="width:120px; height:120px; border-radius:50%; border:3px solid var(--primary); margin-bottom:15px; display:flex; align-items:center; justify-content:center; font-size:4rem; background:var(--card); overflow:hidden;">
-					<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Puce" style="width:100%; height:100%; object-fit:cover;">
-				</div>                
+            <div class="screen-content">
+                <h2>Ton Look ?</h2>
+                <p style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.8;">Identité pour cette partie</p>
+                <div class="avatar-container" style="position:relative; margin-bottom:20px;">
+                    <img id="display-avatar" src="" alt="Avatar" style="width:120px; height:120px; border-radius:50%; border:4px solid var(--mj-color); object-fit:cover; background:#222;">
+                </div>
+
                 <div id="avatar-express-actions" style="width:100%; display:flex; flex-direction:column; gap:10px;">
                     <button class="btn-main" onclick="validateAvatarChoice()" style="width:100%; background:#27ae60;">🚀 Utiliser et continuer</button>
                     <button class="btn-main" onclick="window.showClassicAvatarMenu()" style="width:100%; background:#34495e; font-size:0.9rem;">Modifier la photo / l'avatar</button>
+                </div>
+
+                <div id="avatar-classic-menu" style="display:none; width:100%; flex-direction:column; gap:10px;">
+                    <button class="btn-main" onclick="window.generateDicebear()" style="width:100%; background:#8e44ad;">🎲 Avatar Aléatoire</button>
+                    <button class="btn-main" onclick="window.triggerAvatarUpload()" style="width:100%; background:#2980b9;">📷 Télécharger une photo</button>
+                    <input type="file" id="avatar-upload" style="display:none" accept="image/*" onchange="window.handleFileSelect(event)">
+                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; background:#444; margin-top:5px; font-size:0.8rem;">Retour</button>
                 </div>
 
                 <div id="avatar-choice-container" style="display:none; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; width: 100%; text-align: center;">
@@ -248,10 +256,6 @@
                         <button class="btn-main" onclick="window.handleAvatarChoice(true)" style="padding:12px; font-size:1rem; background:var(--success);">💾 Sauver dans mon profil</button>
                         <button class="btn-main" onclick="window.handleAvatarChoice(false)" style="padding:12px; font-size:1rem; background:#444;">🕒 Juste pour cette partie</button>
                     </div>
-                </div>
-
-                <div id="avatar-gallery-view" class="gallery-container" style="display:none; width:100%;">
-                    <div class="common-grid" id="avatar-grid"></div>
                 </div>
             </div>
         </div>
@@ -711,7 +715,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.232";
+        const CLIENT_VERSION = "1.233";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1280,6 +1284,12 @@
             document.getElementById('avatar-express-actions').style.display = 'none';
             document.getElementById('avatar-choices').style.display = 'flex';
             document.getElementById('avatar-status-text').innerText = "Choisissez votre photo :";
+        };
+		
+		window.hideClassicAvatarMenu = function() {
+            document.getElementById('avatar-express-actions').style.display = 'flex';
+            document.getElementById('avatar-choices').style.display = 'none';
+            document.getElementById('avatar-status-text').innerText = "Identité pour cette partie";
         };
 
         window.useCurrentAvatar = function() {
