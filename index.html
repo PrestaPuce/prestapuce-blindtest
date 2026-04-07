@@ -730,7 +730,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.238";
+        const CLIENT_VERSION = "1.240";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1321,20 +1321,31 @@
             navigateTo('step-mode');
         };
 		
-		// --- PATCH V1.232 : VALIDATEUR D'AVATAR ---
+		// --- PATCH V1.240 : VALIDATEUR D'AVATAR (Correction stricte) ---
         window.validateAvatarChoice = function() {
             const choiceContainer = document.getElementById('avatar-choice-container');
             const expressActions = document.getElementById('avatar-express-actions');
+            const previewEl = document.getElementById('avatar-preview');
             
-            // Si le joueur a un profil, et que son avatar actuel est différent de celui en mémoire
-            if (player.id && window.crmAvatar !== undefined && player.avatar !== window.crmAvatar) {
+            // 1. On capture ce qui est VISIBLEMENT à l'écran (la vraie photo ou l'émoji)
+            if (previewEl) {
+                const img = previewEl.querySelector('img');
+                if (img) {
+                    player.avatar = img.src; // C'est une image
+                } else if (previewEl.innerText.trim() !== "") {
+                    player.avatar = previewEl.innerText.trim(); // C'est un Emoji
+                }
+            }
+
+            // 2. Si le joueur a un compte, qu'il y a un avatar à l'écran, et qu'il est différent de la mémoire
+            if (player.id && player.avatar && player.avatar !== window.crmAvatar) {
                 expressActions.style.display = 'none';
                 choiceContainer.style.display = 'block';
             } else {
-                navigateTo('step-mode'); // LE VRAI CODE D'ORIGINE
+                navigateTo('step-mode');
             }
         };
-
+		
         window.handleCRMFileUpload = function(input) {
             if(input.files[0]) { 
                 compressImage(input.files[0], 300, function(base64) { 
