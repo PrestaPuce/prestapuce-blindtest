@@ -233,9 +233,10 @@
         <div id="step-avatar" class="step-screen">
             <div class="screen-content">
                 <h2>Ton Look ?</h2>
-                <p style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.8;">Identité pour cette partie</p>
+                <p id="avatar-status-text" style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.8;">Identité pour cette partie :</p>
+                
                 <div class="avatar-container" style="position:relative; margin-bottom:20px;">
-                    <img id="display-avatar" src="" alt="Avatar" style="width:120px; height:120px; border-radius:50%; border:4px solid var(--mj-color); object-fit:cover; background:#222;">
+                    <div id="avatar-preview" style="width:120px; height:120px; border-radius:50%; border:4px solid var(--accent); overflow:hidden; background:#222; display:flex; align-items:center; justify-content:center; font-size:4rem;"></div>
                 </div>
 
                 <div id="avatar-express-actions" style="width:100%; display:flex; flex-direction:column; gap:10px;">
@@ -243,11 +244,24 @@
                     <button class="btn-main" onclick="window.showClassicAvatarMenu()" style="width:100%; background:#34495e; font-size:0.9rem;">Modifier la photo / l'avatar</button>
                 </div>
 
-                <div id="avatar-classic-menu" style="display:none; width:100%; flex-direction:column; gap:10px;">
-                    <button class="btn-main" onclick="window.generateDicebear()" style="width:100%; background:#8e44ad;">🎲 Avatar Aléatoire</button>
-                    <button class="btn-main" onclick="window.triggerAvatarUpload()" style="width:100%; background:#2980b9;">📷 Télécharger une photo</button>
-                    <input type="file" id="avatar-upload" style="display:none" accept="image/*" onchange="window.handleFileSelect(event)">
+                <div id="avatar-choices" style="display:none; width:100%; flex-direction:column; gap:10px;">
+                    <div class="choice-card" onclick="document.getElementById('avatar-upload').click()" style="margin-bottom:0;">
+                        <div class="choice-icon">📸</div>
+                        <div class="choice-content"><b style="font-size: 0.95rem;">PHOTO / LOGO</b><span>Uploader une image</span></div>
+                    </div>
+                    <input type="file" id="avatar-upload" accept=".jpg,.jpeg,.png,.webp,image/*" style="display:none" onchange="handleFileUpload(this)">
+                    
+                    <div class="choice-card" onclick="showAvatarGallery()" style="margin-bottom:0;">
+                        <div class="choice-icon">🎭</div>
+                        <div class="choice-content"><b style="font-size: 0.95rem;">GALERIE EMOJI</b><span>Choisir un avatar</span></div>
+                    </div>
+                    
                     <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; background:#444; margin-top:5px; font-size:0.8rem;">Retour</button>
+                </div>
+
+                <div id="avatar-gallery-view" class="gallery-container" style="display:none; width:100%; flex-direction:column; align-items:center;">
+                    <div id="avatar-grid" class="common-grid" style="grid-template-columns: repeat(4, 1fr); max-height: 250px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 15px;"></div>
+                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; background:#444; font-size:0.8rem;">Retour</button>
                 </div>
 
                 <div id="avatar-choice-container" style="display:none; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; width: 100%; text-align: center;">
@@ -270,6 +284,7 @@
                             document.getElementById('avatar-express-actions').style.display = 'flex';
                             document.getElementById('avatar-choices').style.display = 'none';
                             document.getElementById('avatar-gallery-view').style.display = 'none';
+                            document.getElementById('avatar-choice-container').style.display = 'none';
                             document.getElementById('avatar-status-text').innerText = "Identité pour cette partie :";
                         }
                     });
@@ -715,7 +730,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.233";
+        const CLIENT_VERSION = "1.235";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1289,6 +1304,7 @@
 		window.hideClassicAvatarMenu = function() {
             document.getElementById('avatar-express-actions').style.display = 'flex';
             document.getElementById('avatar-choices').style.display = 'none';
+            document.getElementById('avatar-gallery-view').style.display = 'none';
             document.getElementById('avatar-status-text').innerText = "Identité pour cette partie";
         };
 
