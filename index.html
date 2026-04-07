@@ -249,7 +249,7 @@
                         <div class="choice-icon">📸</div>
                         <div class="choice-content"><b style="font-size: 0.95rem;">PHOTO / LOGO</b><span>Uploader une image</span></div>
                     </div>
-                    <input type="file" id="avatar-upload" accept=".jpg,.jpeg,.png,.webp,image/*" style="display:none" onchange="handleFileUpload(this)">
+                    <input type="file" id="avatar-upload" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
                     
                     <div class="choice-card" onclick="showAvatarGallery()" style="margin-bottom:0;">
                         <div class="choice-icon">🎭</div>
@@ -730,7 +730,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.235";
+        const CLIENT_VERSION = "1.236";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
