@@ -249,8 +249,8 @@
                         <div class="choice-icon">📸</div>
                         <div class="choice-content"><b style="font-size: 0.95rem;">PHOTO / LOGO</b><span>Uploader une image</span></div>
                     </div>
-                    <input type="file" id="avatar-upload" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
-                    
+                    <input type="file" id="avatar-upload" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
+					
                     <div class="choice-card" onclick="showAvatarGallery()" style="margin-bottom:0;">
                         <div class="choice-icon">🎭</div>
                         <div class="choice-content"><b style="font-size: 0.95rem;">GALERIE EMOJI</b><span>Choisir un avatar</span></div>
@@ -686,7 +686,7 @@
                     <div style="border:1px dashed var(--primary); padding:15px; text-align:center; border-radius:8px; color:#bdc3c7; cursor:pointer;" onclick="document.getElementById('crm-file-input').click()">
                         <span style="font-size:1.5rem;">📷</span><br><span style="font-size:0.85rem;">Définir une photo</span>
                     </div>
-                    <input type="file" id="crm-file-input" accept=".jpg,.jpeg,.png,.webp,image/*" style="display:none" onchange="window.handleCRMFileUpload(this)">
+                    <input type="file" id="crm-file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="window.handleCRMFileUpload(this)">
                 </div>
 
                 <div id="crm-google-avatar-zone" style="display:none; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px dashed rgba(255,255,255,0.2);">
@@ -730,7 +730,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.236";
+        const CLIENT_VERSION = "1.237";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
