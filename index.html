@@ -275,7 +275,7 @@
         </div>
 
         <script>
-            // FIX: Auto-réinitialisation visuelle de l'écran (si on fait retour)
+            // FIX: Auto-réinitialisation visuelle de l'écran (si on fait retour ou si on arrive)
             var stepAvatarEl = document.getElementById('step-avatar');
             if(stepAvatarEl) {
                 new MutationObserver(function(mutations) {
@@ -286,6 +286,16 @@
                             document.getElementById('avatar-gallery-view').style.display = 'none';
                             document.getElementById('avatar-choice-container').style.display = 'none';
                             document.getElementById('avatar-status-text').innerText = "Identité pour cette partie :";
+                            
+                            // 🚀 LE CORRECTIF VISUEL : On injecte la photo mémoire dans le cercle
+                            var preview = document.getElementById('avatar-preview');
+                            if (player.avatar) {
+                                if (player.avatar.includes('http') || player.avatar.includes('data:image')) {
+                                    preview.innerHTML = '<img src="' + player.avatar + '" alt="Avatar" style="width:100%; height:100%; object-fit:cover;">';
+                                } else {
+                                    preview.innerHTML = player.avatar; // C'est un émoji
+                                }
+                            }
                         }
                     });
                 }).observe(stepAvatarEl, { attributes: true });
@@ -730,7 +740,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.240";
+        const CLIENT_VERSION = "1.243";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -2189,6 +2199,12 @@
                         
                         player.pseudo = data.pseudo || data.firstName;
                         window.crmPseudo = player.pseudo; // 🚀 Mémorisation
+                        
+                        // 🚀 LIGNES RESTAURÉES POUR L'AVATAR :
+                        window.googleAvatar = user.photoURL || ""; 
+                        window.crmAvatar = data.avatar || window.googleAvatar;
+                        player.avatar = window.crmAvatar;
+                        
                         alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
                         
                         window.closeLoginModal();
