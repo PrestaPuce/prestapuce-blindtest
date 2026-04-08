@@ -665,85 +665,94 @@
         }
     </style>
 
-    <div id="modal-crm-profile" class="overlay-full" style="z-index: 9999999; display: none;">
-        <div class="settings-content crm-modal" style="position: relative; max-height: 90vh; overflow-y: auto; text-align:center;">
-            <button onclick="window.closeCRMModal()" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer;">X</button>
+    <div id="modal-crm-profile" class="modal-crm" style="display:none;">
+        <div class="modal-crm-content">
+            <h2 id="crm-title" style="margin-top:0; color:var(--primary);">Créer mon compte</h2>
             
-            <h2 style="margin-top:0; color: white;">Créer mon Compte</h2>
-            <p style="color: #bdc3c7; font-size: 0.85rem; margin-top:-10px;">Rejoignez Buzz ta Puce et conservez vos stats !</p>
-            
-            <div class="crm-stepper">
-                <div class="crm-step active" id="s-dot-1">1</div><div class="crm-step-line" id="s-line-1"></div>
-                <div class="crm-step" id="s-dot-2">2</div><div class="crm-step-line" id="s-line-2"></div>
-                <div class="crm-step" id="s-dot-3">3</div>
-            </div>
-            
-            <div id="crm-part-1" style="display:block; text-align: left;">
-                <button style="width:100%; padding:12px; background:white; color:#444; font-size:0.95rem; font-weight:bold; border-radius:8px; border:none; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" onclick="window.startGoogleAuth()">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width:20px; height:20px;">
-                    Créer avec mon compte Google
-                </button>
-                <div style="text-align:center; color:#bdc3c7; font-size:0.8rem; margin-bottom:10px; font-weight:bold;">OU INSCRIPTION CLASSIQUE</div>
-                
+            <div id="crm-part-1">
+                <p style="font-size:0.9rem; margin-bottom:15px;">Étape 1 : Tes identifiants de connexion</p>
                 <label class="crm-label">E-mail *</label>
-                <input type="email" id="crm-email" class="crm-input" placeholder="joueur@mail.com" autocomplete="username" onkeyup="window.crmCheckEnter(event)">
-                
+                <input type="email" id="crm-email" class="crm-input" placeholder="joueur@mail.com" autocomplete="email">
                 <label class="crm-label">Confirmer l'E-mail *</label>
-                <input type="email" id="crm-email-conf" class="crm-input" placeholder="Retapez votre e-mail" autocomplete="new-password" spellcheck="false" onkeyup="window.crmCheckEnter(event)">
+                <input type="email" id="crm-email-conf" class="crm-input" placeholder="Retapez votre e-mail" autocomplete="email">
                 
                 <label class="crm-label">Mot de passe *</label>
-                <input type="password" id="crm-pwd" class="crm-input" placeholder="8 car., 1 Maj, 1 min, 1 chiffre, 1 spécial" autocomplete="new-password" onkeyup="window.crmCheckEnter(event)">
+                <input type="password" id="crm-pwd" class="crm-input" placeholder="8 car., 1 Maj, 1 min, 1 chiffre, 1 spécial" autocomplete="new-password" oninput="window.checkPasswordStrength(this.value)" onkeyup="window.crmCheckEnter(event)">
 
                 <label class="crm-label">Confirmer le Mot de passe *</label>
                 <input type="password" id="crm-pwd-conf" class="crm-input" placeholder="Retapez votre mot de passe" autocomplete="new-password" onkeyup="window.crmCheckEnter(event)">
 
                 <label style="color:#bdc3c7; font-size:0.85rem; display:flex; align-items:center; gap:8px; cursor:pointer; margin-top:-5px; font-weight:bold;">
-                    <input type="checkbox" id="crm-show-pwds" onchange="window.toggleAllPwds()" style="width:16px; height:16px; cursor:pointer;">
+                    <input type="checkbox" id="crm-show-pwds" onchange="window.togglePasswordVisibility(this, ['crm-pwd', 'crm-pwd-conf'])" style="width:16px; height:16px; cursor:pointer;">
                     Afficher les mots de passe
                 </label>
+
+                <ul style="list-style:none; padding:0; font-size:0.75rem; color:#e74c3c; line-height:1.6; margin-top:10px; margin-bottom:0; text-align:left; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">
+                    <li id="rule-len">❌ 8 caractères minimum</li>
+                    <li id="rule-maj">❌ 1 Majuscule</li>
+                    <li id="rule-min">❌ 1 Minuscule</li>
+                    <li id="rule-num">❌ 1 Chiffre</li>
+                    <li id="rule-spe">❌ 1 Caractère spécial</li>
+                </ul>
             </div>
 
-            <div id="crm-part-2" style="display:none; text-align: left;">
-                <div class="crm-row">
-                    <div class="crm-col"><label class="crm-label">Prénom *</label><input type="text" id="crm-firstname" class="crm-input" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)"></div>
-                    <div class="crm-col"><label class="crm-label">Nom *</label><input type="text" id="crm-lastname" class="crm-input" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)"></div>
+            <div id="crm-part-2" style="display:none;">
+                <p style="font-size:0.9rem; margin-bottom:15px;">Étape 2 : Tes coordonnées</p>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label class="crm-label">Prénom *</label>
+                        <input type="text" id="crm-firstname" class="crm-input" placeholder="Prénom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                    </div>
+                    <div>
+                        <label class="crm-label">Nom *</label>
+                        <input type="text" id="crm-lastname" class="crm-input" placeholder="Nom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                    </div>
                 </div>
-                <div class="crm-row">
-                    <div class="crm-col"><label class="crm-label">Téléphone *</label><input type="tel" id="crm-phone" inputmode="tel" class="crm-input" placeholder="ex: 0612345678" onkeyup="window.crmCheckEnter(event)"></div>
-                    <div class="crm-col"><label class="crm-label">Naissance *</label><input type="date" id="crm-dob" class="crm-input" onkeyup="window.crmCheckEnter(event)"></div>
-                </div>
-                <div class="crm-row">
-                    <div class="crm-col"><label class="crm-label">Entreprise (Optionnel)</label><input type="text" id="crm-company" class="crm-input" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)"></div>
-                </div>
-                <div class="crm-row">
-                    <div class="crm-col"><label class="crm-label">Code Postal *</label><input type="text" id="crm-zip" class="crm-input" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="ex: 75001" oninput="window.fetchCity(this)" onkeyup="window.crmCheckEnter(event)"></div>
-                    <div class="crm-col"><label class="crm-label">Ville *</label><input type="text" id="crm-city" class="crm-input" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)"></div>
+                <label class="crm-label">Téléphone</label>
+                <input type="tel" id="crm-phone" class="crm-input" placeholder="06..." oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                <label class="crm-label">Date de Naissance *</label>
+                <input type="date" id="crm-dob" class="crm-input">
+                <div style="display:grid; grid-template-columns: 80px 1fr; gap:10px;">
+                    <div>
+                        <label class="crm-label">CP *</label>
+                        <input type="text" id="crm-zip" class="crm-input" placeholder="75000" maxlength="5" oninput="this.value = this.value.replace(/[.#$\[\]]/g, ''); window.fetchCityFromZip(this.value)">
+                    </div>
+                    <div>
+                        <label class="crm-label">Ville *</label>
+                        <input type="text" id="crm-city" class="crm-input" placeholder="Ville" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                    </div>
                 </div>
             </div>
 
-            <div id="crm-part-3" style="display:none; text-align: left;">
-                <label class="crm-label">Pseudo Favori *</label>
-                <input type="text" id="crm-pseudo" class="crm-input" placeholder="Votre pseudo en jeu" oninput="window.sanitizeCRM(this)" onkeyup="window.crmCheckEnter(event)">
+            <div id="crm-part-3" style="display:none;">
+                <p style="font-size:0.9rem; margin-bottom:15px;">Étape 3 : Ton identité visuelle</p>
                 
                 <div id="crm-classic-avatar-zone" style="margin-top:10px;">
                     <label class="crm-label">Photo de Profil (Optionnel)</label>
-                    <div style="border:1px dashed var(--primary); padding:15px; text-align:center; border-radius:8px; color:#bdc3c7; cursor:pointer;" onclick="document.getElementById('crm-file-input').click()">
-                        <span style="font-size:1.5rem;">📷</span><br><span style="font-size:0.85rem;">Définir une photo</span>
+                    
+                    <div id="reg-photo-preview" onclick="document.getElementById('crm-file-input').click()" style="width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.05); margin: 5px auto 15px auto; display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; overflow: hidden; border: 2px dashed rgba(255,255,255,0.3);">
+                        <span id="reg-photo-text" style="font-size:0.85rem; color:#bdc3c7; text-align:center;"><span style="font-size:1.5rem;">📷</span><br>Définir</span>
+                        <img id="reg-photo-img" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                        <div id="reg-photo-edit-badge" style="position: absolute; bottom: 0; background: rgba(0,0,0,0.7); width: 100%; text-align: center; padding: 4px 0; font-size: 11px; display: none; color: white;">✏️ Modifier</div>
                     </div>
+
                     <input type="file" id="crm-file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="window.handleCRMFileUpload(this)">
+                    <p id="reg-photo-status" style="font-size:0.8rem; color:var(--success); margin-top:-5px; margin-bottom:10px; text-align:center; display:none;"></p>
                 </div>
 
-                <div id="crm-google-avatar-zone" style="display:none; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px dashed rgba(255,255,255,0.2);">
-                    <p style="color: #bdc3c7; font-size: 0.85rem; margin: 0; text-align: center;">✅ Photo Google récupérée ! <br>Vous pourrez la valider juste après.</p>
-                </div>
+                <label class="crm-label">Pseudo du joueur *</label>
+                <input type="text" id="crm-pseudo" class="crm-input" placeholder="Ton pseudo dans le jeu" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                <label class="crm-label">Entreprise / Team (Optionnel)</label>
+                <input type="text" id="crm-company" class="crm-input" placeholder="Nom de ta société ou équipe" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
             </div>
 
-            <div id="crm-error" style="color: #e74c3c; font-size: 0.85rem; font-weight: bold; min-height: 20px; margin-top:5px;"></div>
-
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <button id="btn-c-back" onclick="window.crmPrev()" style="display:none; width:40%; padding:12px; background:transparent; color:white; border:2px solid #e74c3c; border-radius:8px; font-weight:bold; cursor:pointer;">Retour</button>
-                <button id="btn-c-next" onclick="window.crmNext()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Étape Suivante</button>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button id="btn-c-prev" class="btn-main" onclick="prevStep()" style="display:none; background:#555; flex:1;">Retour</button>
+                <button id="btn-c-next" class="btn-main" onclick="nextStep()" style="background:var(--primary); flex:1;">Suivant</button>
+                <button id="btn-c-cancel" class="btn-main" onclick="closeCRMModal()" style="background:#444; flex:1;">Annuler</button>
             </div>
+            
+            <p id="crm-error" style="color:#e74c3c; font-size:0.8rem; margin-top:10px; min-height:1em;"></p>
         </div>
     </div>
 	
@@ -764,9 +773,19 @@
                 <input type="email" id="login-email" class="crm-input" placeholder="joueur@mail.com">
                 <label class="crm-label">Mot de passe</label>
                 <input type="password" id="login-pwd" class="crm-input" placeholder="Votre mot de passe">
+                
+                <label style="color:#bdc3c7; font-size:0.85rem; display:flex; align-items:center; gap:8px; cursor:pointer; margin-top:-2px; margin-bottom:10px; font-weight:bold;">
+                    <input type="checkbox" onchange="window.togglePasswordVisibility(this, ['login-pwd'])" style="width:16px; height:16px; cursor:pointer;">
+                    Afficher le mot de passe
+                </label>
             </div>
             
             <div id="login-error" style="color: #e74c3c; font-size: 0.85rem; font-weight: bold; min-height: 20px; margin-top:5px; margin-bottom: 10px;"></div>
+            
+            <div id="login-smart-error" style="display:none; text-align:center; margin-bottom:15px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);">
+                <p style="color:#e74c3c; font-size:0.85rem; margin-bottom:10px; margin-top:0;">Ce compte n'existe pas.</p>
+                <button class="btn-main" onclick="window.switchToRegisterFromLogin()" style="background:var(--primary); font-size:0.85rem; padding:10px; width:100%;">Créer mon compte avec ces infos</button>
+            </div>
             
             <button id="btn-do-login" class="btn-main" style="width:100%;" onclick="window.processLogin()">Se Connecter</button>
             <p style="margin-top: 15px; font-size: 0.85rem;"><a href="#" style="color: var(--primary);" onclick="window.resetPassword()">Mot de passe oublié ?</a></p>
@@ -837,7 +856,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.253";
+        const CLIENT_VERSION = "1.260";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1564,7 +1583,18 @@
             if(input.files[0]) { 
                 compressImage(input.files[0], 300, function(base64) { 
                     window.googleAvatar = base64; // On utilise la même variable pour stocker la photo
-                    alert("Photo ajoutée !");
+                    
+                    // 🚀 NOUVEAU : On dessine l'image dans le cercle
+                    document.getElementById('reg-photo-text').style.display = 'none';
+                    const imgEl = document.getElementById('reg-photo-img');
+                    imgEl.src = base64;
+                    imgEl.style.display = 'block';
+                    document.getElementById('reg-photo-edit-badge').style.display = 'block';
+                    document.getElementById('reg-photo-preview').style.border = 'none';
+                    
+                    const statusEl = document.getElementById('reg-photo-status');
+                    statusEl.innerText = "✅ Photo prête !";
+                    statusEl.style.display = 'block';
                 }); 
             }
         };
@@ -2945,9 +2975,19 @@
             .catch(function(error) {
                 console.error(error);
                 btn.innerText = "Se Connecter"; btn.disabled = false;
-                if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') errDiv.innerText = "E-mail ou mot de passe incorrect.";
-                else if(error.code === 'auth/too-many-requests') errDiv.innerText = "Trop de tentatives. Réessayez plus tard.";
-                else errDiv.innerText = "Erreur de connexion.";
+                
+                // 🚀 NOUVEAU : Interception intelligente du compte inexistant
+                if(error.code === 'auth/user-not-found') {
+                    errDiv.innerText = "";
+                    document.getElementById('login-smart-error').style.display = 'block';
+                } else if(error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    errDiv.innerText = "E-mail ou mot de passe incorrect.";
+                    document.getElementById('login-smart-error').style.display = 'none';
+                } else if(error.code === 'auth/too-many-requests') {
+                    errDiv.innerText = "Trop de tentatives. Réessayez plus tard.";
+                } else {
+                    errDiv.innerText = "Erreur de connexion.";
+                }
             });
         };
 
@@ -3027,6 +3067,66 @@
                 window.hideClassicAvatarMenu();
                 navigateTo('step-mode');
             });
+        };
+		
+		// --- PATCH V1.260 (ÉTAPE 1) : OUTILS D'AUTHENTIFICATION (CORRIGÉ) ---
+
+        // 1. Case à cocher : Afficher/Masquer les mots de passe
+        window.togglePasswordVisibility = function(checkbox, inputIds) {
+            inputIds.forEach(id => {
+                let input = document.getElementById(id);
+                if(input) input.type = checkbox.checked ? "text" : "password";
+            });
+        };
+
+        // 2. Validateur dynamique de mot de passe (Adapté à ton bouton crm-next)
+        window.checkPasswordStrength = function(pwd) {
+            const rules = [
+                { id: 'rule-len', test: pwd.length >= 8, text: '8 caractères minimum' },
+                { id: 'rule-maj', test: /[A-Z]/.test(pwd), text: '1 Majuscule' },
+                { id: 'rule-min', test: /[a-z]/.test(pwd), text: '1 Minuscule' },
+                { id: 'rule-num', test: /[0-9]/.test(pwd), text: '1 Chiffre' },
+                { id: 'rule-spe', test: /[^A-Za-z0-9]/.test(pwd), text: '1 Caractère spécial' }
+            ];
+            
+            let allValid = true;
+            rules.forEach(r => {
+                let el = document.getElementById(r.id);
+                if (el) {
+                    if (r.test) {
+                        el.style.color = "var(--success)";
+                        el.innerHTML = "✅ " + r.text;
+                    } else {
+                        el.style.color = "#e74c3c";
+                        el.innerHTML = "❌ " + r.text;
+                        allValid = false;
+                    }
+                }
+            });
+            
+            // On débloque ton vrai bouton "Étape Suivante"
+            let btnNext = document.getElementById('btn-c-next');
+            if(btnNext && window.crmStep === 1) btnNext.disabled = !allValid;
+            
+            return allValid;
+        };
+
+        // 3. Le Pont Magique (Adapté à tes vrais IDs de fenêtres)
+        window.switchToRegisterFromLogin = function() {
+            let email = document.getElementById('login-email').value;
+            let pwd = document.getElementById('login-pwd').value; 
+            
+            document.getElementById('modal-crm-login').style.display = 'none'; 
+            window.openCRMModal(); 
+            
+            setTimeout(() => {
+                document.getElementById('crm-email').value = email; 
+                document.getElementById('crm-email-conf').value = email; 
+                let pwdInput = document.getElementById('crm-pwd'); 
+                pwdInput.value = pwd;
+                document.getElementById('crm-pwd-conf').value = pwd; 
+                window.checkPasswordStrength(pwd); 
+            }, 100);
         };
 		
     </script>
