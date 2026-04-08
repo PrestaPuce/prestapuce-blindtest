@@ -250,7 +250,12 @@
                         <div class="choice-content"><b style="font-size: 0.95rem;">PHOTO / LOGO</b><span>Uploader une image</span></div>
                     </div>
                     <input type="file" id="avatar-upload" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="handleFileUpload(this)">
-					
+
+                    <div class="choice-card" id="btn-avatar-history" onclick="window.showAvatarHistory()" style="display:none; margin-bottom:0;">
+                        <div class="choice-icon">🕰️</div>
+                        <div class="choice-content"><b style="font-size: 0.95rem;">MON HISTORIQUE</b><span>Anciennes photos</span></div>
+                    </div>
+                    
                     <div class="choice-card" onclick="showAvatarGallery()" style="margin-bottom:0;">
                         <div class="choice-icon">🎭</div>
                         <div class="choice-content"><b style="font-size: 0.95rem;">GALERIE EMOJI</b><span>Choisir un avatar</span></div>
@@ -261,6 +266,15 @@
 
                 <div id="avatar-gallery-view" class="gallery-container" style="display:none; width:100%; flex-direction:column; align-items:center;">
                     <div class="common-grid" id="avatar-grid"></div>
+                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; max-width:350px; background:#444; font-size:0.8rem; margin-top:10px;">Retour</button>
+                </div>
+
+                <div id="avatar-history-view" class="gallery-container" style="display:none; width:100%; flex-direction:column; align-items:center;">
+                    <div style="display:flex; justify-content:space-between; width:100%; padding:0 10px; margin-bottom:10px; align-items:center;">
+                        <span style="font-size:0.85em; color:var(--accent);">Tes précédentes identités :</span>
+                        <span id="history-counter" style="font-size:0.85em; font-weight:bold; background:rgba(0,0,0,0.5); padding:3px 8px; border-radius:10px;">0 / 10</span>
+                    </div>
+                    <div class="common-grid" id="avatar-history-grid" style="gap:15px; padding-top:10px;"></div>
                     <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; max-width:350px; background:#444; font-size:0.8rem; margin-top:10px;">Retour</button>
                 </div>
 
@@ -740,7 +754,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.245";
+        const CLIENT_VERSION = "1.250";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1305,17 +1319,108 @@
             } 
         }
 
+        // --- PATCH V1.246 : MOTEUR DE LA GALERIE HYBRIDE ---
+        window.avatarHistory = []; 
+        window.pendingSelfie = null; // Le fameux Buffer temporaire
+
         window.showClassicAvatarMenu = function() {
             document.getElementById('avatar-express-actions').style.display = 'none';
             document.getElementById('avatar-choices').style.display = 'flex';
-            document.getElementById('avatar-status-text').innerText = "Choisissez votre photo :";
+            document.getElementById('avatar-status-text').innerText = "Modifier mon apparence";
+            
+            if (window.avatarHistory && window.avatarHistory.length > 0) {
+                document.getElementById('btn-avatar-history').style.display = 'flex';
+            } else {
+                document.getElementById('btn-avatar-history').style.display = 'none';
+            }
         };
-		
-		window.hideClassicAvatarMenu = function() {
+
+        window.hideClassicAvatarMenu = function() {
             document.getElementById('avatar-express-actions').style.display = 'flex';
             document.getElementById('avatar-choices').style.display = 'none';
             document.getElementById('avatar-gallery-view').style.display = 'none';
-            document.getElementById('avatar-status-text').innerText = "Identité pour cette partie";
+            document.getElementById('avatar-history-view').style.display = 'none';
+            document.getElementById('avatar-status-text').innerText = "Identité pour cette partie :";
+        };
+
+        window.updateHistoryCounter = function() {
+            const counter = document.getElementById('history-counter');
+            if(!counter) return;
+            const count = window.avatarHistory.length;
+            counter.innerText = count + " / 10";
+            if (count >= 10) counter.style.color = "#ff4444"; // Rouge plein
+            else if (count >= 8) counter.style.color = "#ffbb33"; // Orange alerte
+            else counter.style.color = "#ffffff"; // Normal
+        };
+
+        window.showAvatarHistory = function() {
+            document.getElementById('avatar-choices').style.display = 'none';
+            document.getElementById('avatar-history-view').style.display = 'flex';
+            window.updateHistoryCounter();
+
+            const grid = document.getElementById('avatar-history-grid');
+            grid.innerHTML = '';
+            
+            window.avatarHistory.forEach(function(avObj, index) {
+                let wrapper = document.createElement('div');
+                wrapper.style.position = 'relative';
+                wrapper.style.width = '100%';
+                wrapper.style.aspectRatio = '1 / 1';
+                
+                let div = document.createElement('div');
+                div.className = 'grid-item-emoji';
+                div.style.width = '100%'; div.style.height = '100%'; div.style.margin = '0';
+                
+                if(avObj.url.includes('http') || avObj.url.includes('data:image')) {
+                    div.innerHTML = '<img src="' + avObj.url + '" style="width:100%; height:100%; object-fit:cover;">';
+                    div.style.padding = "0"; div.style.overflow = "hidden";
+                } else { div.innerText = avObj.url; }
+                
+                div.onclick = function() { // Sélectionner l'avatar
+                    player.avatar = avObj.url;
+                    document.getElementById('avatar-preview').innerHTML = div.innerHTML;
+                    window.hideClassicAvatarMenu();
+                };
+                wrapper.appendChild(div);
+
+                // Bouton Télécharger (⬇️)
+                if(avObj.url.includes('data:image')) { 
+                    let dlBtn = document.createElement('div');
+                    dlBtn.innerHTML = '⬇️';
+                    dlBtn.style.cssText = 'position:absolute; bottom:-10px; left:-10px; background:#222; border-radius:50%; width:25px; height:25px; display:flex; justify-content:center; align-items:center; font-size:12px; cursor:pointer; border:2px solid #fff; z-index:5;';
+                    dlBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        let a = document.createElement('a');
+                        a.href = avObj.url; a.download = 'Avatar_' + Date.now() + '.jpg';
+                        a.click();
+                        alert("Image téléchargée sur ton appareil !");
+                    };
+                    wrapper.appendChild(dlBtn);
+                }
+
+                // Bouton Supprimer (❌) si l'image n'est pas permanente
+                if(!avObj.isPermanent) {
+                    let delBtn = document.createElement('div');
+                    delBtn.innerHTML = '❌';
+                    delBtn.style.cssText = 'position:absolute; top:-10px; right:-10px; background:#ff4444; border-radius:50%; width:25px; height:25px; display:flex; justify-content:center; align-items:center; font-size:12px; cursor:pointer; border:2px solid #fff; z-index:5;';
+                    delBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        if(confirm("Effacer ce look ? (Pense à le télécharger avec ⬇️ si tu veux le conserver).")) {
+                            window.avatarHistory.splice(index, 1);
+                            firebase.database().ref('users_crm/' + player.id).update({ avatarHistory: window.avatarHistory }).then(() => {
+                                window.showAvatarHistory(); // On rafraîchit
+                                // Magie du Buffer : Sauvegarde automatique si un selfie attendait !
+                                if (window.pendingSelfie) {
+                                    alert("Place libérée ! Ton nouveau selfie a été automatiquement enregistré.");
+                                    window.savePendingSelfie();
+                                }
+                            });
+                        }
+                    };
+                    wrapper.appendChild(delBtn);
+                }
+                grid.appendChild(wrapper);
+            });
         };
 
         window.useCurrentAvatar = function() {
@@ -2204,6 +2309,15 @@
                         window.googleAvatar = user.photoURL || ""; 
                         window.crmAvatar = data.avatar || window.googleAvatar;
                         player.avatar = window.crmAvatar;
+						// 🚀 INITIALISATION GALERIE (Google)
+                        if (data.avatarHistory) {
+                            window.avatarHistory = data.avatarHistory;
+                        } else if (window.crmAvatar) {
+                            window.avatarHistory = [{ url: window.crmAvatar, isPermanent: true }]; // Photo indélébile
+                            firebase.database().ref('users_crm/' + user.uid).update({ avatarHistory: window.avatarHistory });
+                        } else {
+                            window.avatarHistory = [];
+                        }
                         
                         alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
                         
@@ -2537,6 +2651,15 @@
                         window.crmPseudo = player.pseudo; // 🚀 Mémorisation
                         if(data.avatar) player.avatar = data.avatar;
                         window.crmAvatar = player.avatar; // 🚀 Mémorisation Avatar
+						// 🚀 INITIALISATION GALERIE (Classique)
+                        if (data.avatarHistory) {
+                            window.avatarHistory = data.avatarHistory;
+                        } else if (window.crmAvatar) {
+                            window.avatarHistory = [{ url: window.crmAvatar, isPermanent: true }]; // Photo indélébile
+                            firebase.database().ref('users_crm/' + user.uid).update({ avatarHistory: window.avatarHistory });
+                        } else {
+                            window.avatarHistory = [];
+                        }
 						
                         alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
                         window.closeLoginModal();
@@ -2582,17 +2705,60 @@
         };
 		
 		// --- PATCH V1.232 : GESTION DU CHOIX AVATAR ---
+        // --- PATCH V1.246 : SAUVEGARDE ET CHECK DE CAPACITÉ ---
         window.handleAvatarChoice = function(saveToCrm) {
             if (saveToCrm && player.id) {
-                // Mise à jour dans le CRM
-                firebase.database().ref('users_crm/' + player.id).update({ avatar: player.avatar }).then(() => {
-                    window.crmAvatar = player.avatar; // On met à jour la mémoire locale
-                    navigateTo('step-mode'); // LE VRAI CODE D'ORIGINE
+                if (!window.avatarHistory) window.avatarHistory = [];
+                
+                // Si la photo existe déjà dans la galerie, on passe direct
+                let alreadyExists = window.avatarHistory.find(a => a.url === player.avatar);
+                if (alreadyExists) {
+                    firebase.database().ref('users_crm/' + player.id).update({ avatar: player.avatar }).then(() => {
+                        window.crmAvatar = player.avatar; navigateTo('step-mode');
+                    });
+                    return;
+                }
+
+                // CHECK CAPACITÉ (10 MAX)
+                if (window.avatarHistory.length >= 10) {
+                    window.pendingSelfie = player.avatar; // ⏳ Mise en buffer
+                    alert("⚠️ Ta galerie est pleine (10 photos max) !\nPour sauvegarder ce nouveau look, tu dois effacer une ancienne photo avec la croix rouge ❌.");
+                    
+                    document.getElementById('avatar-choice-container').style.display = 'none';
+                    window.showClassicAvatarMenu(); 
+                    window.showAvatarHistory(); // On force l'ouverture de la galerie
+                    return; // On stoppe la navigation
+                }
+
+                // S'il y a de la place, on sauvegarde normalement
+                window.avatarHistory.unshift({ url: player.avatar, isPermanent: false });
+                firebase.database().ref('users_crm/' + player.id).update({ 
+                    avatar: player.avatar,
+                    avatarHistory: window.avatarHistory
+                }).then(() => {
+                    window.crmAvatar = player.avatar; 
+                    navigateTo('step-mode');
                 });
             } else {
-                // Juste pour la session
-                navigateTo('step-mode'); // LE VRAI CODE D'ORIGINE
+                navigateTo('step-mode');
             }
+        };
+
+        // Exécuté automatiquement quand une place est libérée
+        window.savePendingSelfie = function() {
+            if(!window.pendingSelfie) return;
+            
+            window.avatarHistory.unshift({ url: window.pendingSelfie, isPermanent: false });
+            firebase.database().ref('users_crm/' + player.id).update({ 
+                avatar: window.pendingSelfie,
+                avatarHistory: window.avatarHistory
+            }).then(() => {
+                window.crmAvatar = window.pendingSelfie;
+                player.avatar = window.pendingSelfie;
+                window.pendingSelfie = null; // On vide le buffer
+                window.hideClassicAvatarMenu();
+                navigateTo('step-mode');
+            });
         };
 		
     </script>
