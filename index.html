@@ -2526,6 +2526,10 @@
 
                 // Fonction universelle d'écriture dans la base
                 var saveToDatabase = function(userUID, userEmail, isGoogle) {
+                    // 🚀 SÉCURITÉ ABSOLUE : On crée l'historique dès la seconde 0
+                    var initialHistory = window.googleAvatar ? [{ url: window.googleAvatar, isPermanent: true }] : [];
+                    window.avatarHistory = initialHistory;
+
                     return firebase.database().ref('users_crm/' + userUID).set({
                         email: userEmail,
                         firstName: prenom,
@@ -2536,7 +2540,8 @@
                         city: ville,
                         pseudo: pseudo,
                         company: company,
-                        avatar: window.googleAvatar || "", // 🚀 On sauvegarde l'avatar Google
+                        avatar: window.googleAvatar || "", 
+                        avatarHistory: initialHistory, // 🚀 Injection immédiate
                         createdAt: firebase.database.ServerValue.TIMESTAMP,
                         stats: { gamesPlayed: 0, totalPoints: 0, fastestBuzz: 9999, teamsJoined: 0 }
                     }).then(function() {
