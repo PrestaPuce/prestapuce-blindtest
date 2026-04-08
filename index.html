@@ -260,8 +260,8 @@
                 </div>
 
                 <div id="avatar-gallery-view" class="gallery-container" style="display:none; width:100%; flex-direction:column; align-items:center;">
-                    <div id="avatar-grid" class="common-grid" style="grid-template-columns: repeat(4, 1fr); max-height: 250px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 15px;"></div>
-                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; background:#444; font-size:0.8rem;">Retour</button>
+                    <div class="common-grid" id="avatar-grid"></div>
+                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; max-width:350px; background:#444; font-size:0.8rem; margin-top:10px;">Retour</button>
                 </div>
 
                 <div id="avatar-choice-container" style="display:none; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; width: 100%; text-align: center;">
@@ -740,7 +740,7 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.243";
+        const CLIENT_VERSION = "1.245";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
