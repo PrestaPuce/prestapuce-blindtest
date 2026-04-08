@@ -471,14 +471,34 @@
 
     <div id="overlay-settings" class="overlay-full" onclick="this.style.display='none'">
         <div class="settings-content" onclick="event.stopPropagation()">
-            <h2 style="color:var(--accent);">MODIFIER PROFIL</h2>
+            
+            <div id="account-status-container" style="margin-bottom: 15px; text-align: center;">
+                <div id="account-status-badge" style="font-size: 0.8rem; padding: 5px 12px; border-radius: 20px; display: inline-block; font-weight: bold; margin-bottom: 5px;"></div>
+                
+                <div id="btn-convert-guest" onclick="document.getElementById('overlay-settings').style.display='none'; window.openCRMModal();" 
+                     style="display:none; font-size: 0.8rem; color: var(--primary); text-decoration: underline; cursor: pointer;">
+                    Créer un compte pour sauvegarder
+                </div>
+                
+                <button id="btn-edit-profile" class="settings-btn" onclick="window.openEditProfileModal()" style="display:none; background: rgba(39, 174, 96, 0.1); border: 1px solid var(--success); color: white; margin-top: 10px;">
+                    ⚙️ Gérer mes informations
+                </button>
+
+                <button id="btn-security-profile" class="settings-btn" onclick="window.openSecurityModal()" style="display:none; background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; color: white; margin-top: 5px;">
+                    🔒 E-mail & Mot de Passe
+                </button>
+            </div>
+
+            <h2 style="color:var(--accent); margin-top:0;">MODIFIER PROFIL</h2>
+            
             <button class="settings-btn btn-return-game" onclick="finishEdit(false)">⬅️ RETOUR AU BUZZER</button>
+            
             <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
             
             <button id="btn-manage-team" class="settings-btn" onclick="openTeamManagement()" style="display:none; border: 1px solid var(--gold); color: var(--gold);">👑 Gérer mon Équipe</button>
             
             <button class="settings-btn" onclick="editStep('step-pseudo')">✏️ Modifier mon Pseudo</button>
-            <button class="settings-btn" onclick="editStep('step-avatar')">📷 Changer d'Avatar</button>
+            <button class="settings-btn" onclick="window.openAvatarMenuDirectly()">📷 Changer d'Avatar</button>
             <button class="settings-btn" onclick="editStep('step-mode')">🛡️ Changer Mode (Solo/Team)</button>
         </div>
     </div>
@@ -752,9 +772,72 @@
             <p style="margin-top: 15px; font-size: 0.85rem;"><a href="#" style="color: var(--primary);" onclick="window.resetPassword()">Mot de passe oublié ?</a></p>
         </div>
     </div>
+	
+	<div id="overlay-edit-profile" class="overlay-full" style="display:none; z-index:9999;">
+        <div class="modal-content" style="max-width: 400px; padding: 20px;">
+            <h2 style="color:var(--accent); margin-top:0;">MES INFORMATIONS</h2>
+            <p style="font-size:0.8rem; color:#ccc; margin-bottom:15px;">Modifie tes données personnelles ci-dessous.</p>
+            
+            <div style="text-align:left; font-size:0.9rem;">
+                <label>Prénom</label>
+                <input type="text" id="edit-firstname" class="login-input" placeholder="Prénom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key === 'Enter') document.getElementById('edit-lastname').focus();">
+                
+                <label>Nom</label>
+                <input type="text" id="edit-lastname" class="login-input" placeholder="Nom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key === 'Enter') document.getElementById('edit-phone').focus();">
+                
+                <label>Téléphone</label>
+                <input type="tel" id="edit-phone" class="login-input" placeholder="06..." oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key === 'Enter') document.getElementById('edit-dob').focus();">
+                
+                <label>Date de Naissance</label>
+                <input type="date" id="edit-dob" class="login-input" onkeypress="if(event.key === 'Enter') document.getElementById('edit-zip').focus();">
+                
+                <label>Code Postal</label>
+                <input type="text" id="edit-zip" class="login-input" placeholder="75000" oninput="this.value = this.value.replace(/[.#$\[\]]/g, ''); window.fetchCityFromZipEdit(this.value);" onkeypress="if(event.key === 'Enter') document.getElementById('edit-city').focus();">
+                
+                <label>Ville</label>
+                <input type="text" id="edit-city" class="login-input" placeholder="Ville" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key === 'Enter') document.getElementById('edit-company').focus();">
+                
+                <label>Entreprise / Team (Optionnel)</label>
+                <input type="text" id="edit-company" class="login-input" placeholder="Société" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key === 'Enter') window.saveEditedProfile();">
+            </div>
 
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn-main" onclick="document.getElementById('overlay-edit-profile').style.display='none';" style="background:#555; flex:1;">Annuler</button>
+                <button class="btn-main" onclick="window.saveEditedProfile()" style="background:var(--success); flex:1;">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+	
+	<div id="overlay-security-profile" class="overlay-full" style="display:none; z-index:9999;">
+        <div class="modal-content" style="max-width: 400px; padding: 20px;">
+            <h2 style="color:#e74c3c; margin-top:0;">SÉCURITÉ DU COMPTE</h2>
+            <p style="font-size:0.8rem; color:#ccc; margin-bottom:15px;">Ton mot de passe actuel est indispensable pour appliquer des modifications.</p>
+            
+            <div style="text-align:left; font-size:0.9rem;">
+                <label style="color:#e74c3c;">Mot de passe actuel (Obligatoire)</label>
+                <input type="password" id="sec-current-pwd" class="login-input" placeholder="Ton mot de passe actuel" style="border-color:#e74c3c;">
+                
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+                
+                <label>Nouvel E-mail (Laisse vide si inchangé)</label>
+                <input type="email" id="sec-new-email" class="login-input" placeholder="nouvel@email.com">
+                
+                <label>Nouveau Mot de passe (Laisse vide si inchangé)</label>
+                <input type="password" id="sec-new-pwd" class="login-input" placeholder="Nouveau mot de passe">
+                
+                <label>Confirmer Nouveau Mot de passe</label>
+                <input type="password" id="sec-new-pwd-confirm" class="login-input" placeholder="Confirmer mot de passe">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn-main" onclick="document.getElementById('overlay-security-profile').style.display='none';" style="background:#555; flex:1;">Annuler</button>
+                <button class="btn-main" id="btn-save-security" onclick="window.saveSecurityProfile()" style="background:#e74c3c; flex:1;">Valider</button>
+            </div>
+        </div>
+    </div>
+	
     <script>
-        const CLIENT_VERSION = "1.250";
+        const CLIENT_VERSION = "1.253";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1319,7 +1402,7 @@
             } 
         }
 
-        // --- PATCH V1.246 : MOTEUR DE LA GALERIE HYBRIDE ---
+        // --- PATCH V1.251 : MOTEUR DE LA GALERIE HYBRIDE ET RÉCUPÉRATION ---
         window.avatarHistory = []; 
         window.pendingSelfie = null; // Le fameux Buffer temporaire
 
@@ -1328,11 +1411,27 @@
             document.getElementById('avatar-choices').style.display = 'flex';
             document.getElementById('avatar-status-text').innerText = "Modifier mon apparence";
             
+            // 🚀 SÉCURITÉ : Si on est un joueur CRM (ID ne commence pas par u_) et que l'historique est vide, on le télécharge !
+            if ((!window.avatarHistory || window.avatarHistory.length === 0) && myUserID && !myUserID.startsWith('u_')) {
+                firebase.database().ref('users_crm/' + myUserID).once('value').then(snap => {
+                    if(snap.exists() && snap.val().avatarHistory) {
+                        window.avatarHistory = snap.val().avatarHistory;
+                        document.getElementById('btn-avatar-history').style.display = 'flex';
+                    }
+                });
+            }
+            
             if (window.avatarHistory && window.avatarHistory.length > 0) {
                 document.getElementById('btn-avatar-history').style.display = 'flex';
             } else {
                 document.getElementById('btn-avatar-history').style.display = 'none';
             }
+        };
+
+        // 🚀 NOUVEAU : Fonction pour ouvrir directement le menu depuis le jeu
+        window.openAvatarMenuDirectly = function() {
+            editStep('step-avatar');
+            window.showClassicAvatarMenu();
         };
 
         window.hideClassicAvatarMenu = function() {
@@ -1598,7 +1697,171 @@
             }
         }
 
-        function openSettings() { document.getElementById('overlay-settings').style.display = 'flex'; }
+        function openSettings() { 
+            const badge = document.getElementById('account-status-badge');
+            const convertBtn = document.getElementById('btn-convert-guest');
+            const editBtn = document.getElementById('btn-edit-profile');
+            const secBtn = document.getElementById('btn-security-profile'); // Bouton Sécurité
+            
+            if (badge) {
+                if (myUserID && !myUserID.startsWith('u_')) {
+                    badge.innerHTML = "✅ COMPTE CONNECTÉ";
+                    badge.style.background = "rgba(39, 174, 96, 0.2)";
+                    badge.style.color = "var(--success)";
+                    badge.style.border = "1px solid var(--success)";
+                    if(convertBtn) convertBtn.style.display = "none";
+                    if(editBtn) editBtn.style.display = "block";
+                    
+                    // 🚀 DÉTECTION GOOGLE VS EMAIL
+                    const user = firebase.auth().currentUser;
+                    if (user && user.providerData && user.providerData[0] && user.providerData[0].providerId === 'password') {
+                        if(secBtn) secBtn.style.display = "block"; // Affiche si E-mail
+                    } else {
+                        if(secBtn) secBtn.style.display = "none"; // Cache si Google
+                    }
+                } else {
+                    badge.innerHTML = "⚪ PROFIL INVITÉ (Non sauvegardé)";
+                    badge.style.background = "rgba(255, 255, 255, 0.1)";
+                    badge.style.color = "#bdc3c7";
+                    badge.style.border = "1px solid #bdc3c7";
+                    if(convertBtn) convertBtn.style.display = "block";
+                    if(editBtn) editBtn.style.display = "none";
+                    if(secBtn) secBtn.style.display = "none";
+                }
+            }
+            document.getElementById('overlay-settings').style.display = 'flex'; 
+        }
+
+        // --- PATCH V1.252 : GESTION DE LA MODIFICATION DE PROFIL ---
+        window.openEditProfileModal = function() {
+            if (!myUserID || myUserID.startsWith('u_')) return; // Sécurité
+
+            // Récupération des données depuis Firebase
+            firebase.database().ref('users_crm/' + myUserID).once('value').then(snap => {
+                if(snap.exists()) {
+                    const data = snap.val();
+                    document.getElementById('edit-firstname').value = data.firstName || "";
+                    document.getElementById('edit-lastname').value = data.lastName || "";
+                    document.getElementById('edit-phone').value = data.phone || "";
+                    document.getElementById('edit-dob').value = data.dob || "";
+                    document.getElementById('edit-zip').value = data.zip || "";
+                    document.getElementById('edit-city').value = data.city || "";
+                    document.getElementById('edit-company').value = data.company || "";
+                    
+                    document.getElementById('overlay-settings').style.display = 'none';
+                    document.getElementById('overlay-edit-profile').style.display = 'flex';
+                } else {
+                    alert("Impossible de charger ton profil.");
+                }
+            }).catch(e => console.error("Erreur chargement profil", e));
+        };
+
+        window.saveEditedProfile = function() {
+            if (!myUserID || myUserID.startsWith('u_')) return;
+
+            // Rassemblement des nouvelles données
+            const updates = {
+                firstName: document.getElementById('edit-firstname').value.trim(),
+                lastName: document.getElementById('edit-lastname').value.trim(),
+                phone: document.getElementById('edit-phone').value.trim(),
+                dob: document.getElementById('edit-dob').value,
+                zip: document.getElementById('edit-zip').value.trim(),
+                city: document.getElementById('edit-city').value.trim(),
+                company: document.getElementById('edit-company').value.trim()
+            };
+
+            // Envoi à Firebase
+            firebase.database().ref('users_crm/' + myUserID).update(updates).then(() => {
+                alert("✅ Tes informations ont bien été mises à jour !");
+                document.getElementById('overlay-edit-profile').style.display = 'none';
+                openSettings(); // Retour aux paramètres
+            }).catch(e => {
+                alert("Erreur lors de la sauvegarde.");
+                console.error(e);
+            });
+        };
+		
+		// --- PATCH V1.253 : GESTION SÉCURITÉ ---
+        window.openSecurityModal = function() {
+            document.getElementById('sec-current-pwd').value = "";
+            document.getElementById('sec-new-email').value = "";
+            document.getElementById('sec-new-pwd').value = "";
+            document.getElementById('sec-new-pwd-confirm').value = "";
+            
+            // On pré-remplit l'email actuel pour info
+            const user = firebase.auth().currentUser;
+            if(user) document.getElementById('sec-new-email').value = user.email;
+
+            document.getElementById('overlay-settings').style.display = 'none';
+            document.getElementById('overlay-security-profile').style.display = 'flex';
+        };
+
+        window.saveSecurityProfile = function() {
+            const currentPwd = document.getElementById('sec-current-pwd').value;
+            const newEmail = document.getElementById('sec-new-email').value.trim();
+            const newPwd = document.getElementById('sec-new-pwd').value;
+            const newPwdConf = document.getElementById('sec-new-pwd-confirm').value;
+            const btn = document.getElementById('btn-save-security');
+
+            if(!currentPwd) { alert("Le mot de passe actuel est obligatoire."); return; }
+            if(newPwd && newPwd !== newPwdConf) { alert("Les nouveaux mots de passe ne correspondent pas."); return; }
+            if(newPwd && newPwd.length < 6) { alert("Le nouveau mot de passe doit faire au moins 6 caractères."); return; }
+
+            btn.innerText = "⏳ Validation..."; btn.disabled = true;
+            const user = firebase.auth().currentUser;
+            
+            // 1. RÉ-AUTHENTIFICATION
+            const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPwd);
+            user.reauthenticateWithCredential(credential).then(() => {
+                // Création d'un tableau de promesses
+                let promises = [];
+                
+                // 2A. Mise à jour de l'Email (si modifié)
+                if (newEmail && newEmail !== user.email) {
+                    promises.push(user.updateEmail(newEmail).then(() => {
+                        // Mise à jour vitale dans la base CRM
+                        return firebase.database().ref('users_crm/' + myUserID).update({ email: newEmail });
+                    }));
+                }
+                
+                // 2B. Mise à jour du Mot de passe (si demandé)
+                if (newPwd) { promises.push(user.updatePassword(newPwd)); }
+
+                if (promises.length === 0) {
+                    alert("Aucune modification demandée.");
+                    btn.innerText = "Valider"; btn.disabled = false;
+                    return;
+                }
+
+                // Exécution des mises à jour
+                Promise.all(promises).then(() => {
+                    alert("✅ Tes informations de sécurité ont été mises à jour !");
+                    document.getElementById('overlay-security-profile').style.display = 'none';
+                    openSettings();
+                }).catch((error) => {
+                    alert("Erreur lors de la mise à jour : " + error.message);
+                }).finally(() => {
+                    btn.innerText = "Valider"; btn.disabled = false;
+                });
+
+            }).catch((error) => {
+                btn.innerText = "Valider"; btn.disabled = false;
+                if(error.code === 'auth/wrong-password') alert("Le mot de passe actuel est incorrect.");
+                else alert("Erreur d'authentification : " + error.message);
+            });
+        };
+
+        // API Code Postal pour l'édition
+        window.fetchCityFromZipEdit = function(zipcode) {
+            if (zipcode.length >= 5) {
+                fetch('https://geo.api.gouv.fr/communes?codePostal=' + zipcode + '&fields=nom&format=json&geometry=centre')
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.length > 0) document.getElementById('edit-city').value = data[0].nom;
+                }).catch(e => console.error(e));
+            }
+        };
+		
         function confirmQuit() { document.getElementById('overlay-quit').style.display = 'flex'; }
         function editStep(stepId) { isEditing = true; document.getElementById('overlay-settings').style.display = 'none'; if(stepId === 'step-pseudo') document.getElementById('input-pseudo').value = player.pseudo; navigateTo(stepId); }
         
