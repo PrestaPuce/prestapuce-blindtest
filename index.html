@@ -652,6 +652,7 @@
             box-sizing: border-box !important; 
             font-size: 1rem !important; 
             line-height: 40px !important; 
+            text-align: left !important; /* 🚀 On force l'alignement à gauche */
         }
         .crm-input:focus { outline: none !important; border-color: var(--primary) !important; }
         
@@ -689,12 +690,14 @@
                     <input type="email" id="crm-email-conf" class="crm-input" placeholder="Retapez votre e-mail" autocomplete="email">
                     
                     <label class="crm-label">Mot de passe *</label>
-                    <input type="password" id="crm-pwd" class="crm-input" placeholder="8 car., 1 Maj, 1 min, 1 chiffre, 1 spécial" autocomplete="new-password" oninput="window.checkPasswordStrength(this.value)" onkeyup="window.crmCheckEnter(event)">
+                    <input type="password" id="crm-pwd" class="crm-input" placeholder="8 car., 1 Maj, 1 min, 1 chiffre, 1 spécial" autocomplete="new-password" oninput="window.checkPasswordMatch()" onkeyup="window.crmCheckEnter(event)">
 
                     <label class="crm-label">Confirmer le Mot de passe *</label>
-                    <input type="password" id="crm-pwd-conf" class="crm-input" placeholder="Retapez votre mot de passe" autocomplete="new-password" onkeyup="window.crmCheckEnter(event)">
+                    <input type="password" id="crm-pwd-conf" class="crm-input" placeholder="Retapez votre mot de passe" autocomplete="new-password" oninput="window.checkPasswordMatch()" onkeyup="window.crmCheckEnter(event)">
 
-                    <label style="color:#bdc3c7; font-size:0.85rem; display:flex; align-items:center; gap:8px; cursor:pointer; margin-top:-5px; font-weight:bold;">
+                    <div id="pwd-match-status" style="font-size:0.8rem; margin-top:0px; margin-bottom:8px; font-weight:bold; display:none;"></div>
+
+                    <label style="color:#bdc3c7; font-size:0.85rem; display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold;">
                         <input type="checkbox" id="crm-show-pwds" onchange="window.togglePasswordVisibility(this, ['crm-pwd', 'crm-pwd-conf'])" style="width:16px; height:16px; cursor:pointer;">
                         Afficher les mots de passe
                     </label>
@@ -721,12 +724,21 @@
                         <input type="text" id="crm-lastname" class="crm-input" placeholder="Nom" oninput="window.sanitizeCRM(this)">
                     </div>
                 </div>
-                <label class="crm-label">Téléphone</label>
-                <input type="tel" id="crm-phone" class="crm-input" placeholder="06..." oninput="window.sanitizeCRM(this)">
                 
-                <label class="crm-label">Date de Naissance *</label>
-                <input type="date" id="crm-dob" class="crm-input">
+                <div class="crm-row">
+                    <div class="crm-col">
+                        <label class="crm-label">Téléphone</label>
+                        <input type="tel" id="crm-phone" class="crm-input" placeholder="06..." oninput="window.sanitizeCRM(this)">
+                    </div>
+                    <div class="crm-col">
+                        <label class="crm-label">Date de Naissance *</label>
+                        <input type="date" id="crm-dob" class="crm-input">
+                    </div>
+                </div>
                 
+                <label class="crm-label">Entreprise / Team (Optionnel)</label>
+                <input type="text" id="crm-company" class="crm-input" placeholder="Nom de ta société ou équipe" oninput="window.sanitizeCRM(this)">
+
                 <div class="crm-row">
                     <div class="crm-col" style="flex: 0.4;">
                         <label class="crm-label">CP *</label>
@@ -754,23 +766,22 @@
                         <img id="reg-photo-img" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
                         <div id="reg-photo-edit-badge" style="position: absolute; bottom: 0; background: rgba(0,0,0,0.7); width: 100%; text-align: center; padding: 4px 0; font-size: 11px; display: none; color: white;">✏️ Modifier</div>
                     </div>
-                    <input type="file" id="crm-file-input" accept=".jpg,.jpeg,.png,.webp,image/*" style="display:none" onchange="window.handleCRMFileUpload(this)">
+                    <input type="file" id="crm-file-input" accept=".jpg,.jpeg,.png,.webp,image/*,application/octet-stream" style="display:none" onchange="window.handleCRMFileUpload(this)">
                     <p id="reg-photo-status" style="font-size:0.8rem; color:var(--success); margin-top:-5px; margin-bottom:10px; text-align:center; display:none;"></p>
                 </div>
 
                 <label class="crm-label">Pseudo du joueur *</label>
                 <input type="text" id="crm-pseudo" class="crm-input" placeholder="Ton pseudo dans le jeu" oninput="window.sanitizeCRM(this)">
-                
-                <label class="crm-label">Entreprise / Team (Optionnel)</label>
-                <input type="text" id="crm-company" class="crm-input" placeholder="Nom de ta société ou équipe" oninput="window.sanitizeCRM(this)">
             </div>
 
             <p id="crm-error" style="color:#e74c3c; font-size:0.8rem; margin-top:10px; min-height:1em; text-align:center;"></p>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button id="btn-c-back" class="btn-main" onclick="window.crmPrev()" style="display:none; background:#555; flex:0.4; font-size:1rem;">Retour</button>
-                <button id="btn-c-next" class="btn-main" onclick="window.crmNext()" style="background:var(--primary); flex:1; font-size:1rem;">Étape Suivante</button>
+                <button id="btn-c-next" class="btn-main" onclick="window.crmNext()" style="background:var(--primary); flex:1; font-size:1rem;" disabled>Étape Suivante</button>
             </div>
+        </div>
+    </div>
         </div>
     </div>
 	
@@ -874,7 +885,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.261";
+        const CLIENT_VERSION = "1.262";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -3097,14 +3108,35 @@
             });
         };
 
-        // 2. Validateur dynamique de mot de passe (Adapté à ton bouton crm-next)
-        window.checkPasswordStrength = function(pwd) {
+        // 2. Validateur dynamique + Comparateur de mots de passe
+        window.checkPasswordMatch = function() {
+            var p1 = document.getElementById('crm-pwd').value;
+            var p2 = document.getElementById('crm-pwd-conf').value;
+            var matchEl = document.getElementById('pwd-match-status');
+            
+            // A. Analyse de la correspondance
+            let isMatch = false;
+            if(p1.length > 0 || p2.length > 0) {
+                matchEl.style.display = 'block';
+                if(p1 === p2 && p1.length > 0) {
+                    matchEl.innerHTML = "✅ Les mots de passe correspondent";
+                    matchEl.style.color = "var(--success)";
+                    isMatch = true;
+                } else {
+                    matchEl.innerHTML = "❌ Les mots de passe ne correspondent pas";
+                    matchEl.style.color = "#e74c3c";
+                }
+            } else {
+                matchEl.style.display = 'none';
+            }
+
+            // B. Analyse de la sécurité (Rouge/Vert)
             const rules = [
-                { id: 'rule-len', test: pwd.length >= 8, text: '8 caractères minimum' },
-                { id: 'rule-maj', test: /[A-Z]/.test(pwd), text: '1 Majuscule' },
-                { id: 'rule-min', test: /[a-z]/.test(pwd), text: '1 Minuscule' },
-                { id: 'rule-num', test: /[0-9]/.test(pwd), text: '1 Chiffre' },
-                { id: 'rule-spe', test: /[^A-Za-z0-9]/.test(pwd), text: '1 Caractère spécial' }
+                { id: 'rule-len', test: p1.length >= 8, text: '8 caractères minimum' },
+                { id: 'rule-maj', test: /[A-Z]/.test(p1), text: '1 Majuscule' },
+                { id: 'rule-min', test: /[a-z]/.test(p1), text: '1 Minuscule' },
+                { id: 'rule-num', test: /[0-9]/.test(p1), text: '1 Chiffre' },
+                { id: 'rule-spe', test: /[^A-Za-z0-9]/.test(p1), text: '1 Caractère spécial' }
             ];
             
             let allValid = true;
@@ -3122,14 +3154,16 @@
                 }
             });
             
-            // On débloque ton vrai bouton "Étape Suivante"
+            // C. On débloque "Étape Suivante" UNIQUEMENT si sécurité OK + Correspondance OK
             let btnNext = document.getElementById('btn-c-next');
-            if(btnNext && window.crmStep === 1) btnNext.disabled = !allValid;
+            if(btnNext && window.crmStep === 1) {
+                btnNext.disabled = !(allValid && isMatch);
+            }
             
-            return allValid;
+            return (allValid && isMatch);
         };
 
-        // 3. Le Pont Magique (Adapté à tes vrais IDs de fenêtres)
+        // 3. Le Pont Magique (Adapté)
         window.switchToRegisterFromLogin = function() {
             let email = document.getElementById('login-email').value;
             let pwd = document.getElementById('login-pwd').value; 
@@ -3140,10 +3174,9 @@
             setTimeout(() => {
                 document.getElementById('crm-email').value = email; 
                 document.getElementById('crm-email-conf').value = email; 
-                let pwdInput = document.getElementById('crm-pwd'); 
-                pwdInput.value = pwd;
+                document.getElementById('crm-pwd').value = pwd;
                 document.getElementById('crm-pwd-conf').value = pwd; 
-                window.checkPasswordStrength(pwd); 
+                window.checkPasswordMatch(); // On lance la double vérification
             }, 100);
         };
 		
