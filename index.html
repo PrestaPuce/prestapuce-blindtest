@@ -217,9 +217,13 @@
         <div id="step-pseudo" class="step-screen">
             <div class="screen-content">
                 <h2>Ton Nom de Scène ?</h2>
-                <input type="text" id="input-pseudo" placeholder="Ex: Batman, Zorro..." maxlength="12" oninput="window.sanitizePseudoLive(this, 'pseudo-warning')" onkeypress="if(event.key==='Enter') validatePseudo()">
+                <input type="text" id="input-pseudo" class="crm-input" style="max-width:350px;" placeholder="Ex: Batman, Zorro..." maxlength="12" oninput="window.sanitizePseudoLive(this, 'pseudo-warning')" onkeypress="if(event.key==='Enter') validatePseudo()">
                 <p id="pseudo-warning" style="display:none; color:var(--gold); font-size:0.8rem; margin-top:-5px; margin-bottom:10px; font-weight:bold;">⚠️ Émojis et symboles spéciaux interdits.</p>
-                <button id="btn-pseudo-next" class="btn-main" onclick="validatePseudo()">Suivant</button>
+                
+                <div id="pseudo-btns-group" style="width:100%; max-width:350px; display:flex; gap:10px;">
+                    <button id="btn-pseudo-cancel" class="btn-main" onclick="finishEdit(false)" style="display:none; background:#34495e; flex:1;">Annuler</button>
+                    <button id="btn-pseudo-next" class="btn-main" onclick="validatePseudo()" style="flex:1;">Suivant</button>
+                </div>
 
                 <div id="pseudo-choice-container" style="display:none; margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; width: 100%; max-width: 350px;">
                     <p style="font-size:0.85em; margin-bottom:12px; color:var(--accent);">Ce pseudo est différent de ton profil.</p>
@@ -286,7 +290,7 @@
                         <span id="history-counter" style="font-size:0.85em; font-weight:bold; background:rgba(0,0,0,0.5); padding:3px 8px; border-radius:10px;">0 / 10</span>
                     </div>
                     <div class="common-grid" id="avatar-history-grid" style="gap:15px; padding-top:10px;"></div>
-                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; max-width:350px; background:#34495e; font-size:0.8rem; margin-top:10px;">Retour</button>
+                    <button class="btn-main" onclick="window.closeHistoryMenu()" style="width:100%; max-width:350px; background:#34495e; font-size:0.8rem; margin-top:10px;">Retour</button>
                 </div>
 				
                 <div id="avatar-choice-container" style="display:none; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; width: 100%; text-align: center;">
@@ -513,6 +517,26 @@
         </div>
     </div>
     
+	<div id="overlay-avatar-preview" class="overlay-full" style="z-index: 2400;" onclick="this.style.display='none'">
+        <div class="settings-content" onclick="event.stopPropagation()" style="position:relative;">
+            <h2 style="color:var(--accent); margin-top:0;">GÉRER CETTE PHOTO</h2>
+            
+            <div style="display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom:20px;">
+                <button id="btn-zoom-prev" onclick="window.navigateZoom(-1)" style="background:transparent; border:none; color:white; font-size:2rem; cursor:pointer; padding:10px;">◀</button>
+                
+                <div id="zoom-avatar-display" style="width:160px; height:160px; border-radius:50%; border:4px solid var(--accent); overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:5rem; background:#222; flex-shrink:0;"></div>
+                
+                <button id="btn-zoom-next" onclick="window.navigateZoom(1)" style="background:transparent; border:none; color:white; font-size:2rem; cursor:pointer; padding:10px;">▶</button>
+            </div>
+            
+            <button id="btn-zoom-equip" class="btn-main" style="margin-bottom:10px; background:var(--success);">✅ Utiliser cet avatar</button>
+            <button id="btn-zoom-download" class="settings-btn" style="border:1px solid white; text-align:center;">⬇️ Télécharger sur l'appareil</button>
+            <button id="btn-zoom-delete" class="settings-btn" style="border:1px solid var(--danger); color:var(--danger); text-align:center; display:none;">❌ Supprimer de la galerie</button>
+            
+            <button class="btn-secondary" style="margin-top:10px; width:100%; border-color:transparent;" onclick="document.getElementById('overlay-avatar-preview').style.display='none'">Annuler</button>
+        </div>
+    </div>
+
     <div id="overlay-manage-team" class="overlay-full" style="z-index: 2500;" onclick="closeTeamManagement()">
         <div class="settings-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--gold); margin-top:0;">GÉRER L'ÉQUIPE</h2>
@@ -923,7 +947,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.266";
+        const CLIENT_VERSION = "1.267";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1135,9 +1159,25 @@
             if(html5QrCode) { try { html5QrCode.stop(); document.getElementById('reader').style.display='none'; } catch(e){} }
             const current = document.querySelector('.step-screen.active');
             if (pushToHistory) { history.pushState({ step: targetId }, "", "#" + targetId); if(current) stepHistory.push(current.id); }
+            
+            // --- RESET GLOBAL DES ÉTATS D'INTERFACE ---
             document.querySelectorAll('.gallery-container').forEach(g => g.style.display = 'none');
             document.querySelectorAll('.selection-mode-container').forEach(c => c.style.display = 'flex');
             document.getElementById('team-preview').style.display = 'none';
+
+            // Reset spécifique du Pseudo (CRM et Warning)
+            const pseudoChoice = document.getElementById('pseudo-choice-container');
+            const pseudoNext = document.getElementById('btn-pseudo-next');
+            const pseudoCancel = document.getElementById('btn-pseudo-cancel');
+            const pseudoWarn = document.getElementById('pseudo-warning');
+            if (pseudoChoice) pseudoChoice.style.display = 'none';
+            if (pseudoWarn) pseudoWarn.style.display = 'none';
+            if (pseudoNext) {
+                pseudoNext.style.display = 'block';
+                pseudoNext.innerText = isEditing ? "Enregistrer" : "Suivant";
+            }
+            if (pseudoCancel) pseudoCancel.style.display = isEditing ? "block" : "none";
+
             document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
             document.getElementById(targetId).classList.add('active');
             updateBackButton(targetId);
@@ -1557,56 +1597,108 @@
                 div.className = 'grid-item-emoji';
                 div.style.width = '100%'; div.style.height = '100%'; div.style.margin = '0';
                 
-                if(avObj.url.includes('http') || avObj.url.includes('data:image')) {
+                let isImage = avObj.url.includes('http') || avObj.url.includes('data:image');
+                if(isImage) {
                     div.innerHTML = '<img src="' + avObj.url + '" style="width:100%; height:100%; object-fit:cover;">';
                     div.style.padding = "0"; div.style.overflow = "hidden";
                 } else { div.innerText = avObj.url; }
                 
-                div.onclick = function() { // Sélectionner l'avatar
-                    player.avatar = avObj.url;
-                    document.getElementById('avatar-preview').innerHTML = div.innerHTML;
-                    window.hideClassicAvatarMenu();
-                };
+                // 🚀 NOUVEAU : Ouverture du Diaporama !
+                div.onclick = function() { window.openZoomPreview(index); };
                 wrapper.appendChild(div);
 
-                // Bouton Télécharger (⬇️)
-                if(avObj.url.includes('data:image')) { 
-                    let dlBtn = document.createElement('div');
-                    dlBtn.innerHTML = '⬇️';
-                    dlBtn.style.cssText = 'position:absolute; bottom:-10px; left:-10px; background:#222; border-radius:50%; width:25px; height:25px; display:flex; justify-content:center; align-items:center; font-size:12px; cursor:pointer; border:2px solid #fff; z-index:5;';
+                // Miniature : Raccourci Télécharger (Haut Gauche)
+                if(isImage) { 
+                    let dlBtn = document.createElement('div'); dlBtn.innerHTML = '⬇️';
+                    dlBtn.style.cssText = 'position:absolute; top:-10px; left:-10px; background:#222; border-radius:50%; width:25px; height:25px; display:flex; justify-content:center; align-items:center; font-size:12px; cursor:pointer; border:2px solid #fff; z-index:5;';
                     dlBtn.onclick = function(e) {
-                        e.stopPropagation();
-                        let a = document.createElement('a');
-                        a.href = avObj.url; a.download = 'Avatar_' + Date.now() + '.jpg';
-                        a.click();
-                        alert("Image téléchargée sur ton appareil !");
-                    };
-                    wrapper.appendChild(dlBtn);
+                        e.stopPropagation(); let a = document.createElement('a'); a.href = avObj.url; a.download = 'Avatar_' + Date.now() + '.jpg'; a.click();
+                    }; wrapper.appendChild(dlBtn);
                 }
 
-                // Bouton Supprimer (❌) si l'image n'est pas permanente
+                // Miniature : Raccourci Supprimer (Haut Droite)
                 if(!avObj.isPermanent) {
-                    let delBtn = document.createElement('div');
-                    delBtn.innerHTML = '❌';
+                    let delBtn = document.createElement('div'); delBtn.innerHTML = '❌';
                     delBtn.style.cssText = 'position:absolute; top:-10px; right:-10px; background:#ff4444; border-radius:50%; width:25px; height:25px; display:flex; justify-content:center; align-items:center; font-size:12px; cursor:pointer; border:2px solid #fff; z-index:5;';
                     delBtn.onclick = function(e) {
                         e.stopPropagation();
-                        if(confirm("Effacer ce look ? (Pense à le télécharger avec ⬇️ si tu veux le conserver).")) {
+                        if(confirm("Effacer ce look ?")) {
                             window.avatarHistory.splice(index, 1);
                             firebase.database().ref('users_crm/' + myUserID).update({ avatarHistory: window.avatarHistory }).then(() => {
-                                window.showAvatarHistory(); // On rafraîchit
-                                // Magie du Buffer : Sauvegarde automatique si un selfie attendait !
-                                if (window.pendingSelfie) {
-                                    alert("Place libérée ! Ton nouveau selfie a été automatiquement enregistré.");
-                                    window.savePendingSelfie();
-                                }
+                                window.showAvatarHistory(); 
+                                if (window.pendingSelfie) { alert("Place libérée ! Ton nouveau selfie a été automatiquement enregistré."); window.savePendingSelfie(); }
                             });
                         }
-                    };
-                    wrapper.appendChild(delBtn);
+                    }; wrapper.appendChild(delBtn);
                 }
                 grid.appendChild(wrapper);
             });
+        };
+
+        // 🚀 MOTEUR DU DIAPORAMA AVATAR
+        window.currentZoomIndex = 0;
+
+        window.openZoomPreview = function(index) {
+            if (!window.avatarHistory || window.avatarHistory.length === 0) return;
+            window.currentZoomIndex = index;
+            const avObj = window.avatarHistory[index];
+            const previewZone = document.getElementById('zoom-avatar-display');
+            let isImage = avObj.url.includes('http') || avObj.url.includes('data:image');
+            
+            if(isImage) { previewZone.innerHTML = '<img src="' + avObj.url + '" style="width:100%; height:100%; object-fit:cover;">'; } 
+            else { previewZone.innerHTML = avObj.url; }
+
+            // Gestion des flèches
+            document.getElementById('btn-zoom-prev').style.visibility = (index > 0) ? 'visible' : 'hidden';
+            document.getElementById('btn-zoom-next').style.visibility = (index < window.avatarHistory.length - 1) ? 'visible' : 'hidden';
+
+            // Bouton Utiliser
+            document.getElementById('btn-zoom-equip').onclick = () => {
+                document.getElementById('overlay-avatar-preview').style.display = 'none';
+                player.avatar = avObj.url;
+                const previewEl = document.getElementById('avatar-preview');
+                if (previewEl) {
+                    if (isImage) previewEl.innerHTML = '<img src="' + avObj.url + '" style="width:100%; height:100%; object-fit:cover;">';
+                    else previewEl.innerHTML = avObj.url;
+                }
+                if (window.isDirectGallery) window.validateAvatarChoice();
+                else window.hideClassicAvatarMenu();
+            };
+
+            // Bouton Télécharger
+            const dlBtn = document.getElementById('btn-zoom-download');
+            if (isImage) {
+                dlBtn.style.display = 'block';
+                dlBtn.onclick = () => { let a = document.createElement('a'); a.href = avObj.url; a.download = 'Avatar_' + Date.now() + '.jpg'; a.click(); };
+            } else { dlBtn.style.display = 'none'; }
+
+            // Bouton Supprimer dynamique
+            const delBtn = document.getElementById('btn-zoom-delete');
+            if (!avObj.isPermanent) {
+                delBtn.style.display = 'block';
+                delBtn.onclick = () => {
+                    if(confirm("Voulez-vous vraiment supprimer cet avatar de votre galerie ?")) {
+                        window.avatarHistory.splice(window.currentZoomIndex, 1);
+                        firebase.database().ref('users_crm/' + myUserID).update({ avatarHistory: window.avatarHistory }).then(() => {
+                            window.showAvatarHistory();
+                            if (window.avatarHistory.length > 0) {
+                                let newIndex = window.currentZoomIndex >= window.avatarHistory.length ? window.avatarHistory.length - 1 : window.currentZoomIndex;
+                                window.openZoomPreview(newIndex);
+                            } else {
+                                document.getElementById('overlay-avatar-preview').style.display = 'none';
+                            }
+                            if (window.pendingSelfie) { alert("Place libérée ! Ton nouveau selfie a été enregistré."); window.savePendingSelfie(); }
+                        });
+                    }
+                };
+            } else { delBtn.style.display = 'none'; }
+
+            document.getElementById('overlay-avatar-preview').style.display = 'flex';
+        };
+
+        window.navigateZoom = function(direction) {
+            let newIndex = window.currentZoomIndex + direction;
+            if (newIndex >= 0 && newIndex < window.avatarHistory.length) { window.openZoomPreview(newIndex); }
         };
 
         window.useCurrentAvatar = function() {
@@ -1909,14 +2001,24 @@
         };
 		
 		window.openGalleryDirectly = function() {
+            window.isDirectGallery = true; // 🚀 NOUVEAU : Mémoire du routage pour le bouton Retour
             document.getElementById('overlay-settings').style.display = 'none';
-            // On force l'affichage vers la galerie
             navigateTo('step-avatar');
-            // Petit délai pour laisser le temps au DOM de s'actualiser
             setTimeout(() => {
                 document.getElementById('avatar-express-actions').style.display = 'none';
-                window.showAvatarHistory(); // Affiche les photos avec options Supprimer/Télécharger
+                window.showAvatarHistory(); 
             }, 50);
+        };
+
+        window.closeHistoryMenu = function() {
+            if (window.isDirectGallery) {
+                window.isDirectGallery = false;
+                document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
+                navigateTo('step-game', false);
+                openSettings(); // Retour propre au menu !
+            } else {
+                window.hideClassicAvatarMenu();
+            }
         };
 		
 		// --- PATCH V1.253 : GESTION SÉCURITÉ ---
@@ -2928,6 +3030,10 @@
         };
 
         window.crmNext = function() {
+            // 🚀 PROTECTION ANTI-SPAM : On ignore la touche "Entrée" et les clics multiples si ça charge déjà
+            var btnNext = document.getElementById('btn-c-next');
+            if (btnNext && btnNext.disabled) return;
+
             window.showCRMError(""); // Reset erreur
 
             // --- VÉRIFICATIONS ÉTAPE 1 (Identifiants) ---
@@ -3123,9 +3229,13 @@
                 
                 // 🛑 LE BLOCAGE ANTI-RECONNEXION SI EMAIL NON VÉRIFIÉ
                 if (!user.emailVerified) {
+                    if(confirm("⚠️ ACCÈS REFUSÉ ⚠️\n\nVous n'avez pas encore validé votre adresse e-mail.\n\nVeuillez cliquer sur le lien envoyé à " + email + " (Vérifiez vos SPAMS !).\n\nVoulez-vous que l'on vous renvoie un nouvel e-mail de validation ?")) {
+                        user.sendEmailVerification().then(() => {
+                            alert("Nouvel e-mail envoyé à " + email + " !");
+                        }).catch(e => { alert("Erreur d'envoi : " + e.message); });
+                    }
                     firebase.auth().signOut(); // On le déconnecte de force
                     btn.innerText = "Se Connecter"; btn.disabled = false;
-                    alert("⚠️ ACCÈS REFUSÉ ⚠️\n\nVous n'avez pas encore validé votre adresse e-mail.\n\nVeuillez cliquer sur le lien envoyé à " + email + " (Vérifiez vos SPAMS !) avant de pouvoir vous connecter.");
                     return;
                 }
 
@@ -3217,8 +3327,7 @@
             }
         };
 		
-		// --- PATCH V1.232 : GESTION DU CHOIX AVATAR ---
-        // --- PATCH V1.246 : SAUVEGARDE ET CHECK DE CAPACITÉ ---
+        // --- PATCH V1.232 : GESTION DU CHOIX AVATAR (Avec archivage automatique) ---
         window.handleAvatarChoice = function(saveToCrm) {
             const finalizeAvatarFlow = () => {
                 if (isEditing) {
@@ -3231,10 +3340,17 @@
             };
 
             if (saveToCrm && myUserID && !myUserID.startsWith('u_')) {
+                
+                // 🚀 ARCHIVAGE : L'ancien avatar est archivé AVANT d'être écrasé
+                if (window.crmAvatar && window.crmAvatar !== player.avatar) {
+                    let alreadyExists = window.avatarHistory.find(a => a.url === window.crmAvatar);
+                    if (!alreadyExists) window.avatarHistory.unshift({ url: window.crmAvatar, isPermanent: false });
+                }
+
                 // Vérification de la galerie (max 10)
-                if (window.avatarHistory && window.avatarHistory.length >= 10 && !window.pendingSelfie) {
+                if (window.avatarHistory && window.avatarHistory.length > 10 && !window.pendingSelfie) {
                     window.pendingSelfie = player.avatar;
-                    alert("Galerie pleine ! Supprimez une photo pour enregistrer celle-ci par défaut.");
+                    alert("Galerie pleine ! Ton ancien avatar a pris la dernière place. Supprimez une photo pour enregistrer votre nouveau look.");
                     window.openGalleryDirectly();
                     return;
                 }
