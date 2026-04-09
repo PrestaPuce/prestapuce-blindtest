@@ -132,6 +132,15 @@
         
         @keyframes bounceTrophy { 0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 transparent); } 50% { transform: scale(1.1) translateY(-10px); filter: drop-shadow(0 10px 15px rgba(241,196,15,0.6)); } }
         .champion-trophy { animation: popTrophy 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, bounceTrophy 2s ease-in-out 0.6s infinite !important; }
+		
+		/* 🚀 NOUVEAU : Grilles pour formulaires compacts */
+        .crm-row { display: flex; gap: 10px; margin-bottom: 5px; width: 100%; }
+        .crm-col { flex: 1; display: flex; flex-direction: column; }
+        
+        /* Harmonisation de la modale sécurité */
+        #overlay-security-profile label { color: #bdc3c7; font-weight: bold; margin-bottom: 4px; }
+        #overlay-security-profile input { margin-bottom: 12px; }
+		
     </style>
 </head>
 <body>
@@ -470,7 +479,7 @@
     </div>
 
     <div id="overlay-settings" class="overlay-full" onclick="this.style.display='none'">
-        <div class="settings-content" onclick="event.stopPropagation()">
+        <div class="settings-content" onclick="event.stopPropagation()" style="max-width:400px;">
             
             <div id="account-status-container" style="margin-bottom: 15px; text-align: center;">
                 <div id="account-status-badge" style="font-size: 0.8rem; padding: 5px 12px; border-radius: 20px; display: inline-block; font-weight: bold; margin-bottom: 5px;"></div>
@@ -479,27 +488,26 @@
                      style="display:none; font-size: 0.8rem; color: var(--primary); text-decoration: underline; cursor: pointer;">
                     Créer un compte pour sauvegarder
                 </div>
-                
-                <button id="btn-edit-profile" class="settings-btn" onclick="window.openEditProfileModal()" style="display:none; background: rgba(39, 174, 96, 0.1); border: 1px solid var(--success); color: white; margin-top: 10px;">
-                    ⚙️ Gérer mes informations
-                </button>
-
-                <button id="btn-security-profile" class="settings-btn" onclick="window.openSecurityModal()" style="display:none; background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; color: white; margin-top: 5px;">
-                    🔒 E-mail & Mot de Passe
-                </button>
             </div>
 
-            <h2 style="color:var(--accent); margin-top:0;">MODIFIER PROFIL</h2>
-            
-            <button class="settings-btn btn-return-game" onclick="finishEdit(false)">⬅️ RETOUR AU BUZZER</button>
-            
-            <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
-            
-            <button id="btn-manage-team" class="settings-btn" onclick="openTeamManagement()" style="display:none; border: 1px solid var(--gold); color: var(--gold);">👑 Gérer mon Équipe</button>
+            <h2 style="color:var(--accent); margin-top:0; margin-bottom:20px;">MODIFIER PROFIL</h2>
             
             <button class="settings-btn" onclick="editStep('step-pseudo')">✏️ Modifier mon Pseudo</button>
             <button class="settings-btn" onclick="window.openAvatarMenuDirectly()">📷 Changer d'Avatar</button>
+            
+            <button id="btn-direct-gallery" class="settings-btn" onclick="window.openGalleryDirectly()" style="display:none; background:rgba(255,255,255,0.05);">🕰️ Gérer ma Galerie (10 photos)</button>
+            
             <button class="settings-btn" onclick="editStep('step-mode')">🛡️ Changer Mode (Solo/Team)</button>
+            
+            <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+            
+            <button id="btn-manage-team" class="settings-btn" onclick="openTeamManagement()" style="display:none; border: 1px solid var(--gold); color: var(--gold); margin-bottom:15px;">👑 Gérer mon Équipe</button>
+
+            <button id="btn-edit-profile" class="settings-btn" onclick="window.openEditProfileModal()" style="display:none; background: rgba(39, 174, 96, 0.1); border: 1px solid var(--success); color: white;">⚙️ Mes informations personnelles</button>
+            
+            <button id="btn-security-profile" class="settings-btn" onclick="window.openSecurityModal()" style="display:none; background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; color: white;">🔒 E-mail & Mot de Passe</button>
+
+            <button class="settings-btn btn-return-game" onclick="finishEdit(false)" style="margin-top:15px; background:#444;">⬅️ RETOUR AU BUZZER</button>
         </div>
     </div>
     
@@ -695,14 +703,13 @@
                     <label class="crm-label">Confirmer le Mot de passe *</label>
                     <input type="password" id="crm-pwd-conf" class="crm-input" placeholder="Retapez votre mot de passe" autocomplete="new-password" oninput="window.checkPasswordMatch()" onkeyup="window.crmCheckEnter(event)">
 
-                    <div id="pwd-match-status" style="font-size:0.8rem; margin-top:0px; margin-bottom:8px; font-weight:bold; display:none;"></div>
-
-                    <label style="color:#bdc3c7; font-size:0.85rem; display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold;">
+                    <label style="color:#bdc3c7; font-size:0.85rem; display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold; margin-top:5px;">
                         <input type="checkbox" id="crm-show-pwds" onchange="window.togglePasswordVisibility(this, ['crm-pwd', 'crm-pwd-conf'])" style="width:16px; height:16px; cursor:pointer;">
                         Afficher les mots de passe
                     </label>
 
                     <ul style="list-style:none; padding:0; font-size:0.75rem; color:#e74c3c; line-height:1.6; margin-top:10px; margin-bottom:0; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">
+                        <li id="rule-match" style="display:none; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">❌ Les mots de passe ne correspondent pas</li>
                         <li id="rule-len">❌ 8 caractères minimum</li>
                         <li id="rule-maj">❌ 1 Majuscule</li>
                         <li id="rule-min">❌ 1 Minuscule</li>
@@ -732,7 +739,7 @@
                     </div>
                     <div class="crm-col">
                         <label class="crm-label">Date de Naissance *</label>
-                        <input type="date" id="crm-dob" class="crm-input">
+                        <input type="text" id="crm-dob" class="crm-input" placeholder="JJ/MM/AAAA" inputmode="numeric" maxlength="10" oninput="window.formatDateInput(this)">
                     </div>
                 </div>
                 
@@ -822,64 +829,94 @@
     </div>
 	
 	<div id="overlay-edit-profile" class="overlay-full" style="display:none; z-index:9999;">
-        <div class="modal-content" style="max-width: 400px; padding: 20px;">
+        <div class="modal-content" style="max-width: 450px; padding: 20px;">
             <h2 style="color:var(--accent); margin-top:0;">MES INFORMATIONS</h2>
-            <p style="font-size:0.8rem; color:#ccc; margin-bottom:15px;">Modifie tes données personnelles ci-dessous.</p>
+            <p style="font-size:0.8rem; color:#ccc; margin-bottom:20px;">Données enregistrées dans ton profil CRM.</p>
             
             <div style="text-align:left; font-size:0.9rem;">
-                <label>Prénom</label>
-                <input type="text" id="edit-firstname" class="login-input" placeholder="Prénom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key === 'Enter') document.getElementById('edit-lastname').focus();">
-                
-                <label>Nom</label>
-                <input type="text" id="edit-lastname" class="login-input" placeholder="Nom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key === 'Enter') document.getElementById('edit-phone').focus();">
-                
-                <label>Téléphone</label>
-                <input type="tel" id="edit-phone" class="login-input" placeholder="06..." oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key === 'Enter') document.getElementById('edit-dob').focus();">
-                
-                <label>Date de Naissance</label>
-                <input type="date" id="edit-dob" class="login-input" onkeypress="if(event.key === 'Enter') document.getElementById('edit-zip').focus();">
-                
-                <label>Code Postal</label>
-                <input type="text" id="edit-zip" class="login-input" placeholder="75000" oninput="this.value = this.value.replace(/[.#$\[\]]/g, ''); window.fetchCityFromZipEdit(this.value);" onkeypress="if(event.key === 'Enter') document.getElementById('edit-city').focus();">
-                
-                <label>Ville</label>
-                <input type="text" id="edit-city" class="login-input" placeholder="Ville" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key === 'Enter') document.getElementById('edit-company').focus();">
+                <div class="crm-row">
+                    <div class="crm-col">
+                        <label>Prénom *</label>
+                        <input type="text" id="edit-firstname" class="crm-input" placeholder="Prénom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                    </div>
+                    <div class="crm-col">
+                        <label>Nom *</label>
+                        <input type="text" id="edit-lastname" class="crm-input" placeholder="Nom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                    </div>
+                </div>
+
+                <div class="crm-row">
+                    <div class="crm-col">
+                        <label>Téléphone</label>
+                        <input type="tel" id="edit-phone" class="crm-input" placeholder="06..." oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                    </div>
+                    <div class="crm-col">
+                        <label>Date de Naissance *</label>
+                        <input type="text" id="edit-dob" class="crm-input" placeholder="JJ/MM/AAAA" inputmode="numeric" maxlength="10" oninput="window.formatDateInput(this)">
+                    </div>
+                </div>
                 
                 <label>Entreprise / Team (Optionnel)</label>
-                <input type="text" id="edit-company" class="login-input" placeholder="Société" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key === 'Enter') window.saveEditedProfile();">
+                <input type="text" id="edit-company" class="crm-input" placeholder="Société" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                
+                <div class="crm-row">
+                    <div class="crm-col" style="flex:0.4;">
+                        <label>Code Postal *</label>
+                        <input type="text" id="edit-zip" class="crm-input" placeholder="75000" maxlength="5" oninput="this.value = this.value.replace(/[.#$\[\]]/g, ''); window.fetchCityFromZipEdit(this.value);">
+                    </div>
+                    <div class="crm-col">
+                        <label>Ville *</label>
+                        <input type="text" id="edit-city" class="crm-input" placeholder="Ville" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                    </div>
+                </div>
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn-main" onclick="document.getElementById('overlay-edit-profile').style.display='none';" style="background:#555; flex:1;">Annuler</button>
+                <button class="btn-main" onclick="document.getElementById('overlay-edit-profile').style.display='none'; openSettings();" style="background:#555; flex:1;">Annuler</button>
                 <button class="btn-main" onclick="window.saveEditedProfile()" style="background:var(--success); flex:1;">Enregistrer</button>
             </div>
         </div>
     </div>
 	
 	<div id="overlay-security-profile" class="overlay-full" style="display:none; z-index:9999;">
-        <div class="modal-content" style="max-width: 400px; padding: 20px;">
-            <h2 style="color:#e74c3c; margin-top:0;">SÉCURITÉ DU COMPTE</h2>
-            <p style="font-size:0.8rem; color:#ccc; margin-bottom:15px;">Ton mot de passe actuel est indispensable pour appliquer des modifications.</p>
+        <div class="modal-content" style="max-width: 420px; padding: 20px;">
+            <h2 style="color:#e74c3c; margin-top:0;">SÉCURITÉ</h2>
             
             <div style="text-align:left; font-size:0.9rem;">
-                <label style="color:#e74c3c;">Mot de passe actuel (Obligatoire)</label>
-                <input type="password" id="sec-current-pwd" class="login-input" placeholder="Ton mot de passe actuel" style="border-color:#e74c3c;">
+                <label>E-mail actuel</label>
+                <input type="text" id="sec-current-email" class="crm-input" style="background:rgba(255,255,255,0.05); color:#888; border-color:transparent;" readonly>
+                
+                <label>Nouvel E-mail (Optionnel)</label>
+                <input type="email" id="sec-new-email" class="crm-input" placeholder="Laisse vide si inchangé">
                 
                 <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+
+                <label style="color:#e74c3c;">Mot de passe actuel (Obligatoire) *</label>
+                <input type="password" id="sec-current-pwd" class="crm-input" placeholder="Indispensable pour valider" style="border-color:#e74c3c;">
                 
-                <label>Nouvel E-mail (Laisse vide si inchangé)</label>
-                <input type="email" id="sec-new-email" class="login-input" placeholder="nouvel@email.com">
-                
-                <label>Nouveau Mot de passe (Laisse vide si inchangé)</label>
-                <input type="password" id="sec-new-pwd" class="login-input" placeholder="Nouveau mot de passe">
+                <label>Nouveau Mot de passe (Optionnel)</label>
+                <input type="password" id="sec-new-pwd" class="crm-input" placeholder="8 car., 1 Maj, 1 Chiffre..." oninput="window.checkSecPasswordMatch()">
                 
                 <label>Confirmer Nouveau Mot de passe</label>
-                <input type="password" id="sec-new-pwd-confirm" class="login-input" placeholder="Confirmer mot de passe">
+                <input type="password" id="sec-new-pwd-confirm" class="crm-input" placeholder="Retapez le nouveau MDP" oninput="window.checkSecPasswordMatch()">
+
+                <label style="color:#bdc3c7; font-size:0.8rem; display:flex; align-items:center; gap:8px; cursor:pointer; margin-top:-5px; margin-bottom:5px;">
+                    <input type="checkbox" onchange="window.togglePasswordVisibility(this, ['sec-current-pwd', 'sec-new-pwd', 'sec-new-pwd-confirm'])"> Afficher les mots de passe
+                </label>
+
+                <ul id="sec-pwd-rules" style="display:none; list-style:none; padding:10px; font-size:0.75rem; color:#e74c3c; line-height:1.6; background:rgba(0,0,0,0.2); border-radius:8px; margin-top:10px; margin-bottom:0;">
+                    <li id="sec-rule-match" style="display:none; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">❌ Les mots de passe ne correspondent pas</li>
+                    <li id="sec-rule-len">❌ 8 caractères minimum</li>
+                    <li id="sec-rule-maj">❌ 1 Majuscule</li>
+                    <li id="sec-rule-min">❌ 1 Minuscule</li>
+                    <li id="sec-rule-num">❌ 1 Chiffre</li>
+                    <li id="sec-rule-spe">❌ 1 Caractère spécial</li>
+                </ul>
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn-main" onclick="document.getElementById('overlay-security-profile').style.display='none';" style="background:#555; flex:1;">Annuler</button>
-                <button class="btn-main" id="btn-save-security" onclick="window.saveSecurityProfile()" style="background:#e74c3c; flex:1;">Valider</button>
+                <button class="btn-main" onclick="document.getElementById('overlay-security-profile').style.display='none'; openSettings();" style="background:#555; flex:1;">Annuler</button>
+                <button id="btn-save-security" class="btn-main" onclick="window.saveSecurityProfile()" style="background:#e74c3c; flex:1;">Mettre à jour</button>
             </div>
         </div>
     </div>
@@ -1756,11 +1793,14 @@
             }
         }
 
+        // --- PATCH V1.263 : INTELLIGENCE DU MENU ---
+
         function openSettings() { 
             const badge = document.getElementById('account-status-badge');
             const convertBtn = document.getElementById('btn-convert-guest');
             const editBtn = document.getElementById('btn-edit-profile');
-            const secBtn = document.getElementById('btn-security-profile'); // Bouton Sécurité
+            const secBtn = document.getElementById('btn-security-profile');
+            const gallBtn = document.getElementById('btn-direct-gallery');
             
             if (badge) {
                 if (myUserID && !myUserID.startsWith('u_')) {
@@ -1770,13 +1810,13 @@
                     badge.style.border = "1px solid var(--success)";
                     if(convertBtn) convertBtn.style.display = "none";
                     if(editBtn) editBtn.style.display = "block";
+                    if(gallBtn) gallBtn.style.display = "block"; // Affiche accès galerie
                     
-                    // 🚀 DÉTECTION GOOGLE VS EMAIL
                     const user = firebase.auth().currentUser;
                     if (user && user.providerData && user.providerData[0] && user.providerData[0].providerId === 'password') {
-                        if(secBtn) secBtn.style.display = "block"; // Affiche si E-mail
+                        if(secBtn) secBtn.style.display = "block";
                     } else {
-                        if(secBtn) secBtn.style.display = "none"; // Cache si Google
+                        if(secBtn) secBtn.style.display = "none";
                     }
                 } else {
                     badge.innerHTML = "⚪ PROFIL INVITÉ (Non sauvegardé)";
@@ -1786,6 +1826,7 @@
                     if(convertBtn) convertBtn.style.display = "block";
                     if(editBtn) editBtn.style.display = "none";
                     if(secBtn) secBtn.style.display = "none";
+                    if(gallBtn) gallBtn.style.display = "none";
                 }
             }
             document.getElementById('overlay-settings').style.display = 'flex'; 
@@ -1840,19 +1881,78 @@
             });
         };
 		
+		window.openGalleryDirectly = function() {
+            document.getElementById('overlay-settings').style.display = 'none';
+            navigateTo('step-avatar');
+            window.showAvatarHistory(); // Ouvre directement tes 10 photos
+        };
+		
 		// --- PATCH V1.253 : GESTION SÉCURITÉ ---
         window.openSecurityModal = function() {
+            const user = firebase.auth().currentUser;
+            if(!user) return;
+            document.getElementById('sec-current-email').value = user.email;
             document.getElementById('sec-current-pwd').value = "";
             document.getElementById('sec-new-email').value = "";
             document.getElementById('sec-new-pwd').value = "";
             document.getElementById('sec-new-pwd-confirm').value = "";
-            
-            // On pré-remplit l'email actuel pour info
-            const user = firebase.auth().currentUser;
-            if(user) document.getElementById('sec-new-email').value = user.email;
+            document.getElementById('sec-pwd-rules').style.display = 'none';
 
             document.getElementById('overlay-settings').style.display = 'none';
             document.getElementById('overlay-security-profile').style.display = 'flex';
+        };
+
+		window.checkSecPasswordMatch = function() {
+            var p1 = document.getElementById('sec-new-pwd').value;
+            var p2 = document.getElementById('sec-new-pwd-confirm').value;
+            var matchEl = document.getElementById('sec-rule-match');
+            var rulesZone = document.getElementById('sec-pwd-rules');
+            
+            // Affichage de la boîte si on commence à taper un nouveau mot de passe
+            if(p1.length > 0 || p2.length > 0) rulesZone.style.display = 'block';
+            else { rulesZone.style.display = 'none'; return; }
+
+            // A. Analyse de la correspondance
+            let isMatch = false;
+            matchEl.style.display = 'block';
+            if(p1 === p2 && p1.length > 0) {
+                matchEl.innerHTML = "✅ Les mots de passe correspondent";
+                matchEl.style.color = "var(--success)";
+                isMatch = true;
+            } else {
+                matchEl.innerHTML = "❌ Les mots de passe ne correspondent pas";
+                matchEl.style.color = "#e74c3c";
+            }
+
+            // B. Analyse de la sécurité (Rouge/Vert)
+            const rules = [
+                { id: 'sec-rule-len', test: p1.length >= 8, text: '8 caractères minimum' },
+                { id: 'sec-rule-maj', test: /[A-Z]/.test(p1), text: '1 Majuscule' },
+                { id: 'sec-rule-min', test: /[a-z]/.test(p1), text: '1 Minuscule' },
+                { id: 'sec-rule-num', test: /[0-9]/.test(p1), text: '1 Chiffre' },
+                { id: 'sec-rule-spe', test: /[^A-Za-z0-9]/.test(p1), text: '1 Caractère spécial' }
+            ];
+            
+            let allValid = true;
+            rules.forEach(r => {
+                let el = document.getElementById(r.id);
+                if (el) {
+                    if (r.test) {
+                        el.style.color = "var(--success)";
+                        el.innerHTML = "✅ " + r.text;
+                    } else {
+                        el.style.color = "#e74c3c";
+                        el.innerHTML = "❌ " + r.text;
+                        allValid = false;
+                    }
+                }
+            });
+            
+            // C. On bloque/débloque le bouton de sauvegarde
+            let btnSave = document.getElementById('btn-save-security');
+            if(btnSave) {
+                btnSave.disabled = !(allValid && isMatch);
+            }
         };
 
         window.saveSecurityProfile = function() {
@@ -2797,6 +2897,7 @@
             }
 
             // --- VÉRIFICATIONS ÉTAPE 2 (Infos) ---
+            // --- VÉRIFICATIONS ÉTAPE 2 (Infos) ---
             if(window.crmStep === 2) {
                 var prenom = document.getElementById('crm-firstname').value;
                 var nom = document.getElementById('crm-lastname').value;
@@ -2805,11 +2906,17 @@
                 var zip = document.getElementById('crm-zip').value;
                 var ville = document.getElementById('crm-city').value;
                 
-                if(!prenom || !nom || !tel || !dob || !zip || !ville) { 
+                if(!prenom || !nom || !dob || !zip || !ville) { 
                     window.showCRMError("Veuillez remplir les champs obligatoires (*)."); 
                     return; 
                 }
-            } // 🚀 LA FAMEUSE ACCOLADE RÉPARÉE EST ICI !
+                
+                // 🚀 Vérification stricte de la date format JJ/MM/AAAA
+                if(!window.isValidDate(dob)) {
+                    window.showCRMError("La date de naissance doit être au format valide JJ/MM/AAAA.");
+                    return;
+                }
+            }
 
             // --- VÉRIFICATIONS ÉTAPE 3 (Pseudo) ---
             if(window.crmStep === 3) {
@@ -3112,7 +3219,7 @@
         window.checkPasswordMatch = function() {
             var p1 = document.getElementById('crm-pwd').value;
             var p2 = document.getElementById('crm-pwd-conf').value;
-            var matchEl = document.getElementById('pwd-match-status');
+            var matchEl = document.getElementById('rule-match'); // 🚀 On cible maintenant l'élément de la liste
             
             // A. Analyse de la correspondance
             let isMatch = false;
@@ -3154,13 +3261,30 @@
                 }
             });
             
-            // C. On débloque "Étape Suivante" UNIQUEMENT si sécurité OK + Correspondance OK
             let btnNext = document.getElementById('btn-c-next');
             if(btnNext && window.crmStep === 1) {
                 btnNext.disabled = !(allValid && isMatch);
             }
             
             return (allValid && isMatch);
+        };
+		
+		// 🚀 FORMATTEUR AUTOMATIQUE DE DATE (AJOUTE LES SLASHES / )
+        window.formatDateInput = function(input) {
+            let v = input.value.replace(/\D/g, ''); // Garde que les chiffres
+            if (v.length > 8) v = v.substring(0, 8);
+            if (v.length >= 5) {
+                input.value = v.substring(0, 2) + '/' + v.substring(2, 4) + '/' + v.substring(4, 8);
+            } else if (v.length >= 3) {
+                input.value = v.substring(0, 2) + '/' + v.substring(2, 4);
+            } else {
+                input.value = v;
+            }
+        };
+
+        window.isValidDate = function(dateString) {
+            let regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[012])\/(19|20)\d\d$/;
+            return regex.test(dateString);
         };
 
         // 3. Le Pont Magique (Adapté)
