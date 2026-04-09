@@ -947,7 +947,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.268";
+        const CLIENT_VERSION = "1.269";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -2118,7 +2118,6 @@
             });
             
             // C. On bloque/débloque le bouton de sauvegarde
-            let btnSave = document.getElementById('btn-save-security');
             if(btnSave) {
                 btnSave.disabled = !(allValid && isMatch);
             }
