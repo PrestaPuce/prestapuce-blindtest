@@ -51,8 +51,9 @@
         
         .btn-main { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: clamp(1rem, 4vw, 1.3rem); font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 350px; }
         .btn-main:active { transform: scale(0.95); }
+        .btn-main:disabled { background: #555 !important; color: #aaa !important; cursor: not-allowed; box-shadow: none !important; transform: none !important; }
         .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; }
-
+		
         #reader { width: 100%; max-width: 350px; margin-bottom: 15px; border-radius: 15px; overflow: hidden; display: none; border: 2px solid var(--accent); }
         .btn-scan { background: #8e44ad; color: white; border: none; padding: 10px 20px; border-radius: 50px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 350px; margin-bottom: 15px; }
 
@@ -216,14 +217,14 @@
         <div id="step-pseudo" class="step-screen">
             <div class="screen-content">
                 <h2>Ton Nom de Scène ?</h2>
-                <input type="text" id="input-pseudo" placeholder="Ex: Batman, Zorro..." maxlength="12">
+                <input type="text" id="input-pseudo" placeholder="Ex: Batman, Zorro..." maxlength="12" oninput="this.value = this.value.replace(/[^a-zA-Z0-9À-ÿ\s\-_]/g, '')" onkeypress="if(event.key==='Enter') validatePseudo()">
                 <button id="btn-pseudo-next" class="btn-main" onclick="validatePseudo()">Suivant</button>
 
                 <div id="pseudo-choice-container" style="display:none; margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; width: 100%; max-width: 350px;">
                     <p style="font-size:0.85em; margin-bottom:12px; color:var(--accent);">Ce pseudo est différent de ton profil.</p>
                     <div style="display:flex; flex-direction:column; gap:10px;">
-                        <button class="btn-main" onclick="window.handlePseudoChoice(true)" style="padding:12px; font-size:1rem; background:var(--success);">💾 Sauver dans mon profil</button>
-                        <button class="btn-main" onclick="window.handlePseudoChoice(false)" style="padding:12px; font-size:1rem; background:#444;">🕒 Juste pour cette partie</button>
+                        <button id="btn-pseudo-save-crm" class="btn-main" onclick="window.handlePseudoChoice(true)" style="padding:12px; font-size:1rem; background:var(--success);">💾 Sauver dans mon profil (Session)</button>
+                        <button id="btn-pseudo-temp" class="btn-main" onclick="window.handlePseudoChoice(false)" style="padding:12px; font-size:1rem; background:var(--primary);">🕒 Juste pour cette partie (Défaut)</button>
                     </div>
                 </div>
             </div>
@@ -270,12 +271,12 @@
                         <div class="choice-content"><b style="font-size: 0.95rem;">GALERIE EMOJI</b><span>Choisir un avatar</span></div>
                     </div>
                     
-                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; background:#444; margin-top:5px; font-size:0.8rem;">Retour</button>
+                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; background:#34495e; margin-top:5px; font-size:0.8rem;">Retour</button>
                 </div>
 
                 <div id="avatar-gallery-view" class="gallery-container" style="display:none; width:100%; flex-direction:column; align-items:center;">
                     <div class="common-grid" id="avatar-grid"></div>
-                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; max-width:350px; background:#444; font-size:0.8rem; margin-top:10px;">Retour</button>
+                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; max-width:350px; background:#34495e; font-size:0.8rem; margin-top:10px;">Retour</button>
                 </div>
 
                 <div id="avatar-history-view" class="gallery-container" style="display:none; width:100%; flex-direction:column; align-items:center;">
@@ -284,14 +285,14 @@
                         <span id="history-counter" style="font-size:0.85em; font-weight:bold; background:rgba(0,0,0,0.5); padding:3px 8px; border-radius:10px;">0 / 10</span>
                     </div>
                     <div class="common-grid" id="avatar-history-grid" style="gap:15px; padding-top:10px;"></div>
-                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; max-width:350px; background:#444; font-size:0.8rem; margin-top:10px;">Retour</button>
+                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; max-width:350px; background:#34495e; font-size:0.8rem; margin-top:10px;">Retour</button>
                 </div>
-
+				
                 <div id="avatar-choice-container" style="display:none; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; width: 100%; text-align: center;">
                     <p style="font-size:0.85em; margin-bottom:12px; color:var(--accent);">Cet avatar est différent de ton profil.</p>
                     <div style="display:flex; flex-direction:column; gap:10px;">
-                        <button class="btn-main" onclick="window.handleAvatarChoice(true)" style="padding:12px; font-size:1rem; background:var(--success);">💾 Sauver dans mon profil</button>
-                        <button class="btn-main" onclick="window.handleAvatarChoice(false)" style="padding:12px; font-size:1rem; background:#444;">🕒 Juste pour cette partie</button>
+                        <button id="btn-avatar-save-crm" class="btn-main" onclick="window.handleAvatarChoice(true)" style="padding:12px; font-size:1rem; background:var(--success);">💾 Sauver dans mon profil (Session)</button>
+                        <button id="btn-avatar-temp" class="btn-main" onclick="window.handleAvatarChoice(false)" style="padding:12px; font-size:1rem; background:var(--primary);">🕒 Juste pour cette partie (Défaut)</button>
                     </div>
                 </div>
             </div>
@@ -344,7 +345,7 @@
         <div id="step-team-create" class="step-screen">
             <div class="screen-header"><h2>Créer ton Clan</h2></div>
             <div class="screen-content content-top">
-                <input type="text" id="new-team-name" placeholder="Nom de l'équipe" onkeypress="if(event.key==='Enter') createNewTeam()">
+                <input type="text" id="new-team-name" placeholder="Nom de l'équipe" oninput="this.value = this.value.replace(/[.#$\[\]/]/g, '')" onkeypress="if(event.key==='Enter') createNewTeam()">
                 <div id="team-crest-choices" class="selection-mode-container" style="margin-top:20px; width:100%;">
                     <div class="choice-card" onclick="document.getElementById('team-file-input').click()">
                         <div class="choice-icon">📸</div>
@@ -492,10 +493,10 @@
 
             <h2 style="color:var(--accent); margin-top:0; margin-bottom:20px;">MODIFIER PROFIL</h2>
             
-            <button class="settings-btn" onclick="editStep('step-pseudo')">✏️ Modifier mon Pseudo</button>
+<button class="settings-btn" onclick="editStep('step-pseudo')">✏️ Modifier mon Pseudo</button>
             <button class="settings-btn" onclick="window.openAvatarMenuDirectly()">📷 Changer d'Avatar</button>
             
-            <button id="btn-direct-gallery" class="settings-btn" onclick="window.openGalleryDirectly()" style="display:none; background:rgba(255,255,255,0.05);">🕰️ Gérer ma Galerie (10 photos)</button>
+            <button id="btn-direct-gallery" class="settings-btn" onclick="isEditing = true; window.openGalleryDirectly()" style="display:none; background:rgba(255,255,255,0.05);">🕰️ Gérer ma Galerie (10 photos)</button>
             
             <button class="settings-btn" onclick="editStep('step-mode')">🛡️ Changer Mode (Solo/Team)</button>
             
@@ -507,7 +508,7 @@
             
             <button id="btn-security-profile" class="settings-btn" onclick="window.openSecurityModal()" style="display:none; background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; color: white;">🔒 E-mail & Mot de Passe</button>
 
-            <button class="settings-btn btn-return-game" onclick="finishEdit(false)" style="margin-top:15px; background:#444;">⬅️ RETOUR AU BUZZER</button>
+            <button class="settings-btn btn-return-game" onclick="finishEdit(false)" style="margin-top:15px; background:#34495e;">⬅️ RETOUR AU BUZZER</button>
         </div>
     </div>
     
@@ -518,7 +519,7 @@
             <p style="color:#bdc3c7; font-size:0.9rem; margin-bottom:5px; text-align:left;">Nom de l'équipe :</p>
             <div style="display:flex; gap:10px; align-items:center; width:100%;">
                 <input type="text" id="manage-team-name" style="flex:1; box-sizing:border-box; padding:12px; font-size:1.1rem; margin-bottom:0;" 
-                    oninput="document.getElementById('btn-save-team-name').style.display = this.value.trim() !== player.team ? 'block' : 'none';" 
+                    oninput="this.value = this.value.replace(/[.#$\[\]/]/g, ''); document.getElementById('btn-save-team-name').style.display = this.value.trim() !== player.team ? 'block' : 'none';" 
                     onblur="if(this.value.trim() === '') { this.value = player.team; document.getElementById('btn-save-team-name').style.display = 'none'; }"
                     onkeypress="if(event.key==='Enter') renameTeamFromManage()">
                 <button id="btn-save-team-name" onclick="renameTeamFromManage()" style="display:none; background:var(--success); color:white; border:none; border-radius:8px; padding:0 15px; font-weight:bold; cursor:pointer; height:47px; flex-shrink:0; font-size:1.2rem;">✅</button>
@@ -692,10 +693,10 @@
                 <p style="font-size:0.9rem; margin-bottom:15px; color:#bdc3c7;">Tes identifiants de connexion</p>
                 <div style="text-align:left;">
                     <label class="crm-label">E-mail *</label>
-                    <input type="email" id="crm-email" class="crm-input" placeholder="joueur@mail.com" autocomplete="email">
+                    <input type="email" id="crm-email" class="crm-input" placeholder="joueur@mail.com" autocomplete="email" onkeypress="window.crmCheckEnter(event)">
                     
                     <label class="crm-label">Confirmer l'E-mail *</label>
-                    <input type="email" id="crm-email-conf" class="crm-input" placeholder="Retapez votre e-mail" autocomplete="email">
+                    <input type="email" id="crm-email-conf" class="crm-input" placeholder="Retapez votre e-mail" autocomplete="email" onkeypress="window.crmCheckEnter(event)">
                     
                     <label class="crm-label">Mot de passe *</label>
                     <input type="password" id="crm-pwd" class="crm-input" placeholder="8 car., 1 Maj, 1 min, 1 chiffre, 1 spécial" autocomplete="new-password" oninput="window.checkPasswordMatch()" onkeyup="window.crmCheckEnter(event)">
@@ -724,36 +725,36 @@
                 <div class="crm-row">
                     <div class="crm-col">
                         <label class="crm-label">Prénom *</label>
-                        <input type="text" id="crm-firstname" class="crm-input" placeholder="Prénom" oninput="window.sanitizeCRM(this)">
+                        <input type="text" id="crm-firstname" class="crm-input" placeholder="Prénom" oninput="window.sanitizeCRM(this)" onkeypress="window.crmCheckEnter(event)">
                     </div>
                     <div class="crm-col">
                         <label class="crm-label">Nom *</label>
-                        <input type="text" id="crm-lastname" class="crm-input" placeholder="Nom" oninput="window.sanitizeCRM(this)">
+                        <input type="text" id="crm-lastname" class="crm-input" placeholder="Nom" oninput="window.sanitizeCRM(this)" onkeypress="window.crmCheckEnter(event)">
                     </div>
                 </div>
                 
                 <div class="crm-row">
                     <div class="crm-col">
                         <label class="crm-label">Téléphone</label>
-                        <input type="tel" id="crm-phone" class="crm-input" placeholder="06..." oninput="window.sanitizeCRM(this)">
+                        <input type="tel" id="crm-phone" class="crm-input" placeholder="06..." oninput="window.sanitizeCRM(this)" onkeypress="window.crmCheckEnter(event)">
                     </div>
                     <div class="crm-col">
                         <label class="crm-label">Date de Naissance *</label>
-                        <input type="text" id="crm-dob" class="crm-input" placeholder="JJ/MM/AAAA" inputmode="numeric" maxlength="10" oninput="window.formatDateInput(this)">
+                        <input type="text" id="crm-dob" class="crm-input" placeholder="JJ/MM/AAAA" inputmode="numeric" maxlength="10" oninput="window.formatDateInput(this)" onkeypress="window.crmCheckEnter(event)">
                     </div>
                 </div>
                 
                 <label class="crm-label">Entreprise / Team (Optionnel)</label>
-                <input type="text" id="crm-company" class="crm-input" placeholder="Nom de ta société ou équipe" oninput="window.sanitizeCRM(this)">
+                <input type="text" id="crm-company" class="crm-input" placeholder="Nom de ta société ou équipe" oninput="window.sanitizeCRM(this)" onkeypress="window.crmCheckEnter(event)">
 
                 <div class="crm-row">
                     <div class="crm-col" style="flex: 0.4;">
                         <label class="crm-label">CP *</label>
-                        <input type="text" id="crm-zip" class="crm-input" placeholder="75000" maxlength="5" oninput="window.fetchCity(this)">
+                        <input type="text" id="crm-zip" class="crm-input" placeholder="75000" maxlength="5" oninput="window.fetchCity(this)" onkeypress="window.crmCheckEnter(event)">
                     </div>
                     <div class="crm-col" style="flex: 1;">
                         <label class="crm-label">Ville *</label>
-                        <input type="text" id="crm-city" class="crm-input" placeholder="Ville" oninput="window.sanitizeCRM(this)">
+                        <input type="text" id="crm-city" class="crm-input" placeholder="Ville" oninput="window.sanitizeCRM(this)" onkeypress="window.crmCheckEnter(event)">
                     </div>
                 </div>
             </div>
@@ -778,22 +779,20 @@
                 </div>
 
                 <label class="crm-label">Pseudo du joueur *</label>
-                <input type="text" id="crm-pseudo" class="crm-input" placeholder="Ton pseudo dans le jeu" oninput="window.sanitizeCRM(this)">
+                <input type="text" id="crm-pseudo" class="crm-input" placeholder="Ton pseudo dans le jeu" oninput="window.sanitizeCRM(this)" onkeypress="window.crmCheckEnter(event)">
             </div>
 
             <p id="crm-error" style="color:#e74c3c; font-size:0.8rem; margin-top:10px; min-height:1em; text-align:center;"></p>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button id="btn-c-back" class="btn-main" onclick="window.crmPrev()" style="display:none; background:#555; flex:0.4; font-size:1rem;">Retour</button>
+                <button id="btn-c-back" class="btn-main" onclick="window.crmPrev()" style="display:none; background:#34495e; flex:0.4; font-size:1rem;">Retour</button>
                 <button id="btn-c-next" class="btn-main" onclick="window.crmNext()" style="background:var(--primary); flex:1; font-size:1rem;" disabled>Étape Suivante</button>
             </div>
         </div>
     </div>
-        </div>
-    </div>
 	
-	<div id="modal-crm-login" class="overlay-full" style="z-index: 9999999; display: none;">
-        <div class="settings-content crm-modal" style="position: relative; max-width: 400px; text-align:center;">
+	<div id="overlay-security-profile" class="overlay-full" style="display:none; z-index:9999;">
+        <div class="settings-content" style="max-width: 420px; padding: 20px;">
             <button onclick="window.closeLoginModal()" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer;">X</button>
             <h2 style="margin-top:0; color: white;">Bon Retour !</h2>
             <p style="color: #bdc3c7; font-size: 0.85rem; margin-top:-10px; margin-bottom: 20px;">Connectez-vous pour retrouver vos stats.</p>
@@ -804,14 +803,14 @@
             </button>
             <div style="text-align:center; color:#bdc3c7; font-size:0.8rem; margin-bottom:10px; font-weight:bold;">OU</div>
             
-            <div style="text-align: left;">
+<div style="text-align: left;">
                 <label class="crm-label">E-mail</label>
-                <input type="email" id="login-email" class="crm-input" placeholder="joueur@mail.com">
+                <input type="email" id="login-email" class="crm-input" placeholder="joueur@mail.com" onkeypress="if(event.key==='Enter') window.processLogin()">
                 <label class="crm-label">Mot de passe</label>
-                <input type="password" id="login-pwd" class="crm-input" placeholder="Votre mot de passe">
+                <input type="password" id="login-pwd" class="crm-input" placeholder="Votre mot de passe" onkeypress="if(event.key==='Enter') window.processLogin()">
                 
                 <label style="color:#bdc3c7; font-size:0.85rem; display:flex; align-items:center; gap:8px; cursor:pointer; margin-top:-2px; margin-bottom:10px; font-weight:bold;">
-                    <input type="checkbox" onchange="window.togglePasswordVisibility(this, ['login-pwd'])" style="width:16px; height:16px; cursor:pointer;">
+				<input type="checkbox" onchange="window.togglePasswordVisibility(this, ['login-pwd'])" style="width:16px; height:16px; cursor:pointer;">
                     Afficher le mot de passe
                 </label>
             </div>
@@ -829,7 +828,7 @@
     </div>
 	
 	<div id="overlay-edit-profile" class="overlay-full" style="display:none; z-index:9999;">
-        <div class="modal-content" style="max-width: 450px; padding: 20px;">
+        <div class="settings-content" style="max-width: 450px; padding: 20px;">
             <h2 style="color:var(--accent); margin-top:0;">MES INFORMATIONS</h2>
             <p style="font-size:0.8rem; color:#ccc; margin-bottom:20px;">Données enregistrées dans ton profil CRM.</p>
             
@@ -837,49 +836,49 @@
                 <div class="crm-row">
                     <div class="crm-col">
                         <label>Prénom *</label>
-                        <input type="text" id="edit-firstname" class="crm-input" placeholder="Prénom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                        <input type="text" id="edit-firstname" class="crm-input" placeholder="Prénom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                     </div>
                     <div class="crm-col">
                         <label>Nom *</label>
-                        <input type="text" id="edit-lastname" class="crm-input" placeholder="Nom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                        <input type="text" id="edit-lastname" class="crm-input" placeholder="Nom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                     </div>
                 </div>
 
                 <div class="crm-row">
                     <div class="crm-col">
-                        <label>Téléphone</label>
-                        <input type="tel" id="edit-phone" class="crm-input" placeholder="06..." oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                        <label>Téléphone *</label>
+                        <input type="tel" id="edit-phone" class="crm-input" placeholder="06..." oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                     </div>
                     <div class="crm-col">
                         <label>Date de Naissance *</label>
-                        <input type="text" id="edit-dob" class="crm-input" placeholder="JJ/MM/AAAA" inputmode="numeric" maxlength="10" oninput="window.formatDateInput(this)">
+                        <input type="text" id="edit-dob" class="crm-input" placeholder="JJ/MM/AAAA" inputmode="numeric" maxlength="10" oninput="window.formatDateInput(this)" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                     </div>
                 </div>
                 
                 <label>Entreprise / Team (Optionnel)</label>
-                <input type="text" id="edit-company" class="crm-input" placeholder="Société" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                <input type="text" id="edit-company" class="crm-input" placeholder="Société" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                 
                 <div class="crm-row">
                     <div class="crm-col" style="flex:0.4;">
-                        <label>Code Postal *</label>
-                        <input type="text" id="edit-zip" class="crm-input" placeholder="75000" maxlength="5" oninput="this.value = this.value.replace(/[.#$\[\]]/g, ''); window.fetchCityFromZipEdit(this.value);">
+                        <label style="white-space: nowrap;">Code Postal *</label>
+                        <input type="text" id="edit-zip" class="crm-input" placeholder="75000" maxlength="5" oninput="this.value = this.value.replace(/[^0-9]/g, ''); window.fetchCityFromZipEdit(this.value);" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                     </div>
                     <div class="crm-col">
                         <label>Ville *</label>
-                        <input type="text" id="edit-city" class="crm-input" placeholder="Ville" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')">
+                        <input type="text" id="edit-city" class="crm-input" placeholder="Ville" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                     </div>
                 </div>
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn-main" onclick="document.getElementById('overlay-edit-profile').style.display='none'; openSettings();" style="background:#555; flex:1;">Annuler</button>
+                <button class="btn-main" onclick="document.getElementById('overlay-edit-profile').style.display='none'; openSettings();" style="background:#34495e; flex:1;">Annuler</button>
                 <button class="btn-main" onclick="window.saveEditedProfile()" style="background:var(--success); flex:1;">Enregistrer</button>
             </div>
         </div>
     </div>
 	
 	<div id="overlay-security-profile" class="overlay-full" style="display:none; z-index:9999;">
-        <div class="modal-content" style="max-width: 420px; padding: 20px;">
+        <div class="settings-content" style="max-width: 420px; padding: 20px;">
             <h2 style="color:#e74c3c; margin-top:0;">SÉCURITÉ</h2>
             
             <div style="text-align:left; font-size:0.9rem;">
@@ -887,24 +886,24 @@
                 <input type="text" id="sec-current-email" class="crm-input" style="background:rgba(255,255,255,0.05); color:#888; border-color:transparent;" readonly>
                 
                 <label>Nouvel E-mail (Optionnel)</label>
-                <input type="email" id="sec-new-email" class="crm-input" placeholder="Laisse vide si inchangé">
+                <input type="email" id="sec-new-email" class="crm-input" placeholder="Laisse vide si inchangé" onkeypress="if(event.key==='Enter') window.saveSecurityProfile()">
                 
                 <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
 
                 <label style="color:#e74c3c;">Mot de passe actuel (Obligatoire) *</label>
-                <input type="password" id="sec-current-pwd" class="crm-input" placeholder="Indispensable pour valider" style="border-color:#e74c3c;">
+                <input type="password" id="sec-current-pwd" class="crm-input" placeholder="Indispensable pour valider" style="border-color:#e74c3c;" onkeypress="if(event.key==='Enter') window.saveSecurityProfile()">
                 
                 <label>Nouveau Mot de passe (Optionnel)</label>
-                <input type="password" id="sec-new-pwd" class="crm-input" placeholder="8 car., 1 Maj, 1 Chiffre..." oninput="window.checkSecPasswordMatch()">
+                <input type="password" id="sec-new-pwd" class="crm-input" placeholder="8 car., 1 Maj, 1 Chiffre..." oninput="window.checkSecPasswordMatch()" onkeypress="if(event.key==='Enter') window.saveSecurityProfile()">
                 
                 <label>Confirmer Nouveau Mot de passe</label>
-                <input type="password" id="sec-new-pwd-confirm" class="crm-input" placeholder="Retapez le nouveau MDP" oninput="window.checkSecPasswordMatch()">
-
+                <input type="password" id="sec-new-pwd-confirm" class="crm-input" placeholder="Retapez le nouveau MDP" oninput="window.checkSecPasswordMatch()" onkeypress="if(event.key==='Enter') window.saveSecurityProfile()">
+				
                 <label style="color:#bdc3c7; font-size:0.8rem; display:flex; align-items:center; gap:8px; cursor:pointer; margin-top:-5px; margin-bottom:5px;">
                     <input type="checkbox" onchange="window.togglePasswordVisibility(this, ['sec-current-pwd', 'sec-new-pwd', 'sec-new-pwd-confirm'])"> Afficher les mots de passe
                 </label>
 
-                <ul id="sec-pwd-rules" style="display:none; list-style:none; padding:10px; font-size:0.75rem; color:#e74c3c; line-height:1.6; background:rgba(0,0,0,0.2); border-radius:8px; margin-top:10px; margin-bottom:0;">
+				<ul id="sec-pwd-rules" style="display:none; list-style:none; padding:10px; font-size:0.75rem; color:#e74c3c; line-height:1.6; background:rgba(0,0,0,0.2); border-radius:8px; margin-top:10px; margin-bottom:0;">
                     <li id="sec-rule-match" style="display:none; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">❌ Les mots de passe ne correspondent pas</li>
                     <li id="sec-rule-len">❌ 8 caractères minimum</li>
                     <li id="sec-rule-maj">❌ 1 Majuscule</li>
@@ -915,14 +914,14 @@
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn-main" onclick="document.getElementById('overlay-security-profile').style.display='none'; openSettings();" style="background:#555; flex:1;">Annuler</button>
+                <button class="btn-main" onclick="document.getElementById('overlay-security-profile').style.display='none'; openSettings();" style="background:#34495e; flex:1;">Annuler</button>
                 <button id="btn-save-security" class="btn-main" onclick="window.saveSecurityProfile()" style="background:#e74c3c; flex:1;">Mettre à jour</button>
             </div>
         </div>
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.264";
+        const CLIENT_VERSION = "1.265";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1334,11 +1333,15 @@
 
             if (!roomRef) {
                 // Pas de salle connectée
-                if (player.id && window.crmPseudo && val !== window.crmPseudo) {
+                if (myUserID && !myUserID.startsWith('u_') && window.crmPseudo && val !== window.crmPseudo) {
                     choiceContainer.style.display = 'block';
                     if (nextBtn) nextBtn.style.display = 'none';
                 } else {
-                    finalizePseudoValidation(val);
+                    if (isEditing) {
+                        player.pseudo = val; finishEdit(true);
+                    } else {
+                        finalizePseudoValidation(val);
+                    }
                 }
                 return;
             }
@@ -1376,18 +1379,21 @@
                     }
                 }
                 
-                if(isEditing) { roomRef.child('players/' + myUserID).update({ name: val }); player.pseudo = val; finishEdit(true); return; }
-                
                 // 🚀 NOUVEAU : La voie est libre, vérifions si on doit proposer la sauvegarde CRM
-                if (player.id && window.crmPseudo && val !== window.crmPseudo) {
+                alert("✅ Pseudo disponible ! Ton nouveau pseudo '" + val + "' est bien en place.");
+                if (myUserID && !myUserID.startsWith('u_') && window.crmPseudo && val !== window.crmPseudo) {
                     choiceContainer.style.display = 'block';
                     if (nextBtn) nextBtn.style.display = 'none';
                 } else {
-                    finalizePseudoValidation(val);
+                    if (isEditing) {
+                        roomRef.child('players/' + myUserID).update({ name: val }); player.pseudo = val; finishEdit(true);
+                    } else {
+                        finalizePseudoValidation(val);
+                    }
                 }
             });
         }
-
+		
         // Le sous-moteur de suggestion (Année de naissance)
         function suggestNewPseudo(baseVal, msgPrefix) {
             var suggestion = baseVal + Math.floor(10 + Math.random() * 90);
@@ -1466,25 +1472,19 @@
         
         function selectAvatar(av) { 
             player.avatar = av; 
-            if(isEditing) { 
-                logEvent('SYSTEM', `✏️ ${player.pseudo} a changé son avatar`);
-                roomRef.child('players/' + myUserID).update({avatar: av}); 
-                finishEdit(true); 
-            } else { 
-                var preview = document.getElementById('avatar-preview');
-                if(preview) {
-                    if (av.length > 20) {
-                        preview.innerHTML = `<img src="${av}" style="width:100%; height:100%; object-fit:cover;">`;
-                    } else {
-                        preview.innerHTML = av;
-                    }
+            var preview = document.getElementById('avatar-preview');
+            if(preview) {
+                if (av.length > 20) {
+                    preview.innerHTML = `<img src="${av}" style="width:100%; height:100%; object-fit:cover;">`;
+                } else {
+                    preview.innerHTML = av;
                 }
-                
-                document.getElementById('avatar-gallery-view').style.display = 'none';
-                document.getElementById('avatar-choices').style.display = 'none';
-                document.getElementById('avatar-express-actions').style.display = 'flex';
-                document.getElementById('avatar-status-text').innerText = "Nouvelle identité prête :";
-            } 
+            }
+            
+            document.getElementById('avatar-gallery-view').style.display = 'none';
+            document.getElementById('avatar-choices').style.display = 'none';
+            document.getElementById('avatar-express-actions').style.display = 'flex';
+            document.getElementById('avatar-status-text').innerText = "Nouvelle identité prête :";
         }
 
         // --- PATCH V1.251 : MOTEUR DE LA GALERIE HYBRIDE ET RÉCUPÉRATION ---
@@ -1591,7 +1591,7 @@
                         e.stopPropagation();
                         if(confirm("Effacer ce look ? (Pense à le télécharger avec ⬇️ si tu veux le conserver).")) {
                             window.avatarHistory.splice(index, 1);
-                            firebase.database().ref('users_crm/' + player.id).update({ avatarHistory: window.avatarHistory }).then(() => {
+                            firebase.database().ref('users_crm/' + myUserID).update({ avatarHistory: window.avatarHistory }).then(() => {
                                 window.showAvatarHistory(); // On rafraîchit
                                 // Magie du Buffer : Sauvegarde automatique si un selfie attendait !
                                 if (window.pendingSelfie) {
@@ -1609,12 +1609,12 @@
 
         window.useCurrentAvatar = function() {
             // FIX CAPITAINE : Inscription officielle dans la salle
-            if (roomId && player.id) {
-                db.ref('rooms/' + roomId + '/players/' + player.id).update({
-                    pseudo: player.pseudo,
+            if (roomID && myUserID) {
+                db.ref('rooms/' + roomID + '/players/' + myUserID).update({
+                    name: player.pseudo,
                     avatar: player.avatar,
-                    status: 'active',
-                    lastActive: firebase.database.ServerValue.TIMESTAMP
+                    active: true,
+                    joinTimestamp: firebase.database.ServerValue.TIMESTAMP
                 });
             }
             navigateTo('step-mode');
@@ -1636,12 +1636,21 @@
                 }
             }
 
+            alert("✅ Ton nouvel avatar a bien été pris en compte !");
+
             // 2. Si le joueur a un compte, qu'il y a un avatar à l'écran, et qu'il est différent de la mémoire
-            if (player.id && player.avatar && player.avatar !== window.crmAvatar) {
+            if (myUserID && !myUserID.startsWith('u_') && player.avatar && player.avatar !== window.crmAvatar) {
+                alert("ℹ️ Ton ancien avatar sera sauvegardé dans ta galerie. Tu pourras toujours y revenir plus tard.");
                 expressActions.style.display = 'none';
                 choiceContainer.style.display = 'block';
             } else {
-                navigateTo('step-mode');
+                if (isEditing) {
+                    logEvent('SYSTEM', `✏️ ${player.pseudo} a changé son avatar`);
+                    if(roomRef) roomRef.child('players/' + myUserID).update({avatar: player.avatar}); 
+                    finishEdit(true);
+                } else {
+                    navigateTo('step-mode');
+                }
             }
         };
 		
@@ -1859,14 +1868,30 @@
         window.saveEditedProfile = function() {
             if (!myUserID || myUserID.startsWith('u_')) return;
 
+            const fName = document.getElementById('edit-firstname').value.trim();
+            const lName = document.getElementById('edit-lastname').value.trim();
+            const dob = document.getElementById('edit-dob').value;
+            const zip = document.getElementById('edit-zip').value.trim();
+            const city = document.getElementById('edit-city').value.trim();
+
+            if (!fName || !lName || !dob || !zip || !city) {
+                alert("Veuillez remplir tous les champs obligatoires (*).");
+                return;
+            }
+
+            if (!window.isValidDate(dob)) {
+                alert("La date de naissance doit être au format valide JJ/MM/AAAA.");
+                return;
+            }
+
             // Rassemblement des nouvelles données
             const updates = {
-                firstName: document.getElementById('edit-firstname').value.trim(),
-                lastName: document.getElementById('edit-lastname').value.trim(),
+                firstName: fName,
+                lastName: lName,
                 phone: document.getElementById('edit-phone').value.trim(),
-                dob: document.getElementById('edit-dob').value,
-                zip: document.getElementById('edit-zip').value.trim(),
-                city: document.getElementById('edit-city').value.trim(),
+                dob: dob,
+                zip: zip,
+                city: city,
                 company: document.getElementById('edit-company').value.trim()
             };
 
@@ -1883,8 +1908,13 @@
 		
 		window.openGalleryDirectly = function() {
             document.getElementById('overlay-settings').style.display = 'none';
+            // On force l'affichage vers la galerie
             navigateTo('step-avatar');
-            window.showAvatarHistory(); // Ouvre directement tes 10 photos
+            // Petit délai pour laisser le temps au DOM de s'actualiser
+            setTimeout(() => {
+                document.getElementById('avatar-express-actions').style.display = 'none';
+                window.showAvatarHistory(); // Affiche les photos avec options Supprimer/Télécharger
+            }, 50);
         };
 		
 		// --- PATCH V1.253 : GESTION SÉCURITÉ ---
@@ -1956,16 +1986,19 @@
         };
 
         window.saveSecurityProfile = function() {
+            const btn = document.getElementById('btn-save-security');
+            
+            // 🚀 PROTECTION ANTI-BYPASS : On bloque la touche "Entrée" si les règles ne sont pas respectées
+            if (btn && btn.disabled) return; 
+
             const currentPwd = document.getElementById('sec-current-pwd').value;
             const newEmail = document.getElementById('sec-new-email').value.trim();
             const newPwd = document.getElementById('sec-new-pwd').value;
             const newPwdConf = document.getElementById('sec-new-pwd-confirm').value;
-            const btn = document.getElementById('btn-save-security');
 
             if(!currentPwd) { alert("Le mot de passe actuel est obligatoire."); return; }
             if(newPwd && newPwd !== newPwdConf) { alert("Les nouveaux mots de passe ne correspondent pas."); return; }
-            if(newPwd && newPwd.length < 6) { alert("Le nouveau mot de passe doit faire au moins 6 caractères."); return; }
-
+            
             btn.innerText = "⏳ Validation..."; btn.disabled = true;
             const user = firebase.auth().currentUser;
             
@@ -2889,7 +2922,7 @@
                 if(pwd !== pwdConf) { window.showCRMError("Les mots de passe ne correspondent pas."); return; }
                 
                 // Vérification du mot de passe (8 car, 1 maj, 1 min, 1 chiffre, 1 spécial)
-                var pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+                var pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
                 if(!pwdRegex.test(pwd)) { 
                     window.showCRMError("Mot de passe trop faible (min 8 car, 1 Maj, 1 min, 1 chiffre, 1 spécial)."); 
                     return; 
@@ -3050,10 +3083,14 @@
         };
 
         window.processLogin = function() {
+            var btn = document.getElementById('btn-do-login');
+            
+            // 🚀 PROTECTION ANTI-SPAM : On ignore la touche "Entrée" si ça charge déjà
+            if (btn && btn.disabled) return;
+
             var email = document.getElementById('login-email').value;
             var pwd = document.getElementById('login-pwd').value;
             var errDiv = document.getElementById('login-error');
-            var btn = document.getElementById('btn-do-login');
 
             if(!email || !pwd) { errDiv.innerText = "Veuillez remplir tous les champs."; return; }
             
@@ -3138,53 +3175,58 @@
 		// --- PATCH V1.231 : GESTION DU CHOIX PSEUDO ---
         window.handlePseudoChoice = function(saveToCrm) {
             const val = document.getElementById('input-pseudo').value.trim();
-            if (saveToCrm && player.id) {
-                // Mise à jour dans le CRM (dossier users_crm)
-                firebase.database().ref('users_crm/' + player.id).update({ pseudo: val }).then(() => {
-                    window.crmPseudo = val; // On met à jour la mémoire locale
+            
+            const finalizeFlow = () => {
+                if (isEditing) {
+                    if (roomRef) roomRef.child('players/' + myUserID).update({ name: val }); 
+                    player.pseudo = val; 
+                    finishEdit(true);
+                } else {
+                    finalizePseudoValidation(val);
+                }
+            };
+
+            if (saveToCrm && myUserID && !myUserID.startsWith('u_')) {
+                firebase.database().ref('users_crm/' + myUserID).update({ pseudo: val }).then(() => {
+                    window.crmPseudo = val;
+                    finalizeFlow();
                 });
+            } else {
+                finalizeFlow();
             }
-            // Dans tous les cas, on valide la suite du jeu
-            finalizePseudoValidation(val);
         };
 		
 		// --- PATCH V1.232 : GESTION DU CHOIX AVATAR ---
         // --- PATCH V1.246 : SAUVEGARDE ET CHECK DE CAPACITÉ ---
         window.handleAvatarChoice = function(saveToCrm) {
-            if (saveToCrm && player.id) {
-                if (!window.avatarHistory) window.avatarHistory = [];
-                
-                // Si la photo existe déjà dans la galerie, on passe direct
-                let alreadyExists = window.avatarHistory.find(a => a.url === player.avatar);
-                if (alreadyExists) {
-                    firebase.database().ref('users_crm/' + player.id).update({ avatar: player.avatar }).then(() => {
-                        window.crmAvatar = player.avatar; navigateTo('step-mode');
-                    });
+            const finalizeAvatarFlow = () => {
+                if (isEditing) {
+                    logEvent('SYSTEM', `✏️ ${player.pseudo} a changé son avatar`);
+                    if(roomRef) roomRef.child('players/' + myUserID).update({avatar: player.avatar}); 
+                    finishEdit(true);
+                } else {
+                    navigateTo('step-mode');
+                }
+            };
+
+            if (saveToCrm && myUserID && !myUserID.startsWith('u_')) {
+                // Vérification de la galerie (max 10)
+                if (window.avatarHistory && window.avatarHistory.length >= 10 && !window.pendingSelfie) {
+                    window.pendingSelfie = player.avatar;
+                    alert("Galerie pleine ! Supprimez une photo pour enregistrer celle-ci par défaut.");
+                    window.openGalleryDirectly();
                     return;
                 }
 
-                // CHECK CAPACITÉ (10 MAX)
-                if (window.avatarHistory.length >= 10) {
-                    window.pendingSelfie = player.avatar; // ⏳ Mise en buffer
-                    alert("⚠️ Ta galerie est pleine (10 photos max) !\nPour sauvegarder ce nouveau look, tu dois effacer une ancienne photo avec la croix rouge ❌.");
-                    
-                    document.getElementById('avatar-choice-container').style.display = 'none';
-                    window.showClassicAvatarMenu(); 
-                    window.showAvatarHistory(); // On force l'ouverture de la galerie
-                    return; // On stoppe la navigation
-                }
-
-                // S'il y a de la place, on sauvegarde normalement
-                window.avatarHistory.unshift({ url: player.avatar, isPermanent: false });
-                firebase.database().ref('users_crm/' + player.id).update({ 
+                firebase.database().ref('users_crm/' + myUserID).update({ 
                     avatar: player.avatar,
-                    avatarHistory: window.avatarHistory
+                    avatarHistory: window.avatarHistory 
                 }).then(() => {
-                    window.crmAvatar = player.avatar; 
-                    navigateTo('step-mode');
+                    window.crmAvatar = player.avatar;
+                    finalizeAvatarFlow();
                 });
             } else {
-                navigateTo('step-mode');
+                finalizeAvatarFlow();
             }
         };
 
@@ -3193,7 +3235,7 @@
             if(!window.pendingSelfie) return;
             
             window.avatarHistory.unshift({ url: window.pendingSelfie, isPermanent: false });
-            firebase.database().ref('users_crm/' + player.id).update({ 
+            firebase.database().ref('users_crm/' + myUserID).update({ 
                 avatar: window.pendingSelfie,
                 avatarHistory: window.avatarHistory
             }).then(() => {
@@ -3201,7 +3243,14 @@
                 player.avatar = window.pendingSelfie;
                 window.pendingSelfie = null; // On vide le buffer
                 window.hideClassicAvatarMenu();
-                navigateTo('step-mode');
+                
+                if (isEditing) {
+                    logEvent('SYSTEM', `✏️ ${player.pseudo} a changé son avatar depuis la galerie`);
+                    if(roomRef) roomRef.child('players/' + myUserID).update({avatar: player.avatar}); 
+                    finishEdit(true);
+                } else {
+                    navigateTo('step-mode');
+                }
             });
         };
 		
