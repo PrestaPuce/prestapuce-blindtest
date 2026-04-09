@@ -217,7 +217,8 @@
         <div id="step-pseudo" class="step-screen">
             <div class="screen-content">
                 <h2>Ton Nom de Scène ?</h2>
-                <input type="text" id="input-pseudo" placeholder="Ex: Batman, Zorro..." maxlength="12" oninput="this.value = this.value.replace(/[^a-zA-Z0-9À-ÿ\s\-_]/g, '')" onkeypress="if(event.key==='Enter') validatePseudo()">
+                <input type="text" id="input-pseudo" placeholder="Ex: Batman, Zorro..." maxlength="12" oninput="window.sanitizePseudoLive(this, 'pseudo-warning')" onkeypress="if(event.key==='Enter') validatePseudo()">
+                <p id="pseudo-warning" style="display:none; color:var(--gold); font-size:0.8rem; margin-top:-5px; margin-bottom:10px; font-weight:bold;">⚠️ Émojis et symboles spéciaux interdits.</p>
                 <button id="btn-pseudo-next" class="btn-main" onclick="validatePseudo()">Suivant</button>
 
                 <div id="pseudo-choice-container" style="display:none; margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; width: 100%; max-width: 350px;">
@@ -779,7 +780,8 @@
                 </div>
 
                 <label class="crm-label">Pseudo du joueur *</label>
-                <input type="text" id="crm-pseudo" class="crm-input" placeholder="Ton pseudo dans le jeu" oninput="window.sanitizeCRM(this)" onkeypress="window.crmCheckEnter(event)">
+                <input type="text" id="crm-pseudo" class="crm-input" placeholder="Ton pseudo dans le jeu" oninput="window.sanitizePseudoLive(this, 'crm-pseudo-warning')" onkeypress="window.crmCheckEnter(event)">
+                <p id="crm-pseudo-warning" style="display:none; color:var(--gold); font-size:0.8rem; margin-top:-2px; margin-bottom:10px; font-weight:bold;">⚠️ Émojis et symboles spéciaux interdits.</p>
             </div>
 
             <p id="crm-error" style="color:#e74c3c; font-size:0.8rem; margin-top:10px; min-height:1em; text-align:center;"></p>
@@ -791,8 +793,8 @@
         </div>
     </div>
 	
-	<div id="overlay-security-profile" class="overlay-full" style="display:none; z-index:9999;">
-        <div class="settings-content" style="max-width: 420px; padding: 20px;">
+	<div id="modal-crm-login" class="overlay-full" style="display:none; z-index:9999;">
+        <div class="settings-content" style="max-width: 420px; padding: 20px; position: relative;">
             <button onclick="window.closeLoginModal()" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer;">X</button>
             <h2 style="margin-top:0; color: white;">Bon Retour !</h2>
             <p style="color: #bdc3c7; font-size: 0.85rem; margin-top:-10px; margin-bottom: 20px;">Connectez-vous pour retrouver vos stats.</p>
@@ -921,7 +923,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.265";
+        const CLIENT_VERSION = "1.266";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -2829,6 +2831,25 @@
         // 1. FILTRE FIREBASE : Supprime instantanément les caractères interdits
         window.sanitizeCRM = function(input) {
             input.value = input.value.replace(/[.#$\[\]]/g, '');
+        };
+
+        // 🚀 NOUVEAU : Efface les caractères interdits ET prévient le joueur (Ergonomie)
+        window.sanitizePseudoLive = function(input, warningId) {
+            let val = input.value;
+            let cleanVal = val.replace(/[^a-zA-Z0-9À-ÿ\s\-_]/g, '');
+            let warningEl = document.getElementById(warningId);
+
+            if (val !== cleanVal) {
+                input.value = cleanVal; // Effacement physique
+                if (warningEl) {
+                    warningEl.style.display = 'block'; // Affichage du message
+                    clearTimeout(warningEl.timeout);
+                    // Disparition automatique après 3.5 secondes
+                    warningEl.timeout = setTimeout(() => { warningEl.style.display = 'none'; }, 3500);
+                }
+            } else {
+                input.value = cleanVal;
+            }
         };
 
         // 2. API CODE POSTAL : Remplit la ville automatiquement
