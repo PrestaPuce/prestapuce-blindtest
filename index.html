@@ -980,7 +980,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.271";
+        const CLIENT_VERSION = "1.272";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1447,11 +1447,15 @@
                     if (isEditing) { return alert("Ce pseudo est déjà pris."); }
                     
                     if(!isInactive) { 
-                        // Joueur EN LIGNE -> On bloque et on suggère l'année de naissance
-                        suggestNewPseudo(val, "Ce pseudo est déjà pris et le joueur est actuellement en ligne.");
+                        // 🚩 CAS 1 : Joueur EN LIGNE -> On propose maintenant la récupération pour déconnecter l'autre
+                        if(confirm("⚠️ CE JOUEUR EST DÉJÀ EN LIGNE\n\nLe pseudo '" + targetData.name + "' est actuellement en cours de partie sur un autre appareil.\n\nEst-ce bien vous ? (Cliquer sur OK lancera une demande de reconnexion et déconnectera l'autre appareil après validation du MJ).")) {
+                            startRecoveryProcess(takenUid, targetData);
+                        } else {
+                            suggestNewPseudo(val, "Veuillez utiliser un autre pseudo.");
+                        }
                         return; 
                     } else {
-                        // Joueur HORS LIGNE -> On propose la récupération MJ
+                        // 🚩 CAS 2 : Joueur HORS LIGNE -> On propose la récupération MJ (Code existant)
                         if (confirm("Ce profil existe déjà mais est inactif.\nVoulez-vous demander à l'animateur de le récupérer ?")) { 
                             startRecoveryProcess(takenUid, targetData); 
                         } else {
