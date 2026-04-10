@@ -992,7 +992,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.274";
+        const CLIENT_VERSION = "1.276";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1092,6 +1092,8 @@
 
         let roomID = "", roomRef = null, myUserID = ""; 
         let player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
+        window.mySessionID = Math.random().toString(36).substring(2, 15); // Jeton unique
+        window.pendingRecoveryData = null; // Mémoire de récupération
         let gameState = "waiting", currentWinner = null, isBlocked = false;
         let selectedTeamCrest = "", isEditing = false, stepHistory = [];
         let mjName = "l'Animateur", mjLink = "";
@@ -1328,6 +1330,24 @@
         }
         
         function showReconnectScreen() {
+            // 🚀 RÈGLE : Le joueur devient ACTIF uniquement ici (Page Buzzer)
+            if (myUserID) {
+                firebase.database().ref('players/' + myUserID).update({
+                    active: true,
+                    recoveryRequest: null,
+                    reconnectedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Écouteur pour éjecter si une autre session s'ouvre
+                firebase.database().ref('users_crm/' + myUserID + '/currentSessionID').on('value', snap => {
+                    const sess = snap.val();
+                    if (sess && sess !== window.mySessionID) {
+                        alert("⚠️ SESSION RÉCUPÉRÉE AILLEURS\n\nCe compte est utilisé sur un autre appareil.");
+                        location.reload();
+                    }
+                });
+            }
+
             document.getElementById('reconnect-pseudo-display').innerText = player.pseudo;
             const avImg = document.getElementById('reconnect-avatar-preview');
             if(player.avatar && player.avatar.length > 20) { avImg.src = player.avatar; avImg.style.display='block'; } else { avImg.style.display='none'; }
@@ -1335,8 +1355,26 @@
             // 🚀 AFFICHAGE INTELLIGENT DU BLOC DE SAUVEGARDE
             const guestBlock = document.getElementById('reconnect-guest-actions');
             if (guestBlock) {
-                if (myUserID && myUserID.startsWith('u_')) guestBlock.style.display = 'block';
-                else guestBlock.style.display = 'none';
+                if (myUserID && myUserID.startsWith('u_')) {
+                    guestBlock.style.display = 'block';
+                } else {
+                    guestBlock.style.display = 'none';
+                    
+                    // 🚀 ÉTAPE 3 : L'ÉCOUTEUR DE SESSION (Le Coup de pied)
+                    if (window.mySessionID) {
+                        firebase.database().ref('users_crm/' + myUserID + '/currentSessionID').on('value', snap => {
+                            const activeSession = snap.val();
+                            if (activeSession && activeSession !== window.mySessionID) {
+                                // 💥 L'ID en base a changé -> Dégagement immédiat du vieux téléphone
+                                alert("⚠️ SESSION RÉCUPÉRÉE AILLEURS\n\nCe compte vient d'être connecté sur un autre appareil.\nVous allez être déconnecté pour lui laisser la place.");
+                                localStorage.removeItem('buzz_userId'); 
+                                localStorage.removeItem('buzz_lastProfile');
+                                localStorage.removeItem('presta_player_session');
+                                location.reload(); // Recharge l'application à zéro
+                            }
+                        });
+                    }
+                }
             }
             
             navigateTo('step-reconnect');
@@ -1348,7 +1386,13 @@
                 if(snap.exists()) { 
                     snap.ref.update({ active: true }); 
                 } else { 
-                    roomRef.child('players/' + myUserID).set({ name: player.pseudo, avatar: player.avatar, teamName: player.team, teamIcon: player.teamIcon, pts: 0, active: true, banned: false }); 
+                    roomRef.child('players/' + myUserID).set({
+                        name: p,
+                        teamName: "Solo",
+                        teamIcon: "",
+                        active: false, // 🚀 Reste gris jusqu'à la page buzzer
+                        banned: false
+                    });
                 }
                 launchGame(true);
             });
@@ -1540,7 +1584,9 @@
             recoveryRef.on('value', snap => {
                 const p = snap.val();
                 if(!p) { cancelRecovery("Le profil a été supprimé par l'animateur."); return; }
-                if(p.active === true && !p.recoveryRequest) {
+                
+                // 🚀 MODIFICATION : On attend que le MJ envoie le statut 'validated' (Laissez-passer)
+                if(p.recoveryRequest === 'validated') {
                     if(recoveryRef) recoveryRef.off();
                     pendingRecoveryUid = null;
                     
@@ -1556,8 +1602,8 @@
                         // Pas connecté -> Écran de verrouillage "Buzz Ta Puce"
                         window.prepareSecureRecovery(targetUid, p);
                     }
-				}
-			});
+                }
+            });
         }
 
         function cancelRecovery(msg) {
@@ -3368,10 +3414,28 @@
                         alert("🎉 Bon retour parmi nous, " + player.pseudo + " !");
                         window.closeLoginModal();
                         
-                        document.getElementById('input-pseudo').value = player.pseudo;
-                        
-                        // On le renvoie à l'étape Pseudo pour préparer le futur système "Temporaire/Défaut"
-                        navigateTo('step-pseudo'); 
+                        // 🚀 ÉTAPE 2 : LIAISON DE RÉCUPÉRATION ET SESSION UNIQUE
+                        if (window.pendingRecoveryData) {
+                            myUserID = window.pendingRecoveryData.uid;
+                            localStorage.setItem('buzz_userId', myUserID);
+                            
+                            // 🚀 DÉCONNEXION DE L'AUTRE : On écrit notre jeton en base
+                            firebase.database().ref('users_crm/' + myUserID).update({ currentSessionID: window.mySessionID });
+
+                            player = { 
+                                pseudo: window.pendingRecoveryData.name, 
+                                avatar: window.pendingRecoveryData.avatar, 
+                                team: window.pendingRecoveryData.teamName || "Solo", 
+                                teamIcon: window.pendingRecoveryData.teamIcon || "" 
+                            };
+                            window.pendingRecoveryData = null; // On vide la mémoire
+                            showReconnectScreen(); // On va direct à l'écran final
+                        } else {
+                            // Connexion classique : On met à jour le jeton et on suit le chemin normal
+                            firebase.database().ref('users_crm/' + user.uid).update({ currentSessionID: window.mySessionID });
+                            document.getElementById('input-pseudo').value = player.pseudo;
+                            navigateTo('step-pseudo'); 
+                        }
                     } else {
                         errDiv.innerText = "Profil introuvable.";
                     }
@@ -3617,7 +3681,17 @@
             }, 100);
         };
 		
+		// 🚀 CRÉATION DU JETON UNIQUE ET MÉMOIRE DE RÉCUPÉRATION
+        window.mySessionID = Math.random().toString(36).substring(2, 15);
+        window.pendingRecoveryData = null;
+
+		// 🚀 JETON DE SESSION (Généré une seule fois pour ce téléphone)
+		window.mySessionID = Math.random().toString(36).substring(2, 15);
+
 		window.prepareSecureRecovery = function(uid, playerData) {
+            // 🚀 Mémorisation des infos pour bloquer le retour à l'écran pseudo plus tard
+            window.pendingRecoveryData = { uid: uid, name: playerData.name, avatar: playerData.avatar, teamName: playerData.teamName, teamIcon: playerData.teamIcon };
+            
             // 1. On va chercher l'e-mail dans la base CRM (branche users_crm)
             firebase.database().ref('users_crm/' + uid).once('value').then(snap => {
                 const crmData = snap.val() || {};
