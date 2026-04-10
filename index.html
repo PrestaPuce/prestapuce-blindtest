@@ -242,6 +242,18 @@
             </div>
         </div>
 
+        <div id="step-recovery-wait" class="step-screen">
+            <div class="screen-content">
+                <div class="pulse" style="font-size: 4rem; margin-bottom: 10px;">⏳</div>
+                <h1 style="color:var(--accent);">EN ATTENTE...</h1>
+                <p class="desc" style="text-align:center;">
+                    Demande de récupération envoyée à l'animateur pour le pseudo <b id="recovery-name" style="color:white;"></b>.<br><br>
+                    Veuillez patienter...
+                </p>
+                <button class="btn-secondary" onclick="cancelRecovery('Récupération annulée.')" style="margin-top:20px; border-color:var(--danger); color:var(--danger);">Annuler et changer de pseudo</button>
+            </div>
+        </div>
+
         <div id="step-recovery-confirm" class="step-screen">
             <div class="screen-content">
                 <div style="font-size: 4rem; margin-bottom: 10px;">🔐</div>
@@ -980,7 +992,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.272";
+        const CLIENT_VERSION = "1.273";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
