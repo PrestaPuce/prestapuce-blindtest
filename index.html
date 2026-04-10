@@ -242,13 +242,30 @@
             </div>
         </div>
 
-        <div id="step-recovery-wait" class="step-screen">
+        <div id="step-recovery-confirm" class="step-screen">
             <div class="screen-content">
-                <h1 style="color:var(--gold); font-size:2rem; letter-spacing:1px;">EN ATTENTE</h1>
-                <h2 id="recovery-name" style="margin-bottom:10px; color:white; font-size:2.5rem; text-transform:uppercase;">...</h2>
-                <div class="pulse" style="font-size:5rem; margin:20px 0;">⏳</div>
-                <p class="desc" style="font-size:1.1rem; text-align:center;">Demande de récupération envoyée à l'animateur.<br><br>Veuillez patienter pendant qu'il valide votre accès...</p>
-                <button class="btn-secondary" onclick="cancelRecovery()" style="margin-top:40px; border-color:var(--danger); color:var(--danger); font-size:1rem; padding:12px 25px;">❌ Annuler la demande</button>
+                <div style="font-size: 4rem; margin-bottom: 10px;">🔐</div>
+                <h1 style="color:var(--accent); font-size:1.8rem;">PROFIL SÉCURISÉ</h1>
+                <p class="desc" style="text-align:center; margin-bottom:20px;">
+                    Ce pseudo appartient à un compte <b>Buzz Ta Puce</b>.<br>
+                    Pour récupérer votre score et votre identité, veuillez vous authentifier.
+                </p>
+
+                <div id="recovery-account-preview" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; width:100%; max-width:320px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.1);">
+                    <div id="rec-avatar-display" style="width:60px; height:60px; border-radius:50%; border:2px solid var(--accent); margin:0 auto 10px auto; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:2rem; background:#222;"></div>
+                    <b id="rec-pseudo-display" style="display:block; color:white; font-size:1.1rem; margin-bottom:5px;">...</b>
+                    <span id="rec-email-display" style="color:var(--primary); font-size:0.9rem; font-family:monospace;">...</span>
+                </div>
+
+                <div style="width:100%; max-width:320px; display:flex; flex-direction:column; gap:10px;">
+                    <button class="btn-main" onclick="window.startGoogleAuth()" style="background:white; color:#444; font-size:1rem; display:flex; align-items:center; justify-content:center; gap:10px;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="width:20px;">
+                        Identification Google
+                    </button>
+                    <button class="btn-main" onclick="window.openLoginWithEmail()" style="background:var(--primary); font-size:1rem;">🔑 Mot de Passe Classique</button>
+                    
+                    <button class="btn-secondary" onclick="cancelRecovery('Récupération annulée.')" style="margin-top:20px; border-color:var(--danger); color:var(--danger);">Annuler et changer de pseudo</button>
+                </div>
             </div>
         </div>
 
@@ -357,7 +374,9 @@
         <div id="step-team-create" class="step-screen">
             <div class="screen-header"><h2>Créer ton Clan</h2></div>
             <div class="screen-content content-top">
-                <input type="text" id="new-team-name" placeholder="Nom de l'équipe" oninput="this.value = this.value.replace(/[.#$\[\]/]/g, '')" onkeypress="if(event.key==='Enter') createNewTeam()">
+                <input type="text" id="new-team-name" placeholder="Nom de l'équipe" oninput="window.sanitizePseudoLive(this, 'team-warning')" onkeypress="if(event.key==='Enter') createNewTeam()">
+                <p id="team-warning" style="display:none; color:var(--gold); font-size:0.8rem; margin-top:-5px; margin-bottom:10px; font-weight:bold;">⚠️ Émojis et symboles spéciaux interdits.</p>
+                
                 <div id="team-crest-choices" class="selection-mode-container" style="margin-top:20px; width:100%;">
                     <div class="choice-card" onclick="document.getElementById('team-file-input').click()">
                         <div class="choice-icon">📸</div>
@@ -961,7 +980,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.270";
+        const CLIENT_VERSION = "1.271";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1508,15 +1527,21 @@
                 if(p.active === true && !p.recoveryRequest) {
                     if(recoveryRef) recoveryRef.off();
                     pendingRecoveryUid = null;
-                    myUserID = targetUid; 
-                    localStorage.setItem('buzz_userId', myUserID);
-                    player = { pseudo: p.name, avatar: p.avatar, team: p.teamName || "Solo", teamIcon: p.teamIcon || "" };
-                    showReconnectScreen(); 
-                } 
-                else if (p.active === false && p.recoveryRequest == null) {
-                    cancelRecovery("L'animateur a refusé votre demande de reconnexion.");
-                }
-            });
+                    
+                    // 🚀 DOUBLE SÉCURITÉ : On vérifie si l'utilisateur est déjà loggé sur Firebase
+                    const isAuth = firebase.auth().currentUser;
+                    if (isAuth && isAuth.uid === targetUid) {
+                        // Déjà connecté avec le bon compte -> Go !
+                        myUserID = targetUid;
+                        localStorage.setItem('buzz_userId', myUserID);
+                        player = { pseudo: p.name, avatar: p.avatar, team: p.teamName || "Solo", teamIcon: p.teamIcon || "" };
+                        showReconnectScreen();
+                    } else {
+                        // Pas connecté -> Écran de verrouillage "Buzz Ta Puce"
+                        window.prepareSecureRecovery(targetUid, p);
+                    }
+				}
+			});
         }
 
         function cancelRecovery(msg) {
@@ -1526,6 +1551,11 @@
                 roomRef.child('players/' + pendingRecoveryUid).update({ recoveryRequest: null }); 
                 pendingRecoveryUid = null; 
             }
+            
+            // 🚀 SÉCURITÉ : On vide le champ e-mail de la modale de login
+            const loginEmailInput = document.getElementById('login-email');
+            if(loginEmailInput) loginEmailInput.value = '';
+
             if(msg && typeof msg === 'string') alert(msg);
             navigateTo('step-pseudo', false);
         }
@@ -3569,6 +3599,32 @@
                 document.getElementById('crm-pwd-conf').value = pwd; 
                 window.checkPasswordMatch(); // On lance la double vérification
             }, 100);
+        };
+		
+		window.prepareSecureRecovery = function(uid, playerData) {
+            // 1. On va chercher l'e-mail dans la base CRM (branche users_crm)
+            firebase.database().ref('users_crm/' + uid).once('value').then(snap => {
+                const crmData = snap.val() || {};
+                const email = crmData.email || "Compte Google";
+                
+                // 2. Remplissage visuel de l'écran de confirmation
+                document.getElementById('rec-pseudo-display').innerText = playerData.name;
+                document.getElementById('rec-email-display').innerText = email;
+                const avZone = document.getElementById('rec-avatar-display');
+                if(playerData.avatar && playerData.avatar.length > 20) avZone.innerHTML = `<img src="${playerData.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
+                else avZone.innerText = playerData.avatar || "👤";
+
+                // 3. Pré-remplissage invisible du formulaire de login pour gagner du temps
+                const loginEmailInput = document.getElementById('login-email');
+                if(loginEmailInput && crmData.email) loginEmailInput.value = crmData.email;
+
+                navigateTo('step-recovery-confirm');
+            });
+        };
+
+        window.openLoginWithEmail = function() {
+            // Ouvre simplement la modale de connexion que tu as déjà
+            window.openLoginModal();
         };
 		
     </script>
