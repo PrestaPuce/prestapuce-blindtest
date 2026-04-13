@@ -242,7 +242,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.251</div>
+    <div class="version-tag" id="app-version-display">v1.253</div>
 
     <div id="global-dropdown"></div>
 
@@ -363,7 +363,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.251</span>
+                    <span id="disp-v-mj">v1.253</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -728,7 +728,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.251";
+        const APP_VERSION = "1.253";
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -988,7 +988,7 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.251", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: "v1.253", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
@@ -2296,8 +2296,9 @@
                                 <div class="player-controls">${actionsHtml}</div>
                            </div>`;
                 } else {
-                    // PATCH V1.243 : Synchro exacte "Buzzer pris = Ligne verte"
-                    const rC = (d.uid === currentBuzzerId && currentGameState === 'taken') ? "score-row buzzer-active-row grid-player" : "score-row grid-player";
+                    // 🚀 ALERTE ORANGE : Clignote si demande en cours, même si le joueur est actif
+                    let rC = (d.uid === currentBuzzerId && currentGameState === 'taken') ? "score-row buzzer-active-row grid-player" : "score-row grid-player";
+                    if (d.recoveryRequest && d.recoveryRequest !== 'validated') rC += " pulse-alert";
 					hA += `
                     <div class="${rC}">
                         <div class="grid-cell-center" style="font-size:0.75rem;">${stateDot}</div>
@@ -2658,7 +2659,8 @@
 
         function acceptRecovery(u) { 
             logEvent('SYSTEM', `MJ a autorisé une demande de reconnexion`); // 🟢 CAPTEUR
-            roomRef.child('players/'+u).update({active:true, recoveryRequest:null, reconnectedAt:Date.now()}); 
+            // 🚀 SIGNAL DE VALIDATION : On autorise le téléphone à passer à la connexion
+            roomRef.child('players/'+u).update({recoveryRequest:'validated'}); 
         }
 
         function rejectRecovery(u) { 
@@ -2800,8 +2802,26 @@
 		function togglePlayerTeam(u, c) { 
             const i=(c==="Solo")?"":(globalTeams[c]?globalTeams[c].icon:""); 
             const pName = allPlayersData[u] ? allPlayersData[u].name : "Un joueur";
-            logEvent('SYSTEM', `MJ a déplacé ${pName} vers : ${c}`); // 🟢 CAPTEUR
-            roomRef.child('players/'+u).update({teamName:c, teamIcon:i, active:true}); 
+            
+            // 🚀 BUG CAPITAINE : On vérifie si l'équipe de destination est vide
+            let teamHasMembers = false;
+            if (c !== "Solo") {
+                for (let pId in allPlayersData) {
+                    if (allPlayersData[pId].teamName === c && !allPlayersData[pId].banned && pId !== u) {
+                        teamHasMembers = true;
+                        break;
+                    }
+                }
+            }
+            const isCaptainNow = (c !== "Solo" && !teamHasMembers);
+
+            logEvent('SYSTEM', `MJ a déplacé ${pName} vers : ${c}`);
+            roomRef.child('players/'+u).update({
+                teamName:c, 
+                teamIcon:i, 
+                isCaptain: isCaptainNow,
+                captainMessage: isCaptainNow ? `👑 Vous avez été nommé capitaine de l'équipe ${c} !` : null
+            }); 
         }
 
         function handleError() { 
