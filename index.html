@@ -992,7 +992,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.277";
+        const CLIENT_VERSION = "1.278";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1330,6 +1330,9 @@
         }
         
         function showReconnectScreen() {
+            // 🚀 SÉCURITÉ ANTI-CLONAGE : On s'assure d'avoir un jeton
+            if (!window.mySessionID) window.mySessionID = Math.random().toString(36).substring(2, 15);
+
             // 🚀 RÈGLE : Le joueur devient ACTIF uniquement ici (Page Buzzer)
             if (myUserID) {
                 firebase.database().ref('players/' + myUserID).update({
@@ -1338,14 +1341,27 @@
                     reconnectedAt: firebase.database.ServerValue.TIMESTAMP
                 });
 
-                // Écouteur pour éjecter si une autre session s'ouvre
-                firebase.database().ref('users_crm/' + myUserID + '/currentSessionID').on('value', snap => {
-                    const sess = snap.val();
-                    if (sess && sess !== window.mySessionID) {
-                        alert("⚠️ SESSION RÉCUPÉRÉE AILLEURS\n\nCe compte est utilisé sur un autre appareil.");
-                        location.reload();
-                    }
-                });
+                const isAuth = firebase.auth().currentUser;
+                if (isAuth && isAuth.uid === myUserID) {
+                    const sessionRef = firebase.database().ref('users_crm/' + myUserID + '/currentSessionID');
+                    
+                    // 1. On inscrit notre jeton comme étant le jeton "maître" actuel
+                    sessionRef.set(window.mySessionID);
+
+                    // 2. 🚀 L'ÉCOUTEUR ACTIF : On surveille si ce jeton change
+                    sessionRef.on('value', snap => {
+                        const activeSessionID = snap.val();
+                        if (activeSessionID && activeSessionID !== window.mySessionID) {
+                            // Le jeton en base est différent du nôtre -> Un autre téléphone a pris la main
+                            sessionRef.off(); 
+                            alert("⚠️ Ce compte est utilisé sur un autre appareil. Déconnexion...");
+                            firebase.auth().signOut().then(() => {
+                                localStorage.removeItem('buzz_userId');
+                                window.location.reload();
+                            });
+                        }
+                    });
+                }
             }
 
             document.getElementById('reconnect-pseudo-display').innerText = player.pseudo;
@@ -3705,12 +3721,9 @@
             }, 100);
         };
 		
-		// 🚀 CRÉATION DU JETON UNIQUE ET MÉMOIRE DE RÉCUPÉRATION
-        window.mySessionID = Math.random().toString(36).substring(2, 15);
+		// 🚀 INITIALISATION JETON UNIQUE ET MÉMOIRE
+        window.mySessionID = window.mySessionID || Math.random().toString(36).substring(2, 15);
         window.pendingRecoveryData = null;
-
-		// 🚀 JETON DE SESSION (Généré une seule fois pour ce téléphone)
-		window.mySessionID = Math.random().toString(36).substring(2, 15);
 
 		window.prepareSecureRecovery = function(uid, playerData) {
             // 🚀 Mémorisation des infos pour bloquer le retour à l'écran pseudo plus tard
