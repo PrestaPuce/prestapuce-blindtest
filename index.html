@@ -476,14 +476,14 @@
                     <div class="avatar-wrapper" onclick="openSettings()" style="cursor: pointer;">
                         <div class="mini-avatar" id="game-avatar"></div>
                         <img id="team-badge" src="" alt="Team">
-                        <div class="edit-badge">✏️</div>
-                    </div>
+                        </div>
                     <div class="text-info-col">
                         <span id="game-pseudo">Joueur</span>
                         <span id="game-team" style="color:var(--accent);">Solo</span>
                     </div>
                 </div>
                 <div class="header-actions">
+                    <div class="icon-btn" onclick="openSettings()" title="Réglages du profil">⚙️</div>
                     <div class="icon-btn" onclick="showQR()">🔗</div>
                     <div class="icon-btn" onclick="confirmQuit()" style="background:var(--danger);">✕</div>
                 </div>
@@ -534,24 +534,47 @@
                 </div>
             </div>
 
-            <h2 style="color:var(--accent); margin-top:0; margin-bottom:20px;">MODIFIER PROFIL</h2>
+            <h2 style="color:var(--accent); margin-top:0; margin-bottom:15px;">MODIFIER PROFIL</h2>
             
-<button class="settings-btn" onclick="editStep('step-pseudo')">✏️ Modifier mon Pseudo</button>
-            <button class="settings-btn" onclick="window.openAvatarMenuDirectly()">📷 Changer d'Avatar</button>
-            
-            <button id="btn-direct-gallery" class="settings-btn" onclick="isEditing = true; window.openGalleryDirectly()" style="display:none; background:rgba(255,255,255,0.05);">🕰️ Gérer ma Galerie (10 photos)</button>
-            
-            <button class="settings-btn" onclick="editStep('step-mode')">🛡️ Changer Mode (Solo/Team)</button>
+            <div style="display:flex; flex-direction:column; gap: 8px;">
+                <button class="settings-btn" onclick="editStep('step-pseudo')" style="margin:0; padding:10px;">✏️ Modifier mon Pseudo</button>
+                <button class="settings-btn" onclick="window.openAvatarMenuDirectly()" style="margin:0; padding:10px;">📷 Changer d'Avatar</button>
+                <button id="btn-direct-gallery" class="settings-btn" onclick="isEditing = true; window.openGalleryDirectly()" style="display:none; background:rgba(255,255,255,0.05); margin:0; padding:10px;">🕰️ Gérer ma Galerie (10 photos)</button>
+                <button class="settings-btn" onclick="editStep('step-mode')" style="margin:0; padding:10px;">🛡️ Changer Mode (Solo/Team)</button>
+            </div>
             
             <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
             
-            <button id="btn-manage-team" class="settings-btn" onclick="openTeamManagement()" style="display:none; border: 1px solid var(--gold); color: var(--gold); margin-bottom:15px;">👑 Gérer mon Équipe</button>
+            <div style="display:flex; flex-direction:column; gap: 8px;">
+                <button id="btn-manage-team" class="settings-btn" onclick="openTeamManagement()" style="display:none; border: 1px solid var(--gold); color: var(--gold); margin:0; padding:10px;">👑 Gérer mon Équipe</button>
+                <button id="btn-edit-profile" class="settings-btn" onclick="window.openEditProfileModal()" style="display:none; background: rgba(39, 174, 96, 0.1); border: 1px solid var(--success); color: white; margin:0; padding:10px;">⚙️ Mes informations personnelles</button>
+                <button id="btn-security-profile" class="settings-btn" onclick="window.openSecurityModal()" style="display:none; background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; color: white; margin:0; padding:10px;">🔒 E-mail & Mot de Passe</button>
+            </div>
 
-            <button id="btn-edit-profile" class="settings-btn" onclick="window.openEditProfileModal()" style="display:none; background: rgba(39, 174, 96, 0.1); border: 1px solid var(--success); color: white;">⚙️ Mes informations personnelles</button>
+            <button class="settings-btn" onclick="document.getElementById('modal-about-player').style.display='flex'" style="background:transparent; border:1px solid #bdc3c7; color:#bdc3c7; margin-top: 15px; margin-bottom: 0; padding: 10px;">ℹ️ À Propos & Versions</button>
+
+            <button class="settings-btn btn-return-game" onclick="finishEdit(false)" style="margin-top:10px; background:#34495e; padding:12px;">⬅️ RETOUR AU BUZZER</button>
+        </div>
+    </div>
+	
+	<div id="modal-about-player" class="overlay-full" style="z-index: 3000; display:none;" onclick="this.style.display='none'">
+        <div class="settings-content" style="max-width:500px; padding: 30px; position: relative;" onclick="event.stopPropagation()">
+            <button onclick="document.getElementById('modal-about-player').style.display='none'" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">✖</button>
+            <h2 style="color:var(--primary); margin-top: 0; margin-bottom: 20px;">À PROPOS</h2>
             
-            <button id="btn-security-profile" class="settings-btn" onclick="window.openSecurityModal()" style="display:none; background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; color: white;">🔒 E-mail & Mot de Passe</button>
-
-            <button class="settings-btn btn-return-game" onclick="finishEdit(false)" style="margin-top:15px; background:#34495e;">⬅️ RETOUR AU BUZZER</button>
+            <div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-bottom:15px;">
+                <img src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad" style="height:60px; object-fit:contain;">
+                <span style="font-size:1.5rem; color:#bdc3c7;">&amp;</span>
+                <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="height:60px; object-fit:contain; background:rgba(255,255,255,0.1); border-radius:8px; padding:5px;">
+            </div>
+            
+            <p style="font-size:0.9rem; color:#bdc3c7; font-style:italic; margin-bottom:20px;">Buz'ta Puce est une marque déposée de Presta'Puce.</p>
+            
+            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; text-align:center; font-size:0.9rem; color:#ecf0f1; border:1px solid rgba(255,255,255,0.1);">
+                <p style="margin: 0; color: var(--accent); font-weight: bold;">Fichier Client : v1.245</p>
+            </div>
+            
+            <p style="font-size:0.75rem; color:#7f8c8d; margin-top:20px; margin-bottom:0;">&copy; 2026 Presta'Puce. Tous droits réservés.</p>
         </div>
     </div>
     
@@ -992,7 +1015,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.278";
+        const CLIENT_VERSION = "1.279";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -2355,7 +2378,7 @@
                     joinTimestamp: trueTime, isCaptain: becomeCaptain 
                 }).then(() => {
                     if (becomeCaptain && player.team !== "Solo") {
-                        alert("👑 Félicitations Capitaine ! Vous gérez l'équipe " + player.team + ".");
+                        alert(`👑 Bonne nouvelle ! Vous avez été promu Capitaine de l'équipe ${newTeamName} !\n\n💡 NOUVEAU POUVOIR : Cliquez sur la couronne 👑 en haut de l'écran pour gérer votre équipe.`);
                     }
                 });
                 localStorage.setItem('presta_player_session', JSON.stringify(player)); localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar}));
@@ -3015,6 +3038,15 @@
             firebase.auth().signInWithPopup(provider).then(function(result) {
                 var user = result.user;
                 
+                // 🚀 SÉCURITÉ : Vérification de l'identité en cas de récupération
+                if (window.pendingRecoveryData && window.pendingRecoveryData.uid !== user.uid) {
+                    alert("⚠️ ERREUR DE SÉCURITÉ\n\nCe compte Google ne correspond pas au propriétaire du pseudo '" + window.pendingRecoveryData.name + "'.\n\nLa récupération a été annulée.");
+                    window.pendingRecoveryData = null;
+                    firebase.auth().signOut();
+                    window.location.reload();
+                    return;
+                }
+
                 // On fouille dans la base de données pour voir s'il est connu
                 firebase.database().ref('users_crm/' + user.uid).once('value').then(function(snap) {
                     if(snap.exists()) {
@@ -3064,6 +3096,9 @@
                                 team: window.pendingRecoveryData.teamName || "Solo", 
                                 teamIcon: window.pendingRecoveryData.teamIcon || "" 
                             };
+                            // 🚀 RÉCUPÉRATION DU RÔLE DE CAPITAINE
+                            isCaptain = window.pendingRecoveryData.isCaptain || false;
+                            
                             window.pendingRecoveryData = null; // Purge
                             showReconnectScreen(); // On va direct au buzzer, pas au pseudo !
                         } else {
