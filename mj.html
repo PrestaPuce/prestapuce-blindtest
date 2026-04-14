@@ -1029,8 +1029,27 @@
 
         function updateAllVersions() { 
             if(!isSuperAdmin) return;
-            const newV = { index: document.getElementById('inp-v-index').value.trim(), mj: document.getElementById('inp-v-mj').value.trim(), remote: document.getElementById('inp-v-remote').value.trim(), scores: document.getElementById('inp-v-scores').value.trim(), guide: document.getElementById('inp-v-guide').value.trim() };
-            if(confirm("Forcer la mise à jour globale des versions ?")) { db.ref('config/versions').set(newV).then(() => alert("Versions mises à jour avec succès !")); }
+            
+            try {
+                const newV = {};
+                const fields = ['index', 'mj', 'remote', 'scores', 'guide'];
+                
+                fields.forEach(f => {
+                    const el = document.getElementById('inp-v-' + f);
+                    if (el) {
+                        newV[f] = el.value.trim();
+                    }
+                });
+
+                if(confirm("Forcer la mise à jour globale des versions ?")) { 
+                    db.ref('config/versions').set(newV)
+                    .then(() => alert("✅ Versions mises à jour avec succès !"))
+                    .catch(err => alert("❌ Erreur Firebase : " + err.message)); 
+                }
+            } catch (err) {
+                console.error("Erreur lors de la mise à jour :", err);
+                alert("⚠️ Erreur technique : " + err.message);
+            }
         }
 
         function renderSAMjList() {
