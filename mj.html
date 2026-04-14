@@ -362,11 +362,6 @@
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
-                    <span>MJ :</span>
-                    <span id="disp-v-mj">v1.255</span>
-                    <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
-                </div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>Remote :</span>
                     <span id="disp-v-remote">v1.155</span>
                     <input type="text" id="inp-v-remote" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'remote', 'scores')">
@@ -728,7 +723,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.255"; // 🚀 C'EST LE SEUL ENDROIT À MODIFIER DÉSORMAIS
+        const APP_VERSION = "1.256"; // 🚀 C'EST LE SEUL ENDROIT À MODIFIER DÉSORMAIS
 		// On pré-remplit instantanément l'affichage sans attendre la base de données
 		document.addEventListener('DOMContentLoaded', () => {
 		if(document.getElementById('app-version-display')) document.getElementById('app-version-display').innerText = `v${APP_VERSION}`;
@@ -940,16 +935,20 @@
             if(isSuperAdmin) { 
                 document.getElementById('btn-super-admin').style.display='inline-block'; 
                 ['index', 'mj', 'remote', 'scores', 'guide'].forEach(f => {
-                    document.getElementById('disp-v-' + f).style.display = 'none';
-                    document.getElementById('inp-v-' + f).style.display = 'inline-block';
+                    const disp = document.getElementById('disp-v-' + f);
+                    const inp = document.getElementById('inp-v-' + f);
+                    if(disp) disp.style.display = 'none';
+                    if(inp) inp.style.display = 'inline-block';
                 });
                 document.getElementById('sa-inline-save-btn').style.display='block';
                 initSuperAdminListener(); 
             } else { 
                 document.getElementById('btn-super-admin').style.display='none'; 
                 ['index', 'mj', 'remote', 'scores', 'guide'].forEach(f => {
-                    document.getElementById('disp-v-' + f).style.display = 'inline-block';
-                    document.getElementById('inp-v-' + f).style.display = 'none';
+                    const disp = document.getElementById('disp-v-' + f);
+                    const inp = document.getElementById('inp-v-' + f);
+                    if(disp) disp.style.display = 'inline-block';
+                    if(inp) inp.style.display = 'none';
                 });
                 document.getElementById('sa-inline-save-btn').style.display='none';
             }
