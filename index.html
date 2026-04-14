@@ -1015,7 +1015,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.284";
+        const CLIENT_VERSION = "1.285";
 		
 		// 🚀 AUTOMATISATION : Mise à jour du titre et de la modale au chargement
         document.addEventListener("DOMContentLoaded", function() {
@@ -1422,19 +1422,23 @@
                             
                             // C) Si le jeton change et n'est plus le nôtre -> Éjection !
                             if (activeSessionID && activeSessionID !== window.mySessionID) {
-                                sessionRef.off(); // On coupe le radar
-                                alert("⚠️ SESSION TRANSFÉRÉE\n\nCe compte vient d'être connecté sur un autre appareil.\nVous avez été déconnecté pour lui laisser la place.");
+                                sessionRef.off(); 
                                 
-                                // 💥 Nettoyage complet de l'ancien téléphone
-                                firebase.auth().signOut().then(() => {
-                                    localStorage.removeItem('buzz_userId');
-                                    localStorage.removeItem('buzz_lastProfile');
-                                    localStorage.removeItem('presta_player_session');
-                                    window.location.href = 'mj.html'; // 🚀 REDIRECTION VERS LE LIEN DU MJ
-                                }).catch(() => {
-                                    // Parachute de sécurité si erreur
-                                    localStorage.clear();
-                                    window.location.href = 'mj.html'; // 🚀 REDIRECTION VERS LE LIEN DU MJ
+                                // 🚀 RÉCUPÉRATION DU LIEN MJ AVANT DÉCONNEXION
+                                roomRef.child('mjWebsite').once('value').then(snap => {
+                                    const targetUrl = snap.val() || "https://www.prestapuce.fr"; // Lien de secours si vide
+                                    
+                                    alert("⚠️ SESSION TRANSFÉRÉE\n\nCe compte est utilisé sur un autre appareil.\nRedirection vers le site de votre animateur...");
+
+                                    firebase.auth().signOut().then(() => {
+                                        localStorage.removeItem('buzz_userId');
+                                        localStorage.removeItem('buzz_lastProfile');
+                                        localStorage.removeItem('presta_player_session');
+                                        window.location.href = targetUrl; // 🔗 Redirection vers la promo du MJ
+                                    }).catch(() => {
+                                        localStorage.clear();
+                                        window.location.href = targetUrl;
+                                    });
                                 });
                             }
                         });
