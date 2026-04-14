@@ -1015,7 +1015,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.288";
+        const CLIENT_VERSION = "1.289";
 		
 		// 🚀 AUTOMATISATION : Mise à jour du titre et de la modale au chargement
         document.addEventListener("DOMContentLoaded", function() {
@@ -3155,9 +3155,23 @@
                             window.pendingRecoveryData = null; // Purge
                             showReconnectScreen(); // On va direct au buzzer, pas au pseudo !
                         } else {
-                            var gamePseudoInput = document.getElementById('input-pseudo');
-                            if (gamePseudoInput) gamePseudoInput.value = player.pseudo;
-                            navigateTo('step-pseudo');
+                            // 🚀 VOIE VIP (Google) : On met à jour le jeton et on vérifie si le joueur est déjà dans la salle
+                            firebase.database().ref('users_crm/' + user.uid).update({ currentSessionID: window.mySessionID });
+                            if (typeof roomRef !== 'undefined' && roomRef) {
+                                roomRef.child('players/' + user.uid).once('value').then(roomSnap => {
+                                    if (roomSnap.exists()) {
+                                        showReconnectScreen(); // Joueur déjà dans la salle : direct à l'écran de retour !
+                                    } else {
+                                        var gamePseudoInput = document.getElementById('input-pseudo');
+                                        if (gamePseudoInput) gamePseudoInput.value = player.pseudo;
+                                        navigateTo('step-pseudo');
+                                    }
+                                });
+                            } else {
+                                var gamePseudoInput = document.getElementById('input-pseudo');
+                                if (gamePseudoInput) gamePseudoInput.value = player.pseudo;
+                                navigateTo('step-pseudo');
+                            }
                         }
                     } else {
                         // CAS 2 : NOUVEAU JOUEUR GOOGLE -> On le dépose à l'étape 2 !
@@ -3559,10 +3573,21 @@
                             window.pendingRecoveryData = null; // On vide la mémoire
                             showReconnectScreen(); // On va direct à l'écran final
                         } else {
-                            // Connexion classique : On met à jour le jeton et on suit le chemin normal
+                            // 🚀 VOIE VIP (Connexion classique) : On vérifie si le joueur est déjà dans la salle
                             firebase.database().ref('users_crm/' + user.uid).update({ currentSessionID: window.mySessionID });
-                            document.getElementById('input-pseudo').value = player.pseudo;
-                            navigateTo('step-pseudo'); 
+                            if (typeof roomRef !== 'undefined' && roomRef) {
+                                roomRef.child('players/' + user.uid).once('value').then(roomSnap => {
+                                    if (roomSnap.exists()) {
+                                        showReconnectScreen(); // Joueur déjà dans la salle : direct à l'écran de retour !
+                                    } else {
+                                        document.getElementById('input-pseudo').value = player.pseudo;
+                                        navigateTo('step-pseudo'); 
+                                    }
+                                });
+                            } else {
+                                document.getElementById('input-pseudo').value = player.pseudo;
+                                navigateTo('step-pseudo'); 
+                            }
                         }
                     } else {
                         errDiv.innerText = "Profil introuvable.";
