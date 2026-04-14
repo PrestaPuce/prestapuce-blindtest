@@ -1015,7 +1015,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.281";
+        const CLIENT_VERSION = "1.283";
 		
 		// 🚀 AUTOMATISATION : Mise à jour du titre et de la modale au chargement
         document.addEventListener("DOMContentLoaded", function() {
@@ -1396,72 +1396,74 @@
             });
         }
         
-        function showReconnectScreen() {
-            // 🚀 SÉCURITÉ ANTI-CLONAGE : On s'assure d'avoir un jeton
+        window.showReconnectScreen = function() {
+            // 🚀 SÉCURITÉ ANTI-CLONAGE : Création du jeton du téléphone
             if (!window.mySessionID) window.mySessionID = Math.random().toString(36).substring(2, 15);
 
-            // 🚀 RÈGLE : Le joueur devient ACTIF uniquement ici (Page Buzzer)
             if (myUserID) {
+                // 1. On déclare le joueur actif dans la salle
                 firebase.database().ref('players/' + myUserID).update({
                     active: true,
                     recoveryRequest: null,
                     reconnectedAt: firebase.database.ServerValue.TIMESTAMP
                 });
 
-                const isAuth = firebase.auth().currentUser;
-                if (isAuth && isAuth.uid === myUserID) {
+                // 2. 🚀 LE RADAR D'ÉJECTION UNIQUE ET ABSOLU
+                // On active cette sécurité uniquement pour les vrais comptes (pas les invités 'u_...')
+                if (!myUserID.startsWith('u_')) {
                     const sessionRef = firebase.database().ref('users_crm/' + myUserID + '/currentSessionID');
                     
-                    // 1. On inscrit notre jeton comme étant le jeton "maître" actuel
-                    sessionRef.set(window.mySessionID);
-
-                    // 2. 🚀 L'ÉCOUTEUR ACTIF : On surveille si ce jeton change
-                    sessionRef.on('value', snap => {
-                        const activeSessionID = snap.val();
-                        if (activeSessionID && activeSessionID !== window.mySessionID) {
-                            // Le jeton en base est différent du nôtre -> Un autre téléphone a pris la main
-                            sessionRef.off(); 
-                            alert("⚠️ Ce compte est utilisé sur un autre appareil. Déconnexion...");
-                            firebase.auth().signOut().then(() => {
-                                localStorage.removeItem('buzz_userId');
-                                window.location.reload();
-                            });
-                        }
+                    // A) Le téléphone impose son jeton dans le dossier du joueur
+                    sessionRef.set(window.mySessionID).then(() => {
+                        
+                        // B) On allume l'écouteur permanent en temps réel
+                        sessionRef.on('value', snap => {
+                            const activeSessionID = snap.val();
+                            
+                            // C) Si le jeton change et n'est plus le nôtre -> Éjection !
+                            if (activeSessionID && activeSessionID !== window.mySessionID) {
+                                sessionRef.off(); // On coupe le radar
+                                alert("⚠️ SESSION TRANSFÉRÉE\n\nCe compte vient d'être connecté sur un autre appareil.\nVous avez été déconnecté pour lui laisser la place.");
+                                
+                                // 💥 Nettoyage complet de l'ancien téléphone
+                                firebase.auth().signOut().then(() => {
+                                    localStorage.removeItem('buzz_userId');
+                                    localStorage.removeItem('buzz_lastProfile');
+                                    localStorage.removeItem('presta_player_session');
+                                    window.location.reload(); // Renvoie à l'accueil
+                                }).catch(() => {
+                                    // Parachute de sécurité si erreur
+                                    localStorage.clear();
+                                    window.location.reload();
+                                });
+                            }
+                        });
                     });
                 }
             }
 
+            // --- GESTION DE L'AFFICHAGE DE L'ÉCRAN BON RETOUR ---
             document.getElementById('reconnect-pseudo-display').innerText = player.pseudo;
             const avImg = document.getElementById('reconnect-avatar-preview');
-            if(player.avatar && player.avatar.length > 20) { avImg.src = player.avatar; avImg.style.display='block'; } else { avImg.style.display='none'; }
+            if(player.avatar && player.avatar.length > 20) { 
+                avImg.src = player.avatar; 
+                avImg.style.display = 'block'; 
+            } else { 
+                avImg.style.display = 'none'; 
+            }
             
-            // 🚀 AFFICHAGE INTELLIGENT DU BLOC DE SAUVEGARDE
+            // Affichage intelligent du bouton de création de compte
             const guestBlock = document.getElementById('reconnect-guest-actions');
             if (guestBlock) {
                 if (myUserID && myUserID.startsWith('u_')) {
-                    guestBlock.style.display = 'block';
+                    guestBlock.style.display = 'block'; // C'est un invité
                 } else {
-                    guestBlock.style.display = 'none';
-                    
-                    // 🚀 ÉTAPE 3 : L'ÉCOUTEUR DE SESSION (Le Coup de pied)
-                    if (window.mySessionID) {
-                        firebase.database().ref('users_crm/' + myUserID + '/currentSessionID').on('value', snap => {
-                            const activeSession = snap.val();
-                            if (activeSession && activeSession !== window.mySessionID) {
-                                // 💥 L'ID en base a changé -> Dégagement immédiat du vieux téléphone
-                                alert("⚠️ SESSION RÉCUPÉRÉE AILLEURS\n\nCe compte vient d'être connecté sur un autre appareil.\nVous allez être déconnecté pour lui laisser la place.");
-                                localStorage.removeItem('buzz_userId'); 
-                                localStorage.removeItem('buzz_lastProfile');
-                                localStorage.removeItem('presta_player_session');
-                                location.reload(); // Recharge l'application à zéro
-                            }
-                        });
-                    }
+                    guestBlock.style.display = 'none'; // C'est un compte CRM, on cache le bouton
                 }
             }
             
             navigateTo('step-reconnect');
-        }
+        };
 
         function resumeGame() {
             roomRef.child('players/' + myUserID).once('value', snap => {
