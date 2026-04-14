@@ -1015,7 +1015,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.279";
+        const CLIENT_VERSION = "1.280";
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1331,9 +1331,44 @@
                                 return;
                             }
 
-                            player = { pseudo: data.name, avatar: data.avatar, team: data.teamName || "Solo", teamIcon: data.teamIcon || "" };
-                            showReconnectScreen(); return;
+                            // 🚀 ÉTAPE 2 : LE SCAN DE LA SALLE (Recherche de conflit)
+                            roomRef.child('players').once('value', allPlayersSnap => {
+                                const allPlayers = allPlayersSnap.val() || {};
+                                let conflictActive = false;
+
+                                Object.keys(allPlayers).forEach(uid => {
+                                    if (uid !== myUserID && allPlayers[uid].name && allPlayers[uid].name.toLowerCase() === data.name.toLowerCase()) {
+                                        // Un autre joueur a le même pseudo
+                                        if (allPlayers[uid].active === true) {
+                                            conflictActive = true;
+                                        }
+                                    }
+                                });
+
+                                if (conflictActive) {
+                                    // 🚨 SCÉNARIO ROUGE : Le pseudo est pris par un autre appareil actif
+                                    snapUser.ref.remove(); // On détruit la trace de ce téléphone dans Firebase
+                                    localStorage.removeItem('presta_player_session');
+                                    localStorage.removeItem('buzz_lastProfile');
+                                    
+                                    alert("⚠️ CONFLIT DE PSEUDO\n\nLe pseudo '" + data.name + "' est actuellement utilisé par un autre joueur dans la salle.\nTa session locale a été réinitialisée.");
+                                    
+                                    // On génère un nouvel ID pour que le téléphone B reparte de zéro
+                                    myUserID = 'u_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                                    localStorage.setItem('buzz_userId', myUserID);
+                                    player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
+                                    
+                                    navigateTo('step-welcome'); // On le renvoie à l'accueil
+                                } else {
+                                    // ✅ SCÉNARIO VERT : Le pseudo est libre
+                                    player = { pseudo: data.name, avatar: data.avatar, team: data.teamName || "Solo", teamIcon: data.teamIcon || "" };
+                                    showReconnectScreen(); 
+                                }
+                            });
+                            return;
                         }
+                        navigateTo('step-welcome');
+                    });
                         navigateTo('step-welcome');
                     });
                 } else { 
