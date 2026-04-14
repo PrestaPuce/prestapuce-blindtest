@@ -571,7 +571,7 @@
             <p style="font-size:0.9rem; color:#bdc3c7; font-style:italic; margin-bottom:20px;">Buz'ta Puce est une marque déposée de Presta'Puce.</p>
             
             <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; text-align:center; font-size:0.9rem; color:#ecf0f1; border:1px solid rgba(255,255,255,0.1);">
-                <p style="margin: 0; color: var(--accent); font-weight: bold;">Fichier Client : v1.245</p>
+                <p style="margin: 0; color: var(--accent); font-weight: bold;">Fichier Client : v<span id="display-client-version">---</span></p>
             </div>
             
             <p style="font-size:0.75rem; color:#7f8c8d; margin-top:20px; margin-bottom:0;">&copy; 2026 Presta'Puce. Tous droits réservés.</p>
@@ -1015,7 +1015,18 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.280";
+        const CLIENT_VERSION = "1.281";
+		
+		// 🚀 AUTOMATISATION : Mise à jour du titre et de la modale au chargement
+        document.addEventListener("DOMContentLoaded", function() {
+            // Met à jour l'onglet du navigateur
+            document.title = "Buz'ta Puce - v" + CLIENT_VERSION;
+
+            // Met à jour le numéro dans la modale À Propos
+            const vSpan = document.getElementById('display-client-version');
+            if (vSpan) vSpan.innerText = CLIENT_VERSION;
+        });
+		
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
         let isRoomClosing = false;
@@ -1367,8 +1378,6 @@
                             });
                             return;
                         }
-                        navigateTo('step-welcome');
-                    });
                         navigateTo('step-welcome');
                     });
                 } else { 
