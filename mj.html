@@ -242,7 +242,7 @@
 
     <div id="dynamic-bg"></div>
     <div id="bg-protection"></div>
-    <div class="version-tag" id="app-version-display">v1.254</div>
+    <div class="version-tag" id="app-version-display"></div>
 
     <div id="global-dropdown"></div>
 
@@ -357,13 +357,13 @@
                 <h4 style="margin-top:0; color:var(--accent); margin-bottom:10px;">VERSIONS SYSTÈME</h4>
                 
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
-                    <span>Index :</span>
-                    <span id="disp-v-index">v1.179</span>
-                    <input type="text" id="inp-v-index" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'index', 'mj')">
+                    <span>MJ :</span>
+                    <span id="disp-v-mj"></span>
+                    <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
                     <span>MJ :</span>
-                    <span id="disp-v-mj">v1.254</span>
+                    <span id="disp-v-mj">v1.255</span>
                     <input type="text" id="inp-v-mj" style="display:none; width:70px; padding:2px 5px; margin:0; font-size:0.85rem; text-align:right; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.8); color:var(--accent); border-radius:4px; outline:none;" onkeypress="handleVersionKey(event, 'mj', 'remote')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
@@ -728,7 +728,12 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.254";
+        const APP_VERSION = "1.255"; // 🚀 C'EST LE SEUL ENDROIT À MODIFIER DÉSORMAIS
+		// On pré-remplit instantanément l'affichage sans attendre la base de données
+		document.addEventListener('DOMContentLoaded', () => {
+		if(document.getElementById('app-version-display')) document.getElementById('app-version-display').innerText = `v${APP_VERSION}`;
+		if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = `v${APP_VERSION}`;
+		});
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -988,22 +993,23 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: "v1.254", remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                const v = snap.val() || { index: "v1.179", mj: `v${APP_VERSION}`, remote: "v1.155", scores: "v1.169", guide: "v1.022" };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
-                if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = v.mj;
+                // On force l'affichage de la version inscrite dans ce fichier pour le MJ
+                if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = `v${APP_VERSION}`;
                 if(document.getElementById('disp-v-remote')) document.getElementById('disp-v-remote').innerText = v.remote;
                 if(document.getElementById('disp-v-scores')) document.getElementById('disp-v-scores').innerText = v.scores;
                 if(document.getElementById('disp-v-guide')) document.getElementById('disp-v-guide').innerText = v.guide;
                 
                 if(document.getElementById('inp-v-index') && document.activeElement.id !== 'inp-v-index') document.getElementById('inp-v-index').value = v.index;
-                if(document.getElementById('inp-v-mj') && document.activeElement.id !== 'inp-v-mj') document.getElementById('inp-v-mj').value = v.mj;
+                if(document.getElementById('inp-v-mj') && document.activeElement.id !== 'inp-v-mj') document.getElementById('inp-v-mj').value = `v${APP_VERSION}`;
                 if(document.getElementById('inp-v-remote') && document.activeElement.id !== 'inp-v-remote') document.getElementById('inp-v-remote').value = v.remote;
                 if(document.getElementById('inp-v-scores') && document.activeElement.id !== 'inp-v-scores') document.getElementById('inp-v-scores').value = v.scores;
                 if(document.getElementById('inp-v-guide') && document.activeElement.id !== 'inp-v-guide') document.getElementById('inp-v-guide').value = v.guide;
 
                 const appVersionDisp = document.getElementById('app-version-display');
-                if (appVersionDisp) appVersionDisp.innerText = v.mj || `v${APP_VERSION}`;
+                if (appVersionDisp) appVersionDisp.innerText = `v${APP_VERSION}`;
             }); 
         }
 
@@ -2197,27 +2203,43 @@
                 </div>`;
             
             let pArr = [];
-            let counts = { all: 0, active: 0, inactive: 0, banned: 0, recovery: 0 };
+            // 🚀 MODIFICATION : Nouveaux compteurs séparés pour Actifs et Inactifs
+            let counts = { all: 0, active: 0, inactive: 0, banned: 0, recoveryActive: 0, recoveryInactive: 0 };
             
             Object.keys(allPlayersData).forEach(uid => { 
                 const d = allPlayersData[uid]; if(!d)return;
                 let status = 0; if(d.banned) status=2; else if(d.active===false) status=1;
                 
                 counts.all++;
-                if (status === 0) counts.active++;
-                if (status === 1) counts.inactive++;
+                if (status === 0) {
+                    counts.active++;
+                    // Ne compte que si c'est exactement "true" (demande en attente)
+                    if (d.recoveryRequest === true) counts.recoveryActive++;
+                }
+                if (status === 1) {
+                    counts.inactive++;
+                    // Ne compte que si c'est exactement "true" (demande en attente)
+                    if (d.recoveryRequest === true) counts.recoveryInactive++;
+                }
                 if (status === 2) counts.banned++;
-                if (status === 1 && d.recoveryRequest) counts.recovery++;
                 
                 pArr.push({ uid: uid, status: status, ...d }); 
             });
 
-            /* --- PATCH 3.21 & 3.22 : BULLES DE NOTIFICATION ET ALERTE ONGLET --- */
+            /* --- MODIFICATION : ALERTE INDÉPENDANTE SUR LES ONGLETS ACTIFS ET INACTIFS --- */
             document.getElementById('filter-btn-all').innerText = `Tous (${counts.all})`;
-            document.getElementById('filter-btn-active').innerText = `🟢 Actifs (${counts.active})`;
+            
+            const btnActive = document.getElementById('filter-btn-active');
+            if (counts.recoveryActive > 0) {
+                btnActive.classList.add('tab-pulse');
+                btnActive.innerText = `🟢 Actifs (${counts.active}) ⚠️`;
+            } else {
+                btnActive.classList.remove('tab-pulse');
+                btnActive.innerText = `🟢 Actifs (${counts.active})`;
+            }
             
             const btnInactive = document.getElementById('filter-btn-inactive');
-            if (counts.recovery > 0) {
+            if (counts.recoveryInactive > 0) {
                 btnInactive.classList.add('tab-pulse');
                 btnInactive.innerText = `🟠 Inactifs (${counts.inactive}) ⚠️`;
             } else {
@@ -2228,7 +2250,7 @@
             document.getElementById('filter-btn-banned').innerText = `🔴 Bannis (${counts.banned})`;
 
             pArr.sort((a, b) => {
-                /* PATCH 3.22 : Les recoveryRequest remontent TOUJOURS en n°1 absolu */
+                /* PATCH : Les recoveryRequest remontent TOUJOURS en n°1 absolu */
                 if (a.recoveryRequest && !b.recoveryRequest) return -1;
                 if (!a.recoveryRequest && b.recoveryRequest) return 1;
 
@@ -2273,10 +2295,10 @@
                 }
                 let actionsMenuHtml = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
                 /* --- PATCH 3.25 : COURONNE LOBBY JOUEURS --- */let crownIcon = d.isCaptain ? '<span style="margin-left:5px; filter:drop-shadow(0 0 2px gold);">👑</span>' : '';
-				// Si l'état est pris (taken) ET que c'est le joueur en cours, on met la cloche
+                // Si l'état est pris (taken) ET que c'est le joueur en cours, on met la cloche
                 // Sinon on garde le point vert standard
                 let stateDot = d.status === 2 ? '🔴' : (d.status === 1 ? '🟠' : ((d.uid === currentBuzzerId && currentGameState === 'taken') ? '🔔' : '🟢'));
-				
+                
                 if (d.status === 2) {
                     hsB = true;
                     hB += `<div class="score-row grid-player" style="border:1px solid var(--danger);">
@@ -2301,7 +2323,7 @@
                     // 🚀 ALERTE ORANGE : Clignote si demande en cours, même si le joueur est actif
                     let rC = (d.uid === currentBuzzerId && currentGameState === 'taken') ? "score-row buzzer-active-row grid-player" : "score-row grid-player";
                     if (d.recoveryRequest && d.recoveryRequest !== 'validated') rC += " pulse-alert";
-					hA += `
+                    hA += `
                     <div class="${rC}">
                         <div class="grid-cell-center" style="font-size:0.75rem;">${stateDot}</div>
                         <div class="grid-cell-left" style="gap:6px; width:100%; display:flex;">${aH}<b style="overflow:hidden;text-overflow:ellipsis;">${safeNameDisplay}${crownIcon}</b>${quickActionsHtml}</div>

@@ -1015,7 +1015,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.285";
+        const CLIENT_VERSION = "1.288";
 		
 		// 🚀 AUTOMATISATION : Mise à jour du titre et de la modale au chargement
         document.addEventListener("DOMContentLoaded", function() {
@@ -1426,7 +1426,7 @@
                                 
                                 // 🚀 RÉCUPÉRATION DU LIEN MJ AVANT DÉCONNEXION
                                 roomRef.child('mjWebsite').once('value').then(snap => {
-                                    const targetUrl = snap.val() || "https://www.prestapuce.fr"; // Lien de secours si vide
+                                    const targetUrl = snap.val() || "https://tapni.com/app/djcedrik"; // Lien de secours si vide
                                     
                                     alert("⚠️ SESSION TRANSFÉRÉE\n\nCe compte est utilisé sur un autre appareil.\nRedirection vers le site de votre animateur...");
 
@@ -1678,6 +1678,9 @@
                 if(p.recoveryRequest === 'validated') {
                     if(recoveryRef) recoveryRef.off();
                     pendingRecoveryUid = null;
+                    
+                    // 🧹 NETTOYAGE : Le joueur a reçu l'autorisation, on efface la demande pour stopper la console MJ
+                    roomRef.child('players/' + targetUid).update({ recoveryRequest: null });
                     
                     // 🚀 DOUBLE SÉCURITÉ : On vérifie si l'utilisateur est déjà loggé sur Firebase
                     const isAuth = firebase.auth().currentUser;
