@@ -1023,11 +1023,22 @@
                 <button class="btn-main" onclick="document.getElementById('overlay-security-profile').style.display='none'; openSettings();" style="background:#34495e; flex:1;">Annuler</button>
                 <button id="btn-save-security" class="btn-main" onclick="window.saveSecurityProfile()" style="background:#e74c3c; flex:1;">Mettre à jour</button>
             </div>
+			<div id="modal-reauth" class="modal-overlay">
+				<div class="modal-box" style="max-width:400px;">
+					<button class="modal-close-x" onclick="document.getElementById('modal-reauth').style.display='none'">✖</button>
+					<h2 style="color:var(--danger); margin-top:0;">SÉCURITÉ</h2>
+					<p style="font-size:0.9rem; color:#bdc3c7;">Pour confirmer votre identité, veuillez saisir le mot de passe de votre compte.</p>
+					<div class="input-group">
+						<input type="password" id="reauth-password" placeholder="Votre mot de passe actuel">
+					</div>
+					<button onclick="processReauth()" style="background:var(--danger); margin-top:15px; width:100%;">VALIDER MON IDENTITÉ</button>
+				</div>
+			</div>
         </div>
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.291";
+        const CLIENT_VERSION = "1.293";
 		
 		// 🚀 AUTOMATISATION : Mise à jour du titre et de la modale au chargement
         document.addEventListener("DOMContentLoaded", function() {
@@ -3888,63 +3899,87 @@
             window.openLoginModal();
         };
 		
+		let actionAfterReauth = null;
+
 		window.confirmDeleteAccount = function() {
-    const confirm1 = confirm("⚠️ ACTION IRREVERSIBLE\n\nVoulez-vous vraiment supprimer votre compte et toutes vos statistiques ?");
-    if(confirm1) {
-        const confirm2 = confirm("🛑 DERNIÈRE VÉRIFICATION\n\nCela effacera vos points, vos victoires et vos photos de galerie. Confirmer la suppression ?");
-        if(confirm2) {
-            const user = firebase.auth().currentUser;
-            
-            // 1. Préparer l'URL de redirection (MJ ou Tapni par défaut)
-            let targetUrl = "https://tapni.com/app/djcedrik";
-            
-            const performDeletion = (finalUrl) => {
-                // 2. Supprimer d'abord les données CRM (Database)
-                db.ref('users_crm/' + myUserID).remove().then(() => {
-                    
-                    // 3. Supprimer l'entrée du joueur dans la salle (si active)
-                    if (typeof roomRef !== 'undefined' && roomRef) {
-                        roomRef.child('players/' + myUserID).remove();
-                    }
+			const user = firebase.auth().currentUser;
+			if (!user) return;
 
-                    // 4. Supprimer le compte réel (Firebase Authentication)
-                    if (user) {
-                        user.delete().then(() => {
-                            finalizeCleanup(finalUrl);
-                        }).catch(error => {
-                            // Sécurité Firebase : Si la session est trop vieille, il faut se reloguer pour supprimer
-                            if (error.code === 'auth/requires-recent-login') {
-                                alert("🔒 Sécurité : Pour supprimer votre compte, vous devez vous être connecté très récemment. Merci de vous reconnecter, puis de recommencer la suppression.");
-                                firebase.auth().signOut().then(() => window.location.reload());
-                            } else {
-                                // Joueur anonyme ou erreur diverse : on déconnecte simplement
-                                firebase.auth().signOut().then(() => finalizeCleanup(finalUrl));
-                            }
-                        });
-                    } else {
-                        finalizeCleanup(finalUrl);
-                    }
-                }).catch(err => alert("Erreur lors de la suppression des données : " + err.message));
-            };
+			// 🚀 La fonction de suppression réelle (qui attendra la validation du mot de passe)
+			const runDeletion = () => {
+				const confirm1 = confirm("⚠️ ACTION IRREVERSIBLE\n\nVoulez-vous vraiment supprimer votre compte et toutes vos statistiques ?");
+				if(confirm1) {
+					const confirm2 = confirm("🛑 DERNIÈRE VÉRIFICATION\n\nCela effacera vos points, vos victoires et vos photos de galerie. Confirmer la suppression ?");
+					if(confirm2) {
+						let targetUrl = "https://tapni.com/app/djcedrik";
+						const finalizeCleanup = (url) => {
+							alert("✅ Compte supprimé avec succès. Au revoir !");
+							localStorage.clear();
+							window.location.href = url;
+						};
 
-            const finalizeCleanup = (url) => {
-                alert("Compte et données supprimés avec succès. Au revoir !");
-                localStorage.clear();
-                window.location.href = url;
-            };
+						let mjUrl = null;
+						if (typeof roomRef !== 'undefined' && roomRef) {
+							roomRef.child('mjWebsite').once('value').then(snap => { mjUrl = snap.val(); }).catch(()=>{});
+							roomRef.child('players/' + myUserID).remove().catch(()=>{});
+						}		
 
-            // On va chercher l'URL du MJ avant de tout couper
-            if (typeof roomRef !== 'undefined' && roomRef) {
-                roomRef.child('mjWebsite').once('value').then(snap => {
-                    const mjUrl = snap.val();
-                    performDeletion(mjUrl || targetUrl);
-                }).catch(() => performDeletion(targetUrl));
-            } else {
-                performDeletion(targetUrl);
-            }
-        }
-    }
-};
+						// Suppression Base de données + Auth
+						db.ref('users_crm/' + myUserID).remove().then(() => {
+							user.delete().then(() => {
+								finalizeCleanup(mjUrl || targetUrl);
+							}).catch(err => alert("❌ Erreur Firebase Auth : " + err.message));
+						}).catch(err => alert("❌ Erreur Base de données : " + err.message));
+					}
+				}
+			};
+
+			// 🚀 Aiguillage selon le type de compte (Email ou Google)
+			const provider = user.providerData[0]?.providerId;
+
+			if (provider === 'password') {
+				// C'est un compte Email : On affiche ta modale
+				actionAfterReauth = runDeletion;
+				document.getElementById('reauth-password').value = "";
+				document.getElementById('modal-reauth').style.display = 'flex';
+			} else if (provider === 'google.com') {
+				// C'est un compte Google : On demande une vérification rapide via popup
+				const googleProvider = new firebase.auth.GoogleAuthProvider();
+				user.reauthenticateWithPopup(googleProvider)
+				.then(() => runDeletion())
+				.catch(() => alert("❌ Authentification annulée."));
+			} else {
+				runDeletion();
+			}
+		};
+
+		// 🚀 La fonction qui vérifie le mot de passe tapé dans la modale
+		window.processReauth = function() {
+			const user = firebase.auth().currentUser;
+			const pwd = document.getElementById('reauth-password').value;
+    
+			if(!pwd) { 
+				alert("Veuillez saisir votre mot de passe."); 
+				return; 
+			}
+
+			// Création du badge d'identité Firebase
+			const credential = firebase.auth.EmailAuthProvider.credential(user.email, pwd);
+
+			// Vérification
+			user.reauthenticateWithCredential(credential).then(() => {
+				// ✅ C'est le bon mot de passe ! On cache la modale et on lance la suppression
+				document.getElementById('modal-reauth').style.display = 'none';
+				if(actionAfterReauth) actionAfterReauth();
+			}).catch(error => {
+			// ❌ Mauvais mot de passe
+			alert("❌ Mot de passe incorrect. Merci de vous connecter avec le bon mot de passe.");
+			document.getElementById('modal-reauth').style.display = 'none';
+			// Comme tu l'as demandé, on rouvre le menu de profil
+			if(typeof openProfileSettings === 'function') openProfileSettings();
+			});
+		};
+	};
 		
     </script>
 </body>
