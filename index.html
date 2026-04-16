@@ -1027,7 +1027,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.290";
+        const CLIENT_VERSION = "1.291";
 		
 		// 🚀 AUTOMATISATION : Mise à jour du titre et de la modale au chargement
         document.addEventListener("DOMContentLoaded", function() {
@@ -3889,22 +3889,62 @@
         };
 		
 		window.confirmDeleteAccount = function() {
-			const confirm1 = confirm("⚠️ ACTION IRREVERSIBLE\n\nVoulez-vous vraiment supprimer votre compte et toutes vos statistiques ?");
-			if(confirm1) {
-				const confirm2 = confirm("🛑 DERNIÈRE VÉRIFICATION\n\nCela effacera vos points, vos victoires et vos photos de galerie. Confirmer la suppression ?");
-				if(confirm2) {
-					// 1. On nettoie la base de données CRM
-					db.ref('users_crm/' + myUserID).remove().then(() => {
-						// 2. On déconnecte l'utilisateur
-						firebase.auth().signOut().then(() => {
-							alert("Compte supprimé. Nous espérons vous revoir bientôt !");
-							localStorage.clear();
-							window.location.reload();
-						});
-					}).catch(err => alert("Erreur lors de la suppression : " + err.message));
-				}
-			}
-		};
+    const confirm1 = confirm("⚠️ ACTION IRREVERSIBLE\n\nVoulez-vous vraiment supprimer votre compte et toutes vos statistiques ?");
+    if(confirm1) {
+        const confirm2 = confirm("🛑 DERNIÈRE VÉRIFICATION\n\nCela effacera vos points, vos victoires et vos photos de galerie. Confirmer la suppression ?");
+        if(confirm2) {
+            const user = firebase.auth().currentUser;
+            
+            // 1. Préparer l'URL de redirection (MJ ou Tapni par défaut)
+            let targetUrl = "https://tapni.com/app/djcedrik";
+            
+            const performDeletion = (finalUrl) => {
+                // 2. Supprimer d'abord les données CRM (Database)
+                db.ref('users_crm/' + myUserID).remove().then(() => {
+                    
+                    // 3. Supprimer l'entrée du joueur dans la salle (si active)
+                    if (typeof roomRef !== 'undefined' && roomRef) {
+                        roomRef.child('players/' + myUserID).remove();
+                    }
+
+                    // 4. Supprimer le compte réel (Firebase Authentication)
+                    if (user) {
+                        user.delete().then(() => {
+                            finalizeCleanup(finalUrl);
+                        }).catch(error => {
+                            // Sécurité Firebase : Si la session est trop vieille, il faut se reloguer pour supprimer
+                            if (error.code === 'auth/requires-recent-login') {
+                                alert("🔒 Sécurité : Pour supprimer votre compte, vous devez vous être connecté très récemment. Merci de vous reconnecter, puis de recommencer la suppression.");
+                                firebase.auth().signOut().then(() => window.location.reload());
+                            } else {
+                                // Joueur anonyme ou erreur diverse : on déconnecte simplement
+                                firebase.auth().signOut().then(() => finalizeCleanup(finalUrl));
+                            }
+                        });
+                    } else {
+                        finalizeCleanup(finalUrl);
+                    }
+                }).catch(err => alert("Erreur lors de la suppression des données : " + err.message));
+            };
+
+            const finalizeCleanup = (url) => {
+                alert("Compte et données supprimés avec succès. Au revoir !");
+                localStorage.clear();
+                window.location.href = url;
+            };
+
+            // On va chercher l'URL du MJ avant de tout couper
+            if (typeof roomRef !== 'undefined' && roomRef) {
+                roomRef.child('mjWebsite').once('value').then(snap => {
+                    const mjUrl = snap.val();
+                    performDeletion(mjUrl || targetUrl);
+                }).catch(() => performDeletion(targetUrl));
+            } else {
+                performDeletion(targetUrl);
+            }
+        }
+    }
+};
 		
     </script>
 </body>
