@@ -3002,8 +3002,7 @@
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
             
-            document.getElementById('sound-click').play().catch(()=>{}); 
-        }
+            document.getElementById('sound-click').play().catch(()=>{});
             
             logEvent('BUZZ_PLAYER', `⏱️ ${player.pseudo} a cliqué en ${reactionTime} ms`); // 🟢 CAPTEUR
             
