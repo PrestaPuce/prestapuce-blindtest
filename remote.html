@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Remote MJ - Presta'Puce (v1.156)</title>
+    <title>Remote MJ - Presta'Puce</title>
     <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -11,28 +11,71 @@
     <style>
         :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; }
         
+        /* Correction Mobile : 100dvh prend en compte la barre d'adresse */
         body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; touch-action: manipulation; }
         
+        /* LOGIN SCREEN */
         #screen-login { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 20px; background: var(--bg-color); z-index: 100; position: absolute; width: 100%; box-sizing: border-box; }
         input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #555; background: #333; color: white; font-size: 1.1rem; box-sizing: border-box; }
         .btn-login { width: 100%; padding: 15px; background: var(--mj-color); border: none; border-radius: 8px; color: white; font-size: 1.2rem; font-weight: bold; }
 
+        /* HEADER */
         .top-bar { height: 40px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 0.8rem; border-bottom: 1px solid #333; flex-shrink: 0; }
         
-        .player-zone { flex: 0 0 auto; height: 30vh; min-height: 160px; background: var(--card-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; border-bottom: 2px solid var(--accent); padding: 10px; position: relative; }
+        /* ZONE HAUTE : INFO JOUEUR (Compacte) */
+        .player-zone { 
+            flex: 0 0 auto; 
+            height: 25vh; 
+            min-height: 140px;
+            background: var(--card-bg); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            border-bottom: 2px solid var(--accent); 
+            padding: 10px; 
+            position: relative; 
+        }
         .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; background: #333; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 5px; border: 2px solid white; overflow: hidden; }
-        .p-name { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; color: white; text-align: center; }
+        .p-name { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; color: white; }
         
+        /* BARRE D'ACTIONS RAPIDES */
         .quick-actions { display: flex; gap: 15px; margin-top: 5px; }
         .mini-btn { width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 4px rgba(0,0,0,0.3); cursor: pointer; color: white; }
         .mini-btn:active { transform: scale(0.95); }
 
-        .controls-zone { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 8px; background: #111; overflow-y: auto; }
+        /* ZONE BASSE : COMMANDES */
+        .controls-zone { 
+            flex: 1; 
+            padding: 8px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            background: #111; 
+            overflow-y: auto; 
+        }
         
-        .big-btn { width: 100%; flex: 1; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 800; color: white; text-transform: uppercase; box-shadow: 0 3px 0 rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; min-height: 45px; cursor: pointer; transition: 0.1s; }
+        .big-btn { 
+            width: 100%; 
+            flex: 1; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 1.1rem; 
+            font-weight: 800; 
+            color: white; 
+            text-transform: uppercase; 
+            box-shadow: 0 3px 0 rgba(0,0,0,0.3); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 45px; 
+            cursor: pointer; 
+            transition: 0.1s; 
+        }
         .big-btn:active { transform: translateY(3px); box-shadow: none; }
-        .big-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; background: #7f8c8d !important; }
+        .big-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
         
+        /* COULEURS BOUTONS */
         .btn-open { background: var(--blue); font-size: 1.3rem; }
         .btn-open.active { background: var(--mj-color); }
         .btn-gold { background: var(--gold); color: black; }
@@ -43,37 +86,16 @@
 
         .waiting-msg { color: #7f8c8d; font-style: italic; font-size: 1rem; }
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.3); font-size: 0.8rem; font-family: monospace; z-index: 9999; pointer-events: none; }
-
-        .leaderboard-zone { display: none; flex: 1; flex-direction: column; background: #111; overflow-y: auto; padding: 10px; }
-        .rank-card { background: var(--card-bg); border-radius: 8px; padding: 12px 10px; margin-bottom: 8px; display: flex; align-items: flex-start; border-left: 5px solid transparent; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .rank-1 { border-left-color: var(--gold); background: rgba(241, 196, 15, 0.15); }
-        .rank-2 { border-left-color: #bdc3c7; background: rgba(189, 195, 199, 0.15); }
-        .rank-3 { border-left-color: #cd7f32; background: rgba(205, 127, 50, 0.15); }
-        .rank-pos { font-size: 1.5rem; font-weight: bold; width: 40px; text-align: center; }
-        .rank-info { flex: 1; margin-left: 5px; display: flex; flex-direction: column; }
-        .rank-name { font-size: 1.1rem; font-weight: bold; color: white; display: flex; align-items: center; justify-content: space-between; }
-        .rank-pts { font-size: 1.3rem; color: var(--accent); font-weight: bold; margin-left: 10px; }
-        .team-members { font-size: 0.9rem; color: #ecf0f1; margin-top: 10px; display: none; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
-        .team-members.open { display: block; animation: fadeIn 0.2s ease; }
-        .member-line { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); }
-        .member-line:last-child { border-bottom: none; }
-        .chevron { transition: transform 0.3s; font-size: 0.8rem; color: #bdc3c7; padding: 5px; }
-        .chevron.open { transform: rotate(180deg); }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
-		/* PATCH V1.156 : BONUS ÉQUIPES */
-        .btn-toggle-teams { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: var(--gold); border: 1px solid var(--gold); padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 5px; transition: 0.2s; }
-        .btn-toggle-teams:active { transform: scale(0.95); }
-        .team-bonus-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
 
-    <div class="version-tag" id="app-version-display">v1.156</div>
+    <div class="version-tag">v1.153</div>
 
     <div id="screen-login">
         <h2 style="color:var(--accent);">REMOTE ANIMATEUR</h2>
-        <input type="email" id="mj-email" placeholder="Email MJ" onkeypress="if(event.key==='Enter') login()">
-        <input type="password" id="mj-pass" placeholder="Mot de passe" onkeypress="if(event.key==='Enter') login()">
+        <input type="email" id="mj-email" placeholder="Email MJ">
+        <input type="password" id="mj-pass" placeholder="Mot de passe">
         <button class="btn-login" onclick="login()">CONNEXION</button>
     </div>
 
@@ -87,29 +109,17 @@
             <div class="waiting-msg">En attente de buzz...</div>
         </div>
 
-        <div class="controls-zone" id="zone-controls">
-            <button id="btn-open-buzz" class="big-btn btn-open" onclick="openBuzzers()">🔊 OUVRIR BUZZERS</button>
+        <div class="controls-zone">
+            <button id="btn-open-buzz" class="big-btn btn-open" onclick="statusUpdate('ready')">🔊 OUVRIR BUZZERS</button>
             <button class="big-btn btn-gold" onclick="handleReward(3, 'finish')">+3 (Terminé)</button>
             <button class="big-btn btn-green" onclick="handleReward(1, 'finish')">+1 (Terminé)</button>
             <button class="big-btn btn-cyan" onclick="handleReward(1, 'partial')">+1 (On continue)</button>
             <button class="big-btn btn-error" onclick="handleError()">❌ ERREUR</button>
             <button class="big-btn btn-reset" onclick="fullReset()">🔄 RESET BUZZERS</button>
         </div>
-		
-		<div id="zone-teams" style="display:none; padding:15px 10px; flex:1; flex-direction:column; background:#111; overflow-y:auto;">
-            <h3 style="margin-top:0; color:var(--gold); text-align:center;">BONUS DES ÉQUIPES</h3>
-            <div id="teams-bonus-list" style="flex:1; overflow-y:auto; margin-bottom:10px;"></div>
-            <button class="big-btn" style="background:#555; min-height:45px; flex:0 0 auto;" onclick="toggleTeamsZone(false)">⬅️ RETOUR AUX BUZZERS</button>
-        </div>
-		
-        <div class="leaderboard-zone" id="zone-leaderboard">
-            <button class="big-btn btn-gold" style="margin-bottom:15px; min-height:50px; font-size:1rem; flex: 0 0 auto;" onclick="relaunchPodium()">🏆 RELANCER PODIUM ÉCRAN GÉANT</button>
-            <div id="leaderboard-content" style="flex:1; overflow-y:auto; padding-bottom:20px;"></div>
-        </div>
     </div>
 
     <script>
-        const APP_VERSION = "1.156s";
         const firebaseConfig = {
             apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o",
             authDomain: "prestapuce-buzz.firebaseapp.com",
@@ -123,19 +133,9 @@
 
         let roomID = "", roomRef = null, currentPlayer = null;
         let allPlayersData = {};
-        let teamsData = {};
 
         const urlParams = new URLSearchParams(window.location.search);
         roomID = urlParams.get('room');
-
-        // Écoute de la version pour rester synchro avec le Super Admin
-        db.ref('config/versions/remote').on('value', snap => {
-            if(snap.exists()) {
-                const v = snap.val();
-                document.getElementById('app-version-display').innerText = v;
-                document.title = "Remote MJ - Presta'Puce (" + v + ")";
-            }
-        });
 
         auth.onAuthStateChanged(user => {
             if(user && roomID) {
@@ -160,13 +160,6 @@
                 if(currentPlayer) updatePlayerZone(currentPlayer);
             });
 
-            roomRef.child('teams').on('value', snap => {
-                teamsData = snap.val() || {};
-                if(currentPlayer) updatePlayerZone(currentPlayer);
-                /* Met à jour la liste des équipes si elle est ouverte */
-                if(document.getElementById('zone-teams').style.display === 'flex') renderTeamsBonusList();
-            });
-
             roomRef.child('buzzers').on('value', snap => {
                 const b = snap.val();
                 if (b && b.id) {
@@ -181,32 +174,14 @@
             roomRef.child('gameState').on('value', snap => {
                 const st = snap.val() ? snap.val().status : 'waiting';
                 const btn = document.getElementById('btn-open-buzz');
-                
-                if (st === 'endGame') {
-                    document.getElementById('zone-player').style.display = 'none';
-                    document.getElementById('zone-controls').style.display = 'none';
-                    document.getElementById('zone-teams').style.display = 'none';
-                    document.getElementById('zone-leaderboard').style.display = 'flex';
-                    renderLeaderboard();
+                if(st === 'ready' || st === 'taken') {
+                    btn.innerText = "✅ BUZZERS OUVERTS";
+                    btn.classList.add('active');
+                    btn.disabled = true;
                 } else {
-                    document.getElementById('zone-player').style.display = 'flex';
-                    // N'afficher les contrôles que si le menu équipe est fermé
-                    if(document.getElementById('zone-teams').style.display !== 'flex') {
-                        document.getElementById('zone-controls').style.display = 'flex';
-                    }
-                    document.getElementById('zone-leaderboard').style.display = 'none';
-                    
-                    if(st === 'ready' || st === 'taken' || st === 'processing') {
-                        btn.innerText = st === 'processing' ? "⏳ ANALYSE..." : "✅ BUZZERS OUVERTS";
-                        btn.classList.add('active');
-                        if (st === 'processing') btn.style.background = "#e67e22"; else btn.style.background = "var(--mj-color)";
-                        btn.disabled = true;
-                    } else {
-                        btn.innerText = "🔊 OUVRIR BUZZERS";
-                        btn.classList.remove('active');
-                        btn.style.background = "var(--blue)";
-                        btn.disabled = false;
-                    }
+                    btn.innerText = "🔊 OUVRIR BUZZERS";
+                    btn.classList.remove('active');
+                    btn.disabled = false;
                 }
             });
         }
@@ -215,33 +190,22 @@
             const zone = document.getElementById('zone-player');
 
             if(!b || !b.id) {
-                zone.innerHTML = `<div class="waiting-msg">En attente de buzz...</div>
-                                  <button id="btn-toggle-teams" class="btn-toggle-teams" onclick="toggleTeamsZone(true)">🛡️ Bonus Équipes</button>`;
+                zone.innerHTML = `<div class="waiting-msg">En attente de buzz...</div>`;
                 return;
             }
 
             const pData = allPlayersData[b.id] || {};
+
             let avatarDisplay = b.avatar || '👤';
-            if(b.avatar && b.avatar.length > 20) avatarDisplay = `<img src="${b.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
+            if(b.avatar && b.avatar.length > 20) {
+                avatarDisplay = `<img src="${b.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
+            }
 
-            let sanctionBtnHTML = pData.hasBeenWarned 
-                ? `<button class="mini-btn" style="background:var(--danger)" onclick="kickPlayer('${b.id}', '${b.pseudo}')" title="Bannir">🟥</button>`
-                : `<button class="mini-btn" style="background:var(--gold)" onclick="warnPlayer('${b.id}')" title="Avertir">🟨</button>`;
-
-            let teamHTML = "";
-            if (pData.teamName && pData.teamName !== "Solo") {
-                const tName = pData.teamName;
-                const tBonus = teamsData[tName] ? (teamsData[tName].bonus || 0) : 0;
-                teamHTML = `
-                    <div style="margin-top: 10px; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 8px; border: 1px solid var(--accent); display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 0.9rem; color: #bdc3c7;">Équipe <b>${tName}</b></span>
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <button class="mini-btn" style="background:var(--blue); width:30px; height:30px; font-size:1rem;" onclick="adjTeamBonus('${tName.replace(/'/g, "\\'")}', -1)">-</button>
-                            <span style="font-weight:bold; color:var(--accent); font-size:1.1rem; min-width:20px; text-align:center;">${tBonus}</span>
-                            <button class="mini-btn" style="background:var(--blue); width:30px; height:30px; font-size:1rem;" onclick="adjTeamBonus('${tName.replace(/'/g, "\\'")}', 1)">+</button>
-                        </div>
-                    </div>
-                `;
+            let sanctionBtnHTML = "";
+            if (pData.hasBeenWarned) {
+                sanctionBtnHTML = `<button class="mini-btn" style="background:var(--danger)" onclick="kickPlayer('${b.id}', '${b.pseudo}')" title="Bannir">🟥</button>`;
+            } else {
+                sanctionBtnHTML = `<button class="mini-btn" style="background:var(--gold)" onclick="warnPlayer('${b.id}')" title="Avertir">🟨</button>`;
             }
 
             zone.innerHTML = `
@@ -252,23 +216,7 @@
                     <button class="mini-btn" style="background:var(--mj-color)" onclick="adj('${b.id}', 1)">+1</button>
                     ${sanctionBtnHTML}
                 </div>
-                ${teamHTML}
-                <button id="btn-toggle-teams" class="btn-toggle-teams" onclick="toggleTeamsZone(true)">🛡️ Bonus Équipes</button>
             `;
-        }
-
-        function adjTeamBonus(teamName, v) {
-            if(teamsData[teamName] && teamsData[teamName].active !== false) {
-                roomRef.child('teams/' + teamName + '/bonus').transaction(curr => (curr || 0) + v);
-            }
-        }
-
-        function openBuzzers() {
-            if (roomRef) {
-                roomRef.child('buzzAttempts').remove().then(() => {
-                    statusUpdate('ready');
-                });
-            }
         }
 
         function statusUpdate(st) { 
@@ -281,60 +229,20 @@
             roomRef.child('buzzers').remove(); 
             statusUpdate('waiting'); 
         }
-		
-		function toggleTeamsZone(show) {
-            if(show) {
-                document.getElementById('zone-controls').style.display = 'none';
-                document.getElementById('zone-teams').style.display = 'flex';
-                renderTeamsBonusList();
-            } else {
-                document.getElementById('zone-teams').style.display = 'none';
-                document.getElementById('zone-controls').style.display = 'flex';
-            }
-        }
-
-        function renderTeamsBonusList() {
-            const list = document.getElementById('teams-bonus-list');
-            let html = "";
-            Object.keys(teamsData).forEach(tName => {
-                const team = teamsData[tName];
-                if(team.banned === true || team.active === false) return;
-                const safeName = tName.replace(/'/g, "\\'");
-                html += `
-                    <div class="team-bonus-row">
-                        <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
-                            <img src="${team.icon}" style="width:30px; height:30px; border-radius:4px; object-fit:contain; background:white; padding:2px;">
-                            <b style="color:white; font-size:1.1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${tName}</b>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <button class="mini-btn" style="background:var(--blue); width:35px; height:35px;" onclick="adjTeamBonus('${safeName}', -1)">-</button>
-                            <span style="font-weight:bold; color:var(--accent); font-size:1.3rem; min-width:30px; text-align:center;">${team.bonus||0}</span>
-                            <button class="mini-btn" style="background:var(--blue); width:35px; height:35px;" onclick="adjTeamBonus('${safeName}', 1)">+</button>
-                        </div>
-                    </div>
-                `;
-            });
-            if(html === "") html = "<div style='color:#7f8c8d; font-style:italic; text-align:center; margin-top:20px;'>Aucune équipe active.</div>";
-            list.innerHTML = html;
-        }
 
         function handleReward(pts, mode) {
             if(!currentPlayer || !currentPlayer.id) return;
             roomRef.child('players/' + currentPlayer.id + '/pts').transaction(x => (x||0)+pts);
             if(mode === 'partial') {
                 roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
-                openBuzzers();
-            } else {
-                /* --- PATCH V1.156 : Rétention Buzzer sur Remote --- */
-                roomRef.child('blockedPlayers').remove();
-                roomRef.child('gameState').set({status: 'awarded'});
-            }
+                statusUpdate('ready');
+            } else fullReset();
         }
 
         function handleError() {
             if(!currentPlayer || !currentPlayer.pseudo) return;
             roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
-            openBuzzers();
+            statusUpdate('ready');
         }
 
         function adj(uid, v) { 
@@ -344,116 +252,14 @@
         function warnPlayer(uid) {
             if(confirm("Envoyer un avertissement (Carton Jaune) à ce joueur ?")) {
                 roomRef.child('players/' + uid).update({ hasBeenWarned: true, pendingWarning: true });
-                handleError(); 
+                handleError(); // Bloque le joueur et rouvre les buzzers instantanément
             }
         }
 
         function kickPlayer(uid, pseudo) {
             if(confirm("Expulser " + pseudo + " (Carton Rouge) ?")) {
                 roomRef.child('players/' + uid).update({ banned: true, active: false });
-                handleError(); 
-            }
-        }
-
-        function renderLeaderboard() {
-            let rankingMap = new Map();
-            const listEquipes = Object.keys(teamsData);
-            const allPlayers = Object.keys(allPlayersData).map(uid => ({ ...allPlayersData[uid], uid: uid }));
-
-            listEquipes.forEach(tName => {
-                const team = teamsData[tName];
-                if (team.banned === true) return;
-                let score = team.active === false ? (team.frozenScore || 0) : (team.bonus || 0);
-                rankingMap.set("team-" + tName, { 
-                    name: tName, 
-                    pts: score, 
-                    isTeam: true,
-                    members: []
-                });
-            });
-
-            allPlayers.forEach(p => {
-                const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
-                if (statutEquipe !== "Solo" && rankingMap.has("team-" + statutEquipe)) {
-                    let teamEntry = rankingMap.get("team-" + statutEquipe);
-                    teamEntry.pts += (p.pts || 0); 
-                    teamEntry.members.push(p);
-                } else {
-                    if (p.active !== false && !p.banned) { 
-                        rankingMap.set("solo-" + p.name, { 
-                            name: p.name, 
-                            pts: (p.pts || 0), 
-                            isTeam: false,
-                            members: []
-                        }); 
-                    }
-                }
-            });
-
-            let sorted = Array.from(rankingMap.values()).sort((a,b) => b.pts - a.pts);
-            
-            let html = "";
-            sorted.forEach((item, idx) => {
-                let rank = idx + 1;
-                let rankClass = rank === 1 ? 'rank-1' : (rank === 2 ? 'rank-2' : (rank === 3 ? 'rank-3' : ''));
-                let medal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : rank));
-                
-                let membersHtml = "";
-                let clickAction = "";
-                let chevronHtml = "";
-                
-                if(item.isTeam && item.members.length > 0) {
-                    membersHtml = `<div class="team-members" id="members-${idx}">`;
-                    item.members.sort((a,b) => b.pts - a.pts).forEach(m => {
-                        membersHtml += `<div class="member-line"><span>${m.name}</span><span style="color:var(--accent); font-weight:bold;">${m.pts||0}</span></div>`;
-                    });
-                    membersHtml += `</div>`;
-                    chevronHtml = `<span class="chevron" id="chev-${idx}">▼</span>`;
-                    clickAction = `onclick="toggleTeamMembers(${idx})" style="cursor:pointer;"`;
-                }
-
-                html += `
-                    <div class="rank-card ${rankClass}" ${clickAction}>
-                        <div class="rank-pos">${medal}</div>
-                        <div class="rank-info">
-                            <div class="rank-name">
-                                <span>${item.name} ${item.isTeam ? '🛡️' : '👤'}</span>
-                                ${chevronHtml}
-                            </div>
-                            ${membersHtml}
-                        </div>
-                        <div class="rank-pts">${item.pts}</div>
-                    </div>
-                `;
-            });
-
-            document.getElementById('leaderboard-content').innerHTML = html;
-        }
-
-        function toggleTeamMembers(idx) {
-            const el = document.getElementById('members-' + idx);
-            const icon = document.getElementById('chev-' + idx);
-            if(el.classList.contains('open')) {
-                el.classList.remove('open');
-                icon.classList.remove('open');
-            } else {
-                el.classList.add('open');
-                icon.classList.add('open');
-            }
-        }
-
-        function relaunchPodium() {
-            if(roomRef) {
-                roomRef.child('gameState').update({ timestamp: Date.now() });
-                
-                const btn = document.querySelector('#zone-leaderboard .btn-gold');
-                const oldText = btn.innerText;
-                btn.innerText = "✅ SIGNAL ENVOYÉ !";
-                btn.style.background = "var(--success)";
-                setTimeout(() => {
-                    btn.innerText = oldText;
-                    btn.style.background = "var(--gold)";
-                }, 2000);
+                handleError(); // Bloque le joueur et rouvre les buzzers instantanément
             }
         }
     </script>
