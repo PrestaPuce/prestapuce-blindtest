@@ -1038,7 +1038,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.294";
+        const CLIENT_VERSION = "1.295";
 		
 		// 🚀 AUTOMATISATION : Mise à jour du titre et de la modale au chargement
         document.addEventListener("DOMContentLoaded", function() {
@@ -2447,19 +2447,47 @@
                 const trueTime = Date.now() + serverTimeOffset;
                 let becomeCaptain = isCaptain;
                 logEvent('SYSTEM', `📥 ${player.pseudo} a rejoint la partie (${player.team})`); // 🟢 CAPTEUR
-                roomRef.child('players/' + myUserID).set({ 
-                    name: player.pseudo, pts: 0, avatar: player.avatar, 
-                    teamName: player.team, teamIcon: player.teamIcon, 
-                    active: true, banned: false, 
-                    joinTimestamp: trueTime, isCaptain: becomeCaptain 
-                }).then(() => {
-                    if (becomeCaptain && player.team !== "Solo") {
-                        alert(`👑 Bonne nouvelle ! Vous avez été promu Capitaine de l'équipe ${newTeamName} !\n\n💡 NOUVEAU POUVOIR : Cliquez sur la couronne 👑 en haut de l'écran pour gérer votre équipe.`);
-                    }
+
+                // 🛡️ SÉCURITÉ : On vérifie si un score existe déjà pour ce joueur sur le serveur
+                roomRef.child('players/' + myUserID).once('value', snap => {
+                    const existingData = snap.val();
+                    
+                    // On récupère les points s'ils existent, sinon on initialise à 0
+                    const currentPoints = (existingData && existingData.pts !== undefined) ? existingData.pts : 0;
+                    player.pts = currentPoints;
+
+                    roomRef.child('players/' + myUserID).set({ 
+                        name: player.pseudo, 
+                        pts: currentPoints, // Correction : On utilise le score récupéré au lieu de forcer 0
+                        avatar: player.avatar, 
+                        teamName: player.team, 
+                        teamIcon: player.teamIcon, 
+                        active: true, 
+                        banned: false, 
+                        joinTimestamp: trueTime, 
+                        isCaptain: becomeCaptain 
+                    }).then(() => {
+                        if (becomeCaptain && player.team !== "Solo") {
+                            alert(`👑 Bonne nouvelle ! Vous avez été promu Capitaine de l'équipe ${player.team} !\n\n💡 NOUVEAU POUVOIR : Cliquez sur la couronne 👑 en haut de l'écran pour gérer votre équipe.`);
+                        }
+                    });
+
+                    localStorage.setItem('presta_player_session', JSON.stringify(player)); 
+                    localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar}));
+                    
+                    // On lance l'interface une fois que les données sont sécurisées
+                    updateGameHeader(); 
+                    navigateTo('step-game'); 
+                    requestWakeLock(); 
+                    startBuzzer();
                 });
-                localStorage.setItem('presta_player_session', JSON.stringify(player)); localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar}));
+            } else {
+                // Cas d'un retour direct (bouton "Retourner au buzzer")
+                updateGameHeader(); 
+                navigateTo('step-game'); 
+                requestWakeLock(); 
+                startBuzzer();
             }
-            updateGameHeader(); navigateTo('step-game'); requestWakeLock(); startBuzzer();
         }
 
         function updateGameHeader() {

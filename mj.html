@@ -729,7 +729,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.259"; // 🚀 C'EST LE SEUL ENDROIT À MODIFIER DÉSORMAIS
+        const APP_VERSION = "1.260"; // 🚀 C'EST LE SEUL ENDROIT À MODIFIER DÉSORMAIS
 		// On pré-remplit instantanément l'affichage sans attendre la base de données
 		document.addEventListener('DOMContentLoaded', () => {
 		if(document.getElementById('app-version-display')) document.getElementById('app-version-display').innerText = `v${APP_VERSION}`;
@@ -770,6 +770,7 @@
         let activeTeamBlacklist = [];
         let activeTeamBlacklistListener = null;
         let activeDropdownBtn = null;
+		let isBuzzerLocked = false;
 		
 		// PATCH V1.232 : Moteur du Mouchard (Audit Log)
         function logEvent(actionType, message) {
@@ -2146,6 +2147,11 @@
             });
 
             roomRef.child('buzzAttempts').on('value', snap => {
+				// Si un gagnant est déjà en cours de traitement ou affiché, on ignore les nouveaux buzz
+				if (isBuzzerLocked || currentPlayer) return; 
+				const attempts = snap.val();
+				if (!attempts) return;
+				isBuzzerLocked = true;	// On verrouille immédiatement
                 const attempts = snap.val();
                 if (!attempts) return; 
                 
@@ -2824,7 +2830,8 @@
             } 
         }
 
-        function fullReset() { 
+        function fullReset() {
+			isBuzzerLocked = false; // Libère le verrou
             logEvent('SYSTEM', "Reset global (Nettoyage des buzzers et blocages)"); // 🟢 CAPTEUR
             roomRef.child('blockedPlayers').remove(); 
             roomRef.child('buzzers').remove(); 
@@ -2881,6 +2888,7 @@
 
         function handleError() { 
             if(currentPlayer&&currentPlayer.name) { 
+				isBuzzerLocked = false; // Libère le verrou pour permettre aux autres de buzzer
                 logEvent('PUNISH', `Erreur : ${currentPlayer.name} bloqué(e)`); // 🟢 CAPTEUR
                 roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); 
                 statusUpdate('ready'); 
@@ -2888,6 +2896,7 @@
         }
 
         function handleReward(pts, m) { 
+			isBuzzerLocked = false; // Libère le verrou dans tous les cas de récompense
             if(!currentPlayer||!currentPlayer.id)return; 
             const cp=allPlayersData[currentPlayer.id]?(allPlayersData[currentPlayer.id].pts||0):0; 
             roomRef.child('players/'+currentPlayer.id).update({pts:cp+pts, active:true}); 
