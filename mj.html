@@ -729,7 +729,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.260"; // 🚀 C'EST LE SEUL ENDROIT À MODIFIER DÉSORMAIS
+        const APP_VERSION = "1.261"; // 🚀 C'EST LE SEUL ENDROIT À MODIFIER DÉSORMAIS
 		// On pré-remplit instantanément l'affichage sans attendre la base de données
 		document.addEventListener('DOMContentLoaded', () => {
 		if(document.getElementById('app-version-display')) document.getElementById('app-version-display').innerText = `v${APP_VERSION}`;
@@ -2103,7 +2103,11 @@
                     if (ps) { if (!buzzHistory.includes(ps)) buzzHistory.push(ps); else { buzzHistory = buzzHistory.filter(n => n !== ps); buzzHistory.push(ps); } }
                     let rd = null; if(b.id && allPlayersData[b.id]) { rd = allPlayersData[b.id]; currentPlayer = { id: b.id, ...rd }; } else if(ps) { for(const [uid, p] of Object.entries(allPlayersData)) { if(p.name === ps) { rd = p; currentPlayer = { id: uid, ...rd }; break; } } }
                     if(rd) { const a = document.getElementById('p-avatar'); if(rd.avatar && rd.avatar.length > 20) a.innerHTML = `<img src="${rd.avatar}" style="width:70px; height:70px; border-radius:50%; object-fit:cover;">`; else a.innerHTML = rd.avatar || '👤'; document.getElementById('p-name').innerText = rd.name; box.style.display = "block"; if(rd.teamName && rd.teamName !== "Solo") { document.getElementById('p-team').innerHTML = `<div class="crest-mini-bg"><img src="${globalTeams[rd.teamName] ? globalTeams[rd.teamName].icon : rd.teamIcon}" class="crest-mini"></div><span>${rd.teamName}</span>`; } else document.getElementById('p-team').innerHTML = "Solo"; }
-                } else { currentBuzzerId = null; box.style.display = "none"; }
+                } else { 
+                    currentBuzzerId = null; 
+                    box.style.display = "none"; 
+                    currentPlayer = null;
+                }
                 renderLobby(); 
             });
 
@@ -2147,15 +2151,15 @@
             });
 
             roomRef.child('buzzAttempts').on('value', snap => {
-				// Si un gagnant est déjà en cours de traitement ou affiché, on ignore les nouveaux buzz
-				if (isBuzzerLocked || currentPlayer) return; 
-				if (!attempts) return;
-				isBuzzerLocked = true;	// On verrouille immédiatement
+                // On laisse passer les données, on bloque seulement si le fantôme du gagnant précédent est encore là
+                if (currentPlayer) return; 
+                
                 const attempts = snap.val();
-                if (!attempts) return; 
+                if (!attempts) return;
                 
                 if (!buzzProcessing) {
                     buzzProcessing = true;
+                    isBuzzerLocked = true; // On verrouille proprement ici
                     roomRef.child('gameState').set({status: 'processing'}); 
                     
                     setTimeout(() => {
@@ -2180,7 +2184,7 @@
                             });
                             
                             if (winner) {
-                                logEvent('BUZZ', `⚡ ${winner.pseudo} a pris la main !`); // 🟢 CAPTEUR
+                                logEvent('BUZZ', `⚡ ${winner.pseudo} a pris la main !`);
                                 roomRef.child('buzzers').set({ 
                                     id: winner.id, 
                                     pseudo: winner.pseudo, 
