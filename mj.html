@@ -471,8 +471,8 @@
             <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:15px;">
 
                 <div style="display:flex; flex-direction:column; gap:8px; width:150px; flex-shrink:0; z-index:10;">
-                    <button id="btn-open-buzz" style="background:var(--success); margin:0; font-size:0.9rem; height:52px; display:flex; align-items:center; justify-content:center; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2);" onclick="statusUpdate('ready')" title="Ouvrir les buzzers pour la prochaine question">Ouvrir Buzzers</button>
-                    <button style="background:var(--danger); margin:0; font-size:0.9rem; height:52px; display:flex; align-items:center; justify-content:center; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2);" onclick="fullReset()" title="Réinitialiser l'état de tous les buzzers">🧹 Reset Titre</button>
+                    <button id="btn-open-buzz" style="background:var(--success); margin:0; font-size:0.9rem; height:52px; display:flex; align-items:center; justify-content:center; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2);" onclick="openNextQuestion()" title="Ouvrir les buzzers pour la prochaine question">Ouvrir Buzzers</button>
+					<button style="background:var(--danger); margin:0; font-size:0.9rem; height:52px; display:flex; align-items:center; justify-content:center; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2);" onclick="fullReset()" title="Réinitialiser l'état de tous les buzzers">🧹 Reset Titre</button>
                 </div>
 
                 <div style="flex:1; text-align:center; min-width:200px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
@@ -729,7 +729,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.261"; // 🚀 C'EST LE SEUL ENDROIT À MODIFIER DÉSORMAIS
+        const APP_VERSION = "1.262"; // 🚀 C'EST LE SEUL ENDROIT À MODIFIER DÉSORMAIS
 		// On pré-remplit instantanément l'affichage sans attendre la base de données
 		document.addEventListener('DOMContentLoaded', () => {
 		if(document.getElementById('app-version-display')) document.getElementById('app-version-display').innerText = `v${APP_VERSION}`;
@@ -2833,6 +2833,16 @@
             } 
         }
 
+		function openNextQuestion() {
+            isBuzzerLocked = false;
+            roomRef.child('buzzers').remove();
+            roomRef.child('buzzAttempts').remove();
+            roomRef.child('blockedPlayers').remove(); // 🧹 Lève tous les blocages !
+            roomRef.child('gameState').set({status: 'ready'}); // Ouvre les buzzers
+            currentPlayer = null;
+            document.getElementById('player-box').style.display = 'none';
+        }
+
         function fullReset() {
 			isBuzzerLocked = false; // Libère le verrou
             logEvent('SYSTEM', "Reset global (Nettoyage des buzzers et blocages)"); // 🟢 CAPTEUR
@@ -2898,28 +2908,50 @@
             } 
         }
 
-        function handleReward(pts, m) { 
-			isBuzzerLocked = false; // Libère le verrou dans tous les cas de récompense
-            if(!currentPlayer||!currentPlayer.id)return; 
-            const cp=allPlayersData[currentPlayer.id]?(allPlayersData[currentPlayer.id].pts||0):0; 
-            roomRef.child('players/'+currentPlayer.id).update({pts:cp+pts, active:true}); 
+        function handleReward(pts, m) {
+            isBuzzerLocked = false; 
+            if(!currentPlayer || !currentPlayer.id) return;
             
-            logEvent('SCORE', `+${pts} point(s) pour ${currentPlayer.name}`); // 🟢 CAPTEUR
+            const uid = currentPlayer.id;
+            const t = currentPlayer.teamName;
             
-            if(m==='partial'){ 
-                roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); 
-                statusUpdate('ready'); 
-            } else { 
-                /* --- PATCH V1.242 : Correction Lumière Verte --- */
-                roomRef.child('blockedPlayers').remove(); 
-                
-                // On utilise le statut 'awarded' (qui n'est pas 'taken', donc la lumière verte s'éteint)
-                roomRef.child('gameState').set({status:'awarded'}); 
-                
-                // ON FORCE LE RAFRAÎCHISSEMENT DU LOBBY POUR EFFACER LA LUMIÈRE
-                renderLobby(); 
+            db.ref('users/' + uid).once('value').then(snap => {
+                if(snap.exists()) {
+                    const currentTotal = snap.val().totalScore || 0;
+                    db.ref('users/' + uid).update({ totalScore: currentTotal + pts });
+                }
+            });
+
+            roomRef.child('players/' + uid).once('value').then(snap => {
+                if(snap.exists()) {
+                    const p = snap.val();
+                    const newPts = (p.pts || 0) + pts;
+                    roomRef.child('players/' + uid).update({ pts: newPts });
+                    logEvent('SCORE', `➕ ${p.name} gagne ${pts} pts (Total: ${newPts})`);
+                    
+                    if(t && t !== "Solo") {
+                        roomRef.child('teams/' + t).once('value').then(tsnap => {
+                            if(tsnap.exists()) {
+                                const newT = (tsnap.val().pts || 0) + pts;
+                                roomRef.child('teams/' + t).update({ pts: newT });
+                            }
+                        });
+                    }
+                }
+            });
+
+            if(m === 'finish') { 
+                // BRANCHE A : Validation finale. Le joueur reste affiché sur la console MJ.
+                // On met l'état global sur 'waiting' pour forcer tous les téléphones à afficher ATTENDEZ.
+                roomRef.child('gameState').set({status: 'waiting'}); 
             } 
-        }        
+            else { 
+                // BRANCHE B : +1 en continu. On bloque le joueur, on efface l'affichage MJ, et on réouvre.
+                roomRef.child('blockedPlayers/' + currentPlayer.name).set(true);
+                statusUpdate('ready'); 
+            }
+        }
+        
         function quitRoom() { 
             if(mjProfileData.isGuest===true) {
                 if(confirm("⚠️ SUPPRESSION DÉFINITIVE DE CETTE SALLE ?\nToutes les données (scores, équipes) seront perdues.")) {

@@ -1038,7 +1038,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.295";
+        const CLIENT_VERSION = "1.296";
 		
 		// 🚀 AUTOMATISATION : Mise à jour du titre et de la modale au chargement
         document.addEventListener("DOMContentLoaded", function() {
@@ -3038,34 +3038,36 @@
         }
 
         function updateUI() {
-            const c = document.getElementById('btn-buzz'); const l = document.getElementById('label'); const msg = document.getElementById('status-msg'); const box = c.parentElement.parentElement; box.className = "step-screen active"; 
+            const c = document.getElementById('btn-buzz'); const l = document.getElementById('label'); const msg = document.getElementById('status-msg'); const box = c.parentElement.parentElement; 
             
-            if (currentWinner) { 
-                if(currentWinner === player.pseudo) { 
-                    box.classList.add('main-prise'); 
-                    l.innerText = "C'EST À TOI !"; 
-                    msg.innerText = "🎤 Donne ta réponse !"; 
-                } else { 
-                    box.classList.add('blocked'); 
-                    l.innerText = "OCCUPÉ"; 
-                    msg.innerText = `${currentWinner} a la main.`; 
-                } 
-            } else if (gameState === 'processing') {
-                // NOUVEL ÉTAT : L'écran reste gris le temps que le MJ calcule
-                box.classList.add('blocked'); 
-                l.innerText = "VÉRIFICATION"; 
-                msg.innerText = "Calcul du plus rapide..."; 
-            } else if (isBlocked) { 
-                box.classList.add('blocked'); 
-                l.innerText = "BLOQUÉ"; 
-                msg.innerText = "Attends la prochaine manche."; 
+            box.className = "step-screen active"; 
+            
+            // 0️⃣ PRIORITÉ ABSOLUE : Fin de manche (Branche A). Tout le monde repasse en "ATTENDEZ".
+            if (gameState === 'waiting') {
+                l.innerText = "ATTENDEZ"; msg.innerText = "L'animateur va lancer le son..."; 
+            // 1️⃣ Si la main est libre, on ouvre les buzzers (sauf pour les bloqués)
             } else if (gameState === 'ready') { 
-                box.classList.add('ready'); 
-                l.innerText = "BUZZEZ !"; 
-                msg.innerText = "La main est libre !"; 
+                if (isBlocked) { 
+                    box.classList.add('blocked'); l.innerText = "BLOQUÉ"; msg.innerText = "Attends la prochaine manche."; 
+                } else { 
+                    box.classList.add('ready'); l.innerText = "BUZZEZ !"; msg.innerText = "La main est libre !"; 
+                } 
+            // 2️⃣ Si l'arbitre analyse un buzz simultané
+            } else if (gameState === 'processing') {
+                box.classList.add('blocked'); l.innerText = "VÉRIFICATION"; msg.innerText = "L'arbitre vérifie..."; 
+            // 3️⃣ Si un joueur a la main
+            } else if (gameState === 'taken' && currentWinner) { 
+                if(currentWinner === player.pseudo) { 
+                    box.classList.add('main-prise'); l.innerText = "C'EST À TOI !"; msg.innerText = "🎤 Donne ta réponse !"; 
+                } else { 
+                    box.classList.add('blocked'); l.innerText = "OCCUPÉ"; msg.innerText = `${currentWinner} a la main.`; 
+                } 
+            // 4️⃣ Sécurité si le joueur est bloqué dans un autre état
+            } else if (isBlocked) { 
+                box.classList.add('blocked'); l.innerText = "BLOQUÉ"; msg.innerText = "Attends la prochaine manche."; 
+            // 5️⃣ État par défaut
             } else { 
-                l.innerText = "ATTENDEZ"; 
-                msg.innerText = "L'animateur va lancer le son..."; 
+                l.innerText = "ATTENDEZ"; msg.innerText = "L'animateur va lancer le son..."; 
             }
         }
 
