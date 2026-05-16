@@ -2149,7 +2149,6 @@
             roomRef.child('buzzAttempts').on('value', snap => {
 				// Si un gagnant est déjà en cours de traitement ou affiché, on ignore les nouveaux buzz
 				if (isBuzzerLocked || currentPlayer) return; 
-				const attempts = snap.val();
 				if (!attempts) return;
 				isBuzzerLocked = true;	// On verrouille immédiatement
                 const attempts = snap.val();
