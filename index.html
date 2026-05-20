@@ -4,9 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Presta'Puce - Blind Test</title>
-    <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png">
+	<script src="config.js"></script>
+	<script src="config.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Images
+        const favicon = document.getElementById('page-favicon');
+        if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
+        
+        const about1 = document.getElementById('about-logo-1');
+        if(about1) about1.src = APP_CONFIG.LOGO_BUZTAPUCE;
+
+        const about2 = document.getElementById('about-logo-2');
+        if(about2) about2.src = APP_CONFIG.LOGO_URL;
+
+        // Fichiers Audio
+        const sClick = document.getElementById('sound-click');
+        if(sClick) sClick.src = APP_CONFIG.SOUND_BUZZ;
+
+        const sWin = document.getElementById('sound-win');
+        if(sWin) sWin.src = APP_CONFIG.SOUND_CHAMPION;
+
+        const sApp = document.getElementById('sound-applause');
+        if(sApp) sApp.src = APP_CONFIG.SOUND_APPLAUSE;
+    });
+</script>
+    <link rel="icon" id="page-favicon" type="image/png">
     
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     
@@ -564,13 +589,13 @@
             
         <div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-bottom:15px;">
 			<a href="https://tapni.com/app/djcedrik" target="_blank" style="display:contents;">
-			<img src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/LOGO%20BUZ'TA%20PUCE%20FOND%20TRANSPARENT%20(1)%20(1).png?alt=media&token=0b71fa08-4047-4439-be45-37fcd40dffad" style="height:60px; object-fit:contain; cursor:pointer;">
+			<img id="about-logo-1" style="height:60px; object-fit:contain; cursor:pointer;">
 			</a>
     
 			<span style="font-size:1.5rem; color:#bdc3c7;">&amp;</span>
     
 			<a href="https://tapni.com/app/djcedrik" target="_blank" style="display:contents;">
-			<img src="https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png" style="height:60px; object-fit:contain; background:rgba(255,255,255,0.1); border-radius:8px; padding:5px; cursor:pointer;">
+			<img id="about-logo-2" style="height:60px; object-fit:contain; background:rgba(255,255,255,0.1); border-radius:8px; padding:5px; cursor:pointer;">
 			</a>
 		</div>
             
@@ -725,10 +750,10 @@
         <button class="btn-main" onclick="showClosingScreen()" style="margin-top:30px;">Terminer</button>
     </div>
 
-    <audio id="sound-click" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/BUZZER.WAV?alt=media&token=43ced984-3c6a-4167-b0dc-4cd97d7760dd" preload="auto"></audio>
-    <audio id="sound-win" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Buzzer%20champion.mp3?alt=media&token=8425ad5e-69a3-4a57-966e-58df8ff39701" preload="auto"></audio>
-    <audio id="sound-applause" src="https://firebasestorage.googleapis.com/v0/b/prestapuce-buzz.firebasestorage.app/o/Bruitage%20-%20Ambiance%20Et%20Applaudissement.mp3?alt=media&token=4a653c7f-67c2-4cc8-b53c-c58c2dda3bbd" preload="auto"></audio>
-
+    <audio id="sound-click" preload="auto"></audio>
+    <audio id="sound-win" preload="auto"></audio>
+    <audio id="sound-applause" preload="auto"></audio>
+	
 	<style>
         .crm-modal { max-width: 750px; width: 98%; background: var(--card); border: 2px solid var(--primary); }
         .crm-stepper { display: flex; align-items: center; justify-content: center; margin: 15px 0 20px 0; }

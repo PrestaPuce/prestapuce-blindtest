@@ -3,7 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Console MJ Pro - Presta'Puce</title>
-    <link rel="icon" id="page-favicon" type="image/png" href="https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png">
+	<script src="config.js"></script>
+	<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // 1. Mise à jour de l'icône de l'onglet (Favicon)
+        const favicon = document.getElementById('page-favicon');
+        if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
+        
+        // 2. Mise à jour de la carte qui se retourne (flip-front)
+        const flipFront = document.getElementById('flip-front-logo');
+        if(flipFront) flipFront.src = APP_CONFIG.LOGO_URL;
+
+        // 3. Mise à jour du logo de l'écran de connexion
+        const loginMj = document.getElementById('login-mj-logo');
+        if(loginMj) loginMj.src = APP_CONFIG.LOGO_URL;
+
+        // 4. Mise à jour des deux logos côte à côte dans la modale
+        const about1 = document.getElementById('about-logo-1');
+        if(about1) about1.src = APP_CONFIG.LOGO_URL;
+
+        const about2 = document.getElementById('about-logo-2');
+        if(about2) about2.src = APP_CONFIG.LOGO_BUZTAPUCE;
+    });
+	</script>
+    <link rel="icon" id="page-favicon" type="image/png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
@@ -250,8 +273,8 @@
         <div class="flip-container">
             <div class="flip-inner" id="logo-flip-inner">
                 <div class="flip-front">
-                    <img src="https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png">
-                </div>
+					<img id="flip-front-logo">
+				</div>
                 <div class="flip-back">
                     <img id="flip-back-logo" src="">
                 </div>
@@ -282,7 +305,7 @@
 
     <div id="screen-login" class="box" style="display:block;">
         <button class="btn-ghost" onclick="toggleGuide()">AIDE / GUIDE</button>
-        <img id="login-mj-logo" src="https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png" style="width:100px; margin-bottom:15px;">
+        <img id="login-mj-logo" style="width:100px; margin-bottom:15px;">
         <h2>Accès MJ Sécurisé</h2>
         <input type="email" id="mj-email" placeholder="Email MJ" onkeypress="if(event.key==='Enter') login()">
         <div class="password-wrapper">
@@ -346,10 +369,10 @@
             <h2 style="color:var(--blue); margin-top:0;">À PROPOS</h2>
             
             <div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-bottom:15px;">
-                <img src="https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png" style="height:60px; object-fit:contain;">
-                <span style="font-size:1.5rem; color:#bdc3c7;">&amp;</span>
-                <img src="https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" style="height:60px; object-fit:contain; background:rgba(255,255,255,0.1); border-radius:8px; padding:5px;">
-            </div>
+				<img id="about-logo-1" style="height:60px; object-fit:contain;">
+				<span style="font-size:1.5rem; color:#bdc3c7;">&amp;</span>
+				<img id="about-logo-2" style="height:60px; object-fit:contain; background:rgba(255,255,255,0.1); border-radius:8px; padding:5px;">
+			</div>
             
             <p style="font-size:0.9rem; color:#bdc3c7; font-style:italic; margin-bottom:20px;">Buz'ta Puce est une marque déposée de Presta' Puce.</p>
             
@@ -1515,8 +1538,8 @@
                 Object.keys(globalTeams).forEach(tKey => { 
                     if(globalTeams[tKey].icon === urlToDelete) {
                         logEvent('SYSTEM', `🛠️ Remplacement auto du blason supprimé pour l'équipe ${tKey}`); // 🟢 L'ULTIME CAPTEUR
-                        roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png" }); 
-                    }
+                        roomRef.child('teams/' + tKey).update({ icon: mjProfileData.customLogo || APP_CONFIG.LOGO_URL });
+					}
                 }); 
             }
             db.ref(`users/${uid}/library/${key}`).remove().catch(e=>alert("Erreur BDD: "+e.message)).then(() => {
@@ -1668,12 +1691,12 @@
         }
 
         function updateLogos(url) { 
-            const defaultLogo = "https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png";
-            const oldWixLogo = "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png";
-            const f = (url && url !== "" && url !== oldWixLogo && url !== defaultLogo) ? url : defaultLogo; 
-            
-            document.getElementById('login-mj-logo').src = defaultLogo; 
-            document.getElementById('page-favicon').href = f; 
+			const defaultLogo = APP_CONFIG.LOGO_URL;
+			const oldWixLogo = APP_CONFIG.LOGO_BUZTAPUCE;
+			const f = (url && url !== "" && url !== oldWixLogo && url !== defaultLogo) ? url : defaultLogo; 
+
+			document.getElementById('login-mj-logo').src = f; 
+			document.getElementById('page-favicon').href = f;
             
             const flipInner = document.getElementById('logo-flip-inner');
             const mjLogoImg = document.getElementById('flip-back-logo');
@@ -1806,9 +1829,9 @@
                 fullReset();
             }
             
-            const defLogo = "https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png";
-			try { roomRef.child('mjLogo').set(mjProfileData.customLogo && mjProfileData.customLogo !== "https://static.wixstatic.com/media/eda9e4_e7ab6af2d5a7428f9bc7e4af454e20ef~mv2.png" ? mjProfileData.customLogo : defLogo); } catch(e){}
-            try { if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); } catch(e){}
+            const defLogo = APP_CONFIG.LOGO_URL;
+			try { roomRef.child('mjLogo').set(mjProfileData.customLogo && mjProfileData.customLogo !== APP_CONFIG.LOGO_BUZTAPUCE ? mjProfileData.customLogo : defLogo); } catch(e){}
+			try { if(mjProfileData.customLink) roomRef.child('mjLink').set(mjProfileData.customLink); } catch(e){}
             try { roomRef.child('isGuestRoom').set(mjProfileData.isGuest === true); } catch(e){}
             try { if(mjProfileData.defaultBackground) roomRef.child('customBackground').set(mjProfileData.defaultBackground); } catch(e){}
             try { roomRef.child('showDefaultCrests').set(showDefaultCrests); } catch(e){}
@@ -2686,8 +2709,8 @@
         function openEditModal(uid) { const d = allPlayersData[uid]; if(!d)return; editingPlayerUid=uid; editingPlayerOriginalPseudo=d.name; editingPlayerOriginalAvatar=d.avatar||"👤"; editingPlayerCurrentAvatar=editingPlayerOriginalAvatar; document.getElementById('edit-player-name').value=d.name; document.getElementById('btn-censor-avatar').style.display=(editingPlayerOriginalAvatar.length>20)?'block':'none'; updateEditAvatarPreview(); populateEditGallery(); document.getElementById('modal-edit-player').style.display='flex'; }
         function populateEditGallery() { const g=document.getElementById('edit-avatar-gallery'); g.innerHTML=""; const o=document.createElement('div'); o.className='edit-gallery-item original-avatar-item'; if(editingPlayerOriginalAvatar.length>20)o.innerHTML=`<img src="${editingPlayerOriginalAvatar}">`; else o.innerText=editingPlayerOriginalAvatar; o.onclick=()=>{editingPlayerCurrentAvatar=editingPlayerOriginalAvatar;updateEditAvatarPreview();}; g.appendChild(o); avatars.forEach(a=>{ const d=document.createElement('div'); d.className='edit-gallery-item'; d.innerText=a; d.onclick=()=>{editingPlayerCurrentAvatar=a;updateEditAvatarPreview();}; g.appendChild(d); }); }
         function updateEditAvatarPreview() { const c=document.getElementById('edit-player-avatar-preview'); if(editingPlayerCurrentAvatar.length>20)c.innerHTML=`<img src="${editingPlayerCurrentAvatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`; else c.innerText=editingPlayerCurrentAvatar; }
-        function censorPlayerAvatar() { editingPlayerCurrentAvatar = mjProfileData.customLogo || "https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png"; updateEditAvatarPreview(); }
-        function closeEditPlayerModal() { document.getElementById('modal-edit-player').style.display='none'; editingPlayerUid=null; }
+		function censorPlayerAvatar() { editingPlayerCurrentAvatar = mjProfileData.customLogo || APP_CONFIG.LOGO_URL; updateEditAvatarPreview(); }
+		function closeEditPlayerModal() { document.getElementById('modal-edit-player').style.display='none'; editingPlayerUid=null; }
         
 		function savePlayerEdit() { 
             if(!editingPlayerUid)return; 
