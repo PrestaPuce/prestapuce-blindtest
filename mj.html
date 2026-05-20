@@ -5,7 +5,11 @@
     <title>Console MJ Pro - Presta'Puce</title>
 	<script src="config.js"></script>
 	<script>
+    const APP_VERSION = APP_CONFIG.VERSIONS.APP;
+
     document.addEventListener("DOMContentLoaded", () => {
+        document.title = `Console MJ Pro - Presta'Puce (v${APP_CONFIG.VERSIONS.APP})`;
+
         // 1. Mise à jour de l'icône de l'onglet (Favicon)
         const favicon = document.getElementById('page-favicon');
         if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
@@ -24,6 +28,16 @@
 
         const about2 = document.getElementById('about-logo-2');
         if(about2) about2.src = APP_CONFIG.LOGO_BUZTAPUCE;
+
+        // 5. Mise à jour automatique des affichages de version de la modale À propos
+        const dispRemote = document.getElementById('disp-v-remote');
+        if(dispRemote) dispRemote.innerText = `v${APP_CONFIG.VERSIONS.REMOTE}`;
+
+        const dispScores = document.getElementById('disp-v-scores');
+        if(dispScores) dispScores.innerText = `v${APP_CONFIG.VERSIONS.SCORES}`;
+
+        const dispGuide = document.getElementById('disp-v-guide');
+        if(dispGuide) dispGuide.innerText = `v${APP_CONFIG.VERSIONS.GUIDE}`;
     });
 	</script>
     <link rel="icon" id="page-favicon" type="image/png">
@@ -752,7 +766,7 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.262"; // 🚀 C'EST LE SEUL ENDROIT À MODIFIER DÉSORMAIS
+		// Variable gérée dynamiquement au début du fichier via config.js	
 		// On pré-remplit instantanément l'affichage sans attendre la base de données
 		document.addEventListener('DOMContentLoaded', () => {
 		if(document.getElementById('app-version-display')) document.getElementById('app-version-display').innerText = `v${APP_VERSION}`;
@@ -1022,10 +1036,16 @@
         
         function initVersionListener() { 
             db.ref('config/versions').on('value', snap => { 
-                const v = snap.val() || { index: "v1.179", mj: `v${APP_VERSION}`, remote: "v1.155", scores: "v1.169", guide: "v1.022" };
+                // Si Firebase est vide, on prend comme valeurs de secours celles de notre config.js centralisé
+                const v = snap.val() || { 
+                    index: `v${APP_CONFIG.VERSIONS.CLIENT}`, 
+                    mj: `v${APP_VERSION}`, 
+                    remote: `v${APP_CONFIG.VERSIONS.REMOTE}`, 
+                    scores: `v${APP_CONFIG.VERSIONS.SCORES}`, 
+                    guide: `v${APP_CONFIG.VERSIONS.GUIDE}` 
+                };
                 
                 if(document.getElementById('disp-v-index')) document.getElementById('disp-v-index').innerText = v.index;
-                // On force l'affichage de la version inscrite dans ce fichier pour le MJ
                 if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = `v${APP_VERSION}`;
                 if(document.getElementById('disp-v-remote')) document.getElementById('disp-v-remote').innerText = v.remote;
                 if(document.getElementById('disp-v-scores')) document.getElementById('disp-v-scores').innerText = v.scores;

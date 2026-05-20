@@ -3,9 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guide Utilisateur - Presta'Puce</title>
+<title>Guide Utilisateur - Presta'Puce</title>
 	<script src="config.js"></script>
     <link rel="icon" id="page-favicon" type="image/png">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.title = `Guide Utilisateur - Presta'Puce (v${APP_CONFIG.VERSIONS.GUIDE})`;
+            
+            const favicon = document.getElementById('page-favicon');
+            if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
+        });
+    </script>
     <style>
         :root { --bg-color: #1a1a1a; --card-bg: #2c3e50; --accent: #f1c40f; --text: #ecf0f1; --mj: #2ecc71; --blue: #3498db; --danger: #e74c3c; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: var(--text); margin: 0; padding: 20px; line-height: 1.6; }

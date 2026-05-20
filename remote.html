@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Remote MJ - Presta'Puce (v1.156)</title>
+    <title>Remote MJ - Presta'Puce</title>
 	<script src="config.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.title = `Remote MJ - Presta'Puce (v${APP_CONFIG.VERSIONS.REMOTE})`;
+            
+            const favicon = document.getElementById('page-favicon');
+            if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
+
+            const vDisplay = document.getElementById('app-version-display');
+            if(vDisplay) vDisplay.innerText = `v${APP_CONFIG.VERSIONS.REMOTE}`;
+        });
+    </script>
     <link rel="icon" id="page-favicon" type="image/png">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -69,7 +80,7 @@
 </head>
 <body>
 
-    <div class="version-tag" id="app-version-display">v1.157</div>
+    <div class="version-tag" id="app-version-display"></div>
 
     <div id="screen-login">
         <h2 style="color:var(--accent);">REMOTE ANIMATEUR</h2>

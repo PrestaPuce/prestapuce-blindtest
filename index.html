@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Presta'Puce - Blind Test</title>
+	<title>Presta'Puce - Blind Test</title>
 	<script src="config.js"></script>
-	<script src="config.js"></script>
-<script>
+	<script>
+    window.CLIENT_VERSION = APP_CONFIG.VERSIONS.CLIENT;
+
     document.addEventListener("DOMContentLoaded", () => {
+        document.title = `Presta'Puce - Blind Test (v${APP_CONFIG.VERSIONS.CLIENT})`;
+
         // Images
         const favicon = document.getElementById('page-favicon');
         if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
@@ -28,7 +31,7 @@
         const sApp = document.getElementById('sound-applause');
         if(sApp) sApp.src = APP_CONFIG.SOUND_APPLAUSE;
     });
-</script>
+	</script>
     <link rel="icon" id="page-favicon" type="image/png">
     
 	<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -999,6 +1002,14 @@
                 <button class="btn-main" onclick="document.getElementById('overlay-edit-profile').style.display='none'; openSettings();" style="background:#34495e; flex:1;">Annuler</button>
                 <button class="btn-main" onclick="window.saveEditedProfile()" style="background:var(--success); flex:1;">Enregistrer</button>
             </div>
+			<div style="margin-top: 35px; border-top: 1px dashed #e74c3c; padding-top: 20px; text-align: center; width: 100%;">
+				<p style="color: #95a5a6; font-size: 0.8rem; margin-bottom: 12px; font-style: italic;">
+				⚠️ Cette action supprime définitivement votre compte de notre CRM ainsi que toutes vos statistiques de jeu.
+				</p>
+				<button id="btn-delete-account" onclick="triggerAccountDeletion()" style="background: transparent; color: #e74c3c; border: 1px solid #e74c3c; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; box-sizing: border-box; transition: all 0.3s;" onmouseenter="this.style.background='#e74c3c'; this.style.color='white';" onmouseleave="this.style.background='transparent'; this.style.color='#e74c3c';">
+				Supprimer mon compte définitivement
+				</button>
+			</div>
         </div>
     </div>
 	
@@ -1038,12 +1049,6 @@
                 </ul>
             </div>
 
-			<div style="margin-top:40px; padding-top:15px; border-top:1px dashed rgba(255,255,255,0.1); text-align:center;">
-				<span onclick="confirmDeleteAccount()" style="color:#7f8c8d; font-size:0.75rem; text-decoration:underline; cursor:pointer; opacity:0.6;">
-				Supprimer définitivement mon compte
-				</span>
-			</div>
-
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button class="btn-main" onclick="document.getElementById('overlay-security-profile').style.display='none'; openSettings();" style="background:#34495e; flex:1;">Annuler</button>
                 <button id="btn-save-security" class="btn-main" onclick="window.saveSecurityProfile()" style="background:#e74c3c; flex:1;">Mettre à jour</button>
@@ -1063,7 +1068,7 @@
     </div>
 	
     <script>
-        const CLIENT_VERSION = "1.296";
+        // Variable gérée dynamiquement au début du fichier via config.js
 		
 		// 🚀 AUTOMATISATION : Mise à jour du titre et de la modale au chargement
         document.addEventListener("DOMContentLoaded", function() {

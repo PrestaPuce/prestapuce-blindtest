@@ -7,6 +7,15 @@ const APP_CONFIG = {
     SOUND_BUZZ: "https://static.wixstatic.com/mp3/eda9e4_b0c741f047f549a28051b8a2a2264f37.wav", 
     SOUND_CHAMPION: "https://static.wixstatic.com/mp3/eda9e4_f7bb386482f54a2fb8f00a0c4ebe990d.mp3",
     SOUND_APPLAUSE: "https://static.wixstatic.com/mp3/eda9e4_a38a05892581432e9304fa03888211e3.mp3"
+	
+	// 🚀 CENTRALISATION DES VERSIONS
+    VERSIONS: {
+        CLIENT: "1.298",      // Pour index.html
+        APP: "1.264",         // Pour mj.html
+        REMOTE: "1.159",      // Pour remote.html
+        SCORES: "1.182",      // Pour scores.html
+        GUIDE: "1.024"        // Pour guide.html
+	}
 };
 
 // ANCIEN LIEN https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png

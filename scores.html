@@ -5,6 +5,17 @@
     <title>Scores - Presta'Puce</title>
 	<script src="config.js"></script>
     <link rel="icon" id="page-favicon" type="image/png">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.title = `Scores - Presta'Puce (v${APP_CONFIG.VERSIONS.SCORES})`;
+            
+            const favicon = document.getElementById('page-favicon');
+            if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
+            
+            const mainLogo = document.getElementById('main-logo');
+            if(mainLogo) mainLogo.src = APP_CONFIG.LOGO_URL;
+        });
+    </script>
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
@@ -180,7 +191,7 @@
         @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes scorePop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.5); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
     </style>
-    <div id="version-display" class="version-tag">v1.182</div>
+	<div id="version-display" class="version-tag"></div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
@@ -273,12 +284,10 @@
     </div>
 
     <script>
-        const CLIENT_VERSION = "1.182";
-        
-        document.addEventListener("DOMContentLoaded", () => {
-            document.title = "Scores - Presta'Puce (v" + CLIENT_VERSION + ")";
+		document.addEventListener("DOMContentLoaded", () => {
+            document.title = `Scores - Presta'Puce (v${APP_CONFIG.VERSIONS.SCORES})`;
             const versionDisp = document.getElementById('version-display');
-            if(versionDisp) versionDisp.innerText = "v" + CLIENT_VERSION;
+            if(versionDisp) versionDisp.innerText = `v${APP_CONFIG.VERSIONS.SCORES}`;
             
             checkLobbyOrRoom();
         });
