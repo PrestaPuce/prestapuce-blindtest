@@ -6,7 +6,7 @@ const APP_CONFIG = {
     // 🎵 SONS
     SOUND_BUZZ: "https://static.wixstatic.com/mp3/eda9e4_b0c741f047f549a28051b8a2a2264f37.wav", 
     SOUND_CHAMPION: "https://static.wixstatic.com/mp3/eda9e4_f7bb386482f54a2fb8f00a0c4ebe990d.mp3",
-    SOUND_APPLAUSE: "https://static.wixstatic.com/mp3/eda9e4_a38a05892581432e9304fa03888211e3.mp3"
+    SOUND_APPLAUSE: "https://static.wixstatic.com/mp3/eda9e4_a38a05892581432e9304fa03888211e3.mp3",
 	
 	// 🚀 CENTRALISATION DES VERSIONS
     VERSIONS: {
