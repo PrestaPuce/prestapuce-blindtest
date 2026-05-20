@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <title>Console MJ Pro - Presta'Puce</title>
 	<script src="config.js"></script>
-	<script>
+<script>
     const APP_VERSION = APP_CONFIG.VERSIONS.APP;
 
     document.addEventListener("DOMContentLoaded", () => {
         document.title = `Console MJ Pro - Presta'Puce (v${APP_CONFIG.VERSIONS.APP})`;
+
+        // Injection immédiate de la version en bas à droite sur l'écran de connexion
+        const appVersionDisp = document.getElementById('app-version-display');
+        if (appVersionDisp) appVersionDisp.innerText = `v${APP_VERSION}`;
 
         // 1. Mise à jour de l'icône de l'onglet (Favicon)
         const favicon = document.getElementById('page-favicon');
