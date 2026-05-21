@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Console MJ Pro - Presta'Puce</title>
-	<script src="config.js"></script>
+<script src="config.js"></script>
 <script>
     const APP_VERSION = APP_CONFIG.VERSIONS.APP;
 
@@ -14,19 +14,22 @@
         const appVersionDisp = document.getElementById('app-version-display');
         if (appVersionDisp) appVersionDisp.innerText = `v${APP_VERSION}`;
 
-        // 1. Mise à jour de l'icône de l'onglet (Favicon)
+        // 1. Mise à jour de l'icône de l'onglet (Favicon : Logo Buz'Ta'Puce par défaut)
         const favicon = document.getElementById('page-favicon');
-        if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
+        if(favicon) favicon.href = APP_CONFIG.LOGO_BUZTAPUCE;
         
-        // 2. Mise à jour de la carte qui se retourne (flip-front)
+        // 2. Mise à jour de la carte de chargement qui se retourne
         const flipFront = document.getElementById('flip-front-logo');
-        if(flipFront) flipFront.src = APP_CONFIG.LOGO_URL;
+        if(flipFront) flipFront.src = APP_CONFIG.LOGO_BUZTAPUCE; // Face avant par défaut
 
-        // 3. Mise à jour du logo de l'écran de connexion
+        const flipBack = document.getElementById('flip-back-logo');
+        if(flipBack) flipBack.src = APP_CONFIG.LOGO_URL; // Face arrière (Presta'Puce)
+
+        // 3. Mise à jour du logo de l'écran de connexion (Buz'Ta'Puce par défaut)
         const loginMj = document.getElementById('login-mj-logo');
-        if(loginMj) loginMj.src = APP_CONFIG.LOGO_URL;
+        if(loginMj) loginMj.src = APP_CONFIG.LOGO_BUZTAPUCE;
 
-        // 4. Mise à jour des deux logos côte à côte dans la modale
+        // 4. Mise à jour des deux logos côte à côte dans la modale À propos
         const about1 = document.getElementById('about-logo-1');
         if(about1) about1.src = APP_CONFIG.LOGO_URL;
 
