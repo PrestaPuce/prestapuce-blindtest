@@ -1353,6 +1353,26 @@
             .catch(err => alert("Erreur caméra : " + err));
         }
 
+        function showBannedScreen(mjName, mjLink) {
+            const targetUrl = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik";
+            const overlay = document.getElementById('overlay-warning');
+            if(overlay) {
+                overlay.innerHTML = `
+                    <div class="settings-content" onclick="event.stopPropagation()">
+                        <div style="font-size: 3.5rem; margin-bottom: 10px;">🟥</div>
+                        <h2 style="color:var(--danger); margin-top:0;">ACCÈS REFUSÉ</h2>
+                        <p style="color:#ccc; font-size:1rem; margin-bottom: 25px; line-height: 1.4;">
+                            Vous avez été expulsé de la partie par <b>${mjName}</b>.<br><br>
+                            Allez le voir pour qu'il vous réhabilite si vous souhaitez rejouer.
+                        </p>
+                        <button class="btn-main" onclick="window.location.replace('${targetUrl}')" style="width: 100%; background: var(--danger); color: white;">J'ai compris</button>
+                    </div>
+                `;
+                overlay.style.display = 'flex';
+                if(roomRef) roomRef.off(); // Coupe la connexion pour empêcher les bugs
+            }
+        }
+
         function checkRoomAndStart(autoLogin) {
             db.ref('activeRooms/' + roomID).once('value', snap => {
                 if(snap.exists()) {
@@ -1383,7 +1403,7 @@
                     roomRef.child('players/' + myUserID).once('value', snapUser => {
                         if(snapUser.exists()) {
                             const data = snapUser.val();
-                            if(data.banned) { alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; return; }
+                            if(data.banned) { showBannedScreen(mjName, mjLink); return; }
                             
                             // 🛡️ SÉCURITÉ 2 : Destruction du joueur fantôme dans Firebase
                             if(!data.name || data.name === "undefined" || data.name === "null") {
@@ -2846,7 +2866,7 @@
                 if (isExiting || isRoomClosing) return; 
                 const d = snap.val(); 
                 if(!d) { if(roomRef) roomRef.off(); alert("Votre compte a été supprimé définitivement."); localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; return; }
-                if(d.banned) { if(roomRef) roomRef.off(); alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; return; }
+                if(d.banned) { showBannedScreen(mjName, mjLink); return; }
                 
                 /* --- PATCH V1.179 : PAUSE INTENTIONNELLE DU MJ UNIQUEMENT --- */
                 if(d.active === false && d.kickedByMj === true) { 
