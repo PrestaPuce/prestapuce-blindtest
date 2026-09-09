@@ -236,7 +236,7 @@
                     <div id="line-2" class="type-line"></div>
                     <div id="line-3" class="type-line"></div>
                 </div>
-                <button class="btn-main" onclick="navigateTo('step-auth')" style="width:100%; max-width:320px; margin-top:20px; font-size:1.3rem; padding:18px;">C'est parti ! 🚀</button>
+                <button class="btn-main" onclick="window.handleWelcomeNext()" style="width:100%; max-width:320px; margin-top:20px; font-size:1.3rem; padding:18px;">C'est parti ! 🚀</button>
             </div>
         </div>
 
@@ -1178,7 +1178,20 @@
         }
 
         let roomID = "", roomRef = null, myUserID = ""; 
+        let roomSettings = { loginMode: 'full', gameMode: 'mixed' }; // 🚀 Paramètres MJ en direct
         let player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
+
+        // 🚀 FONCTIONS DE ROUTAGE INTELLIGENT
+        window.handleWelcomeNext = function() {
+            if (roomSettings.loginMode === 'quick') navigateTo('step-pseudo');
+            else navigateTo('step-auth');
+        };
+
+        window.handleModeRouting = function() {
+            if (roomSettings.gameMode === 'solo_only') selectMode('Solo');
+            else if (roomSettings.gameMode === 'team_only') goToTeamAction();
+            else window.handleModeRouting();
+        };
         window.mySessionID = Math.random().toString(36).substring(2, 15); // Jeton unique
         window.pendingRecoveryData = null; // Mémoire de récupération
         let gameState = "waiting", currentWinner = null, isBlocked = false;
@@ -1377,6 +1390,13 @@
             db.ref('activeRooms/' + roomID).once('value', snap => {
                 if(snap.exists()) {
                     roomRef = db.ref('rooms/' + roomID);
+                    
+                    // 🚀 Écoute des règles du jeu en direct
+                    roomRef.child('settings').on('value', snap => {
+                        if(snap.exists()) roomSettings = snap.val();
+                        else roomSettings = { loginMode: 'full', gameMode: 'mixed' };
+                    });
+
                     const lastRoom = localStorage.getItem('buzz_lastRoom');
                     if(lastRoom !== roomID) { localStorage.removeItem('presta_player_session'); localStorage.setItem('buzz_lastRoom', roomID); autoLogin = false; }
                     roomRef.child('mjName').once('value', s => { if(s.exists()) { mjName = s.val(); document.getElementById('welcome-mj-name').innerText = mjName.toUpperCase(); } });
@@ -1532,10 +1552,10 @@
             // Affichage intelligent du bouton de création de compte
             const guestBlock = document.getElementById('reconnect-guest-actions');
             if (guestBlock) {
-                if (myUserID && myUserID.startsWith('u_')) {
-                    guestBlock.style.display = 'block'; // C'est un invité
+                if (myUserID && myUserID.startsWith('u_') && roomSettings.loginMode !== 'quick') {
+                    guestBlock.style.display = 'block'; // C'est un invité en mode Full
                 } else {
-                    guestBlock.style.display = 'none'; // C'est un compte CRM, on cache le bouton
+                    guestBlock.style.display = 'none'; // C'est un compte CRM ou Mode Rapide
                 }
             }
             
@@ -1612,7 +1632,7 @@
                     
                     player.pseudo = val; 
                     player.avatar = p.avatar; 
-                    navigateTo('step-mode');
+                    window.handleModeRouting();
                 });
             } else {
                 if(roomRef && myUserID) roomRef.child('players/' + myUserID).update({active: false});
@@ -2018,7 +2038,7 @@
                     joinTimestamp: firebase.database.ServerValue.TIMESTAMP
                 });
             }
-            navigateTo('step-mode');
+            window.handleModeRouting();
         };
 		
 		// --- PATCH V1.240 : VALIDATEUR D'AVATAR (Correction stricte) ---
@@ -2050,7 +2070,7 @@
                     if(roomRef) roomRef.child('players/' + myUserID).update({avatar: player.avatar}); 
                     finishEdit(true);
                 } else {
-                    navigateTo('step-mode');
+                    window.handleModeRouting();
                 }
             }
         };
@@ -2233,7 +2253,7 @@
                     badge.style.background = "rgba(255, 255, 255, 0.1)";
                     badge.style.color = "#bdc3c7";
                     badge.style.border = "1px solid #bdc3c7";
-                    if(guestMenu) guestMenu.style.display = "flex"; // 🚀 On affiche les boutons
+                    if(guestMenu) guestMenu.style.display = roomSettings.loginMode === 'quick' ? "none" : "flex"; // 🚀 Masqué si Rapide
                     if(editBtn) editBtn.style.display = "none";
                     if(secBtn) secBtn.style.display = "none";
                     if(gallBtn) gallBtn.style.display = "none";
@@ -3777,7 +3797,7 @@
                     if(roomRef) roomRef.child('players/' + myUserID).update({avatar: player.avatar}); 
                     finishEdit(true);
                 } else {
-                    navigateTo('step-mode');
+                    window.handleModeRouting();
                 }
             };
 
@@ -3853,7 +3873,7 @@
                     if(roomRef) roomRef.child('players/' + myUserID).update({avatar: player.avatar}); 
                     finishEdit(true);
                 } else {
-                    navigateTo('step-mode');
+                    window.handleModeRouting();
                 }
             });
         };
