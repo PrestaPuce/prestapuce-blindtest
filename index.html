@@ -1181,16 +1181,25 @@
         let roomSettings = { loginMode: 'full', gameMode: 'mixed' }; // 🚀 Paramètres MJ en direct
         let player = { pseudo: "", avatar: "", team: "Solo", teamIcon: "" };
 
-        // 🚀 FONCTIONS DE ROUTAGE INTELLIGENT
+        // 🚀 FONCTIONS DE ROUTAGE INTELLIGENT (BLINDÉES)
         window.handleWelcomeNext = function() {
-            if (roomSettings.loginMode === 'quick') navigateTo('step-pseudo');
-            else navigateTo('step-auth');
+            try {
+                let lMode = (typeof roomSettings !== 'undefined' && roomSettings && roomSettings.loginMode) ? roomSettings.loginMode : 'full';
+                if (lMode === 'quick') navigateTo('step-pseudo');
+                else navigateTo('step-auth');
+            } catch (e) { navigateTo('step-auth'); } // Parachute
         };
 
         window.handleModeRouting = function() {
-            if (roomSettings.gameMode === 'solo_only') selectMode('Solo');
-            else if (roomSettings.gameMode === 'team_only') goToTeamAction();
-            else window.handleModeRouting();
+            try {
+                let gMode = (typeof roomSettings !== 'undefined' && roomSettings && roomSettings.gameMode) ? roomSettings.gameMode : 'mixed';
+                if (gMode === 'solo_only') selectMode('Solo');
+                else if (gMode === 'team_only') goToTeamAction();
+                else navigateTo('step-mode');
+            } catch (e) { 
+                console.error("Erreur routage:", e);
+                navigateTo('step-mode'); // Parachute
+            }
         };
         window.mySessionID = Math.random().toString(36).substring(2, 15); // Jeton unique
         window.pendingRecoveryData = null; // Mémoire de récupération
@@ -2047,30 +2056,32 @@
             const expressActions = document.getElementById('avatar-express-actions');
             const previewEl = document.getElementById('avatar-preview');
             
-            // 1. On capture ce qui est VISIBLEMENT à l'écran (la vraie photo ou l'émoji)
             if (previewEl) {
                 const img = previewEl.querySelector('img');
                 if (img) {
-                    player.avatar = img.src; // C'est une image
+                    player.avatar = img.src; 
                 } else if (previewEl.innerText.trim() !== "") {
-                    player.avatar = previewEl.innerText.trim(); // C'est un Emoji
+                    player.avatar = previewEl.innerText.trim(); 
                 }
             }
 
             alert("✅ Ton nouvel avatar a bien été pris en compte !");
 
-            // 2. Si le joueur a un compte, qu'il y a un avatar à l'écran, et qu'il est différent de la mémoire
-            if (myUserID && !myUserID.startsWith('u_') && player.avatar && player.avatar !== window.crmAvatar) {
+            if (typeof myUserID !== 'undefined' && myUserID && !myUserID.startsWith('u_') && player.avatar && typeof window.crmAvatar !== 'undefined' && player.avatar !== window.crmAvatar) {
                 alert("ℹ️ Ton ancien avatar sera sauvegardé dans ta galerie. Tu pourras toujours y revenir plus tard.");
-                expressActions.style.display = 'none';
-                choiceContainer.style.display = 'block';
+                if (expressActions) expressActions.style.display = 'none';
+                if (choiceContainer) choiceContainer.style.display = 'block';
             } else {
-                if (isEditing) {
-                    logEvent('SYSTEM', `✏️ ${player.pseudo} a changé son avatar`);
-                    if(roomRef) roomRef.child('players/' + myUserID).update({avatar: player.avatar}); 
-                    finishEdit(true);
+                if (typeof isEditing !== 'undefined' && isEditing) {
+                    if (typeof logEvent === 'function') logEvent('SYSTEM', `✏️ ${player.pseudo} a changé son avatar`);
+                    if (typeof roomRef !== 'undefined' && roomRef) roomRef.child('players/' + myUserID).update({avatar: player.avatar}); 
+                    if (typeof finishEdit === 'function') finishEdit(true);
                 } else {
-                    window.handleModeRouting();
+                    if (typeof window.handleModeRouting === 'function') {
+                        window.handleModeRouting();
+                    } else {
+                        navigateTo('step-mode');
+                    }
                 }
             }
         };
