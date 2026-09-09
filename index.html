@@ -1529,7 +1529,7 @@
                     snap.ref.update({ active: true }); 
                 } else { 
                     roomRef.child('players/' + myUserID).set({
-                        name: p,
+                        name: player.pseudo,
                         teamName: "Solo",
                         teamIcon: "",
                         active: false, // 🚀 Reste gris jusqu'à la page buzzer

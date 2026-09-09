@@ -801,8 +801,8 @@
                 const enEquipe = p.teamName && listEquipes.includes(p.teamName);
                 const inactiveClass = p.active === false ? "inactive-card" : "";
                 
-                // PATCH V1.176 : On éteint l'encadré vert si les points sont donnés
-                const buzzedClass = (p.uid === currentBuzzerId && currentGameState !== 'awarded') ? "last-buzzed" : "";
+                // PATCH V1.266 : Le halo vert s'affiche STRICTEMENT quand le joueur a la main (taken)
+                const buzzedClass = (p.uid === currentBuzzerId && currentGameState === 'taken') ? "last-buzzed" : "";
                 
                 let displayPtsP = p.pts || 0;
                 if (animatingScores[idP] !== undefined) {

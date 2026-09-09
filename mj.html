@@ -2911,6 +2911,7 @@
             if(confirm("Bannir "+n+" (Rouge) ?")) {
                 logEvent('PUNISH', `MJ a banni le joueur : ${n}`); // 🟢 CAPTEUR
                 roomRef.child('players/'+u).update({banned:true, active:false}); 
+                if (currentBuzzerId === u) { isBuzzerLocked = false; statusUpdate('ready'); }
             }
         }
 
@@ -3060,6 +3061,7 @@
             if(confirm(`Mettre ${n} en pause ?`)) {
                 logEvent('SYSTEM', `MJ a mis le joueur ${n} en PAUSE`); // 🟢 CAPTEUR
                 roomRef.child('players/'+u).update({active: false, kickedByMj: true}); 
+                if (currentBuzzerId === u) { isBuzzerLocked = false; statusUpdate('ready'); }
             }
         }
 		
@@ -3067,6 +3069,7 @@
             if(confirm(`⚠️ Supprimer définitivement le joueur ${n} ?`)) {
                 logEvent('SYSTEM', `MJ a supprimé définitivement le joueur : ${n}`); // 🟢 CAPTEUR
                 roomRef.child('players/'+u).remove(); 
+                if (currentBuzzerId === u) { isBuzzerLocked = false; statusUpdate('ready'); }
             }
         }
         
