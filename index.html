@@ -2971,7 +2971,18 @@
             });
             roomRef.child('buzzers').on('value', snap => {
                 const val = snap.val(); currentBuzzer = val ? val.pseudo : null; currentBuzzerId = val ? val.id : null;
-                if (val && (currentBuzzerId === myUserID || currentBuzzer === player.pseudo) && currentWinner !== player.pseudo) { document.getElementById('sound-win').play().catch(()=>{}); if(navigator.vibrate) navigator.vibrate([200, 100, 200]); }
+                if (val && (currentBuzzerId === myUserID || currentBuzzer === player.pseudo) && currentWinner !== player.pseudo) { 
+                    
+                    // 🚀 CORRECTION : On coupe net le son du buzzer classique pour éviter la cacophonie
+                    const sClick = document.getElementById('sound-click');
+                    if (sClick) {
+                        sClick.pause();
+                        sClick.currentTime = 0;
+                    }
+                    
+                    document.getElementById('sound-win').play().catch(()=>{}); 
+                    if(navigator.vibrate) navigator.vibrate([200, 100, 200]); 
+                }
                 currentWinner = val ? val.pseudo : null; updateUI();
             });
             roomRef.child('blockedPlayers/' + player.pseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
