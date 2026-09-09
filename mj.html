@@ -476,7 +476,47 @@
             <input type="text" id="new-room-mj" placeholder="Ex: DJ Fred" onkeypress="if(event.key==='Enter') document.getElementById('new-room-name').focus()">
             <div style="text-align: left; font-size: 0.85rem; color: var(--accent); margin-bottom: 5px; font-weight: bold; margin-top: 10px;">NOM DE L'ÉVÉNEMENT</div>
             <input type="text" id="new-room-name" placeholder="Ex: Soirée Disco ou Mariage Sophie" onkeypress="if(event.key==='Enter') confirmCreateRoom()">
+            
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="text-align: left; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">PARCOURS DE CONNEXION</div>
+                <select id="new-room-login" style="font-size: 0.9rem; padding: 8px; margin-bottom: 10px;">
+                    <option value="full">Complet (Propose compte CRM)</option>
+                    <option value="quick">Rapide (Accès Invité Direct)</option>
+                </select>
+
+                <div style="text-align: left; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">MODE DE JEU</div>
+                <select id="new-room-mode" style="font-size: 0.9rem; padding: 8px; margin-bottom: 0;">
+                    <option value="mixed">Mixte (Solo & Équipes autorisés)</option>
+                    <option value="solo_only">100% Solo (Bloque les équipes)</option>
+                    <option value="team_only">100% Équipes (Obligatoire)</option>
+                </select>
+            </div>
+
             <button onclick="confirmCreateRoom()" style="margin-top:20px; font-size:1.1rem; background:var(--mj-color);">LANCER LA PARTIE</button>
+        </div>
+    </div>
+	
+	<div id="modal-room-settings" class="modal-overlay">
+        <div class="modal-box" style="max-width: 400px;">
+            <button class="modal-close-x" onclick="document.getElementById('modal-room-settings').style.display='none'">✖</button>
+            <h2 style="color:var(--accent); margin-top:0;">⚙️ RÈGLES DU JEU</h2>
+            
+            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="text-align: left; font-size: 0.9rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">PARCOURS DE CONNEXION</div>
+                <select id="edit-room-login" style="font-size: 1rem; padding: 10px; margin-bottom: 15px;">
+                    <option value="full">Complet (Propose compte CRM)</option>
+                    <option value="quick">Rapide (Accès Invité Direct)</option>
+                </select>
+
+                <div style="text-align: left; font-size: 0.9rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">MODE DE JEU</div>
+                <select id="edit-room-mode" style="font-size: 1rem; padding: 10px; margin-bottom: 0;">
+                    <option value="mixed">Mixte (Solo & Équipes autorisés)</option>
+                    <option value="solo_only">100% Solo (Bloque les équipes)</option>
+                    <option value="team_only">100% Équipes (Obligatoire)</option>
+                </select>
+            </div>
+
+            <button onclick="saveRoomSettings()" style="margin-top:20px; font-size:1.1rem; background:var(--mj-color);">💾 ENREGISTRER</button>
         </div>
     </div>
 
@@ -533,8 +573,10 @@
                         <button onclick="forceRoomOpen()" title="Recréer la porte d'entrée publique en cas de bug réseau" style="background:transparent; border:none; padding:0; display:inline-flex; align-items:center; justify-content:center; box-shadow:none; cursor:pointer; font-size:1.1rem; margin:0; transition:0.2s; opacity:0.9;">🔄</button>
                     </div>
                     
+                    <button style="background: transparent; border: 2px solid #34495e; color: #34495e; font-size: 0.85rem; padding:6px 15px; margin: 0 auto 15px auto; width: auto; font-weight:bold; border-radius:15px; cursor: pointer;" onclick="openRoomSettings()" title="Modifier les règles de la partie en cours">⚙️ RÈGLES DU JEU</button>
+
                     <button style="background: #1a1a1a; color: white; border: 2px solid white; font-size: 0.95rem; padding:8px 25px; margin: 0; width: auto; font-weight:bold; border-radius:20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform:uppercase;" onclick="triggerEndGame()" title="Clôturer l'événement, afficher le podium et archiver la salle">🏁 FIN DE PARTIE 🏆</button>
-                </div>
+				</div>
 
                 <div style="display:flex; flex-direction:column; gap:8px; width:150px; flex-shrink:0; z-index:10;">
                     <button style="background:var(--blue); margin:0; padding:0; font-size:0.9rem; height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2); line-height:1.1;" onclick="quitRoom()" title="Fermer cette fenêtre sans détruire la salle"><div>🚪 Quitter</div><small style="font-size:0.7rem; opacity:0.8; font-weight:normal;">(Sauvegarder)</small></button>
@@ -1773,8 +1815,12 @@
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
                 isArchived: false,
                 isPaused: false,
-                gameState: { status: 'waiting' }
-            }; 
+                gameState: { status: 'waiting' },
+                settings: {
+                    loginMode: document.getElementById('new-room-login') ? document.getElementById('new-room-login').value : 'full',
+                    gameMode: document.getElementById('new-room-mode') ? document.getElementById('new-room-mode').value : 'mixed'
+                }
+            };
             
             db.ref('rooms/' + newRoomId).set(initialData).then(() => { 
                 document.getElementById('modal-create-room').style.display = 'none';
@@ -3107,6 +3153,29 @@
         
         // --- PATCH V1.196 : CORRECTION AUDIT (FONCTION MANQUANTE) ---
         function kickTeam(n) { if(confirm(`Expulser l'équipe ${n} (Rouge) ?`)) banTeam(n); }
+		
+		function openRoomSettings() {
+            if(!roomRef) return;
+            roomRef.child('settings').once('value').then(snap => {
+                const settings = snap.val() || { loginMode: 'full', gameMode: 'mixed' };
+                document.getElementById('edit-room-login').value = settings.loginMode || 'full';
+                document.getElementById('edit-room-mode').value = settings.gameMode || 'mixed';
+                document.getElementById('modal-room-settings').style.display = 'flex';
+            });
+        }
+
+        function saveRoomSettings() {
+            if(!roomRef) return;
+            const newSettings = {
+                loginMode: document.getElementById('edit-room-login').value,
+                gameMode: document.getElementById('edit-room-mode').value
+            };
+            logEvent('SYSTEM', `⚙️ MJ a modifié les règles du jeu (Connexion: ${newSettings.loginMode}, Mode: ${newSettings.gameMode})`); // 🟢 CAPTEUR
+            roomRef.child('settings').update(newSettings).then(() => {
+                document.getElementById('modal-room-settings').style.display = 'none';
+                alert("✅ Règles du jeu mises à jour !");
+            });
+        }
 		
     </script>
 </body>
