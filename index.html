@@ -1383,7 +1383,7 @@
                     roomRef.child('players/' + myUserID).once('value', snapUser => {
                         if(snapUser.exists()) {
                             const data = snapUser.val();
-                            if(data.banned) { alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
+                            if(data.banned) { alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; return; }
                             
                             // 🛡️ SÉCURITÉ 2 : Destruction du joueur fantôme dans Firebase
                             if(!data.name || data.name === "undefined" || data.name === "null") {
@@ -2845,14 +2845,14 @@
             roomRef.child('players/' + myUserID).on('value', snap => { 
                 if (isExiting || isRoomClosing) return; 
                 const d = snap.val(); 
-                if(!d) { if(roomRef) roomRef.off(); alert("Votre compte a été supprimé définitivement."); localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
-                if(d.banned) { if(roomRef) roomRef.off(); alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; return; }
+                if(!d) { if(roomRef) roomRef.off(); alert("Votre compte a été supprimé définitivement."); localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; return; }
+                if(d.banned) { if(roomRef) roomRef.off(); alert("Vous avez été banni par " + mjName + ". Allez le voir pour vous reconnecter."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; return; }
                 
                 /* --- PATCH V1.179 : PAUSE INTENTIONNELLE DU MJ UNIQUEMENT --- */
                 if(d.active === false && d.kickedByMj === true) { 
                     if(roomRef) roomRef.off(); 
                     alert(`⏸️ Vous avez été mis en pause par ${mjName}.\nVous pourrez vous reconnecter plus tard si l'animateur vous y autorise.`); 
-                    window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; 
+                    window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; 
                     return; 
                 }
                 if (d.pendingWarning === true) { document.getElementById('overlay-warning').style.display = 'flex'; }
@@ -3009,11 +3009,11 @@
             releaseWakeLock(); 
             if(action === 'save') {
                 alert("La création de compte arrive très bientôt !");
-                if(confirm("Tant que l'animateur n'a pas fermé la salle, vous pourrez revenir et récupérer votre score.\n\nVoulez-vous quitter ?")) { isExiting = true; setInactiveAndAction(() => { window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; }); }
+                if(confirm("Tant que l'animateur n'a pas fermé la salle, vous pourrez revenir et récupérer votre score.\n\nVoulez-vous quitter ?")) { isExiting = true; setInactiveAndAction(() => { window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; }); }
             } else if(action === 'change') {
                 if(confirm("Quitter cette salle pour en rejoindre une autre ?\nVotre profil sera conservé.")) { isExiting = true; setInactiveAndAction(() => { localStorage.removeItem('presta_player_session'); localStorage.removeItem('buzz_lastRoom'); location.reload(); }); }
             } else if(action === 'exit') {
-                if(confirm("⚠️ Tout effacer et quitter définitivement ?")) { isExiting = true; setInactiveAndAction(() => { localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; }); }
+                if(confirm("⚠️ Tout effacer et quitter définitivement ?")) { isExiting = true; setInactiveAndAction(() => { localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; }); }
             }
         }
 
@@ -3023,8 +3023,8 @@
             document.getElementById('overlay-closing').style.display = 'flex'; 
         }
         
-        function handleFinalSave() { alert("La création de compte arrive très bientôt !\nTon profil reste néanmoins mémorisé sur ce téléphone pour ta prochaine partie."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; }
-        function handleFinalLeave() { localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://google.com"; }
+        function handleFinalSave() { alert("La création de compte arrive très bientôt !\nTon profil reste néanmoins mémorisé sur ce téléphone pour ta prochaine partie."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; }
+        function handleFinalLeave() { localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; }
 
         function handlePress(e) { 
             if(e.cancelable) e.preventDefault(); 
