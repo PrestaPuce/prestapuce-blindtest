@@ -1,0 +1,17 @@
+{
+  "name": "Buz'ta Puce - Console MJ",
+  "short_name": "Buz'ta Puce",
+  "start_url": "./mj.html",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#f1c40f",
+  "description": "Console Animateur Blind Test par Presta'Puce",
+  "icons": [
+    {
+      "src": "https://static.wixstatic.com/media/eda9e4_dc2ff731fcff46ae864a10091fbab8c7~mv2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

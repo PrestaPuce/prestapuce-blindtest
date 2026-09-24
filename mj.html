@@ -48,6 +48,7 @@
     });
 	</script>
     <link rel="icon" id="page-favicon" type="image/png">
+	<link rel="manifest" href="manifest.json">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
@@ -977,6 +978,7 @@
             return sortObj.asc ? "🔼" : "🔽";
         }
 		
+        /* --- PATCH V1.268 : CORRECTION SAFARI NAVIGATION PRIVÉE (FALLBACK INDEXEDDB) --- */
         function login() { 
             const e = document.getElementById('mj-email').value.trim();
             const p = document.getElementById('mj-pass').value; 
@@ -992,11 +994,30 @@
             
             document.getElementById('btn-login-submit').innerText = "⏳ Connexion...";
             
-            auth.signInWithEmailAndPassword(e, p).then(r => {
+            let persistenceMode = document.getElementById('remember-me').checked 
+                ? firebase.auth.Auth.Persistence.LOCAL 
+                : firebase.auth.Auth.Persistence.SESSION;
+
+            auth.setPersistence(persistenceMode)
+            .then(() => {
+                return auth.signInWithEmailAndPassword(e, p);
+            })
+            .then(r => {
                 loadMjData(r.user);
-            }).catch(err => {
-                document.getElementById('btn-login-submit').innerText = "Se Connecter";
-                alert("Oups ! Identifiants incorrects ou erreur : " + err.message);
+            })
+            .catch(err => {
+                if (err.message && err.message.includes("destructured")) {
+                    auth.setPersistence(firebase.auth.Auth.Persistence.NONE)
+                    .then(() => auth.signInWithEmailAndPassword(e, p))
+                    .then(r => loadMjData(r.user))
+                    .catch(fallbackErr => {
+                        document.getElementById('btn-login-submit').innerText = "Se Connecter";
+                        alert("Oups ! Identifiants incorrects ou erreur : " + fallbackErr.message);
+                    });
+                } else {
+                    document.getElementById('btn-login-submit').innerText = "Se Connecter";
+                    alert("Oups ! Identifiants incorrects ou erreur : " + err.message);
+                }
             }); 
         }
 
@@ -1938,7 +1959,20 @@
             });
         }
 
-        function openScoreBoard() { if(!roomID) return; window.open(window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/scores.html?room=" + roomID, '_blank'); }
+        /* --- PATCH V1.268 : OUVERTURE SCORES FAÇON "PENNYLANE" (COMPATIBLE APP BUREAU) --- */
+        function openScoreBoard() { 
+            if(!roomID) return; 
+            const url = window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/scores.html?room=" + roomID;
+            
+            // On crée un faux lien HTML invisible pour forcer Chrome à ouvrir un vrai onglet
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function toggleGuide() { const o = document.getElementById('overlay-guide'); if(o.style.display === 'flex') o.style.display = 'none'; else { o.style.display = 'flex'; document.getElementById('guide-iframe').src = "guide.html?t=" + Date.now(); } }
         function showRemoteQR() { const o = document.getElementById('overlay-remote-qr'); const q = document.getElementById('qrcode-remote'); q.innerHTML = ""; new QRCode(q, { text: window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/remote.html?room=" + roomID, width: 250, height: 250 }); o.style.display = 'flex'; }
 
