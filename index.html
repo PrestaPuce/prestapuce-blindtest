@@ -568,7 +568,7 @@
                 <button class="settings-btn" onclick="editStep('step-pseudo')" style="margin:0; padding:10px;">✏️ Modifier mon Pseudo</button>
                 <button class="settings-btn" onclick="window.openAvatarMenuDirectly()" style="margin:0; padding:10px;">📷 Changer d'Avatar</button>
                 <button id="btn-direct-gallery" class="settings-btn" onclick="isEditing = true; window.openGalleryDirectly()" style="display:none; background:rgba(255,255,255,0.05); margin:0; padding:10px;">🕰️ Gérer ma Galerie (10 photos)</button>
-                <button class="settings-btn" onclick="editStep('step-mode')" style="margin:0; padding:10px;">🛡️ Changer Mode (Solo/Team)</button>
+                <button id="btn-change-mode" class="settings-btn" onclick="editStep('step-mode')" style="margin:0; padding:10px;">🛡️ Changer Mode (Solo/Team)</button>
             </div>
             
             <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 15px 0;">
@@ -1792,8 +1792,14 @@
                         localStorage.setItem('buzz_userId', myUserID);
                         player = { pseudo: p.name, avatar: p.avatar, team: p.teamName || "Solo", teamIcon: p.teamIcon || "" };
                         showReconnectScreen();
+                    } else if (targetUid.startsWith('u_')) {
+                        // 🚀 PATCH V1.304 : Le joueur est un INVITE (Partie Rapide). Pas besoin de compte !
+                        myUserID = targetUid;
+                        localStorage.setItem('buzz_userId', myUserID);
+                        player = { pseudo: p.name, avatar: p.avatar, team: p.teamName || "Solo", teamIcon: p.teamIcon || "" };
+                        showReconnectScreen();
                     } else {
-                        // Pas connecté -> Écran de verrouillage "Buzz Ta Puce"
+                        // Pas connecté et c'est un compte CRM -> Écran de verrouillage "Buzz Ta Puce"
                         window.prepareSecureRecovery(targetUid, p);
                     }
                 }
@@ -2238,18 +2244,46 @@
 
         function openSettings() { 
             const badge = document.getElementById('account-status-badge');
-            const guestMenu = document.getElementById('guest-actions-menu'); // 🚀 On cible le nouveau menu
+            const guestMenu = document.getElementById('guest-actions-menu'); 
             const editBtn = document.getElementById('btn-edit-profile');
             const secBtn = document.getElementById('btn-security-profile');
             const gallBtn = document.getElementById('btn-direct-gallery');
             
+            // 🚀 PATCH V1.304 : ANTI-TRICHE (Désactivation des menus pendant une manche)
+            const btnMode = document.getElementById('btn-change-mode');
+            const btnManageTeam = document.getElementById('btn-manage-team');
+            
+            if (gameState !== 'waiting' && gameState !== 'awarded') {
+                if (btnMode) {
+                    btnMode.disabled = true;
+                    btnMode.style.opacity = '0.4';
+                    btnMode.innerText = "🛡️ Mode bloqué (Manche en cours)";
+                }
+                if (btnManageTeam) {
+                    btnManageTeam.disabled = true;
+                    btnManageTeam.style.opacity = '0.4';
+                    btnManageTeam.innerText = "👑 Gestion bloquée (Manche en cours)";
+                }
+            } else {
+                if (btnMode) {
+                    btnMode.disabled = false;
+                    btnMode.style.opacity = '1';
+                    btnMode.innerText = "🛡️ Changer Mode (Solo/Team)";
+                }
+                if (btnManageTeam) {
+                    btnManageTeam.disabled = false;
+                    btnManageTeam.style.opacity = '1';
+                    btnManageTeam.innerText = "👑 Gérer mon Équipe";
+                }
+            }
+
             if (badge) {
                 if (myUserID && !myUserID.startsWith('u_')) {
                     badge.innerHTML = "✅ COMPTE CONNECTÉ";
                     badge.style.background = "rgba(39, 174, 96, 0.2)";
                     badge.style.color = "var(--success)";
                     badge.style.border = "1px solid var(--success)";
-                    if(guestMenu) guestMenu.style.display = "none"; // 🚀 On cache
+                    if(guestMenu) guestMenu.style.display = "none";
                     if(editBtn) editBtn.style.display = "block";
                     if(gallBtn) gallBtn.style.display = "block"; 
                     
@@ -2264,7 +2298,7 @@
                     badge.style.background = "rgba(255, 255, 255, 0.1)";
                     badge.style.color = "#bdc3c7";
                     badge.style.border = "1px solid #bdc3c7";
-                    if(guestMenu) guestMenu.style.display = roomSettings.loginMode === 'quick' ? "none" : "flex"; // 🚀 Masqué si Rapide
+                    if(guestMenu) guestMenu.style.display = roomSettings.loginMode === 'quick' ? "none" : "flex";
                     if(editBtn) editBtn.style.display = "none";
                     if(secBtn) secBtn.style.display = "none";
                     if(gallBtn) gallBtn.style.display = "none";
@@ -2992,6 +3026,12 @@
                     // 🟢 DÉMARRAGE DU CHRONO QUAND L'ÉCRAN DEVIENT VERT
                     if (newStatus === 'ready' && gameState !== 'ready') {
                         buzzerReadyTime = Date.now();
+                        // 🚀 PATCH V1.304 : ANTI-TRICHE (Expulsion automatique des menus)
+                        if (isEditing || document.getElementById('overlay-manage-team').style.display === 'flex') {
+                            document.getElementById('overlay-manage-team').style.display = 'none';
+                            finishEdit(false);
+                            alert("⚠️ La manche vient de commencer, les modifications d'équipe sont verrouillées !");
+                        }
                     } else if (newStatus !== 'ready') {
                         buzzerReadyTime = 0;
                     }
