@@ -281,6 +281,31 @@
             border-color: transparent !important; /* Laisse le box-shadow faire le travail pour éviter les sauts */
         }
         /* On réutilise ton animation pulse-alert existante pour le joueur interne */
+		
+		/* --- PATCH V1.270 : MODE JOUR CONSOLE MJ --- */
+        body.day-mode { color: #2c3e50 !important; }
+        .day-mode #dynamic-bg { background: #ecf0f1 !important; animation: none !important; }
+        .day-mode .box, .day-mode .current-player, .day-mode .hub-details, .day-mode .modal-box { background: rgba(255, 255, 255, 0.95) !important; color: #2c3e50 !important; border-color: #bdc3c7 !important; }
+        .day-mode .dashboard > div > div { background: rgba(255, 255, 255, 0.85) !important; border: 1px solid #bdc3c7 !important; }
+        .day-mode input, .day-mode select { background: #ffffff !important; color: #2c3e50 !important; border: 1px solid #95a5a6 !important; }
+        .day-mode .score-row, .day-mode .hub-line { background: #ffffff !important; border: 1px solid #bdc3c7 !important; color: #2c3e50 !important; }
+        .day-mode .score-row.airlock-row { background: #fdf2e9 !important; border-color: #f39c12 !important; }
+        .day-mode .score-row.buzzer-active-row { background: #eafaf1 !important; border-color: #27ae60 !important; }
+        .day-mode .score-row:hover, .day-mode .hub-line:hover { background: #f2f3f4 !important; }
+        .day-mode .dropdown-item { color: #2c3e50 !important; }
+        .day-mode .dropdown-item:hover { background: #ecf0f1 !important; }
+        .day-mode .sort-header, .day-mode .section-title, .day-mode h2, .day-mode h3, .day-mode h4, .day-mode .input-helper { color: #2c3e50 !important; text-shadow: none !important; }
+        .day-mode .hub-tab { background: #ecf0f1; color: #7f8c8d; border-color: #bdc3c7; }
+        .day-mode .hub-tab.active { background: var(--blue) !important; color: white !important; border-color: var(--blue) !important; }
+        .day-mode .dropdown-btn, .day-mode .top-right-btn { color: #2c3e50 !important; border-color: #bdc3c7 !important; background: #ecf0f1 !important; }
+        .day-mode .dropdown-btn:hover { background: #bdc3c7 !important; }
+        .day-mode .btn-ghost { color: #2c3e50 !important; border-color: #2c3e50 !important; }
+        .day-mode .room-info-card { background: #f1c40f !important; color: #2c3e50 !important; border: 1px solid #d4ac0d !important; }
+        /* Fix du bouton qui était invisible */
+        .day-mode #btn-day-mode { background: #2c3e50 !important; color: white !important; border-color: #2c3e50 !important; }
+        /* Fix des textes gris clairs */
+        .day-mode span[style*="color:#bdc3c7"], .day-mode span[style*="color: #bdc3c7"] { color: #7f8c8d !important; }
+        .day-mode small[style*="color:#bdc3c7"] { color: #7f8c8d !important; }
     </style>
 </head>
 <body>
@@ -2206,21 +2231,20 @@
             roomRef.child('eventName').on('value', snap => { if(snap.exists()) document.getElementById('display-event-name').innerText = snap.val(); else document.getElementById('display-event-name').innerText = "PARTIE EN COURS"; });
             roomRef.child('mjName').on('value', snap => { if(snap.exists()) document.getElementById('display-mj-name').innerText = "Animé par " + snap.val(); else document.getElementById('display-mj-name').innerText = "Animé par MJ"; });
             
-            // 🚀 PATCH V1.269 : ÉCOUTEUR MODE JOUR
+            // 🚀 PATCH V1.270 : ÉCOUTEUR MODE JOUR (Console MJ globale)
             roomRef.child('settings/dayMode').on('value', snap => {
                 const isDay = snap.val() === true;
                 const btn = document.getElementById('btn-day-mode');
-                if (btn) {
-                    if (isDay) {
-                        btn.innerHTML = "🌙 MODE NUIT";
-                        btn.style.borderColor = "#34495e";
-                        btn.style.color = "#34495e";
-                        btn.style.background = "#f1c40f";
-                    } else {
-                        btn.innerHTML = "☀️ MODE JOUR";
-                        btn.style.borderColor = "#f1c40f";
-                        btn.style.color = "#f1c40f";
-                        btn.style.background = "transparent";
+                
+                if (isDay) {
+                    document.body.classList.add('day-mode');
+                    if (btn) btn.innerHTML = "🌙 MODE NUIT";
+                } else {
+                    document.body.classList.remove('day-mode');
+                    if (btn) btn.innerHTML = "☀️ MODE JOUR";
+                    // Restaure le fond personnalisé du MJ en mode Nuit
+                    if (mjProfileData.consoleBackground) {
+                        applyMjConsoleBg(mjProfileData.consoleBackground);
                     }
                 }
             });

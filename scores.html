@@ -166,6 +166,16 @@
         filter: blur(15px);
         transition: filter 0.5s ease;
         }
+        
+        /* 🚀 PATCH V1.271 : MODE JOUR SCORES */
+        body.day-mode { color: #2c3e50; }
+        .day-mode #dynamic-bg { background: #ecf0f1 !important; animation: none !important; }
+        .day-mode .card { background: rgba(255, 255, 255, 0.9); border-color: #bdc3c7; color: #2c3e50; }
+        .day-mode .column-title { color: #2980b9; border-bottom-color: #bdc3c7; text-shadow: none; }
+        .day-mode .info b { text-shadow: none; }
+        .day-mode #event-name-display { color: #2c3e50; text-shadow: none; }
+        .day-mode .header-center { background: rgba(255,255,255,0.8); border-color: #bdc3c7; }
+        .day-mode .team-tag { color: #7f8c8d; }
     </style>
 </head>
 <body>
@@ -440,6 +450,18 @@
         function initScoreboard() {
             document.getElementById('room-title').innerText = roomID;
             roomRef = db.ref('rooms/' + roomID);
+            
+            // 🚀 PATCH V1.271 : ÉCOUTEUR RÉGLAGES (Mode Jour & Mode Solo)
+            window.roomSettings = { gameMode: 'mixed' };
+            roomRef.child('settings').on('value', snap => {
+                if(snap.exists()) window.roomSettings = snap.val();
+                
+                if (window.roomSettings.dayMode === true) document.body.classList.add('day-mode');
+                else document.body.classList.remove('day-mode');
+                
+                updateDisplay(); // Force le rafraîchissement pour masquer "Solo" immédiatement
+            });
+
             const currentPath = window.location.href.split('?')[0].replace('scores', 'index');
             const playURL = currentPath + "?room=" + roomID;
             
@@ -811,10 +833,15 @@
                 
                 let crownIcon = p.isCaptain ? '<span style="margin-left:5px; filter:drop-shadow(0 0 5px gold); font-size: 1.1em;">👑</span>' : '';
 
+                // 🚀 PATCH V1.271 : Masquage du tag Solo si le mode est 100% Solo
+                let teamTagHtml = (window.roomSettings && window.roomSettings.gameMode === 'solo_only') 
+                    ? "" 
+                    : `<span class="team-tag">(${enEquipe ? p.teamName : "Solo"})</span>`;
+
                 pListHTML += `
                     <div class="card ${buzzedClass} ${inactiveClass}" data-id="${idP}">
                         <div class="avatar">${renderAvatar(p.avatar)}</div>
-                        <div class="info"><b>${p.name}${crownIcon}</b> <span class="team-tag">(${enEquipe ? p.teamName : "Solo"})</span></div>
+                        <div class="info"><b>${p.name}${crownIcon}</b> ${teamTagHtml}</div>
                         <div class="pts">${displayPtsP}</div>
                     </div>`;
             });
@@ -870,10 +897,15 @@
                         </div>
                     `;
                 } else {
+                    // 🚀 PATCH V1.271 : Masquage de la mention Solo
+                    let soloText = (window.roomSettings && window.roomSettings.gameMode === 'solo_only') 
+                        ? "" 
+                        : `<div style="font-size: clamp(0.6rem, 1.5vh, 0.9rem); color: #bdc3c7; font-weight: normal; margin-top: 0.3vh;">Solo</div>`;
+                    
                     infoHtml = `
                         <div style="display:flex; flex-direction:column; justify-content:center; line-height:1.2; width:100%; text-overflow: ellipsis; overflow: hidden;">
                             <b style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</b>
-                            <div style="font-size: clamp(0.6rem, 1.5vh, 0.9rem); color: #bdc3c7; font-weight: normal; margin-top: 0.3vh;">Solo</div>
+                            ${soloText}
                         </div>
                     `;
                 }

@@ -76,6 +76,19 @@
         .btn-toggle-teams { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: var(--gold); border: 1px solid var(--gold); padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         .btn-toggle-teams:active { transform: scale(0.95); }
         .team-bonus-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* 🚀 PATCH V1.271 : MODE JOUR REMOTE */
+        body.day-mode { background-color: #ecf0f1; color: #2c3e50; }
+        .day-mode .top-bar { background: #bdc3c7; color: #2c3e50; border-bottom: 1px solid #95a5a6; }
+        .day-mode .player-zone { background: rgba(255,255,255,0.9); border-bottom: 2px solid #3498db; }
+        .day-mode .controls-zone, .day-mode .leaderboard-zone, .day-mode #zone-teams { background: #ffffff; }
+        .day-mode .p-name { color: #2c3e50; }
+        .day-mode .waiting-msg { color: #7f8c8d; }
+        .day-mode .rank-card { background: rgba(255,255,255,0.95); border: 1px solid #bdc3c7; color: #2c3e50; }
+        .day-mode .rank-name { color: #2c3e50; }
+        .day-mode .team-bonus-row { background: rgba(255,255,255,0.9); border: 1px solid #bdc3c7; }
+        .day-mode .team-bonus-row b { color: #2c3e50 !important; }
+        .day-mode h3 { color: #2c3e50 !important; }
     </style>
 </head>
 <body>
@@ -167,6 +180,12 @@
         function launchRemote(id) {
             roomRef = db.ref('rooms/' + id);
             
+            // 🚀 PATCH V1.271 : ÉCOUTEUR MODE JOUR REMOTE
+            roomRef.child('settings/dayMode').on('value', snap => {
+                if (snap.val() === true) document.body.classList.add('day-mode');
+                else document.body.classList.remove('day-mode');
+            });
+
             roomRef.child('players').on('value', snap => {
                 allPlayersData = snap.val() || {};
                 if(currentPlayer) updatePlayerZone(currentPlayer);
