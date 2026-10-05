@@ -1053,17 +1053,17 @@
                 <button class="btn-main" onclick="document.getElementById('overlay-security-profile').style.display='none'; openSettings();" style="background:#34495e; flex:1;">Annuler</button>
                 <button id="btn-save-security" class="btn-main" onclick="window.saveSecurityProfile()" style="background:#e74c3c; flex:1;">Mettre à jour</button>
             </div>
-			<div id="modal-reauth" class="modal-overlay">
-				<div class="modal-box" style="max-width:400px;">
-					<button class="modal-close-x" onclick="document.getElementById('modal-reauth').style.display='none'">✖</button>
-					<h2 style="color:var(--danger); margin-top:0;">SÉCURITÉ</h2>
-					<p style="font-size:0.9rem; color:#bdc3c7;">Pour confirmer votre identité, veuillez saisir le mot de passe de votre compte.</p>
-					<div class="input-group">
-						<input type="password" id="reauth-password" placeholder="Votre mot de passe actuel">
-					</div>
-					<button onclick="processReauth()" style="background:var(--danger); margin-top:15px; width:100%;">VALIDER MON IDENTITÉ</button>
-				</div>
-			</div>
+        </div>
+    </div>
+
+    <!-- 🚀 CORRECTION : Adaptation du design de la modale d'authentification pour les joueurs -->
+    <div id="modal-reauth" class="overlay-full" style="display:none; z-index:10000;">
+        <div class="settings-content" style="max-width:400px; position:relative;">
+            <button onclick="document.getElementById('modal-reauth').style.display='none'" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer;">✖</button>
+            <h2 style="color:var(--danger); margin-top:0;">SÉCURITÉ</h2>
+            <p style="font-size:0.9rem; color:#bdc3c7; margin-bottom: 20px;">Pour confirmer votre identité, veuillez saisir le mot de passe de votre compte.</p>
+            <input type="password" id="reauth-password" class="crm-input" placeholder="Votre mot de passe actuel" onkeypress="if(event.key==='Enter') processReauth()">
+            <button class="btn-main" onclick="processReauth()" style="background:var(--danger); margin-top:15px; width:100%;">VALIDER MON IDENTITÉ</button>
         </div>
     </div>
 	
@@ -1403,7 +1403,22 @@
                     // 🚀 Écoute des règles du jeu en direct
                     roomRef.child('settings').on('value', snap => {
                         if(snap.exists()) roomSettings = snap.val();
-                        else roomSettings = { loginMode: 'full', gameMode: 'mixed' };
+                        else roomSettings = { loginMode: 'full', gameMode: 'mixed', teamLock: 'individual', dayMode: false };
+                        
+                        // 🚀 PATCH V1.305 : RÉCEPTEUR MODE JOUR (Inversion des couleurs)
+                        if (roomSettings.dayMode === true) {
+                            document.documentElement.style.setProperty('--bg', '#ecf0f1'); // Blanc cassé
+                            document.documentElement.style.setProperty('--card', '#ffffff'); // Blanc pur
+                            document.documentElement.style.setProperty('--text', '#2c3e50'); // Texte Noir/Bleu foncé
+                            document.body.style.backgroundColor = 'var(--bg)';
+                            document.body.style.color = 'var(--text)';
+                        } else {
+                            document.documentElement.style.setProperty('--bg', '#1a1a1a'); // Noir classique
+                            document.documentElement.style.setProperty('--card', '#2c3e50'); 
+                            document.documentElement.style.setProperty('--text', '#ffffff');
+                            document.body.style.backgroundColor = 'var(--bg)';
+                            document.body.style.color = 'var(--text)';
+                        }
                     });
 
                     const lastRoom = localStorage.getItem('buzz_lastRoom');
@@ -3042,6 +3057,10 @@
             });
             roomRef.child('buzzers').on('value', snap => {
                 const val = snap.val(); currentBuzzer = val ? val.pseudo : null; currentBuzzerId = val ? val.id : null;
+                
+                // 🚀 PATCH V1.305 : Mémorisation de l'équipe du gagnant pour la synchro
+                window.globalCurrentWinnerTeam = val ? (val.teamName || "Solo") : "Solo";
+                
                 if (val && (currentBuzzerId === myUserID || currentBuzzer === player.pseudo) && currentWinner !== player.pseudo) { 
                     
                     // 🚀 CORRECTION : On coupe net le son du buzzer classique pour éviter la cacophonie
@@ -3056,7 +3075,14 @@
                 }
                 currentWinner = val ? val.pseudo : null; updateUI();
             });
-            roomRef.child('blockedPlayers/' + player.pseudo).on('value', snap => { isBlocked = snap.exists(); updateUI(); });
+            
+            // 🚀 PATCH V1.305 : GESTION DU BLOCAGE ÉQUIPE OU INDIVIDUEL CÔTÉ TÉLÉPHONE
+            roomRef.child('blockedPlayers').on('value', snap => { 
+                const blockedList = snap.val() || {};
+                // Vérifie si MON pseudo est dans la liste rouge (soit seul, soit ajouté avec toute l'équipe)
+                isBlocked = blockedList[player.pseudo] === true; 
+                updateUI(); 
+            });
         }
 
         function acknowledgeWarning() { 
@@ -3164,15 +3190,25 @@
             
             document.getElementById('sound-click').play().catch(()=>{});
             
+            // 🚀 CORRECTION : Calcul du temps de réaction avant de l'envoyer au MJ
+            let reactionTime = Date.now() - buzzerReadyTime;
             logEvent('BUZZ_PLAYER', `⏱️ ${player.pseudo} a cliqué en ${reactionTime} ms`); // 🟢 CAPTEUR
             
-            updateUI(); 
+            updateUI();
         }
 
         function updateUI() {
             const c = document.getElementById('btn-buzz'); const l = document.getElementById('label'); const msg = document.getElementById('status-msg'); const box = c.parentElement.parentElement; 
             
             box.className = "step-screen active"; 
+            
+            // 🚀 PATCH V1.305 : SYNCHRONISATION ÉQUIPE (Vérifie si un membre de MON équipe a gagné)
+            let isMyTeamWinner = false;
+            let teamWinnerName = "";
+            if (currentWinner && window.globalCurrentWinnerTeam && window.globalCurrentWinnerTeam !== "Solo" && window.globalCurrentWinnerTeam === player.team) {
+                isMyTeamWinner = true;
+                teamWinnerName = currentWinner;
+            }
             
             // 0️⃣ PRIORITÉ ABSOLUE : Fin de manche (Branche A). Tout le monde repasse en "ATTENDEZ".
             if (gameState === 'waiting') {
@@ -3191,6 +3227,8 @@
             } else if (gameState === 'taken' && currentWinner) { 
                 if(currentWinner === player.pseudo) { 
                     box.classList.add('main-prise'); l.innerText = "C'EST À TOI !"; msg.innerText = "🎤 Donne ta réponse !"; 
+                } else if (isMyTeamWinner) {
+                    box.classList.add('main-prise'); l.innerText = "BIEN JOUÉ !"; msg.innerText = `🎤 ${teamWinnerName} a pris la main !`; 
                 } else { 
                     box.classList.add('blocked'); l.innerText = "OCCUPÉ"; msg.innerText = `${currentWinner} a la main.`; 
                 } 
@@ -4083,24 +4121,32 @@
 					const confirm2 = confirm("🛑 DERNIÈRE VÉRIFICATION\n\nCela effacera vos points, vos victoires et vos photos de galerie. Confirmer la suppression ?");
 					if(confirm2) {
 						let targetUrl = "https://tapni.com/app/djcedrik";
+						
 						const finalizeCleanup = (url) => {
 							alert("✅ Compte supprimé avec succès. Au revoir !");
 							localStorage.clear();
 							window.location.href = url;
 						};
 
-						let mjUrl = null;
-						if (typeof roomRef !== 'undefined' && roomRef) {
-							roomRef.child('mjWebsite').once('value').then(snap => { mjUrl = snap.val(); }).catch(()=>{});
-							roomRef.child('players/' + myUserID).remove().catch(()=>{});
-						}		
+						const doFinalDelete = (url) => {
+							db.ref('users_crm/' + myUserID).remove().then(() => {
+								user.delete().then(() => {
+									finalizeCleanup(url);
+								}).catch(err => alert("❌ Erreur Firebase Auth : " + err.message));
+							}).catch(err => alert("❌ Erreur Base de données : " + err.message));
+						};
 
-						// Suppression Base de données + Auth
-						db.ref('users_crm/' + myUserID).remove().then(() => {
-							user.delete().then(() => {
-								finalizeCleanup(mjUrl || targetUrl);
-							}).catch(err => alert("❌ Erreur Firebase Auth : " + err.message));
-						}).catch(err => alert("❌ Erreur Base de données : " + err.message));
+						// 🚀 CORRECTION : On attend la réponse de Firebase avant de détruire le compte
+						if (typeof roomRef !== 'undefined' && roomRef) {
+							roomRef.child('players/' + myUserID).remove().catch(()=>{});
+							roomRef.child('mjWebsite').once('value').then(snap => { 
+								doFinalDelete(snap.val() || targetUrl); 
+							}).catch(() => { 
+								doFinalDelete(targetUrl); 
+							});
+						} else {
+							doFinalDelete(targetUrl);
+						}
 					}
 				}
 			};
@@ -4147,7 +4193,7 @@
 			alert("❌ Mot de passe incorrect. Merci de vous connecter avec le bon mot de passe.");
 			document.getElementById('modal-reauth').style.display = 'none';
 			// Comme tu l'as demandé, on rouvre le menu de profil
-			if(typeof openProfileSettings === 'function') openProfileSettings();
+			openSettings();
 			});
 		};
 		

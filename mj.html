@@ -486,11 +486,19 @@
                 </select>
 
                 <div style="text-align: left; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">MODE DE JEU</div>
-                <select id="new-room-mode" style="font-size: 0.9rem; padding: 8px; margin-bottom: 0;">
-                    <option value="mixed">Mixte (Solo & Équipes autorisés)</option>
-                    <option value="solo_only">100% Solo (Bloque les équipes)</option>
-                    <option value="team_only">100% Équipes (Obligatoire)</option>
-                </select>
+				<select id="new-room-mode" style="font-size: 0.9rem; padding: 8px; margin-bottom: 10px;" onchange="toggleTeamLockUI('new')">
+					<option value="mixed">Mixte (Solo & Équipes autorisés)</option>
+					<option value="solo_only">100% Solo (Bloque les équipes)</option>
+					<option value="team_only">100% Équipes (Obligatoire)</option>
+				</select>
+
+				<div id="new-team-lock-container">
+					<div style="text-align: left; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">RÈGLE DE BLOCAGE (ERREUR)</div>
+					<select id="new-room-team-lock" style="font-size: 0.9rem; padding: 8px; margin-bottom: 0;">
+						<option value="individual">Individuel (Un seul joueur bloqué)</option>
+						<option value="team">Équipe (Toute l'équipe est bloquée)</option>
+					</select>
+				</div>
             </div>
 
             <button onclick="confirmCreateRoom()" style="margin-top:20px; font-size:1.1rem; background:var(--mj-color);">LANCER LA PARTIE</button>
@@ -510,11 +518,19 @@
                 </select>
 
                 <div style="text-align: left; font-size: 0.9rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">MODE DE JEU</div>
-                <select id="edit-room-mode" style="font-size: 1rem; padding: 10px; margin-bottom: 0;">
+                <select id="edit-room-mode" style="font-size: 1rem; padding: 10px; margin-bottom: 15px;" onchange="toggleTeamLockUI('edit')">
                     <option value="mixed">Mixte (Solo & Équipes autorisés)</option>
                     <option value="solo_only">100% Solo (Bloque les équipes)</option>
                     <option value="team_only">100% Équipes (Obligatoire)</option>
                 </select>
+
+                <div id="edit-team-lock-container">
+                    <div style="text-align: left; font-size: 0.9rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">RÈGLE DE BLOCAGE (ERREUR)</div>
+                    <select id="edit-room-team-lock" style="font-size: 1rem; padding: 10px; margin-bottom: 0;">
+                        <option value="individual">Individuel (Un seul joueur bloqué)</option>
+                        <option value="team">Équipe (Toute l'équipe est bloquée)</option>
+                    </select>
+                </div>
             </div>
 
             <button onclick="saveRoomSettings()" style="margin-top:20px; font-size:1.1rem; background:var(--mj-color);">💾 ENREGISTRER</button>
@@ -574,7 +590,10 @@
                         <button onclick="forceRoomOpen()" title="Recréer la porte d'entrée publique en cas de bug réseau" style="background:transparent; border:none; padding:0; display:inline-flex; align-items:center; justify-content:center; box-shadow:none; cursor:pointer; font-size:1.1rem; margin:0; transition:0.2s; opacity:0.9;">🔄</button>
                     </div>
                     
-                    <button style="background: transparent; border: 2px solid #34495e; color: #34495e; font-size: 0.85rem; padding:6px 15px; margin: 0 auto 15px auto; width: auto; font-weight:bold; border-radius:15px; cursor: pointer;" onclick="openRoomSettings()" title="Modifier les règles de la partie en cours">⚙️ RÈGLES DU JEU</button>
+                    <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px; margin-top:10px;">
+                        <button id="btn-day-mode" style="background: transparent; border: 2px solid #f1c40f; color: #f1c40f; font-size: 0.85rem; padding:6px 15px; margin: 0; width: auto; font-weight:bold; border-radius:15px; cursor: pointer;" onclick="toggleDayMode()" title="Passer les écrans en Mode Jour (Haute luminosité)">☀️ MODE JOUR</button>
+                        <button style="background: transparent; border: 2px solid #34495e; color: #34495e; font-size: 0.85rem; padding:6px 15px; margin: 0; width: auto; font-weight:bold; border-radius:15px; cursor: pointer;" onclick="openRoomSettings()" title="Modifier les règles de la partie en cours">⚙️ RÈGLES DU JEU</button>
+                    </div>
 
                     <button style="background: #1a1a1a; color: white; border: 2px solid white; font-size: 0.95rem; padding:8px 25px; margin: 0; width: auto; font-weight:bold; border-radius:20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform:uppercase;" onclick="triggerEndGame()" title="Clôturer l'événement, afficher le podium et archiver la salle">🏁 FIN DE PARTIE 🏆</button>
 				</div>
@@ -1809,6 +1828,11 @@
         function askMjNameAndCreate() { 
             document.getElementById('new-room-mj').value = mjProfileData.prenom || "MJ"; 
             document.getElementById('new-room-name').value = ""; 
+            
+            // 🚀 PATCH V1.269 : Initialisation du menu de blocage
+            if (document.getElementById('new-room-mode')) document.getElementById('new-room-mode').value = 'mixed';
+            if (typeof toggleTeamLockUI === 'function') toggleTeamLockUI('new');
+            
             document.getElementById('modal-create-room').style.display = 'flex'; 
             setTimeout(() => document.getElementById('new-room-name').focus(), 100); 
         }
@@ -1839,7 +1863,9 @@
                 gameState: { status: 'waiting' },
                 settings: {
                     loginMode: document.getElementById('new-room-login') ? document.getElementById('new-room-login').value : 'full',
-                    gameMode: document.getElementById('new-room-mode') ? document.getElementById('new-room-mode').value : 'mixed'
+                    gameMode: document.getElementById('new-room-mode') ? document.getElementById('new-room-mode').value : 'mixed',
+                    teamLock: document.getElementById('new-room-team-lock') ? document.getElementById('new-room-team-lock').value : 'individual',
+                    dayMode: false
                 }
             };
             
@@ -2138,7 +2164,7 @@
             }
         }
 		
-		/* --- PATCH 3.23 : SUCCESSION AUTOMATIQUE SI INACTIF --- */
+		/* --- PATCH V1.269 : SUCCESSION AUTOMATIQUE ABSOLUE (Anti-Trône Vide) --- */
         function handleCaptainSuccession(teamName) {
             const members = Object.keys(allPlayersData)
                 .map(uid => ({ uid, ...allPlayersData[uid] }))
@@ -2146,7 +2172,8 @@
 
             const currentCaptain = members.find(p => p.isCaptain === true);
 
-            if (currentCaptain && currentCaptain.active === false) {
+            // Se déclenche si le capitaine actuel est inactif, OU s'il n'y a plus aucun capitaine (trône vide)
+            if (!currentCaptain || (currentCaptain && currentCaptain.active === false)) {
                 const activeMembers = members
                     .filter(p => p.active !== false)
                     .sort((a, b) => (a.joinTimestamp || 0) - (b.joinTimestamp || 0));
@@ -2154,15 +2181,20 @@
                 if (activeMembers.length > 0) {
                     const nextId = activeMembers[0].uid;
                     const nextName = activeMembers[0].name || "Inconnu";
-                    const oldId = currentCaptain.uid;
-                    const oldName = currentCaptain.name || "L'ancien capitaine";
-
                     let updates = {};
-                    updates[oldId + '/isCaptain'] = false;
-                    updates[oldId + '/captainMessage'] = `ℹ️ Vous n'êtes plus capitaine de l'équipe ${teamName}. ${nextName} est le nouveau capitaine.`;
+
+                    if (currentCaptain) {
+                        const oldId = currentCaptain.uid;
+                        const oldName = currentCaptain.name || "L'ancien capitaine";
+                        updates[oldId + '/isCaptain'] = false;
+                        updates[oldId + '/captainMessage'] = `ℹ️ Vous n'êtes plus capitaine de l'équipe ${teamName}. ${nextName} est le nouveau capitaine.`;
+                        updates[nextId + '/captainMessage'] = `👑 ${oldName} n'est plus actif. Vous êtes le nouveau capitaine de l'équipe ${teamName} !`;
+                    } else {
+                        // Cas du transfert forcé : Le capitaine a disparu de l'équipe
+                        updates[nextId + '/captainMessage'] = `👑 Le trône était vide. Vous êtes le nouveau capitaine de l'équipe ${teamName} !`;
+                    }
                     
                     updates[nextId + '/isCaptain'] = true;
-                    updates[nextId + '/captainMessage'] = `👑 ${oldName} n'est plus actif. Vous êtes le nouveau capitaine de l'équipe ${teamName} !`;
                     
                     logEvent('SYSTEM', `👑 Succession auto : ${nextName} devient capitaine de ${teamName}`); // 🟢 CAPTEUR
                     roomRef.child('players').update(updates);
@@ -2174,6 +2206,24 @@
             roomRef.child('eventName').on('value', snap => { if(snap.exists()) document.getElementById('display-event-name').innerText = snap.val(); else document.getElementById('display-event-name').innerText = "PARTIE EN COURS"; });
             roomRef.child('mjName').on('value', snap => { if(snap.exists()) document.getElementById('display-mj-name').innerText = "Animé par " + snap.val(); else document.getElementById('display-mj-name').innerText = "Animé par MJ"; });
             
+            // 🚀 PATCH V1.269 : ÉCOUTEUR MODE JOUR
+            roomRef.child('settings/dayMode').on('value', snap => {
+                const isDay = snap.val() === true;
+                const btn = document.getElementById('btn-day-mode');
+                if (btn) {
+                    if (isDay) {
+                        btn.innerHTML = "🌙 MODE NUIT";
+                        btn.style.borderColor = "#34495e";
+                        btn.style.color = "#34495e";
+                        btn.style.background = "#f1c40f";
+                    } else {
+                        btn.innerHTML = "☀️ MODE JOUR";
+                        btn.style.borderColor = "#f1c40f";
+                        btn.style.color = "#f1c40f";
+                        btn.style.background = "transparent";
+                    }
+                }
+            });
             roomRef.child('players').on('value', snap => { 
                 const rawData = snap.val() || {}; 
                 allPlayersData = {};
@@ -3009,19 +3059,22 @@
             const i=(c==="Solo")?"":(globalTeams[c]?globalTeams[c].icon:""); 
             const pName = allPlayersData[u] ? allPlayersData[u].name : "Un joueur";
             
-            // 🚀 BUG CAPITAINE : On vérifie si l'équipe de destination est vide
-            let teamHasMembers = false;
+            // 🚀 PATCH V1.269 : VERIFICATION DU TRÔNE DE L'ÉQUIPE D'ACCUEIL
+            let teamHasCaptain = false;
             if (c !== "Solo") {
                 for (let pId in allPlayersData) {
                     if (allPlayersData[pId].teamName === c && !allPlayersData[pId].banned && pId !== u) {
-                        teamHasMembers = true;
-                        break;
+                        if (allPlayersData[pId].isCaptain) teamHasCaptain = true;
                     }
                 }
             }
-            const isCaptainNow = (c !== "Solo" && !teamHasMembers);
+            
+            const isCaptainNow = (c !== "Solo" && !teamHasCaptain);
 
-            logEvent('SYSTEM', `MJ a déplacé ${pName} vers : ${c}`);
+            logEvent('SYSTEM', `MJ a déplacé ${pName} vers : ${c} ${isCaptainNow ? '(Couronné)' : ''}`);
+            
+            // On modifie juste le joueur. Le moteur de la console repérera le trône vide 
+            // au prochain cycle et s'occupera lui-même de la succession de l'ancienne équipe.
             roomRef.child('players/'+u).update({
                 teamName:c, 
                 teamIcon:i, 
@@ -3031,11 +3084,28 @@
         }
 
         function handleError() { 
-            if(currentPlayer&&currentPlayer.name) { 
-				isBuzzerLocked = false; // Libère le verrou pour permettre aux autres de buzzer
-                logEvent('PUNISH', `Erreur : ${currentPlayer.name} bloqué(e)`); // 🟢 CAPTEUR
-                roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); 
-                statusUpdate('ready'); 
+            if(currentPlayer && currentPlayer.name) { 
+                isBuzzerLocked = false; 
+                
+                // 🚀 PATCH V1.269 : LECTURE DE LA RÈGLE DE BLOCAGE
+                roomRef.child('settings/teamLock').once('value').then(snap => {
+                    const isTeamLock = (snap.val() === 'team') && currentPlayer.teamName && currentPlayer.teamName !== "Solo";
+                    
+                    if (isTeamLock) {
+                        logEvent('PUNISH', `Erreur : L'équipe entière ${currentPlayer.teamName} est bloquée`);
+                        let updates = {};
+                        Object.values(allPlayersData).forEach(p => {
+                            if (p.teamName === currentPlayer.teamName && p.active !== false && !p.banned) {
+                                updates[p.name] = true; // Ajoute tous les membres actifs de l'équipe à la liste rouge
+                            }
+                        });
+                        roomRef.child('blockedPlayers').update(updates);
+                    } else {
+                        logEvent('PUNISH', `Erreur : ${currentPlayer.name} bloqué(e) en individuel`); 
+                        roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); 
+                    }
+                    statusUpdate('ready'); 
+                });
             } 
         }
 
@@ -3191,9 +3261,15 @@
 		function openRoomSettings() {
             if(!roomRef) return;
             roomRef.child('settings').once('value').then(snap => {
-                const settings = snap.val() || { loginMode: 'full', gameMode: 'mixed' };
+                const settings = snap.val() || { loginMode: 'full', gameMode: 'mixed', teamLock: 'individual' };
                 document.getElementById('edit-room-login').value = settings.loginMode || 'full';
                 document.getElementById('edit-room-mode').value = settings.gameMode || 'mixed';
+                
+                const lockSelect = document.getElementById('edit-room-team-lock');
+                if (lockSelect) lockSelect.value = settings.teamLock || 'individual';
+                
+                if (typeof toggleTeamLockUI === 'function') toggleTeamLockUI('edit');
+                
                 document.getElementById('modal-room-settings').style.display = 'flex';
             });
         }
@@ -3202,15 +3278,38 @@
             if(!roomRef) return;
             const newSettings = {
                 loginMode: document.getElementById('edit-room-login').value,
-                gameMode: document.getElementById('edit-room-mode').value
+                gameMode: document.getElementById('edit-room-mode').value,
+                teamLock: document.getElementById('edit-room-team-lock') ? document.getElementById('edit-room-team-lock').value : 'individual'
             };
-            logEvent('SYSTEM', `⚙️ MJ a modifié les règles du jeu (Connexion: ${newSettings.loginMode}, Mode: ${newSettings.gameMode})`); // 🟢 CAPTEUR
+            logEvent('SYSTEM', `⚙️ MJ a modifié les règles du jeu`); // 🟢 CAPTEUR
             roomRef.child('settings').update(newSettings).then(() => {
                 document.getElementById('modal-room-settings').style.display = 'none';
                 alert("✅ Règles du jeu mises à jour !");
             });
         }
 		
+    // 🚀 PATCH V1.269 : DÉCLENCHEUR MODE JOUR
+        function toggleDayMode() {
+            if(!roomRef) return;
+            roomRef.child('settings/dayMode').once('value').then(snap => {
+                const isDay = snap.val() === true;
+                roomRef.child('settings/dayMode').set(!isDay);
+                logEvent('SYSTEM', `MJ a activé le Mode ${!isDay ? 'JOUR ☀️' : 'NUIT 🌙'}`);
+            });
+        }
+
+        // 🚀 PATCH V1.269 : MASQUAGE DYNAMIQUE DU BLOCAGE D'ÉQUIPE (MODE SOLO)
+        function toggleTeamLockUI(prefix) {
+            const modeSelect = document.getElementById(prefix + '-room-mode');
+            const container = document.getElementById(prefix + '-team-lock-container');
+            if (modeSelect && container) {
+                if (modeSelect.value === 'solo_only') {
+                    container.style.display = 'none'; // On cache l'option si on est en 100% Solo
+                } else {
+                    container.style.display = 'block'; // On l'affiche pour Mixte et Équipe
+                }
+            }
+        }
     </script>
 </body>
 </html>
