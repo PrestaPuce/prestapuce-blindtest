@@ -375,14 +375,20 @@
         function warnPlayer(uid) {
             if(confirm("Envoyer un avertissement (Carton Jaune) à ce joueur ?")) {
                 roomRef.child('players/' + uid).update({ hasBeenWarned: true, pendingWarning: true });
-                handleError(); 
+                if (currentPlayer && currentPlayer.id === uid) {
+                    if (currentGameState === 'taken') handleError(); // Bloque et rouvre si question en cours
+                    else roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); // Bloque juste en silence si on est en attente
+                }
             }
         }
 
         function kickPlayer(uid, pseudo) {
             if(confirm("Expulser " + pseudo + " (Carton Rouge) ?")) {
                 roomRef.child('players/' + uid).update({ banned: true, active: false });
-                handleError(); 
+                if (currentPlayer && currentPlayer.id === uid) {
+                    roomRef.child('buzzers').remove(); // 🚀 Le joueur disparaît de la télécommande
+                    if (currentGameState === 'taken') handleError(); 
+                }
             }
         }
 

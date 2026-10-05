@@ -3065,18 +3065,23 @@
             if(confirm("Bannir "+n+" (Rouge) ?")) {
                 logEvent('PUNISH', `MJ a banni le joueur : ${n}`); // 🟢 CAPTEUR
                 roomRef.child('players/'+u).update({banned:true, active:false}); 
-                if (currentBuzzerId === u) { isBuzzerLocked = false; statusUpdate('ready'); }
+                if (currentBuzzerId === u) { 
+                    roomRef.child('buzzers').remove(); // 🚀 Disparaît immédiatement de la télécommande et de l'écran MJ
+                    if (currentGameState === 'taken') { isBuzzerLocked = false; statusUpdate('ready'); } // Rouvre seulement si question en cours
+                }
             }
         }
 
         function unkickPlayer(u) { 
             logEvent('SYSTEM', `MJ a levé le bannissement d'un joueur`); // 🟢 CAPTEUR
-            roomRef.child('players/'+u).update({banned:false, active:true, reconnectedAt:Date.now()}); 
+            // 🚀 PATCH V1.273 : Nettoyage de l'ordre d'expulsion (kickedByMj: null)
+            roomRef.child('players/'+u).update({banned:false, active:true, reconnectedAt:Date.now(), kickedByMj: null}); 
         }
 
         function restoreInactivePlayer(u) { 
             logEvent('SYSTEM', `MJ a forcé la réactivation d'un joueur inactif`); // 🟢 CAPTEUR
-            roomRef.child('players/'+u).update({active:true, reconnectedAt:Date.now()}); 
+            // 🚀 PATCH V1.273 : Nettoyage de l'ordre d'expulsion (kickedByMj: null)
+            roomRef.child('players/'+u).update({active:true, reconnectedAt:Date.now(), kickedByMj: null}); 
         }
         
 		function togglePlayerTeam(u, c) { 
@@ -3235,7 +3240,10 @@
             if(confirm(`Mettre ${n} en pause ?`)) {
                 logEvent('SYSTEM', `MJ a mis le joueur ${n} en PAUSE`); // 🟢 CAPTEUR
                 roomRef.child('players/'+u).update({active: false, kickedByMj: true}); 
-                if (currentBuzzerId === u) { isBuzzerLocked = false; statusUpdate('ready'); }
+                if (currentBuzzerId === u) { 
+                    roomRef.child('buzzers').remove(); // 🚀 Disparaît immédiatement de la télécommande
+                    if (currentGameState === 'taken') { isBuzzerLocked = false; statusUpdate('ready'); }
+                }
             }
         }
 		
@@ -3243,7 +3251,10 @@
             if(confirm(`⚠️ Supprimer définitivement le joueur ${n} ?`)) {
                 logEvent('SYSTEM', `MJ a supprimé définitivement le joueur : ${n}`); // 🟢 CAPTEUR
                 roomRef.child('players/'+u).remove(); 
-                if (currentBuzzerId === u) { isBuzzerLocked = false; statusUpdate('ready'); }
+                if (currentBuzzerId === u) { 
+                    roomRef.child('buzzers').remove(); // 🚀 Disparaît immédiatement de la télécommande
+                    if (currentGameState === 'taken') { isBuzzerLocked = false; statusUpdate('ready'); }
+                }
             }
         }
         
