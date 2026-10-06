@@ -1106,22 +1106,31 @@
         function releaseWakeLock() {
             if (wakeLock !== null) { wakeLock.release().catch(()=>{}); wakeLock = null; }
         }
-        /* --- PATCH V1.177 : ANTI-AFK (PAGE VISIBILITY API) --- */
+        /* --- PATCH V1.306 : ANTI-AFK SÉCURISÉ (Le "Micro-ondes" Anti-S24) --- */
+        let reconnectTimer = null;
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && document.getElementById('step-game').classList.contains('active')) requestWakeLock();
             
             if (roomRef && myUserID && gameState !== 'endGame' && gameState !== 'closing') {
                 if (document.hidden || document.visibilityState === 'hidden') {
+                    // On annule tout retour en cours si on repart en arrière-plan
+                    if (reconnectTimer) clearTimeout(reconnectTimer);
+                    
                     logEvent('NETWORK', `📉 ${player.pseudo||'Un joueur'} a mis l'application en arrière-plan`); // 🟢 CAPTEUR
                     roomRef.child('players/' + myUserID).update({ active: false });
                 } else {
-                    logEvent('NETWORK', `📈 ${player.pseudo||'Un joueur'} est revenu sur l'application`); // 🟢 CAPTEUR
-                    roomRef.child('players/' + myUserID).once('value', snap => {
-                        const p = snap.val();
-                        if (p && !p.banned && p.active === false && !p.recoveryRequest) {
-                            roomRef.child('players/' + myUserID).update({ active: true, reconnectedAt: Date.now() });
-                        }
-                    });
+                    // On place le retour dans le minuteur "micro-ondes" de 2 secondes
+                    if (reconnectTimer) clearTimeout(reconnectTimer);
+                    
+                    reconnectTimer = setTimeout(() => {
+                        logEvent('NETWORK', `📈 ${player.pseudo||'Un joueur'} est réellement revenu sur l'application (Dégel)`); // 🟢 CAPTEUR
+                        roomRef.child('players/' + myUserID).once('value', snap => {
+                            const p = snap.val();
+                            if (p && !p.banned && p.active === false && !p.recoveryRequest) {
+                                roomRef.child('players/' + myUserID).update({ active: true, reconnectedAt: Date.now() });
+                            }
+                        });
+                    }, 2000); // Le code attend 2 secondes avant de s'exécuter
                 }
             }
         });
