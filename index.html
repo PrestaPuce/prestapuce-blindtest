@@ -398,8 +398,8 @@
         <div id="step-mode" class="step-screen">
             <div class="screen-header"><h2>Ta Stratégie ?</h2></div>
             <div class="screen-content">
-                <div class="choice-card" onclick="selectMode('Solo')"><div class="choice-icon">👤</div><div class="choice-content"><b>Loup Solitaire</b><span>Je joue pour ma gloire.</span></div></div>
-                <div class="choice-card" onclick="goToTeamAction()"><div class="choice-icon">🛡️</div><div class="choice-content"><b>En Équipe</b><span>On gagne ensemble.</span></div></div>
+                <div id="card-mode-solo" class="choice-card" onclick="selectMode('Solo')"><div class="choice-icon">👤</div><div class="choice-content"><b>Loup Solitaire</b><span>Je joue pour ma gloire.</span></div></div>
+                <div id="card-mode-team" class="choice-card" onclick="goToTeamAction()"><div class="choice-icon">🛡️</div><div class="choice-content"><b>En Équipe</b><span>On gagne ensemble.</span></div></div>
             </div>
         </div>
 
@@ -1409,10 +1409,36 @@
                 if(snap.exists()) {
                     roomRef = db.ref('rooms/' + roomID);
                     
-                    // 🚀 Écoute des règles du jeu en direct
+                   // 🚀 Écoute des règles du jeu en direct
                     roomRef.child('settings').on('value', snap => {
                         if(snap.exists()) roomSettings = snap.val();
                         else roomSettings = { loginMode: 'full', gameMode: 'mixed', teamLock: 'individual', dayMode: false };
+                        
+                        // 🚀 NOUVEAU : VERROUILLAGE VISUEL DES MODES
+                        const cardSolo = document.getElementById('card-mode-solo');
+                        const cardTeam = document.getElementById('card-mode-team');
+                        if (cardSolo && cardTeam) {
+                            if (roomSettings.gameMode === 'team_only') {
+                                cardSolo.style.opacity = '0.4';
+                                cardSolo.style.pointerEvents = 'none';
+                                cardSolo.querySelector('span').innerText = 'Mode désactivé par l\'animateur';
+                            } else {
+                                cardSolo.style.opacity = '1';
+                                cardSolo.style.pointerEvents = 'auto';
+                                cardSolo.querySelector('span').innerText = 'Je joue pour ma gloire.';
+                            }
+                            if (roomSettings.gameMode === 'solo_only') {
+                                cardTeam.style.opacity = '0.4';
+                                cardTeam.style.pointerEvents = 'none';
+                                cardTeam.querySelector('span').innerText = 'Mode désactivé par l\'animateur';
+                            } else {
+                                cardTeam.style.opacity = '1';
+                                cardTeam.style.pointerEvents = 'auto';
+                                cardTeam.querySelector('span').innerText = 'On gagne ensemble.';
+                            }
+                        }
+                        if (typeof updateGameHeader === 'function') updateGameHeader();
+                        if (document.getElementById('overlay-settings').style.display === 'flex') openSettings();
                         
                         // 🚀 PATCH V1.305 : RÉCEPTEUR MODE JOUR (Inversion des couleurs)
                         if (roomSettings.dayMode === true) {
@@ -2290,9 +2316,16 @@
                 }
             } else {
                 if (btnMode) {
-                    btnMode.disabled = false;
-                    btnMode.style.opacity = '1';
-                    btnMode.innerText = "🛡️ Changer Mode (Solo/Team)";
+                    // 🚀 NOUVEAU : Grisage complet du bouton si 100% Solo
+                    if (typeof roomSettings !== 'undefined' && roomSettings.gameMode === 'solo_only') {
+                        btnMode.disabled = true;
+                        btnMode.style.opacity = '0.4';
+                        btnMode.innerText = "🛡️ Mode 100% Solo imposé";
+                    } else {
+                        btnMode.disabled = false;
+                        btnMode.style.opacity = '1';
+                        btnMode.innerText = "🛡️ Changer Mode (Solo/Team)";
+                    }
                 }
                 if (btnManageTeam) {
                     btnManageTeam.disabled = false;
@@ -2633,15 +2666,23 @@
             const miniAv = document.getElementById('game-avatar');
             if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`; else miniAv.innerText = player.avatar;
             
-            /* PATCH V1.180 : Couronne cliquable */
-            document.getElementById('game-pseudo').innerHTML = player.pseudo + (isCaptain && player.team !== "Solo" ? " <span style='font-size:1.2rem; cursor:pointer; filter:drop-shadow(0 0 4px gold);' onclick='openTeamManagement()' title='Gérer mon équipe'>👑</span>" : "");
+            /* PATCH V1.180 : Couronne cliquable & 🚀 NOUVEAU : Carton Jaune */
+            let crownHtml = (isCaptain && player.team !== "Solo") ? " <span style='font-size:1.2rem; cursor:pointer; filter:drop-shadow(0 0 4px gold);' onclick='openTeamManagement()' title='Gérer mon équipe'>👑</span>" : "";
+            let warnHtml = player.hasBeenWarned ? " <span style='font-size:1rem; margin-left:5px; filter:drop-shadow(0 0 2px red);' title='Avertissement reçu'>🟨</span>" : "";
+            
+            document.getElementById('game-pseudo').innerHTML = player.pseudo + crownHtml + warnHtml;
             
             const teamEl = document.getElementById('game-team'); const badgeEl = document.getElementById('team-badge'); const buzzerBg = document.getElementById('buzzer-bg');
             let bgImg = player.avatar;
             if (player.team !== "Solo") { 
                 teamEl.innerText = player.team; teamEl.style.display = "block"; 
                 if (player.teamIcon) { badgeEl.src = player.teamIcon; badgeEl.style.display = "block"; if(player.teamIcon.length > 20) bgImg = player.teamIcon; } 
-            } else { teamEl.innerText = "Solo"; teamEl.style.display = "block"; badgeEl.style.display = "none"; }
+            } else { 
+                teamEl.innerText = "Solo"; 
+                // 🚀 NOUVEAU : On masque "Solo" si on est en mode "solo_only" imposé
+                teamEl.style.display = (typeof roomSettings !== 'undefined' && roomSettings.gameMode === 'solo_only') ? "none" : "block"; 
+                badgeEl.style.display = "none"; 
+            }
             if(bgImg.length > 20) { buzzerBg.src = bgImg; buzzerBg.style.display = "block"; } else { buzzerBg.style.display = "none"; }
             
             const btnManage = document.getElementById('btn-manage-team');
@@ -2969,6 +3010,10 @@
                 let profileChanged = false;
                 if (d.name && d.name !== player.pseudo) { player.pseudo = d.name; profileChanged = true; }
                 if (d.avatar && d.avatar !== player.avatar) { player.avatar = d.avatar; profileChanged = true; }
+                
+                // 🚀 NOUVEAU : Mémorisation du carton jaune côté joueur
+                player.hasBeenWarned = d.hasBeenWarned === true;
+                
                 if (profileChanged) { localStorage.setItem('buzz_lastProfile', JSON.stringify({pseudo: player.pseudo, avatar: player.avatar})); localStorage.setItem('presta_player_session', JSON.stringify(player)); }
 
                 /* --- PATCH V1.178 : RADAR DE CAPITANAT (Final) --- */
