@@ -832,6 +832,9 @@
                 }
                 
                 let crownIcon = p.isCaptain ? '<span style="margin-left:5px; filter:drop-shadow(0 0 5px gold); font-size: 1.1em;">👑</span>' : '';
+                
+                // 🚀 NOUVEAU : CARTON JAUNE SUR L'ÉCRAN GÉANT
+                let warnIcon = p.hasBeenWarned ? '<span style="margin-right:10px; font-size: 1.5rem; filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.8));">🟨</span>' : '';
 
                 // 🚀 PATCH V1.271 : Masquage du tag Solo si le mode est 100% Solo
                 let teamTagHtml = (window.roomSettings && window.roomSettings.gameMode === 'solo_only') 
@@ -842,6 +845,7 @@
                     <div class="card ${buzzedClass} ${inactiveClass}" data-id="${idP}">
                         <div class="avatar">${renderAvatar(p.avatar)}</div>
                         <div class="info"><b>${p.name}${crownIcon}</b> ${teamTagHtml}</div>
+                        ${warnIcon}
                         <div class="pts">${displayPtsP}</div>
                     </div>`;
             });

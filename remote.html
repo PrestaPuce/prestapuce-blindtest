@@ -275,9 +275,12 @@
                 `;
             }
 
+			// 🚀 NOUVEAU : Affichage du Carton Jaune
+            let warnIcon = pData.hasBeenWarned ? '<span style="margin-left:8px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.8));" title="Joueur averti">🟨</span>' : '';
+
             zone.innerHTML = `
                 <div class="avatar">${avatarDisplay}</div>
-                <div class="p-name">${b.pseudo}</div>
+                <div class="p-name" style="display:flex; align-items:center; justify-content:center;">${b.pseudo}${warnIcon}</div>
                 <div class="quick-actions">
                     <button class="mini-btn" style="background:var(--blue)" onclick="adj('${b.id}', -1)">-1</button>
                     <button class="mini-btn" style="background:var(--mj-color)" onclick="adj('${b.id}', 1)">+1</button>
