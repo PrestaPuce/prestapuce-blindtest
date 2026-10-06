@@ -606,7 +606,8 @@
                 rankingMap.set("team-" + tName, { 
                     dataId: "team-" + tName, name: tName, pts: score, icon: team.icon, 
                     isTeam: true, count: 0, historicalCount: 0, tInactive: 0, tBanned: 0, 
-                    isActive: team.active !== false, captainName: "" 
+                    isActive: team.active !== false, captainName: "",
+                    hasBeenWarned: team.hasBeenWarned // 🚀 PATCH : Récupération du carton jaune
                 });
             });
 
@@ -626,7 +627,8 @@
                         rankingMap.set("solo-" + p.name, { 
                             dataId: "solo-" + p.name, name: p.name, pts: (p.pts || 0), 
                             avatar: p.avatar, isTeam: false, isActive: p.active !== false, 
-                            count: 1, historicalCount: 1
+                            count: 1, historicalCount: 1,
+                            hasBeenWarned: p.hasBeenWarned // 🚀 PATCH : Récupération du carton jaune
                         }); 
                     }
                 }
@@ -914,12 +916,16 @@
                     `;
                 }
 
+                // 🚀 NOUVEAU : CARTON JAUNE DANS LE CLASSEMENT GÉNÉRAL (Juste avant le score)
+                let warnIconG = item.hasBeenWarned ? '<span style="margin-right:10px; font-size: 1.5rem; filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.8));">🟨</span>' : '';
+
                 gListHTML += `
                     <div class="card${inactiveClass}${rankClass}" data-id="${idG}">
                         <div class="crest">${iconHtml}</div>
                         <div class="info" style="align-items: center; width: 100%;">
                             ${infoHtml}
                         </div>
+                        ${warnIconG}
                         <div class="pts">${displayPtsG}</div>
                     </div>`;
             });

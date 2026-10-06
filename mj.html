@@ -248,7 +248,7 @@
         .ghost-crown { margin: 0 !important; } 
         
         /* Grilles ajustées. On donne un peu plus de place à l'ÉTAT et CPT pour éviter les chevauchements */
-        .grid-player { display: grid; grid-template-columns: 50px 1fr 90px 110px; align-items: center; gap: 5px; }
+        .grid-player { display: grid; grid-template-columns: 45px 1fr 90px 30px 110px; align-items: center; gap: 5px; }
         .grid-team { display: grid; grid-template-columns: 20px 50px 1fr 60px 110px; align-items: center; gap: 5px; }
         /* --- PATCH V1.214 : GRILLE 5 COLONNES ACCORDÉON --- */
         .grid-member { display: grid; grid-template-columns: 40px 35px 1fr 90px 30px; align-items: center; gap: 5px; }        
@@ -2440,6 +2440,7 @@
                     <div class="sort-col grid-cell-center ${playerSort.col==='status'?'sort-active':''}" onclick="setSort('player','status')" title="Trier par État">${getSortArrow('player','status')} ÉTAT</div>
                     <div class="sort-col grid-cell-left ${playerSort.col==='name'?'sort-active':''}" onclick="setSort('player','name')" title="Trier par Nom">${getSortArrow('player','name')} NOM</div>
                     <div class="sort-col grid-cell-left ${playerSort.col==='team'?'sort-active':''}" onclick="setSort('player','team')" title="Trier par Mode/Équipe">${getSortArrow('player','team')} MODE</div>
+                    <div class="sort-col grid-cell-center ${playerSort.col==='warn'?'sort-active':''}" onclick="setSort('player','warn')" title="Trier par Avertissement">${getSortArrow('player','warn')} 🟨</div>
                     <div class="sort-col grid-cell-left ${playerSort.col==='pts'?'sort-active':''}" onclick="setSort('player','pts')" title="Trier par Score">${getSortArrow('player','pts')} SCORE</div>
                 </div>`;
             
@@ -2504,6 +2505,7 @@
                 else if (playerSort.col === 'pts') { valA = a.pts || 0; valB = b.pts || 0; }
                 else if (playerSort.col === 'status') { valA = a.status; valB = b.status; }
                 else if (playerSort.col === 'team') { valA = (a.teamName||"Solo").toLowerCase(); valB = (b.teamName||"Solo").toLowerCase(); }
+                else if (playerSort.col === 'warn') { valA = a.hasBeenWarned ? 1 : 0; valB = b.hasBeenWarned ? 1 : 0; }
                 else {
                     let iA=buzzHistory.indexOf(nameA), iB=buzzHistory.indexOf(nameB);
                     if(iA!==-1 || iB!==-1) return iB-iA;
@@ -2537,8 +2539,8 @@
                 let actionsMenuHtml = `<button class="dropdown-btn" onclick="openPlayerMenu(event, '${d.uid}')">⋮</button>`;
                 /* --- PATCH 3.25 : COURONNE LOBBY JOUEURS --- */let crownIcon = d.isCaptain ? '<span style="margin-left:5px; filter:drop-shadow(0 0 2px gold);">👑</span>' : '';
                 
-                // 🚀 NOUVEAU : CARTON JAUNE (Console MJ)
-                let warnIcon = d.hasBeenWarned ? '<span style="margin-left:5px; font-size:0.9rem; filter:drop-shadow(0 0 2px red);" title="Joueur Averti">🟨</span>' : '';
+                // 🚀 NOUVEAU : CARTON JAUNE (Séparé du pseudo, placé dans sa colonne dédiée)
+                let warnIcon = d.hasBeenWarned ? '<span style="font-size:0.9rem; filter:drop-shadow(0 0 2px red);" title="Joueur Averti">🟨</span>' : '';
                 
                 // Si l'état est pris (taken) ET que c'est le joueur en cours, on met la cloche
                 // Sinon on garde le point vert standard
@@ -2548,8 +2550,9 @@
                     hsB = true;
                     hB += `<div class="score-row grid-player" style="border:1px solid var(--danger);">
                                 <div class="grid-cell-center" style="font-size:0.75rem;">${stateDot}</div>
-                                <div class="grid-cell-left" style="color:var(--danger); gap:6px; width:100%; display:flex;">${aH}<b style="overflow:hidden;text-overflow:ellipsis;">${safeNameDisplay}${crownIcon}${warnIcon}</b>${quickActionsHtml}</div>
+                                <div class="grid-cell-left" style="color:var(--danger); gap:6px; width:100%; display:flex;">${aH}<b style="overflow:hidden;text-overflow:ellipsis;">${safeNameDisplay}${crownIcon}</b>${quickActionsHtml}</div>
                                 <div></div>
+                                <div class="grid-cell-center">${warnIcon}</div>
                                 <div class="player-controls">${actionsMenuHtml}</div>
                            </div>`;
                 } else if (d.status === 1) {
@@ -2560,8 +2563,9 @@
                     let opac = d.recoveryRequest ? "1" : "0.6";
                     hI += `<div class="${rClass}" style="opacity:${opac};">
                                 <div class="grid-cell-center" style="font-size:0.75rem;">${stateDot}</div>
-                                <div class="grid-cell-left" style="gap:6px; width:100%; display:flex;">${aH}<b style="overflow:hidden;text-overflow:ellipsis;">${safeNameDisplay}${crownIcon}${warnIcon}</b>${quickActionsHtml}</div>
+                                <div class="grid-cell-left" style="gap:6px; width:100%; display:flex;">${aH}<b style="overflow:hidden;text-overflow:ellipsis;">${safeNameDisplay}${crownIcon}</b>${quickActionsHtml}</div>
                                 <div class="grid-cell-left">${txt}</div>
+                                <div class="grid-cell-center">${warnIcon}</div>
                                 <div class="player-controls">${actionsMenuHtml}</div>
                            </div>`;
                 } else {
@@ -2571,8 +2575,9 @@
                     hA += `
                     <div class="${rC}">
                         <div class="grid-cell-center" style="font-size:0.75rem;">${stateDot}</div>
-                        <div class="grid-cell-left" style="gap:6px; width:100%; display:flex;">${aH}<b style="overflow:hidden;text-overflow:ellipsis;">${safeNameDisplay}${crownIcon}${warnIcon}</b>${quickActionsHtml}</div>
+                        <div class="grid-cell-left" style="gap:6px; width:100%; display:flex;">${aH}<b style="overflow:hidden;text-overflow:ellipsis;">${safeNameDisplay}${crownIcon}</b>${quickActionsHtml}</div>
                         <div class="grid-cell-left"><select class="mini-select" onchange="togglePlayerTeam('${d.uid}', this.value)">${tO}</select></div>
+                        <div class="grid-cell-center">${warnIcon}</div>
                         <div class="player-controls">
                             <div class="team-score-ctrl">
                                 <button class="btn-tiny" onclick="adj('${d.uid}',-1)">-</button>
