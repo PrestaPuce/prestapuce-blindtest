@@ -11,7 +11,7 @@ const APP_CONFIG = {
 	// 🚀 CENTRALISATION DES VERSIONS
     VERSIONS: {
         CLIENT: "1.311",      // Pour index.html
-        APP: "1.279",         // Pour mj.html
+        APP: "1.280",         // Pour mj.html
         REMOTE: "1.163",      // Pour remote.html
         SCORES: "1.186",      // Pour scores.html
         GUIDE: "1.024"        // Pour guide.html

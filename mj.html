@@ -149,6 +149,7 @@
         .team-bonus-val { font-size: 0.9rem; font-weight: bold; margin: 0 8px; color: var(--accent); min-width: 20px; text-align: center; line-height: 24px; }
         
         .mini-select { width: auto; padding: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 0; max-width: 100px; }
+        .mini-select:disabled { opacity: 0.4; cursor: not-allowed; background: rgba(0,0,0,0.2); border-color: transparent; }
         
         /* Menu Contextuel Global (Téléporté) */
         #global-dropdown { display: none; position: fixed; z-index: 99999; min-width: 220px; background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); flex-direction: column; overflow: hidden; padding: 5px 0; }
@@ -2260,7 +2261,13 @@
                         badgeLock.innerText = settings.teamLock === 'team' ? "🛑 Bloc. ÉQUIPE" : "🛑 Bloc. INDIV.";
                     }
                 }
+                
+                // 🚀 CORRECTION : On force le rafraîchissement des listes pour appliquer le grisage immédiatement
+                renderLobby();
+                renderTeamLobby();
             });
+
+            // 🚀 PATCH V1.270 : ÉCOUTEUR MODE JOUR (Console MJ globale)
 
             // 🚀 PATCH V1.270 : ÉCOUTEUR MODE JOUR (Console MJ globale)
             roomRef.child('settings/dayMode').on('value', snap => {
@@ -2553,8 +2560,8 @@
                 let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; 
                 Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
                 
-                // 🚀 DÉSACTIVATION du menu si on est en 100% Solo
-                let selectDisabled = (typeof window.roomSettings !== 'undefined' && window.roomSettings.gameMode === 'solo_only') ? "disabled" : "";
+                // 🚀 Désactivation du selecteur si mode 100% Solo imposé
+                let selectDisabled = (typeof window.roomSettings !== 'undefined' && window.roomSettings.gameMode === 'solo_only') ? 'disabled="disabled"' : '';
                 
                 const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;">` : `<span style="font-size:1.1rem;flex-shrink:0;width:20px;text-align:center;">${d.avatar||'👤'}</span>`;
 				
