@@ -2,309 +2,320 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Guide d'utilisation Pro - Presta'Puce</title>
     <script src="config.js"></script>
     <link rel="icon" id="page-favicon" type="image/png">
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             document.title = `Guide d'utilisation Pro - Presta'Puce (v${APP_CONFIG.VERSIONS.GUIDE})`;
-            
             const favicon = document.getElementById('page-favicon');
             if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
-            
             const versionSpan = document.getElementById('display-guide-version');
             if(versionSpan) versionSpan.innerText = APP_CONFIG.VERSIONS.GUIDE;
         });
+
+        // 🚀 MOTEUR DE RECHERCHE DYNAMIQUE INTÉGRÉ
+        function searchGuide() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const sections = document.querySelectorAll('.guide-section');
+            const toc = document.getElementById('toc-grid');
+            const noRes = document.getElementById('no-results');
+            
+            if (query.length < 2) {
+                // Si la recherche est vide, on remet l'affichage par défaut
+                toc.style.display = 'grid';
+                sections.forEach(s => s.style.display = 'block');
+                noRes.style.display = 'none';
+                return;
+            }
+            
+            // Sinon on masque le menu et on filtre les sections
+            toc.style.display = 'none';
+            let found = 0;
+            
+            sections.forEach(sec => {
+                const text = sec.innerText.toLowerCase();
+                const keywords = (sec.getAttribute('data-keywords') || "").toLowerCase();
+                
+                // Si le texte visible OU les mots-clés cachés correspondent
+                if (text.includes(query) || keywords.includes(query)) {
+                    sec.style.display = 'block';
+                    found++;
+                } else {
+                    sec.style.display = 'none';
+                }
+            });
+            
+            noRes.style.display = found === 0 ? 'block' : 'none';
+        }
+
+        // Fonction pour scroller doucement vers une section
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     </script>
     <style>
         :root { 
-            --bg-color: #1a1a1a; 
-            --card-bg: #2c3e50; 
+            --bg: #1a1a1a; 
+            --card: #2c3e50; 
+            --card-light: #34495e;
             --accent: #f1c40f; 
             --text: #ecf0f1; 
             --mj: #2ecc71; 
             --blue: #3498db; 
             --danger: #e74c3c;
-            --gold: #f39c12;
-            --sidebar-width: 280px;
         }
         
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); color: var(--text); margin: 0; padding: 0; display: flex; line-height: 1.6; scroll-behavior: smooth; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.5; overflow-x: hidden; }
         
-        /* SIDEBAR NAVIGATION */
-        nav { width: var(--sidebar-width); background: #111; height: 100vh; position: fixed; top: 0; left: 0; overflow-y: auto; border-right: 2px solid var(--card-bg); display: flex; flex-direction: column; }
-        .nav-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); }
-        .nav-header h1 { color: var(--accent); margin: 0; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
-        .nav-header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #7f8c8d; font-style: italic; }
-        .nav-links { padding: 20px 0; display: flex; flex-direction: column; }
-        .nav-links a { color: #bdc3c7; text-decoration: none; padding: 12px 25px; display: block; border-left: 4px solid transparent; transition: 0.2s; font-weight: 500; font-size: 0.95rem; }
-        .nav-links a:hover { background: rgba(255,255,255,0.05); color: white; border-left-color: var(--blue); }
-        .nav-links a.active { background: rgba(52, 152, 219, 0.1); color: var(--accent); border-left-color: var(--accent); font-weight: bold; }
-        
-        /* MAIN CONTENT */
-        main { margin-left: var(--sidebar-width); padding: 40px 60px; max-width: 1000px; width: 100%; box-sizing: border-box; }
-        
-        section { margin-bottom: 60px; scroll-margin-top: 40px; }
-        h2 { color: var(--accent); font-size: 2.2rem; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
-        h3 { color: var(--mj); font-size: 1.4rem; margin-top: 30px; margin-bottom: 15px; }
-        h4 { color: white; font-size: 1.1rem; margin-bottom: 10px; }
-        p { color: #bdc3c7; font-size: 1.05rem; }
-        ul { color: #bdc3c7; font-size: 1.05rem; }
-        li { margin-bottom: 10px; }
-        strong { color: white; }
+        /* Custom Scrollbar pour l'iframe */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
 
-        /* HIGHLIGHT BOXES */
-        .info-box { background: rgba(52, 152, 219, 0.1); border-left: 4px solid var(--blue); padding: 20px; border-radius: 0 8px 8px 0; margin: 20px 0; }
-        .info-box h4 { color: var(--blue); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        /* EN-TÊTE STICKY & RECHERCHE */
+        .sticky-header { position: sticky; top: 0; background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); padding: 20px; z-index: 100; border-bottom: 2px solid rgba(241, 196, 15, 0.3); display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .header-titles { text-align: center; }
+        .header-titles h1 { margin: 0; color: var(--accent); font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .header-titles p { margin: 0; color: #bdc3c7; font-size: 0.85rem; font-style: italic; }
         
-        .alert-box { background: rgba(231, 76, 60, 0.1); border-left: 4px solid var(--danger); padding: 20px; border-radius: 0 8px 8px 0; margin: 20px 0; }
-        .alert-box h4 { color: var(--danger); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        .search-container { width: 100%; max-width: 600px; position: relative; }
+        .search-container input { width: 100%; padding: 12px 20px 12px 40px; border-radius: 30px; border: 2px solid var(--card-light); background: rgba(0,0,0,0.5); color: white; font-size: 1rem; box-sizing: border-box; outline: none; transition: 0.3s; }
+        .search-container input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(241, 196, 15, 0.2); background: rgba(0,0,0,0.8); }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; pointer-events: none; }
 
-        .pro-box { background: rgba(241, 196, 15, 0.1); border: 1px solid var(--accent); padding: 25px; border-radius: 12px; margin: 30px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .pro-box h3 { color: var(--accent); margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.6rem; }
+        /* MENU DES CHAPITRES (TOC) */
+        .toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; padding: 20px; max-width: 1000px; margin: 0 auto; }
+        .toc-card { background: var(--card); border: 1px solid var(--card-light); border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .toc-card:hover { transform: translateY(-3px); border-color: var(--accent); background: var(--card-light); }
+        .toc-icon { font-size: 2rem; flex-shrink: 0; }
+        .toc-title { font-weight: bold; font-size: 0.95rem; color: white; line-height: 1.2; }
+
+        /* CONTENU PRINCIPAL */
+        main { padding: 10px 20px 40px 20px; max-width: 1000px; margin: 0 auto; }
+        .guide-section { margin-bottom: 40px; padding-top: 20px; }
+        .section-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .section-header h2 { margin: 0; color: var(--accent); font-size: 1.5rem; }
         
-        /* GRID DE FONCTIONNALITÉS */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
-        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; border-top: 4px solid transparent; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .card:hover { transform: translateY(-5px); }
-        .card.b-green { border-top-color: var(--mj); }
-        .card.b-red { border-top-color: var(--danger); }
-        .card.b-gold { border-top-color: var(--gold); }
-        .card.b-purple { border-top-color: var(--purple); }
-        .card-icon { font-size: 2.5rem; margin-bottom: 15px; display: block; }
-        .card h4 { color: white; margin: 0 0 10px 0; font-size: 1.2rem; }
-        .card p { margin: 0; font-size: 0.95rem; }
+        /* CHUNKS DE LECTURE (Blocs épurés) */
+        .chunk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .chunk { background: rgba(255,255,255,0.03); border-left: 4px solid var(--mj); border-radius: 0 8px 8px 0; padding: 15px; margin-bottom: 15px; }
+        .chunk.blue { border-left-color: var(--blue); background: rgba(52, 152, 219, 0.05); }
+        .chunk.red { border-left-color: var(--danger); background: rgba(231, 76, 60, 0.05); }
+        .chunk.gold { border-left-color: var(--gold); background: rgba(241, 196, 15, 0.05); }
+        
+        .chunk h4 { margin: 0 0 8px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; color: white; }
+        .chunk p { margin: 0; font-size: 0.9rem; color: #bdc3c7; line-height: 1.5; }
+        .chunk ul { margin: 8px 0 0 0; padding-left: 20px; font-size: 0.9rem; color: #bdc3c7; }
+        .chunk li { margin-bottom: 5px; }
+        .chunk b { color: white; }
 
         /* BADGES */
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; margin-right: 5px; vertical-align: middle; }
-        .badge-yellow { background: rgba(241, 196, 15, 0.2); color: var(--accent); border: 1px solid var(--accent); }
-        .badge-red { background: rgba(231, 76, 60, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-        .badge-green { background: rgba(46, 204, 113, 0.2); color: var(--mj); border: 1px solid var(--mj); }
-        .badge-blue { background: rgba(52, 152, 219, 0.2); color: var(--blue); border: 1px solid var(--blue); }
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; border: 1px solid currentColor; }
+        .b-green { color: var(--mj); background: rgba(46, 204, 113, 0.1); }
+        .b-red { color: var(--danger); background: rgba(231, 76, 60, 0.1); }
+        .b-gold { color: var(--gold); background: rgba(241, 196, 15, 0.1); }
 
-        footer { text-align: center; padding: 40px 0; border-top: 1px solid #333; margin-top: 60px; color: #7f8c8d; }
-
-        /* RESPONSIVE */
-        @media (max-width: 900px) {
-            nav { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 2px solid var(--card-bg); }
-            main { margin-left: 0; padding: 20px; }
-            .grid-2 { grid-template-columns: 1fr; }
-            .nav-links { flex-direction: row; overflow-x: auto; white-space: nowrap; padding: 10px; }
-            .nav-links a { border-left: none; border-bottom: 4px solid transparent; }
-            .nav-links a.active { border-left: none; border-bottom-color: var(--accent); }
-        }
+        #no-results { display: none; text-align: center; padding: 40px 20px; color: #7f8c8d; font-size: 1.1rem; font-style: italic; }
     </style>
 </head>
 <body>
 
-    <nav>
-        <div class="nav-header">
-            <h1>Guide MJ Pro</h1>
-            <p>Système Presta'Puce</p>
+    <!-- EN-TÊTE FIXE AVEC BARRE DE RECHERCHE -->
+    <div class="sticky-header">
+        <div class="header-titles">
+            <h1>Manuel MJ Pro</h1>
+            <p>Presta'Puce • v<span id="display-guide-version"></span></p>
         </div>
-        <div class="nav-links">
-            <a href="#intro" class="active">🌟 Introduction</a>
-            <a href="#moteur">⚡ L'Arbitrage Asynchrone</a>
-            <a href="#demarrage">🚀 Création de Salle</a>
-            <a href="#reseau">📡 Sécurité & Réseau</a>
-            <a href="#gestion-joueurs">👥 Gestion des Joueurs</a>
-            <a href="#gestion-equipes">🛡️ Le Système de Clans</a>
-            <a href="#medias">🎨 Médias & Écrans</a>
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Chercher une fonction (ex: Mode de jeu, Réseau...)" oninput="searchGuide()">
         </div>
-    </nav>
+    </div>
+
+    <!-- MENU RAPIDE (Table des matières) -->
+    <div class="toc-grid" id="toc-grid">
+        <div class="toc-card" onclick="scrollToSection('sec-reseau')">
+            <div class="toc-icon">📡</div><div class="toc-title">1. Réseau & Asynchronisme</div>
+        </div>
+        <div class="toc-card" onclick="scrollToSection('sec-modes')">
+            <div class="toc-icon">⚙️</div><div class="toc-title">2. Modes de jeu & Démarrage</div>
+        </div>
+        <div class="toc-card" onclick="scrollToSection('sec-blocage')">
+            <div class="toc-icon">🛑</div><div class="toc-title">3. Erreurs & Blocages</div>
+        </div>
+        <div class="toc-card" onclick="scrollToSection('sec-joueurs')">
+            <div class="toc-icon">👥</div><div class="toc-title">4. Gestion des Joueurs</div>
+        </div>
+        <div class="toc-card" onclick="scrollToSection('sec-equipes')">
+            <div class="toc-icon">🛡️</div><div class="toc-title">5. Le Système d'Équipes</div>
+        </div>
+        <div class="toc-card" onclick="scrollToSection('sec-medias')">
+            <div class="toc-icon">🎨</div><div class="toc-title">6. Médias & Écran Géant</div>
+        </div>
+    </div>
 
     <main>
-        <!-- EN-TÊTE -->
-        <header style="text-align: center; margin-bottom: 40px; border-bottom: 2px solid var(--accent); padding-bottom: 20px;">
-            <h1 style="color: var(--accent); margin: 0; font-size: 2.5rem; text-transform: uppercase;">Presta'Puce</h1>
-            <div style="font-style: italic; color: #bdc3c7;">La Suite Blind Test Ultime • v<span id="display-guide-version"></span></div>
-        </header>
+        <div id="no-results">Aucun résultat ne correspond à votre recherche...</div>
 
-        <!-- INTRO -->
-        <section id="intro">
-            <h2>🌟 Introduction</h2>
-            <p>Bienvenue dans la suite d'animation <strong>Presta'Puce Blind Test</strong>. Vous n'avez pas entre les mains un simple gadget, mais une véritable application professionnelle conçue par et pour des animateurs événementiels.</p>
-            <p>Créée pour pallier les défauts des buzzers physiques (pannes, triches) et le chaos des "mains levées", cette application embarque un moteur de jeu complexe capable de gérer de manière autonome les déconnexions, le comportement des joueurs et l'affichage multi-écrans.</p>
+        <!-- SECTION 1 : RÉSEAU & MOTEUR -->
+        <div class="guide-section" id="sec-reseau" data-keywords="réseau wifi 4g 5g ping latence asynchrone vérification temps voyant connexion déconnexion plantage porte verte rouge réparation">
+            <div class="section-header">
+                <h2>📡 1. Réseau & Asynchronisme</h2>
+            </div>
             
-            <div class="info-box">
-                <h4>🛠️ Les 4 Piliers du Système</h4>
+            <div class="chunk blue">
+                <h4>Le Voyant Réseau Console (MJ)</h4>
+                <p>Dans l'en-tête de votre console MJ (à côté du CODE SALLE), se trouve un indicateur vital :</p>
                 <ul>
-                    <li><strong>La Console MJ :</strong> Votre tableau de bord. Elle donne les pleins pouvoirs (points, expulsions, règles du jeu en direct).</li>
-                    <li><strong>L'Écran Géant (Scores) :</strong> Diffusé sur TV/Projecteur. Il affiche le QR Code, anime les scores en 3D et dévoile le podium final.</li>
-                    <li><strong>Le Smartphone Joueur :</strong> Un buzzer interactif, fluide, avec création de profils, de clans et d'avatars personnalisés.</li>
-                    <li><strong>La Télécommande (Remote) :</strong> Vous permet de quitter l'ordinateur et de gérer les buzzers depuis la piste de danse.</li>
+                    <li><span class="badge b-green">🟢 En ligne</span> : Tout fonctionne parfaitement.</li>
+                    <li><span class="badge b-red">🔴 Hors ligne</span> : Votre ordinateur a perdu la connexion internet.</li>
                 </ul>
+                <p><b>Le Bouton de Secours (🔄) :</b> En cas de micro-coupure réseau de votre ordinateur, la "porte" d'accès au jeu peut se fermer accidentellement. Si de nouveaux joueurs n'arrivent plus à scanner le QR Code, <b>cliquez sur ce bouton 🔄</b> pour forcer la réouverture de la salle sans déconnecter les autres.</p>
             </div>
-        </section>
 
-        <!-- LE MOTEUR (LA VRAIE VALEUR AJOUTÉE) -->
-        <section id="moteur">
-            <div class="pro-box">
-                <h3>⚡ Le Moteur d'Arbitrage Asynchrone (Anti-Latence)</h3>
-                <p>C'est le cœur technologique de l'application. Dans une salle, vos joueurs auront des connexions très différentes : certains seront en Wi-Fi, d'autres en 5G, d'autres encore avec une mauvaise 3G. Si l'application se contentait de donner la victoire au "premier signal reçu par le serveur", le joueur avec la meilleure 5G gagnerait toujours. Ce serait profondément injuste.</p>
-                <p>Pour garantir une équité absolue, notre moteur fonctionne différemment :</p>
-                
-                <div class="grid-2" style="margin-bottom: 20px;">
-                    <div class="card b-blue">
-                        <span class="card-icon">⏱️</span>
-                        <h4>1. Synchronisation Atomique</h4>
-                        <p>Dès qu'un joueur rejoint la salle, son téléphone calcule son décalage (ping) exact avec l'horloge de notre serveur central.</p>
-                    </div>
-                    <div class="card b-gold">
-                        <span class="card-icon">🧠</span>
-                        <h4>2. Fenêtre d'Analyse</h4>
-                        <p>Quand un joueur buzze, son téléphone fige l'heure <strong>réelle</strong> de son clic. Le serveur s'accorde alors une fraction de seconde (fenêtre d'analyse) pour collecter les signaux des téléphones plus lents.</p>
-                    </div>
-                </div>
-
-                <p><strong>Ce que voient les joueurs :</strong> Si plusieurs joueurs cliquent dans un mouchoir de poche, leurs buzzers afficheront temporairement le message <strong style="color:var(--accent);">"VÉRIFICATION..."</strong>. Ce n'est pas un bug réseau ! C'est l'intelligence artificielle qui compare les horodatages réels au millième de seconde près avant de déclarer le vrai vainqueur.</p>
+            <div class="chunk gold">
+                <h4>Le Moteur de Jeu des Joueurs (Anti-Latence)</h4>
+                <p>Dans la salle, les connexions des joueurs diffèrent (Wi-Fi, 4G, 5G). Si l'application validait le "premier signal reçu par le serveur", la meilleure 5G gagnerait toujours. Notre système corrige cela :</p>
+                <ul>
+                    <li><b>Synchronisation :</b> Dès qu'un joueur rejoint, l'application calcule son décalage réseau exact.</li>
+                    <li><b>Fenêtre de tir :</b> Quand quelqu'un buzze, l'horloge interne de son téléphone est figée. Le serveur attend une fraction de seconde supplémentaire pour collecter les signaux des téléphones lents.</li>
+                </ul>
+                <p>👉 C'est pour cela que les joueurs voient parfois le message <b>"VÉRIFICATION..."</b>. L'IA du système compare les chronomètres au millième de seconde avant de désigner le vainqueur équitable.</p>
             </div>
-        </section>
+        </div>
 
-        <!-- DEMARRAGE -->
-        <section id="demarrage">
-            <h2>🚀 Création et Paramétrage de la Salle</h2>
-            <p>En créant une nouvelle salle, vous définissez les règles qui s'appliqueront instantanément sur les téléphones des joueurs.</p>
-            
-            <div class="grid-2">
-                <div class="card b-green">
+        <!-- SECTION 2 : MODES DE JEU -->
+        <div class="guide-section" id="sec-modes" data-keywords="mode de jeu création démarrage mixte solo équipe paramétrage règles connexion rapide complet">
+            <div class="section-header">
+                <h2>⚙️ 2. Modes de jeu & Démarrage</h2>
+            </div>
+
+            <div class="chunk-grid">
+                <div class="chunk">
                     <h4>Parcours de Connexion</h4>
-                    <p><strong>Complet :</strong> Les joueurs sont incités à créer un compte pour sauvegarder leurs statistiques à vie.<br><br><strong>Rapide :</strong> Les joueurs accèdent directement au choix du pseudo (Idéal pour des soirées privées ponctuelles).</p>
+                    <p><b>Complet :</b> Les joueurs sont invités à se créer un compte sécurisé (mot de passe ou Google) pour conserver leurs statistiques et avatars à vie.<br><br>
+                    <b>Rapide :</b> Les joueurs zappent l'inscription et choisissent directement un pseudo (Idéal pour des mariages ou soirées éphémères).</p>
                 </div>
-                <div class="card b-purple">
-                    <h4>Modes de Jeu</h4>
-                    <p><strong>Mixte :</strong> Les joueurs peuvent choisir de jouer en Solo ou de créer/rejoindre une équipe.<br><br><strong>100% Solo ou 100% Équipes :</strong> Force les téléphones à s'adapter (dissolution automatique des équipes existantes ou obligation de rejoindre un clan).</p>
+                
+                <div class="chunk">
+                    <h4>Les 3 Modes de Jeu</h4>
+                    <p><b>Mixte :</b> Les joueurs peuvent librement choisir de jouer seul ou de créer un clan.<br>
+                    <b>100% Solo :</b> Les équipes sont interdites. (Si vous activez ce mode en cours de jeu, les équipes existantes sont automatiquement dissoutes sur les téléphones).<br>
+                    <b>100% Équipes :</b> Obligation d'être dans un clan pour jouer.</p>
                 </div>
             </div>
 
-            <div class="info-box">
-                <h4>🛑 La Règle de Blocage (Erreur)</h4>
-                <p>Si un joueur donne une mauvaise réponse et que vous cliquez sur <strong>Erreur</strong>, vous pouvez choisir l'impact :</p>
+            <div class="chunk blue">
+                <h4>⚙️ Modification en Direct</h4>
+                <p>Vous avez mal configuré la salle ? Pas de panique. Cliquez sur le bouton <b>RÈGLES DU JEU</b> depuis la Console MJ. Modifiez n'importe quel paramètre : les téléphones de tous les joueurs s'adapteront <b>en temps réel</b> sans avoir à relancer la partie.</p>
+            </div>
+        </div>
+
+        <!-- SECTION 3 : BLOCAGE ET ERREURS -->
+        <div class="guide-section" id="sec-blocage" data-keywords="blocage bloquer erreur faute sanction verrouillage pénalité individuel équipe">
+            <div class="section-header">
+                <h2>🛑 3. Erreurs & Blocages</h2>
+            </div>
+
+            <div class="chunk red">
+                <h4>Que se passe-t-il quand un joueur donne une mauvaise réponse ?</h4>
+                <p>Lorsque le joueur ayant la main donne une mauvaise réponse, vous cliquez sur le bouton <b>Erreur (Rouge)</b>. Son buzzer devient gris et inactif sur son téléphone. Il ne pourra re-buzzer qu'à la question suivante (après avoir cliqué sur Ouvrir Buzzers).</p>
+            </div>
+
+            <div class="chunk">
+                <h4>La Stratégie de Blocage</h4>
+                <p>Dans la configuration de la salle (ou dans ⚙️ Règles du jeu), vous pouvez choisir l'impact d'une erreur pour les joueurs en équipe :</p>
                 <ul>
-                    <li><strong>Blocage Individuel :</strong> Seul le joueur qui s'est trompé est verrouillé pour la suite du titre. Le reste de son équipe peut encore buzzer.</li>
-                    <li><strong>Blocage Équipe :</strong> La mauvaise réponse verrouille les buzzers de <strong>toute son équipe</strong>. Idéal pour instaurer une vraie discipline de groupe !</li>
+                    <li><b>Blocage Individuel :</b> Seul le joueur qui s'est trompé est verrouillé. Ses coéquipiers peuvent encore tenter de buzzer.</li>
+                    <li><b>Blocage Équipe :</b> La mauvaise réponse verrouille instantanément <b>tous les membres</b> de son équipe. Une excellente règle pour instaurer la concertation et la discipline de groupe !</li>
                 </ul>
             </div>
+        </div>
 
-            <div class="alert-box">
-                <h4>🔄 Le Mode "Règles du Jeu" en direct</h4>
-                <p>Vous n'êtes jamais bloqué ! Sur votre console, le bouton <strong>"⚙️ RÈGLES DU JEU"</strong> vous permet de modifier tous ces paramètres en plein milieu de la partie. Les téléphones des joueurs s'adapteront en temps réel.</p>
-            </div>
-        </section>
-
-        <!-- RÉSEAU ET SÉCURITÉ -->
-        <section id="reseau">
-            <h2>📡 Sécurité & Réseau</h2>
-            <p>L'événementiel implique parfois des aléas techniques. La Console MJ intègre des outils de diagnostic en direct.</p>
-
-            <div class="pro-box" style="margin-top: 20px;">
-                <h3 style="color: var(--mj);">Le Voyant Réseau & La Porte de Secours</h3>
-                <p>Dans l'en-tête de votre console MJ, juste à côté du "CODE SALLE", vous trouverez deux éléments cruciaux :</p>
-                <ul>
-                    <li><strong>L'indicateur d'état (🟢/🔴) :</strong> Il vous indique en temps réel la santé de votre connexion au serveur central.</li>
-                    <li><strong>Le bouton "Forcer l'Ouverture" (🔄) :</strong> Il arrive qu'une micro-coupure Wi-Fi sur votre ordinateur ferme accidentellement l'accès public à la salle. Si de nouveaux joueurs n'arrivent plus à scanner le QR Code ou ne trouvent pas la partie, <strong>cliquez sur ce bouton 🔄</strong>. Cela réparera la "porte d'entrée" instantanément sans perturber les joueurs déjà connectés.</li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- GESTION JOUEURS -->
-        <section id="gestion-joueurs">
-            <h2>👥 Gestion et Discipline des Joueurs</h2>
-            <p>La console MJ dispose d'un système de modération digne des plus grands événements pour pallier les comportements indésirables (spam, déconnexions, pseudos offensants).</p>
-            
-            <div class="info-box">
-                <h4>Les États Visuels (Pastilles)</h4>
-                <ul>
-                    <li><span class="badge badge-green">🟢 Actif</span> : Le joueur est présent et son téléphone est allumé.</li>
-                    <li><span class="badge badge-yellow">🟠 Inactif</span> : Le joueur a fermé l'application, mis son téléphone en veille, ou l'a rangé dans sa poche (Le système le détecte automatiquement pour économiser de la bande passante).</li>
-                    <li><span class="badge badge-yellow">⚠️ Alerte</span> : L'onglet clignote ! Le joueur tente de récupérer un ancien pseudo depuis un autre appareil. <strong>À vous de valider (✔) ou refuser (✖) sa reconnexion.</strong></li>
-                </ul>
+        <!-- SECTION 4 : GESTION JOUEURS -->
+        <div class="guide-section" id="sec-joueurs" data-keywords="joueur modération gérer jaune rouge avertissement carton expulsion bannissement censure forcer forçage main">
+            <div class="section-header">
+                <h2>👥 4. Gestion des Joueurs</h2>
             </div>
 
-            <h3>Les Outils de Sanction</h3>
-            <p>En cliquant sur les <strong>trois petits points (⋮)</strong> à côté d'un joueur, vous accédez à l'arsenal de modération :</p>
-            <div class="grid-2">
-                <div class="card b-gold">
-                    <h4><span class="badge badge-yellow">🟨</span> Carton Jaune (Avertissement)</h4>
-                    <p>Génère une alerte plein écran sur le téléphone du joueur (ex: pseudo limite, comportement bruyant). Un carton jaune apparaîtra à côté de son nom sur l'Écran Géant pour l'afficher publiquement.</p>
+            <p style="margin-bottom:15px;">Le menu d'action d'un joueur (les trois petits points <b>⋮</b>) vous offre un panel de modération complet.</p>
+
+            <div class="chunk-grid">
+                <div class="chunk gold">
+                    <h4>🟨 Avertissement (Carton Jaune)</h4>
+                    <p>Pour un comportement bruyant ou limite. Déclenche une alerte plein écran sur son smartphone. Un petit carré jaune reste affiché à côté de son nom sur votre console et sur l'Écran Géant public.</p>
                 </div>
-                <div class="card b-red">
-                    <h4><span class="badge badge-red">🟥</span> Carton Rouge (Expulsion)</h4>
-                    <p>Le joueur est définitivement banni de la partie. Son téléphone est verrouillé et redirigé hors du jeu. Ses points sont gelés.</p>
+                
+                <div class="chunk red">
+                    <h4>🟥 Expulsion (Carton Rouge)</h4>
+                    <p>Le joueur est définitivement banni. Son téléphone est verrouillé et éjecté du jeu. Il atterrit dans l'onglet "Bannis" de votre console. Vous pouvez le "Gracier" pour lui rendre l'accès si nécessaire.</p>
                 </div>
             </div>
-            
-            <p style="margin-top:20px;"><strong>✏️ Censure d'Avatar :</strong> Un selfie déplacé ? Éditez le joueur, cliquez sur "Censurer" et son image sera instantanément remplacée par le logo de votre entreprise, y compris sur l'Écran Géant.</p>
-            <p><strong>⚡ Forcer la Main :</strong> Un joueur crie la bonne réponse mais a oublié de buzzer ? Cliquez sur "Forcer le buzzer" dans son menu pour lui attribuer la main. Son téléphone s'allume en vert et les autres se bloquent.</p>
-        </section>
 
-        <!-- GESTION EQUIPES -->
-        <section id="gestion-equipes">
-            <h2>🛡️ Le Système de Clans (Équipes)</h2>
-            <p>L'application gère nativement le regroupement de joueurs pour faire grimper un score collectif, tout en maintenant les scores individuels.</p>
+            <div class="chunk">
+                <h4>⚡ Forcer le buzzer (La Main Levée)</h4>
+                <p>Un joueur s'est excité et a hurlé la bonne réponse sans buzzer ? Pas besoin de pénaliser sa réactivité verbale ! Ouvrez son menu et cliquez sur <b>Forcer le buzzer</b>. Son téléphone passera instantanément au Vert et tous les autres se bloqueront.</p>
+            </div>
 
-            <div class="info-box">
+            <div class="chunk blue">
+                <h4>🚫 Censure d'Avatar</h4>
+                <p>Un joueur a uploadé un selfie inapproprié ? Cliquez sur "Éditer le joueur", puis sur le bouton rouge <b>Censurer</b>. Sa photo sera immédiatement et définitivement remplacée par le logo par défaut (le vôtre), même sur l'Écran Géant.</p>
+            </div>
+        </div>
+
+        <!-- SECTION 5 : ÉQUIPES -->
+        <div class="guide-section" id="sec-equipes" data-keywords="équipe clan système capitaine couronne trône succession automatique pause transfert ajustement bonus point">
+            <div class="section-header">
+                <h2>🛡️ 5. Le Système d'Équipes (Clans)</h2>
+            </div>
+
+            <div class="chunk gold">
                 <h4>👑 Le Rôle du Capitaine</h4>
-                <p>Celui qui crée l'équipe en devient le Capitaine (marqué par une couronne). Sur son téléphone, il possède un bouton exclusif lui permettant de modifier le nom, de changer le blason (Selfie de groupe) et d'<strong>expulser les mauvais membres</strong> de son clan.</p>
+                <p>Le joueur qui crée une équipe en devient automatiquement le Capitaine (marqué par une couronne 👑). Il possède une interface exclusive lui permettant de <b>modifier le blason du clan</b> (ex: un selfie de groupe) et d'<b>expulser les mauvais membres</b> (qui redeviendront des joueurs Solos).</p>
             </div>
 
-            <h3>L'Intelligence des Équipes</h3>
-            <ul>
-                <li><strong>Succession Automatique (Anti-Trône Vide) :</strong> Si le capitaine quitte la partie ou n'a plus de batterie, le système ne laisse pas l'équipe orpheline. L'application désigne automatiquement le membre actif le plus ancien comme nouveau Capitaine et l'alerte sur son écran !</li>
-                <li><strong>Mise en Pause :</strong> Une table va manger ou fume une cigarette ? Mettez l'équipe en pause depuis la Console MJ. Leurs scores sont congelés au chaud. Lorsqu'ils reviendront, un pop-up leur proposera de récupérer leur équipe instantanément.</li>
-                <li><strong>Transfert Forcé (MJ) :</strong> Le Capitaine refuse de céder sa place ? Dans la console MJ, ouvrez l'accordéon d'une équipe, cliquez sur "⋮" d'un membre et choisissez <strong>"👑 Nommer Capitaine"</strong>. Le transfert de pouvoir est exécuté de force.</li>
-                <li><strong>Ajustement Bonus :</strong> Les boutons <strong>[+]</strong> et <strong>[-]</strong> dans la barre de l'équipe vous permettent d'ajouter des points bonus à l'équipe entière (sans modifier les scores individuels des joueurs).</li>
-            </ul>
-        </section>
+            <div class="chunk">
+                <h4>L'Intelligence du Système d'Équipe</h4>
+                <ul>
+                    <li><b>Succession Automatique (Anti-Trône Vide) :</b> Si un Capitaine quitte la partie (ou si son téléphone s'éteint), le système détecte le "trône vide". Il désigne automatiquement le joueur actif le plus ancien du clan comme nouveau Capitaine et l'alerte sur son écran !</li>
+                    <li><b>Transfert de Pouvoir (MJ) :</b> Un capitaine est incompétent ? Depuis votre console, déroulez les joueurs de l'équipe, cliquez sur le menu (⋮) d'un autre membre et choisissez <b>Nommer Capitaine</b>.</li>
+                    <li><b>Ajustement Bonus :</b> Utilisez les boutons <b>[+]</b> et <b>[-]</b> dans la barre de l'équipe (Lobby MJ ou Remote) pour ajouter des points de bonus globaux à l'équipe, sans toucher au score individuel des joueurs.</li>
+                </ul>
+            </div>
 
-        <!-- MEDIAS & ÉCRANS -->
-        <section id="medias">
-            <h2>🎨 Personnalisation, Médias et Écrans</h2>
-            <p>Votre image de marque est essentielle. Tout le système est personnalisable sans relancer la partie.</p>
+            <div class="chunk blue">
+                <h4>⏸️ Mettre une équipe en pause</h4>
+                <p>Une table part fumer ou se restaurer ? Depuis votre console, mettez leur équipe en pause. Leurs scores sont "congelés" et préservés, et l'équipe disparaît des classements. À leur retour, un simple clic sur "Réactiver" leur rend tous leurs acquis.</p>
+            </div>
+        </div>
 
-            <div class="grid-2">
-                <div class="card b-blue">
-                    <span class="card-icon">📺</span>
-                    <h4>Fonds d'écran & Mode Jour</h4>
-                    <p>Dans "Ma Carte de Visite", gérez votre galerie de fonds d'écran TV (ex: Soirée Disco, Mariage). <br>En extérieur ? Cliquez sur <strong>☀️ MODE JOUR</strong> depuis l'accueil pour inverser les couleurs (Écrans blancs, forte luminosité) de la Console MJ, des Joueurs et de l'Écran Géant !</p>
+        <!-- SECTION 6 : MEDIAS -->
+        <div class="guide-section" id="sec-medias" data-keywords="média écran géant podium fin de partie fond image blason galerie jour nuit soleil">
+            <div class="section-header">
+                <h2>🎨 6. Médias & Écran Géant</h2>
+            </div>
+
+            <div class="chunk-grid">
+                <div class="chunk blue">
+                    <h4>☀️ Mode Jour / Nuit</h4>
+                    <p>Vous animez un événement en plein après-midi ? Cliquez sur le bouton <b>MODE JOUR</b> depuis le tableau de bord. L'interface MJ, les téléphones des joueurs et l'Écran Géant passeront instantanément sur un fond blanc ultra-lumineux pour contrer les reflets du soleil.</p>
                 </div>
-                <div class="card b-green">
-                    <span class="card-icon">🖼️</span>
-                    <h4>Galeries & Blasons</h4>
-                    <p>Déposez vos propres images dans la galerie MJ. Elles deviendront disponibles pour tous les joueurs qui souhaitent s'en servir de Blason d'équipe. Idéal pour uploader les logos des entreprises lors de séminaires corporatifs.</p>
+                
+                <div class="chunk">
+                    <h4>🖼️ Gestion des Blasons</h4>
+                    <p>Dans <i>Ma Carte de Visite &gt; Blasons</i>, uploadez vos propres images (ex: Les logos des départements d'une entreprise pour un Séminaire). Ces images seront immédiatement proposées aux joueurs lors de la création de leurs équipes !</p>
                 </div>
             </div>
 
-            <div class="pro-box" style="margin-top: 40px; text-align: center;">
-                <h3 style="justify-content: center; margin-bottom: 20px;">🏁 Clôture de l'Événement</h3>
-                <p>À la fin de votre prestation, cliquez sur <strong>"🏁 FIN DE PARTIE"</strong>.<br>Cela coupe tous les buzzers, lance le Podium 3D animé sur l'Écran Géant avec confettis, et archive votre salle dans la section "Archives" pour que vous puissiez retrouver les scores des mois plus tard !</p>
+            <div class="chunk gold">
+                <h4>🏁 Clôture : Le Podium</h4>
+                <p>À la fin du show, cliquez sur <b>FIN DE PARTIE 🏆</b>. Le système coupe instantanément tous les buzzers. L'Écran Géant s'anime en 3D pour dévoiler le Top 3 (avec le nom des Capitaines et l'avatar de l'équipe gagnante) sous une pluie de confettis ! La salle est ensuite basculée en <b>Lecture Seule (Archive)</b>.</p>
             </div>
-        </section>
+        </div>
 
     </main>
 
-    <script>
-        // Surbrillance du menu au défilement
-        const sections = document.querySelectorAll("section");
-        const navLinks = document.querySelectorAll(".nav-links a");
-
-        window.addEventListener("scroll", () => {
-            let current = "";
-            sections.forEach((section) => {
-                const sectionTop = section.offsetTop;
-                if (scrollY >= sectionTop - 60) {
-                    current = section.getAttribute("id");
-                }
-            });
-
-            navLinks.forEach((link) => {
-                link.classList.remove("active");
-                if (link.getAttribute("href").includes(current)) {
-                    link.classList.add("active");
-                }
-            });
-        });
-    </script>
 </body>
 </html>
