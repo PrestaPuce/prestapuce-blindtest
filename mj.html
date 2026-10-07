@@ -308,15 +308,31 @@
         .day-mode span[style*="color:#bdc3c7"], .day-mode span[style*="color: #bdc3c7"] { color: #7f8c8d !important; }
         .day-mode small[style*="color:#bdc3c7"] { color: #7f8c8d !important; }
 
-        /* 🚀 CSS DU TUTORIEL MJ */
-        #tuto-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999998; pointer-events: auto; }
+        /* 🚀 CSS DU SIMULATEUR MJ (BAC À SABLE) */
+        #tuto-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999998; pointer-events: auto; }
         #tuto-tooltip { display: none; position: absolute; background: var(--card-bg); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; width: 320px; z-index: 999999; box-shadow: 0 15px 35px rgba(0,0,0,0.8); backdrop-filter: blur(15px); color: white; transition: all 0.3s ease; }
         #tuto-tooltip h3 { color: var(--accent); margin: 0 0 10px 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
         #tuto-tooltip p { font-size: 0.95rem; margin: 0 0 20px 0; color: #ecf0f1; line-height: 1.4; }
         .tuto-buttons { display: flex; justify-content: space-between; gap: 10px; }
         .tuto-btn-skip { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
-        .tuto-btn-next { background: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; }
-        .tuto-highlight { position: relative !important; z-index: 999999 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; background: var(--card-bg) !important; border-radius: 8px; pointer-events: none !important; }
+        .tuto-btn-next { background: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center; }
+        .tuto-highlight { position: relative !important; z-index: 999999 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; background: var(--card-bg) !important; border-radius: 8px; }
+
+        /* VRAIS FAUX TÉLÉPHONES (Clones de index.html) */
+        #simu-phones-container { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 800px; z-index: 999999; justify-content: space-between; gap: 10px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
+        .simu-phone { flex: 1; background: #2c3e50; border-radius: 12px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; border: 2px solid #34495e; transition: 0.2s; position: relative; cursor: pointer; }
+        .simu-avatar { width: 35px; height: 35px; border-radius: 50%; background: #222; border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 5px; overflow: hidden; }
+        .simu-name { font-size: 0.8rem; font-weight: bold; color: white; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-align: center; }
+        .simu-team { font-size: 0.65rem; color: var(--accent); margin-bottom: 10px; white-space: nowrap; }
+        
+        .simu-buzzer { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: bold; color: white; transition: 0.1s; text-align: center; margin-bottom: 5px; }
+        .simu-buzzer.wait { background: #e74c3c; box-shadow: 0 5px 0 #c0392b; }
+        .simu-buzzer.ready { background: #2ecc71; box-shadow: 0 5px 0 #27ae60; }
+        .simu-buzzer.ready:active { transform: translateY(5px); box-shadow: 0 0 0 #27ae60; }
+        .simu-buzzer.taken { background: #3498db !important; box-shadow: 0 5px 0 #2980b9 !important; }
+        .simu-buzzer.blocked { background: #555 !important; box-shadow: 0 5px 0 #333 !important; opacity: 0.6; }
+        
+        .simu-kicked { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(231,76,60,0.9); border-radius:10px; display:none; flex-direction:column; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:0.8rem; z-index:10; }
     </style>
 </head>
 <body>
@@ -340,22 +356,26 @@
         </div>
     </div>
 
-    <!-- 🚀 HTML DU TUTORIEL -->
+    <!-- 🚀 HTML DU SIMULATEUR MJ -->
     <div id="tuto-overlay"></div>
     <div id="tuto-tooltip">
         <h3 id="tuto-title">Titre</h3>
         <p id="tuto-text">Texte explicatif</p>
         <div class="tuto-buttons">
-            <button class="tuto-btn-skip" onclick="window.endTuto()">Zapper</button>
+            <button class="tuto-btn-skip" onclick="window.endTuto()">Quitter</button>
             <button class="tuto-btn-next" onclick="window.nextTutoStep()" id="tuto-btn-next">Suivant ➔</button>
         </div>
+    </div>
+    
+    <div id="simu-phones-container">
+        <!-- Généré dynamiquement en JS -->
     </div>
 
     <div id="top-right-tools" class="ghost-ui">
         <button class="top-right-btn" onclick="openScoreBoard()">📺 Scores</button>
         <button class="top-right-btn" onclick="showRemoteQR()">📱 Remote</button>
         <button class="top-right-btn" onclick="toggleGuide()">📖 Guide</button>
-        <button class="top-right-btn" style="border-color:var(--accent); color:var(--accent);" onclick="window.startTuto(2, true)">🎓 Tutoriel</button>
+        <button class="top-right-btn" style="border-color:var(--accent); color:var(--accent);" onclick="window.startTuto(0, true)">🎓 Bac à Sable</button>
     </div>
 
     <div id="univ-lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:30000; align-items:center; justify-content:space-between; padding:0 20px; box-sizing:border-box;" onclick="if(event.target.id==='univ-lightbox') closeLightbox()">
@@ -929,45 +949,48 @@
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
 
         // 🚀 ==========================================
-        // MOTEUR DE TUTORIEL INTÉGRÉ & SIMULATION
+        // MOTEUR DE SIMULATION "BAC À SABLE" INTERACTIF
         // ==========================================
         window.isTutoRunning = false;
-        let tutoCurrentPhase = 1;
+        let tutoCurrentPhase = 0;
         let tutoCurrentStep = 0;
+        let tutoListener = null; 
         
+        const tutoStepsPhase0 = [
+            { target: 'global-mj-logo-container', title: "👋 Votre Profil MJ", text: "Bienvenue dans l'application Presta'Puce.<br><br>C'est ici que vous pourrez modifier votre mot de passe, uploader le logo de votre entreprise et gérer vos blasons (dans la Bibliothèque).<br><br><i>Cliquez sur Suivant.</i>" },
+            { target: 'btn-choice-new-room', title: "🚀 C'est parti !", text: "Pour commencer, <b>cliquez sur Créer une nouvelle salle</b>.", autoAction: 'click' }
+        ];
+
         const tutoStepsPhase1 = [
-            { target: 'new-room-login', title: "🔐 Parcours de Connexion", text: "<strong>Complet :</strong> Les joueurs créent un compte (Email/Google) pour garder leurs stats à vie.<br><br><strong>Rapide :</strong> Accès direct avec juste un pseudo (Idéal pour des mariages ou événements uniques)." },
-            { target: 'new-room-mode', title: "⚔️ Mode de Jeu", text: "<strong>Mixte :</strong> Autorise Solo ET Équipes.<br><strong>100% Solo :</strong> Interdit les équipes.<br><strong>100% Équipes :</strong> Regroupement obligatoire.<br><br><i>Modifiable en direct pendant la partie !</i>" },
-            { target: 'new-room-team-lock', title: "🛑 Règle d'Erreur", text: "Si un joueur répond mal : voulez-vous bloquer uniquement son buzzer (Individuel) ou geler les buzzers de toute son équipe pour forcer la concertation ?" }
+            { target: 'new-room-login', title: "🔐 Parcours de Connexion", text: "<strong>Complet :</strong> Les joueurs créent un compte pour garder leurs stats à vie.<br><strong>Rapide :</strong> Accès direct avec juste un pseudo.<br><br><i>Modifiez ce menu déroulant pour avancer.</i>", autoAction: 'change' },
+            { target: 'new-room-mode', title: "⚔️ Mode de Jeu", text: "<strong>Mixte :</strong> Autorise Solo ET Équipes.<br><strong>100% Solo :</strong> Interdit les équipes.<br><strong>100% Équipes :</strong> Regroupement obligatoire.<br><br><i>Modifiez ce menu pour avancer.</i>", autoAction: 'change' },
+            { target: 'btn-launch-room', title: "🛑 Règle d'Erreur", text: "Le menu au-dessus permet de choisir si une erreur bloque uniquement le joueur ou toute son équipe.<br><br><i>Faites votre choix, puis <b>cliquez sur Lancer la Partie</b>.</i>", autoAction: 'click' }
         ];
 
         const tutoStepsPhase2 = [
-            { target: 'room-info-card', title: "🎛️ La Console Centrale", text: "Voici votre tableau de bord. J'ai généré 5 faux joueurs virtuels pour vous montrer le fonctionnement : 'Ninja' (Solo) et 2 équipes complètes." },
-            { target: 'top-right-tools', title: "📺 Déployer le Matériel", text: "Ces 3 boutons sont vos meilleurs amis :<br>- <strong>Scores :</strong> À afficher sur l'Écran Géant (TV, Vidéoprojecteur).<br>- <strong>Remote :</strong> Votre télécommande mobile.<br>- <strong>Guide :</strong> Le manuel complet." },
-            { target: 'btn-open-buzz', title: "🔊 Ouvrir les Buzzers", text: "C'est le bouton principal. Cliquez dessus pour débloquer les téléphones de vos joueurs au début de chaque nouvelle manche." },
-            { target: 'player-box', title: "⚡ Un joueur a buzzé !", text: "Tom vient de buzzer ! Les autres joueurs sont bloqués. Vous devez valider sa réponse :<br><strong>+3 ou +1 (Terminé) :</strong> Attribue les points et clôture la manche.<br><strong>+1 (On continue) :</strong> Tom gagne 1 point, son buzzer se bloque, mais les autres se rouvrent pour continuer à jouer." },
-            { target: 'mj-team-search', title: "🛡️ Gestion des Clans", text: "Utilisez ces filtres pour retrouver une équipe. Cliquez sur les 3 petits points (⋮) d'un membre pour le nommer Capitaine, ou expulser l'équipe entière." },
-            { target: 'player-search', title: "👥 Modération Joueurs", text: "Votre outil de police. Cliquez sur les (⋮) d'un joueur pour : forcer son buzzer manuellement, lui donner un Carton Jaune 🟨 (Avertissement) ou un Carton Rouge 🟥 (Expulsion)." }
+            { target: 'network-status-container', title: "📡 La Coupure Réseau (Test)", text: "Oups, une micro-coupure Wi-Fi ! Le voyant est passé au 🔴. Les nouveaux joueurs ne peuvent plus rentrer.<br><br><strong>Cliquez sur le bouton 🔄 juste à côté</strong> pour forcer la réparation.", autoAction: 'click', overrideTarget: 'btn-repair-network' },
+            { target: 'live-rules-display', title: "⚙️ Paramètres en Direct", text: "Vos choix de modes sont affichés ici. Le bouton <b>Règles du Jeu</b> permet de les modifier en plein live.<br>Le <b>☀️ Mode Jour</b> inversera les couleurs en extérieur." },
+            { target: 'top-right-tools', title: "📺 Déployer le Matériel", text: "Ces 3 boutons sont vos meilleurs amis :<br>- <strong>Scores :</strong> À afficher sur l'Écran Géant.<br>- <strong>Remote :</strong> Votre télécommande mobile.<br>- <strong>Guide :</strong> Le manuel complet." },
+            { target: 'btn-open-buzz', title: "🔊 Ouvrez les Buzzers !", text: "J'ai fait apparaître 5 faux téléphones de joueurs en bas de votre écran.<br><br><strong>Cliquez sur Ouvrir Buzzers</strong> : vous allez voir leurs téléphones passer au Vert !" }, // L'avancée se fait via la fonction window.statusUpdate
+            { target: 'simu-phones-container', title: "⚡ Testez un Buzz", text: "Jouez le rôle d'un joueur ! <strong>Cliquez sur le téléphone de Marie ou de Ninja en bas.</strong><br><br>Vous allez voir son téléphone prendre la main (Bleu) et les autres se bloquer (Rouge)." }, // L'avancée se fait via simuClickBuzzer
+            { target: 'player-box', title: "⚖️ Arbitrage Libre", text: "Le joueur a la main. <br><br><strong>Testez le bouton Erreur :</strong> le joueur sera bloqué (Gris) et les autres téléphones repasseront au Vert.<br><strong>Testez les boutons +3 / +1 :</strong> Les points seront attribués et la manche sera clôturée." }, // L'avancée se fait via handleReward/handleError
+            { target: 'mj-team-search', title: "🛡️ Gestion des Équipes", text: "Le mode Simulateur est totalement déverrouillé.<br><br><b>Ouvrez l'équipe des Tigres (flèche jaune ▶).</b> Vous y verrez les membres. En cliquant sur (⋮), vous pourrez nommer un Capitaine 👑, expulser un membre ou bloquer toute l'équipe." },
+            { target: 'player-search', title: "👥 Modération Joueurs", text: "Dans le Lobby Joueurs, cliquez sur (⋮) pour découvrir l'arsenal :<br><b>Forcer le buzzer</b> si un joueur a oublié de cliquer, lui donner un <b>Avertissement 🟨</b> ou l'<b>Expulser 🟥</b>." },
+            { target: null, title: "🏁 Fin de l'entraînement", text: "Jouez avec les buzzers virtuels et l'arbitrage autant que vous voulez.<br><br>Quand vous aurez terminé, cliquez sur <strong>FIN DE PARTIE 🏆</strong> sur votre console pour clôturer le simulateur et voir l'écran de Lecture Seule." }
         ];
 
         window.startTuto = function(phase, isForced = false) {
             let state = localStorage.getItem('mj_tuto_state');
             
-            // Si on force depuis le bouton (isForced = true), on y va direct
             if (!isForced) {
-                if (phase === 1 && !state) {
-                    // C'est le tout premier démarrage
-                    if (confirm("👋 Bienvenue ! C'est votre première connexion.\nSouhaitez-vous lancer un rapide tutoriel interactif pour découvrir les réglages et manipuler de faux joueurs virtuels ?\n\n(Vous pourrez toujours le relancer plus tard depuis le menu).")) {
+                if (phase === 0 && !state) {
+                    if (confirm("👋 Bienvenue pour votre première connexion !\nSouhaitez-vous lancer le Simulateur de Vol pour vous entraîner avec de faux téléphones virtuels avant de jouer ?\n\n(Vous pourrez le relancer plus tard depuis le bouton 'Bac à Sable').")) {
                         localStorage.setItem('mj_tuto_state', 'accepted');
                     } else {
-                        localStorage.setItem('mj_tuto_state', 'done');
-                        return; // Le MJ ne veut pas du tuto
+                        localStorage.setItem('mj_tuto_state', 'done'); return;
                     }
-                } else if (phase === 1 && state === 'done') {
-                    return; // Le MJ a déjà refusé ou fini le tuto, on ne fait rien
-                } else if (phase === 2 && state !== 'accepted') {
-                    return; // Le MJ n'a pas accepté la phase 1, on ne lance pas la phase 2
-                }
+                } else if (state === 'done') { return; } 
+                else if (phase !== 0 && state !== 'accepted') { return; }
             }
 
             window.isTutoRunning = true;
@@ -976,7 +999,25 @@
             document.getElementById('tuto-overlay').style.display = 'block';
             document.getElementById('tuto-tooltip').style.display = 'block';
             
-            if(phase === 2) injectFakeTutoData();
+            // Assignation d'IDs temporaires pour cibler les boutons
+            if (phase === 0) {
+                const btnNew = document.querySelector('button[onclick="askMjNameAndCreate()"]');
+                if(btnNew) btnNew.id = 'btn-choice-new-room';
+            }
+            if (phase === 1) {
+                const btnLaunch = document.querySelector('#modal-create-room button[onclick="confirmCreateRoom()"]');
+                if(btnLaunch) btnLaunch.id = 'btn-launch-room';
+            }
+            if (phase === 2) {
+                const btnRep = document.querySelector('button[onclick="forceRoomOpen()"]');
+                if(btnRep) btnRep.id = 'btn-repair-network';
+                
+                injectFakeTutoData();
+                document.getElementById('simu-phones-container').style.display = 'flex';
+                document.getElementById('network-status-dot').innerText = '🔴';
+                document.getElementById('network-status-dot').classList.add('pulse-alert');
+            }
+            
             showTutoStep();
         };
 
@@ -986,45 +1027,74 @@
             document.getElementById('tuto-overlay').style.display = 'none';
             document.getElementById('tuto-tooltip').style.display = 'none';
             document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
+            document.getElementById('simu-phones-container').style.display = 'none';
             
+            if(tutoListener) tutoListener.el.removeEventListener(tutoListener.type, tutoListener.fn);
             if(tutoCurrentPhase === 2) clearFakeTutoData();
         };
 
         window.nextTutoStep = function() {
-            const steps = tutoCurrentPhase === 1 ? tutoStepsPhase1 : tutoStepsPhase2;
+            let steps = tutoCurrentPhase === 0 ? tutoStepsPhase0 : (tutoCurrentPhase === 1 ? tutoStepsPhase1 : tutoStepsPhase2);
             tutoCurrentStep++;
             if (tutoCurrentStep >= steps.length) {
-                window.endTuto();
-                if(tutoCurrentPhase === 1) alert("✅ Paramétrage compris ! Vous pouvez maintenant Lancer la Partie pour voir la suite.");
+                if(tutoCurrentPhase === 2) {
+                    // On laisse le simulateur tourner, on cache juste la bulle
+                    document.getElementById('tuto-tooltip').style.display = 'none';
+                    document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
+                } else {
+                    document.getElementById('tuto-tooltip').style.display = 'none';
+                    document.getElementById('tuto-overlay').style.display = 'none';
+                }
             } else {
                 showTutoStep();
             }
         };
 
         function showTutoStep() {
-            const steps = tutoCurrentPhase === 1 ? tutoStepsPhase1 : tutoStepsPhase2;
+            let steps = tutoCurrentPhase === 0 ? tutoStepsPhase0 : (tutoCurrentPhase === 1 ? tutoStepsPhase1 : tutoStepsPhase2);
             const step = steps[tutoCurrentStep];
             
+            // Nettoyage de l'étape précédente
             document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
+            if(tutoListener) { tutoListener.el.removeEventListener(tutoListener.type, tutoListener.fn); tutoListener = null; }
             
-            const targetEl = document.getElementById(step.target);
-            if (targetEl) {
-                targetEl.classList.add('tuto-highlight');
-                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.getElementById('tuto-btn-next').style.display = 'block'; // Affiché par défaut
+
+            if (step.target) {
+                const targetEl = document.getElementById(step.target);
+                if (targetEl) {
+                    targetEl.classList.add('tuto-highlight');
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    positionTooltip(targetEl);
+                    targetEl.style.pointerEvents = "auto";
+                    
+                    // Gestion de l'avancement automatique (clic ou menu déroulant)
+                    if (step.autoAction) {
+                        document.getElementById('tuto-btn-next').style.display = 'none'; // On force le MJ à faire l'action
+                        const listenEl = step.overrideTarget ? document.getElementById(step.overrideTarget) : targetEl;
+                        if (listenEl) {
+                            const fn = () => { setTimeout(() => { window.nextTutoStep(); }, 300); };
+                            listenEl.addEventListener(step.autoAction, fn);
+                            tutoListener = { el: listenEl, type: step.autoAction, fn: fn };
+                        }
+                    }
+                }
+            } else {
+                const tooltip = document.getElementById('tuto-tooltip');
+                tooltip.style.top = '50%'; tooltip.style.left = '50%';
+                tooltip.style.transform = 'translate(-50%, -50%)';
             }
             
             document.getElementById('tuto-title').innerHTML = step.title;
             document.getElementById('tuto-text').innerHTML = step.text;
             
             const btnNext = document.getElementById('tuto-btn-next');
-            btnNext.innerText = (tutoCurrentStep === steps.length - 1) ? "Terminer ✔️" : "Suivant ➔";
-            
-            positionTooltip(targetEl);
+            btnNext.innerText = (tutoCurrentStep === steps.length - 1) ? (tutoCurrentPhase === 2 ? "Fermer l'aide" : "Suivant ➔") : "Suivant ➔";
         }
         
         function positionTooltip(targetEl) {
             const tooltip = document.getElementById('tuto-tooltip');
-            if (!targetEl) return;
+            tooltip.style.transform = 'none';
             const rect = targetEl.getBoundingClientRect();
             
             if (rect.bottom + 200 < window.innerHeight) {
@@ -1034,11 +1104,12 @@
             }
             
             let leftPos = rect.left + (rect.width / 2) - 160;
-            if (leftPos < 10) leftPos = 10; // Empêche de sortir à gauche
-            if (leftPos + 320 > window.innerWidth) leftPos = window.innerWidth - 340; // Empêche de sortir à droite
+            if (leftPos < 10) leftPos = 10;
+            if (leftPos + 320 > window.innerWidth) leftPos = window.innerWidth - 340;
             tooltip.style.left = leftPos + 'px';
         }
 
+        // --- 🚀 INTERCEPTEUR DE BASE DE DONNÉES LOCALE ---
         function injectFakeTutoData() {
             globalTeams = {
                 "Les Requins": { active: true, bonus: 0, icon: "🦈" },
@@ -1049,39 +1120,199 @@
                 "t2": { name: "Marie", teamName: "Les Requins", active: true, pts: 2, isCaptain: false, avatar: "👩‍🚀" },
                 "t3": { name: "Sam", teamName: "Les Tigres", active: true, pts: 4, isCaptain: true, avatar: "🤠" },
                 "t4": { name: "Tom", teamName: "Les Tigres", active: true, pts: 1, isCaptain: false, avatar: "👽" },
-                "t5": { name: "Ninja", teamName: "Solo", active: true, pts: 8, isCaptain: false, avatar: "🥷", hasBeenWarned: true }
+                "t5": { name: "Ninja", teamName: "Solo", active: true, pts: 8, isCaptain: false, avatar: "🥷", hasBeenWarned: false }
             };
             
-            currentBuzzerId = "t4";
-            currentPlayer = { id: "t4", pseudo: "Tom", teamName: "Les Tigres", avatar: "👽" };
-            currentGameState = 'taken';
+            currentBuzzerId = null; currentPlayer = null;
+            currentGameState = 'waiting'; currentBlocked = {}; buzzHistory = [];
             
-            const box = document.getElementById('player-box');
-            box.style.display = "block";
-            document.getElementById('p-name').innerText = "Tom";
-            document.getElementById('p-avatar').innerHTML = "👽";
-            document.getElementById('p-team').innerHTML = `<div class="crest-mini-bg"><span class="crest-mini">🐅</span></div><span>Les Tigres</span>`;
-            
-            // On force le grisage visuel du bouton
+            document.getElementById('player-box').style.display = "none";
             const btnOpenBuzz = document.getElementById('btn-open-buzz');
-            if (btnOpenBuzz) {
-                btnOpenBuzz.disabled = true;
-                btnOpenBuzz.innerHTML = "🟢 BUZZERS OUVERTS";
-            }
+            if (btnOpenBuzz) { btnOpenBuzz.disabled = false; btnOpenBuzz.innerHTML = "Ouvrir Buzzers"; }
             
-            renderLobby();
-            renderTeamLobby();
+            renderLobby(); renderTeamLobby(); buildSimuPhones();
         }
 
         function clearFakeTutoData() {
-            globalTeams = {};
-            allPlayersData = {};
-            currentBuzzerId = null;
-            currentPlayer = null;
-            currentGameState = 'waiting';
+            globalTeams = {}; allPlayersData = {}; currentBuzzerId = null; currentPlayer = null;
+            currentGameState = 'waiting'; currentBlocked = {}; buzzHistory = [];
             document.getElementById('player-box').style.display = "none";
-            fullReset(); // Recharge les vraies données de la BDD
+            document.getElementById('simu-phones-container').style.display = "none";
+            document.getElementById('network-status-dot').innerText = '🟢';
+            document.getElementById('network-status-dot').classList.remove('pulse-alert');
+            fullReset();
         }
+
+        function buildSimuPhones() {
+            const container = document.getElementById('simu-phones-container');
+            container.innerHTML = "";
+            
+            Object.keys(allPlayersData).forEach(uid => {
+                const p = allPlayersData[uid];
+                const card = document.createElement('div');
+                card.className = 'simu-phone';
+                card.id = 'simu-ph-' + uid;
+                
+                card.innerHTML = `
+                    <div class="simu-kicked" id="simu-kick-${uid}">Banni 🟥</div>
+                    <div class="simu-avatar">${p.avatar}</div>
+                    <div class="simu-name">${p.name}</div>
+                    <div class="simu-team">${p.teamName === 'Solo' ? 'Solo' : '🛡️ ' + p.teamName}</div>
+                    <div class="simu-buzzer wait" id="simu-bz-${uid}" onclick="simuClickBuzzer('${uid}')">ATTENDEZ</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateSimuPhones() {
+            Object.keys(allPlayersData).forEach(uid => {
+                const bz = document.getElementById('simu-bz-' + uid);
+                const kickEl = document.getElementById('simu-kick-' + uid);
+                if(!bz) return;
+                
+                if (allPlayersData[uid].banned) { kickEl.style.display = "flex"; return; } 
+                else { kickEl.style.display = "none"; }
+                
+                if (currentGameState === 'waiting') {
+                    bz.className = "simu-buzzer wait"; bz.innerText = "ATTENDEZ";
+                } else if (currentGameState === 'ready') {
+                    if (currentBlocked[allPlayersData[uid].name]) {
+                        bz.className = "simu-buzzer blocked"; bz.innerText = "BLOQUÉ";
+                    } else {
+                        bz.className = "simu-buzzer ready"; bz.innerText = "BUZZEZ !";
+                    }
+                } else if (currentGameState === 'taken') {
+                    if (currentBuzzerId === uid) {
+                        bz.className = "simu-buzzer taken"; bz.innerText = "À TOI !";
+                    } else if (currentBlocked[allPlayersData[uid].name]) {
+                        bz.className = "simu-buzzer blocked"; bz.innerText = "BLOQUÉ";
+                    } else {
+                        bz.className = "simu-buzzer wait"; bz.innerText = "TROP TARD";
+                    }
+                }
+            });
+        }
+
+        function simuClickBuzzer(uid) {
+            if (currentGameState !== 'ready') return;
+            if (currentBlocked[allPlayersData[uid].name]) return;
+            
+            // Fait avancer le tuto si le MJ devait cliquer sur un téléphone
+            if (tutoCurrentPhase === 2 && tutoCurrentStep === 4) window.nextTutoStep();
+
+            const p = allPlayersData[uid];
+            currentGameState = 'taken';
+            currentBuzzerId = uid;
+            currentPlayer = { id: uid, pseudo: p.name, teamName: p.teamName, avatar: p.avatar };
+            
+            const btnOpenBuzz = document.getElementById('btn-open-buzz');
+            if (btnOpenBuzz) { btnOpenBuzz.disabled = true; btnOpenBuzz.innerHTML = "🟢 BUZZERS OUVERTS"; }
+            
+            const box = document.getElementById('player-box');
+            box.style.display = "block";
+            document.getElementById('p-name').innerText = p.name;
+            document.getElementById('p-avatar').innerHTML = p.avatar;
+            document.getElementById('p-team').innerHTML = p.teamName === "Solo" ? "Solo" : `<div class="crest-mini-bg"><span class="crest-mini">${globalTeams[p.teamName].icon}</span></div><span>${p.teamName}</span>`;
+            
+            updateSimuPhones();
+            renderLobby(); renderTeamLobby();
+        }
+
+        // 🚀 INTERCEPTION DES FONCTIONS CLÉS PENDANT LA SIMULATION
+        const originalStatusUpdate = window.statusUpdate;
+        window.statusUpdate = function(st) {
+            if (!window.isTutoRunning) { originalStatusUpdate(st); return; }
+            currentGameState = st;
+            if(st === 'ready') { currentBuzzerId = null; currentPlayer = null; document.getElementById('player-box').style.display = 'none'; }
+            
+            const btnOpenBuzz = document.getElementById('btn-open-buzz');
+            if (btnOpenBuzz) {
+                if (st === 'ready') { btnOpenBuzz.disabled = true; btnOpenBuzz.innerHTML = "🟢 BUZZERS OUVERTS"; }
+                else { btnOpenBuzz.disabled = false; btnOpenBuzz.innerHTML = "Ouvrir Buzzers"; }
+            }
+            updateSimuPhones(); renderLobby(); renderTeamLobby();
+            
+            // Fait avancer le tuto quand le MJ clique sur "Ouvrir Buzzers"
+            if (tutoCurrentPhase === 2 && tutoCurrentStep === 3 && st === 'ready') window.nextTutoStep(); 
+        };
+
+        const originalFullReset = window.fullReset;
+        window.fullReset = function() {
+            if (!window.isTutoRunning) { originalFullReset(); return; }
+            currentBlocked = {}; currentBuzzerId = null; currentPlayer = null; currentGameState = 'waiting';
+            document.getElementById('player-box').style.display = 'none';
+            window.statusUpdate('waiting');
+        };
+
+        const originalHandleError = window.handleError;
+        window.handleError = function() {
+            if (!window.isTutoRunning) { originalHandleError(); return; }
+            if(currentPlayer) {
+                const teamLockMode = document.getElementById('edit-room-team-lock') ? document.getElementById('edit-room-team-lock').value : 'individual';
+                if (teamLockMode === 'team' && currentPlayer.teamName !== 'Solo') {
+                    Object.values(allPlayersData).forEach(p => {
+                        if (p.teamName === currentPlayer.teamName) currentBlocked[p.name] = true;
+                    });
+                } else {
+                    currentBlocked[currentPlayer.pseudo] = true;
+                }
+                window.statusUpdate('ready');
+                
+                // Avance le tuto lors de la simulation d'arbitrage
+                if (tutoCurrentPhase === 2 && tutoCurrentStep === 5) window.nextTutoStep();
+            }
+        };
+
+        const originalHandleReward = window.handleReward;
+        window.handleReward = function(pts, m) {
+            if (!window.isTutoRunning) { originalHandleReward(pts, m); return; }
+            if(!currentPlayer) return;
+            
+            const uid = currentPlayer.id;
+            allPlayersData[uid].pts += pts;
+            if (currentPlayer.teamName !== "Solo") globalTeams[currentPlayer.teamName].bonus += pts;
+            
+            if(m === 'finish') { window.statusUpdate('waiting'); }
+            else { currentBlocked[currentPlayer.pseudo] = true; window.statusUpdate('ready'); }
+            
+            // Avance le tuto lors de la simulation d'arbitrage
+            if (tutoCurrentPhase === 2 && tutoCurrentStep === 5) window.nextTutoStep();
+        };
+
+        const originalKickPlayer = window.kickPlayer;
+        window.kickPlayer = function(uid, n) {
+            if (!window.isTutoRunning) { originalKickPlayer(uid, n); return; }
+            allPlayersData[uid].banned = true; allPlayersData[uid].active = false;
+            updateSimuPhones(); renderLobby(); renderTeamLobby();
+        };
+
+        const originalWarnPlayer = window.warnPlayer;
+        window.warnPlayer = function(uid, n) {
+            if (!window.isTutoRunning) { originalWarnPlayer(uid, n); return; }
+            allPlayersData[uid].hasBeenWarned = true;
+            renderLobby(); renderTeamLobby();
+        };
+        
+        const originalTransferCap = window.transferCaptaincy;
+        window.transferCaptaincy = function(oldId, oldName, newId, newName, teamName) {
+            if (!window.isTutoRunning) { originalTransferCap(oldId, oldName, newId, newName, teamName); return; }
+            if(oldId) allPlayersData[oldId].isCaptain = false;
+            allPlayersData[newId].isCaptain = true;
+            renderLobby(); renderTeamLobby(); renderTeamMembers(teamName);
+        };
+        
+        const originalForceRoomOpen = window.forceRoomOpen;
+        window.forceRoomOpen = function() {
+            if (!window.isTutoRunning) { originalForceRoomOpen(); return; }
+            // Géré spécifiquement dans showTutoStep via le hack (bouton réseau)
+        };
+        
+        const originalTriggerEndGame = window.triggerEndGame;
+        window.triggerEndGame = function() {
+            if (!window.isTutoRunning) { originalTriggerEndGame(); return; }
+            alert("🏁 BOUM ! Pluie de confettis sur votre TV.\n\nFélicitations, vous avez terminé la simulation !");
+            window.endTuto();
+        };
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {};
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
         
@@ -1562,6 +1793,9 @@
                 mjRooms.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
                 
                 renderHubRooms();
+                
+                // 🚀 DÉCLENCHE LA PHASE 0 (Le Menu Accueil)
+                if (typeof window.startTuto === 'function') setTimeout(() => window.startTuto(0, false), 500);
             }).catch(error => {
                 console.error(error);
                 alert("Erreur de connexion à la base de données : " + error.message);
@@ -2128,6 +2362,9 @@
         }
 
         function askMjNameAndCreate() { 
+            // 🚀 Clôture la phase 0 si elle était en cours
+            if (tutoCurrentPhase === 0 && window.isTutoRunning) window.endTuto();
+            
             document.getElementById('new-room-mj').value = mjProfileData.prenom || "MJ"; 
             document.getElementById('new-room-name').value = ""; 
             
@@ -2137,7 +2374,7 @@
             document.getElementById('modal-create-room').style.display = 'flex'; 
             setTimeout(() => {
                 document.getElementById('new-room-name').focus();
-                // 🚀 ON TENTE DE LANCER LA PHASE 1 DU TUTO
+                // 🚀 DÉCLENCHE LA PHASE 1
                 if (typeof window.startTuto === 'function') window.startTuto(1, false);
             }, 100); 
         }
