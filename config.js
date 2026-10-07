@@ -14,7 +14,7 @@ const APP_CONFIG = {
         APP: "1.281",         // Pour mj.html
         REMOTE: "1.163",      // Pour remote.html
         SCORES: "1.186",      // Pour scores.html
-        GUIDE: "1.027"        // Pour guide.html
+        GUIDE: "1.028"        // Pour guide.html
 	}
 };
 

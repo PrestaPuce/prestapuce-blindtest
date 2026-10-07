@@ -15,9 +15,18 @@
             if(versionSpan) versionSpan.innerText = APP_CONFIG.VERSIONS.GUIDE;
         });
 
+        // 🚀 FONCTION POUR IGNORER LES ACCENTS ET CÉDILLES
+        function removeAccents(str) {
+            if (!str) return "";
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
         // 🚀 MOTEUR DE RECHERCHE DYNAMIQUE INTÉGRÉ
         function searchGuide() {
-            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            // On récupère la recherche brute et on lui enlève ses accents
+            const rawQuery = document.getElementById('search-input').value.toLowerCase().trim();
+            const query = removeAccents(rawQuery);
+            
             const sections = document.querySelectorAll('.guide-section');
             const toc = document.getElementById('toc-grid');
             const noRes = document.getElementById('no-results');
@@ -35,10 +44,11 @@
             let found = 0;
             
             sections.forEach(sec => {
-                const text = sec.innerText.toLowerCase();
-                const keywords = (sec.getAttribute('data-keywords') || "").toLowerCase();
+                // On enlève aussi les accents du texte des paragraphes et des mots-clés
+                const text = removeAccents(sec.innerText.toLowerCase());
+                const keywords = removeAccents((sec.getAttribute('data-keywords') || "").toLowerCase());
                 
-                // Si le texte visible OU les mots-clés cachés correspondent
+                // Si le texte filtré OU les mots-clés filtrés correspondent
                 if (text.includes(query) || keywords.includes(query)) {
                     sec.style.display = 'block';
                     found++;
@@ -65,6 +75,8 @@
             --mj: #2ecc71; 
             --blue: #3498db; 
             --danger: #e74c3c;
+            --gold: #f39c12;
+            --sidebar-width: 280px;
         }
         
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.5; overflow-x: hidden; }
@@ -112,7 +124,7 @@
         .chunk b { color: white; }
 
         /* BADGES */
-        .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; border: 1px solid currentColor; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; border: 1px solid currentColor; }
         .b-green { color: var(--mj); background: rgba(46, 204, 113, 0.1); }
         .b-red { color: var(--danger); background: rgba(231, 76, 60, 0.1); }
         .b-gold { color: var(--gold); background: rgba(241, 196, 15, 0.1); }
@@ -277,7 +289,7 @@
             </div>
 
             <div class="chunk">
-                <h4>L'Intelligence du Système d'Équipe</h4>
+                <h4>L'Intelligence des Équipes</h4>
                 <ul>
                     <li><b>Succession Automatique (Anti-Trône Vide) :</b> Si un Capitaine quitte la partie (ou si son téléphone s'éteint), le système détecte le "trône vide". Il désigne automatiquement le joueur actif le plus ancien du clan comme nouveau Capitaine et l'alerte sur son écran !</li>
                     <li><b>Transfert de Pouvoir (MJ) :</b> Un capitaine est incompétent ? Depuis votre console, déroulez les joueurs de l'équipe, cliquez sur le menu (⋮) d'un autre membre et choisissez <b>Nommer Capitaine</b>.</li>
