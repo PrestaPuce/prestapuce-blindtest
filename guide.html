@@ -13,7 +13,6 @@
             const favicon = document.getElementById('page-favicon');
             if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
             
-            // 🚀 Injection dynamique de la version dans le texte de la page
             const versionSpan = document.getElementById('display-guide-version');
             if(versionSpan) versionSpan.innerText = APP_CONFIG.VERSIONS.GUIDE;
         });
@@ -82,6 +81,7 @@
         .badge-yellow { background: rgba(241, 196, 15, 0.2); color: var(--accent); border: 1px solid var(--accent); }
         .badge-red { background: rgba(231, 76, 60, 0.2); color: var(--danger); border: 1px solid var(--danger); }
         .badge-green { background: rgba(46, 204, 113, 0.2); color: var(--mj); border: 1px solid var(--mj); }
+        .badge-blue { background: rgba(52, 152, 219, 0.2); color: var(--blue); border: 1px solid var(--blue); }
 
         footer { text-align: center; padding: 40px 0; border-top: 1px solid #333; margin-top: 60px; color: #7f8c8d; }
 
@@ -107,6 +107,7 @@
             <a href="#intro" class="active">🌟 Introduction</a>
             <a href="#moteur">⚡ L'Arbitrage Asynchrone</a>
             <a href="#demarrage">🚀 Création de Salle</a>
+            <a href="#reseau">📡 Sécurité & Réseau</a>
             <a href="#gestion-joueurs">👥 Gestion des Joueurs</a>
             <a href="#gestion-equipes">🛡️ Le Système de Clans</a>
             <a href="#medias">🎨 Médias & Écrans</a>
@@ -173,13 +174,37 @@
                 </div>
                 <div class="card b-purple">
                     <h4>Modes de Jeu</h4>
-                    <p><strong>Mixte :</strong> Les joueurs peuvent choisir de jouer en Solo ou de créer/rejoindre une équipe.<br><br><strong>100% Solo ou 100% Équipes :</strong> Force les téléphones à s'adapter. (Si vous activez "100% Équipes" en pleine partie, les joueurs Solos seront alertés et devront rejoindre un clan).</p>
+                    <p><strong>Mixte :</strong> Les joueurs peuvent choisir de jouer en Solo ou de créer/rejoindre une équipe.<br><br><strong>100% Solo ou 100% Équipes :</strong> Force les téléphones à s'adapter (dissolution automatique des équipes existantes ou obligation de rejoindre un clan).</p>
                 </div>
+            </div>
+
+            <div class="info-box">
+                <h4>🛑 La Règle de Blocage (Erreur)</h4>
+                <p>Si un joueur donne une mauvaise réponse et que vous cliquez sur <strong>Erreur</strong>, vous pouvez choisir l'impact :</p>
+                <ul>
+                    <li><strong>Blocage Individuel :</strong> Seul le joueur qui s'est trompé est verrouillé pour la suite du titre. Le reste de son équipe peut encore buzzer.</li>
+                    <li><strong>Blocage Équipe :</strong> La mauvaise réponse verrouille les buzzers de <strong>toute son équipe</strong>. Idéal pour instaurer une vraie discipline de groupe !</li>
+                </ul>
             </div>
 
             <div class="alert-box">
                 <h4>🔄 Le Mode "Règles du Jeu" en direct</h4>
-                <p>Vous n'êtes jamais bloqué ! Sur votre console, le bouton <strong>"⚙️ RÈGLES DU JEU"</strong> vous permet de modifier ces paramètres en cours de partie. L'interface des téléphones des joueurs s'adaptera en temps réel.</p>
+                <p>Vous n'êtes jamais bloqué ! Sur votre console, le bouton <strong>"⚙️ RÈGLES DU JEU"</strong> vous permet de modifier tous ces paramètres en plein milieu de la partie. Les téléphones des joueurs s'adapteront en temps réel.</p>
+            </div>
+        </section>
+
+        <!-- RÉSEAU ET SÉCURITÉ -->
+        <section id="reseau">
+            <h2>📡 Sécurité & Réseau</h2>
+            <p>L'événementiel implique parfois des aléas techniques. La Console MJ intègre des outils de diagnostic en direct.</p>
+
+            <div class="pro-box" style="margin-top: 20px;">
+                <h3 style="color: var(--mj);">Le Voyant Réseau & La Porte de Secours</h3>
+                <p>Dans l'en-tête de votre console MJ, juste à côté du "CODE SALLE", vous trouverez deux éléments cruciaux :</p>
+                <ul>
+                    <li><strong>L'indicateur d'état (🟢/🔴) :</strong> Il vous indique en temps réel la santé de votre connexion au serveur central.</li>
+                    <li><strong>Le bouton "Forcer l'Ouverture" (🔄) :</strong> Il arrive qu'une micro-coupure Wi-Fi sur votre ordinateur ferme accidentellement l'accès public à la salle. Si de nouveaux joueurs n'arrivent plus à scanner le QR Code ou ne trouvent pas la partie, <strong>cliquez sur ce bouton 🔄</strong>. Cela réparera la "porte d'entrée" instantanément sans perturber les joueurs déjà connectés.</li>
+                </ul>
             </div>
         </section>
 
@@ -211,6 +236,7 @@
             </div>
             
             <p style="margin-top:20px;"><strong>✏️ Censure d'Avatar :</strong> Un selfie déplacé ? Éditez le joueur, cliquez sur "Censurer" et son image sera instantanément remplacée par le logo de votre entreprise, y compris sur l'Écran Géant.</p>
+            <p><strong>⚡ Forcer la Main :</strong> Un joueur crie la bonne réponse mais a oublié de buzzer ? Cliquez sur "Forcer le buzzer" dans son menu pour lui attribuer la main. Son téléphone s'allume en vert et les autres se bloquent.</p>
         </section>
 
         <!-- GESTION EQUIPES -->
@@ -225,9 +251,10 @@
 
             <h3>L'Intelligence des Équipes</h3>
             <ul>
-                <li><strong>Succession Automatique (Anti-Trône Vide) :</strong> Si le capitaine quitte la partie ou n'a plus de batterie, le système ne laisse pas l'équipe orpheline. L'application désigne automatiquement le membre le plus ancien comme nouveau Capitaine et l'alerte sur son écran !</li>
+                <li><strong>Succession Automatique (Anti-Trône Vide) :</strong> Si le capitaine quitte la partie ou n'a plus de batterie, le système ne laisse pas l'équipe orpheline. L'application désigne automatiquement le membre actif le plus ancien comme nouveau Capitaine et l'alerte sur son écran !</li>
                 <li><strong>Mise en Pause :</strong> Une table va manger ou fume une cigarette ? Mettez l'équipe en pause depuis la Console MJ. Leurs scores sont congelés au chaud. Lorsqu'ils reviendront, un pop-up leur proposera de récupérer leur équipe instantanément.</li>
                 <li><strong>Transfert Forcé (MJ) :</strong> Le Capitaine refuse de céder sa place ? Dans la console MJ, ouvrez l'accordéon d'une équipe, cliquez sur "⋮" d'un membre et choisissez <strong>"👑 Nommer Capitaine"</strong>. Le transfert de pouvoir est exécuté de force.</li>
+                <li><strong>Ajustement Bonus :</strong> Les boutons <strong>[+]</strong> et <strong>[-]</strong> dans la barre de l'équipe vous permettent d'ajouter des points bonus à l'équipe entière (sans modifier les scores individuels des joueurs).</li>
             </ul>
         </section>
 
