@@ -398,9 +398,17 @@
         
         <p class="section-title">SÉCURITÉ</p>
         <div class="password-wrapper"><input type="password" id="prof-pass-current" placeholder="Mot de passe actuel" style="border-color:var(--danger);" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
-        <div class="password-wrapper"><input type="password" id="prof-pass" placeholder="Nouveau mot de passe" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
-        <div class="password-wrapper"><input type="password" id="prof-pass-conf" placeholder="Confirmer le mot de passe" style="margin-bottom:0;" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
-        <span class="input-helper" style="margin-top:5px; margin-bottom:15px;">8 caractères, 1 Maj, 1 Min, 1 Chiffre, 1 Spécial.</span>
+        <div class="password-wrapper"><input type="password" id="prof-pass" placeholder="Nouveau mot de passe" oninput="window.checkMjPasswordMatch('prof-pass', 'prof-pass-conf', 'rule-prof-match', 'rule-prof-len', 'rule-prof-maj', 'rule-prof-min', 'rule-prof-num', 'rule-prof-spe', 'rules-list-prof', 'btn-save-profile')" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+        <div class="password-wrapper"><input type="password" id="prof-pass-conf" placeholder="Confirmer le mot de passe" style="margin-bottom:0;" oninput="window.checkMjPasswordMatch('prof-pass', 'prof-pass-conf', 'rule-prof-match', 'rule-prof-len', 'rule-prof-maj', 'rule-prof-min', 'rule-prof-num', 'rule-prof-spe', 'rules-list-prof', 'btn-save-profile')" onkeypress="if(event.key==='Enter') saveProfile()"><div class="password-icon" onclick="togglePasswordVisibility('prof-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+        
+        <ul id="rules-list-prof" style="display:none; list-style:none; padding:10px; font-size:0.75rem; color:#e74c3c; line-height:1.6; background:rgba(0,0,0,0.2); border-radius:8px; margin-top:10px; margin-bottom:15px; text-align: left;">
+            <li id="rule-prof-match" style="display:none; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">❌ Les mots de passe ne correspondent pas</li>
+            <li id="rule-prof-len">❌ 8 caractères minimum</li>
+            <li id="rule-prof-maj">❌ 1 Majuscule</li>
+            <li id="rule-prof-min">❌ 1 Minuscule</li>
+            <li id="rule-prof-num">❌ 1 Chiffre</li>
+            <li id="rule-prof-spe">❌ 1 Caractère spécial</li>
+        </ul>
         
         <div style="display:flex; gap:10px; margin-top:10px;">
             <button id="btn-save-profile" onclick="saveProfile()" style="background:var(--mj-color); margin:0; flex:2;">💾 ENREGISTRER</button>
@@ -798,8 +806,17 @@
            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
                <h4 style="margin-top:0; color:#bdc3c7; text-align:left;">Modifier les identifiants</h4>
                <div class="password-wrapper"><input type="password" id="sa-det-pass-current" placeholder="Mot de passe ACTUEL du MJ" style="border-color:var(--danger);" onkeypress="if(event.key==='Enter') saveSAMjDetails()"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-current', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
-               <div class="password-wrapper"><input type="password" id="sa-det-pass-new" placeholder="Nouveau mot de passe" onkeypress="if(event.key==='Enter') saveSAMjDetails()"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-new', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
-               <div class="password-wrapper" style="margin-bottom:0;"><input type="password" id="sa-det-pass-conf" placeholder="Confirmer le nouveau mot de passe" style="margin-bottom:0;" onkeypress="if(event.key==='Enter') saveSAMjDetails()"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+               <div class="password-wrapper"><input type="password" id="sa-det-pass-new" placeholder="Nouveau mot de passe" oninput="window.checkMjPasswordMatch('sa-det-pass-new', 'sa-det-pass-conf', 'rule-sa-match', 'rule-sa-len', 'rule-sa-maj', 'rule-sa-min', 'rule-sa-num', 'rule-sa-spe', 'rules-list-sa', 'btn-sa-save')" onkeypress="if(event.key==='Enter') saveSAMjDetails()"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-new', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+               <div class="password-wrapper" style="margin-bottom:0;"><input type="password" id="sa-det-pass-conf" placeholder="Confirmer le nouveau mot de passe" style="margin-bottom:0;" oninput="window.checkMjPasswordMatch('sa-det-pass-new', 'sa-det-pass-conf', 'rule-sa-match', 'rule-sa-len', 'rule-sa-maj', 'rule-sa-min', 'rule-sa-num', 'rule-sa-spe', 'rules-list-sa', 'btn-sa-save')" onkeypress="if(event.key==='Enter') saveSAMjDetails()"><div class="password-icon" onclick="togglePasswordVisibility('sa-det-pass-conf', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+               
+               <ul id="rules-list-sa" style="display:none; list-style:none; padding:10px; font-size:0.75rem; color:#e74c3c; line-height:1.6; background:rgba(0,0,0,0.2); border-radius:8px; margin-top:10px; margin-bottom:0; text-align: left;">
+                    <li id="rule-sa-match" style="display:none; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">❌ Les mots de passe ne correspondent pas</li>
+                    <li id="rule-sa-len">❌ 8 caractères minimum</li>
+                    <li id="rule-sa-maj">❌ 1 Majuscule</li>
+                    <li id="rule-sa-min">❌ 1 Minuscule</li>
+                    <li id="rule-sa-num">❌ 1 Chiffre</li>
+                    <li id="rule-sa-spe">❌ 1 Caractère spécial</li>
+               </ul>
            </div>
            <button id="btn-sa-save" onclick="saveSAMjDetails()" style="background:var(--mj-color); margin-top:20px; margin-bottom:0; font-size:1.1rem;">💾 ENREGISTRER</button>
            <button class="btn-cancel" onclick="deleteMjAccount()" style="width:100%; margin-top:20px; margin-bottom:0;">🗑️ SUPPRIMER CE COMPTE MJ</button>
@@ -810,11 +827,19 @@
        <div class="modal-box">
            <h2 style="color:var(--mj-color); margin-top:0;">➕ NOUVEAU COMPTE MJ</h2>
            <input type="email" id="sa-create-email" placeholder="Email du MJ" onkeypress="if(event.key==='Enter') createMjAction()">
-           <div class="password-wrapper"><input type="password" id="sa-create-pass" placeholder="Mot de passe" onkeypress="if(event.key==='Enter') createMjAction()"><div class="password-icon" onclick="togglePasswordVisibility('sa-create-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
-           <span class="input-helper" style="margin-top:0; margin-bottom:10px;">8 car. min, 1 Maj, 1 Min, 1 Chiffre, 1 Spécial.</span>
-           <input type="text" id="sa-create-prenom" placeholder="Prénom (Affiché aux joueurs)" onkeypress="if(event.key==='Enter') createMjAction()">
+           <div class="password-wrapper" style="margin-bottom:0;"><input type="password" id="sa-create-pass" placeholder="Mot de passe" oninput="window.checkMjPasswordMatch('sa-create-pass', 'sa-create-pass', null, 'rule-crea-len', 'rule-crea-maj', 'rule-crea-min', 'rule-crea-num', 'rule-crea-spe', 'rules-list-crea', 'btn-sa-create')" onkeypress="if(event.key==='Enter') createMjAction()"><div class="password-icon" onclick="togglePasswordVisibility('sa-create-pass', this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div></div>
+           
+           <ul id="rules-list-crea" style="display:none; list-style:none; padding:10px; font-size:0.75rem; color:#e74c3c; line-height:1.6; background:rgba(0,0,0,0.2); border-radius:8px; margin-top:10px; margin-bottom:10px; text-align: left;">
+                <li id="rule-crea-len">❌ 8 caractères minimum</li>
+                <li id="rule-crea-maj">❌ 1 Majuscule</li>
+                <li id="rule-crea-min">❌ 1 Minuscule</li>
+                <li id="rule-crea-num">❌ 1 Chiffre</li>
+                <li id="rule-crea-spe">❌ 1 Caractère spécial</li>
+           </ul>
+           
+           <input type="text" id="sa-create-prenom" placeholder="Prénom (Affiché aux joueurs)" style="margin-top:10px;" onkeypress="if(event.key==='Enter') createMjAction()">
            <div style="display:flex; gap:10px; margin-top:15px;">
-               <button onclick="createMjAction()" style="background:var(--mj-color); flex:2;">CRÉER (30 Jours)</button>
+               <button id="btn-sa-create" onclick="createMjAction()" style="background:var(--mj-color); flex:2;">CRÉER (30 Jours)</button>
                <button class="btn-cancel" onclick="document.getElementById('modal-sa-create').style.display='none'" style="flex:1;">ANNULER</button>
            </div>
        </div>
@@ -954,6 +979,64 @@
         }
 
         function isValidPassword(pwd) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(pwd); }
+
+        // 🚀 MOTEUR DE VÉRIFICATION VISUELLE DU MOT DE PASSE (Unifié)
+        window.checkMjPasswordMatch = function(idPass1, idPass2, idMatch, idLen, idMaj, idMin, idNum, idSpe, idList, idBtn) {
+            var p1 = document.getElementById(idPass1).value;
+            var p2 = document.getElementById(idPass2).value;
+            var rulesZone = document.getElementById(idList);
+            var btnSave = document.getElementById(idBtn);
+            var matchEl = idMatch ? document.getElementById(idMatch) : null;
+            
+            if(p1.length > 0 || (idPass1 !== idPass2 && p2.length > 0)) {
+                rulesZone.style.display = 'block';
+            } else { 
+                rulesZone.style.display = 'none'; 
+                if(btnSave) btnSave.disabled = false; // On débloque si le MJ a effacé le champ pour annuler la modif
+                return; 
+            }
+
+            let isMatch = true;
+            if (matchEl) {
+                matchEl.style.display = 'block';
+                if(p1 === p2 && p1.length > 0) {
+                    matchEl.innerHTML = "✅ Les mots de passe correspondent";
+                    matchEl.style.color = "var(--success)";
+                    isMatch = true;
+                } else {
+                    matchEl.innerHTML = "❌ Les mots de passe ne correspondent pas";
+                    matchEl.style.color = "#e74c3c";
+                    isMatch = false;
+                }
+            }
+
+            const rules = [
+                { id: idLen, test: p1.length >= 8, text: '8 caractères minimum' },
+                { id: idMaj, test: /[A-Z]/.test(p1), text: '1 Majuscule' },
+                { id: idMin, test: /[a-z]/.test(p1), text: '1 Minuscule' },
+                { id: idNum, test: /[0-9]/.test(p1), text: '1 Chiffre' },
+                { id: idSpe, test: /[^A-Za-z0-9]/.test(p1), text: '1 Caractère spécial' }
+            ];
+            
+            let allValid = true;
+            rules.forEach(r => {
+                let el = document.getElementById(r.id);
+                if (el) {
+                    if (r.test) {
+                        el.style.color = "var(--success)";
+                        el.innerHTML = "✅ " + r.text;
+                    } else {
+                        el.style.color = "#e74c3c";
+                        el.innerHTML = "❌ " + r.text;
+                        allValid = false;
+                    }
+                }
+            });
+            
+            if(btnSave) {
+                btnSave.disabled = !(allValid && isMatch);
+            }
+        };
 
         window.onload = function() {
             document.title = `Console MJ Pro - Presta'Puce (v${APP_VERSION})`;
@@ -1243,6 +1326,9 @@
         function adjSaDays(val) { const i = document.getElementById('sa-det-days-input'); let f = (parseInt(i.value) || 0) + val; if(f < 0) f = 0; i.value = f; }
         function setUnlimited() { document.getElementById('sa-det-days-input').value = 9999; }
         function saveSAMjDetails() {
+            const btnSave = document.getElementById('btn-sa-save');
+            if (btnSave && btnSave.disabled) return; // 🚀 PROTECTION ANTI-BYPASS "ENTRÉE"
+            
             if(!targetMjUid || !allUsersData[targetMjUid]) return; const u = allUsersData[targetMjUid]; const oldEmail = u.email || "";
             const updates = { prenom: document.getElementById('sa-det-prenom').value.trim(), nom: document.getElementById('sa-det-nom').value.trim(), expirationDate: Date.now() + ((parseInt(document.getElementById('sa-det-days-input').value) || 0) * 86400000) };
             const newEmail = document.getElementById('sa-det-email').value.trim(), currentPass = document.getElementById('sa-det-pass-current').value, newPass = document.getElementById('sa-det-pass-new').value, confPass = document.getElementById('sa-det-pass-conf').value;
@@ -1261,6 +1347,9 @@
             } else { db.ref('users/' + targetMjUid).update(updates).then(() => { alert("Enregistré !"); document.getElementById('modal-sa-mj-details').style.display = 'none'; }); }
         }
         function createMjAction() {
+            const btnCreate = document.getElementById('btn-sa-create');
+            if (btnCreate && btnCreate.disabled) return; // 🚀 PROTECTION ANTI-BYPASS "ENTRÉE"
+            
             const email = document.getElementById('sa-create-email').value.trim(), pass = document.getElementById('sa-create-pass').value, prenom = document.getElementById('sa-create-prenom').value.trim();
             if(!email || !isValidPassword(pass)) return alert("Email invalide ou mdp non sécurisé.");
             secondaryAuth.createUserWithEmailAndPassword(email, pass).then((uc) => {
@@ -1815,6 +1904,10 @@
         
         async function saveProfile() {
             if(mjProfileData.isGuest===true) return alert("Action impossible en Découverte.");
+            
+            const btn = document.getElementById('btn-save-profile');
+            if(btn && btn.disabled) return; // 🚀 PROTECTION ANTI-BYPASS "ENTRÉE"
+            
             const user = auth.currentUser; if(!user) return;
             const newE = document.getElementById('prof-email').value.trim(), passC = document.getElementById('prof-pass-current').value, pass1 = document.getElementById('prof-pass').value, pass2 = document.getElementById('prof-pass-conf').value;
             const eCh = newE!==user.email, pCh = pass1!=="";
