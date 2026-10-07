@@ -511,6 +511,8 @@
                     </div>
                 </div>
                 <div class="header-actions">
+                    <!-- 🚀 NOUVEAU : La couronne de Capitaine placée juste avant la roue dentée -->
+                    <div class="icon-btn" id="btn-header-captain" onclick="openTeamManagement()" title="Gérer mon équipe" style="display:none; background:rgba(241, 196, 15, 0.2); border:1px solid var(--gold);">👑</div>
                     <div class="icon-btn" onclick="openSettings()" title="Réglages du profil">⚙️</div>
                     <div class="icon-btn" onclick="showQR()">🔗</div>
                     <div class="icon-btn" onclick="confirmQuit()" style="background:var(--danger);">✕</div>
@@ -2684,11 +2686,9 @@
             const miniAv = document.getElementById('game-avatar');
             if(player.avatar.length > 20) miniAv.innerHTML = `<img src="${player.avatar}" style="width:100%; height:100%; object-fit:cover;">`; else miniAv.innerText = player.avatar;
             
-            /* PATCH V1.180 : Couronne cliquable & 🚀 NOUVEAU : Carton Jaune */
-            let crownHtml = (isCaptain && player.team !== "Solo") ? " <span style='font-size:1.2rem; cursor:pointer; filter:drop-shadow(0 0 4px gold);' onclick='openTeamManagement()' title='Gérer mon équipe'>👑</span>" : "";
+            // 🚀 PATCH : Carton Jaune seul à côté du pseudo (La couronne est partie en haut à droite)
             let warnHtml = player.hasBeenWarned ? " <span style='font-size:1rem; margin-left:5px; filter:drop-shadow(0 0 2px red);' title='Avertissement reçu'>🟨</span>" : "";
-            
-            document.getElementById('game-pseudo').innerHTML = player.pseudo + crownHtml + warnHtml;
+            document.getElementById('game-pseudo').innerHTML = player.pseudo + warnHtml;
             
             const teamEl = document.getElementById('game-team'); const badgeEl = document.getElementById('team-badge'); const buzzerBg = document.getElementById('buzzer-bg');
             let bgImg = player.avatar;
@@ -2705,6 +2705,10 @@
             
             const btnManage = document.getElementById('btn-manage-team');
             if(btnManage) btnManage.style.display = (isCaptain && player.team !== "Solo") ? "block" : "none";
+            
+            // 🚀 NOUVEAU : Affichage de la couronne en haut à droite à côté de la roue dentée
+            const btnHeaderCaptain = document.getElementById('btn-header-captain');
+            if(btnHeaderCaptain) btnHeaderCaptain.style.display = (isCaptain && player.team !== "Solo") ? "flex" : "none";
         }
 
         // --- GESTION ÉQUIPE (CAPITAINE) TEMPS RÉEL + RECHERCHE UNIFIÉE ---
@@ -3048,6 +3052,9 @@
                         player.teamIcon = "";
                         isCaptain = false;
                         updateGameHeader();
+                        // Fermeture d'urgence des modales d'équipe ouvertes
+                        document.getElementById('overlay-manage-team').style.display = 'none';
+                        document.getElementById('overlay-crest-edit').style.display = 'none';
                     } else {
                         checkWhyKickedAndShowModal(oldTeamName);
                     }
