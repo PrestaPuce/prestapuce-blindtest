@@ -317,6 +317,12 @@
         .tuto-btn-skip { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
         .tuto-btn-next { background: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center; }
         .tuto-highlight { position: relative !important; z-index: 999999 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; background: var(--card-bg) !important; border-radius: 8px; }
+        
+        /* FIX BUG DE DECALAGE DU LOGO ET DES BOUTONS */
+        #top-right-tools.tuto-highlight { position: fixed !important; right: 15px !important; top: 15px !important; background: transparent !important; box-shadow: none !important; }
+        #top-right-tools.tuto-highlight .top-right-btn { box-shadow: 0 0 0 2px var(--accent), 0 0 20px rgba(241, 196, 15, 0.8) !important; pointer-events: none; }
+        #global-mj-logo-container.tuto-highlight { position: fixed !important; top: 15px !important; left: 15px !important; background: transparent !important; box-shadow: none !important; }
+        #global-mj-logo-container.tuto-highlight .flip-inner { box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; border-radius: 8px; pointer-events: none; }
 
         /* VRAIS FAUX TÉLÉPHONES (Clones de index.html) */
         #simu-phones-container { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 800px; z-index: 999999; justify-content: space-between; gap: 10px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
@@ -375,7 +381,7 @@
         <button class="top-right-btn" onclick="openScoreBoard()">📺 Scores</button>
         <button class="top-right-btn" onclick="showRemoteQR()">📱 Remote</button>
         <button class="top-right-btn" onclick="toggleGuide()">📖 Guide</button>
-        <button class="top-right-btn" style="border-color:var(--accent); color:var(--accent);" onclick="window.startTuto(0, true)">🎓 Bac à Sable</button>
+        <button class="top-right-btn" style="background:rgba(241, 196, 15, 0.15); border: 2px solid var(--accent); color: var(--accent); white-space: normal; line-height: 1.2; padding: 6px 2px;" onclick="window.startTuto(2, true)">🎓 Tutoriel<br>"(Bac à Sable)"</button>
     </div>
 
     <div id="univ-lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:30000; align-items:center; justify-content:space-between; padding:0 20px; box-sizing:border-box;" onclick="if(event.target.id==='univ-lightbox') closeLightbox()">
@@ -980,14 +986,15 @@
         ];
 
         window.startTuto = function(phase, isForced = false) {
-            let state = localStorage.getItem('mj_tuto_state');
+            // Changement de clé pour ignorer vos anciens tests et forcer la question
+            let state = localStorage.getItem('mj_tuto_state_v2');
             
             if (!isForced) {
                 if (phase === 0 && !state) {
-                    if (confirm("👋 Bienvenue pour votre première connexion !\nSouhaitez-vous lancer le Simulateur de Vol pour vous entraîner avec de faux téléphones virtuels avant de jouer ?\n\n(Vous pourrez le relancer plus tard depuis le bouton 'Bac à Sable').")) {
-                        localStorage.setItem('mj_tuto_state', 'accepted');
+                    if (confirm("👋 Bienvenue pour votre première connexion !\nSouhaitez-vous lancer le Simulateur de Vol pour vous entraîner avec de faux téléphones virtuels avant de jouer ?\n\n(Vous pourrez le relancer plus tard depuis le bouton 'Tutoriel').")) {
+                        localStorage.setItem('mj_tuto_state_v2', 'accepted');
                     } else {
-                        localStorage.setItem('mj_tuto_state', 'done'); return;
+                        localStorage.setItem('mj_tuto_state_v2', 'done'); return;
                     }
                 } else if (state === 'done') { return; } 
                 else if (phase !== 0 && state !== 'accepted') { return; }
@@ -1023,7 +1030,7 @@
 
         window.endTuto = function() {
             window.isTutoRunning = false;
-            localStorage.setItem('mj_tuto_state', 'done');
+            localStorage.setItem('mj_tuto_state_v2', 'done');
             document.getElementById('tuto-overlay').style.display = 'none';
             document.getElementById('tuto-tooltip').style.display = 'none';
             document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
@@ -2362,8 +2369,11 @@
         }
 
         function askMjNameAndCreate() { 
-            // 🚀 Clôture la phase 0 si elle était en cours
-            if (tutoCurrentPhase === 0 && window.isTutoRunning) window.endTuto();
+            let wasTutoPhase0 = (typeof window.isTutoRunning !== 'undefined' && window.isTutoRunning && tutoCurrentPhase === 0);
+            if (wasTutoPhase0) {
+                // On nettoie la phase 0 visuellement, mais on ne fait PAS endTuto() pour ne pas marquer le tuto comme "done"
+                document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
+            }
             
             document.getElementById('new-room-mj').value = mjProfileData.prenom || "MJ"; 
             document.getElementById('new-room-name').value = ""; 
@@ -2374,8 +2384,8 @@
             document.getElementById('modal-create-room').style.display = 'flex'; 
             setTimeout(() => {
                 document.getElementById('new-room-name').focus();
-                // 🚀 DÉCLENCHE LA PHASE 1
-                if (typeof window.startTuto === 'function') window.startTuto(1, false);
+                // 🚀 DÉCLENCHE LA PHASE 1 EN FORÇAGE SI ON VIENT DE LA PHASE 0
+                if (wasTutoPhase0 && typeof window.startTuto === 'function') window.startTuto(1, true);
             }, 100); 
         }
         
@@ -2503,14 +2513,19 @@
             try { roomRef.child('showDefaultCrests').set(showDefaultCrests); } catch(e){}
             
             try { syncLibraryToRoom(); } catch(e){ console.error(e); }
+            let wasTutoPhase1 = (typeof window.isTutoRunning !== 'undefined' && window.isTutoRunning && tutoCurrentPhase === 1);
+            if (wasTutoPhase1) {
+                document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
+            }
+
             try { initMJLogic(); } catch(e){ console.error(e); }
             try { initLibrarySync(); } catch(e){ console.error(e); }
             try { loadBgLibrary('dashboard'); } catch(e){ console.error(e); }
             try { openScoreBoard(); } catch(e){ console.error(e); }
             
-            // 🚀 ON LANCE LA PHASE 2 DU TUTO (Qui vérifiera toute seule si elle doit s'exécuter ou non)
+            // 🚀 ON LANCE LE BAC A SABLE (PHASE 2 EN FORÇAGE SI ON VIENT DE LA PHASE 1)
             setTimeout(() => {
-                if (typeof window.startTuto === 'function') window.startTuto(2, false);
+                if (wasTutoPhase1 && typeof window.startTuto === 'function') window.startTuto(2, true);
             }, 1000);
         }
 		
