@@ -307,6 +307,16 @@
         /* Fix des textes gris clairs */
         .day-mode span[style*="color:#bdc3c7"], .day-mode span[style*="color: #bdc3c7"] { color: #7f8c8d !important; }
         .day-mode small[style*="color:#bdc3c7"] { color: #7f8c8d !important; }
+
+        /* 🚀 CSS DU TUTORIEL MJ */
+        #tuto-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999998; pointer-events: auto; }
+        #tuto-tooltip { display: none; position: absolute; background: var(--card-bg); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; width: 320px; z-index: 999999; box-shadow: 0 15px 35px rgba(0,0,0,0.8); backdrop-filter: blur(15px); color: white; transition: all 0.3s ease; }
+        #tuto-tooltip h3 { color: var(--accent); margin: 0 0 10px 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+        #tuto-tooltip p { font-size: 0.95rem; margin: 0 0 20px 0; color: #ecf0f1; line-height: 1.4; }
+        .tuto-buttons { display: flex; justify-content: space-between; gap: 10px; }
+        .tuto-btn-skip { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
+        .tuto-btn-next { background: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; }
+        .tuto-highlight { position: relative !important; z-index: 999999 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; background: var(--card-bg) !important; border-radius: 8px; pointer-events: none !important; }
     </style>
 </head>
 <body>
@@ -330,10 +340,22 @@
         </div>
     </div>
 
+    <!-- 🚀 HTML DU TUTORIEL -->
+    <div id="tuto-overlay"></div>
+    <div id="tuto-tooltip">
+        <h3 id="tuto-title">Titre</h3>
+        <p id="tuto-text">Texte explicatif</p>
+        <div class="tuto-buttons">
+            <button class="tuto-btn-skip" onclick="window.endTuto()">Zapper</button>
+            <button class="tuto-btn-next" onclick="window.nextTutoStep()" id="tuto-btn-next">Suivant ➔</button>
+        </div>
+    </div>
+
     <div id="top-right-tools" class="ghost-ui">
         <button class="top-right-btn" onclick="openScoreBoard()">📺 Scores</button>
         <button class="top-right-btn" onclick="showRemoteQR()">📱 Remote</button>
         <button class="top-right-btn" onclick="toggleGuide()">📖 Guide</button>
+        <button class="top-right-btn" style="border-color:var(--accent); color:var(--accent);" onclick="window.startTuto(2, true)">🎓 Tutoriel</button>
     </div>
 
     <div id="univ-lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:30000; align-items:center; justify-content:space-between; padding:0 20px; box-sizing:border-box;" onclick="if(event.target.id==='univ-lightbox') closeLightbox()">
@@ -905,6 +927,161 @@
         const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary"); const secondaryAuth = secondaryApp.auth();
 
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
+
+        // 🚀 ==========================================
+        // MOTEUR DE TUTORIEL INTÉGRÉ & SIMULATION
+        // ==========================================
+        window.isTutoRunning = false;
+        let tutoCurrentPhase = 1;
+        let tutoCurrentStep = 0;
+        
+        const tutoStepsPhase1 = [
+            { target: 'new-room-login', title: "🔐 Parcours de Connexion", text: "<strong>Complet :</strong> Les joueurs créent un compte (Email/Google) pour garder leurs stats à vie.<br><br><strong>Rapide :</strong> Accès direct avec juste un pseudo (Idéal pour des mariages ou événements uniques)." },
+            { target: 'new-room-mode', title: "⚔️ Mode de Jeu", text: "<strong>Mixte :</strong> Autorise Solo ET Équipes.<br><strong>100% Solo :</strong> Interdit les équipes.<br><strong>100% Équipes :</strong> Regroupement obligatoire.<br><br><i>Modifiable en direct pendant la partie !</i>" },
+            { target: 'new-room-team-lock', title: "🛑 Règle d'Erreur", text: "Si un joueur répond mal : voulez-vous bloquer uniquement son buzzer (Individuel) ou geler les buzzers de toute son équipe pour forcer la concertation ?" }
+        ];
+
+        const tutoStepsPhase2 = [
+            { target: 'room-info-card', title: "🎛️ La Console Centrale", text: "Voici votre tableau de bord. J'ai généré 5 faux joueurs virtuels pour vous montrer le fonctionnement : 'Ninja' (Solo) et 2 équipes complètes." },
+            { target: 'top-right-tools', title: "📺 Déployer le Matériel", text: "Ces 3 boutons sont vos meilleurs amis :<br>- <strong>Scores :</strong> À afficher sur l'Écran Géant (TV, Vidéoprojecteur).<br>- <strong>Remote :</strong> Votre télécommande mobile.<br>- <strong>Guide :</strong> Le manuel complet." },
+            { target: 'btn-open-buzz', title: "🔊 Ouvrir les Buzzers", text: "C'est le bouton principal. Cliquez dessus pour débloquer les téléphones de vos joueurs au début de chaque nouvelle manche." },
+            { target: 'player-box', title: "⚡ Un joueur a buzzé !", text: "Tom vient de buzzer ! Les autres joueurs sont bloqués. Vous devez valider sa réponse :<br><strong>+3 ou +1 (Terminé) :</strong> Attribue les points et clôture la manche.<br><strong>+1 (On continue) :</strong> Tom gagne 1 point, son buzzer se bloque, mais les autres se rouvrent pour continuer à jouer." },
+            { target: 'mj-team-search', title: "🛡️ Gestion des Clans", text: "Utilisez ces filtres pour retrouver une équipe. Cliquez sur les 3 petits points (⋮) d'un membre pour le nommer Capitaine, ou expulser l'équipe entière." },
+            { target: 'player-search', title: "👥 Modération Joueurs", text: "Votre outil de police. Cliquez sur les (⋮) d'un joueur pour : forcer son buzzer manuellement, lui donner un Carton Jaune 🟨 (Avertissement) ou un Carton Rouge 🟥 (Expulsion)." }
+        ];
+
+        window.startTuto = function(phase, isForced = false) {
+            let state = localStorage.getItem('mj_tuto_state');
+            
+            // Si on force depuis le bouton (isForced = true), on y va direct
+            if (!isForced) {
+                if (phase === 1 && !state) {
+                    // C'est le tout premier démarrage
+                    if (confirm("👋 Bienvenue ! C'est votre première connexion.\nSouhaitez-vous lancer un rapide tutoriel interactif pour découvrir les réglages et manipuler de faux joueurs virtuels ?\n\n(Vous pourrez toujours le relancer plus tard depuis le menu).")) {
+                        localStorage.setItem('mj_tuto_state', 'accepted');
+                    } else {
+                        localStorage.setItem('mj_tuto_state', 'done');
+                        return; // Le MJ ne veut pas du tuto
+                    }
+                } else if (phase === 1 && state === 'done') {
+                    return; // Le MJ a déjà refusé ou fini le tuto, on ne fait rien
+                } else if (phase === 2 && state !== 'accepted') {
+                    return; // Le MJ n'a pas accepté la phase 1, on ne lance pas la phase 2
+                }
+            }
+
+            window.isTutoRunning = true;
+            tutoCurrentPhase = phase;
+            tutoCurrentStep = 0;
+            document.getElementById('tuto-overlay').style.display = 'block';
+            document.getElementById('tuto-tooltip').style.display = 'block';
+            
+            if(phase === 2) injectFakeTutoData();
+            showTutoStep();
+        };
+
+        window.endTuto = function() {
+            window.isTutoRunning = false;
+            localStorage.setItem('mj_tuto_state', 'done');
+            document.getElementById('tuto-overlay').style.display = 'none';
+            document.getElementById('tuto-tooltip').style.display = 'none';
+            document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
+            
+            if(tutoCurrentPhase === 2) clearFakeTutoData();
+        };
+
+        window.nextTutoStep = function() {
+            const steps = tutoCurrentPhase === 1 ? tutoStepsPhase1 : tutoStepsPhase2;
+            tutoCurrentStep++;
+            if (tutoCurrentStep >= steps.length) {
+                window.endTuto();
+                if(tutoCurrentPhase === 1) alert("✅ Paramétrage compris ! Vous pouvez maintenant Lancer la Partie pour voir la suite.");
+            } else {
+                showTutoStep();
+            }
+        };
+
+        function showTutoStep() {
+            const steps = tutoCurrentPhase === 1 ? tutoStepsPhase1 : tutoStepsPhase2;
+            const step = steps[tutoCurrentStep];
+            
+            document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
+            
+            const targetEl = document.getElementById(step.target);
+            if (targetEl) {
+                targetEl.classList.add('tuto-highlight');
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            document.getElementById('tuto-title').innerHTML = step.title;
+            document.getElementById('tuto-text').innerHTML = step.text;
+            
+            const btnNext = document.getElementById('tuto-btn-next');
+            btnNext.innerText = (tutoCurrentStep === steps.length - 1) ? "Terminer ✔️" : "Suivant ➔";
+            
+            positionTooltip(targetEl);
+        }
+        
+        function positionTooltip(targetEl) {
+            const tooltip = document.getElementById('tuto-tooltip');
+            if (!targetEl) return;
+            const rect = targetEl.getBoundingClientRect();
+            
+            if (rect.bottom + 200 < window.innerHeight) {
+                tooltip.style.top = (rect.bottom + window.scrollY + 15) + 'px';
+            } else {
+                tooltip.style.top = (rect.top + window.scrollY - tooltip.offsetHeight - 15) + 'px';
+            }
+            
+            let leftPos = rect.left + (rect.width / 2) - 160;
+            if (leftPos < 10) leftPos = 10; // Empêche de sortir à gauche
+            if (leftPos + 320 > window.innerWidth) leftPos = window.innerWidth - 340; // Empêche de sortir à droite
+            tooltip.style.left = leftPos + 'px';
+        }
+
+        function injectFakeTutoData() {
+            globalTeams = {
+                "Les Requins": { active: true, bonus: 0, icon: "🦈" },
+                "Les Tigres": { active: true, bonus: 0, icon: "🐅" }
+            };
+            allPlayersData = {
+                "t1": { name: "Alex", teamName: "Les Requins", active: true, pts: 5, isCaptain: true, avatar: "😎" },
+                "t2": { name: "Marie", teamName: "Les Requins", active: true, pts: 2, isCaptain: false, avatar: "👩‍🚀" },
+                "t3": { name: "Sam", teamName: "Les Tigres", active: true, pts: 4, isCaptain: true, avatar: "🤠" },
+                "t4": { name: "Tom", teamName: "Les Tigres", active: true, pts: 1, isCaptain: false, avatar: "👽" },
+                "t5": { name: "Ninja", teamName: "Solo", active: true, pts: 8, isCaptain: false, avatar: "🥷", hasBeenWarned: true }
+            };
+            
+            currentBuzzerId = "t4";
+            currentPlayer = { id: "t4", pseudo: "Tom", teamName: "Les Tigres", avatar: "👽" };
+            currentGameState = 'taken';
+            
+            const box = document.getElementById('player-box');
+            box.style.display = "block";
+            document.getElementById('p-name').innerText = "Tom";
+            document.getElementById('p-avatar').innerHTML = "👽";
+            document.getElementById('p-team').innerHTML = `<div class="crest-mini-bg"><span class="crest-mini">🐅</span></div><span>Les Tigres</span>`;
+            
+            // On force le grisage visuel du bouton
+            const btnOpenBuzz = document.getElementById('btn-open-buzz');
+            if (btnOpenBuzz) {
+                btnOpenBuzz.disabled = true;
+                btnOpenBuzz.innerHTML = "🟢 BUZZERS OUVERTS";
+            }
+            
+            renderLobby();
+            renderTeamLobby();
+        }
+
+        function clearFakeTutoData() {
+            globalTeams = {};
+            allPlayersData = {};
+            currentBuzzerId = null;
+            currentPlayer = null;
+            currentGameState = 'waiting';
+            document.getElementById('player-box').style.display = "none";
+            fullReset(); // Recharge les vraies données de la BDD
+        }
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {};
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
         
@@ -1954,12 +2131,15 @@
             document.getElementById('new-room-mj').value = mjProfileData.prenom || "MJ"; 
             document.getElementById('new-room-name').value = ""; 
             
-            // 🚀 PATCH V1.269 : Initialisation du menu de blocage
             if (document.getElementById('new-room-mode')) document.getElementById('new-room-mode').value = 'mixed';
             if (typeof toggleTeamLockUI === 'function') toggleTeamLockUI('new');
             
             document.getElementById('modal-create-room').style.display = 'flex'; 
-            setTimeout(() => document.getElementById('new-room-name').focus(), 100); 
+            setTimeout(() => {
+                document.getElementById('new-room-name').focus();
+                // 🚀 ON TENTE DE LANCER LA PHASE 1 DU TUTO
+                if (typeof window.startTuto === 'function') window.startTuto(1, false);
+            }, 100); 
         }
         
         function confirmCreateRoom() { 
@@ -2090,6 +2270,11 @@
             try { initLibrarySync(); } catch(e){ console.error(e); }
             try { loadBgLibrary('dashboard'); } catch(e){ console.error(e); }
             try { openScoreBoard(); } catch(e){ console.error(e); }
+            
+            // 🚀 ON LANCE LA PHASE 2 DU TUTO (Qui vérifiera toute seule si elle doit s'exécuter ou non)
+            setTimeout(() => {
+                if (typeof window.startTuto === 'function') window.startTuto(2, false);
+            }, 1000);
         }
 		
 		/* --- PATCH V1.215 : BOUTON D'URGENCE MANUEL --- */
@@ -2380,6 +2565,7 @@
                 }
             });
             roomRef.child('players').on('value', snap => { 
+                if(window.isTutoRunning) return; // 🚀 BARRIÈRE TUTORIEL
                 const rawData = snap.val() || {}; 
                 allPlayersData = {};
 
@@ -2432,6 +2618,7 @@
             });
 
             roomRef.child('buzzers').on('value', snap => {
+                if(window.isTutoRunning) return; // 🚀 BARRIÈRE TUTORIEL
                 const b = snap.val(); const box = document.getElementById('player-box');
                 if(b) { 
                     currentBuzzerId = b.id; const ps = b.pseudo;
@@ -2539,13 +2726,15 @@
             });
 
             roomRef.child('teams').on('value', snap => { 
+                if(window.isTutoRunning) return; // 🚀 BARRIÈRE TUTORIEL
                 globalTeams = snap.val() || {}; 
                 renderLobby(); 
                 renderTeamLobby();
             });
             
             roomRef.child('blockedPlayers').on('value', snap => { 
-                currentBlocked = snap.val() || {}; 
+                if(window.isTutoRunning) return; // 🚀 BARRIÈRE TUTORIEL
+                currentBlocked = snap.val() || {};
                 renderLobby(); 
             });
         }
@@ -2756,7 +2945,7 @@
 
             let counts = { all: 0, active: 0, inactive: 0, banned: 0 };
 
-            let tArr = Object.keys(globalTeams).map(k => {
+            let tArr = Object.keys(globalTeams).filter(k => k !== "Solo").map(k => {
                 const t = globalTeams[k];
                 let total = 0, aC = 0, iC = 0, bC = 0;
                 Object.values(allPlayersData).forEach(p => { 
