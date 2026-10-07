@@ -3329,7 +3329,29 @@
                 gameMode: document.getElementById('edit-room-mode').value,
                 teamLock: document.getElementById('edit-room-team-lock') ? document.getElementById('edit-room-team-lock').value : 'individual'
             };
+            
             logEvent('SYSTEM', `⚙️ MJ a modifié les règles du jeu`); // 🟢 CAPTEUR
+            
+            // 🚀 NOUVEAU : DISSOLUTION FORCÉE SI PASSAGE EN 100% SOLO
+            if (newSettings.gameMode === 'solo_only') {
+                roomRef.child('players').once('value', snap => {
+                    let updates = {};
+                    snap.forEach(child => {
+                        const p = child.val();
+                        if (p.teamName && p.teamName !== "Solo") {
+                            updates[child.key + '/teamName'] = "Solo";
+                            updates[child.key + '/teamIcon'] = "";
+                            updates[child.key + '/isCaptain'] = false;
+                            updates[child.key + '/captainMessage'] = null;
+                        }
+                    });
+                    if(Object.keys(updates).length > 0) {
+                        roomRef.child('players').update(updates);
+                        logEvent('SYSTEM', `⚔️ Dissolution automatique de toutes les équipes (Mode 100% Solo)`);
+                    }
+                });
+            }
+            
             roomRef.child('settings').update(newSettings).then(() => {
                 document.getElementById('modal-room-settings').style.display = 'none';
                 alert("✅ Règles du jeu mises à jour !");

@@ -1440,6 +1440,16 @@
                         if (typeof updateGameHeader === 'function') updateGameHeader();
                         if (document.getElementById('overlay-settings').style.display === 'flex') openSettings();
                         
+                        // 🚀 NOUVEAU : TÉLÉPORTATION EN LIVE (Si le MJ force les équipes et qu'on est en Solo)
+                        if (roomSettings.gameMode === 'team_only' && player && player.team === "Solo") {
+                            const currentStep = document.querySelector('.step-screen.active');
+                            if (currentStep && currentStep.id === 'step-game') {
+                                alert("⚠️ L'animateur exige des équipes pour la suite !\nCrée ou rejoins un clan pour retourner au buzzer.");
+                                document.getElementById('overlay-settings').style.display = 'none';
+                                goToTeamAction();
+                            }
+                        }
+                        
                         // 🚀 PATCH V1.305 : RÉCEPTEUR MODE JOUR (Inversion des couleurs)
                         if (roomSettings.dayMode === true) {
                             document.documentElement.style.setProperty('--bg', '#ecf0f1'); // Blanc cassé
@@ -2615,6 +2625,14 @@
 		}
 
         function launchGame(isReconnect = false) {
+            // 🚀 SÉCURITÉ : Blocage au lancement si le MJ a exigé les équipes
+            if (player.team === "Solo" && typeof roomSettings !== 'undefined' && roomSettings.gameMode === 'team_only') {
+                alert("⚠️ L'animateur exige des équipes pour la suite !\nCrée ou rejoins un clan pour retourner au buzzer.");
+                document.getElementById('overlay-settings').style.display = 'none';
+                goToTeamAction();
+                return;
+            }
+            
             if(!isReconnect) {
                 const trueTime = Date.now() + serverTimeOffset;
                 let becomeCaptain = isCaptain;
@@ -3024,7 +3042,15 @@
                 const oldTeamName = player.team;
                 
                 if (oldTeamName !== "Solo" && newTeamName === "Solo") {
-                    checkWhyKickedAndShowModal(oldTeamName);
+                    // 🚀 BYPASS INTELLIGENT : Si le mode 100% Solo est imposé, pas de pop-up d'expulsion
+                    if (typeof roomSettings !== 'undefined' && roomSettings.gameMode === 'solo_only') {
+                        player.team = "Solo";
+                        player.teamIcon = "";
+                        isCaptain = false;
+                        updateGameHeader();
+                    } else {
+                        checkWhyKickedAndShowModal(oldTeamName);
+                    }
                 }
                 
                 /* --- PATCH V1.185 : ALERTE TUTORIEL CAPITAINE (SILENCE EN FIN DE JEU) --- */
