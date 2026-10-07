@@ -2553,11 +2553,11 @@
                 let tO = `<option value="Solo" ${d.teamName==="Solo"?"selected":""}>Solo</option>`; 
                 Object.keys(globalTeams).forEach(t => { if(globalTeams[t].active!==false&&globalTeams[t].banned!==true) tO += `<option value="${t}" ${d.teamName===t?"selected":""}>${t}</option>`; });
                 
-                // 🚀 Désactivation du selecteur si mode 100% Solo imposé
+                // 🚀 DÉSACTIVATION du menu si on est en 100% Solo
                 let selectDisabled = (typeof window.roomSettings !== 'undefined' && window.roomSettings.gameMode === 'solo_only') ? "disabled" : "";
                 
                 const aH = (d.avatar&&d.avatar.length>20) ? `<img src="${d.avatar}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;">` : `<span style="font-size:1.1rem;flex-shrink:0;width:20px;text-align:center;">${d.avatar||'👤'}</span>`;
-                
+				
                 // 🚀 PLACEMENT : Séparation des boutons rapides (✔/✖) et du menu (⋮)
                 let quickActionsHtml = "";
                 if (d.recoveryRequest && d.recoveryRequest !== 'validated') {

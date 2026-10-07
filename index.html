@@ -3046,18 +3046,24 @@
                 const oldTeamName = player.team;
                 
                 if (oldTeamName !== "Solo" && newTeamName === "Solo") {
-                    // 🚀 BYPASS INTELLIGENT : Si le mode 100% Solo est imposé, pas de pop-up d'expulsion
-                    if (typeof roomSettings !== 'undefined' && roomSettings.gameMode === 'solo_only') {
-                        player.team = "Solo";
-                        player.teamIcon = "";
-                        isCaptain = false;
-                        updateGameHeader();
-                        // Fermeture d'urgence des modales d'équipe ouvertes
-                        document.getElementById('overlay-manage-team').style.display = 'none';
-                        document.getElementById('overlay-crest-edit').style.display = 'none';
-                    } else {
-                        checkWhyKickedAndShowModal(oldTeamName);
-                    }
+                    // 🚀 ANTI-LATENCE : On attend 500ms pour être sûr de recevoir les nouvelles règles du MJ
+                    setTimeout(() => {
+                        // 🚀 BYPASS INTELLIGENT : Si le mode 100% Solo est imposé, pas de pop-up d'expulsion
+                        if (typeof roomSettings !== 'undefined' && roomSettings.gameMode === 'solo_only') {
+                            player.team = "Solo";
+                            player.teamIcon = "";
+                            isCaptain = false;
+                            updateGameHeader();
+                            
+                            // 🚀 CORRECTION : Fermeture d'urgence absolue de TOUS les menus d'équipe
+                            document.getElementById('overlay-manage-team').style.display = 'none';
+                            document.getElementById('overlay-crest-edit').style.display = 'none';
+                            document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
+                            document.getElementById('step-game').classList.add('active');
+                        } else {
+                            checkWhyKickedAndShowModal(oldTeamName);
+                        }
+                    }, 500);
                 }
                 
                 /* --- PATCH V1.185 : ALERTE TUTORIEL CAPITAINE (SILENCE EN FIN DE JEU) --- */
