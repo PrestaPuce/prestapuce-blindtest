@@ -316,17 +316,19 @@
         .tuto-buttons { display: flex; justify-content: space-between; gap: 10px; }
         .tuto-btn-skip { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
         .tuto-btn-next { background: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center; }
+        /* 🚀 FIX TUTORIEL : GESTION DES CLICS ET DES MODALES */
         body.tuto-running { pointer-events: none !important; }
-        body.tuto-running .box, body.tuto-running .dashboard > div, body.tuto-running .dashboard > div > div, body.tuto-running .current-player { backdrop-filter: none !important; z-index: auto !important; }
-        body.tuto-running .modal-overlay { z-index: 999999 !important; }
-        .tuto-highlight { position: relative !important; z-index: 9999999 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; background: var(--card-bg) !important; border-radius: 8px; pointer-events: auto !important; }
-        #tuto-tooltip, #tuto-overlay { z-index: 9999999 !important; pointer-events: auto !important; }
+        body.tuto-running .box, body.tuto-running .dashboard > div, body.tuto-running .dashboard > div > div, body.tuto-running .current-player, body.tuto-running .modal-box { backdrop-filter: none !important; z-index: auto !important; transform: none !important; }
+        body.tuto-running .modal-overlay { z-index: 9999999 !important; background: transparent !important; }
+        #tuto-overlay { z-index: 9999998 !important; pointer-events: none !important; }
+        .tuto-highlight { position: relative !important; z-index: 99999999 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; background: var(--card-bg) !important; border-radius: 8px; pointer-events: auto !important; }
+        #tuto-tooltip { z-index: 999999999 !important; pointer-events: auto !important; }
         
         /* FIX BUG DE DECALAGE DU LOGO ET DES BOUTONS */
-        #top-right-tools.tuto-highlight { position: fixed !important; right: 15px !important; top: 15px !important; background: transparent !important; box-shadow: none !important; }
-        #top-right-tools.tuto-highlight .top-right-btn { box-shadow: 0 0 0 2px var(--accent), 0 0 20px rgba(241, 196, 15, 0.8) !important; pointer-events: none; }
-        #global-mj-logo-container.tuto-highlight { position: fixed !important; top: 15px !important; left: 15px !important; background: transparent !important; box-shadow: none !important; }
-        #global-mj-logo-container.tuto-highlight .flip-inner { box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; border-radius: 8px; pointer-events: none; }
+        #top-right-tools.tuto-highlight { position: fixed !important; right: 15px !important; top: 15px !important; background: transparent !important; box-shadow: none !important; z-index: 99999999 !important; }
+        #top-right-tools.tuto-highlight .top-right-btn { box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; pointer-events: auto !important; }
+        #global-mj-logo-container.tuto-highlight { position: fixed !important; top: 15px !important; left: 15px !important; background: transparent !important; box-shadow: none !important; z-index: 99999999 !important; pointer-events: auto !important; }
+        #global-mj-logo-container.tuto-highlight .flip-inner { box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; border-radius: 8px; pointer-events: auto !important; }
 
         /* VRAIS FAUX TÉLÉPHONES (Clones de index.html) */
         #simu-phones-container { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 800px; z-index: 999999; justify-content: space-between; gap: 10px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
@@ -2131,7 +2133,6 @@
             }
         });
 
-        function profileLogout() { auth.signOut().then(()=>location.reload()); }
         function openSuperAdmin() { if(!isSuperAdmin) return; document.getElementById('screen-choice').style.display = 'none'; document.getElementById('screen-super-admin').style.display = 'block'; }
         function closeSuperAdmin() { document.getElementById('screen-super-admin').style.display = 'none'; document.getElementById('screen-choice').style.display = 'block'; }
         
@@ -2707,7 +2708,7 @@
             const n = document.getElementById('modal-t-name').value.trim();
             if(!n) return alert("Veuillez saisir un nom d'équipe.");
             // PATCH V1.231 : Vigile Anti-Crash BDD
-			if(/[.#$\[\]/]/.test(n)) return alert("Les caractères suivants sont interdits : . # $ [ ] /");
+			if(/[.#$\[\]\/]/.test(n)) return alert("Les caractères suivants sont interdits : . # $ [ ] /");
             if(!selCrest) return alert("Veuillez sélectionner un blason.");
             
             if(mjProfileData.isGuest === true && !editingTeamKey && Object.keys(globalTeams).length >= 2) return alert("Limité à 2 équipes en Découverte.");
