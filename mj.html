@@ -307,6 +307,10 @@
         /* Fix des textes gris clairs */
         .day-mode span[style*="color:#bdc3c7"], .day-mode span[style*="color: #bdc3c7"] { color: #7f8c8d !important; }
         .day-mode small[style*="color:#bdc3c7"] { color: #7f8c8d !important; }
+        
+        /* 🚀 NOUVEAU : Les faux téléphones passent en blanc en Mode Jour ! */
+        .day-mode .simu-phone { background: rgba(255,255,255,0.95) !important; color: #2c3e50 !important; border-color: #bdc3c7 !important; }
+        .day-mode .simu-name { color: #2c3e50 !important; }
 
         /* 🚀 CSS DU SIMULATEUR MJ (BAC À SABLE) */
         #tuto-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999998; pointer-events: auto; }
@@ -1160,6 +1164,8 @@
 							const fn = () => { 
 							setTimeout(() => { 
                             if (window.isTutoRunning && tutoCurrentPhase === expectedPhase && tutoCurrentStep === expectedStep) {
+                                // 🚀 PATCH TUTO : Si c'est le clic sur Ouvrir Buzzers, on ouvre VRAIMENT les buzzers en plus de passer l'étape
+                                if (step.overrideTarget === 'btn-open-buzz') openNextQuestion();
                                 window.nextTutoStep(); 
                             }
 							}, 300); 
@@ -3725,6 +3731,11 @@
             roomRef.child('gameState').set({status: 'ready'}); // Ouvre les buzzers
             currentPlayer = null;
             document.getElementById('player-box').style.display = 'none';
+            // 🚀 PATCH TUTO : Si on est dans le simulateur, on force la mise à jour visuelle des buzzers en vert !
+            if (window.isTutoRunning) {
+                currentGameState = 'ready';
+                updateSimuPhones();
+            }
         }
 
         function fullReset() {
