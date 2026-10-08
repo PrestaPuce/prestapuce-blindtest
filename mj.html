@@ -329,6 +329,9 @@
         #top-right-tools.tuto-highlight .top-right-btn { box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; pointer-events: auto !important; }
         #global-mj-logo-container.tuto-highlight { position: fixed !important; top: 15px !important; left: 15px !important; background: transparent !important; box-shadow: none !important; z-index: 99999999 !important; pointer-events: auto !important; }
         #global-mj-logo-container.tuto-highlight .flip-inner { box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; border-radius: 8px; pointer-events: auto !important; }
+        
+        /* Garder les téléphones en bas même en surbrillance */
+        #simu-phones-container.tuto-highlight { position: fixed !important; bottom: 20px !important; left: 50% !important; transform: translateX(-50%) !important; }
 
         /* VRAIS FAUX TÉLÉPHONES (Clones de index.html) */
         #simu-phones-container { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 800px; z-index: 999999; justify-content: space-between; gap: 10px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
@@ -700,21 +703,23 @@
                     </div>
 
                     <!-- 🚀 AFFICHAGE DES RÈGLES EN DIRECT -->
-                    <div id="live-rules-display" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:15px;">
-                        <span id="badge-game-mode" style="background:var(--blue); color:white; font-size:0.7rem; padding:4px 8px; border-radius:12px; font-weight:bold; text-transform:uppercase; box-shadow:0 2px 4px rgba(0,0,0,0.2);">Mode...</span>
-                        <span id="badge-team-lock" style="background:var(--gold); color:black; font-size:0.7rem; padding:4px 8px; border-radius:12px; font-weight:bold; text-transform:uppercase; box-shadow:0 2px 4px rgba(0,0,0,0.2);">Blocage...</span>
-                    </div>
-                    
-                    <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px; margin-top:5px;">
-                        <button id="btn-day-mode" style="background: white; border: 2px solid white; color: black; font-size: 0.85rem; padding:6px 15px; margin: 0; width: auto; font-weight:bold; border-radius:15px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);" onclick="toggleDayMode()" title="Passer les écrans en Mode Jour (Haute luminosité)">☀️ MODE JOUR</button>
-                        <button style="background: transparent; border: 2px solid #34495e; color: #34495e; font-size: 0.85rem; padding:6px 15px; margin: 0; width: auto; font-weight:bold; border-radius:15px; cursor: pointer;" onclick="openRoomSettings()" title="Modifier les règles de la partie en cours">⚙️ RÈGLES DU JEU</button>
+                    <div id="tuto-zone-rules" style="padding: 10px; border-radius: 8px;">
+                        <div id="live-rules-display" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:15px;">
+                            <span id="badge-game-mode" style="background:var(--blue); color:white; font-size:0.7rem; padding:4px 8px; border-radius:12px; font-weight:bold; text-transform:uppercase; box-shadow:0 2px 4px rgba(0,0,0,0.2);">Mode...</span>
+                            <span id="badge-team-lock" style="background:var(--gold); color:black; font-size:0.7rem; padding:4px 8px; border-radius:12px; font-weight:bold; text-transform:uppercase; box-shadow:0 2px 4px rgba(0,0,0,0.2);">Blocage...</span>
+                        </div>
+                        
+                        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px; margin-top:5px;">
+                            <button id="btn-day-mode" style="background: white; border: 2px solid white; color: black; font-size: 0.85rem; padding:6px 15px; margin: 0; width: auto; font-weight:bold; border-radius:15px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);" onclick="toggleDayMode()" title="Passer les écrans en Mode Jour (Haute luminosité)">☀️ MODE JOUR</button>
+                            <button style="background: transparent; border: 2px solid #34495e; color: #34495e; font-size: 0.85rem; padding:6px 15px; margin: 0; width: auto; font-weight:bold; border-radius:15px; cursor: pointer;" onclick="openRoomSettings()" title="Modifier les règles de la partie en cours">⚙️ RÈGLES DU JEU</button>
+                        </div>
                     </div>
 
                     <button style="background: #1a1a1a; color: white; border: 2px solid white; font-size: 0.95rem; padding:8px 25px; margin: 0; width: auto; font-weight:bold; border-radius:20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform:uppercase;" onclick="triggerEndGame()" title="Clôturer l'événement, afficher le podium et archiver la salle">🏁 FIN DE PARTIE 🏆</button>
 				</div>
 
-                <div style="display:flex; flex-direction:column; gap:8px; width:150px; flex-shrink:0; z-index:10;">
-                    <button style="background:var(--blue); margin:0; padding:0; font-size:0.9rem; height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2); line-height:1.1;" onclick="quitRoom()" title="Fermer cette fenêtre sans détruire la salle"><div>🚪 Quitter</div><small style="font-size:0.7rem; opacity:0.8; font-weight:normal;">(Sauvegarder)</small></button>
+                <div id="tuto-zone-buzz" style="display:flex; flex-direction:column; gap:8px; width:150px; flex-shrink:0; z-index:10;">
+                    <button id="btn-open-buzz" style="background:var(--success); margin:0; font-size:0.9rem; height:52px; display:flex; align-items:center; justify-content:center; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2);" onclick="openNextQuestion()" title="Ouvrir les buzzers pour la prochaine question">Ouvrir Buzzers</button>
                     <button id="btn-delete-room" style="background:var(--danger); margin:0; padding:0; font-size:0.9rem; height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; box-shadow:0 4px 6px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2); line-height:1.1;" onmousedown="startDeleteHold(event)" onmouseup="cancelDeleteHold(event)" onmouseleave="cancelDeleteHold(event)" ontouchstart="startDeleteHold(event)" ontouchend="cancelDeleteHold(event)" title="ATTENTION : Détruire définitivement la salle !"><div>⚠️ Supprimer</div><small style="font-size:0.7rem; opacity:0.8; font-weight:normal;">(Détruire)</small></button>
                 </div>
 
@@ -1021,8 +1026,8 @@
 
         const tutoStepsPhase2 = [
             { target: 'network-status-container', title: "📡 La Coupure Réseau", text: "Test : micro-coupure Wi-Fi ! Le voyant est rouge 🔴.<br><br><strong>Cliquez sur le bouton 🔄 à côté</strong> pour forcer la réparation.", autoAction: 'click', overrideTarget: 'btn-repair-network' },
-            { target: 'live-rules-display', title: "⚙️ Paramètres en Direct", text: "Vos choix (Mixte, Blocage) sont affichés ici. Le bouton <b>Règles du Jeu</b> permet de les modifier en live. Le <b>Mode Jour</b> inversera les couleurs." },
-            { target: 'btn-open-buzz', title: "🔊 Ouvrez les Buzzers !", text: "J'ai généré 5 faux téléphones en bas de votre écran.<br><br><strong>Cliquez sur Ouvrir Buzzers</strong> : vous allez les voir s'activer (Vert) !" },
+            { target: 'tuto-zone-rules', title: "⚙️ Paramètres en Direct", text: "Vos choix (Mixte, Blocage) s'affichent ici. Vous pouvez cliquer sur <b>Règles du Jeu</b> ou tester le <b>Mode Jour</b> librement.<br><br><i>Cliquez sur Suivant.</i>" },
+            { target: 'tuto-zone-buzz', title: "🔊 Ouvrez les Buzzers !", text: "J'ai généré 5 faux téléphones en bas de votre écran.<br><br><strong>Cliquez sur Ouvrir Buzzers</strong> : vous allez les voir s'activer (Vert) !", autoAction: 'click', overrideTarget: 'btn-open-buzz' },
             { target: 'simu-phones-container', title: "⚡ Testez un Buzz", text: "Jouez le rôle d'un joueur ! <strong>Cliquez sur le téléphone de Marie ou de Ninja en bas.</strong><br><br>Il va prendre la main (Bleu) et bloquer les autres (Rouge)." },
             { target: 'player-box', title: "⚖️ Arbitrage Libre", text: "Le joueur a la main.<br><br><strong>Cliquez sur Erreur :</strong> le joueur sera grisé et les autres se rouvriront (Vert).<br>Ou testez +3 / +1." },
             { target: 'mj-team-search', title: "🛡️ Gestion des Équipes", text: "Déployez l'équipe des Tigres (flèche jaune ▶). En cliquant sur les 3 points (⋮) d'un membre, vous pouvez nommer un Capitaine 👑 ou l'expulser." },
