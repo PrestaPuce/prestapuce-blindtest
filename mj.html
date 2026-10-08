@@ -2533,10 +2533,6 @@
             try { roomRef.child('showDefaultCrests').set(showDefaultCrests); } catch(e){}
             
             try { syncLibraryToRoom(); } catch(e){ console.error(e); }
-            let wasTutoPhase1 = (typeof window.isTutoRunning !== 'undefined' && window.isTutoRunning && tutoCurrentPhase === 1);
-            if (wasTutoPhase1) {
-                document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
-            }
 
             // 🚀 Enregistre si la phase 1 était en cours pour enchaîner
             let wasTutoPhase1 = (typeof window.isTutoRunning !== 'undefined' && window.isTutoRunning && tutoCurrentPhase === 1);
