@@ -1013,9 +1013,9 @@
         const tutoStepsPhase1 = [
             { target: 'new-room-mj', title: "👤 Nom de l'animateur", text: "Par défaut, c'est le prénom enregistré dans votre profil. Modifiable pour l'événement.<br><br><i>Cliquez sur Suivant.</i>" },
             { target: 'new-room-name', title: "📝 Nom de l'événement", text: "Saisissez un nom (ex: Mariage Test) pour simuler la création.<br><br><i>Tapez un nom puis cliquez sur Suivant.</i>" },
-            { target: 'new-room-login', title: "🔐 Parcours de Connexion", text: "<strong>Complet :</strong> Les joueurs créent un compte.<br><strong>Rapide :</strong> Accès invité avec un pseudo.<br><br><i>Modifiez ce choix pour avancer.</i>", autoAction: 'change' },
-            { target: 'new-room-mode', title: "⚔️ Mode de Jeu", text: "Mixte (Solo & Équipes), 100% Solo, ou 100% Équipes.<br><br><i>Modifiez ce choix pour avancer.</i>", autoAction: 'change' },
-            { target: 'new-room-team-lock', title: "🛑 Règle d'Erreur", text: "Si un joueur répond mal, voulez-vous geler son équipe entière ?<br><br><i>Faites votre choix pour avancer.</i>", autoAction: 'change' },
+            { target: 'new-room-login', title: "🔐 Parcours de Connexion", text: "<strong>Complet :</strong> Les joueurs créent un compte.<br><strong>Rapide :</strong> Accès invité avec un pseudo.<br><br><i>Cliquez sur ce menu pour découvrir les options, puis validez.</i>", autoAction: 'click' },
+            { target: 'new-room-mode', title: "⚔️ Mode de Jeu", text: "Mixte (Solo & Équipes), 100% Solo, ou 100% Équipes.<br><br><i>Cliquez sur ce menu pour découvrir les options.</i>", autoAction: 'click' },
+            { target: 'new-room-team-lock', title: "🛑 Règle d'Erreur", text: "Si un joueur répond mal, voulez-vous geler son équipe entière ?<br><br><i>Cliquez sur ce menu pour découvrir les options.</i>", autoAction: 'click' },
             { target: 'btn-launch-room', title: "🚀 Lancer !", text: "La salle est prête. <b>Cliquez sur Lancer la Partie</b>.", autoAction: 'click' }
         ];
 
@@ -2443,6 +2443,10 @@
             const randomSuffix = Math.floor(Math.random() * 999).toString().padStart(3,'0');
             const newRoomId = dateStr + randomSuffix; 
             
+            // 🚀 PATCH TUTO : On détermine les valeurs réelles, mais on force le mode mixte si le Tuto est actif
+            let finalGameMode = document.getElementById('new-room-mode') ? document.getElementById('new-room-mode').value : 'mixed';
+            if (window.isTutoRunning) finalGameMode = 'mixed';
+
             const initialData = { 
                 mj: auth.currentUser.uid, 
                 mjName: mjName,
@@ -2456,7 +2460,7 @@
                 gameState: { status: 'waiting' },
                 settings: {
                     loginMode: document.getElementById('new-room-login') ? document.getElementById('new-room-login').value : 'full',
-                    gameMode: document.getElementById('new-room-mode') ? document.getElementById('new-room-mode').value : 'mixed',
+                    gameMode: finalGameMode,
                     teamLock: document.getElementById('new-room-team-lock') ? document.getElementById('new-room-team-lock').value : 'individual',
                     dayMode: false
                 }
