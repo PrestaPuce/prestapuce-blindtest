@@ -602,7 +602,7 @@
 				</select>
 
 				<div id="new-team-lock-container">
-					<div style="text-align: left; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">RÈGLE DE BLOCAGE (ERREUR)</div>
+					<div style="text-align: left; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">RÈGLE DE BLOCAGE (LIÉE AUX ÉQUIPES)</div>
 					<select id="new-room-team-lock" style="font-size: 0.9rem; padding: 8px; margin-bottom: 0;">
 						<option value="individual">Individuel (Un seul joueur bloqué)</option>
 						<option value="team">Équipe (Toute l'équipe est bloquée)</option>
@@ -634,7 +634,7 @@
                 </select>
 
                 <div id="edit-team-lock-container">
-                    <div style="text-align: left; font-size: 0.9rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">RÈGLE DE BLOCAGE (ERREUR)</div>
+                    <div style="text-align: left; font-size: 0.9rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">RÈGLE DE BLOCAGE (LIÉE AUX ÉQUIPES)</div>
                     <select id="edit-room-team-lock" style="font-size: 1rem; padding: 10px; margin-bottom: 0;">
                         <option value="individual">Individuel (Un seul joueur bloqué)</option>
                         <option value="team">Équipe (Toute l'équipe est bloquée)</option>
@@ -1013,9 +1013,9 @@
         const tutoStepsPhase1 = [
             { target: 'new-room-mj', title: "👤 Nom de l'animateur", text: "Par défaut, c'est le prénom enregistré dans votre profil. Modifiable pour l'événement.<br><br><i>Cliquez sur Suivant.</i>" },
             { target: 'new-room-name', title: "📝 Nom de l'événement", text: "Saisissez un nom (ex: Mariage Test) pour simuler la création.<br><br><i>Tapez un nom puis cliquez sur Suivant.</i>" },
-            { target: 'new-room-login', title: "🔐 Parcours de Connexion", text: "<strong>Complet :</strong> Les joueurs créent un compte.<br><strong>Rapide :</strong> Accès invité avec un pseudo.<br><br><i>Cliquez sur ce menu pour découvrir les options, puis validez.</i>", autoAction: 'click' },
-            { target: 'new-room-mode', title: "⚔️ Mode de Jeu", text: "Mixte (Solo & Équipes), 100% Solo, ou 100% Équipes.<br><br><i>Cliquez sur ce menu pour découvrir les options.</i>", autoAction: 'click' },
-            { target: 'new-room-team-lock', title: "🛑 Règle d'Erreur", text: "Si un joueur répond mal, voulez-vous geler son équipe entière ?<br><br><i>Cliquez sur ce menu pour découvrir les options.</i>", autoAction: 'click' },
+            { target: 'new-room-login', title: "🔐 Parcours de Connexion", text: "<strong>Complet :</strong> Les joueurs créent un compte.<br><strong>Rapide :</strong> Accès invité avec un pseudo.<br><br><i>Cliquez sur le menu pour voir les choix, puis validez.</i>", autoAction: 'click' },
+            { target: 'new-room-mode', title: "⚔️ Mode de Jeu", text: "Pour ce Bac à Sable, <b>le mode Mixte est imposé</b> afin de tester les équipes.<br><br><i>Cliquez sur le menu pour continuer.</i>", autoAction: 'click' },
+            { target: 'new-room-team-lock', title: "🛑 Règle d'Erreur (Équipes)", text: "En cas d'erreur d'un joueur, faut-il bloquer toute son équipe ou juste lui ?<br><br><i>Cliquez sur le menu pour continuer.</i>", autoAction: 'click' },
             { target: 'btn-launch-room', title: "🚀 Lancer !", text: "La salle est prête. <b>Cliquez sur Lancer la Partie</b>.", autoAction: 'click' }
         ];
 
@@ -2415,10 +2415,21 @@
             document.getElementById('new-room-mj').value = mjProfileData.prenom || "MJ"; 
             document.getElementById('new-room-name').value = ""; 
             
-            if (document.getElementById('new-room-mode')) document.getElementById('new-room-mode').value = 'mixed';
+            const modeSelect = document.getElementById('new-room-mode');
+            if (modeSelect) {
+                modeSelect.value = 'mixed';
+                // 🚀 PATCH TUTO : On grise les autres options si le tuto tourne
+                if (window.isTutoRunning) {
+                    Array.from(modeSelect.options).forEach(opt => {
+                        if (opt.value !== 'mixed') opt.disabled = true;
+                    });
+                } else {
+                    Array.from(modeSelect.options).forEach(opt => opt.disabled = false);
+                }
+            }
             if (typeof toggleTeamLockUI === 'function') toggleTeamLockUI('new');
             
-            document.getElementById('modal-create-room').style.display = 'flex'; 
+            document.getElementById('modal-create-room').style.display = 'flex';
             setTimeout(() => {
                 document.getElementById('new-room-name').focus();
                 // 🚀 DÉCLENCHE LA PHASE 1 DIRECTEMENT SI ON ÉTAIT DANS LE TUTO
