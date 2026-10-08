@@ -316,22 +316,23 @@
         .tuto-buttons { display: flex; justify-content: space-between; gap: 10px; }
         .tuto-btn-skip { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
         .tuto-btn-next { background: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center; }
-        /* 🚀 FIX TUTORIEL : GESTION DES CLICS ET DES MODALES */
+        
+		/* 🚀 FIX TUTORIEL : GESTION DES CLICS ET DES MODALES */
         body.tuto-running { pointer-events: none !important; }
         body.tuto-running .box, body.tuto-running .dashboard > div, body.tuto-running .dashboard > div > div, body.tuto-running .current-player, body.tuto-running .modal-box { backdrop-filter: none !important; z-index: auto !important; transform: none !important; }
         
         /* 1. L'écran noir du tuto */
         #tuto-overlay { z-index: 2000000 !important; pointer-events: none !important; }
         
-        /* 2. L'élément en surbrillance (au-dessus de l'écran noir) */
-        .tuto-highlight { position: relative !important; z-index: 2000010 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; background: var(--card-bg) !important; border-radius: 8px; pointer-events: auto !important; }
-        
-        /* 3. La bulle d'explication (au-dessus de la surbrillance) */
-        #tuto-tooltip { z-index: 2000020 !important; pointer-events: auto !important; }
-
-        /* 4. Les modales (ex: Règles du jeu) deviennent le BOSS ABSOLU si elles sont ouvertes */
-        body.tuto-running .modal-overlay { z-index: 2000030 !important; background: rgba(0,0,0,0.8) !important; pointer-events: auto !important; }
+        /* 2. Les modales ouvertes pendant le tuto (juste au-dessus de l'écran noir) */
+        body.tuto-running .modal-overlay { z-index: 2000010 !important; background: rgba(0,0,0,0.8) !important; pointer-events: auto !important; }
         body.tuto-running .modal-box, body.tuto-running .modal-close-x { pointer-events: auto !important; }
+        
+        /* 3. L'élément en surbrillance (doit écraser la modale) */
+        .tuto-highlight { position: relative !important; z-index: 2000020 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; background: var(--card-bg) !important; border-radius: 8px; pointer-events: auto !important; }
+        
+        /* 4. La bulle d'explication (le chef absolu) */
+        #tuto-tooltip { z-index: 2000030 !important; pointer-events: auto !important; }
         
         /* FIX BUG DE DECALAGE DU LOGO ET DES BOUTONS */
         #top-right-tools.tuto-highlight { position: fixed !important; right: 15px !important; top: 15px !important; background: transparent !important; box-shadow: none !important; z-index: 2000020 !important; }
@@ -1196,6 +1197,12 @@
             }
             
             let leftPos = rect.left + (rect.width / 2) - 160;
+            
+            // 🚀 PATCH TUTO : On décale la bulle tout à droite à l'étape des paramètres pour ne pas cacher la modale !
+            if (tutoCurrentPhase === 2 && tutoCurrentStep === 1) {
+                leftPos = window.innerWidth - 350;
+            }
+            
             if (leftPos < 10) leftPos = 10;
             if (leftPos + 320 > window.innerWidth) leftPos = window.innerWidth - 340;
             tooltip.style.left = leftPos + 'px';
