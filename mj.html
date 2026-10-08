@@ -1113,6 +1113,12 @@
                     positionTooltip(targetEl);
                     targetEl.style.pointerEvents = "auto";
                     
+                    // 🚀 NOUVEAU : Si l'action doit se faire sur un bouton voisin, on le sort de l'écran noir aussi !
+                    if (step.overrideTarget) {
+                        const overEl = document.getElementById(step.overrideTarget);
+                        if (overEl) overEl.classList.add('tuto-highlight');
+                    }
+                    
                     if (step.autoAction) {
 						btnNext.style.display = 'none'; 
 						const listenEl = step.overrideTarget ? document.getElementById(step.overrideTarget) : targetEl;
