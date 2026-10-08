@@ -316,7 +316,11 @@
         .tuto-buttons { display: flex; justify-content: space-between; gap: 10px; }
         .tuto-btn-skip { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
         .tuto-btn-next { background: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center; }
-        .tuto-highlight { position: relative !important; z-index: 999999 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; background: var(--card-bg) !important; border-radius: 8px; }
+        body.tuto-running { pointer-events: none !important; }
+        body.tuto-running .box, body.tuto-running .dashboard > div, body.tuto-running .dashboard > div > div, body.tuto-running .current-player { backdrop-filter: none !important; z-index: auto !important; }
+        body.tuto-running .modal-overlay { z-index: 999999 !important; }
+        .tuto-highlight { position: relative !important; z-index: 9999999 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; background: var(--card-bg) !important; border-radius: 8px; pointer-events: auto !important; }
+        #tuto-tooltip, #tuto-overlay { z-index: 9999999 !important; pointer-events: auto !important; }
         
         /* FIX BUG DE DECALAGE DU LOGO ET DES BOUTONS */
         #top-right-tools.tuto-highlight { position: fixed !important; right: 15px !important; top: 15px !important; background: transparent !important; box-shadow: none !important; }
@@ -1037,8 +1041,9 @@
                 localStorage.setItem('mj_tuto_state_v3', 'accepted');
             }
 
-            window.isTutoRunning = true;
-            tutoCurrentPhase = phase;
+			window.isTutoRunning = true;
+			document.body.classList.add('tuto-running');
+			tutoCurrentPhase = phase;
             tutoCurrentStep = 0;
             document.getElementById('tuto-overlay').style.display = 'block';
             document.getElementById('tuto-tooltip').style.display = 'block';
@@ -1062,6 +1067,7 @@
 
         window.endTuto = function() {
             window.isTutoRunning = false;
+            document.body.classList.remove('tuto-running');
             localStorage.setItem('mj_tuto_state_v3', 'done');
             document.getElementById('tuto-overlay').style.display = 'none';
             document.getElementById('tuto-tooltip').style.display = 'none';
@@ -1106,18 +1112,28 @@
                     targetEl.style.pointerEvents = "auto";
                     
                     if (step.autoAction) {
-                        btnNext.style.display = 'none'; 
-                        const listenEl = step.overrideTarget ? document.getElementById(step.overrideTarget) : targetEl;
-                        if (listenEl) {
-                            const fn = () => { setTimeout(() => { window.nextTutoStep(); }, 300); };
-                            listenEl.addEventListener(step.autoAction, fn);
-                            tutoListener = { el: listenEl, type: step.autoAction, fn: fn };
-                        }
-                    } else {
+						btnNext.style.display = 'none'; 
+						const listenEl = step.overrideTarget ? document.getElementById(step.overrideTarget) : targetEl;
+						if (listenEl) {
+							const expectedPhase = tutoCurrentPhase;
+							const expectedStep = tutoCurrentStep;
+							const fn = () => { 
+							setTimeout(() => { 
+                            if (window.isTutoRunning && tutoCurrentPhase === expectedPhase && tutoCurrentStep === expectedStep) {
+                                window.nextTutoStep(); 
+                            }
+							}, 300); 
+							};
+							listenEl.addEventListener(step.autoAction, fn);
+							tutoListener = { el: listenEl, type: step.autoAction, fn: fn };
+						}
+					}
+					else {
                         btnNext.style.display = 'block';
                     }
                 }
-            } else {
+            } 
+			else {
                 btnNext.style.display = 'block';
                 const tooltip = document.getElementById('tuto-tooltip');
                 tooltip.style.top = '50%'; tooltip.style.left = '50%';
