@@ -5,17 +5,7 @@
     <title>Scores - Presta'Puce</title>
 	<script src="config.js"></script>
     <link rel="icon" id="page-favicon" type="image/png">
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            document.title = `Scores - Presta'Puce (v${APP_CONFIG.VERSIONS.SCORES})`;
-            
-            const favicon = document.getElementById('page-favicon');
-            if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
-            
-            const mainLogo = document.getElementById('main-logo');
-            if(mainLogo) mainLogo.src = APP_CONFIG.LOGO_URL;
-        });
-    </script>
+
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
@@ -24,12 +14,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --bg-color: #1a1a1a; --accent: #f1c40f; --card-bg: rgba(44, 62, 80, 0.4); --gold: #f1c40f; --silver: #bdc3c7; --bronze: #cd7f32; --blue: #3498db; --danger: #e74c3c; --success: #2ecc71; }
+        :root { --bg-color: #090d16; --accent: #f1c40f; --card-bg: rgba(20, 29, 48, 0.62); --gold: #facc15; --silver: #cbd5e1; --bronze: #d97706; --blue: #38bdf8; --danger: #ef4444; --success: #2ecc71; }
         
-        body { margin: 0; padding: 1vh; font-family: 'Segoe UI', sans-serif; color: white; height: 100vh; overflow: hidden; box-sizing: border-box; display: flex; flex-direction: column; background: transparent; }
+        body { margin: 0; padding: 1vh; font-family: 'Segoe UI', system-ui, sans-serif; color: white; height: 100vh; overflow: hidden; box-sizing: border-box; display: flex; flex-direction: column; background: transparent; }
         
-        /* FOND DYNAMIQUE PRESTA'PUCE */
-        #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: linear-gradient(45deg, #0f0c29, #302b63, #24243e); background-size: 300% 300%; animation: gradientBG 15s ease infinite; transition: background 0.5s ease; }
+        /* FOND DYNAMIQUE SHOW TV PRESTA'PUCE */
+        #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: radial-gradient(circle at 50% 15%, #1e1b4b 0%, #0f172a 55%, #060913 100%); background-size: 200% 200%; animation: gradientBG 18s ease infinite; transition: background 0.5s ease; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         
         /* FILTRE D'ASSOMBRISSEMENT */
@@ -39,7 +29,7 @@
         #blur-overlay.active { opacity: 1; pointer-events: auto; }
 
         header { display: flex; align-items: center; justify-content: center; height: 12vh; position: relative; margin-bottom: -2vh; flex-shrink: 0; z-index: 10; display: none; }
-        .header-center { display: flex; align-items: center; gap: 1vw; background: rgba(0,0,0,0.5); padding: 1vh 3vw 1vh 1vw; border-radius: 50px; border: 1px solid rgba(241, 196, 15, 0.3); backdrop-filter: blur(5px); }
+        .header-center { display: flex; align-items: center; gap: 1vw; background: rgba(9, 13, 24, 0.68); padding: 1vh 3vw 1vh 1.2vw; border-radius: 60px; border: 1px solid rgba(241, 196, 15, 0.45); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 25px rgba(241, 196, 15, 0.12); backdrop-filter: blur(16px); }
         .title-group { display: flex; flex-direction: column; align-items: center; line-height: 1; }
         
         #event-name-display { font-size: clamp(1.5rem, 3.5vh, 2.8rem); margin: 0; color: white; text-transform: uppercase; font-weight: 900; text-shadow: 0 2px 5px rgba(0,0,0,0.8); } 
@@ -75,9 +65,6 @@
         #btn-fullscreen svg { width: 60%; height: 60%; fill: currentColor; }
         .hide-ui { opacity: 0 !important; pointer-events: none; }
 
-        #btn-hof { display: none; position: fixed; top: 6vh; right: 1vw; background: rgba(0,0,0,0.5); border: 1px solid var(--accent); color: var(--accent); padding: 0.5vh 1.5vw; border-radius: 15px; cursor: pointer; font-size: clamp(0.6rem, 1.5vh, 1rem); font-weight: bold; transition: 0.2s; z-index: 1500; }
-        #btn-hof:hover { background: var(--accent); color: black; }
-		
         .main-container { display: none; grid-template-columns: 1fr 1fr; gap: 2vw; flex-grow: 1; padding: 0 1vw; overflow: hidden; margin-top: 0; }
         .column-wrapper { display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
         .column-title { text-align: center; font-size: clamp(1rem, 3vh, 2rem); color: var(--accent); text-transform: uppercase; border-bottom: 1px solid rgba(241, 196, 15, 0.5); flex-shrink: 0; letter-spacing: 1px; padding-bottom: 2px; margin-bottom: 5px; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
@@ -87,7 +74,7 @@
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
-        .card { background: var(--card-bg); display: flex; align-items: center; padding: 0 1vw; border-radius: 8px; margin-bottom: 0.8vh; border-left: 0.5vw solid var(--accent); height: 7vh; transition: border 0.3s, background 0.3s, box-shadow 0.3s; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-left: 0.5vw solid var(--accent); }
+        .card { background: var(--card-bg); display: flex; align-items: center; padding: 0 1.1vw; border-radius: 12px; margin-bottom: 0.85vh; height: 7vh; transition: border 0.3s, background 0.3s, box-shadow 0.3s; backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.12); border-left: 0.45vw solid var(--accent); box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
         .avatar, .crest { width: 5vh; display: flex; justify-content: center; align-items: center; font-size: 2.5vh; }
         .crest-bg { padding: 0; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .crest-bg.native-svg { background: white; padding: 2px; }
@@ -117,7 +104,7 @@
 
         /* PODIUM CSS CORRIGÉ (V1.171) */
         #podium-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #141414; z-index: 3000; flex-direction: column; align-items: center; justify-content: center; padding: 2vh; box-sizing: border-box; overflow-y: auto; }
-        #podium-content { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; }
+
         .podium-container { display: flex; align-items: flex-end; justify-content: center; gap: 3vw; margin-top: 2vh; }
         .step { text-align: center; display: flex; flex-direction: column; align-items: center; width: 20vw; }
         .step-block { width: 100%; border-radius: 15px 15px 0 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 2vh; font-size: 4vh; font-weight: bold; color: rgba(0,0,0,0.5); box-shadow: 0 1vh 3vh rgba(0,0,0,0.5); }
@@ -134,15 +121,12 @@
         @keyframes trophyZoom { 0% { transform: scale(1); filter: drop-shadow(0 0 0 transparent); } 100% { transform: scale(1.1); filter: drop-shadow(0 1vh 1vh rgba(255,255,255,0.2)); } }
         @keyframes bounceTrophy { 0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 transparent); } 50% { transform: scale(1.1) translateY(-2vh); filter: drop-shadow(0 2vh 2vh rgba(241,196,15,0.6)); } }
         @keyframes popTrophy { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        #podium-content h1 { font-size: clamp(2rem, 8vw, 2.5rem); margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; line-height: 1.1; }
-        #podium-content p { font-size: 1.3rem; color: white; margin: 0; font-weight: bold; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; }
-		.champion-trophy { animation: bounceTrophyScore 2s ease-in-out infinite !important; }
+
 
         .nav-btn { padding:1.5vh 3vw; font-size:2vh; background:var(--bg-color); color:white; border:1px solid white; border-radius:1vh; cursor:pointer; margin: 0 1vw; transition: 0.2s; }
         .nav-btn:hover { background: white; color: black; }
         #btn-return-podium { display: none; position: fixed; bottom: 2vh; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; border: none; padding: 1vh 2vw; border-radius: 20px; font-weight: bold; cursor: pointer; z-index: 100; box-shadow: 0 0 10px rgba(241, 196, 15, 0.5); font-size: 2vh; }
-        #hof-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 4000; flex-direction: column; align-items: center; justify-content: center; }
-        .hof-content { width: 60vw; background: #2c3e50; padding: 4vh; border-radius: 20px; border: 3px solid var(--accent); }
+
 
         /* LOBBY ECRAN GEANT */
         #lobby-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: transparent; z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 2vh 5vw; box-sizing: border-box; }
@@ -185,7 +169,7 @@
     <div id="big-anim-overlay"></div>
     <div id="giant-buzzer-wrapper" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:4500; align-items:center; justify-content:center;">
         
-        <div id="giant-buzzer-display" style="display:flex; flex-direction:column; align-items:center; background:rgba(46, 204, 113, 0.95); border:4px solid white; border-radius:30px; padding:5vh 8vw; box-shadow:0 20px 50px rgba(0,0,0,0.9); text-align:center; min-width: 40vw;">
+        <div id="giant-buzzer-display" style="display:flex; flex-direction:column; align-items:center; background:radial-gradient(circle at 50% 25%, rgba(52, 211, 153, 0.96), rgba(5, 150, 105, 0.96)); border:3px solid rgba(255,255,255,0.9); border-radius:32px; padding:5vh 8vw; box-shadow:0 25px 60px rgba(0,0,0,0.85), 0 0 60px rgba(46, 204, 113, 0.55); text-align:center; min-width: 40vw; backdrop-filter:blur(16px);">
             <div id="giant-buzzer-avatar" style="width:18vh; height:18vh; font-size:12vh; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:2vh; border: 5px solid white; overflow:hidden;">👤</div>
             <div id="giant-buzzer-name" style="font-size:6vh; font-weight:900; color:white; text-transform:uppercase;">PSEUDO</div>
             
@@ -198,14 +182,13 @@
         <div id="giant-score-anim" style="display:none; position:absolute; font-size:25vh; font-weight:900; color:white; text-shadow:0 10px 30px rgba(0,0,0,0.9); animation: scorePop 0.8s ease-out;">+3</div>
     </div>
     <style>
-        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes scorePop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.5); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 	<div id="version-display" class="version-tag"></div>
 
     <div id="lobby-screen" style="display:none;">
         <div class="lobby-box">
-            <img src="https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png" style="width:120px; margin: 0 auto 2vh auto;">
+            <img id="lobby-logo" src="" style="width:120px; margin: 0 auto 2vh auto;">
             <h1 style="color:white; margin:0 0 2vh 0; font-size: 2rem; text-shadow: 0 2px 5px black;">ÉCRANS GÉANTS</h1>
             
             <div style="position:relative;">
@@ -232,14 +215,14 @@
     </div>
 
     <div id="blur-overlay" onclick="toggleQRZoom()"></div>
-    <div id="btn-fullscreen" onclick="toggleFullScreen()" title="Plein Écran (Touche F)">
+    <div id="btn-fullscreen" onclick="toggleFullScreen()" title="Plein Écran (Touche F ou F11)">
         <svg id="icon-fs" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
     </div>
+    <button id="fs-restore-pill" onclick="toggleFullScreen()" title="Réactiver immédiatement le mode Plein Écran" style="display:none; position:fixed; top:1.2vh; right:5.8vw; z-index:5001; background:linear-gradient(135deg, #facc15, #eab308); color:#0f172a; border:none; border-radius:30px; padding:0.7vh 1.4vw; font-weight:800; font-size:1.5vh; cursor:pointer; box-shadow:0 6px 20px rgba(250,204,21,0.45); align-items:center; gap:6px;">⛶ Plein Écran</button>
     <div id="qr-box" onclick="toggleQRZoom()">
         <div id="qrcode"></div>
         <div id="qr-label">REJOINDRE</div>
     </div>
-    <button id="btn-hof" onclick="toggleHOF()">🏆 Hall of Fame</button>
 
     <header id="main-header">
         <div class="header-center">
@@ -247,7 +230,7 @@
                 <div class="flip-container">
                     <div class="flip-inner" id="logo-flip-inner">
                         <div class="flip-front">
-                            <img src="https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png">
+                            <img id="header-front-logo" src="">
                         </div>
                         <div class="flip-back">
                             <img id="display-mj-logo" src="">
@@ -285,17 +268,16 @@
         </div>
     </div>
 
-    <div id="hof-overlay" onclick="toggleHOF()">
-        <div class="hof-content" onclick="event.stopPropagation()">
-            <h1 style="color:var(--accent); margin-top:0;">🏆 TOP 10 MONDIAL</h1>
-            <div id="hof-list"></div>
-            <button onclick="toggleHOF()" style="margin-top:20px; width:100%; padding:10px; border-radius:10px; border:none; background:var(--accent); font-weight:bold; cursor:pointer;">RETOUR AU JEU</button>
-        </div>
-    </div>
 
     <script>
 		document.addEventListener("DOMContentLoaded", () => {
             document.title = `Scores - Presta'Puce (v${APP_CONFIG.VERSIONS.SCORES})`;
+            const favicon = document.getElementById('page-favicon');
+            if(favicon) favicon.href = APP_CONFIG.LOGO_URL;
+            const lobbyLogo = document.getElementById('lobby-logo');
+            if(lobbyLogo) lobbyLogo.src = APP_CONFIG.LOGO_BUZTAPUCE;
+            const headerFrontLogo = document.getElementById('header-front-logo');
+            if(headerFrontLogo) headerFrontLogo.src = APP_CONFIG.LOGO_BUZTAPUCE;
             const versionDisp = document.getElementById('version-display');
             if(versionDisp) versionDisp.innerText = `v${APP_CONFIG.VERSIONS.SCORES}`;
             
@@ -473,9 +455,9 @@
                     bgDiv.style.background = `url('${snap.val()}') center/cover no-repeat`;
                     bgDiv.style.animation = 'none';
                 } else {
-                    bgDiv.style.background = 'linear-gradient(45deg, #0f0c29, #302b63, #24243e)';
-                    bgDiv.style.backgroundSize = '300% 300%';
-                    bgDiv.style.animation = 'gradientBG 15s ease infinite';
+                    bgDiv.style.background = 'radial-gradient(circle at 50% 15%, #1e1b4b 0%, #0f172a 55%, #060913 100%)';
+                    bgDiv.style.backgroundSize = '200% 200%';
+                    bgDiv.style.animation = 'gradientBG 18s ease infinite';
                 }
             });
 
@@ -491,8 +473,8 @@
 
             roomRef.child('mjLogo').on('value', snap => { 
                 const logoVal = snap.val();
-                const defaultLogo = "https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png";
-                const oldWixLogo = "https://static.wixstatic.com/media/eda9e4_20fab3d00cf94a9987b925f3cee8e2ce~mv2.png";
+                const defaultLogo = APP_CONFIG.LOGO_URL;
+                const oldWixLogo = APP_CONFIG.LOGO_BUZTAPUCE;
                 
                 const flipInner = document.getElementById('logo-flip-inner');
                 const mjLogoImg = document.getElementById('display-mj-logo');
@@ -968,7 +950,7 @@
                     if(rank === 2) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583319.png" class="trophy-img">`; 
                     if(rank === 3) imgHtml = `<img src="https://cdn-icons-png.flaticon.com/512/2583/2583434.png" class="trophy-img">`; 
                     
-                    let avatarDisplay = item.isTeam ? `<div class="crest-bg" style="width:10vh; height:10vh; margin:0 auto;"><img src="${item.icon}" style="width:100%; height:100%; object-fit:contain;"></div>` : renderAvatar(item.avatar, 50); 
+                    let avatarDisplay = item.isTeam ? `<div class="crest-bg" style="width:10vh; height:10vh; margin:0 auto;"><img src="${item.icon}" style="width:100%; height:100%; object-fit:contain;"></div>` : `<div style="width:10vh; height:10vh; margin:0 auto;">${renderAvatar(item.avatar)}</div>`; 
                     
                     // Ajout du nom du Capitaine sous le nom de l'équipe
                     let capHtml = (item.isTeam && item.captainName) ? `<div style="font-size: clamp(0.9rem, 2vh, 1.5rem); color: var(--gold); margin-bottom: 1.5vh; font-weight: bold; text-shadow: 0 2px 4px black;">👑 Cap. ${item.captainName}</div>` : '';
@@ -1001,10 +983,36 @@
             else document.getElementById('btn-return-podium').style.display = 'none'; 
         }
         
-        function toggleFullScreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => { console.log(err); }); } else { if (document.exitFullscreen) document.exitFullscreen(); } }
-        document.addEventListener('keydown', (e) => { if(e.key.toLowerCase() === 'f') toggleFullScreen(); });
+        let hadFullscreenSession = false;
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    hadFullscreenSession = true;
+                }).catch(err => { console.log(err); });
+            } else {
+                hadFullscreenSession = false;
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+        document.addEventListener('fullscreenchange', () => {
+            const fsBtn = document.getElementById('btn-fullscreen');
+            const restorePill = document.getElementById('fs-restore-pill');
+            if (document.fullscreenElement) {
+                hadFullscreenSession = true;
+                if (restorePill) restorePill.style.display = 'none';
+            } else {
+                if (fsBtn) fsBtn.classList.remove('hide-ui');
+                if (restorePill && hadFullscreenSession && roomID) {
+                    restorePill.style.display = 'inline-flex';
+                }
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+            if (e.key.toLowerCase() === 'f') toggleFullScreen();
+        });
         let uiTimer; document.onmousemove = () => { document.getElementById('btn-fullscreen').classList.remove('hide-ui'); clearTimeout(uiTimer); uiTimer = setTimeout(() => { if(document.fullscreenElement) document.getElementById('btn-fullscreen').classList.add('hide-ui'); }, 3000); };
-        function toggleHOF() { const overlay = document.getElementById('hof-overlay'); if(overlay.style.display === "flex") { overlay.style.display = "none"; } else { overlay.style.display = "flex"; document.getElementById('hof-list').innerHTML = "<p style='text-align:center;'>Historique global en construction...</p>"; } }
+        document.querySelectorAll('button:not([title])').forEach(b => { const t = b.innerText.trim(); if (t) b.setAttribute('title', t); });
     </script>
 </body>
 </html>

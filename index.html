@@ -43,11 +43,18 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
-        :root { --primary: #3498db; --bg: #1a1a1a; --card: #2c3e50; --text: #ffffff; --accent: #f1c40f; --success: #27ae60; --danger: #e74c3c; --grey: #7f8c8d; --gold: #f39c12; }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+        :root { --primary: #3b82f6; --bg: #090d16; --card: rgba(23, 32, 53, 0.88); --text: #ffffff; --accent: #f1c40f; --success: #22c55e; --danger: #ef4444; --grey: #64748b; --gold: #f59e0b; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
         
         .wizard-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-        .step-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; background: var(--bg); z-index: 10; }
+        .step-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; background: radial-gradient(circle at 50% 15%, #1e293b 0%, #090d16 75%); z-index: 10; }
+        body.day-mode .step-screen { background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%) !important; }
+        body.day-mode h2, body.day-mode .welcome-title-main, body.day-mode .type-line, body.day-mode .choice-content b, body.day-mode #game-pseudo { color: #0f172a !important; }
+        body.day-mode p.desc, body.day-mode .choice-content span, body.day-mode .score-label { color: #475569 !important; }
+        body.day-mode .choice-card, body.day-mode .qr-card, body.day-mode .settings-content { background: rgba(255,255,255,0.96) !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important; }
+        body.day-mode input[type="text"], body.day-mode input[type="number"] { background: #ffffff !important; color: #0f172a !important; border-color: #94a3b8 !important; }
+        body.day-mode .game-header { background: rgba(255,255,255,0.85) !important; border-bottom: 1px solid #cbd5e1; }
+        body.day-mode .icon-btn { background: rgba(15,23,42,0.08); color: #0f172a; }
         .step-screen.active { display: flex; }
 
         .screen-header { flex-shrink: 0; width: 100%; padding: 15px 20px 5px 20px; text-align: center; box-sizing: border-box; }
@@ -77,15 +84,15 @@
         input[type="text"], input[type="number"] { box-sizing: border-box; width: 100%; max-width: 350px; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: clamp(1rem, 4vw, 1.3rem); text-align: center; outline: none; margin-bottom: 10px; flex-shrink: 0; transition: border-color 0.3s; }
         input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
         
-        .btn-main { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: clamp(1rem, 4vw, 1.3rem); font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); transition: transform 0.1s; text-transform: uppercase; width: 100%; max-width: 350px; }
-        .btn-main:active { transform: scale(0.95); }
-        .btn-main:disabled { background: #555 !important; color: #aaa !important; cursor: not-allowed; box-shadow: none !important; transform: none !important; }
-        .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: #ddd; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; }
+        .btn-main { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: 1px solid rgba(255,255,255,0.18); padding: 15px 30px; border-radius: 50px; font-size: clamp(1rem, 4vw, 1.25rem); font-weight: 800; letter-spacing: 0.5px; cursor: pointer; box-shadow: 0 8px 22px rgba(37, 99, 235, 0.45); transition: all 0.15s ease; text-transform: uppercase; width: 100%; max-width: 350px; }
+        .btn-main:active { transform: scale(0.96); }
+        .btn-main:disabled { background: #555 !important; color: #aaa !important; border-color: transparent !important; cursor: not-allowed; box-shadow: none !important; transform: none !important; }
+        .btn-secondary { background: rgba(59, 130, 246, 0.12); border: 1.5px solid rgba(59, 130, 246, 0.45); color: #e2e8f0; padding: 10px 22px; border-radius: 50px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; font-weight: bold; width: auto; display: inline-block; transition: 0.2s; }
 		
         #reader { width: 100%; max-width: 350px; margin-bottom: 15px; border-radius: 15px; overflow: hidden; display: none; border: 2px solid var(--accent); }
-        .btn-scan { background: #8e44ad; color: white; border: none; padding: 10px 20px; border-radius: 50px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 350px; margin-bottom: 15px; }
+        .btn-scan { background: linear-gradient(135deg, #9333ea, #6b21a8); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px 20px; border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 350px; margin-bottom: 15px; box-shadow: 0 6px 20px rgba(147, 51, 234, 0.35); }
 
-        .choice-card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; width: 100%; max-width: 350px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.2); box-sizing: border-box; flex-shrink: 0; }
+        .choice-card { background: var(--card); backdrop-filter: blur(14px); border-radius: 18px; padding: 16px; margin-bottom: 12px; width: 100%; max-width: 350px; cursor: pointer; border: 1px solid rgba(255,255,255,0.12); transition: all 0.2s ease; display: flex; align-items: center; text-align: left; box-shadow: 0 8px 22px rgba(0,0,0,0.3); box-sizing: border-box; flex-shrink: 0; }
         .choice-card:active { transform: scale(0.98); background: rgba(255,255,255,0.1); border-color: var(--accent); }
         .choice-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
         .choice-content b { display: block; font-size: 1.2rem; margin-bottom: 3px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -112,7 +119,6 @@
         .avatar-wrapper { position: relative; width: 44px; height: 44px; flex-shrink: 0; transition: transform 0.2s; }
         .avatar-wrapper:active { transform: scale(0.9); }
         .mini-avatar { width: 100%; height: 100%; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; border: 2px solid var(--accent); }
-        .edit-badge { position: absolute; bottom: -5px; left: -5px; background: var(--card); border: 2px solid var(--accent); border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; z-index: 6; box-shadow: 0 2px 4px rgba(0,0,0,0.5); pointer-events: none; }
         #team-badge { position: absolute; bottom: -5px; right: -20px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #2c3e50; background: white; object-fit: cover; display: none; z-index: 5; }
         
         .text-info-col { display: flex; flex-direction: column; justify-content: space-between; height: 40px; margin-left: 28px; }
@@ -122,14 +128,17 @@
         .icon-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; backdrop-filter: blur(4px); }
         
         .buzzer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 60px; }
-        .buzzer { width: 65vw; height: 65vw; max-width: 260px; max-height: 260px; border-radius: 50%; border: none; background: #e74c3c; box-shadow: 0 15px 0 #c0392b, 0 20px 40px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.1s; cursor: pointer; overflow: hidden; }
-        .buzzer.buzzer-pressed { transform: translateY(15px); box-shadow: 0 0 0 #c0392b; }
-        .ready .buzzer { background: #2ecc71; box-shadow: 0 15px 0 #27ae60; }
-        .ready .buzzer.buzzer-pressed { box-shadow: 0 0 0 #27ae60; }
-        .main-prise .buzzer { background: #3498db !important; box-shadow: 0 15px 0 #2980b9 !important; }
-        .blocked .buzzer { background: #555 !important; box-shadow: 0 15px 0 #333 !important; opacity: 0.6; pointer-events: none; }
-        .buzzer-label { font-size: clamp(1.2rem, 5vw, 1.8rem); font-weight: bold; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; z-index: 2; position: relative; }
-        .buzzer-img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; border-radius: 50%; pointer-events: none; }
+        @keyframes readyGlow { 0%, 100% { box-shadow: 0 16px 0 #15803d, 0 0 35px rgba(34, 197, 94, 0.55), 0 25px 50px rgba(0,0,0,0.55), inset 0 4px 15px rgba(255,255,255,0.45); } 50% { box-shadow: 0 16px 0 #15803d, 0 0 65px rgba(74, 222, 128, 0.85), 0 25px 55px rgba(0,0,0,0.6), inset 0 6px 20px rgba(255,255,255,0.6); } }
+        @keyframes winnerGlow { 0%, 100% { box-shadow: 0 16px 0 #1e3a8a, 0 0 40px rgba(59, 130, 246, 0.65), 0 25px 50px rgba(0,0,0,0.55), inset 0 4px 15px rgba(255,255,255,0.45); } 50% { box-shadow: 0 16px 0 #1e3a8a, 0 0 75px rgba(96, 165, 250, 0.95), 0 25px 55px rgba(0,0,0,0.6), inset 0 6px 22px rgba(255,255,255,0.65); } }
+        .buzzer { width: 66vw; height: 66vw; max-width: 268px; max-height: 268px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.28); background: radial-gradient(circle at 35% 28%, #ff6b6b 0%, #ef4444 52%, #991b1b 100%); box-shadow: 0 16px 0 #7f1d1d, 0 0 35px rgba(239, 68, 68, 0.4), 0 25px 50px rgba(0,0,0,0.55), inset 0 4px 14px rgba(255,255,255,0.35); display: flex; align-items: center; justify-content: center; position: relative; transition: transform 0.08s ease, box-shadow 0.15s ease; cursor: pointer; overflow: hidden; }
+        .buzzer::after { content: ""; position: absolute; top: 6%; left: 16%; width: 68%; height: 34%; border-radius: 50%; background: linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0) 100%); pointer-events: none; z-index: 1; }
+        .buzzer.buzzer-pressed { transform: translateY(14px); box-shadow: 0 2px 0 #7f1d1d, 0 0 25px rgba(239, 68, 68, 0.5) !important; animation: none !important; }
+        .ready .buzzer { background: radial-gradient(circle at 35% 28%, #4ade80 0%, #22c55e 52%, #15803d 100%); border-color: rgba(187, 247, 208, 0.55); animation: readyGlow 1.8s infinite ease-in-out; }
+        .ready .buzzer.buzzer-pressed { transform: translateY(14px); box-shadow: 0 2px 0 #15803d, 0 0 45px rgba(74, 222, 128, 0.85) !important; animation: none !important; }
+        .main-prise .buzzer { background: radial-gradient(circle at 35% 28%, #60a5fa 0%, #2563eb 52%, #1e3a8a 100%) !important; border-color: rgba(191, 219, 254, 0.65) !important; animation: winnerGlow 1.5s infinite ease-in-out !important; }
+        .blocked .buzzer { background: #555 !important; border-color: rgba(255,255,255,0.1) !important; box-shadow: 0 12px 0 #333 !important; opacity: 0.65; pointer-events: none; animation: none !important; }
+        .buzzer-label { font-size: clamp(1.25rem, 5.2vw, 1.85rem); font-weight: 900; letter-spacing: 1px; color: white; text-shadow: 0 3px 8px rgba(0,0,0,0.65); pointer-events: none; z-index: 2; position: relative; }
+        .buzzer-img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.28; border-radius: 50%; pointer-events: none; }
 
         .score-container { margin-bottom: 20px; text-align: center; display: flex; flex-direction: column; gap: 5px; }
         .score-row { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.1rem; }
@@ -162,10 +171,6 @@
         @keyframes bounceTrophy { 0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 transparent); } 50% { transform: scale(1.1) translateY(-10px); filter: drop-shadow(0 10px 15px rgba(241,196,15,0.6)); } }
         .champion-trophy { animation: popTrophy 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, bounceTrophy 2s ease-in-out 0.6s infinite !important; }
 		
-		/* 🚀 NOUVEAU : Grilles pour formulaires compacts */
-        .crm-row { display: flex; gap: 10px; margin-bottom: 5px; width: 100%; }
-        .crm-col { flex: 1; display: flex; flex-direction: column; }
-        
         /* Harmonisation de la modale sécurité */
         #overlay-security-profile label { color: #bdc3c7; font-weight: bold; margin-bottom: 4px; }
         #overlay-security-profile input { margin-bottom: 12px; }
@@ -256,7 +261,7 @@
                 <p id="pseudo-warning" style="display:none; color:var(--gold); font-size:0.8rem; margin-top:-5px; margin-bottom:10px; font-weight:bold;">⚠️ Émojis et symboles spéciaux interdits.</p>
                 
                 <div id="pseudo-btns-group" style="width:100%; max-width:350px; display:flex; gap:10px;">
-                    <button id="btn-pseudo-cancel" class="btn-main" onclick="finishEdit(false)" style="display:none; background:#34495e; flex:1;">Annuler</button>
+                    <button id="btn-pseudo-cancel" class="btn-main" onclick="finishEdit(false)" style="display:none; background:linear-gradient(135deg, #1e3a8a, #2563eb); flex:1;">Annuler</button>
                     <button id="btn-pseudo-next" class="btn-main" onclick="validatePseudo()" style="flex:1;">Suivant</button>
                 </div>
 
@@ -320,7 +325,7 @@
 
                 <div id="avatar-express-actions" style="width:100%; display:flex; flex-direction:column; gap:10px;">
                     <button class="btn-main" onclick="validateAvatarChoice()" style="width:100%; background:#27ae60;">🚀 Utiliser et continuer</button>
-                    <button class="btn-main" onclick="window.showClassicAvatarMenu()" style="width:100%; background:#34495e; font-size:0.9rem;">Modifier la photo / l'avatar</button>
+                    <button class="btn-main" onclick="window.showClassicAvatarMenu()" style="width:100%; background:linear-gradient(135deg, #1e3a8a, #2563eb); font-size:0.9rem;">Modifier la photo / l'avatar</button>
                 </div>
 
                 <div id="avatar-choices" style="display:none; width:100%; flex-direction:column; gap:10px;">
@@ -340,12 +345,12 @@
                         <div class="choice-content"><b style="font-size: 0.95rem;">GALERIE EMOJI</b><span>Choisir un avatar</span></div>
                     </div>
                     
-                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; background:#34495e; margin-top:5px; font-size:0.8rem;">Retour</button>
+                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; background:linear-gradient(135deg, #1e3a8a, #2563eb); margin-top:5px; font-size:0.8rem;">Retour</button>
                 </div>
 
                 <div id="avatar-gallery-view" class="gallery-container" style="display:none; width:100%; flex-direction:column; align-items:center;">
                     <div class="common-grid" id="avatar-grid"></div>
-                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; max-width:350px; background:#34495e; font-size:0.8rem; margin-top:10px;">Retour</button>
+                    <button class="btn-main" onclick="window.hideClassicAvatarMenu()" style="width:100%; max-width:350px; background:linear-gradient(135deg, #1e3a8a, #2563eb); font-size:0.8rem; margin-top:10px;">Retour</button>
                 </div>
 
                 <div id="avatar-history-view" class="gallery-container" style="display:none; width:100%; flex-direction:column; align-items:center;">
@@ -354,7 +359,7 @@
                         <span id="history-counter" style="font-size:0.85em; font-weight:bold; background:rgba(0,0,0,0.5); padding:3px 8px; border-radius:10px;">0 / 10</span>
                     </div>
                     <div class="common-grid" id="avatar-history-grid" style="gap:15px; padding-top:10px;"></div>
-                    <button class="btn-main" onclick="window.closeHistoryMenu()" style="width:100%; max-width:350px; background:#34495e; font-size:0.8rem; margin-top:10px;">Retour</button>
+                    <button class="btn-main" onclick="window.closeHistoryMenu()" style="width:100%; max-width:350px; background:linear-gradient(135deg, #1e3a8a, #2563eb); font-size:0.8rem; margin-top:10px;">Retour</button>
                 </div>
 				
                 <div id="avatar-choice-container" style="display:none; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; width: 100%; text-align: center;">
@@ -583,7 +588,7 @@
 
             <button class="settings-btn" onclick="document.getElementById('modal-about-player').style.display='flex'" style="background:transparent; border:1px solid #bdc3c7; color:#bdc3c7; margin-top: 15px; margin-bottom: 0; padding: 10px;">ℹ️ À Propos & Versions</button>
 
-            <button class="settings-btn btn-return-game" onclick="finishEdit(false)" style="margin-top:10px; background:#34495e; padding:12px;">⬅️ RETOUR AU BUZZER</button>
+            <button class="settings-btn btn-return-game" onclick="finishEdit(false)" style="margin-top:10px; background:linear-gradient(135deg, #1e3a8a, #2563eb); padding:12px;">⬅️ RETOUR AU BUZZER</button>
         </div>
     </div>
 	
@@ -691,12 +696,13 @@
 
     <div id="overlay-quit" class="overlay-full" onclick="this.style.display='none'">
         <div class="settings-content" onclick="event.stopPropagation()">
-            <h2 style="color:var(--danger);">QUITTER ?</h2>
-            <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px;">Que veux-tu faire ?</p>
-            <button class="settings-btn btn-save-quit" onclick="handleExitAction('save')">💾 Sauvegarder & Quitter <small>(Bientôt)</small></button>
-            <button class="settings-btn btn-change-room" onclick="handleExitAction('change')">🔄 Changer de Salle</button>
-            <button class="settings-btn btn-exit-def" onclick="handleExitAction('exit')">🚪 Sortie Définitive (Sans sauvegarde)</button>
-            <button class="btn-secondary" style="margin-top:10px; width:100%; border-color:white; color:white;" onclick="document.getElementById('overlay-quit').style.display='none'">❌ Annuler (Retour au jeu)</button>
+            <h2 style="color:var(--danger); margin-top:0;">QUITTER LA PARTIE ?</h2>
+            <p id="quit-subtitle" style="color:#cbd5e1; font-size:0.95rem; margin-bottom:18px; line-height:1.4;">Que veux-tu faire ?</p>
+            <button id="btn-quit-save" class="settings-btn btn-save-quit" onclick="handleExitAction('save')" title="Sauvegarder mon profil et quitter">💾 Sauvegarder & Quitter</button>
+            <button id="btn-quit-change" class="settings-btn btn-change-room" onclick="handleExitAction('change')" title="Rejoindre une autre salle">🔄 Changer de Salle</button>
+            <button id="btn-quit-exit" class="settings-btn btn-exit-def" onclick="handleExitAction('exit')" title="Quitter définitivement sans sauvegarder">🚪 Sortie Définitive (Sans sauvegarde)</button>
+            <button id="btn-quit-quick" class="btn-main" style="display:none; background:linear-gradient(135deg, #ef4444, #b91c1c); box-shadow:0 6px 18px rgba(239,68,68,0.4); margin-bottom:12px; width:100%;" onclick="handleExitAction('quick_exit')" title="Confirmer la sortie de la partie">🚪 Oui, quitter la partie</button>
+            <button class="btn-secondary" style="margin-top:8px; width:100%; border-color:rgba(59,130,246,0.5); color:white;" onclick="document.getElementById('overlay-quit').style.display='none'" title="Rester dans la partie">❌ Annuler (Retour au jeu)</button>
         </div>
     </div>
 
@@ -733,9 +739,9 @@
     <div id="overlay-closing" class="overlay-full" style="z-index: 6000;">
         <div class="settings-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--gold); margin-top:0;">PARTIE TERMINÉE 🏁</h2>
-            <p style="color:#ccc; font-size:1rem; margin-bottom: 25px; line-height: 1.4;">L'animateur clôture la salle.<br><br>Veux-tu sauvegarder ton profil et ton score pour tes futures parties ?</p>
-            <button class="btn-main" onclick="handleFinalSave()" style="margin-bottom: 12px; width: 100%; background: var(--success);">💾 Créer un compte <small>(Bientôt)</small></button>
-            <button class="settings-btn" onclick="handleFinalLeave()" style="border: 1px solid var(--danger); color: var(--danger); text-align: center;">🚪 Quitter sans sauvegarder</button>
+            <p id="closing-msg" style="color:#cbd5e1; font-size:1rem; margin-bottom: 25px; line-height: 1.45;">L'animateur clôture la salle.<br><br>Veux-tu sauvegarder ton profil et ton score pour tes futures parties ?</p>
+            <button id="btn-closing-save" class="btn-main" onclick="handleFinalSave()" style="margin-bottom: 12px; width: 100%; background: linear-gradient(135deg, #22c55e, #15803d);" title="Créer un compte ou sauvegarder mon score">💾 Créer un compte / Sauvegarder</button>
+            <button id="btn-closing-leave" class="settings-btn" onclick="handleFinalLeave()" style="border: 1px solid var(--danger); color: var(--danger); text-align: center;" title="Quitter la salle">🚪 Quitter sans sauvegarder</button>
         </div>
     </div>
 
@@ -915,7 +921,7 @@
             <p id="crm-error" style="color:#e74c3c; font-size:0.8rem; margin-top:10px; min-height:1em; text-align:center;"></p>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button id="btn-c-back" class="btn-main" onclick="window.crmPrev()" style="display:none; background:#34495e; flex:0.4; font-size:1rem;">Retour</button>
+                <button id="btn-c-back" class="btn-main" onclick="window.crmPrev()" style="display:none; background:linear-gradient(135deg, #1e3a8a, #2563eb); flex:0.4; font-size:1rem;">Retour</button>
                 <button id="btn-c-next" class="btn-main" onclick="window.crmNext()" style="background:var(--primary); flex:1; font-size:1rem;" disabled>Étape Suivante</button>
             </div>
         </div>
@@ -966,18 +972,18 @@
                 <div class="crm-row">
                     <div class="crm-col">
                         <label>Prénom *</label>
-                        <input type="text" id="edit-firstname" class="crm-input" placeholder="Prénom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
+                        <input type="text" id="edit-firstname" class="crm-input" placeholder="Prénom" oninput="window.sanitizeCRM(this)" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                     </div>
                     <div class="crm-col">
                         <label>Nom *</label>
-                        <input type="text" id="edit-lastname" class="crm-input" placeholder="Nom" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
+                        <input type="text" id="edit-lastname" class="crm-input" placeholder="Nom" oninput="window.sanitizeCRM(this)" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                     </div>
                 </div>
 
                 <div class="crm-row">
                     <div class="crm-col">
                         <label>Téléphone *</label>
-                        <input type="tel" id="edit-phone" class="crm-input" placeholder="06..." oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
+                        <input type="tel" id="edit-phone" class="crm-input" placeholder="06..." oninput="window.sanitizeCRM(this)" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                     </div>
                     <div class="crm-col">
                         <label>Date de Naissance *</label>
@@ -986,7 +992,7 @@
                 </div>
                 
                 <label>Entreprise / Team (Optionnel)</label>
-                <input type="text" id="edit-company" class="crm-input" placeholder="Société" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
+                <input type="text" id="edit-company" class="crm-input" placeholder="Société" oninput="window.sanitizeCRM(this)" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                 
                 <div class="crm-row">
                     <div class="crm-col" style="flex:0.4;">
@@ -995,20 +1001,20 @@
                     </div>
                     <div class="crm-col">
                         <label>Ville *</label>
-                        <input type="text" id="edit-city" class="crm-input" placeholder="Ville" oninput="this.value = this.value.replace(/[.#$\[\]]/g, '')" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
+                        <input type="text" id="edit-city" class="crm-input" placeholder="Ville" oninput="window.sanitizeCRM(this)" onkeypress="if(event.key==='Enter') window.saveEditedProfile()">
                     </div>
                 </div>
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn-main" onclick="document.getElementById('overlay-edit-profile').style.display='none'; openSettings();" style="background:#34495e; flex:1;">Annuler</button>
+                <button class="btn-main" onclick="document.getElementById('overlay-edit-profile').style.display='none'; openSettings();" style="background:linear-gradient(135deg, #1e3a8a, #2563eb); flex:1;">Annuler</button>
                 <button class="btn-main" onclick="window.saveEditedProfile()" style="background:var(--success); flex:1;">Enregistrer</button>
             </div>
 			<div style="margin-top: 35px; border-top: 1px dashed #e74c3c; padding-top: 20px; text-align: center; width: 100%;">
 				<p style="color: #95a5a6; font-size: 0.8rem; margin-bottom: 12px; font-style: italic;">
 				⚠️ Cette action supprime définitivement votre compte de notre CRM ainsi que toutes vos statistiques de jeu.
 				</p>
-				<button id="btn-delete-account" onclick="triggerAccountDeletion()" style="background: transparent; color: #e74c3c; border: 1px solid #e74c3c; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; box-sizing: border-box; transition: all 0.3s;" onmouseenter="this.style.background='#e74c3c'; this.style.color='white';" onmouseleave="this.style.background='transparent'; this.style.color='#e74c3c';">
+				<button id="btn-delete-account" onclick="window.confirmDeleteAccount()" style="background: transparent; color: #e74c3c; border: 1px solid #e74c3c; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; box-sizing: border-box; transition: all 0.3s;" onmouseenter="this.style.background='#e74c3c'; this.style.color='white';" onmouseleave="this.style.background='transparent'; this.style.color='#e74c3c';">
 				Supprimer mon compte définitivement
 				</button>
 			</div>
@@ -1052,7 +1058,7 @@
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn-main" onclick="document.getElementById('overlay-security-profile').style.display='none'; openSettings();" style="background:#34495e; flex:1;">Annuler</button>
+                <button class="btn-main" onclick="document.getElementById('overlay-security-profile').style.display='none'; openSettings();" style="background:linear-gradient(135deg, #1e3a8a, #2563eb); flex:1;">Annuler</button>
                 <button id="btn-save-security" class="btn-main" onclick="window.saveSecurityProfile()" style="background:#e74c3c; flex:1;">Mettre à jour</button>
             </div>
         </div>
@@ -1070,17 +1076,7 @@
     </div>
 	
     <script>
-        // Variable gérée dynamiquement au début du fichier via config.js
-		
-		// 🚀 AUTOMATISATION : Mise à jour du titre et de la modale au chargement
-        document.addEventListener("DOMContentLoaded", function() {
-            // Met à jour l'onglet du navigateur
-            document.title = "Buz'ta Puce - v" + CLIENT_VERSION;
-
-            // Met à jour le numéro dans la modale À Propos
-            const vSpan = document.getElementById('display-client-version');
-            if (vSpan) vSpan.innerText = CLIENT_VERSION;
-        });
+        // Version gérée dynamiquement via config.js et synchronisée avec Firebase
 		
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
         let isExiting = false; 
@@ -1175,7 +1171,6 @@
         db.ref('.info/serverTimeOffset').on('value', snap => {
             serverTimeOffset = snap.val() || 0;
         });
-        let hasBuzzedLocally = false;
         let buzzerReadyTime = 0; // 🟢 Chronomètre local anti-latence
 
         // 🟢 MOTEUR DU MOUCHARD (Côté Joueur)
@@ -1236,13 +1231,16 @@
         }
 
         window.onload = () => {
-            document.title = "Presta'Puce - Blind Test (v" + CLIENT_VERSION + ")";
             document.getElementById('version-display').innerText = "v" + CLIENT_VERSION;
+            const vSpan = document.getElementById('display-client-version');
+            if (vSpan) vSpan.innerText = CLIENT_VERSION;
 
-            db.ref('config/minVersion').once('value', snap => {
-                const serverVer = snap.val(); const url = new URL(window.location.href);
-                if(serverVer && serverVer !== CLIENT_VERSION && url.searchParams.get('force_ver') !== serverVer) {
-                    url.searchParams.set('force_ver', serverVer); url.searchParams.set('t', Date.now()); window.location.href = url.toString();
+            db.ref('config/versions/index').on('value', snap => {
+                if (snap.exists()) {
+                    const rawVer = String(snap.val()).replace(/^v/, '');
+                    document.title = `Presta'Puce - Blind Test (v${rawVer})`;
+                    document.getElementById('version-display').innerText = "v" + rawVer;
+                    if (vSpan) vSpan.innerText = rawVer;
                 }
             });
             let storedId = localStorage.getItem('buzz_userId');
@@ -1268,8 +1266,11 @@
                 });
             }
             
-            document.getElementById('input-pseudo').addEventListener('keypress', (e)=>{if(e.key==='Enter') validatePseudo()});
             window.addEventListener('popstate', (event) => { if(stepHistory.length > 0) goBack(); });
+            document.querySelectorAll('button:not([title]), .icon-btn:not([title])').forEach(b => {
+                const txt = b.innerText.replace(/\s+/g, ' ').trim();
+                if (txt) b.setAttribute('title', txt);
+            });
         };
 
         function fetchActiveRooms() {
@@ -1452,16 +1453,18 @@
                             }
                         }
                         
-                        // 🚀 PATCH V1.305 : RÉCEPTEUR MODE JOUR (Inversion des couleurs)
+                        // 🚀 PATCH V1.314 : RÉCEPTEUR MODE JOUR / STUDIO NUIT
                         if (roomSettings.dayMode === true) {
-                            document.documentElement.style.setProperty('--bg', '#ecf0f1'); // Blanc cassé
-                            document.documentElement.style.setProperty('--card', '#ffffff'); // Blanc pur
-                            document.documentElement.style.setProperty('--text', '#2c3e50'); // Texte Noir/Bleu foncé
+                            document.body.classList.add('day-mode');
+                            document.documentElement.style.setProperty('--bg', '#f1f5f9');
+                            document.documentElement.style.setProperty('--card', '#ffffff');
+                            document.documentElement.style.setProperty('--text', '#0f172a');
                             document.body.style.backgroundColor = 'var(--bg)';
                             document.body.style.color = 'var(--text)';
                         } else {
-                            document.documentElement.style.setProperty('--bg', '#1a1a1a'); // Noir classique
-                            document.documentElement.style.setProperty('--card', '#2c3e50'); 
+                            document.body.classList.remove('day-mode');
+                            document.documentElement.style.setProperty('--bg', '#090d16');
+                            document.documentElement.style.setProperty('--card', 'rgba(23, 32, 53, 0.88)');
                             document.documentElement.style.setProperty('--text', '#ffffff');
                             document.body.style.backgroundColor = 'var(--bg)';
                             document.body.style.color = 'var(--text)';
@@ -1564,9 +1567,9 @@
             // 🚀 SÉCURITÉ ANTI-CLONAGE : Création du jeton du téléphone
             if (!window.mySessionID) window.mySessionID = Math.random().toString(36).substring(2, 15);
 
-            if (myUserID) {
+            if (myUserID && roomRef) {
                 // 1. On déclare le joueur actif dans la salle
-                firebase.database().ref('players/' + myUserID).update({
+                roomRef.child('players/' + myUserID).update({
                     active: true,
                     recoveryRequest: null,
                     reconnectedAt: firebase.database.ServerValue.TIMESTAMP
@@ -1589,8 +1592,9 @@
                                 sessionRef.off(); 
                                 
                                 // 🚀 RÉCUPÉRATION DU LIEN MJ AVANT DÉCONNEXION
-                                roomRef.child('mjWebsite').once('value').then(snap => {
-                                    const targetUrl = snap.val() || "https://tapni.com/app/djcedrik"; // Lien de secours si vide
+                                roomRef.child('mjLink').once('value').then(snap => {
+                                    const linkVal = snap.val();
+                                    const targetUrl = (linkVal && linkVal.startsWith('http')) ? linkVal : "https://tapni.com/app/djcedrik";
                                     
                                     alert("⚠️ SESSION TRANSFÉRÉE\n\nCe compte est utilisé sur un autre appareil.\nRedirection vers le site de votre animateur...");
 
@@ -2105,19 +2109,7 @@
             if (newIndex >= 0 && newIndex < window.currentZoomList.length) { window.openZoomPreview(newIndex); }
         };
 
-        window.useCurrentAvatar = function() {
-            // FIX CAPITAINE : Inscription officielle dans la salle
-            if (roomID && myUserID) {
-                db.ref('rooms/' + roomID + '/players/' + myUserID).update({
-                    name: player.pseudo,
-                    avatar: player.avatar,
-                    active: true,
-                    joinTimestamp: firebase.database.ServerValue.TIMESTAMP
-                });
-            }
-            window.handleModeRouting();
-        };
-		
+
 		// --- PATCH V1.240 : VALIDATEUR D'AVATAR (Correction stricte) ---
         window.validateAvatarChoice = function() {
             const choiceContainer = document.getElementById('avatar-choice-container');
@@ -2605,7 +2597,20 @@
             }
         };
 		
-        function confirmQuit() { document.getElementById('overlay-quit').style.display = 'flex'; }
+        function confirmQuit() {
+            const isQuick = (typeof roomSettings !== 'undefined' && roomSettings && roomSettings.loginMode === 'quick');
+            const bSave = document.getElementById('btn-quit-save');
+            const bChange = document.getElementById('btn-quit-change');
+            const bExit = document.getElementById('btn-quit-exit');
+            const bQuick = document.getElementById('btn-quit-quick');
+            const sub = document.getElementById('quit-subtitle');
+            if (bSave) bSave.style.display = isQuick ? 'none' : 'block';
+            if (bChange) bChange.style.display = isQuick ? 'none' : 'block';
+            if (bExit) bExit.style.display = isQuick ? 'none' : 'block';
+            if (bQuick) bQuick.style.display = isQuick ? 'block' : 'none';
+            if (sub) sub.innerText = isQuick ? "Confirmes-tu vouloir quitter la partie ?" : "Que veux-tu faire ?";
+            document.getElementById('overlay-quit').style.display = 'flex';
+        }
         function editStep(stepId) { isEditing = true; document.getElementById('overlay-settings').style.display = 'none'; if(stepId === 'step-pseudo') document.getElementById('input-pseudo').value = player.pseudo; navigateTo(stepId); }
         
         function finishEdit(stayInMenu = false) { 
@@ -3124,9 +3129,6 @@
             roomRef.child('gameState').on('value', snap => { 
                 const st = snap.val(); 
                 
-				/* PATCH V1.188 : On débloque aussi le clic local quand les points sont donnés */
-                if (st && (st.status === 'ready' || st.status === 'waiting' || st.status === 'awarded')) hasBuzzedLocally = false;
-                
                 if (st && st.status === 'endGame') showEndGame(); 
                 else if (st && st.status === 'closing') showClosingScreen(); 
                 else { 
@@ -3227,10 +3229,27 @@
         }
 
         function executeExitAction(action) {
-            releaseWakeLock(); 
             if(action === 'save') {
-                alert("La création de compte arrive très bientôt !");
-                if(confirm("Tant que l'animateur n'a pas fermé la salle, vous pourrez revenir et récupérer votre score.\n\nVoulez-vous quitter ?")) { isExiting = true; setInactiveAndAction(() => { window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; }); }
+                if (myUserID && myUserID.startsWith('u_')) {
+                    document.getElementById('overlay-quit').style.display = 'none';
+                    window.openCRMModal();
+                    return;
+                }
+                if(confirm("✅ Ton profil est lié à ton compte ! Tant que l'animateur n'a pas fermé la salle, tu pourras revenir et récupérer ton score.\n\nVoulez-vous quitter ?")) {
+                    releaseWakeLock();
+                    isExiting = true;
+                    setInactiveAndAction(() => { window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; });
+                }
+                return;
+            }
+            releaseWakeLock();
+            if(action === 'quick_exit') {
+                isExiting = true;
+                setInactiveAndAction(() => {
+                    localStorage.removeItem('presta_player_session');
+                    localStorage.removeItem('buzz_lastRoom');
+                    window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik";
+                });
             } else if(action === 'change') {
                 if(confirm("Quitter cette salle pour en rejoindre une autre ?\nVotre profil sera conservé.")) { isExiting = true; setInactiveAndAction(() => { localStorage.removeItem('presta_player_session'); localStorage.removeItem('buzz_lastRoom'); location.reload(); }); }
             } else if(action === 'exit') {
@@ -3241,17 +3260,46 @@
         function showClosingScreen() { 
             isRoomClosing = true; 
             document.getElementById('podium-zone').style.display = 'none'; 
+            const isQuick = (typeof roomSettings !== 'undefined' && roomSettings && roomSettings.loginMode === 'quick');
+            const saveBtn = document.getElementById('btn-closing-save');
+            const leaveBtn = document.getElementById('btn-closing-leave');
+            const msgEl = document.getElementById('closing-msg');
+            if (isQuick) {
+                if (saveBtn) saveBtn.style.display = 'none';
+                if (msgEl) msgEl.innerHTML = `Merci d'avoir participé à la partie de <b>${mjName}</b> ! 🎉<br><br>Confirmes-tu vouloir quitter la salle ?`;
+                if (leaveBtn) {
+                    leaveBtn.className = 'btn-main';
+                    leaveBtn.style.cssText = 'width:100%; background:linear-gradient(135deg, #ef4444, #b91c1c); color:white; border:none;';
+                    leaveBtn.innerText = '🚪 Quitter la partie';
+                }
+            } else {
+                if (saveBtn) saveBtn.style.display = 'block';
+                if (msgEl) msgEl.innerHTML = `L'animateur clôture la salle.<br><br>Veux-tu sauvegarder ton profil et ton score pour tes futures parties ?`;
+                if (leaveBtn) {
+                    leaveBtn.className = 'settings-btn';
+                    leaveBtn.style.cssText = 'border: 1px solid var(--danger); color: var(--danger); text-align: center;';
+                    leaveBtn.innerText = '🚪 Quitter sans sauvegarder';
+                }
+            }
             document.getElementById('overlay-closing').style.display = 'flex'; 
         }
         
-        function handleFinalSave() { alert("La création de compte arrive très bientôt !\nTon profil reste néanmoins mémorisé sur ce téléphone pour ta prochaine partie."); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; }
+        function handleFinalSave() {
+            if (myUserID && myUserID.startsWith('u_')) {
+                document.getElementById('overlay-closing').style.display = 'none';
+                window.openCRMModal();
+                return;
+            }
+            alert("✅ Ton profil est déjà sauvegardé sur ton compte !");
+            window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik";
+        }
         function handleFinalLeave() { localStorage.clear(); window.location.href = (mjLink && mjLink.startsWith('http')) ? mjLink : "https://tapni.com/app/djcedrik"; }
 
         function handlePress(e) { 
             if(e.cancelable) e.preventDefault(); 
             
             // On bloque le clic uniquement si on est en jeu ET que ce n'est pas le moment des points/attente
-            if(isBlocked || hasBuzzedLocally || (currentWinner && gameState !== 'awarded' && gameState !== 'waiting')) return;  
+            if(isBlocked || (currentWinner && gameState !== 'awarded' && gameState !== 'waiting')) return;  
             
             const btn = document.getElementById('btn-buzz'); 
             btn.classList.add('buzzer-pressed'); 
@@ -3544,7 +3592,7 @@
 
         // 1. FILTRE FIREBASE : Supprime instantanément les caractères interdits
         window.sanitizeCRM = function(input) {
-            input.value = input.value.replace(/[.#$\[\]]/g, '');
+            input.value = input.value.replace(/[.#$\[\]\/]/g, '');
         };
 
         // 🚀 NOUVEAU : Efface les caractères interdits ET prévient le joueur (Ergonomie)
@@ -3631,14 +3679,6 @@
                     }
                 }
             }
-        };
-
-        // 4. LA CASE À COCHER : Afficher/Masquer les mots de passe
-        window.toggleAllPwds = function() {
-            var chk = document.getElementById('crm-show-pwds').checked;
-            var type = chk ? "text" : "password";
-            document.getElementById('crm-pwd').type = type;
-            document.getElementById('crm-pwd-conf').type = type;
         };
 
         window.crmNext = function() {
@@ -3895,6 +3935,7 @@
                                 team: window.pendingRecoveryData.teamName || "Solo", 
                                 teamIcon: window.pendingRecoveryData.teamIcon || "" 
                             };
+                            isCaptain = window.pendingRecoveryData.isCaptain || false;
                             window.pendingRecoveryData = null; // On vide la mémoire
                             showReconnectScreen(); // On va direct à l'écran final
                         } else {
@@ -4159,13 +4200,9 @@
             }, 100);
         };
 		
-		// 🚀 INITIALISATION JETON UNIQUE ET MÉMOIRE
-        window.mySessionID = window.mySessionID || Math.random().toString(36).substring(2, 15);
-        window.pendingRecoveryData = null;
-
 		window.prepareSecureRecovery = function(uid, playerData) {
             // 🚀 Mémorisation des infos pour bloquer le retour à l'écran pseudo plus tard
-            window.pendingRecoveryData = { uid: uid, name: playerData.name, avatar: playerData.avatar, teamName: playerData.teamName, teamIcon: playerData.teamIcon };
+            window.pendingRecoveryData = { uid: uid, name: playerData.name, avatar: playerData.avatar, teamName: playerData.teamName, teamIcon: playerData.teamIcon, isCaptain: playerData.isCaptain || false };
             
             // 1. On va chercher l'e-mail dans la base CRM (branche users_crm)
             firebase.database().ref('users_crm/' + uid).once('value').then(snap => {
@@ -4232,8 +4269,9 @@
 						// 🚀 CORRECTION : On attend la réponse de Firebase avant de détruire le compte
 						if (typeof roomRef !== 'undefined' && roomRef) {
 							roomRef.child('players/' + myUserID).remove().catch(()=>{});
-							roomRef.child('mjWebsite').once('value').then(snap => { 
-								doFinalDelete(snap.val() || targetUrl); 
+							roomRef.child('mjLink').once('value').then(snap => { 
+								const linkVal = snap.val();
+								doFinalDelete((linkVal && linkVal.startsWith('http')) ? linkVal : targetUrl); 
 							}).catch(() => { 
 								doFinalDelete(targetUrl); 
 							});

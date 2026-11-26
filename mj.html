@@ -45,6 +45,9 @@
 
         const dispGuide = document.getElementById('disp-v-guide');
         if(dispGuide) dispGuide.innerText = `v${APP_CONFIG.VERSIONS.GUIDE}`;
+
+        const dispMj = document.getElementById('disp-v-mj');
+        if(dispMj) dispMj.innerText = `v${APP_VERSION}`;
     });
 	</script>
     <link rel="icon" id="page-favicon" type="image/png">
@@ -55,9 +58,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --mj-color: #2ecc71; --bg-color: transparent; --card-bg: rgba(44, 62, 80, 0.75); --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; --success: #27ae60; --purple: #8e44ad; }
-        body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px 20px 20px 20px; user-select: none; -webkit-user-select: none; }
-        #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: linear-gradient(45deg, #0f0c29, #302b63, #24243e); background-size: 300% 300%; animation: gradientBG 15s ease infinite; }
+        :root { --mj-color: #22c55e; --bg-color: transparent; --card-bg: rgba(20, 29, 48, 0.82); --text-color: #ffffff; --danger: #ef4444; --accent: #f1c40f; --blue: #3b82f6; --gold: #f59e0b; --success: #22c55e; --purple: #9333ea; }
+        body { background: var(--bg-color); color: white; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; margin: 0; padding: 15px 20px 20px 20px; user-select: none; -webkit-user-select: none; }
+        #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: radial-gradient(circle at 50% 15%, #1e1b4b 0%, #0f172a 55%, #060913 100%); background-size: 200% 200%; animation: gradientBG 18s ease infinite; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         #bg-protection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(0, 0, 0, 0.5); pointer-events: none; }
         
@@ -96,9 +99,11 @@
         .ghost-ui.faded { opacity: 0.3; }
         .ghost-ui:hover { opacity: 1 !important; }
 
-        #top-right-tools { display:none; position: fixed; top: 15px; right: 15px; gap: 8px; z-index: 9999; flex-direction: column; width: 90px; }
-        .top-right-btn { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px; font-size: 0.75rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border-radius: 8px; margin:0; width: 100%; text-align: center; backdrop-filter: blur(5px); transition: 0.2s; cursor:pointer; font-weight:bold; }
-        .top-right-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); color: var(--accent); }
+        #top-right-tools { display:none; position: fixed; top: 15px; right: 15px; gap: 7px; z-index: 9999; flex-direction: column; width: 156px; padding: 8px; background: rgba(9, 13, 24, 0.72); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
+        .top-right-btn { background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(255,255,255,0.14); color: #f8fafc; padding: 0 12px; height: 36px; font-size: 0.8rem; box-shadow: 0 2px 6px rgba(0,0,0,0.3); border-radius: 9px; margin: 0; width: 100%; display: flex; align-items: center; justify-content: flex-start; gap: 8px; text-transform: none; letter-spacing: 0.2px; white-space: nowrap; transition: all 0.2s ease; cursor: pointer; font-weight: 700; }
+        .top-right-btn:hover { background: rgba(59, 130, 246, 0.22); border-color: var(--accent); color: var(--accent); transform: translateX(-3px); }
+        .top-right-btn.btn-sandbox-pro { background: linear-gradient(135deg, rgba(245, 158, 11, 0.24), rgba(234, 179, 8, 0.1)); border: 1px solid rgba(250, 204, 21, 0.55); color: #fde047; }
+        .top-right-btn.btn-sandbox-pro:hover { background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(234, 179, 8, 0.22)); border-color: #fde047; color: #ffffff; box-shadow: 0 0 15px rgba(250, 204, 21, 0.35); }
 
         .hub-search-bar { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--accent); background: rgba(0,0,0,0.6); color: white; font-size: 1.1rem; outline: none; margin-bottom: 20px; transition: 0.3s; }
         .hub-search-bar:focus { box-shadow: 0 0 15px rgba(241, 196, 15, 0.5); }
@@ -204,8 +209,6 @@
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #c0392b; -webkit-transition: .4s; transition: .4s; border-radius: 34px; }
         .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; -webkit-transition: .4s; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: #27ae60; } input:checked + .slider:before { transform: translateX(26px); }
-        .show-pass-container { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 0.9rem; cursor: pointer; text-align: left; width: 100%; padding-left: 5px; }
-        .show-pass-container input { width: 18px; height: 18px; margin: 0; cursor: pointer; flex-shrink: 0; }
         .version-tag { position: fixed; bottom: 10px; right: 15px; color: rgba(255, 255, 255, 0.5); font-size: 0.8rem; font-family: monospace; z-index: 9999; pointer-events: none; }
         .btn-ghost { position: absolute; top: 15px !important; right: 15px !important; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: all 0.3s ease; box-shadow: none !important; width: auto !important; margin: 0 !important; backdrop-filter: blur(5px); }
         .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,255,255,0.1); }
@@ -224,12 +227,8 @@
 
         .readonly-mode .player-controls { display: none !important; }
         .readonly-mode .team-controls { display: none !important; }
-        .readonly-mode #mj-actions-bar { display: none !important; }
         .readonly-mode .current-player .action-grid { display: none !important; }
-        .readonly-mode .team-item.banned, .readonly-mode .team-item.inactive { display: none !important; }
         .readonly-mode #inactive-section, .readonly-mode #banned-section { display: none !important; }
-        .readonly-mode #mj-team-inactive-section, .readonly-mode #mj-team-banned-section { display: none !important; }
-        .readonly-mode #player-search-container { display: none !important; }
         /* --- PATCH V1.205 : CORRECTION TRONCATURE & ALIGNEMENTS --- */
         .score-row.buzzer-active-row { box-shadow: inset 0 0 10px #2ecc71, 0 0 15px rgba(46, 204, 113, 0.4) !important; transform: scale(1) !important; border: 2px solid var(--success) !important; margin: 1px 0; }
         .sort-header { display: flex; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 2px; padding: 2px 4px; font-size: 0.65rem; font-weight: bold; color: #bdc3c7; text-transform: uppercase; letter-spacing: 0.5px; box-sizing: border-box; }
@@ -298,7 +297,9 @@
         .day-mode .sort-header, .day-mode .section-title, .day-mode h2, .day-mode h3, .day-mode h4, .day-mode .input-helper { color: #2c3e50 !important; text-shadow: none !important; }
         .day-mode .hub-tab { background: #ecf0f1; color: #7f8c8d; border-color: #bdc3c7; }
         .day-mode .hub-tab.active { background: var(--blue) !important; color: white !important; border-color: var(--blue) !important; }
-        .day-mode .dropdown-btn, .day-mode .top-right-btn { color: #2c3e50 !important; border-color: #bdc3c7 !important; background: #ecf0f1 !important; }
+        .day-mode #top-right-tools { background: rgba(255, 255, 255, 0.9) !important; border-color: #cbd5e1 !important; }
+        .day-mode .dropdown-btn, .day-mode .top-right-btn { color: #1e293b !important; border-color: #cbd5e1 !important; background: #f8fafc !important; }
+        .day-mode .top-right-btn.btn-sandbox-pro { background: linear-gradient(135deg, #fef3c7, #fde68a) !important; border-color: #f59e0b !important; color: #92400e !important; }
         .day-mode .dropdown-btn:hover { background: #bdc3c7 !important; }
         .day-mode .btn-ghost { color: #2c3e50 !important; border-color: #2c3e50 !important; }
         .day-mode .room-info-card { background: #f1c40f !important; color: #2c3e50 !important; border: 1px solid #d4ac0d !important; }
@@ -308,60 +309,71 @@
         .day-mode span[style*="color:#bdc3c7"], .day-mode span[style*="color: #bdc3c7"] { color: #7f8c8d !important; }
         .day-mode small[style*="color:#bdc3c7"] { color: #7f8c8d !important; }
         
-        /* 🚀 NOUVEAU : Les faux téléphones passent en blanc en Mode Jour ! */
-        .day-mode .simu-phone { background: rgba(255,255,255,0.95) !important; color: #2c3e50 !important; border-color: #bdc3c7 !important; }
-        .day-mode .simu-name { color: #2c3e50 !important; }
-
-        /* 🚀 CSS DU SIMULATEUR MJ (BAC À SABLE) */
-        #tuto-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999998; pointer-events: auto; }
-        #tuto-tooltip { display: none; position: absolute; background: var(--card-bg); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; width: 320px; z-index: 999999; box-shadow: 0 15px 35px rgba(0,0,0,0.8); backdrop-filter: blur(15px); color: white; transition: all 0.3s ease; }
-        #tuto-tooltip h3 { color: var(--accent); margin: 0 0 10px 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
-        #tuto-tooltip p { font-size: 0.95rem; margin: 0 0 20px 0; color: #ecf0f1; line-height: 1.4; }
-        .tuto-buttons { display: flex; justify-content: space-between; gap: 10px; }
-        .tuto-btn-skip { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
-        .tuto-btn-next { background: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold; flex: 1; text-align: center; }
+        /* 🚀 CSS DU SIMULATEUR MJ (BAC À SABLE CONVIVIAL) */
+        #tuto-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(6, 9, 19, 0.78); z-index: 999998; pointer-events: auto; }
+        #tuto-tooltip { display: none; position: absolute; background: rgba(17, 24, 39, 0.96); border: 2px solid var(--accent); border-radius: 16px; padding: 18px 20px; width: 340px; z-index: 999999; box-shadow: 0 20px 50px rgba(0,0,0,0.85), 0 0 25px rgba(241, 196, 15, 0.25); backdrop-filter: blur(18px); color: white; transition: all 0.25s ease; }
+        .tuto-step-badge { display: inline-block; background: rgba(241, 196, 15, 0.18); color: var(--accent); border: 1px solid rgba(241, 196, 15, 0.45); border-radius: 20px; padding: 2px 10px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        #tuto-tooltip h3 { color: var(--accent); margin: 0 0 8px 0; font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
+        #tuto-tooltip p { font-size: 0.92rem; margin: 0 0 16px 0; color: #e2e8f0; line-height: 1.45; }
+        .tuto-buttons { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .tuto-btn-skip { background: transparent; border: 1px solid var(--danger); color: #fca5a5; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 0.78rem; font-weight: bold; width: auto; margin: 0; box-shadow: none; text-transform: none; }
+        .tuto-btn-prev { background: rgba(59, 130, 246, 0.18); border: 1px solid rgba(59, 130, 246, 0.45); color: #93c5fd; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; width: auto; margin: 0; box-shadow: none; text-transform: none; }
+        .tuto-btn-next { background: linear-gradient(135deg, #facc15, #eab308); color: #0f172a; border: none; padding: 9px 14px; border-radius: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 800; flex: 1; text-align: center; margin: 0; text-transform: none; }
         
-		/* 🚀 FIX TUTORIEL : GESTION DES CLICS ET DES MODALES */
+        /* GESTION DES CLICS ET DES MODALES PENDANT LE GUIDAGE */
         body.tuto-running { pointer-events: none !important; }
         body.tuto-running .box, body.tuto-running .dashboard > div, body.tuto-running .dashboard > div > div, body.tuto-running .current-player, body.tuto-running .modal-box { backdrop-filter: none !important; z-index: auto !important; transform: none !important; }
-        
-        /* 1. L'écran noir du tuto */
         #tuto-overlay { z-index: 2000000 !important; pointer-events: none !important; }
-        
-        /* 2. Les modales ouvertes pendant le tuto (juste au-dessus de l'écran noir) */
         body.tuto-running .modal-overlay { z-index: 2000010 !important; background: rgba(0,0,0,0.8) !important; pointer-events: auto !important; }
         body.tuto-running .modal-box, body.tuto-running .modal-close-x { pointer-events: auto !important; }
-        
-        /* 3. L'élément en surbrillance (doit écraser la modale) */
-        .tuto-highlight { position: relative !important; z-index: 2000020 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; background: var(--card-bg) !important; border-radius: 8px; pointer-events: auto !important; }
-        
-        /* 4. La bulle d'explication (le chef absolu) */
+        .tuto-highlight { position: relative !important; z-index: 2000020 !important; box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.85) !important; border-radius: 10px; pointer-events: auto !important; }
+        div.tuto-highlight:not(#simu-phones-container):not(#top-right-tools):not(#global-mj-logo-container) { background: rgba(20, 29, 48, 0.92) !important; }
+        body.day-mode div.tuto-highlight:not(#simu-phones-container):not(#top-right-tools):not(#global-mj-logo-container) { background: rgba(255, 255, 255, 0.96) !important; }
+        .tuto-highlight * { pointer-events: auto !important; }
         #tuto-tooltip { z-index: 2000030 !important; pointer-events: auto !important; }
-        
-        /* FIX BUG DE DECALAGE DU LOGO ET DES BOUTONS */
-        #top-right-tools.tuto-highlight { position: fixed !important; right: 15px !important; top: 15px !important; background: transparent !important; box-shadow: none !important; z-index: 2000020 !important; }
-        #top-right-tools.tuto-highlight .top-right-btn { box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; pointer-events: auto !important; }
+        #top-right-tools.tuto-highlight { position: fixed !important; right: 15px !important; top: 15px !important; box-shadow: none !important; z-index: 2000020 !important; }
         #global-mj-logo-container.tuto-highlight { position: fixed !important; top: 15px !important; left: 15px !important; background: transparent !important; box-shadow: none !important; z-index: 2000020 !important; pointer-events: auto !important; }
         #global-mj-logo-container.tuto-highlight .flip-inner { box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(241, 196, 15, 0.8) !important; border-radius: 8px; pointer-events: auto !important; }
-        
-        /* Garder les téléphones en bas même en surbrillance */
-        #simu-phones-container.tuto-highlight { position: fixed !important; bottom: 20px !important; left: 50% !important; transform: translateX(-50%) !important; }
+        #simu-phones-container.tuto-highlight { position: fixed !important; bottom: 16px !important; left: 50% !important; transform: translateX(-50%) !important; }
 
-        /* VRAIS FAUX TÉLÉPHONES (Clones de index.html) */
-        #simu-phones-container { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 800px; z-index: 999999; justify-content: space-between; gap: 10px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
-        .simu-phone { flex: 1; background: #2c3e50; border-radius: 12px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; border: 2px solid #34495e; transition: 0.2s; position: relative; cursor: pointer; }
-        .simu-avatar { width: 35px; height: 35px; border-radius: 50%; background: #222; border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 5px; overflow: hidden; }
-        .simu-name { font-size: 0.8rem; font-weight: bold; color: white; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-align: center; }
-        .simu-team { font-size: 0.65rem; color: var(--accent); margin-bottom: 10px; white-space: nowrap; }
+        /* 📱 LES 5 TÉLÉPHONES VIRTUELS (CLONES FIDÈLES NUIT & JOUR) */
+        @keyframes simuReadyPulse { 0%, 100% { box-shadow: 0 5px 0 #15803d, 0 0 14px rgba(34, 197, 94, 0.6); } 50% { box-shadow: 0 5px 0 #15803d, 0 0 28px rgba(74, 222, 128, 0.95); transform: scale(1.04); } }
+        #simu-phones-container { display: none; flex-direction: column; position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 820px; z-index: 999990; gap: 10px; padding: 12px 15px 14px 15px; background: rgba(9, 13, 24, 0.88); border-radius: 18px; border: 1.5px solid rgba(241, 196, 15, 0.45); box-shadow: 0 20px 50px rgba(0,0,0,0.75); backdrop-filter: blur(16px); transition: background 0.3s ease, border-color 0.3s ease; }
+        .simu-dock-bar { display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: #fde047; font-weight: 700; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .simu-dock-quit { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 4px 12px; border-radius: 20px; font-size: 0.74rem; font-weight: 800; cursor: pointer; width: auto; margin: 0; box-shadow: none; text-transform: none; }
+        .simu-dock-quit:hover { background: #ef4444; color: white; }
+        .simu-phones-row { display: flex; justify-content: space-between; gap: 10px; width: 100%; }
+        .simu-phone { flex: 1; background: radial-gradient(circle at 50% 15%, #1e293b 0%, #090d16 85%); border-radius: 16px; padding: 8px 6px 10px 6px; display: flex; flex-direction: column; align-items: center; border: 2px solid #334155; box-shadow: inset 0 1px 3px rgba(255,255,255,0.12), 0 6px 16px rgba(0,0,0,0.45); transition: all 0.25s ease; position: relative; cursor: pointer; }
+        .simu-phone:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .simu-notch { width: 28px; height: 4px; border-radius: 4px; background: rgba(255,255,255,0.18); margin-bottom: 6px; }
+        .simu-avatar { width: 34px; height: 34px; border-radius: 50%; background: #1e293b; border: 1.5px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; margin-bottom: 4px; overflow: hidden; transition: background 0.25s; }
+        .simu-name { font-size: 0.78rem; font-weight: 800; color: #ffffff; margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-align: center; transition: color 0.25s; }
+        .simu-team { font-size: 0.65rem; color: var(--accent); margin-bottom: 2px; white-space: nowrap; font-weight: 600; transition: color 0.25s; }
+        .simu-pts { font-size: 0.68rem; color: #94a3b8; font-weight: 700; margin-bottom: 8px; transition: color 0.25s; }
         
-        .simu-buzzer { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: bold; color: white; transition: 0.1s; text-align: center; margin-bottom: 5px; }
-        .simu-buzzer.wait { background: #e74c3c; box-shadow: 0 5px 0 #c0392b; }
-        .simu-buzzer.ready { background: #2ecc71; box-shadow: 0 5px 0 #27ae60; }
-        .simu-buzzer.ready:active { transform: translateY(5px); box-shadow: 0 0 0 #27ae60; }
-        .simu-buzzer.taken { background: #3498db !important; box-shadow: 0 5px 0 #2980b9 !important; }
-        .simu-buzzer.blocked { background: #555 !important; box-shadow: 0 5px 0 #333 !important; opacity: 0.6; }
+        .simu-buzzer { width: 62px; height: 62px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.28); display: flex; align-items: center; justify-content: center; font-size: 0.58rem; font-weight: 900; letter-spacing: 0.3px; color: white; transition: all 0.15s ease; text-align: center; margin-bottom: 3px; position: relative; overflow: hidden; text-shadow: 0 1px 3px rgba(0,0,0,0.65); }
+        .simu-buzzer::after { content: ""; position: absolute; top: 6%; left: 18%; width: 64%; height: 32%; border-radius: 50%; background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%); pointer-events: none; }
+        .simu-buzzer.wait { background: radial-gradient(circle at 35% 30%, #ff6b6b, #ef4444 55%, #991b1b 100%); box-shadow: 0 5px 0 #7f1d1d, 0 0 10px rgba(239,68,68,0.35); }
+        .simu-buzzer.ready { background: radial-gradient(circle at 35% 30%, #4ade80, #22c55e 55%, #15803d 100%); border-color: rgba(187, 247, 208, 0.7); animation: simuReadyPulse 1.5s infinite ease-in-out; }
+        .simu-buzzer.ready:active { transform: translateY(4px); box-shadow: 0 1px 0 #15803d !important; animation: none; }
+        .simu-buzzer.taken { background: radial-gradient(circle at 35% 30%, #60a5fa, #2563eb 55%, #1e3a8a 100%) !important; border-color: rgba(191, 219, 254, 0.8) !important; box-shadow: 0 5px 0 #1e3a8a, 0 0 22px rgba(59, 130, 246, 0.8) !important; }
+        .simu-buzzer.blocked { background: #64748b !important; border-color: transparent !important; box-shadow: 0 4px 0 #334155 !important; opacity: 0.65; }
         
-        .simu-kicked { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(231,76,60,0.9); border-radius:10px; display:none; flex-direction:column; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:0.8rem; z-index:10; }
+        .simu-kicked { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(220, 38, 38, 0.92); border-radius:14px; display:none; flex-direction:column; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:0.8rem; z-index:10; }
+
+        /* ☀️ MODE JOUR SUR LES 5 FAUX TÉLÉPHONES (ÉCRANS BLANCS HAUTE LUMINOSITÉ) */
+        body.day-mode #simu-phones-container { background: rgba(255, 255, 255, 0.96) !important; border: 2px solid #94a3b8 !important; box-shadow: 0 15px 40px rgba(15, 23, 42, 0.18) !important; }
+        body.day-mode .simu-dock-bar { color: #0f172a !important; border-bottom-color: #e2e8f0 !important; }
+        body.day-mode .simu-dock-quit { background: #fee2e2 !important; color: #b91c1c !important; border-color: #ef4444 !important; }
+        body.day-mode .simu-phone { background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%) !important; color: #0f172a !important; border: 2px solid #cbd5e1 !important; box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08) !important; }
+        body.day-mode .simu-notch { background: #cbd5e1 !important; }
+        body.day-mode .simu-avatar { background: #f8fafc !important; border-color: #f59e0b !important; }
+        body.day-mode .simu-name { color: #0f172a !important; }
+        body.day-mode .simu-team { color: #b45309 !important; }
+        body.day-mode .simu-pts { color: #475569 !important; }
+        body.day-mode #tuto-tooltip { background: #ffffff !important; color: #0f172a !important; border-color: #f59e0b !important; box-shadow: 0 20px 50px rgba(0,0,0,0.25) !important; }
+        body.day-mode #tuto-tooltip h3 { color: #b45309 !important; }
+        body.day-mode #tuto-tooltip p { color: #334155 !important; }
     </style>
 </head>
 <body>
@@ -385,26 +397,44 @@
         </div>
     </div>
 
+    <!-- 🚀 MODALE DE CONFIRMATION INTERNE NON-BLOQUANTE (Protège le Plein Écran TV) -->
+    <div id="modal-mj-confirm" class="modal-overlay" style="z-index: 2500000;">
+        <div class="modal-box" style="max-width: 400px; padding: 25px;">
+            <h3 id="mjc-title" style="color:var(--accent); margin:0 0 12px 0; font-size:1.25rem;">Confirmation</h3>
+            <p id="mjc-msg" style="color:#e2e8f0; font-size:0.95rem; line-height:1.45; margin:0 0 22px 0; white-space:pre-line;"></p>
+            <div style="display:flex; gap:10px;">
+                <button id="mjc-cancel" class="btn-cancel" style="margin:0; flex:1; padding:11px;" title="Annuler cette action">Annuler</button>
+                <button id="mjc-ok" style="margin:0; flex:1.3; padding:11px; background:var(--danger);" title="Valider l'action">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 🚀 HTML DU SIMULATEUR MJ -->
     <div id="tuto-overlay"></div>
     <div id="tuto-tooltip">
+        <div class="tuto-step-badge" id="tuto-step-counter">Étape 1 / 8</div>
         <h3 id="tuto-title">Titre</h3>
         <p id="tuto-text">Texte explicatif</p>
         <div class="tuto-buttons">
-            <button class="tuto-btn-skip" onclick="window.endTuto()">Quitter</button>
-            <button class="tuto-btn-next" onclick="window.nextTutoStep()" id="tuto-btn-next">Suivant ➔</button>
+            <button class="tuto-btn-skip" onclick="window.endTuto()" title="Quitter le mode entraînement">Quitter</button>
+            <button class="tuto-btn-prev" id="tuto-btn-prev" onclick="window.prevTutoStep()" title="Revenir à l'étape précédente">⬅ Retour</button>
+            <button class="tuto-btn-next" onclick="window.nextTutoStep()" id="tuto-btn-next" title="Passer à l'étape suivante">Suivant ➔</button>
         </div>
     </div>
     
     <div id="simu-phones-container">
-        <!-- Généré dynamiquement en JS -->
+        <div class="simu-dock-bar">
+            <span>📱 5 Téléphones Virtuels (Cliquez sur un buzzer vert pour simuler un joueur)</span>
+            <button class="simu-dock-quit" onclick="window.endTuto()" title="Fermer le simulateur Bac à Sable et revenir à la vraie salle">✖ Quitter le Bac à Sable</button>
+        </div>
+        <div class="simu-phones-row" id="simu-phones-row"></div>
     </div>
 
     <div id="top-right-tools" class="ghost-ui">
-        <button class="top-right-btn" onclick="openScoreBoard()">📺 Scores</button>
-        <button class="top-right-btn" onclick="showRemoteQR()">📱 Remote</button>
-        <button class="top-right-btn" onclick="toggleGuide()">📖 Guide</button>
-        <button class="top-right-btn" style="background:rgba(241, 196, 15, 0.15); border: 2px solid var(--accent); color: var(--accent); white-space: normal; line-height: 1.2; padding: 6px 2px;" onclick="window.startTuto(2, true)">🎓 Tutoriel<br>"(Bac à Sable)"</button>
+        <button class="top-right-btn" onclick="openScoreBoard()" title="Ouvrir l'Écran Géant des scores sur votre TV ou vidéoprojecteur"><span>📺</span><span>Écran Scores</span></button>
+        <button class="top-right-btn" onclick="showRemoteQR()" title="Afficher le QR Code de la télécommande mobile animateur"><span>📱</span><span>Télécommande</span></button>
+        <button class="top-right-btn" onclick="toggleGuide()" title="Consulter le Manuel Pro interactif"><span>📖</span><span>Manuel Pro</span></button>
+        <button class="top-right-btn btn-sandbox-pro" onclick="window.startTuto(2, true)" title="Lancer le simulateur interactif avec 5 téléphones virtuels"><span>🎓</span><span>Bac à Sable</span></button>
     </div>
 
     <div id="univ-lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:30000; align-items:center; justify-content:space-between; padding:0 20px; box-sizing:border-box;" onclick="if(event.target.id==='univ-lightbox') closeLightbox()">
@@ -444,8 +474,8 @@
     <div id="screen-profile" class="box" style="display:none; max-height:90vh; overflow-y:auto; padding-bottom: 30px;">
         <h2 style="margin-bottom:20px; color:white;">MA CARTE DE VISITE</h2>
         <p class="section-title">👤 IDENTITÉ</p>
-        <input type="text" id="prof-nom" placeholder="Nom" onkeypress="if(event.key==='Enter') saveProfile()">
-        <input type="text" id="prof-prenom" placeholder="Prénom (Affiché aux joueurs)" onkeypress="if(event.key==='Enter') saveProfile()">
+        <input type="text" id="prof-nom" placeholder="Nom" oninput="window.sanitizeMjInput(this)" onkeypress="if(event.key==='Enter') saveProfile()">
+        <input type="text" id="prof-prenom" placeholder="Prénom (Affiché aux joueurs)" oninput="window.sanitizeMjInput(this)" onkeypress="if(event.key==='Enter') saveProfile()">
         <input type="email" id="prof-email" placeholder="Email (Identifiant)" style="border-color:var(--blue);" onkeypress="if(event.key==='Enter') saveProfile()">
         
         <p class="section-title">🖼️ IMAGE DE MARQUE</p>
@@ -600,9 +630,9 @@
             <h2 style="color:var(--accent); margin-top:0;">NOUVELLE SALLE</h2>
             <p style="font-size:0.9rem; color:#bdc3c7; margin-bottom:20px;">Personnalisez l'affichage pour vos joueurs.</p>
             <div style="text-align: left; font-size: 0.85rem; color: var(--accent); margin-bottom: 5px; font-weight: bold;">NOM DE L'ANIMATEUR / DJ</div>
-            <input type="text" id="new-room-mj" placeholder="Ex: DJ Fred" onkeypress="if(event.key==='Enter') document.getElementById('new-room-name').focus()">
+            <input type="text" id="new-room-mj" placeholder="Ex: DJ Fred" oninput="window.sanitizeMjInput(this)" onkeypress="if(event.key==='Enter') document.getElementById('new-room-name').focus()">
             <div style="text-align: left; font-size: 0.85rem; color: var(--accent); margin-bottom: 5px; font-weight: bold; margin-top: 10px;">NOM DE L'ÉVÉNEMENT</div>
-            <input type="text" id="new-room-name" placeholder="Ex: Soirée Disco ou Mariage Sophie" onkeypress="if(event.key==='Enter') confirmCreateRoom()">
+            <input type="text" id="new-room-name" placeholder="Ex: Soirée Disco ou Mariage Sophie" oninput="window.sanitizeMjInput(this)" onkeypress="if(event.key==='Enter') confirmCreateRoom()">
             
             <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1);">
                 <div style="text-align: left; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 5px; font-weight: bold;">PARCOURS DE CONNEXION</div>
@@ -668,7 +698,7 @@
             <button class="modal-close-x" onclick="document.getElementById('modal-team-edit').style.display='none'">✖</button>
             <h2 id="team-modal-title" style="color:var(--accent); margin-top:0; text-transform:uppercase;">CRÉER UNE ÉQUIPE</h2>
             
-            <input type="text" id="modal-t-name" placeholder="Nom de l'équipe..." onkeypress="if(event.key==='Enter') saveTeamFromModal()" style="font-size:1.1rem; padding:15px; margin-bottom:15px;">
+            <input type="text" id="modal-t-name" placeholder="Nom de l'équipe..." oninput="window.sanitizeMjInput(this)" onkeypress="if(event.key==='Enter') saveTeamFromModal()" style="font-size:1.1rem; padding:15px; margin-bottom:15px;">
             
             <div class="switch-container" style="justify-content: flex-start; margin-bottom: 15px;">
                 <label for="modal-check-hide-default" style="cursor:pointer; color:#bdc3c7; font-size:0.9rem;">Afficher les blasons par défaut :</label>
@@ -871,8 +901,8 @@
            <button class="modal-close-x" onclick="document.getElementById('modal-sa-mj-details').style.display='none'">✖</button>
            <h2 style="color:var(--blue); margin-top:0; margin-bottom:15px;">FICHE MAÎTRE DU JEU</h2>
            <div style="display:flex; gap:10px; margin-bottom:5px;">
-               <input type="text" id="sa-det-prenom" placeholder="Prénom" style="margin-bottom:0;" onkeypress="if(event.key==='Enter') saveSAMjDetails()">
-               <input type="text" id="sa-det-nom" placeholder="Nom" style="margin-bottom:0;" onkeypress="if(event.key==='Enter') saveSAMjDetails()">
+               <input type="text" id="sa-det-prenom" placeholder="Prénom" style="margin-bottom:0;" oninput="window.sanitizeMjInput(this)" onkeypress="if(event.key==='Enter') saveSAMjDetails()">
+               <input type="text" id="sa-det-nom" placeholder="Nom" style="margin-bottom:0;" oninput="window.sanitizeMjInput(this)" onkeypress="if(event.key==='Enter') saveSAMjDetails()">
            </div>
            <input type="email" id="sa-det-email" placeholder="Email (Identifiant)" style="margin-bottom:5px; border-color:var(--accent);" onkeypress="if(event.key==='Enter') saveSAMjDetails()">
            
@@ -929,7 +959,7 @@
                 <li id="rule-crea-spe">❌ 1 Caractère spécial</li>
            </ul>
            
-           <input type="text" id="sa-create-prenom" placeholder="Prénom (Affiché aux joueurs)" style="margin-top:10px;" onkeypress="if(event.key==='Enter') createMjAction()">
+           <input type="text" id="sa-create-prenom" placeholder="Prénom (Affiché aux joueurs)" style="margin-top:10px;" oninput="window.sanitizeMjInput(this)" onkeypress="if(event.key==='Enter') createMjAction()">
            <div style="display:flex; gap:10px; margin-top:15px;">
                <button id="btn-sa-create" onclick="createMjAction()" style="background:var(--mj-color); flex:2;">CRÉER (30 Jours)</button>
                <button class="btn-cancel" onclick="document.getElementById('modal-sa-create').style.display='none'" style="flex:1;">ANNULER</button>
@@ -984,12 +1014,7 @@
     </div>
 
     <script>
-		// Variable gérée dynamiquement au début du fichier via config.js	
-		// On pré-remplit instantanément l'affichage sans attendre la base de données
-		document.addEventListener('DOMContentLoaded', () => {
-		if(document.getElementById('app-version-display')) document.getElementById('app-version-display').innerText = `v${APP_VERSION}`;
-		if(document.getElementById('disp-v-mj')) document.getElementById('disp-v-mj').innerText = `v${APP_VERSION}`;
-		});
+		// Version initialisée via config.js et synchronisée avec Firebase
         
         const firebaseConfig = { apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o", authDomain: "prestapuce-buzz.firebaseapp.com", databaseURL: "https://prestapuce-buzz-default-rtdb.europe-west1.firebasedatabase.app", projectId: "prestapuce-buzz", storageBucket: "prestapuce-buzz.firebasestorage.app", messagingSenderId: "907270883505", appId: "1:907270883505:web:197efec0b99db28180ba90" };
         firebase.initializeApp(firebaseConfig);
@@ -998,14 +1023,33 @@
 
         const avatars = ["🦁","🐯","🐼","🦊","🐵","🐶","🐱","🦄","😎","🤖","👽","👾","👻","🤡","🐙","🦉","🐸","🐹","🐰","🥳","🤠","😈","🎅","🧙","🧛","🧜","🧝","🧞","🧟","🧚","👼","🤵","🤴","👸","🕵","👮","👩‍🚒","👩‍🚀","🦸","🦹"];
 
+        // 🚀 OUTILS GLOBAUX : FILTRE BDD, INFOBULLES & CONFIRMATION NON-BLOQUANTE
+        window.sanitizeMjInput = function(input) {
+            if (input) input.value = input.value.replace(/[.#$\[\]\/]/g, '');
+        };
+
+        window.mjConfirm = function(title, message, onConfirm, okLabel = "Confirmer", okColor = "var(--danger)") {
+            const modal = document.getElementById('modal-mj-confirm');
+            document.getElementById('mjc-title').innerText = title;
+            document.getElementById('mjc-msg').innerText = message;
+            const okBtn = document.getElementById('mjc-ok');
+            okBtn.innerText = okLabel;
+            okBtn.style.background = okColor;
+            okBtn.onclick = () => { modal.style.display = 'none'; onConfirm(); };
+            document.getElementById('mjc-cancel').onclick = () => { modal.style.display = 'none'; };
+            modal.style.display = 'flex';
+        };
+
         // 🚀 ==========================================
-        // MOTEUR DE SIMULATION "BAC À SABLE" INTERACTIF
+        // MOTEUR DE SIMULATION "BAC À SABLE" INTERACTIF V2
         // ==========================================
-        window.isTutoRunning = false;
+        window.isTutoRunning = false;   // Guidage pas-à-pas (écran assombri)
+        window.isSandboxMode = false;   // Isolation locale des 5 faux téléphones
         let tutoCurrentPhase = 0;
         let tutoCurrentStep = 0;
-        let tutoListener = null; 
-        
+        let tutoListener = null;
+        let savedRealRoomState = null;
+
         window.showTutoPrompt = function() {
             if (localStorage.getItem('mj_tuto_hide') === 'true') return;
             document.getElementById('modal-tuto-prompt').style.display = 'flex';
@@ -1023,90 +1067,103 @@
         };
 
         const tutoStepsPhase0 = [
-            { target: 'global-mj-logo-container', title: "👋 Votre Profil MJ", text: "Bienvenue dans l'application Presta'Puce.<br><br>C'est ici que vous pourrez modifier votre mot de passe, uploader le logo de votre entreprise et gérer vos blasons.<br><br><i>Cliquez sur Suivant.</i>" },
-            { target: 'btn-choice-new-room', title: "🚀 C'est parti !", text: "Pour commencer l'entraînement, <b>cliquez sur Créer une nouvelle salle</b>.", autoAction: 'click' }
+            { target: 'global-mj-logo-container', title: "👋 Votre Carte de Visite MJ", text: "Bienvenue dans <b>Buz'ta Puce</b> !<br><br>En cliquant sur ce logo animé, vous personnalisez votre nom d'animateur, votre logo pro, vos blasons et vos fonds d'écran." },
+            { target: 'btn-choice-new-room', title: "🆕 Créer une Salle", text: "Cliquez maintenant sur <b>Créer une nouvelle salle</b> pour configurer votre premier événement d'entraînement.", autoAction: 'click' }
         ];
 
         const tutoStepsPhase1 = [
-            { target: 'new-room-mj', title: "👤 Nom de l'animateur", text: "Par défaut, c'est le prénom enregistré dans votre profil. Modifiable pour l'événement.<br><br><i>Cliquez sur Suivant.</i>" },
-            { target: 'new-room-name', title: "📝 Nom de l'événement", text: "Saisissez un nom (ex: Mariage Test) pour simuler la création.<br><br><i>Tapez un nom puis cliquez sur Suivant.</i>" },
-            { target: 'new-room-login', title: "🔐 Parcours de Connexion", text: "<strong>Complet :</strong> Les joueurs créent un compte.<br><strong>Rapide :</strong> Accès invité avec un pseudo.<br><br><i>Cliquez sur le menu pour voir les choix, puis validez.</i>", autoAction: 'click' },
-            { target: 'new-room-mode', title: "⚔️ Mode de Jeu", text: "Pour ce Bac à Sable, <b>le mode Mixte est imposé</b> afin de tester les équipes.<br><br><i>Cliquez sur le menu pour continuer.</i>", autoAction: 'click' },
-            { target: 'new-room-team-lock', title: "🛑 Règle d'Erreur (Équipes)", text: "En cas d'erreur d'un joueur, faut-il bloquer toute son équipe ou juste lui ?<br><br><i>Cliquez sur le menu pour continuer.</i>", autoAction: 'click' },
-            { target: 'btn-launch-room', title: "🚀 Lancer !", text: "La salle est prête. <b>Cliquez sur Lancer la Partie</b>.", autoAction: 'click' }
+            { target: 'new-room-mj', title: "🎤 Nom d'Animateur", text: "Votre prénom d'animateur est pré-rempli automatiquement et s'affichera sur les téléphones des invités." },
+            { target: 'new-room-name', title: "🎉 Nom de l'Événement", text: "Tapez un nom d'événement (ex : <b>Soirée Test</b>) puis cliquez sur <b>Suivant</b>." },
+            { target: 'new-room-login', title: "🔐 Parcours Joueurs", text: "<b>Complet :</b> Propose un compte fidélité.<br><b>Rapide :</b> Entrée immédiate avec un simple pseudo.<br><br><i>Choisissez une option ou cliquez sur Suivant.</i>" },
+            { target: 'new-room-mode', title: "⚔️ Mode de Jeu", text: "En soirée réelle, choisissez entre <b>Mixte</b>, <b>100% Solo</b> ou <b>100% Équipes</b> (ici fixé sur Mixte pour l'entraînement)." },
+            { target: 'new-room-team-lock', title: "🛑 Règle d'Erreur", text: "Décidez si une mauvaise réponse bloque <b>uniquement le joueur</b> ou <b>toute sa table</b>." },
+            { target: 'btn-launch-room', title: "🚀 Ouvrir le Cockpit !", text: "Tout est prêt ! Cliquez sur <b>LANCER LA PARTIE</b> pour entrer en régie.", autoAction: 'click' }
         ];
 
         const tutoStepsPhase2 = [
-            { target: 'network-status-container', title: "📡 La Coupure Réseau", text: "Test : micro-coupure Wi-Fi ! Le voyant est rouge 🔴.<br><br><strong>Cliquez sur le bouton 🔄 à côté</strong> pour forcer la réparation.", autoAction: 'click', overrideTarget: 'btn-repair-network' },
-            { target: 'tuto-zone-rules', title: "⚙️ Paramètres en Direct", text: "Vos choix (Mixte, Blocage) s'affichent ici. Vous pouvez cliquer sur <b>Règles du Jeu</b> ou tester le <b>Mode Jour</b> librement.<br><br><i>Cliquez sur Suivant.</i>" },
-            { target: 'tuto-zone-buzz', title: "🔊 Ouvrez les Buzzers !", text: "J'ai généré 5 faux téléphones en bas de votre écran.<br><br><strong>Cliquez sur Ouvrir Buzzers</strong> : vous allez les voir s'activer (Vert) !", autoAction: 'click', overrideTarget: 'btn-open-buzz' },
-            { target: 'simu-phones-container', title: "⚡ Testez un Buzz", text: "Jouez le rôle d'un joueur ! <strong>Cliquez sur le téléphone de Marie ou de Ninja en bas.</strong><br><br>Il va prendre la main (Bleu) et bloquer les autres (Rouge)." },
-            { target: 'player-box', title: "⚖️ Arbitrage Libre", text: "Le joueur a la main.<br><br><strong>Cliquez sur Erreur :</strong> le joueur sera grisé et les autres se rouvriront (Vert).<br>Ou testez +3 / +1." },
-            { target: 'mj-team-search', title: "🛡️ Gestion des Équipes", text: "Déployez l'équipe des Tigres (flèche jaune ▶). En cliquant sur les 3 points (⋮) d'un membre, vous pouvez nommer un Capitaine 👑 ou l'expulser." },
-            { target: 'player-search', title: "👥 Modération Joueurs", text: "Dans la liste Joueurs, cliquez sur (⋮) pour tester les Cartons Jaunes 🟨 ou l'Expulsion 🟥." },
-            { target: null, title: "🏁 Fin de l'entraînement", text: "Amusez-vous avec le simulateur autant que vous voulez.<br><br>Pour terminer, cliquez sur <strong>FIN DE PARTIE 🏆</strong> sur votre console." }
+            { target: 'network-status-container', title: "📡 Sécurité Anti-Coupure", text: "Simulation : micro-coupure Wi-Fi (voyant 🔴) !<br><br><b>Cliquez sur le bouton 🔄 juste à droite</b> pour rouvrir instantanément l'accès à la salle.", overrideTarget: 'btn-repair-network', waitManualHook: true },
+            { target: 'tuto-zone-rules', title: "☀️ Testez le Mode Jour !", text: "Animation en plein soleil ? <b>Cliquez sur ☀️ MODE JOUR</b> : regardez la console ET les <b>5 téléphones virtuels en bas</b> passer instantanément sur fond blanc !<br><br><i>Cliquez ensuite sur Suivant.</i>" },
+            { target: 'tuto-zone-buzz', title: "🔊 Ouvrez les Buzzers !", text: "Lancez votre musique et <b>cliquez sur Ouvrir Buzzers</b> : les 5 buzzers des téléphones en bas vont passer au <b>VERT lumineux (BUZZEZ !)</b>.", overrideTarget: 'btn-open-buzz', waitManualHook: true },
+            { target: 'simu-phones-container', title: "⚡ Simulez un Joueur !", text: "Les buzzers sont <b>verts</b> ! <b>Cliquez sur le buzzer vert de Marie ou de Ninja</b> en bas de l'écran.<br><br>Il prendra la main en <b>Bleu</b> (et son coéquipier verra aussi <i>BIEN JOUÉ !</i>).", waitManualHook: true },
+            { target: 'player-box', title: "⚖️ Arbitrage du Blind Test", text: "Le joueur a la main !<br>• <b>+3 / +1 (Terminé)</b> : donne les points et referme les buzzers.<br>• <b>+1 (On continue)</b> : donne 1 pt (ex: l'artiste), bloque ce joueur et <b>rouvre en vert</b> pour le titre !<br>• <b>Erreur</b> : grise le joueur et rouvre aux autres.<br><br><b>Testez un de ces 4 boutons !</b>", waitManualHook: true },
+            { target: 'mj-team-search', title: "🛡️ Clans & Capitaines", text: "Cliquez sur une équipe (flèche ▶) pour voir ses membres, ajouter des bonus <b>+/-</b> ou transférer la couronne de Capitaine 👑." },
+            { target: 'player-search', title: "👥 Modération Express", text: "Le bouton <b>⋮</b> d'un joueur permet de <b>Forcer le buzzer</b> (main levée), mettre un <b>Carton Jaune 🟨</b>, <b>Expulser 🟥</b> ou censurer une photo." },
+            { target: null, title: "🎮 Mode Libre Débloqué !", text: "Le guidage est terminé : <b>toute la console est maintenant déverrouillée</b> !<br><br>Amusez-vous librement avec les 5 téléphones en bas, le Mode Jour et les points. Cliquez sur <b>✖ Quitter le Bac à Sable</b> (ou <b>FIN DE PARTIE 🏆</b>) quand vous avez fini." }
         ];
+
+        function getCurrentTutoSteps() {
+            return tutoCurrentPhase === 0 ? tutoStepsPhase0 : (tutoCurrentPhase === 1 ? tutoStepsPhase1 : tutoStepsPhase2);
+        }
 
         window.startTuto = function(phase, isForced = false) {
             let state = localStorage.getItem('mj_tuto_state_v3');
-            
             if (!isForced) {
-                if (phase === 0 && !state) {
-                    window.showTutoPrompt();
-                    return;
-                } else if (state === 'done') { return; } 
-                else if (phase !== 0 && state !== 'accepted') { return; }
+                if (phase === 0 && !state) { window.showTutoPrompt(); return; }
+                else if (state === 'done') return;
+                else if (phase !== 0 && state !== 'accepted') return;
             } else if (phase === 0) {
                 localStorage.setItem('mj_tuto_state_v3', 'accepted');
             }
 
-			window.isTutoRunning = true;
-			document.body.classList.add('tuto-running');
-			tutoCurrentPhase = phase;
+            window.isTutoRunning = true;
+            document.body.classList.add('tuto-running');
+            tutoCurrentPhase = phase;
             tutoCurrentStep = 0;
             document.getElementById('tuto-overlay').style.display = 'block';
             document.getElementById('tuto-tooltip').style.display = 'block';
-            
-            if (phase === 0) {
-                const btnNew = document.querySelector('button[onclick="askMjNameAndCreate()"]');
-                if(btnNew) btnNew.id = 'btn-choice-new-room';
-            }
+
             if (phase === 2) {
-                const btnRep = document.querySelector('button[onclick="forceRoomOpen()"]');
-                if(btnRep) btnRep.id = 'btn-repair-network';
-                
+                window.isSandboxMode = true;
                 injectFakeTutoData();
                 document.getElementById('simu-phones-container').style.display = 'flex';
                 document.getElementById('network-status-dot').innerText = '🔴';
                 document.getElementById('network-status-dot').classList.add('pulse-alert');
             }
-            
             showTutoStep();
         };
 
-        window.endTuto = function() {
+        window.unlockSandboxFreePlay = function() {
             window.isTutoRunning = false;
+            document.body.classList.remove('tuto-running');
+            document.getElementById('tuto-overlay').style.display = 'none';
+            document.getElementById('tuto-tooltip').style.display = 'none';
+            document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
+            if (tutoListener) { tutoListener.el.removeEventListener(tutoListener.type, tutoListener.fn); tutoListener = null; }
+        };
+
+        window.endTuto = function() {
+            const wasSandbox = window.isSandboxMode;
+            window.isTutoRunning = false;
+            window.isSandboxMode = false;
             document.body.classList.remove('tuto-running');
             localStorage.setItem('mj_tuto_state_v3', 'done');
             document.getElementById('tuto-overlay').style.display = 'none';
             document.getElementById('tuto-tooltip').style.display = 'none';
             document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
             document.getElementById('simu-phones-container').style.display = 'none';
-            
-            if(tutoListener) tutoListener.el.removeEventListener(tutoListener.type, tutoListener.fn);
-            if(tutoCurrentPhase === 2) clearFakeTutoData();
+
+            if (tutoListener) { tutoListener.el.removeEventListener(tutoListener.type, tutoListener.fn); tutoListener = null; }
+            if (wasSandbox) clearFakeTutoData();
+        };
+
+        window.prevTutoStep = function() {
+            if (tutoCurrentStep > 0) {
+                tutoCurrentStep--;
+                showTutoStep();
+            }
         };
 
         window.nextTutoStep = function() {
-            let steps = tutoCurrentPhase === 0 ? tutoStepsPhase0 : (tutoCurrentPhase === 1 ? tutoStepsPhase1 : tutoStepsPhase2);
+            const steps = getCurrentTutoSteps();
             tutoCurrentStep++;
             if (tutoCurrentStep >= steps.length) {
-                if(tutoCurrentPhase === 2) {
-                    document.getElementById('tuto-tooltip').style.display = 'none';
-                    document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
+                if (tutoCurrentPhase === 2) {
+                    // Déverrouillage complet pour jouer librement avec les 5 téléphones !
+                    window.unlockSandboxFreePlay();
                 } else {
                     document.getElementById('tuto-tooltip').style.display = 'none';
                     document.getElementById('tuto-overlay').style.display = 'none';
+                    document.body.classList.remove('tuto-running');
                 }
             } else {
                 showTutoStep();
@@ -1114,22 +1171,24 @@
         };
 
         function showTutoStep() {
-            let steps = tutoCurrentPhase === 0 ? tutoStepsPhase0 : (tutoCurrentPhase === 1 ? tutoStepsPhase1 : tutoStepsPhase2);
+            const steps = getCurrentTutoSteps();
             const step = steps[tutoCurrentStep];
-            
+
             document.querySelectorAll('.tuto-highlight').forEach(el => el.classList.remove('tuto-highlight'));
-            if(tutoListener) { tutoListener.el.removeEventListener(tutoListener.type, tutoListener.fn); tutoListener = null; }
-            
+            if (tutoListener) { tutoListener.el.removeEventListener(tutoListener.type, tutoListener.fn); tutoListener = null; }
+
+            const counterEl = document.getElementById('tuto-step-counter');
+            if (counterEl) counterEl.innerText = `Étape ${tutoCurrentStep + 1} / ${steps.length}`;
+
+            const btnPrev = document.getElementById('tuto-btn-prev');
+            if (btnPrev) btnPrev.style.display = tutoCurrentStep > 0 ? 'inline-block' : 'none';
+
             const btnNext = document.getElementById('tuto-btn-next');
-            
-            // 🚀 PATCH TUTO : Empêcher de passer si le nom de l'événement est vide
             btnNext.onclick = function() {
                 if (tutoCurrentPhase === 1 && tutoCurrentStep === 1) {
                     const eventInput = document.getElementById('new-room-name');
                     if (!eventInput || eventInput.value.trim() === "") {
-                        alert("⚠️ Vous devez d'abord saisir un nom pour l'événement !");
-                        if(eventInput) eventInput.focus();
-                        return; // Bloque le passage à l'étape suivante
+                        eventInput.value = "Soirée Démo";
                     }
                 }
                 window.nextTutoStep();
@@ -1139,124 +1198,180 @@
                 const targetEl = document.getElementById(step.target);
                 if (targetEl) {
                     targetEl.classList.add('tuto-highlight');
-                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (step.target !== 'simu-phones-container' && step.target !== 'top-right-tools' && step.target !== 'global-mj-logo-container') {
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    if (step.overrideTarget) {
+                        const overEl = document.getElementById(step.overrideTarget);
+                        if (overEl) overEl.classList.add('tuto-highlight');
+                    }
                     positionTooltip(targetEl);
-                    targetEl.style.pointerEvents = "auto";
-                    
-                    // 🚀 NOUVEAU : Si l'action doit se faire sur un bouton voisin, on le sort de l'écran noir aussi !
-                    if (step.overrideTarget) {
-                        const overEl = document.getElementById(step.overrideTarget);
-                        if (overEl) overEl.classList.add('tuto-highlight');
-                    }
-                    
-                   // 🚀 NOUVEAU : Si l'action doit se faire sur un bouton voisin, on le sort de l'écran noir aussi !
-                    if (step.overrideTarget) {
-                        const overEl = document.getElementById(step.overrideTarget);
-                        if (overEl) overEl.classList.add('tuto-highlight');
-                    }
-                    
+
                     if (step.autoAction) {
-						btnNext.style.display = 'none'; 
-						const listenEl = step.overrideTarget ? document.getElementById(step.overrideTarget) : targetEl;
-						if (listenEl) {
-							const expectedPhase = tutoCurrentPhase;
-							const expectedStep = tutoCurrentStep;
-							const fn = () => { 
-							setTimeout(() => { 
-                            if (window.isTutoRunning && tutoCurrentPhase === expectedPhase && tutoCurrentStep === expectedStep) {
-                                // 🚀 PATCH TUTO : Si c'est le clic sur Ouvrir Buzzers, on ouvre VRAIMENT les buzzers en plus de passer l'étape
-                                if (step.overrideTarget === 'btn-open-buzz') openNextQuestion();
-                                window.nextTutoStep(); 
-                            }
-							}, 300); 
-							};
-							listenEl.addEventListener(step.autoAction, fn);
-							tutoListener = { el: listenEl, type: step.autoAction, fn: fn };
-						}
-					}
-					else {
+                        btnNext.style.display = 'none';
+                        const listenEl = step.overrideTarget ? document.getElementById(step.overrideTarget) : targetEl;
+                        if (listenEl) {
+                            const expectedPhase = tutoCurrentPhase;
+                            const expectedStep = tutoCurrentStep;
+                            const fn = () => {
+                                setTimeout(() => {
+                                    if (window.isTutoRunning && tutoCurrentPhase === expectedPhase && tutoCurrentStep === expectedStep) {
+                                        window.nextTutoStep();
+                                    }
+                                }, 250);
+                            };
+                            listenEl.addEventListener(step.autoAction, fn);
+                            tutoListener = { el: listenEl, type: step.autoAction, fn: fn };
+                        }
+                    } else if (step.waitManualHook) {
+                        btnNext.style.display = 'none';
+                    } else {
                         btnNext.style.display = 'block';
                     }
                 }
-            } 
-			else {
+            } else {
                 btnNext.style.display = 'block';
                 const tooltip = document.getElementById('tuto-tooltip');
-                tooltip.style.top = '50%'; tooltip.style.left = '50%';
+                tooltip.style.top = '45%';
+                tooltip.style.left = '50%';
                 tooltip.style.transform = 'translate(-50%, -50%)';
             }
-            
+
             document.getElementById('tuto-title').innerHTML = step.title;
             document.getElementById('tuto-text').innerHTML = step.text;
-            btnNext.innerText = (tutoCurrentStep === steps.length - 1) ? (tutoCurrentPhase === 2 ? "Fermer l'aide" : "Suivant ➔") : "Suivant ➔";
+            btnNext.innerText = (tutoCurrentStep === steps.length - 1)
+                ? (tutoCurrentPhase === 2 ? "Jouer librement 🚀" : "Suivant ➔")
+                : "Suivant ➔";
         }
-        
+
         function positionTooltip(targetEl) {
             const tooltip = document.getElementById('tuto-tooltip');
             tooltip.style.transform = 'none';
             const rect = targetEl.getBoundingClientRect();
-            
-            if (rect.bottom + 200 < window.innerHeight) {
+
+            if (targetEl.id === 'simu-phones-container') {
+                tooltip.style.top = Math.max(15, rect.top + window.scrollY - tooltip.offsetHeight - 18) + 'px';
+                tooltip.style.left = Math.max(15, (window.innerWidth / 2) - 170) + 'px';
+                return;
+            }
+
+            if (rect.bottom + 230 < window.innerHeight) {
                 tooltip.style.top = (rect.bottom + window.scrollY + 15) + 'px';
             } else {
-                tooltip.style.top = (rect.top + window.scrollY - tooltip.offsetHeight - 15) + 'px';
+                tooltip.style.top = Math.max(15, rect.top + window.scrollY - tooltip.offsetHeight - 15) + 'px';
             }
-            
-            let leftPos = rect.left + (rect.width / 2) - 160;
-            
-            // 🚀 PATCH TUTO : On décale la bulle tout à droite à l'étape des paramètres pour ne pas cacher la modale !
+
+            let leftPos = rect.left + (rect.width / 2) - 170;
             if (tutoCurrentPhase === 2 && tutoCurrentStep === 1) {
-                leftPos = window.innerWidth - 350;
+                leftPos = Math.min(window.innerWidth - 360, rect.right + 15);
             }
-            
-            if (leftPos < 10) leftPos = 10;
-            if (leftPos + 320 > window.innerWidth) leftPos = window.innerWidth - 340;
+            if (leftPos < 12) leftPos = 12;
+            if (leftPos + 345 > window.innerWidth) leftPos = window.innerWidth - 355;
             tooltip.style.left = leftPos + 'px';
         }
 
         function injectFakeTutoData() {
+            savedRealRoomState = {
+                dayMode: document.body.classList.contains('day-mode')
+            };
             globalTeams = {
-                "Les Requins": { active: true, bonus: 0, icon: "🦈" },
-                "Les Tigres": { active: true, bonus: 0, icon: "🐅" }
+                "Les Requins": { active: true, bonus: 0, icon: createBlason(1) },
+                "Les Tigres": { active: true, bonus: 0, icon: createBlason(0) }
             };
             allPlayersData = {
-                "t1": { name: "Alex", teamName: "Les Requins", active: true, pts: 5, isCaptain: true, avatar: "😎" },
-                "t2": { name: "Marie", teamName: "Les Requins", active: true, pts: 2, isCaptain: false, avatar: "👩‍🚀" },
-                "t3": { name: "Sam", teamName: "Les Tigres", active: true, pts: 4, isCaptain: true, avatar: "🤠" },
-                "t4": { name: "Tom", teamName: "Les Tigres", active: true, pts: 1, isCaptain: false, avatar: "👽" },
-                "t5": { name: "Ninja", teamName: "Solo", active: true, pts: 8, isCaptain: false, avatar: "🥷", hasBeenWarned: false }
+                "t1": { uid: "t1", name: "Alex", teamName: "Les Requins", active: true, pts: 5, isCaptain: true, avatar: "😎", hasBeenWarned: false },
+                "t2": { uid: "t2", name: "Marie", teamName: "Les Requins", active: true, pts: 2, isCaptain: false, avatar: "👩‍🚀", hasBeenWarned: false },
+                "t3": { uid: "t3", name: "Sam", teamName: "Les Tigres", active: true, pts: 4, isCaptain: true, avatar: "🤠", hasBeenWarned: false },
+                "t4": { uid: "t4", name: "Tom", teamName: "Les Tigres", active: true, pts: 1, isCaptain: false, avatar: "👽", hasBeenWarned: false },
+                "t5": { uid: "t5", name: "Ninja", teamName: "Solo", active: true, pts: 8, isCaptain: false, avatar: "🥷", hasBeenWarned: false }
             };
-            currentBuzzerId = null; currentPlayer = null; currentGameState = 'waiting'; currentBlocked = {}; buzzHistory = [];
-            
+            currentBuzzerId = null;
+            currentPlayer = null;
+            currentGameState = 'waiting';
+            currentBlocked = {};
+            buzzHistory = [];
+
             document.getElementById('player-box').style.display = "none";
             const btnOpenBuzz = document.getElementById('btn-open-buzz');
             if (btnOpenBuzz) { btnOpenBuzz.disabled = false; btnOpenBuzz.innerHTML = "Ouvrir Buzzers"; }
-            
-            renderLobby(); renderTeamLobby(); buildSimuPhones();
+
+            renderLobby();
+            renderTeamLobby();
+            buildSimuPhones();
+            updateSimuPhones();
         }
 
         function clearFakeTutoData() {
-            globalTeams = {}; allPlayersData = {}; currentBuzzerId = null; currentPlayer = null; currentGameState = 'waiting'; currentBlocked = {}; buzzHistory = [];
-            document.getElementById('player-box').style.display = "none"; document.getElementById('simu-phones-container').style.display = "none";
-            document.getElementById('network-status-dot').innerText = '🟢'; document.getElementById('network-status-dot').classList.remove('pulse-alert');
-            fullReset();
+            document.getElementById('player-box').style.display = "none";
+            document.getElementById('simu-phones-container').style.display = "none";
+            document.getElementById('network-status-dot').innerText = '🟢';
+            document.getElementById('network-status-dot').classList.remove('pulse-alert');
+
+            if (savedRealRoomState) {
+                const btnDay = document.getElementById('btn-day-mode');
+                if (savedRealRoomState.dayMode) {
+                    document.body.classList.add('day-mode');
+                    if (btnDay) btnDay.innerHTML = "🌙 MODE NUIT";
+                } else {
+                    document.body.classList.remove('day-mode');
+                    if (btnDay) btnDay.innerHTML = "☀️ MODE JOUR";
+                }
+                savedRealRoomState = null;
+            }
+
+            if (roomRef) {
+                // Recharge les vraies données de la salle depuis Firebase sans les écraser
+                roomRef.once('value').then(snap => {
+                    const rData = snap.val() || {};
+                    globalTeams = rData.teams || {};
+                    allPlayersData = {};
+                    const rawP = rData.players || {};
+                    Object.keys(rawP).forEach(uid => {
+                        if (rawP[uid] && rawP[uid].name && rawP[uid].name !== "undefined") {
+                            allPlayersData[uid] = { uid: uid, ...rawP[uid] };
+                        }
+                    });
+                    currentBlocked = rData.blockedPlayers || {};
+                    currentGameState = (rData.gameState && rData.gameState.status) ? rData.gameState.status : 'waiting';
+                    currentBuzzerId = (rData.buzzers && rData.buzzers.id) ? rData.buzzers.id : null;
+                    currentPlayer = currentBuzzerId && allPlayersData[currentBuzzerId] ? { id: currentBuzzerId, ...allPlayersData[currentBuzzerId] } : null;
+                    const btnOpenBuzz = document.getElementById('btn-open-buzz');
+                    if (btnOpenBuzz) {
+                        const openStates = ['ready', 'taken', 'processing'];
+                        btnOpenBuzz.disabled = openStates.includes(currentGameState);
+                        btnOpenBuzz.innerHTML = openStates.includes(currentGameState) ? "🟢 BUZZERS OUVERTS" : "Ouvrir Buzzers";
+                    }
+                    renderLobby();
+                    renderTeamLobby();
+                });
+            } else {
+                globalTeams = {}; allPlayersData = {}; currentBlocked = {}; currentBuzzerId = null; currentPlayer = null; currentGameState = 'waiting';
+                renderLobby(); renderTeamLobby();
+            }
         }
 
         function buildSimuPhones() {
-            const container = document.getElementById('simu-phones-container');
+            const container = document.getElementById('simu-phones-row');
+            if (!container) return;
             container.innerHTML = "";
-            
+
             Object.keys(allPlayersData).forEach(uid => {
                 const p = allPlayersData[uid];
                 const card = document.createElement('div');
                 card.className = 'simu-phone';
                 card.id = 'simu-ph-' + uid;
-                
+                card.title = `Téléphone virtuel de ${p.name} — Cliquez pour buzzer quand le bouton est vert`;
+
+                const crown = p.isCaptain ? ' 👑' : '';
+                const warn = p.hasBeenWarned ? ' 🟨' : '';
+
                 card.innerHTML = `
                     <div class="simu-kicked" id="simu-kick-${uid}">Banni 🟥</div>
+                    <div class="simu-notch"></div>
                     <div class="simu-avatar">${p.avatar}</div>
-                    <div class="simu-name">${p.name}</div>
-                    <div class="simu-team">${p.teamName === 'Solo' ? 'Solo' : '🛡️ ' + p.teamName}</div>
+                    <div class="simu-name" id="simu-nm-${uid}">${p.name}${crown}${warn}</div>
+                    <div class="simu-team" id="simu-tm-${uid}">${p.teamName === 'Solo' ? 'Solo' : '🛡️ ' + p.teamName}</div>
+                    <div class="simu-pts" id="simu-pt-${uid}">Score : ${p.pts || 0} pt${(p.pts||0)>1?'s':''}</div>
                     <div class="simu-buzzer wait" id="simu-bz-${uid}" onclick="simuClickBuzzer('${uid}')">ATTENDEZ</div>
                 `;
                 container.appendChild(card);
@@ -1264,157 +1379,90 @@
         }
 
         function updateSimuPhones() {
+            if (!window.isSandboxMode) return;
+            const winnerTeam = (currentPlayer && currentPlayer.teamName && currentPlayer.teamName !== "Solo") ? currentPlayer.teamName : null;
+
             Object.keys(allPlayersData).forEach(uid => {
+                const p = allPlayersData[uid];
                 const bz = document.getElementById('simu-bz-' + uid);
                 const kickEl = document.getElementById('simu-kick-' + uid);
-                if(!bz) return;
-                
-                if (allPlayersData[uid].banned) { kickEl.style.display = "flex"; return; } 
+                const nmEl = document.getElementById('simu-nm-' + uid);
+                const tmEl = document.getElementById('simu-tm-' + uid);
+                const ptEl = document.getElementById('simu-pt-' + uid);
+                if (!bz) return;
+
+                if (nmEl) nmEl.innerText = p.name + (p.isCaptain ? ' 👑' : '') + (p.hasBeenWarned ? ' 🟨' : '');
+                if (tmEl) tmEl.innerText = (!p.teamName || p.teamName === 'Solo') ? 'Solo' : '🛡️ ' + p.teamName;
+                if (ptEl) ptEl.innerText = `Score : ${p.pts || 0} pt${(p.pts||0)>1?'s':''}`;
+
+                if (p.banned) { kickEl.style.display = "flex"; return; }
                 else { kickEl.style.display = "none"; }
-                
+
                 if (currentGameState === 'waiting') {
-                    bz.className = "simu-buzzer wait"; bz.innerText = "ATTENDEZ";
+                    bz.className = "simu-buzzer wait";
+                    bz.innerText = "ATTENDEZ";
                 } else if (currentGameState === 'ready') {
-                    if (currentBlocked[allPlayersData[uid].name]) {
-                        bz.className = "simu-buzzer blocked"; bz.innerText = "BLOQUÉ";
+                    if (currentBlocked[p.name]) {
+                        bz.className = "simu-buzzer blocked";
+                        bz.innerText = "BLOQUÉ";
                     } else {
-                        bz.className = "simu-buzzer ready"; bz.innerText = "BUZZEZ !";
+                        bz.className = "simu-buzzer ready";
+                        bz.innerText = "BUZZEZ !";
                     }
                 } else if (currentGameState === 'taken') {
                     if (currentBuzzerId === uid) {
-                        bz.className = "simu-buzzer taken"; bz.innerText = "À TOI !";
-                    } else if (currentBlocked[allPlayersData[uid].name]) {
-                        bz.className = "simu-buzzer blocked"; bz.innerText = "BLOQUÉ";
+                        bz.className = "simu-buzzer taken";
+                        bz.innerText = "C'EST À TOI !";
+                    } else if (winnerTeam && p.teamName === winnerTeam) {
+                        bz.className = "simu-buzzer taken";
+                        bz.innerText = "BIEN JOUÉ !";
+                    } else if (currentBlocked[p.name]) {
+                        bz.className = "simu-buzzer blocked";
+                        bz.innerText = "BLOQUÉ";
                     } else {
-                        bz.className = "simu-buzzer wait"; bz.innerText = "TROP TARD";
+                        bz.className = "simu-buzzer blocked";
+                        bz.innerText = "OCCUPÉ";
                     }
                 }
             });
         }
 
         function simuClickBuzzer(uid) {
-            if (currentGameState !== 'ready') return;
-            if (currentBlocked[allPlayersData[uid].name]) return;
-            
-            if (tutoCurrentPhase === 2 && tutoCurrentStep === 3) window.nextTutoStep();
-
+            if (!window.isSandboxMode) return;
             const p = allPlayersData[uid];
+            if (!p || p.banned) return;
+            if (currentGameState !== 'ready') return;
+            if (currentBlocked[p.name]) return;
+
             currentGameState = 'taken';
             currentBuzzerId = uid;
-            currentPlayer = { id: uid, pseudo: p.name, teamName: p.teamName, avatar: p.avatar };
-            
+            currentPlayer = { id: uid, name: p.name, pseudo: p.name, teamName: p.teamName, avatar: p.avatar };
+            if (!buzzHistory.includes(p.name)) buzzHistory.push(p.name);
+
             const btnOpenBuzz = document.getElementById('btn-open-buzz');
             if (btnOpenBuzz) { btnOpenBuzz.disabled = true; btnOpenBuzz.innerHTML = "🟢 BUZZERS OUVERTS"; }
-            
+
             const box = document.getElementById('player-box');
             box.style.display = "block";
             document.getElementById('p-name').innerText = p.name;
             document.getElementById('p-avatar').innerHTML = p.avatar;
-            document.getElementById('p-team').innerHTML = p.teamName === "Solo" ? "Solo" : `<div class="crest-mini-bg"><span class="crest-mini">${globalTeams[p.teamName].icon}</span></div><span>${p.teamName}</span>`;
-            
+            document.getElementById('p-team').innerHTML = (!p.teamName || p.teamName === "Solo")
+                ? "Solo"
+                : `<div class="crest-mini-bg"><img src="${globalTeams[p.teamName] ? globalTeams[p.teamName].icon : ''}" class="crest-mini"></div><span>${p.teamName}</span>`;
+
             updateSimuPhones();
-            renderLobby(); renderTeamLobby();
+            renderLobby();
+            renderTeamLobby();
+
+            if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 3) {
+                window.nextTutoStep();
+            }
         }
-
-        const originalStatusUpdate = window.statusUpdate;
-        window.statusUpdate = function(st) {
-            if (!window.isTutoRunning) { originalStatusUpdate(st); return; }
-            currentGameState = st;
-            if(st === 'ready') { currentBuzzerId = null; currentPlayer = null; document.getElementById('player-box').style.display = 'none'; }
-            
-            const btnOpenBuzz = document.getElementById('btn-open-buzz');
-            if (btnOpenBuzz) {
-                if (st === 'ready') { btnOpenBuzz.disabled = true; btnOpenBuzz.innerHTML = "🟢 BUZZERS OUVERTS"; }
-                else { btnOpenBuzz.disabled = false; btnOpenBuzz.innerHTML = "Ouvrir Buzzers"; }
-            }
-            updateSimuPhones(); renderLobby(); renderTeamLobby();
-            
-            if (tutoCurrentPhase === 2 && tutoCurrentStep === 2 && st === 'ready') window.nextTutoStep(); 
-        };
-
-        const originalFullReset = window.fullReset;
-        window.fullReset = function() {
-            if (!window.isTutoRunning) { originalFullReset(); return; }
-            currentBlocked = {}; currentBuzzerId = null; currentPlayer = null; currentGameState = 'waiting';
-            document.getElementById('player-box').style.display = 'none';
-            window.statusUpdate('waiting');
-        };
-
-        const originalHandleError = window.handleError;
-        window.handleError = function() {
-            if (!window.isTutoRunning) { originalHandleError(); return; }
-            if(currentPlayer) {
-                const teamLockMode = document.getElementById('new-room-team-lock') ? document.getElementById('new-room-team-lock').value : 'individual';
-                if (teamLockMode === 'team' && currentPlayer.teamName !== 'Solo') {
-                    Object.values(allPlayersData).forEach(p => {
-                        if (p.teamName === currentPlayer.teamName) currentBlocked[p.name] = true;
-                    });
-                } else {
-                    currentBlocked[currentPlayer.pseudo] = true;
-                }
-                window.statusUpdate('ready');
-                
-                if (tutoCurrentPhase === 2 && tutoCurrentStep === 4) window.nextTutoStep();
-            }
-        };
-
-        const originalHandleReward = window.handleReward;
-        window.handleReward = function(pts, m) {
-            if (!window.isTutoRunning) { originalHandleReward(pts, m); return; }
-            if(!currentPlayer) return;
-            
-            const uid = currentPlayer.id;
-            allPlayersData[uid].pts += pts;
-            if (currentPlayer.teamName !== "Solo") globalTeams[currentPlayer.teamName].bonus += pts;
-            
-            if(m === 'finish') { window.statusUpdate('waiting'); }
-            else { currentBlocked[currentPlayer.pseudo] = true; window.statusUpdate('ready'); }
-            
-            if (tutoCurrentPhase === 2 && tutoCurrentStep === 4) window.nextTutoStep();
-        };
-
-        const originalKickPlayer = window.kickPlayer;
-        window.kickPlayer = function(uid, n) {
-            if (!window.isTutoRunning) { originalKickPlayer(uid, n); return; }
-            allPlayersData[uid].banned = true; allPlayersData[uid].active = false;
-            updateSimuPhones(); renderLobby(); renderTeamLobby();
-        };
-
-        const originalWarnPlayer = window.warnPlayer;
-        window.warnPlayer = function(uid, n) {
-            if (!window.isTutoRunning) { originalWarnPlayer(uid, n); return; }
-            allPlayersData[uid].hasBeenWarned = true;
-            renderLobby(); renderTeamLobby();
-        };
-        
-        const originalTransferCap = window.transferCaptaincy;
-        window.transferCaptaincy = function(oldId, oldName, newId, newName, teamName) {
-            if (!window.isTutoRunning) { originalTransferCap(oldId, oldName, newId, newName, teamName); return; }
-            if(oldId) allPlayersData[oldId].isCaptain = false;
-            allPlayersData[newId].isCaptain = true;
-            renderLobby(); renderTeamLobby(); renderTeamMembers(teamName);
-        };
-        
-        const originalForceRoomOpen = window.forceRoomOpen;
-        window.forceRoomOpen = function() {
-            if (!window.isTutoRunning) { originalForceRoomOpen(); return; }
-            document.getElementById('network-status-dot').innerText = '🟢';
-            document.getElementById('network-status-dot').classList.remove('pulse-alert');
-            alert("✅ Porte d'entrée réparée ! Bravo, vous avez rétabli la connexion !");
-            if (tutoCurrentPhase === 2 && tutoCurrentStep === 0) window.nextTutoStep();
-        };
-        
-        const originalTriggerEndGame = window.triggerEndGame;
-        window.triggerEndGame = function() {
-            if (!window.isTutoRunning) { originalTriggerEndGame(); return; }
-            alert("🏁 BOUM ! Pluie de confettis sur votre TV.\n\nFélicitations, vous avez terminé la simulation !");
-            window.endTuto();
-        };
         let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {};
         let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
         
         let activeLibraryUid = null, isProxyMode = false, activeBgLibraryUid = null, isProxyBgMode = false, modalSelectedBgUrl = "";
-        let mjLibrary = {}, mjBgLibrary = {}, selectedBgUrl = "", currentRoomBgUrl = ""; 
+        let mjLibrary = {}, mjBgLibrary = {}, currentRoomBgUrl = "";
         let showDefaultCrests = true, pendingRestoreTeam = null, currentBuzzerId = null, buzzHistory = [];
         let editingPlayerUid = null, editingPlayerOriginalPseudo = "", editingPlayerOriginalAvatar = "", editingPlayerCurrentAvatar = "";
         let isSuperAdmin = false, allUsersData = {}, targetMjUid = null;
@@ -1425,7 +1473,7 @@
 
         let buzzProcessing = false;
 		let currentGameState = 'waiting';
-        let curLbType = '', curLbIdx = 0, lbCrests = [], lbBgsDash = [], lbBgsModal = [];
+        let curLbType = '', curLbIdx = 0, lbCrests = [], lbBgsModal = [];
         let currentPlayerFilter = 'all';
         let currentMjTeamFilter = 'all'; 
         
@@ -1438,7 +1486,6 @@
         let activeTeamBlacklist = [];
         let activeTeamBlacklistListener = null;
         let activeDropdownBtn = null;
-		let isBuzzerLocked = false;
 		
 		// PATCH V1.232 : Moteur du Mouchard (Audit Log)
         function logEvent(actionType, message) {
@@ -1544,8 +1591,6 @@
         };
 
         window.onload = function() {
-            document.title = `Console MJ Pro - Presta'Puce (v${APP_VERSION})`;
-            document.getElementById('app-version-display').innerText = `v${APP_VERSION}`;
             
             /* --- PATCH V1.218 : CHARGEMENT DE L'EMAIL --- */
             const savedEmail = localStorage.getItem('presta_mj_email');
@@ -1570,12 +1615,9 @@
             document.addEventListener('keydown', e => { if(document.getElementById('univ-lightbox').style.display === 'flex') { if(e.key==='ArrowLeft') lbPrev(e); else if(e.key==='ArrowRight') lbNext(e); else if(e.key==='Escape') closeLightbox(e); } });
             
             window.addEventListener('scroll', handleGhostUI, true);
-            
-            document.addEventListener('click', function(e) {
-                const menu = document.getElementById('global-dropdown');
-                if (menu && menu.classList.contains('show') && !e.target.closest('.global-dropdown-menu') && !e.target.closest('.dropdown-btn')) {
-                    closeGlobalDropdown();
-                }
+            document.querySelectorAll('button:not([title])').forEach(b => {
+                const txt = b.innerText.replace(/\s+/g, ' ').trim();
+                if (txt) b.setAttribute('title', txt);
             });
         };
 
@@ -1720,8 +1762,7 @@
                 if (!data.library && data.customLogos) { let m={}; Object.values(data.customLogos).forEach((u,i)=>m['m_'+i]=u); db.ref(`users/${user.uid}/library`).set(m).then(()=>{ mjLibrary=m; }); } else { mjLibrary = data.library || {}; }
                 mjBgLibrary = data.bgLibrary || {};
                 
-                if(data.defaultBackground) if(document.getElementById('check-default-bg')) document.getElementById('check-default-bg').checked=true;
-                if(data.consoleBackground) { if(document.getElementById('check-console-bg')) document.getElementById('check-console-bg').checked=true; applyMjConsoleBg(data.consoleBackground); } else applyMjConsoleBg(null);
+                if(data.consoleBackground) applyMjConsoleBg(data.consoleBackground); else applyMjConsoleBg(null);
                 
                 showDefaultCrests = (data.showDefaultCrests !== false); 
                 if(document.getElementById('check-hide-default')) document.getElementById('check-hide-default').checked = showDefaultCrests;
@@ -1949,8 +1990,8 @@
                     const players = snap.val() || {};
                     const backupPromises = [];
                     Object.keys(players).forEach(uid => {
-                        if (uid.length > 20 && !uid.startsWith("u_")) { 
-                            backupPromises.push(db.ref('users/' + uid + '/history/' + targetRoomID).set({ date: firebase.database.ServerValue.TIMESTAMP, pts: players[uid].pts || 0, teamName: players[uid].teamName || "Solo", eventName: document.getElementById('display-event-name').innerText || "Partie" }));
+                        if (!uid.startsWith("u_")) { 
+                            backupPromises.push(db.ref('users_crm/' + uid + '/history/' + targetRoomID).set({ date: firebase.database.ServerValue.TIMESTAMP, pts: players[uid].pts || 0, teamName: players[uid].teamName || "Solo", eventName: document.getElementById('display-event-name').innerText || "Partie" }));
                         }
                     });
                     Promise.all(backupPromises).then(() => { rRef.remove(); db.ref('activeRooms/' + targetRoomID).remove(); resolve(); }).catch(() => { rRef.remove(); db.ref('activeRooms/' + targetRoomID).remove(); resolve(); });
@@ -2369,7 +2410,7 @@
         }
 
         function handleBgUpload(files, mode) { if(!files||files.length===0)return; const file=files[0], uid=mode==='modal'?activeBgLibraryUid:auth.currentUser.uid; storage.ref(`mj_custom_bgs/${uid}/${Date.now()}_${file.name}`).put(file).then(s=>s.ref.getDownloadURL()).then(u=>{ db.ref(`users/${uid}/bgLibrary`).push(u).then(()=>{ loadBgLibrary(mode); }); }).catch(e=>alert("Erreur: "+e.message)); }
-        function addBgUrlToLibrary(mode) { const p=mode==='modal'?'bg-modal':'room-bg', i=document.getElementById(p+'-url-input'), u=i.value.trim(); if(!u||(!u.startsWith('http')&&!u.startsWith('data:image/')))return alert("URL invalide."); db.ref(`users/${mode==='modal'?activeBgLibraryUid:auth.currentUser.uid}/bgLibrary`).push(u).then(()=>{ i.value=""; loadBgLibrary(mode); }).catch(e=>alert("Erreur: "+e.message)); }
+        function addBgUrlToLibrary(mode) { const i=document.getElementById('bg-modal-url-input'), u=i.value.trim(); if(!u||(!u.startsWith('http')&&!u.startsWith('data:image/')))return alert("URL invalide."); db.ref(`users/${activeBgLibraryUid || auth.currentUser.uid}/bgLibrary`).push(u).then(()=>{ i.value=""; loadBgLibrary(mode); }).catch(e=>alert("Erreur: "+e.message)); }
         function setModalBgAction(type) { if(!modalSelectedBgUrl)return; const uid=activeBgLibraryUid; if(type==='default'){ db.ref(`users/${uid}/defaultBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond par défaut enregistré !");if(!isProxyBgMode)mjProfileData.defaultBackground=modalSelectedBgUrl;}); } else { db.ref(`users/${uid}/consoleBackground`).set(modalSelectedBgUrl).then(()=>{alert("Fond console enregistré !");if(!isProxyBgMode){mjProfileData.consoleBackground=modalSelectedBgUrl;applyMjConsoleBg(modalSelectedBgUrl);}}); } }
         function applyMjConsoleBg(url) { const bg=document.getElementById('dynamic-bg'); if(url&&url!==""){ bg.style.background=`url('${url}') center/cover no-repeat`; bg.style.animation='none'; }else{ bg.style.background='linear-gradient(45deg, #0f0c29, #302b63, #24243e)'; bg.style.backgroundSize='300% 300%'; bg.style.animation='gradientBG 15s ease infinite'; } }
         
@@ -2495,8 +2536,8 @@
                 return alert("⚠️ Le nom de l'événement est obligatoire pour créer une salle.");
             }
             
-            if(/[.#$\[\]]/.test(mjName) || /[.#$\[\]]/.test(eventName)) {
-                return alert("Les caractères suivants sont interdits : . # $ [ ]");
+            if(/[.#$\[\]\/]/.test(mjName) || /[.#$\[\]\/]/.test(eventName)) {
+                return alert("Les caractères suivants sont interdits : . # $ [ ] /");
             }
             
             const d = new Date(); 
@@ -2633,6 +2674,14 @@
 		
 		/* --- PATCH V1.215 : BOUTON D'URGENCE MANUEL --- */
         function forceRoomOpen() {
+            if (window.isSandboxMode) {
+                document.getElementById('network-status-dot').innerText = '🟢';
+                document.getElementById('network-status-dot').classList.remove('pulse-alert');
+                if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 0) {
+                    window.nextTutoStep();
+                }
+                return;
+            }
             if(!roomID || document.getElementById('screen-dashboard').classList.contains('readonly-mode')) {
                 return alert("Action impossible : La salle est fermée ou archivée.");
             }
@@ -2653,15 +2702,15 @@
             });
         }
 
-        /* --- PATCH V1.268 : OUVERTURE SCORES FAÇON "PENNYLANE" (COMPATIBLE APP BUREAU) --- */
+        /* --- PATCH V1.299 : OUVERTURE SCORES ISOLÉE (PROTÈGE LE PLEIN ÉCRAN SUR ÉCRAN SECONDAIRE) --- */
         function openScoreBoard() { 
             if(!roomID) return; 
             const url = window.location.href.split('?')[0].substring(0, window.location.href.split('?')[0].lastIndexOf('/')) + "/scores.html?room=" + roomID;
             
-            // On crée un faux lien HTML invisible pour forcer Chrome à ouvrir un vrai onglet
             const link = document.createElement('a');
             link.href = url;
             link.target = '_blank';
+            link.rel = 'noopener noreferrer';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -2808,10 +2857,16 @@
             }
         }
 
-        /* --- PATCH V1.210 : PHRASES DE TRANSFERT EXACTES --- */
+        /* --- PATCH V1.299 : TRANSFERT CAPITANAT NON-BLOQUANT + BAC À SABLE --- */
         function transferCaptaincy(oldId, oldName, newId, newName, teamName) {
+            if (window.isSandboxMode) {
+                if (oldId && allPlayersData[oldId]) allPlayersData[oldId].isCaptain = false;
+                if (allPlayersData[newId]) allPlayersData[newId].isCaptain = true;
+                updateSimuPhones(); renderLobby(); renderTeamLobby(); renderTeamMembers(teamName);
+                return;
+            }
             const displayOld = oldName || "L'ancien capitaine";
-            if (confirm(`Êtes-vous sûr de vouloir enlever le capitanat à ${displayOld} pour le donner à ${newName} ?`)) {
+            window.mjConfirm("👑 Changement de Capitaine", `Retirer la couronne à ${displayOld} pour nommer ${newName} capitaine de l'équipe ${teamName} ?`, () => {
                 logEvent('SYSTEM', `MJ a transféré le capitanat de ${teamName} à ${newName}`); // 🟢 CAPTEUR
                 let updates = {};
                 Object.keys(allPlayersData).forEach(k => {
@@ -2829,7 +2884,7 @@
                 updates[newId + '/captainMessage'] = `👑 ${displayOld} n'est plus capitaine. Vous êtes le nouveau capitaine de l'équipe ${teamName}.`;
                 
                 roomRef.child('players').update(updates);
-            }
+            }, "👑 Nommer Capitaine", "var(--gold)");
         }
 		
 		/* --- PATCH V1.269 : SUCCESSION AUTOMATIQUE ABSOLUE (Anti-Trône Vide) --- */
@@ -2871,11 +2926,13 @@
         }
 
         function initMJLogic() {
+            roomRef.child('customBackground').on('value', snap => { currentRoomBgUrl = snap.val() || ""; });
             roomRef.child('eventName').on('value', snap => { if(snap.exists()) document.getElementById('display-event-name').innerText = snap.val(); else document.getElementById('display-event-name').innerText = "PARTIE EN COURS"; });
             roomRef.child('mjName').on('value', snap => { if(snap.exists()) document.getElementById('display-mj-name').innerText = "Animé par " + snap.val(); else document.getElementById('display-mj-name').innerText = "Animé par MJ"; });
             
-            // 🚀 NOUVEAU : ÉCOUTEUR DES RÈGLES DU JEU (Mise à jour des badges Console MJ)
+            // 🚀 ÉCOUTEUR DES RÈGLES DU JEU (Mise à jour des badges Console MJ)
             roomRef.child('settings').on('value', snap => {
+                if (window.isSandboxMode) return;
                 const settings = snap.val() || { gameMode: 'mixed', teamLock: 'individual' };
                 window.roomSettings = settings; // Sauvegarde globale pour la console
                 
@@ -2900,9 +2957,8 @@
             });
 
             // 🚀 PATCH V1.270 : ÉCOUTEUR MODE JOUR (Console MJ globale)
-
-            // 🚀 PATCH V1.270 : ÉCOUTEUR MODE JOUR (Console MJ globale)
             roomRef.child('settings/dayMode').on('value', snap => {
+                if (window.isSandboxMode) return;
                 const isDay = snap.val() === true;
                 const btn = document.getElementById('btn-day-mode');
                 
@@ -2919,7 +2975,7 @@
                 }
             });
             roomRef.child('players').on('value', snap => { 
-                if(window.isTutoRunning) return; // 🚀 BARRIÈRE TUTORIEL
+                if(window.isSandboxMode) return; // 🚀 BARRIÈRE BAC À SABLE
                 const rawData = snap.val() || {}; 
                 allPlayersData = {};
 
@@ -2927,8 +2983,8 @@
                 Object.keys(rawData).forEach(uid => {
                     const p = rawData[uid];
                     // Si le joueur a un vrai nom, on l'accepte. Sinon, on le désintègre !
-                    if (p.name && p.name !== "undefined" && p.name.trim() !== "") {
-                        allPlayersData[uid] = p;
+                    if (p && p.name && p.name !== "undefined" && p.name.trim() !== "") {
+                        allPlayersData[uid] = { uid: uid, ...p };
                     }
                 });
                 
@@ -2972,7 +3028,7 @@
             });
 
             roomRef.child('buzzers').on('value', snap => {
-                if(window.isTutoRunning) return; // 🚀 BARRIÈRE TUTORIEL
+                if(window.isSandboxMode) return; // 🚀 BARRIÈRE BAC À SABLE
                 const b = snap.val(); const box = document.getElementById('player-box');
                 if(b) { 
                     currentBuzzerId = b.id; const ps = b.pseudo;
@@ -2989,6 +3045,7 @@
 
             // --- PATCH V1.245 : HARMONISATION AVEC REMOTE (VERROUILLAGE BOUTON) ---
             roomRef.child('gameState').on('value', snap => {
+                if (window.isSandboxMode) return;
                 const st = snap.val() ? snap.val().status : 'waiting';
                 currentGameState = st; 
 
@@ -3015,18 +3072,12 @@
                     }
                 }
                 
-                if (st === 'endGame') showEndGame();
-                else if (st === 'closing') showClosingScreen();
-                else { 
-                    const podiumZone = document.getElementById('podium-zone');
-                    if (podiumZone) podiumZone.style.display = 'none'; 
-                }
-                
                 renderLobby();
                 renderTeamLobby();
             });
 
             roomRef.child('buzzAttempts').on('value', snap => {
+                if (window.isSandboxMode) return;
                 // On laisse passer les données, on bloque seulement si le fantôme du gagnant précédent est encore là
                 if (currentPlayer) return; 
                 
@@ -3035,7 +3086,6 @@
                 
                 if (!buzzProcessing) {
                     buzzProcessing = true;
-                    isBuzzerLocked = true; // On verrouille proprement ici
                     roomRef.child('gameState').set({status: 'processing'}); 
                     
                     setTimeout(() => {
@@ -3080,14 +3130,14 @@
             });
 
             roomRef.child('teams').on('value', snap => { 
-                if(window.isTutoRunning) return; // 🚀 BARRIÈRE TUTORIEL
+                if(window.isSandboxMode) return; // 🚀 BARRIÈRE BAC À SABLE
                 globalTeams = snap.val() || {}; 
                 renderLobby(); 
                 renderTeamLobby();
             });
             
             roomRef.child('blockedPlayers').on('value', snap => { 
-                if(window.isTutoRunning) return; // 🚀 BARRIÈRE TUTORIEL
+                if(window.isSandboxMode) return; // 🚀 BARRIÈRE BAC À SABLE
                 currentBlocked = snap.val() || {};
                 renderLobby(); 
             });
@@ -3322,7 +3372,7 @@
                 else if (status === 1) counts.inactive++;
                 else counts.active++;
 
-                let hasBuzzer = Object.values(allPlayersData).some(p => p.teamName === k && p.uid === currentBuzzerId && currentGameState !== 'awarded');
+                let hasBuzzer = Object.values(allPlayersData).some(p => p.teamName === k && p.uid === currentBuzzerId && currentGameState === 'taken');
                 return { key: k, status: status, totalScore: total, aC: aC, iC: iC, bC: bC, hasBuzzer: hasBuzzer, ...t };
             });
 
@@ -3561,11 +3611,16 @@
         }
 
         function expelTeamMember(uid, name, avatar, teamName) {
-            if(confirm(`Expulser ${name} de l'équipe ?\n\nIl repassera en Solo et sera mis sur la liste noire de l'équipe.`)) {
-                logEvent('PUNISH', `MJ a expulsé ${name} de l'équipe ${teamName}`); // 🟢 CAPTEUR
+            if (window.isSandboxMode) {
+                if (allPlayersData[uid]) { allPlayersData[uid].teamName = "Solo"; allPlayersData[uid].isCaptain = false; }
+                updateSimuPhones(); renderLobby(); renderTeamLobby(); renderTeamMembers(teamName);
+                return;
+            }
+            window.mjConfirm("✕ Expulser de l'équipe", `Retirer ${name} de l'équipe ${teamName} ?\nIl repassera en Solo.`, () => {
+                logEvent('PUNISH', `MJ a expulsé ${name} de l'équipe ${teamName}`);
                 roomRef.child('teams/' + teamName + '/blacklist/' + uid).set({ name: name, avatar: avatar });
                 roomRef.child('players/' + uid).update({ teamName: "Solo", teamIcon: "", isCaptain: false });
-            }
+            });
         }
 		
         function pardonTeamMember(uid, teamName) { 
@@ -3600,42 +3655,61 @@
         }
         
         function setPlayerScore(u, v) { 
-            logEvent('SCORE', `MJ a fixé manuellement le score à ${v}`); // 🟢 CAPTEUR
+            if (window.isSandboxMode) {
+                if (allPlayersData[u]) allPlayersData[u].pts = parseInt(v) || 0;
+                updateSimuPhones(); renderLobby(); renderTeamLobby();
+                return;
+            }
+            logEvent('SCORE', `MJ a fixé manuellement le score à ${v}`);
             roomRef.child('players/'+u).update({pts: parseInt(v)||0}); 
         }
         
 		function warnPlayer(u, n) { 
-            if(confirm(`Avertissement (Jaune) à ${n} ?`)) {
-                logEvent('PUNISH', `MJ a donné un AVERTISSEMENT au joueur : ${n}`); // 🟢 CAPTEUR
-                roomRef.child('players/'+u).update({hasBeenWarned:true, pendingWarning:true}); 
+            if (window.isSandboxMode) {
+                if (allPlayersData[u]) allPlayersData[u].hasBeenWarned = true;
+                updateSimuPhones(); renderLobby(); renderTeamLobby();
+                return;
             }
+            window.mjConfirm("🟨 Carton Jaune", `Envoyer un avertissement officiel à ${n} ?`, () => {
+                logEvent('PUNISH', `MJ a donné un AVERTISSEMENT au joueur : ${n}`);
+                roomRef.child('players/'+u).update({hasBeenWarned:true, pendingWarning:true}); 
+            }, "🟨 Avertir", "var(--gold)");
         }
 
         function acceptRecovery(u) { 
-            logEvent('SYSTEM', `MJ a autorisé une demande de reconnexion`); // 🟢 CAPTEUR
-            // 🚀 SIGNAL DE VALIDATION : On autorise le téléphone à passer à la connexion
+            logEvent('SYSTEM', `MJ a autorisé une demande de reconnexion`);
             roomRef.child('players/'+u).update({recoveryRequest:'validated'}); 
         }
 
         function rejectRecovery(u) { 
-            if(confirm("Refuser ?")) {
-                logEvent('PUNISH', `MJ a refusé une demande de reconnexion`); // 🟢 CAPTEUR
+            window.mjConfirm("✖ Refuser la reconnexion", "Refuser cette demande de récupération de profil ?", () => {
+                logEvent('PUNISH', `MJ a refusé une demande de reconnexion`);
                 roomRef.child('players/'+u).update({recoveryRequest:null}); 
-            }
+            });
         }
 
         function archiveTeam(n) { 
-            if(confirm("Pause équipe "+n+" ?")) { 
-                logEvent('SYSTEM', `MJ a mis en PAUSE l'équipe ${n}`); // 🟢 CAPTEUR
+            if (window.isSandboxMode) {
+                if (globalTeams[n]) globalTeams[n].active = false;
+                renderLobby(); renderTeamLobby();
+                return;
+            }
+            window.mjConfirm("⏸️ Pause d'équipe", `Mettre l'équipe ${n} en pause (scores gelés) ?`, () => {
+                logEvent('SYSTEM', `MJ a mis en PAUSE l'équipe ${n}`);
                 let c=0; Object.values(allPlayersData).forEach(p=>{if(p.teamName===n)c+=(p.pts||0);}); c+=(globalTeams[n].bonus||0); let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, frozenScore:c, previousMembers:m, lastState:'active'}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:""})); 
-            } 
+            }, "⏸️ Mettre en pause", "var(--blue)");
         }
 
         function banTeam(n) { 
-            if(confirm("Bannir équipe "+n+" ?")) { 
-                logEvent('PUNISH', `MJ a BANNI l'équipe ${n}`); // 🟢 CAPTEUR
+            if (window.isSandboxMode) {
+                if (globalTeams[n]) { globalTeams[n].active = false; globalTeams[n].banned = true; }
+                renderLobby(); renderTeamLobby();
+                return;
+            }
+            window.mjConfirm("🟥 Bannir l'équipe", `Expulser l'équipe ${n} de la partie ?`, () => {
+                logEvent('PUNISH', `MJ a BANNI l'équipe ${n}`);
                 let m=[]; Object.entries(allPlayersData).forEach(([u,p])=>{if(p.teamName===n)m.push(u);}); roomRef.child('teams/'+n).update({active:false, banned:true, previousMembers:m, lastState:(globalTeams[n].active!==false?'active':'inactive')}); m.forEach(u=>roomRef.child('players/'+u).update({teamName:"Solo", teamIcon:"", active:true, banned:false})); 
-            } 
+            });
         }
 
         function openRestoreModal(n) { const t=globalTeams[n]; if(t.lastState==='active'||(!t.banned&&!t.active)){if(confirm("Réactiver "+n+" ?"))performRestore(n,'active');}else{pendingRestoreTeam=n; document.getElementById('restore-team-msg').innerText=`${n} était EN PAUSE avant d'être bannie.`; document.getElementById('modal-restore-team').style.display='flex';} }
@@ -3648,55 +3722,77 @@
         }
 
         function deleteTeamDefinitive(n) { 
-            if(confirm(`⚠️ Supprimer DÉFINITIVEMENT l'équipe ${n} ?`)) {
-                logEvent('SYSTEM', `MJ a supprimé l'équipe : ${n}`); // 🟢 CAPTEUR
-                roomRef.child('teams/'+n).remove(); 
+            if (window.isSandboxMode) {
+                delete globalTeams[n];
+                Object.values(allPlayersData).forEach(p => { if (p.teamName === n) { p.teamName = "Solo"; p.isCaptain = false; } });
+                updateSimuPhones(); renderLobby(); renderTeamLobby();
+                return;
             }
+            window.mjConfirm("🗑️ Supprimer l'équipe", `Supprimer DÉFINITIVEMENT l'équipe ${n} ?`, () => {
+                logEvent('SYSTEM', `MJ a supprimé l'équipe : ${n}`);
+                roomRef.child('teams/'+n).remove(); 
+            });
         }
         
 		function updateTeamBonus(n, d) { 
+            if (window.isSandboxMode) {
+                if (globalTeams[n]) globalTeams[n].bonus = (globalTeams[n].bonus || 0) + d;
+                renderTeamLobby();
+                return;
+            }
             const t=globalTeams[n]; 
-            logEvent('SCORE', `Ajustement bonus MJ : ${d>0?'+':''}${d} pts pour l'équipe ${n}`); // 🟢 CAPTEUR
+            logEvent('SCORE', `Ajustement bonus MJ : ${d>0?'+':''}${d} pts pour l'équipe ${n}`);
             if(t.active!==false)roomRef.child('teams/'+n+'/bonus').transaction(v=>(v||0)+d); 
             else roomRef.child('teams/'+n).update({frozenScore:(t.frozenScore||0)+d, bonus:(t.bonus||0)+d}); 
         }
 
-        function deletePlayer(u, n, a) { 
-            if(a) { 
-                if(confirm("Rendre inactif "+n+" ?")) {
-                    logEvent('SYSTEM', `MJ a forcé l'inactivité du joueur : ${n}`); // 🟢 CAPTEUR
-                    roomRef.child('players/'+u).update({active:false}); 
-                }
-            } else { 
-                if(confirm("⚠️ Supprimer "+n+" définitivement ?")) {
-                    logEvent('SYSTEM', `MJ a supprimé définitivement le joueur : ${n}`); // 🟢 CAPTEUR
-                    roomRef.child('players/'+u).remove(); 
-                }
-            } 
-        }
-
         function forceBuzzer(u) { 
             const p=allPlayersData[u]; 
-            if(p) { 
-                logEvent('SYSTEM', `MJ a FORCÉ LE BUZZER pour ${p.name}`); // 🟢 CAPTEUR
-                roomRef.child('gameState').update({status:'taken'}); 
-                roomRef.child('buzzers').set({id:u, pseudo:p.name, avatar:p.avatar||"", teamName:p.teamName||"Solo", teamIcon:p.teamIcon||""}); 
-            } 
+            if (!p) return;
+            if (window.isSandboxMode) {
+                currentGameState = 'taken';
+                currentBuzzerId = u;
+                currentPlayer = { id: u, name: p.name, pseudo: p.name, teamName: p.teamName, avatar: p.avatar };
+                const btnOpenBuzz = document.getElementById('btn-open-buzz');
+                if (btnOpenBuzz) { btnOpenBuzz.disabled = true; btnOpenBuzz.innerHTML = "🟢 BUZZERS OUVERTS"; }
+                const box = document.getElementById('player-box');
+                box.style.display = "block";
+                document.getElementById('p-name').innerText = p.name;
+                document.getElementById('p-avatar').innerHTML = p.avatar || '👤';
+                document.getElementById('p-team').innerHTML = (!p.teamName || p.teamName === "Solo") ? "Solo" : p.teamName;
+                updateSimuPhones(); renderLobby(); renderTeamLobby();
+                return;
+            }
+            logEvent('SYSTEM', `MJ a FORCÉ LE BUZZER pour ${p.name}`);
+            roomRef.child('gameState').update({status:'taken'}); 
+            roomRef.child('buzzers').set({id:u, pseudo:p.name, avatar:p.avatar||"", teamName:p.teamName||"Solo", teamIcon:p.teamIcon||""}); 
         }
 
         function toggleBlockPlayer(ps) { 
+            if (window.isSandboxMode) {
+                if (currentBlocked[ps]) delete currentBlocked[ps];
+                else currentBlocked[ps] = true;
+                updateSimuPhones(); renderLobby();
+                return;
+            }
             if(currentBlocked[ps]) {
-                logEvent('SYSTEM', `MJ a débloqué le buzzer de ${ps}`); // 🟢 CAPTEUR
+                logEvent('SYSTEM', `MJ a débloqué le buzzer de ${ps}`);
                 roomRef.child('blockedPlayers/'+ps).remove(); 
             } else { 
-                logEvent('PUNISH', `MJ a bloqué le buzzer de ${ps}`); // 🟢 CAPTEUR
+                logEvent('PUNISH', `MJ a bloqué le buzzer de ${ps}`);
                 roomRef.child('blockedPlayers/'+ps).set(true); 
             }
         }
         
         function triggerEndGame() { 
-            if(confirm("🏁 Fin de partie ?\n\nCela affichera le podium et placera cette salle dans vos Archives en Lecture Seule.")) { 
-                logEvent('SYSTEM', "🏁 MJ a déclenché la FIN DE PARTIE"); // 🟢 CAPTEUR
+            if (window.isSandboxMode) {
+                window.mjConfirm("🏁 Fin de la Démo", "Bravo ! En conditions réelles, le Podium Olympique et une pluie de confettis s'affichent sur votre Écran Géant et sur les téléphones des vainqueurs.\n\nQuitter le Bac à Sable ?", () => {
+                    window.endTuto();
+                }, "🎉 Terminer la démo", "var(--success)");
+                return;
+            }
+            window.mjConfirm("🏁 Fin de Partie", "Clôturer la partie maintenant ?\n\nCela lancera le Podium Final sur l'Écran Géant et archivera la salle en Lecture Seule.", () => {
+                logEvent('SYSTEM', "🏁 MJ a déclenché la FIN DE PARTIE");
                 roomRef.child('gameState').set({status:'endGame', timestamp:Date.now()}); 
                 roomRef.update({ isArchived: true });
                 roomRef.child('buzzers').remove(); 
@@ -3708,14 +3804,34 @@
 
                 document.getElementById('screen-dashboard').classList.add('readonly-mode');
                 document.getElementById('readonly-banner').style.display = 'block';
-            } 
+            }, "🏁 Afficher le Podium", "var(--gold)");
         }
         
         function statusUpdate(st) { 
+            if (window.isSandboxMode) {
+                currentGameState = st;
+                if (st === 'ready' || st === 'waiting') {
+                    currentBuzzerId = null;
+                    currentPlayer = null;
+                    document.getElementById('player-box').style.display = 'none';
+                }
+                const btnOpenBuzz = document.getElementById('btn-open-buzz');
+                if (btnOpenBuzz) {
+                    if (st === 'ready' || st === 'taken') {
+                        btnOpenBuzz.disabled = true;
+                        btnOpenBuzz.innerHTML = "🟢 BUZZERS OUVERTS";
+                    } else {
+                        btnOpenBuzz.disabled = false;
+                        btnOpenBuzz.innerHTML = "Ouvrir Buzzers";
+                    }
+                }
+                updateSimuPhones(); renderLobby(); renderTeamLobby();
+                return;
+            }
             if(roomRef) { 
                 roomRef.child('gameState').set({status:st}); 
                 if(st==='ready') { 
-                    logEvent('SYSTEM', "Ouverture des buzzers"); // 🟢 CAPTEUR
+                    logEvent('SYSTEM', "Ouverture des buzzers");
                     roomRef.child('buzzers').remove(); 
                     roomRef.child('buzzAttempts').remove(); 
                     buzzProcessing = false;
@@ -3724,23 +3840,42 @@
         }
 
 		function openNextQuestion() {
-            isBuzzerLocked = false;
+            if (window.isSandboxMode) {
+                currentBlocked = {};
+                currentBuzzerId = null;
+                currentPlayer = null;
+                currentGameState = 'ready';
+                document.getElementById('player-box').style.display = 'none';
+                const btnOpenBuzz = document.getElementById('btn-open-buzz');
+                if (btnOpenBuzz) {
+                    btnOpenBuzz.disabled = true;
+                    btnOpenBuzz.innerHTML = "🟢 BUZZERS OUVERTS";
+                }
+                updateSimuPhones();
+                renderLobby();
+                renderTeamLobby();
+                if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 2) {
+                    window.nextTutoStep();
+                }
+                return;
+            }
+            if (!roomRef) return;
             roomRef.child('buzzers').remove();
             roomRef.child('buzzAttempts').remove();
-            roomRef.child('blockedPlayers').remove(); // 🧹 Lève tous les blocages !
-            roomRef.child('gameState').set({status: 'ready'}); // Ouvre les buzzers
+            roomRef.child('blockedPlayers').remove();
+            roomRef.child('gameState').set({status: 'ready'});
             currentPlayer = null;
             document.getElementById('player-box').style.display = 'none';
-            // 🚀 PATCH TUTO : Si on est dans le simulateur, on force la mise à jour visuelle des buzzers en vert !
-            if (window.isTutoRunning) {
-                currentGameState = 'ready';
-                updateSimuPhones();
-            }
         }
 
         function fullReset() {
-			isBuzzerLocked = false; // Libère le verrou
-            logEvent('SYSTEM', "Reset global (Nettoyage des buzzers et blocages)"); // 🟢 CAPTEUR
+            if (window.isSandboxMode) {
+                currentBlocked = {};
+                statusUpdate('waiting');
+                return;
+            }
+            if (!roomRef) return;
+            logEvent('SYSTEM', "Reset global (Nettoyage des buzzers et blocages)");
             roomRef.child('blockedPlayers').remove(); 
             roomRef.child('buzzers').remove(); 
             roomRef.child('buzzAttempts').remove(); 
@@ -3748,38 +3883,64 @@
         }
         
         function adj(u, v) { 
-            logEvent('SCORE', `MJ a ajusté le score d'un joueur (${v > 0 ? '+' : ''}${v})`); // 🟢 CAPTEUR
+            if (window.isSandboxMode) {
+                if (allPlayersData[u]) allPlayersData[u].pts = (allPlayersData[u].pts || 0) + v;
+                updateSimuPhones(); renderLobby(); renderTeamLobby();
+                return;
+            }
+            logEvent('SCORE', `MJ a ajusté le score d'un joueur (${v > 0 ? '+' : ''}${v})`);
             roomRef.child('players/'+u+'/pts').transaction(x=>(x||0)+v); 
         }
         
 		function kickPlayer(u, n) { 
-            if(confirm("Bannir "+n+" (Rouge) ?")) {
-                logEvent('PUNISH', `MJ a banni le joueur : ${n}`); // 🟢 CAPTEUR
+            if (window.isSandboxMode) {
+                if (allPlayersData[u]) { allPlayersData[u].banned = true; allPlayersData[u].active = false; }
+                if (currentBuzzerId === u) statusUpdate('ready');
+                else { updateSimuPhones(); renderLobby(); renderTeamLobby(); }
+                return;
+            }
+            window.mjConfirm("🟥 Carton Rouge", `Expulser ${n} de la partie ?`, () => {
+                logEvent('PUNISH', `MJ a banni le joueur : ${n}`);
                 roomRef.child('players/'+u).update({banned:true, active:false}); 
                 if (currentBuzzerId === u) { 
-                    roomRef.child('buzzers').remove(); // 🚀 Disparaît immédiatement de la télécommande et de l'écran MJ
-                    if (currentGameState === 'taken') { isBuzzerLocked = false; statusUpdate('ready'); } // Rouvre seulement si question en cours
+                    roomRef.child('buzzers').remove();
+                    if (currentGameState === 'taken') { statusUpdate('ready'); }
                 }
-            }
+            });
         }
 
         function unkickPlayer(u) { 
-            logEvent('SYSTEM', `MJ a levé le bannissement d'un joueur`); // 🟢 CAPTEUR
-            // 🚀 PATCH V1.273 : Nettoyage de l'ordre d'expulsion (kickedByMj: null)
+            if (window.isSandboxMode) {
+                if (allPlayersData[u]) { allPlayersData[u].banned = false; allPlayersData[u].active = true; }
+                updateSimuPhones(); renderLobby(); renderTeamLobby();
+                return;
+            }
+            logEvent('SYSTEM', `MJ a levé le bannissement d'un joueur`);
             roomRef.child('players/'+u).update({banned:false, active:true, reconnectedAt:Date.now(), kickedByMj: null}); 
         }
 
         function restoreInactivePlayer(u) { 
-            logEvent('SYSTEM', `MJ a forcé la réactivation d'un joueur inactif`); // 🟢 CAPTEUR
-            // 🚀 PATCH V1.273 : Nettoyage de l'ordre d'expulsion (kickedByMj: null)
+            if (window.isSandboxMode) {
+                if (allPlayersData[u]) allPlayersData[u].active = true;
+                updateSimuPhones(); renderLobby(); renderTeamLobby();
+                return;
+            }
+            logEvent('SYSTEM', `MJ a forcé la réactivation d'un joueur inactif`);
             roomRef.child('players/'+u).update({active:true, reconnectedAt:Date.now(), kickedByMj: null}); 
         }
         
 		function togglePlayerTeam(u, c) { 
+            if (window.isSandboxMode) {
+                if (allPlayersData[u]) {
+                    allPlayersData[u].teamName = c;
+                    if (c === "Solo") allPlayersData[u].isCaptain = false;
+                }
+                updateSimuPhones(); renderLobby(); renderTeamLobby();
+                return;
+            }
             const i=(c==="Solo")?"":(globalTeams[c]?globalTeams[c].icon:""); 
             const pName = allPlayersData[u] ? allPlayersData[u].name : "Un joueur";
             
-            // 🚀 PATCH V1.269 : VERIFICATION DU TRÔNE DE L'ÉQUIPE D'ACCUEIL
             let teamHasCaptain = false;
             if (c !== "Solo") {
                 for (let pId in allPlayersData) {
@@ -3793,8 +3954,6 @@
 
             logEvent('SYSTEM', `MJ a déplacé ${pName} vers : ${c} ${isCaptainNow ? '(Couronné)' : ''}`);
             
-            // On modifie juste le joueur. Le moteur de la console repérera le trône vide 
-            // au prochain cycle et s'occupera lui-même de la succession de l'ancienne équipe.
             roomRef.child('players/'+u).update({
                 teamName:c, 
                 teamIcon:i, 
@@ -3804,10 +3963,24 @@
         }
 
         function handleError() { 
+            if (window.isSandboxMode) {
+                if (!currentPlayer) return;
+                const pName = currentPlayer.name || currentPlayer.pseudo;
+                const tLock = (window.roomSettings && window.roomSettings.teamLock === 'team') && currentPlayer.teamName && currentPlayer.teamName !== 'Solo';
+                if (tLock) {
+                    Object.values(allPlayersData).forEach(p => {
+                        if (p.teamName === currentPlayer.teamName) currentBlocked[p.name] = true;
+                    });
+                } else {
+                    currentBlocked[pName] = true;
+                }
+                statusUpdate('ready');
+                if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 4) {
+                    window.nextTutoStep();
+                }
+                return;
+            }
             if(currentPlayer && currentPlayer.name) { 
-                isBuzzerLocked = false; 
-                
-                // 🚀 PATCH V1.269 : LECTURE DE LA RÈGLE DE BLOCAGE
                 roomRef.child('settings/teamLock').once('value').then(snap => {
                     const isTeamLock = (snap.val() === 'team') && currentPlayer.teamName && currentPlayer.teamName !== "Solo";
                     
@@ -3816,7 +3989,7 @@
                         let updates = {};
                         Object.values(allPlayersData).forEach(p => {
                             if (p.teamName === currentPlayer.teamName && p.active !== false && !p.banned) {
-                                updates[p.name] = true; // Ajoute tous les membres actifs de l'équipe à la liste rouge
+                                updates[p.name] = true;
                             }
                         });
                         roomRef.child('blockedPlayers').update(updates);
@@ -3830,18 +4003,33 @@
         }
 
         function handleReward(pts, m) {
-            isBuzzerLocked = false; 
+            if (window.isSandboxMode) {
+                if (!currentPlayer || !currentPlayer.id) return;
+                const uid = currentPlayer.id;
+                const pName = currentPlayer.name || currentPlayer.pseudo;
+                if (allPlayersData[uid]) allPlayersData[uid].pts = (allPlayersData[uid].pts || 0) + pts;
+                if (m === 'finish') {
+                    statusUpdate('waiting');
+                } else {
+                    currentBlocked[pName] = true;
+                    statusUpdate('ready');
+                }
+                if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 4) {
+                    window.nextTutoStep();
+                }
+                return;
+            }
             if(!currentPlayer || !currentPlayer.id) return;
             
             const uid = currentPlayer.id;
-            const t = currentPlayer.teamName;
             
-            db.ref('users/' + uid).once('value').then(snap => {
-                if(snap.exists()) {
-                    const currentTotal = snap.val().totalScore || 0;
-                    db.ref('users/' + uid).update({ totalScore: currentTotal + pts });
-                }
-            });
+            if (!uid.startsWith('u_')) {
+                db.ref('users_crm/' + uid).once('value').then(snap => {
+                    if(snap.exists()) {
+                        db.ref('users_crm/' + uid + '/stats/totalPoints').transaction(curr => (curr || 0) + pts);
+                    }
+                });
+            }
 
             roomRef.child('players/' + uid).once('value').then(snap => {
                 if(snap.exists()) {
@@ -3849,25 +4037,13 @@
                     const newPts = (p.pts || 0) + pts;
                     roomRef.child('players/' + uid).update({ pts: newPts });
                     logEvent('SCORE', `➕ ${p.name} gagne ${pts} pts (Total: ${newPts})`);
-                    
-                    if(t && t !== "Solo") {
-                        roomRef.child('teams/' + t).once('value').then(tsnap => {
-                            if(tsnap.exists()) {
-                                const newT = (tsnap.val().pts || 0) + pts;
-                                roomRef.child('teams/' + t).update({ pts: newT });
-                            }
-                        });
-                    }
                 }
             });
 
             if(m === 'finish') { 
-                // BRANCHE A : Validation finale. Le joueur reste affiché sur la console MJ.
-                // On met l'état global sur 'waiting' pour forcer tous les téléphones à afficher ATTENDEZ.
                 roomRef.child('gameState').set({status: 'waiting'}); 
             } 
             else { 
-                // BRANCHE B : +1 en continu. On bloque le joueur, on efface l'affichage MJ, et on réouvre.
                 roomRef.child('blockedPlayers/' + currentPlayer.name).set(true);
                 statusUpdate('ready'); 
             }
@@ -3926,41 +4102,60 @@
             }
         }
 		
-		// --- PATCH V1.195 : FONCTIONS DU MENU CONTEXTUEL MANQUANTES ---
+		// --- PATCH V1.299 : MODÉRATION NON-BLOQUANTE (PROTÈGE LE PLEIN ÉCRAN TV) ---
         function pausePlayer(u, n) { 
-            if(confirm(`Mettre ${n} en pause ?`)) {
-                logEvent('SYSTEM', `MJ a mis le joueur ${n} en PAUSE`); // 🟢 CAPTEUR
+            if (window.isSandboxMode) {
+                if (allPlayersData[u]) allPlayersData[u].active = false;
+                if (currentBuzzerId === u) statusUpdate('ready');
+                else { updateSimuPhones(); renderLobby(); renderTeamLobby(); }
+                return;
+            }
+            window.mjConfirm("⏸️ Mettre en pause", `Mettre le joueur ${n} en pause ?`, () => {
+                logEvent('SYSTEM', `MJ a mis le joueur ${n} en PAUSE`);
                 roomRef.child('players/'+u).update({active: false, kickedByMj: true}); 
                 if (currentBuzzerId === u) { 
-                    roomRef.child('buzzers').remove(); // 🚀 Disparaît immédiatement de la télécommande
-                    if (currentGameState === 'taken') { isBuzzerLocked = false; statusUpdate('ready'); }
+                    roomRef.child('buzzers').remove();
+                    if (currentGameState === 'taken') { statusUpdate('ready'); }
                 }
-            }
+            }, "⏸️ Mettre en pause", "var(--blue)");
         }
 		
         function deletePlayerDefinitive(u, n) { 
-            if(confirm(`⚠️ Supprimer définitivement le joueur ${n} ?`)) {
-                logEvent('SYSTEM', `MJ a supprimé définitivement le joueur : ${n}`); // 🟢 CAPTEUR
+            if (window.isSandboxMode) {
+                delete allPlayersData[u];
+                buildSimuPhones();
+                if (currentBuzzerId === u) statusUpdate('ready');
+                else { updateSimuPhones(); renderLobby(); renderTeamLobby(); }
+                return;
+            }
+            window.mjConfirm("🗑️ Supprimer le joueur", `Supprimer définitivement le joueur ${n} de cette salle ?`, () => {
+                logEvent('SYSTEM', `MJ a supprimé définitivement le joueur : ${n}`);
                 roomRef.child('players/'+u).remove(); 
                 if (currentBuzzerId === u) { 
-                    roomRef.child('buzzers').remove(); // 🚀 Disparaît immédiatement de la télécommande
-                    if (currentGameState === 'taken') { isBuzzerLocked = false; statusUpdate('ready'); }
+                    roomRef.child('buzzers').remove();
+                    if (currentGameState === 'taken') { statusUpdate('ready'); }
                 }
-            }
+            }, "🗑️ Supprimer", "var(--danger)");
         }
         
         function warnTeam(n) { 
-            if(confirm(`Avertissement (Jaune) à l'équipe ${n} ?`)) {
-                logEvent('PUNISH', `MJ a donné un AVERTISSEMENT à l'équipe : ${n}`); // 🟢 CAPTEUR
+            if (window.isSandboxMode) {
+                if (globalTeams[n]) globalTeams[n].hasBeenWarned = true;
+                Object.values(allPlayersData).forEach(p => { if (p.teamName === n) p.hasBeenWarned = true; });
+                updateSimuPhones(); renderLobby(); renderTeamLobby();
+                return;
+            }
+            window.mjConfirm("🟨 Avertir l'équipe", `Envoyer un avertissement (Carton Jaune) à toute l'équipe ${n} ?`, () => {
+                logEvent('PUNISH', `MJ a donné un AVERTISSEMENT à l'équipe : ${n}`);
                 roomRef.child('teams/'+n).update({hasBeenWarned:true});
-                Object.values(allPlayersData).forEach(p => {
+                Object.entries(allPlayersData).forEach(([uid, p]) => {
                     if (p.teamName === n && p.active !== false && !p.banned) {
-                        roomRef.child('players/' + p.uid).update({ hasBeenWarned: true, pendingWarning: true });
+                        roomRef.child('players/' + uid).update({ hasBeenWarned: true, pendingWarning: true });
                         roomRef.child('blockedPlayers/' + p.name).set(true); 
                     }
                 });
                 statusUpdate('ready');
-            } 
+            }, "🟨 Avertir l'équipe", "var(--gold)");
         }
         
         function toggleTeamBlock(n) {
@@ -3982,7 +4177,7 @@
         }
         
         // --- PATCH V1.196 : CORRECTION AUDIT (FONCTION MANQUANTE) ---
-        function kickTeam(n) { if(confirm(`Expulser l'équipe ${n} (Rouge) ?`)) banTeam(n); }
+        function kickTeam(n) { banTeam(n); }
 		
 		function openRoomSettings() {
             if(!roomRef) return;
@@ -4036,8 +4231,22 @@
             });
         }
 		
-    // 🚀 PATCH V1.269 : DÉCLENCHEUR MODE JOUR
+    // 🚀 PATCH V1.299 : DÉCLENCHEUR MODE JOUR (RÉEL + SIMULATION ÉCRANS BLANCS)
         function toggleDayMode() {
+            if (window.isSandboxMode) {
+                const nowDay = !document.body.classList.contains('day-mode');
+                const btn = document.getElementById('btn-day-mode');
+                if (nowDay) {
+                    document.body.classList.add('day-mode');
+                    if (btn) btn.innerHTML = "🌙 MODE NUIT";
+                } else {
+                    document.body.classList.remove('day-mode');
+                    if (btn) btn.innerHTML = "☀️ MODE JOUR";
+                    if (mjProfileData.consoleBackground) applyMjConsoleBg(mjProfileData.consoleBackground);
+                }
+                updateSimuPhones();
+                return;
+            }
             if(!roomRef) return;
             roomRef.child('settings/dayMode').once('value').then(snap => {
                 const isDay = snap.val() === true;

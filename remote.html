@@ -21,37 +21,38 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
-        :root { --mj-color: #2ecc71; --bg-color: #1a1a1a; --card-bg: #2c3e50; --text-color: #ffffff; --danger: #e74c3c; --accent: #f1c40f; --blue: #3498db; --gold: #f39c12; }
+        :root { --mj-color: #2ecc71; --bg-color: #0b0f19; --card-bg: rgba(23, 32, 53, 0.85); --text-color: #ffffff; --danger: #ef4444; --accent: #f1c40f; --blue: #3b82f6; --gold: #f59e0b; }
         
-        body { background: var(--bg-color); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; touch-action: manipulation; }
+        body { background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0b0f19 75%); color: white; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; touch-action: manipulation; }
         
-        #screen-login { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 20px; background: var(--bg-color); z-index: 100; position: absolute; width: 100%; box-sizing: border-box; }
-        input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #555; background: #333; color: white; font-size: 1.1rem; box-sizing: border-box; }
-        .btn-login { width: 100%; padding: 15px; background: var(--mj-color); border: none; border-radius: 8px; color: white; font-size: 1.2rem; font-weight: bold; }
+        #screen-login { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 24px; background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0b0f19 80%); z-index: 100; position: absolute; width: 100%; box-sizing: border-box; }
+        input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.18); background: rgba(15, 23, 42, 0.8); color: white; font-size: 1.1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(241, 196, 15, 0.2); }
+        .btn-login { width: 100%; padding: 16px; background: linear-gradient(135deg, #2ecc71, #16a34a); border: none; border-radius: 12px; color: white; font-size: 1.15rem; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 8px 20px rgba(46, 204, 113, 0.35); cursor: pointer; }
 
-        .top-bar { height: 40px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 0.8rem; border-bottom: 1px solid #333; flex-shrink: 0; }
+        .top-bar { height: 42px; background: rgba(9, 13, 24, 0.92); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; font-size: 0.82rem; border-bottom: 1px solid rgba(241, 196, 15, 0.25); flex-shrink: 0; }
         
-        .player-zone { flex: 0 0 auto; height: 30vh; min-height: 160px; background: var(--card-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; border-bottom: 2px solid var(--accent); padding: 10px; position: relative; }
-        .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; background: #333; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 5px; border: 2px solid white; overflow: hidden; }
-        .p-name { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; color: white; text-align: center; }
+        .player-zone { flex: 0 0 auto; height: 30vh; min-height: 165px; background: linear-gradient(180deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.92)); backdrop-filter: blur(14px); display: flex; flex-direction: column; align-items: center; justify-content: center; border-bottom: 2px solid rgba(241, 196, 15, 0.6); box-shadow: 0 8px 25px rgba(0,0,0,0.4); padding: 10px; position: relative; }
+        .avatar { width: 58px; height: 58px; border-radius: 50%; object-fit: cover; background: #1e293b; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 6px; border: 2px solid var(--accent); box-shadow: 0 0 18px rgba(241, 196, 15, 0.35); overflow: hidden; }
+        .p-name { font-weight: 800; font-size: 1.15rem; margin-bottom: 6px; color: white; text-align: center; letter-spacing: 0.3px; }
         
         .quick-actions { display: flex; gap: 15px; margin-top: 5px; }
-        .mini-btn { width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 4px rgba(0,0,0,0.3); cursor: pointer; color: white; }
-        .mini-btn:active { transform: scale(0.95); }
+        .mini-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.35); cursor: pointer; color: white; transition: transform 0.1s; }
+        .mini-btn:active { transform: scale(0.92); }
 
-        .controls-zone { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 8px; background: #111; overflow-y: auto; }
+        .controls-zone { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 9px; background: transparent; overflow-y: auto; }
         
-        .big-btn { width: 100%; flex: 1; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 800; color: white; text-transform: uppercase; box-shadow: 0 3px 0 rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; min-height: 45px; cursor: pointer; transition: 0.1s; }
-        .big-btn:active { transform: translateY(3px); box-shadow: none; }
-        .big-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; background: #7f8c8d !important; }
+        .big-btn { width: 100%; flex: 1; border: 1px solid rgba(255,255,255,0.16); border-radius: 14px; font-size: 1.1rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.4px; box-shadow: 0 5px 0 rgba(0,0,0,0.35), 0 8px 20px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; min-height: 46px; cursor: pointer; transition: all 0.12s ease; }
+        .big-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0,0,0,0.35); }
+        .big-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; background: #64748b !important; border-color: transparent !important; }
         
-        .btn-open { background: var(--blue); font-size: 1.3rem; }
-        .btn-open.active { background: var(--mj-color); }
-        .btn-gold { background: var(--gold); color: black; }
-        .btn-green { background: var(--mj-color); }
-        .btn-cyan { background: #3498db; }
-        .btn-error { background: var(--danger); }
-        .btn-reset { background: #34495e; color: #ccc; font-size: 0.9rem; flex: 0 0 40px; min-height: 40px; }
+        .btn-open { background: linear-gradient(135deg, #3b82f6, #1d4ed8); font-size: 1.25rem; box-shadow: 0 5px 0 #1e3a8a, 0 0 22px rgba(59, 130, 246, 0.35); }
+        .btn-open.active { background: linear-gradient(135deg, #2ecc71, #15803d); box-shadow: 0 5px 0 #14532d, 0 0 22px rgba(46, 204, 113, 0.4); }
+        .btn-gold { background: linear-gradient(135deg, #facc15, #eab308); color: #0f172a; box-shadow: 0 5px 0 #a16207, 0 0 18px rgba(250, 204, 21, 0.3); }
+        .btn-green { background: linear-gradient(135deg, #2ecc71, #16a34a); box-shadow: 0 5px 0 #14532d; }
+        .btn-cyan { background: linear-gradient(135deg, #38bdf8, #0284c7); box-shadow: 0 5px 0 #075985; }
+        .btn-error { background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 5px 0 #7f1d1d; }
+        .btn-reset { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(56, 189, 248, 0.35); color: #e2e8f0; font-size: 0.9rem; flex: 0 0 42px; min-height: 42px; box-shadow: 0 3px 0 rgba(0,0,0,0.3); }
 
         .waiting-msg { color: #7f8c8d; font-style: italic; font-size: 1rem; }
         .version-tag { position: fixed; bottom: 5px; right: 10px; color: rgba(255, 255, 255, 0.3); font-size: 0.8rem; font-family: monospace; z-index: 9999; pointer-events: none; }
@@ -102,6 +103,17 @@
         <button class="btn-login" onclick="login()">CONNEXION</button>
     </div>
 
+    <div id="remote-confirm-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.82); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+        <div style="background:rgba(23,32,53,0.96); border:2px solid var(--accent); border-radius:18px; padding:24px; max-width:340px; width:100%; text-align:center; box-shadow:0 15px 40px rgba(0,0,0,0.6);">
+            <h3 id="rcm-title" style="margin:0 0 10px 0; color:var(--accent); font-size:1.2rem;">Confirmation</h3>
+            <p id="rcm-msg" style="margin:0 0 20px 0; color:#e2e8f0; font-size:0.95rem; line-height:1.4;"></p>
+            <div style="display:flex; gap:10px;">
+                <button id="rcm-cancel" title="Annuler l'action" style="flex:1; padding:12px; border-radius:10px; border:1px solid rgba(59,130,246,0.5); background:rgba(59,130,246,0.15); color:white; font-weight:bold; cursor:pointer;">Annuler</button>
+                <button id="rcm-ok" title="Confirmer l'action" style="flex:1; padding:12px; border-radius:10px; border:none; background:var(--danger); color:white; font-weight:bold; cursor:pointer;">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
     <div id="screen-remote" style="display:none; height:100%; flex-direction:column;">
         <div class="top-bar">
             <span>📡 REMOTE</span>
@@ -124,7 +136,7 @@
 		<div id="zone-teams" style="display:none; padding:15px 10px; flex:1; flex-direction:column; background:#111; overflow-y:auto;">
             <h3 style="margin-top:0; color:var(--gold); text-align:center;">BONUS DES ÉQUIPES</h3>
             <div id="teams-bonus-list" style="flex:1; overflow-y:auto; margin-bottom:10px;"></div>
-            <button class="big-btn" style="background:#555; min-height:45px; flex:0 0 auto;" onclick="toggleTeamsZone(false)">⬅️ RETOUR AUX BUZZERS</button>
+            <button class="big-btn" style="background:var(--blue); min-height:45px; flex:0 0 auto;" onclick="toggleTeamsZone(false)">⬅️ RETOUR AUX BUZZERS</button>
         </div>
 		
         <div class="leaderboard-zone" id="zone-leaderboard">
@@ -134,7 +146,6 @@
     </div>
 
     <script>
-        const APP_VERSION = "1.157s";
         const firebaseConfig = {
             apiKey: "AIzaSyAf1Vl_O8SHJeFjHavKBJgUFGGy73I8t-o",
             authDomain: "prestapuce-buzz.firebaseapp.com",
@@ -147,8 +158,46 @@
         const auth = firebase.auth();
 
         let roomID = "", roomRef = null, currentPlayer = null;
+        let currentGameState = 'waiting';
         let allPlayersData = {};
         let teamsData = {};
+        let remoteWakeLock = null;
+
+        async function requestRemoteWakeLock() {
+            if ('wakeLock' in navigator) {
+                try { remoteWakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
+            }
+        }
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && roomRef) requestRemoteWakeLock();
+        });
+
+        function remoteConfirm(title, msg, onConfirm, btnColor = 'var(--danger)') {
+            const modal = document.getElementById('remote-confirm-modal');
+            document.getElementById('rcm-title').innerText = title;
+            document.getElementById('rcm-msg').innerText = msg;
+            const okBtn = document.getElementById('rcm-ok');
+            okBtn.style.background = btnColor;
+            okBtn.onclick = () => { modal.style.display = 'none'; onConfirm(); };
+            document.getElementById('rcm-cancel').onclick = () => { modal.style.display = 'none'; };
+            modal.style.display = 'flex';
+        }
+
+        function ensureButtonTitles() {
+            document.querySelectorAll('button:not([title])').forEach(b => {
+                const txt = b.innerText.replace(/\s+/g, ' ').trim();
+                if (txt) b.setAttribute('title', txt);
+            });
+        }
+
+        function logEvent(actionType, message) {
+            if (!roomID) return;
+            db.ref('rooms/' + roomID + '/debugLog').push({
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                type: actionType,
+                msg: "[REMOTE] " + message
+            });
+        }
 
         const urlParams = new URLSearchParams(window.location.search);
         roomID = urlParams.get('room');
@@ -178,6 +227,8 @@
         }
 
         function launchRemote(id) {
+            requestRemoteWakeLock();
+            ensureButtonTitles();
             roomRef = db.ref('rooms/' + id);
             
             // 🚀 PATCH V1.271 : ÉCOUTEUR MODE JOUR REMOTE
@@ -211,6 +262,7 @@
 
             roomRef.child('gameState').on('value', snap => {
                 const st = snap.val() ? snap.val().status : 'waiting';
+                currentGameState = st;
                 const btn = document.getElementById('btn-open-buzz');
                 
                 if (st === 'endGame') {
@@ -293,26 +345,41 @@
 
         function adjTeamBonus(teamName, v) {
             if(teamsData[teamName] && teamsData[teamName].active !== false) {
+                logEvent('SCORE', `Ajustement bonus équipe ${teamName} (${v > 0 ? '+' : ''}${v})`);
                 roomRef.child('teams/' + teamName + '/bonus').transaction(curr => (curr || 0) + v);
             }
         }
 
         function openBuzzers() {
-            if (roomRef) {
-                roomRef.child('buzzAttempts').remove().then(() => {
-                    statusUpdate('ready');
-                });
-            }
+            if (!roomRef) return;
+            logEvent('SYSTEM', "Ouverture des buzzers");
+            roomRef.child('buzzers').remove();
+            roomRef.child('buzzAttempts').remove();
+            roomRef.child('blockedPlayers').remove();
+            roomRef.child('gameState').set({ status: 'ready' });
+        }
+
+        function reopenBuzzersKeepBlocked() {
+            if (!roomRef) return;
+            roomRef.child('buzzers').remove();
+            roomRef.child('buzzAttempts').remove();
+            roomRef.child('gameState').set({ status: 'ready' });
         }
 
         function statusUpdate(st) { 
+            if (!roomRef) return;
             roomRef.child('gameState').set({ status: st }); 
-            if(st === 'ready') roomRef.child('buzzers').remove(); 
+            if(st === 'ready') {
+                roomRef.child('buzzers').remove();
+                roomRef.child('buzzAttempts').remove();
+            }
         }
 
         function fullReset() { 
+            logEvent('SYSTEM', "Reset global des buzzers et blocages");
             roomRef.child('blockedPlayers').remove(); 
             roomRef.child('buzzers').remove(); 
+            roomRef.child('buzzAttempts').remove();
             statusUpdate('waiting'); 
         }
 		
@@ -354,45 +421,81 @@
 
         function handleReward(pts, mode) {
             if(!currentPlayer || !currentPlayer.id) return;
-            roomRef.child('players/' + currentPlayer.id + '/pts').transaction(x => (x||0)+pts);
+            const uid = currentPlayer.id;
+            const pseudo = currentPlayer.pseudo;
+
+            if (!uid.startsWith('u_')) {
+                db.ref('users_crm/' + uid).once('value').then(snap => {
+                    if(snap.exists()) {
+                        db.ref('users_crm/' + uid + '/stats/totalPoints').transaction(curr => (curr || 0) + pts);
+                    }
+                });
+            }
+
+            roomRef.child('players/' + uid + '/pts').transaction(x => (x||0) + pts, (err, committed, snap) => {
+                if (committed && snap) {
+                    logEvent('SCORE', `➕ ${pseudo} gagne ${pts} pts (Total: ${snap.val()})`);
+                }
+            });
+
             if(mode === 'partial') {
-                roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
-                openBuzzers();
+                roomRef.child('blockedPlayers/' + pseudo).set(true);
+                reopenBuzzersKeepBlocked();
             } else {
-                /* --- PATCH V1.156 : Rétention Buzzer sur Remote --- */
-                roomRef.child('blockedPlayers').remove();
-                roomRef.child('gameState').set({status: 'awarded'});
+                roomRef.child('gameState').set({ status: 'waiting' });
             }
         }
 
         function handleError() {
             if(!currentPlayer || !currentPlayer.pseudo) return;
-            roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
-            openBuzzers();
+            const pData = allPlayersData[currentPlayer.id] || {};
+            const pTeam = pData.teamName || "Solo";
+
+            roomRef.child('settings/teamLock').once('value').then(snap => {
+                const isTeamLock = (snap.val() === 'team') && pTeam !== "Solo";
+                if (isTeamLock) {
+                    logEvent('PUNISH', `Erreur : L'équipe entière ${pTeam} est bloquée`);
+                    let updates = {};
+                    Object.values(allPlayersData).forEach(p => {
+                        if (p && p.teamName === pTeam && p.active !== false && !p.banned && p.name) {
+                            updates[p.name] = true;
+                        }
+                    });
+                    roomRef.child('blockedPlayers').update(updates);
+                } else {
+                    logEvent('PUNISH', `Erreur : ${currentPlayer.pseudo} bloqué(e) en individuel`);
+                    roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
+                }
+                reopenBuzzersKeepBlocked();
+            });
         }
 
         function adj(uid, v) { 
+            logEvent('SCORE', `Ajustement manuel d'un joueur (${v > 0 ? '+' : ''}${v})`);
             roomRef.child('players/'+uid+'/pts').transaction(x => (x||0)+v); 
         }
 
         function warnPlayer(uid) {
-            if(confirm("Envoyer un avertissement (Carton Jaune) à ce joueur ?")) {
+            const pName = (allPlayersData[uid] && allPlayersData[uid].name) ? allPlayersData[uid].name : "Joueur";
+            remoteConfirm("🟨 Carton Jaune", `Envoyer un avertissement officiel à ${pName} ?`, () => {
+                logEvent('PUNISH', `Avertissement (Jaune) envoyé à ${pName}`);
                 roomRef.child('players/' + uid).update({ hasBeenWarned: true, pendingWarning: true });
                 if (currentPlayer && currentPlayer.id === uid) {
-                    if (currentGameState === 'taken') handleError(); // Bloque et rouvre si question en cours
-                    else roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true); // Bloque juste en silence si on est en attente
+                    if (currentGameState === 'taken') handleError();
+                    else roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
                 }
-            }
+            }, 'var(--gold)');
         }
 
         function kickPlayer(uid, pseudo) {
-            if(confirm("Expulser " + pseudo + " (Carton Rouge) ?")) {
+            remoteConfirm("🟥 Carton Rouge", `Expulser définitivement ${pseudo} de la partie ?`, () => {
+                logEvent('PUNISH', `Expulsion (Rouge) du joueur : ${pseudo}`);
                 roomRef.child('players/' + uid).update({ banned: true, active: false });
                 if (currentPlayer && currentPlayer.id === uid) {
-                    roomRef.child('buzzers').remove(); // 🚀 Le joueur disparaît de la télécommande
-                    if (currentGameState === 'taken') handleError(); 
+                    roomRef.child('buzzers').remove();
+                    if (currentGameState === 'taken') reopenBuzzersKeepBlocked();
                 }
-            }
+            }, 'var(--danger)');
         }
 
         function renderLeaderboard() {

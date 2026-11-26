@@ -61,25 +61,24 @@
     </script>
     <style>
         :root { 
-            --bg: #1a1a1a; 
-            --card: #2c3e50; 
-            --card-light: #34495e;
+            --bg: #0b0f19; 
+            --card: rgba(23, 32, 53, 0.78); 
+            --card-light: rgba(36, 50, 82, 0.88);
             --accent: #f1c40f; 
-            --text: #ecf0f1; 
+            --text: #f1f5f9; 
             --mj: #2ecc71; 
-            --blue: #3498db; 
-            --danger: #e74c3c;
-            --gold: #f39c12;
-            --sidebar-width: 280px;
+            --blue: #38bdf8; 
+            --danger: #ef4444;
+            --gold: #f59e0b;
         }
         
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.5; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0b0f19 65%); background-attachment: fixed; color: var(--text); margin: 0; padding: 0; line-height: 1.6; overflow-x: hidden; }
         
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
 
-        .sticky-header { position: sticky; top: 0; background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); padding: 20px; z-index: 100; border-bottom: 2px solid rgba(241, 196, 15, 0.3); display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .sticky-header { position: sticky; top: 0; background: rgba(11, 15, 25, 0.88); backdrop-filter: blur(18px); padding: 20px; z-index: 100; border-bottom: 1px solid rgba(241, 196, 15, 0.35); box-shadow: 0 8px 30px rgba(0,0,0,0.45); display: flex; flex-direction: column; align-items: center; gap: 15px; }
         .header-titles { text-align: center; }
         .header-titles h1 { margin: 0; color: var(--accent); font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
         .header-titles p { margin: 0; color: #bdc3c7; font-size: 0.85rem; font-style: italic; }
@@ -90,8 +89,8 @@
         .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; pointer-events: none; }
 
         .toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; padding: 20px; max-width: 1000px; margin: 0 auto; }
-        .toc-card { background: var(--card); border: 1px solid var(--card-light); border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-        .toc-card:hover { transform: translateY(-3px); border-color: var(--accent); background: var(--card-light); }
+        .toc-card { background: var(--card); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+        .toc-card:hover { transform: translateY(-4px); border-color: var(--accent); background: var(--card-light); box-shadow: 0 12px 25px rgba(241, 196, 15, 0.15); }
         .toc-icon { font-size: 2rem; flex-shrink: 0; }
         .toc-title { font-weight: bold; font-size: 0.95rem; color: white; line-height: 1.2; }
 
@@ -116,8 +115,6 @@
         .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; border: 1px solid currentColor; }
         .b-green { color: var(--mj); background: rgba(46, 204, 113, 0.1); }
         .b-red { color: var(--danger); background: rgba(231, 76, 60, 0.1); }
-        .b-gold { color: var(--gold); background: rgba(241, 196, 15, 0.1); }
-        .b-cyan { color: #00bcd4; background: rgba(0, 188, 212, 0.1); }
 
         #no-results { display: none; text-align: center; padding: 40px 20px; color: #7f8c8d; font-size: 1.1rem; font-style: italic; }
     </style>
@@ -170,7 +167,7 @@
                 <h2>🌐 1. Les Écrans de l'Écosystème</h2>
             </div>
             
-            <p>La Console MJ (le tableau de bord principal) dispose de 3 boutons gris en haut à droite pour déployer l'écosystème autour de vous.</p>
+            <p>La Console MJ (le tableau de bord principal) dispose d'un dock de 4 boutons d'accès rapide en haut à droite (<b>Écran Géant</b>, <b>Télécommande</b>, <b>Manuel Pro</b> et <b>Mode Démo</b>) pour déployer l'écosystème autour de vous.</p>
 
             <div class="chunk-grid">
                 <div class="chunk blue">
@@ -181,6 +178,7 @@
                         <li>Le classement général en temps réel (Solos et Équipes fusionnés).</li>
                         <li><b>Des animations 3D :</b> Dès que vous attribuez un "+3" ou "+1", le score bondit (Super Popup).</li>
                         <li>Le Podium Final (Top 3) avec pluie de confettis à la fin de la partie.</li>
+                        <li><b>Astuce Double Écran (PC) :</b> Sur votre vidéoprojecteur ou TV secondaire, appuyez sur la touche <b>F11</b> (ou le bouton Plein Écran) pour verrouiller l'affichage sans bordure toute la soirée.</li>
                     </ul>
                 </div>
                 
@@ -233,7 +231,7 @@
                 <div class="chunk">
                     <h4>Parcours de Connexion</h4>
                     <p><b>Complet :</b> Les joueurs sont invités à se créer un compte sécurisé pour conserver leurs statistiques à vie.<br><br>
-                    <b>Rapide :</b> Les joueurs zappent l'inscription et choisissent directement un pseudo (Idéal pour des soirées éphémères).</p>
+                    <b>Rapide :</b> Les joueurs zappent l'inscription et choisissent directement un pseudo. En fin de partie ou en quittant, aucune création de compte ne leur est demandée : ils sont redirigés directement vers votre lien pro (Idéal pour des soirées éphémères).</p>
                 </div>
                 
                 <div class="chunk">
