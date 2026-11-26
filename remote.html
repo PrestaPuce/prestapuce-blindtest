@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Remote MJ - Presta'Puce</title>
-	<script src="config.js"></script>
+    <script src="config.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             document.title = `Remote MJ - Presta'Puce (v${APP_CONFIG.VERSIONS.REMOTE})`;
@@ -14,6 +14,8 @@
 
             const vDisplay = document.getElementById('app-version-display');
             if(vDisplay) vDisplay.innerText = `v${APP_CONFIG.VERSIONS.REMOTE}`;
+
+            ensureButtonTitles();
         });
     </script>
     <link rel="icon" id="page-favicon" type="image/png">
@@ -73,13 +75,13 @@
         .chevron { transition: transform 0.3s; font-size: 0.8rem; color: #bdc3c7; padding: 5px; }
         .chevron.open { transform: rotate(180deg); }
         @keyframes fadeIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
-		/* PATCH V1.156 : BONUS ÉQUIPES */
+        /* PATCH V1.156 : BONUS ÉQUIPES */
         .btn-toggle-teams { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: var(--gold); border: 1px solid var(--gold); padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         .btn-toggle-teams:active { transform: scale(0.95); }
         .team-bonus-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); }
         
         /* 🚀 PATCH V1.271 : MODE JOUR REMOTE */
-        body.day-mode { background-color: #ecf0f1; color: #2c3e50; }
+        body.day-mode { background: #ecf0f1; background-color: #ecf0f1; color: #2c3e50; }
         .day-mode .top-bar { background: #bdc3c7; color: #2c3e50; border-bottom: 1px solid #95a5a6; }
         .day-mode .player-zone { background: rgba(255,255,255,0.9); border-bottom: 2px solid #3498db; }
         .day-mode .controls-zone, .day-mode .leaderboard-zone, .day-mode #zone-teams { background: #ffffff; }
@@ -132,13 +134,13 @@
             <button class="big-btn btn-error" onclick="handleError()">❌ ERREUR</button>
             <button class="big-btn btn-reset" onclick="fullReset()">🔄 RESET BUZZERS</button>
         </div>
-		
-		<div id="zone-teams" style="display:none; padding:15px 10px; flex:1; flex-direction:column; background:#111; overflow-y:auto;">
+        
+        <div id="zone-teams" style="display:none; padding:15px 10px; flex:1; flex-direction:column; background:#111; overflow-y:auto;">
             <h3 style="margin-top:0; color:var(--gold); text-align:center;">BONUS DES ÉQUIPES</h3>
             <div id="teams-bonus-list" style="flex:1; overflow-y:auto; margin-bottom:10px;"></div>
             <button class="big-btn" style="background:var(--blue); min-height:45px; flex:0 0 auto;" onclick="toggleTeamsZone(false)">⬅️ RETOUR AUX BUZZERS</button>
         </div>
-		
+        
         <div class="leaderboard-zone" id="zone-leaderboard">
             <button class="big-btn btn-gold" style="margin-bottom:15px; min-height:50px; font-size:1rem; flex: 0 0 auto;" onclick="relaunchPodium()">🏆 RELANCER PODIUM ÉCRAN GÉANT</button>
             <div id="leaderboard-content" style="flex:1; overflow-y:auto; padding-bottom:20px;"></div>
@@ -252,7 +254,7 @@
             roomRef.child('buzzers').on('value', snap => {
                 const b = snap.val();
                 if (b && b.id) {
-                    currentPlayer = { id: b.id, pseudo: b.pseudo, avatar: b.avatar };
+                    currentPlayer = { id: b.id, pseudo: b.pseudo, avatar: b.avatar, teamName: b.teamName };
                     updatePlayerZone(currentPlayer);
                 } else {
                     currentPlayer = null;
@@ -299,7 +301,7 @@
 
             if(!b || !b.id) {
                 zone.innerHTML = `<div class="waiting-msg">En attente de buzz...</div>
-                                  <button id="btn-toggle-teams" class="btn-toggle-teams" onclick="toggleTeamsZone(true)">🛡️ Bonus Équipes</button>`;
+                <button id="btn-toggle-teams" class="btn-toggle-teams" onclick="toggleTeamsZone(true)">🛡️ Bonus Équipes</button>`;
                 return;
             }
 
@@ -327,7 +329,7 @@
                 `;
             }
 
-			// 🚀 NOUVEAU : Affichage du Carton Jaune
+            // 🚀 NOUVEAU : Affichage du Carton Jaune
             let warnIcon = pData.hasBeenWarned ? '<span style="margin-left:8px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.8));" title="Joueur averti">🟨</span>' : '';
 
             zone.innerHTML = `
@@ -382,8 +384,8 @@
             roomRef.child('buzzAttempts').remove();
             statusUpdate('waiting'); 
         }
-		
-		function toggleTeamsZone(show) {
+        
+        function toggleTeamsZone(show) {
             if(show) {
                 document.getElementById('zone-controls').style.display = 'none';
                 document.getElementById('zone-teams').style.display = 'flex';
@@ -422,7 +424,9 @@
         function handleReward(pts, mode) {
             if(!currentPlayer || !currentPlayer.id) return;
             const uid = currentPlayer.id;
-            const pseudo = currentPlayer.pseudo;
+            const pData = allPlayersData[uid] || {};
+            const pseudo = pData.name || currentPlayer.pseudo;
+            const pTeam = pData.teamName || currentPlayer.teamName || "Solo";
 
             if (!uid.startsWith('u_')) {
                 db.ref('users_crm/' + uid).once('value').then(snap => {
@@ -439,34 +443,63 @@
             });
 
             if(mode === 'partial') {
-                roomRef.child('blockedPlayers/' + pseudo).set(true);
-                reopenBuzzersKeepBlocked();
+                // 🚀 PATCH V1.166 : Respect de la règle Blocage Équipe sur "+1 (On continue)"
+                roomRef.child('settings/teamLock').once('value').then(snap => {
+                    const isTeamLock = (snap.val() === 'team') && pTeam && pTeam !== "Solo";
+                    let updates = {
+                        'buzzers': null,
+                        'buzzAttempts': null,
+                        'gameState': { status: 'ready' }
+                    };
+
+                    if (isTeamLock) {
+                        logEvent('SYSTEM', `+${pts} (On continue) : L'équipe entière ${pTeam} est bloquée pour la suite du titre`);
+                        Object.values(allPlayersData).forEach(p => {
+                            if (p && p.teamName === pTeam && !p.banned && p.name) {
+                                updates['blockedPlayers/' + p.name] = true;
+                            }
+                        });
+                        if (pseudo) updates['blockedPlayers/' + pseudo] = true;
+                    } else {
+                        logEvent('SYSTEM', `+${pts} (On continue) : ${pseudo} bloqué(e) en individuel pour la suite du titre`);
+                        if (pseudo) updates['blockedPlayers/' + pseudo] = true;
+                    }
+
+                    roomRef.update(updates);
+                });
             } else {
                 roomRef.child('gameState').set({ status: 'waiting' });
             }
         }
 
         function handleError() {
-            if(!currentPlayer || !currentPlayer.pseudo) return;
+            if(!currentPlayer || (!currentPlayer.pseudo && !currentPlayer.id)) return;
             const pData = allPlayersData[currentPlayer.id] || {};
-            const pTeam = pData.teamName || "Solo";
+            const pseudo = pData.name || currentPlayer.pseudo;
+            const pTeam = pData.teamName || currentPlayer.teamName || "Solo";
 
             roomRef.child('settings/teamLock').once('value').then(snap => {
-                const isTeamLock = (snap.val() === 'team') && pTeam !== "Solo";
+                const isTeamLock = (snap.val() === 'team') && pTeam && pTeam !== "Solo";
+                let updates = {
+                    'buzzers': null,
+                    'buzzAttempts': null,
+                    'gameState': { status: 'ready' }
+                };
+
                 if (isTeamLock) {
                     logEvent('PUNISH', `Erreur : L'équipe entière ${pTeam} est bloquée`);
-                    let updates = {};
                     Object.values(allPlayersData).forEach(p => {
-                        if (p && p.teamName === pTeam && p.active !== false && !p.banned && p.name) {
-                            updates[p.name] = true;
+                        if (p && p.teamName === pTeam && !p.banned && p.name) {
+                            updates['blockedPlayers/' + p.name] = true;
                         }
                     });
-                    roomRef.child('blockedPlayers').update(updates);
+                    if (pseudo) updates['blockedPlayers/' + pseudo] = true;
                 } else {
-                    logEvent('PUNISH', `Erreur : ${currentPlayer.pseudo} bloqué(e) en individuel`);
-                    roomRef.child('blockedPlayers/' + currentPlayer.pseudo).set(true);
+                    logEvent('PUNISH', `Erreur : ${pseudo} bloqué(e) en individuel`);
+                    if (pseudo) updates['blockedPlayers/' + pseudo] = true;
                 }
-                reopenBuzzersKeepBlocked();
+
+                roomRef.update(updates);
             });
         }
 
@@ -519,7 +552,7 @@
                 const statutEquipe = (p.teamName && p.teamName !== "Solo") ? p.teamName : "Solo";
                 if (statutEquipe !== "Solo" && rankingMap.has("team-" + statutEquipe)) {
                     let teamEntry = rankingMap.get("team-" + statutEquipe);
-                    teamEntry.pts += (p.pts || 0); 
+                    if (!p.banned) teamEntry.pts += (p.pts || 0); 
                     teamEntry.members.push(p);
                 } else {
                     if (p.active !== false && !p.banned) { 
@@ -547,7 +580,7 @@
                 
                 if(item.isTeam && item.members.length > 0) {
                     membersHtml = `<div class="team-members" id="members-${idx}">`;
-                    item.members.sort((a,b) => b.pts - a.pts).forEach(m => {
+                    item.members.sort((a,b) => (b.pts||0) - (a.pts||0)).forEach(m => {
                         membersHtml += `<div class="member-line"><span>${m.name}</span><span style="color:var(--accent); font-weight:bold;">${m.pts||0}</span></div>`;
                     });
                     membersHtml += `</div>`;
