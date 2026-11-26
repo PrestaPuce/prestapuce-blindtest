@@ -1,23 +1,30 @@
 /* ============================================================================
  * mj-tuto.js — Simulateur Bac à Sable (5 Téléphones) & Tutoriel Guidé Interactif
- * Console MJ Pro - Buz'Ta Puce (v1.303)
+ * Console MJ Pro - Buz'Ta Puce (v1.304)
  * ============================================================================ */
 
 let tutoStep4Buzzed = false;
 let tutoStep5Arbitrated = false;
 
 window.showTutoPrompt = function() {
+    // Ne s'affiche qu'une seule fois par connexion (jamais en revenant d'une salle ou du Bac à Sable !)
+    if (window.tutoPromptShownThisSession) return;
     if (localStorage.getItem('mj_tuto_hide') === 'true') return;
+    window.tutoPromptShownThisSession = true;
+    const chk = document.getElementById('tuto-dont-show-again');
+    if (chk) chk.checked = false;
     document.getElementById('modal-tuto-prompt').style.display = 'flex';
 };
 
 window.acceptTutoPrompt = function() {
+    window.tutoPromptShownThisSession = true;
     if (document.getElementById('tuto-dont-show-again').checked) localStorage.setItem('mj_tuto_hide', 'true');
     document.getElementById('modal-tuto-prompt').style.display = 'none';
     window.startTuto(0, true);
 };
 
 window.declineTutoPrompt = function() {
+    window.tutoPromptShownThisSession = true;
     if (document.getElementById('tuto-dont-show-again').checked) localStorage.setItem('mj_tuto_hide', 'true');
     document.getElementById('modal-tuto-prompt').style.display = 'none';
 };
@@ -44,7 +51,7 @@ const tutoStepsPhase2 = [
     { target: 'player-box', title: "⚖️ Arbitrage des Points", text: "Le cadre des points s'éclaire !<br>• <b>+3 / +1 (Terminé)</b> : attribue les points et referme les buzzers.<br>• <b>+1 (On continue)</b> : donne 1 pt, bloque ce joueur (ou son équipe) et <b>rouvre en vert</b> aux autres !<br>• <b>Erreur</b> : bloque ce joueur (ou son équipe) et rouvre aux autres.<br><br><b>Cliquez sur l'un des 4 boutons éclairés !</b>", waitManualHook: true },
     { target: 'tuto-zone-teams', title: "🛡️ Clans & Capitaines", text: "Déployez une équipe (flèche <b>▶</b>) pour voir ses membres, ajouter des bonus <b>+/-</b> ou transférer la couronne de Capitaine <b>👑</b>." },
     { target: 'tuto-zone-players', title: "👥 Modération Express", text: "Cliquez sur le menu <b>⋮</b> d'un joueur pour tester <b>Forcer le buzzer</b> (main levée), un <b>Carton Jaune 🟨</b>, l'<b>Expulsion 🟥</b> ou l'édition." },
-    { target: null, title: "🎮 Mode Libre Débloqué !", text: "Le guidage est terminé : <b>toute la console est maintenant déverrouillée</b> !<br><br>Testez librement les 5 téléphones en bas, les règles et les scores. Cliquez sur <b>✖ Quitter le Bac à Sable</b> (ou <b>FIN DE PARTIE 🏆</b>) quand vous avez terminé." }
+    { target: 'top-right-tools', overrideTarget: 'btn-top-sandbox', title: "🎮 Mode Libre & Rappel", text: "Le guidage est terminé : cliquez sur <b>Jouer librement 🚀</b> pour tester toute la console à votre rythme !<br><br>• Pour sortir ensuite : utilisez <b>🚪 Quitter</b> ou <b>🏁 FIN DE PARTIE 🏆</b>.<br>• 💡 Ce bouton <b>🎓 Bac à Sable</b> sur le côté droit reste toujours disponible pour relancer l'entraînement ultérieurement !" }
 ];
 
 function getCurrentTutoSteps() {
@@ -118,6 +125,7 @@ window.startTuto = function(phase, isForced = false) {
     if (tutoAdvanceTimer) { clearTimeout(tutoAdvanceTimer); tutoAdvanceTimer = null; }
     if (tutoListener) { tutoListener.el.removeEventListener(tutoListener.type, tutoListener.fn); tutoListener = null; }
 
+    window.tutoPromptShownThisSession = true;
     window.isTutoRunning = true;
     document.body.classList.add('tuto-running');
     tutoCurrentPhase = phase;
@@ -157,7 +165,23 @@ window.unlockSandboxFreePlay = function() {
     if (simuDock) simuDock.classList.remove('tuto-peek', 'tuto-highlight');
 };
 
-window.endTuto = function() {
+window.endTuto = function(forceImmediate = false, skipRoomReload = false) {
+    window.tutoPromptShownThisSession = true;
+
+    // Si le MJ clique sur Quitter / ✖ Quitter le Bac à Sable pendant le simulateur, on lui affiche le rappel du bouton latéral !
+    if (window.isSandboxMode && forceImmediate !== true) {
+        window.mjConfirm(
+            "🎓 Fin du Bac à Sable",
+            "Vous allez fermer le mode entraînement et retrouver votre salle normale.\n\n💡 Bon à savoir : Si vous souhaitez refaire l'entraînement ultérieurement, cliquez simplement sur le bouton « 🎓 Bac à Sable » situé sur le côté en haut à droite !",
+            () => {
+                window.endTuto(true, false);
+            },
+            "✅ Quitter le Bac à Sable",
+            "var(--success)"
+        );
+        return;
+    }
+
     if (tutoAdvanceTimer) { clearTimeout(tutoAdvanceTimer); tutoAdvanceTimer = null; }
     if (tutoListener) { tutoListener.el.removeEventListener(tutoListener.type, tutoListener.fn); tutoListener = null; }
     ensureProfileClosedForTuto();
@@ -178,7 +202,7 @@ window.endTuto = function() {
         simuDock.classList.remove('tuto-peek', 'tuto-highlight');
         simuDock.style.display = 'none';
     }
-    if (wasSandbox) clearFakeTutoData();
+    if (wasSandbox) clearFakeTutoData(skipRoomReload === true);
 };
 
 window.prevTutoStep = function() {
@@ -348,7 +372,7 @@ function showTutoStep() {
         // - Étape 4/8 : éclairés via .tuto-highlight (cible directe)
         // - Étape 5/8 : éclairés via .tuto-peek pour voir en direct le blocage d'équipe/individuel
         if (simuDock) {
-            if (tutoCurrentStep === 4) {
+            if (tutoCurrentStep === 4 || tutoCurrentStep === 7) {
                 simuDock.classList.add('tuto-peek');
             } else {
                 simuDock.classList.remove('tuto-peek');
@@ -466,7 +490,9 @@ function scrollAndPositionTooltip(targetEl) {
     const dockH = hasDock ? (simuDock.offsetHeight + 28) : 20;
     const safeViewportH = window.innerHeight - dockH;
 
-    if (targetEl && !fixedTargets.includes(targetEl.id) && tutoCurrentPhase !== 1) {
+    if (targetEl && targetEl.id === 'top-right-tools' && window.scrollY > 8) {
+        window.scrollTo({ top: 0, behavior: 'auto' });
+    } else if (targetEl && !fixedTargets.includes(targetEl.id) && tutoCurrentPhase !== 1) {
         const rawRect = targetEl.getBoundingClientRect();
         const absTop = rawRect.top + window.scrollY;
         let desiredScrollY = window.scrollY;
@@ -518,6 +544,18 @@ function positionTooltip(targetEl) {
     }
 
     const rect = targetEl.getBoundingClientRect();
+
+    // Étape 8/8 : Menu d'outils en haut à droite (#top-right-tools / 🎓 Bac à Sable) -> Bulle placée juste à sa gauche
+    if (targetEl.id === 'top-right-tools') {
+        if (rect.left - ttW - 18 >= 12) {
+            tooltip.style.left = (rect.left - ttW - 18) + 'px';
+            tooltip.style.top = (window.scrollY + clampTopViewport(Math.max(16, rect.top))) + 'px';
+        } else {
+            tooltip.style.left = clampLeft(window.innerWidth - ttW - 15) + 'px';
+            tooltip.style.top = (window.scrollY + clampTopViewport(rect.bottom + 14)) + 'px';
+        }
+        return;
+    }
 
     // Carte de Visite MJ (#screen-profile) ouverte à l'étape 1/2 : décalée à droite ou à gauche de la fiche
     if (targetEl.id === 'screen-profile') {
@@ -689,7 +727,7 @@ function injectFakeTutoData() {
     updateSimuPhones();
 }
 
-function clearFakeTutoData() {
+function clearFakeTutoData(skipRoomReload = false) {
     document.getElementById('player-box').style.display = "none";
     document.getElementById('simu-phones-container').style.display = "none";
     document.getElementById('network-status-dot').innerText = '🟢';
@@ -709,7 +747,7 @@ function clearFakeTutoData() {
         savedRealRoomState = null;
     }
 
-    if (roomRef) {
+    if (roomRef && !skipRoomReload) {
         roomRef.once('value').then(snap => {
             const rData = snap.val() || {};
             if (rData.settings) {

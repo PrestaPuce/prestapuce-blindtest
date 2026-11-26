@@ -1,6 +1,6 @@
 /* ============================================================================
  * mj-actions.js — Actions de Jeu, Arbitrage Points, Modération, Paramètres & Mode Jour
- * Console MJ Pro - Buz'Ta Puce (v1.303)
+ * Console MJ Pro - Buz'Ta Puce (v1.304)
  * ============================================================================ */
 
 function openEditModal(uid) { const d = allPlayersData[uid]; if(!d)return; editingPlayerUid=uid; editingPlayerOriginalPseudo=d.name; editingPlayerOriginalAvatar=d.avatar||"👤"; editingPlayerCurrentAvatar=editingPlayerOriginalAvatar; document.getElementById('edit-player-name').value=d.name; document.getElementById('btn-censor-avatar').style.display=(editingPlayerOriginalAvatar.length>20)?'block':'none'; updateEditAvatarPreview(); populateEditGallery(); document.getElementById('modal-edit-player').style.display='flex'; }
@@ -204,9 +204,15 @@ function toggleBlockPlayer(ps) {
 
 function triggerEndGame() { 
     if (window.isSandboxMode) {
-        window.mjConfirm("🏁 Fin de la Démo", "Bravo ! En conditions réelles, le Podium Olympique et une pluie de confettis s'affichent sur votre Écran Géant et sur les téléphones des vainqueurs.\n\nQuitter le Bac à Sable ?", () => {
-            window.endTuto();
-        }, "🎉 Terminer la démo", "var(--success)");
+        window.mjConfirm(
+            "🏁 Fin du Bac à Sable",
+            "Bravo ! En conditions réelles, le Podium Olympique et une pluie de confettis s'affichent sur votre Écran Géant et sur les téléphones des vainqueurs.\n\n💡 Bon à savoir : Si vous souhaitez refaire un essai ultérieurement, cliquez simplement sur le bouton « 🎓 Bac à Sable » situé sur le côté en haut à droite !",
+            () => {
+                window.endTuto(true, false);
+            },
+            "🎉 Terminer la démo",
+            "var(--success)"
+        );
         return;
     }
     window.mjConfirm("🏁 Fin de Partie", "Clôturer la partie maintenant ?\n\nCela affichera le Podium Final sur l'Écran Géant et archivera cette salle en Lecture Seule.", () => { 
@@ -536,8 +542,7 @@ function handleReward(pts, m) {
     }
 }
 
-function quitRoom() { 
-    if (window.isSandboxMode) window.endTuto();
+function executeQuitRoom() {
     if(mjProfileData.isGuest===true) {
         if(confirm("⚠️ SUPPRESSION DÉFINITIVE DE CETTE SALLE ?\nToutes les données (scores, équipes) seront perdues.")) {
             roomRef.child('gameState').set({status:'closing', timestamp:Date.now()});
@@ -555,7 +560,24 @@ function quitRoom() {
             publicRef.onDisconnect().cancel();
         }
         checkUserRoom(auth.currentUser.uid); 
-    } 
+    }
+}
+
+function quitRoom() { 
+    if (window.isSandboxMode) {
+        window.mjConfirm(
+            "🎓 Fin du Bac à Sable",
+            "Vous allez quitter le mode Bac à Sable et revenir à l'accueil de vos salles.\n\n💡 Bon à savoir : Vous retrouverez à tout moment le bouton « 🎓 Bac à Sable » dans le menu sur le côté en haut à droite d'une salle si vous souhaitez relancer l'entraînement ultérieurement !",
+            () => {
+                window.endTuto(true, true);
+                executeQuitRoom();
+            },
+            "🚪 Quitter la partie",
+            "var(--blue)"
+        );
+        return;
+    }
+    executeQuitRoom();
 }
 
 function startDeleteHold(e) {

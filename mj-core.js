@@ -1,6 +1,6 @@
 /* ============================================================================
  * mj-core.js — Initialisation Firebase, Variables Globales, Auth, SuperAdmin & Hub
- * Console MJ Pro - Buz'Ta Puce (v1.302)
+ * Console MJ Pro - Buz'Ta Puce (v1.304)
  * ============================================================================ */
 
 // Version initialisée via config.js et synchronisée avec Firebase
@@ -33,15 +33,16 @@ window.mjConfirm = function(title, message, onConfirm, okLabel = "Confirmer", ok
 // MOTEUR DE SIMULATION "BAC À SABLE" INTERACTIF V3 (v1.300)
 
 // --- ÉTAT GLOBAL DU SIMULATEUR & TUTORIEL (partagé avec mj-tuto.js) ---
-window.isTutoRunning = false;  // Guidage pas-à-pas (écran assombri)
-window.isSandboxMode = false;  // Isolation locale des 5 faux téléphones
+window.isTutoRunning = false;              // Guidage pas-à-pas (écran assombri)
+window.isSandboxMode = false;              // Isolation locale des 5 faux téléphones
+window.tutoPromptShownThisSession = false; // Empêche de redemander le tuto en quittant une salle durant la même session
 let tutoCurrentPhase = 0;
 let tutoCurrentStep = 0;
 let tutoHighestStep = { 0: 0, 1: 0, 2: 0 };
 let tutoListener = null;
 let tutoAdvanceTimer = null;
 let savedRealRoomState = null;
-let lastSimuBuzzerUid = "t2";
+let lastSimuBuzzerUid = "t3";
 
 let roomID = "", roomRef = null, currentPlayer = null, selCrest = "", globalTeams = {};
 let allPlayersData = {}, currentBlocked = {}, editingTeamKey = null, mjProfileData = {};
@@ -250,6 +251,7 @@ function login() {
     const p = document.getElementById('mj-pass').value; 
     
     if(!e || !p) return alert("Veuillez saisir votre email et votre mot de passe.");
+    window.tutoPromptShownThisSession = false; // Nouvelle connexion : autorise l'affichage unique de la proposition d'entraînement
     
     /* --- PATCH V1.218 : SAUVEGARDE DE L'EMAIL --- */
     if(document.getElementById('remember-me').checked) {

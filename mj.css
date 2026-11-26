@@ -1,4 +1,4 @@
-/* Console MJ Pro - Presta'Puce (Feuille de style principale v1.303) */
+/* Console MJ Pro - Presta'Puce (Feuille de style principale v1.304) */
 :root { --mj-color: #22c55e; --bg-color: transparent; --card-bg: rgba(20, 29, 48, 0.82); --text-color: #ffffff; --danger: #ef4444; --accent: #f1c40f; --blue: #3b82f6; --gold: #f59e0b; --success: #22c55e; --purple: #9333ea; }
 body { background: var(--bg-color); color: white; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; margin: 0; padding: 15px 20px 20px 20px; user-select: none; -webkit-user-select: none; }
 #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: radial-gradient(circle at 50% 15%, #1e1b4b 0%, #0f172a 55%, #060913 100%); background-size: 200% 200%; animation: gradientBG 18s ease infinite; }
@@ -442,4 +442,24 @@ body.tuto-running #tuto-zone-rules.tuto-highlight {
 
 body.day-mode.tuto-running #tuto-zone-rules.tuto-highlight {
     background: rgba(255, 255, 255, 0.97) !important;
+}
+
+/* Surbrillance du bouton 🎓 Bac à Sable dans le menu latéral droit à l'étape 8/8 */
+#top-right-tools.tuto-highlight {
+    position: fixed !important;
+    right: 15px !important;
+    top: 15px !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+    z-index: 2000020 !important;
+}
+#top-right-tools.tuto-highlight,
+#top-right-tools.tuto-highlight * {
+    pointer-events: none !important;
+}
+#top-right-tools #btn-top-sandbox.tuto-highlight {
+    position: relative !important;
+    z-index: 2000025 !important;
+    border: 2px solid #facc15 !important;
+    animation: tutoGoldPulse 1.6s infinite ease-in-out !important;
 }
