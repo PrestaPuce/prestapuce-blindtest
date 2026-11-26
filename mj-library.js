@@ -1,6 +1,6 @@
 /* ============================================================================
  * mj-library.js — Menus Contextuels, Lightbox, Bibliothèques, Profil MJ & Équipes
- * Console MJ Pro - Buz'Ta Puce (v1.302)
+ * Console MJ Pro - Buz'Ta Puce (v1.303)
  * ============================================================================ */
 
 function openPlayerMenu(e, uid) {
@@ -378,7 +378,9 @@ function undoProfileLogo() {
 
 function updateLogoPreview(u) { const p=document.getElementById('prof-logo-preview'), h=document.getElementById('prof-logo-placeholder'); if(u){p.src=u;p.style.display='block';h.style.display='none';}else{p.style.display='none';h.style.display='block';} }
 function showProfile() {
-    if(document.getElementById('screen-choice').style.display==="block") previousScreen="screen-choice"; if(document.getElementById('screen-dashboard').style.display==="block") previousScreen="screen-dashboard";
+    if(document.getElementById('screen-choice').style.display==="block") window.previousScreen="screen-choice";
+    else if(document.getElementById('screen-dashboard').style.display==="block") window.previousScreen="screen-dashboard";
+    else if(!window.previousScreen) window.previousScreen="screen-choice";
     document.getElementById('screen-choice').style.display="none"; document.getElementById('screen-dashboard').style.display="none"; document.getElementById('screen-profile').style.display="block";
     document.getElementById('top-right-tools').style.display="none";
     document.getElementById('btn-undo-logo').style.display="none";
@@ -388,8 +390,22 @@ function showProfile() {
         const isG = mjProfileData.isGuest===true; ['prof-nom','prof-prenom','prof-link','prof-email'].forEach(id=>document.getElementById(id).disabled=isG); document.getElementById('btn-save-profile').disabled=isG;
         const dz=document.getElementById('profile-drop-zone'); if(isG){dz.style.opacity='0.5';dz.style.pointerEvents='none';}else{dz.style.opacity='1';dz.style.pointerEvents='auto';}
     }
+    if (window.isTutoRunning && typeof window.onTutoProfileOpened === 'function') {
+        window.onTutoProfileOpened();
+    }
 }
-function closeProfile() { document.getElementById('screen-profile').style.display="none"; document.getElementById(previousScreen).style.display="block"; if(previousScreen==="screen-dashboard") document.getElementById('top-right-tools').style.display="flex"; }
+function closeProfile() {
+    const targetScr = window.previousScreen || "screen-choice";
+    const profEl = document.getElementById('screen-profile');
+    profEl.style.display = "none";
+    profEl.classList.remove('tuto-highlight');
+    document.body.classList.remove('tuto-profile-open');
+    document.getElementById(targetScr).style.display = "block";
+    if (targetScr === "screen-dashboard") document.getElementById('top-right-tools').style.display = "flex";
+    if (window.isTutoRunning && typeof window.onTutoProfileClosed === 'function') {
+        window.onTutoProfileClosed();
+    }
+}
 
 async function saveProfile() {
     if(mjProfileData.isGuest===true) return alert("Action impossible en Découverte.");

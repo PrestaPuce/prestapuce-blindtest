@@ -1,6 +1,6 @@
 /* ============================================================================
  * mj-actions.js — Actions de Jeu, Arbitrage Points, Modération, Paramètres & Mode Jour
- * Console MJ Pro - Buz'Ta Puce (v1.302)
+ * Console MJ Pro - Buz'Ta Puce (v1.303)
  * ============================================================================ */
 
 function openEditModal(uid) { const d = allPlayersData[uid]; if(!d)return; editingPlayerUid=uid; editingPlayerOriginalPseudo=d.name; editingPlayerOriginalAvatar=d.avatar||"👤"; editingPlayerCurrentAvatar=editingPlayerOriginalAvatar; document.getElementById('edit-player-name').value=d.name; document.getElementById('btn-censor-avatar').style.display=(editingPlayerOriginalAvatar.length>20)?'block':'none'; updateEditAvatarPreview(); populateEditGallery(); document.getElementById('modal-edit-player').style.display='flex'; }
@@ -174,6 +174,8 @@ function forceBuzzer(u) {
         if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 6) {
             const pBox = document.getElementById('player-box');
             if (pBox) pBox.classList.add('tuto-highlight');
+            const simuDock = document.getElementById('simu-phones-container');
+            if (simuDock) simuDock.classList.add('tuto-peek');
             const pZone = document.getElementById('tuto-zone-players');
             if (pZone && typeof scrollAndPositionTooltip === 'function') scrollAndPositionTooltip(pZone);
         }
@@ -385,86 +387,118 @@ function togglePlayerTeam(u, c) {
 function handleError() { 
     if (window.isSandboxMode) {
         if (!currentPlayer) return;
-        const pName = currentPlayer.name || currentPlayer.pseudo;
-        const tLock = (window.roomSettings && window.roomSettings.teamLock === 'team') && currentPlayer.teamName && currentPlayer.teamName !== 'Solo';
+        const uid = currentPlayer.id;
+        const pObj = (uid && allPlayersData[uid]) ? allPlayersData[uid] : currentPlayer;
+        const pName = pObj.name || currentPlayer.name || currentPlayer.pseudo;
+        const pTeam = pObj.teamName || currentPlayer.teamName || 'Solo';
+        const tLock = (window.roomSettings && window.roomSettings.teamLock === 'team') && pTeam && pTeam !== 'Solo';
+
         if (tLock) {
             Object.values(allPlayersData).forEach(p => {
-                if (p.teamName === currentPlayer.teamName) currentBlocked[p.name] = true;
+                if (p && p.teamName === pTeam && !p.banned && p.name) {
+                    currentBlocked[p.name] = true;
+                }
             });
-        } else {
+            if (pName) currentBlocked[pName] = true;
+        } else if (pName) {
             currentBlocked[pName] = true;
         }
+
         const pBox = document.getElementById('player-box');
         if (pBox) { pBox.classList.remove('tuto-highlight'); pBox.style.marginTop = ''; }
         statusUpdate('ready');
-        if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 4) {
-            if (tutoAdvanceTimer) clearTimeout(tutoAdvanceTimer);
-            tutoAdvanceTimer = setTimeout(() => {
-                tutoAdvanceTimer = null;
-                if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 4) window.nextTutoStep();
-            }, 900);
+
+        if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 4 && typeof window.onTutoStep5Arbitrated === 'function') {
+            window.onTutoStep5Arbitrated('error', 0, pName, pTeam, tLock);
         }
         return;
     }
-    if(currentPlayer && currentPlayer.name) { 
+
+    if (currentPlayer && (currentPlayer.name || currentPlayer.id)) {
+        const uid = currentPlayer.id;
+        const pObj = (uid && allPlayersData[uid]) ? allPlayersData[uid] : currentPlayer;
+        const pName = pObj.name || currentPlayer.name || currentPlayer.pseudo;
+        const pTeam = pObj.teamName || currentPlayer.teamName || "Solo";
+
         roomRef.child('settings/teamLock').once('value').then(snap => {
-            const isTeamLock = (snap.val() === 'team') && currentPlayer.teamName && currentPlayer.teamName !== "Solo";
-            
+            const isTeamLock = (snap.val() === 'team') && pTeam && pTeam !== "Solo";
+            let updates = {
+                'buzzers': null,
+                'buzzAttempts': null,
+                'gameState': { status: 'ready' }
+            };
+
             if (isTeamLock) {
-                logEvent('PUNISH', `Erreur : L'équipe entière ${currentPlayer.teamName} est bloquée`);
-                let updates = {};
+                logEvent('PUNISH', `Erreur : L'équipe entière ${pTeam} est bloquée`);
                 Object.values(allPlayersData).forEach(p => {
-                    if (p.teamName === currentPlayer.teamName && p.active !== false && !p.banned) {
-                        updates[p.name] = true;
+                    if (p && p.teamName === pTeam && !p.banned && p.name) {
+                        updates['blockedPlayers/' + p.name] = true;
                     }
                 });
-                roomRef.child('blockedPlayers').update(updates);
+                if (pName) updates['blockedPlayers/' + pName] = true;
             } else {
-                logEvent('PUNISH', `Erreur : ${currentPlayer.name} bloqué(e) en individuel`); 
-                roomRef.child('blockedPlayers/'+currentPlayer.name).set(true); 
+                logEvent('PUNISH', `Erreur : ${pName} bloqué(e) en individuel`);
+                if (pName) updates['blockedPlayers/' + pName] = true;
             }
-            statusUpdate('ready'); 
+
+            buzzProcessing = false;
+            roomRef.update(updates);
         });
-    } 
+    }
 }
 
 function handleReward(pts, m) {
     if (window.isSandboxMode) {
         if (!currentPlayer || !currentPlayer.id) return;
         const uid = currentPlayer.id;
-        const pName = currentPlayer.name || currentPlayer.pseudo;
+        const pObj = allPlayersData[uid] || currentPlayer;
+        const pName = pObj.name || currentPlayer.name || currentPlayer.pseudo;
+        const pTeam = pObj.teamName || currentPlayer.teamName || 'Solo';
+        const tLock = (window.roomSettings && window.roomSettings.teamLock === 'team') && pTeam && pTeam !== 'Solo';
+
         if (allPlayersData[uid]) allPlayersData[uid].pts = (allPlayersData[uid].pts || 0) + pts;
         const pBox = document.getElementById('player-box');
         if (pBox) { pBox.classList.remove('tuto-highlight'); pBox.style.marginTop = ''; }
+
         if (m === 'finish') {
             statusUpdate('waiting');
         } else {
-            currentBlocked[pName] = true;
+            if (tLock) {
+                Object.values(allPlayersData).forEach(p => {
+                    if (p && p.teamName === pTeam && !p.banned && p.name) {
+                        currentBlocked[p.name] = true;
+                    }
+                });
+                if (pName) currentBlocked[pName] = true;
+            } else if (pName) {
+                currentBlocked[pName] = true;
+            }
             statusUpdate('ready');
         }
-        if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 4) {
-            if (tutoAdvanceTimer) clearTimeout(tutoAdvanceTimer);
-            tutoAdvanceTimer = setTimeout(() => {
-                tutoAdvanceTimer = null;
-                if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 4) window.nextTutoStep();
-            }, 900);
+
+        if (window.isTutoRunning && tutoCurrentPhase === 2 && tutoCurrentStep === 4 && typeof window.onTutoStep5Arbitrated === 'function') {
+            window.onTutoStep5Arbitrated(m, pts, pName, pTeam, tLock);
         }
         return;
     }
-    if(!currentPlayer || !currentPlayer.id) return;
-    
+
+    if (!currentPlayer || !currentPlayer.id) return;
+
     const uid = currentPlayer.id;
-    
+    const pObj = allPlayersData[uid] || currentPlayer;
+    const pName = pObj.name || currentPlayer.name || currentPlayer.pseudo;
+    const pTeam = pObj.teamName || currentPlayer.teamName || "Solo";
+
     if (!uid.startsWith('u_')) {
         db.ref('users_crm/' + uid).once('value').then(snap => {
-            if(snap.exists()) {
+            if (snap.exists()) {
                 db.ref('users_crm/' + uid + '/stats/totalPoints').transaction(curr => (curr || 0) + pts);
             }
         });
     }
 
     roomRef.child('players/' + uid).once('value').then(snap => {
-        if(snap.exists()) {
+        if (snap.exists()) {
             const p = snap.val();
             const newPts = (p.pts || 0) + pts;
             roomRef.child('players/' + uid).update({ pts: newPts });
@@ -472,12 +506,33 @@ function handleReward(pts, m) {
         }
     });
 
-    if(m === 'finish') { 
-        roomRef.child('gameState').set({status: 'waiting'}); 
-    } 
-    else { 
-        roomRef.child('blockedPlayers/' + currentPlayer.name).set(true);
-        statusUpdate('ready'); 
+    if (m === 'finish') {
+        roomRef.child('gameState').set({ status: 'waiting' });
+    } else {
+        roomRef.child('settings/teamLock').once('value').then(snap => {
+            const isTeamLock = (snap.val() === 'team') && pTeam && pTeam !== "Solo";
+            let updates = {
+                'buzzers': null,
+                'buzzAttempts': null,
+                'gameState': { status: 'ready' }
+            };
+
+            if (isTeamLock) {
+                logEvent('SYSTEM', `+${pts} (On continue) : L'équipe entière ${pTeam} est bloquée pour la suite du titre`);
+                Object.values(allPlayersData).forEach(p => {
+                    if (p && p.teamName === pTeam && !p.banned && p.name) {
+                        updates['blockedPlayers/' + p.name] = true;
+                    }
+                });
+                if (pName) updates['blockedPlayers/' + pName] = true;
+            } else {
+                logEvent('SYSTEM', `+${pts} (On continue) : ${pName} bloqué(e) en individuel pour la suite du titre`);
+                if (pName) updates['blockedPlayers/' + pName] = true;
+            }
+
+            buzzProcessing = false;
+            roomRef.update(updates);
+        });
     }
 }
 

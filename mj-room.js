@@ -1,6 +1,6 @@
 /* ============================================================================
  * mj-room.js — Création de Salle, Cockpit Régie, Synchro Firebase & Rendu Lobbies
- * Console MJ Pro - Buz'Ta Puce (v1.302)
+ * Console MJ Pro - Buz'Ta Puce (v1.303)
  * ============================================================================ */
 
 function askMjNameAndCreate() { 
@@ -73,6 +73,8 @@ function confirmCreateRoom() {
         }
     };
     
+    window.roomSettings = { ...initialData.settings };
+
     db.ref('rooms/' + newRoomId).set(initialData).then(() => { 
         document.getElementById('modal-create-room').style.display = 'none';
         

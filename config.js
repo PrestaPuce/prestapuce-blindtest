@@ -11,8 +11,8 @@ const APP_CONFIG = {
   // 🚀 CENTRALISATION DES VERSIONS
   VERSIONS: {
     CLIENT: "1.315", // Pour index.html (Architecture modulaire v1.315)
-    APP: "1.302",    // Pour mj.html (Architecture modulaire v1.302)
-    REMOTE: "1.165", // Pour remote.html
+    APP: "1.303",    // Pour mj.html (Correctifs Bac à Sable & Blocage Équipe v1.303)
+    REMOTE: "1.166", // Pour remote.html (Correctif Blocage Équipe +1 On continue v1.166)
     SCORES: "1.188", // Pour scores.html
     GUIDE: "1.031"   // Pour guide.html
   }

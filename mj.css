@@ -1,4 +1,4 @@
-/* Console MJ Pro - Presta'Puce (Feuille de style principale v1.302) */
+/* Console MJ Pro - Presta'Puce (Feuille de style principale v1.303) */
 :root { --mj-color: #22c55e; --bg-color: transparent; --card-bg: rgba(20, 29, 48, 0.82); --text-color: #ffffff; --danger: #ef4444; --accent: #f1c40f; --blue: #3b82f6; --gold: #f59e0b; --success: #22c55e; --purple: #9333ea; }
 body { background: var(--bg-color); color: white; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; margin: 0; padding: 15px 20px 20px 20px; user-select: none; -webkit-user-select: none; }
 #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: radial-gradient(circle at 50% 15%, #1e1b4b 0%, #0f172a 55%, #060913 100%); background-size: 200% 200%; animation: gradientBG 18s ease infinite; }
@@ -250,7 +250,7 @@ body.day-mode { color: #2c3e50 !important; }
 
 /* 🚀 CSS DU SIMULATEUR MJ (BAC À SABLE CONVIVIAL V1.300) */
 body.sandbox-active .dashboard { padding-bottom: 255px !important; }
-#tuto-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(6, 9, 19, 0.76); z-index: 999998; pointer-events: auto; }
+#tuto-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(6, 9, 19, 0.84); z-index: 999998; pointer-events: auto; }
 #tuto-tooltip { display: none; position: absolute; background: rgba(17, 24, 39, 0.97); border: 2px solid var(--accent); border-radius: 16px; padding: 18px 20px; width: 325px; z-index: 999999; box-shadow: 0 20px 50px rgba(0,0,0,0.85), 0 0 25px rgba(241, 196, 15, 0.25); backdrop-filter: blur(18px); color: white; transition: top 0.22s ease, left 0.22s ease; box-sizing: border-box; }
 .tuto-step-badge { display: inline-block; background: rgba(241, 196, 15, 0.18); color: var(--accent); border: 1px solid rgba(241, 196, 15, 0.45); border-radius: 20px; padding: 2px 10px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
 #tuto-tooltip h3 { color: var(--accent); margin: 0 0 8px 0; font-size: 1.12rem; display: flex; align-items: center; gap: 8px; }
@@ -327,9 +327,11 @@ body.tuto-running #modal-mj-confirm * { pointer-events: auto !important; }
 .simu-kicked { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(220, 38, 38, 0.92); border-radius:14px; display:none; flex-direction:column; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:0.8rem; z-index:10; }
 
 /* ☀️ MODE JOUR SUR LES 5 FAUX TÉLÉPHONES (ÉCRANS BLANCS HAUTE LUMINOSITÉ) */
-body.day-mode #simu-phones-container { background: rgba(255, 255, 255, 0.96) !important; border: 2px solid #94a3b8 !important; box-shadow: 0 15px 40px rgba(15, 23, 42, 0.18) !important; }
-body.day-mode .simu-dock-bar { color: #0f172a !important; border-bottom-color: #e2e8f0 !important; }
-body.day-mode .simu-dock-quit { background: #fee2e2 !important; color: #b91c1c !important; border-color: #ef4444 !important; }
+/* Le plateau conteneur #simu-phones-container garde son fond sombre en Mode Jour pour faire ressortir les 5 téléphones blancs */
+body.day-mode #simu-phones-container { background: rgba(9, 13, 24, 0.92) !important; border: 1.5px solid rgba(245, 158, 11, 0.65) !important; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.45) !important; }
+body.day-mode .simu-dock-bar { color: #fde047 !important; border-bottom-color: rgba(255, 255, 255, 0.14) !important; }
+body.day-mode .simu-dock-quit { background: rgba(239, 68, 68, 0.22) !important; color: #fca5a5 !important; border-color: #ef4444 !important; }
+body.day-mode .simu-dock-quit:hover { background: #ef4444 !important; color: #ffffff !important; }
 body.day-mode .simu-phone { background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%) !important; color: #0f172a !important; border: 2px solid #cbd5e1 !important; box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08) !important; }
 body.day-mode .simu-notch { background: #cbd5e1 !important; }
 body.day-mode .simu-avatar { background: #f8fafc !important; border-color: #f59e0b !important; }
@@ -341,13 +343,57 @@ body.day-mode #tuto-tooltip h3 { color: #b45309 !important; }
 body.day-mode #tuto-tooltip p { color: #334155 !important; }
 
 /* ============================================================================
- * AJUSTEMENTS V1.302 — SURBRILLANCE #player-box & RESPONSIVE ÉTAPE 5/8
+ * AJUSTEMENTS V1.303 — CARTE DE VISITE MJ CLAIRE, BOUTON QUITTER & ÉTAPE 5/8
  * ============================================================================ */
 @keyframes tutoGoldPulse {
     0%, 100% { box-shadow: 0 0 0 4px #facc15, 0 0 32px rgba(250, 204, 21, 0.85), 0 18px 40px rgba(0, 0, 0, 0.8); }
     50% { box-shadow: 0 0 0 6px #fde047, 0 0 55px rgba(250, 204, 21, 1), 0 18px 48px rgba(0, 0, 0, 0.88); }
 }
 
+/* Modales secondaires autorisées au-dessus du voile sombre (ex: Blasons, Fonds, À propos depuis la Carte de Visite) */
+body.tuto-running #modal-library,
+body.tuto-running #modal-bg-library,
+body.tuto-running #modal-about,
+body.tuto-running #univ-lightbox {
+    z-index: 2000040 !important;
+    pointer-events: auto !important;
+}
+
+/* Carte de Visite MJ (#screen-profile) éclairée en pleine lumière à l'étape 1/2 */
+body.tuto-running #screen-profile.tuto-highlight {
+    position: relative !important;
+    z-index: 2000022 !important;
+    pointer-events: auto !important;
+    background: rgba(20, 29, 48, 0.98) !important;
+    border: 3px solid #facc15 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 0 0 4px #facc15, 0 0 40px rgba(250, 204, 21, 0.85), 0 20px 50px rgba(0, 0, 0, 0.85) !important;
+}
+
+body.day-mode.tuto-running #screen-profile.tuto-highlight {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 3px solid #f59e0b !important;
+}
+
+@media (min-width: 900px) and (max-width: 1380px) {
+    body.tuto-running.tuto-profile-open #screen-profile.tuto-highlight {
+        margin-left: max(85px, calc(50% - 390px)) !important;
+        margin-right: auto !important;
+    }
+}
+
+/* Ne jamais réactiver le clic sur un bouton explicitement disabled dans une zone éclairée */
+.tuto-highlight button:disabled {
+    pointer-events: none !important;
+}
+
+/* Quand le dock des 5 téléphones est visible au-dessus du voile (.tuto-peek), le bouton Quitter reste TOUJOURS cliquable */
+#simu-phones-container.tuto-peek .simu-dock-quit {
+    pointer-events: auto !important;
+}
+
+/* Surbrillance franche du cadre des points (#player-box) à l'étape 5/8 */
 body.tuto-running #player-box.tuto-highlight {
     position: relative !important;
     z-index: 2000025 !important;
